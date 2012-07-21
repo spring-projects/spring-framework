@@ -16,7 +16,10 @@
 
 package org.springframework.web.servlet.config;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -29,6 +32,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -44,6 +48,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -102,9 +109,10 @@ import org.w3c.dom.Element;
  * </ul>
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
- * {@link ExceptionHandlerExceptionResolver} are configured with default
- * instances of the following kind, unless custom instances are provided:
+ * {@link ExceptionHandlerExceptionResolver} are configured with instances of
+ * the following by default:
  * <ul>
+ * 	<li>A {@link ContentNegotiationManager}
  * 	<li>A {@link DefaultFormattingConversionService}
  * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
  * 	available on the classpath
@@ -143,11 +151,14 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), source);
 		parserContext.pushContainingComponent(compDefinition);
 
-		RootBeanDefinition methodMappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
-		methodMappingDef.setSource(source);
-		methodMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		methodMappingDef.getPropertyValues().add("order", 0);
-		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(methodMappingDef);
+		RuntimeBeanReference contentNegotiationManager = getContentNegotiationManager(element, source, parserContext);
+
+		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(RequestMappingHandlerMapping.class);
+		handlerMappingDef.setSource(source);
+		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		handlerMappingDef.getPropertyValues().add("order", 0);
+		handlerMappingDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
+		String methodMappingName = parserContext.getReaderContext().registerWithGeneratedName(handlerMappingDef);
 
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
@@ -164,22 +175,23 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
 
-		RootBeanDefinition methodAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
-		methodAdapterDef.setSource(source);
-		methodAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		methodAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
-		methodAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+		handlerAdapterDef.setSource(source);
+		handlerAdapterDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		handlerAdapterDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
+		handlerAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
+		handlerAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
 		if (element.hasAttribute("ignoreDefaultModelOnRedirect")) {
 			Boolean ignoreDefaultModel = Boolean.valueOf(element.getAttribute("ignoreDefaultModelOnRedirect"));
-			methodAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
+			handlerAdapterDef.getPropertyValues().add("ignoreDefaultModelOnRedirect", ignoreDefaultModel);
 		}
 		if (argumentResolvers != null) {
-			methodAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
+			handlerAdapterDef.getPropertyValues().add("customArgumentResolvers", argumentResolvers);
 		}
 		if (returnValueHandlers != null) {
-			methodAdapterDef.getPropertyValues().add("customReturnValueHandlers", returnValueHandlers);
+			handlerAdapterDef.getPropertyValues().add("customReturnValueHandlers", returnValueHandlers);
 		}
-		String methodAdapterName = parserContext.getReaderContext().registerWithGeneratedName(methodAdapterDef);
+		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
 		csInterceptorDef.setSource(source);
@@ -191,13 +203,14 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		mappedCsInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, csInterceptorDef);
 		String mappedInterceptorName = parserContext.getReaderContext().registerWithGeneratedName(mappedCsInterceptorDef);
 
-		RootBeanDefinition methodExceptionResolver = new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
-		methodExceptionResolver.setSource(source);
-		methodExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		methodExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
-		methodExceptionResolver.getPropertyValues().add("order", 0);
+		RootBeanDefinition exceptionHandlerExceptionResolver = new RootBeanDefinition(ExceptionHandlerExceptionResolver.class);
+		exceptionHandlerExceptionResolver.setSource(source);
+		exceptionHandlerExceptionResolver.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		exceptionHandlerExceptionResolver.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
+		exceptionHandlerExceptionResolver.getPropertyValues().add("messageConverters", messageConverters);
+		exceptionHandlerExceptionResolver.getPropertyValues().add("order", 0);
 		String methodExceptionResolverName =
-				parserContext.getReaderContext().registerWithGeneratedName(methodExceptionResolver);
+				parserContext.getReaderContext().registerWithGeneratedName(exceptionHandlerExceptionResolver);
 
 		RootBeanDefinition responseStatusExceptionResolver = new RootBeanDefinition(ResponseStatusExceptionResolver.class);
 		responseStatusExceptionResolver.setSource(source);
@@ -213,9 +226,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		String defaultExceptionResolverName =
 				parserContext.getReaderContext().registerWithGeneratedName(defaultExceptionResolver);
 
-		parserContext.registerComponent(new BeanComponentDefinition(methodMappingDef, methodMappingName));
-		parserContext.registerComponent(new BeanComponentDefinition(methodAdapterDef, methodAdapterName));
-		parserContext.registerComponent(new BeanComponentDefinition(methodExceptionResolver, methodExceptionResolverName));
+		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, methodMappingName));
+		parserContext.registerComponent(new BeanComponentDefinition(handlerAdapterDef, handlerAdapterName));
+		parserContext.registerComponent(new BeanComponentDefinition(exceptionHandlerExceptionResolver, methodExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(responseStatusExceptionResolver, responseStatusExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(defaultExceptionResolver, defaultExceptionResolverName));
 		parserContext.registerComponent(new BeanComponentDefinition(mappedCsInterceptorDef, mappedInterceptorName));
@@ -259,6 +272,42 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		else {
 			return null;
 		}
+	}
+
+	private RuntimeBeanReference getContentNegotiationManager(Element element, Object source, ParserContext parserContext) {
+		RuntimeBeanReference contentNegotiationManagerRef;
+		if (element.hasAttribute("content-negotiation-manager")) {
+			contentNegotiationManagerRef = new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
+		}
+		else {
+			RootBeanDefinition managerDef = new RootBeanDefinition(ContentNegotiationManager.class);
+			managerDef.setSource(source);
+			managerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			PathExtensionContentNegotiationStrategy strategy1 = new PathExtensionContentNegotiationStrategy(getDefaultMediaTypes());
+			HeaderContentNegotiationStrategy strategy2 = new HeaderContentNegotiationStrategy();
+			managerDef.getConstructorArgumentValues().addIndexedArgumentValue(0, Arrays.asList(strategy1,strategy2));
+
+			String beanName = "mvcContentNegotiationManager";
+			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , managerDef);
+			parserContext.registerComponent(new BeanComponentDefinition(managerDef, beanName));
+			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);
+		}
+		return contentNegotiationManagerRef;
+	}
+
+	private Map<String, MediaType> getDefaultMediaTypes() {
+		Map<String, MediaType> map = new HashMap<String, MediaType>();
+		if (romePresent) {
+			map.put("atom", MediaType.APPLICATION_ATOM_XML);
+			map.put("rss", MediaType.valueOf("application/rss+xml"));
+		}
+		if (jackson2Present || jacksonPresent) {
+			map.put("json", MediaType.APPLICATION_JSON);
+		}
+		if (jaxb2Present) {
+			map.put("xml", MediaType.APPLICATION_XML);
+		}
+		return map;
 	}
 
 	private RuntimeBeanReference getMessageCodesResolver(Element element, Object source, ParserContext parserContext) {

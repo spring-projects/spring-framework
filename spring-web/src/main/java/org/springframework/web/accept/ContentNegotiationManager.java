@@ -30,10 +30,19 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * This class is used to determine the requested {@linkplain MediaType media types}
- * in a request by delegating to a list of {@link ContentNegotiationStrategy} instances.
+ * of a request by delegating to a list of ContentNegotiationStrategy instances.
+ * The strategies must be provided at instantiation or alternatively if using
+ * the default constructor, an instance of {@link HeaderContentNegotiationStrategy}
+ * will be configured by default.
  *
- * <p>It may also be used to determine the extensions associated with a MediaType by
- * delegating to a list of {@link MediaTypeFileExtensionResolver} instances.
+ * <p>This class may also be used to look up file extensions associated with a
+ * MediaType. This is done by consulting the list of configured
+ * {@link MediaTypeFileExtensionResolver} instances. Note that some
+ * ContentNegotiationStrategy implementations also implement
+ * MediaTypeFileExtensionResolver and the class constructor accepting the former
+ * will also detect if they implement the latter. If you need to register additional
+ * resolvers, you can use the method
+ * {@link #addFileExtensionResolvers(MediaTypeFileExtensionResolver...)}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -50,6 +59,7 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 	 * Create an instance with the given ContentNegotiationStrategy instances.
 	 * <p>Each instance is checked to see if it is also an implementation of
 	 * MediaTypeFileExtensionResolver, and if so it is registered as such.
+	 * @param strategies one more more ContentNegotiationStrategy instances
 	 */
 	public ContentNegotiationManager(ContentNegotiationStrategy... strategies) {
 		Assert.notEmpty(strategies, "At least one ContentNegotiationStrategy is expected");
@@ -70,6 +80,11 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 
 	/**
 	 * Add MediaTypeFileExtensionResolver instances.
+	 * <p>Note that some {@link ContentNegotiationStrategy} implementations also
+	 * implement {@link MediaTypeFileExtensionResolver} and the class constructor
+	 * accepting the former will also detect implementations of the latter. Therefore
+	 * you only need to use this method to register additional instances.
+	 * @param one more resolvers
 	 */
 	public void addFileExtensionResolvers(MediaTypeFileExtensionResolver... resolvers) {
 		this.fileExtensionResolvers.addAll(Arrays.asList(resolvers));

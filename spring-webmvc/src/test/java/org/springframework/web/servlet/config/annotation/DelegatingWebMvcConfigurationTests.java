@@ -67,11 +67,13 @@ public class DelegatingWebMvcConfigurationTests {
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
+		Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer = new Capture<ContentNegotiationConfigurer>();
 		Capture<FormattingConversionService> conversionService = new Capture<FormattingConversionService>();
 		Capture<List<HandlerMethodArgumentResolver>> resolvers = new Capture<List<HandlerMethodArgumentResolver>>();
 		Capture<List<HandlerMethodReturnValueHandler>> handlers = new Capture<List<HandlerMethodReturnValueHandler>>();
 
 		configurer.configureMessageConverters(capture(converters));
+		configurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
 		expect(configurer.getValidator()).andReturn(null);
 		expect(configurer.getMessageCodesResolver()).andReturn(null);
 		configurer.addFormatters(capture(conversionService));
@@ -135,8 +137,10 @@ public class DelegatingWebMvcConfigurationTests {
 	public void handlerExceptionResolver() throws Exception {
 		Capture<List<HttpMessageConverter<?>>> converters = new Capture<List<HttpMessageConverter<?>>>();
 		Capture<List<HandlerExceptionResolver>> exceptionResolvers = new Capture<List<HandlerExceptionResolver>>();
+		Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer = new Capture<ContentNegotiationConfigurer>();
 
 		configurer.configureMessageConverters(capture(converters));
+		configurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
 		configurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
 		replay(configurer);
 

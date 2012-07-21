@@ -4478,6 +4478,54 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     </section>
 
+    <section id="mvc-config-content-negotiation">
+      <title>Configuring Content Negotiation</title>
+
+      <para>You can configure how Spring MVC determines requested media types for content negotiation purposes.
+      The available strategies are to check the request path extension, a
+      request parameter, the "Accept" header, and also to use a default content type.</para>
+
+      <para>By default the path extension is checked first and the "Accept"
+      header is checked second. The path extension check recognizes ".json" if Jackson is available,
+      ".xml" if JAXB2 is available, and ".atom" and ".rss" if the Rome library is available.
+      It also uses the <classname>ServletContext</classname> and the <emphasis>Java Activation Framework</emphasis>
+      to perform lookups as a fallback option.</para>
+
+      <para>An example of customizing content negotiation in Java:</para>
+
+      <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+  @Override
+  public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+    configurer.setFavorPathExtension(false).setFavorParameter(true);
+  }
+}</programlisting>
+
+     <para>In XML you'll need to use the <code>content-negotiation-manager</code> property:</para>
+
+		<programlisting language="xml">&lt;mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" /&gt;
+
+&lt;bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManager"&gt;
+    &lt;constructor-arg&gt;
+        &lt;list&gt;
+            &lt;ref bean="pathExtensionStrategy" /&gt;
+            &lt;bean id="headerStrategy" class="org.springframework.web.accept.HeaderContentNegotiationStrategy"/&gt;
+        &lt;/list&gt;
+    &lt;/constructor-arg&gt;
+&lt;/bean&gt;
+
+&lt;bean id="pathExtensionStrategy" class="org.springframework.web.accept.PathExtensionContentNegotiationStrategy"&gt;
+    &lt;constructor-arg&gt;
+        &lt;map&gt;
+            &lt;entry key="xml" value="application/rss+xml" /&gt;
+        &lt;/map&gt;
+    &lt;/constructor-arg&gt;
+&lt;/bean&gt;</programlisting>
+
+	</section>
+
     <section id="mvc-config-view-controller">
       <title>Configuring View Controllers</title>
 

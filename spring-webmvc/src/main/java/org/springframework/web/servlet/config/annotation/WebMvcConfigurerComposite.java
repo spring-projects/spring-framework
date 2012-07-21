@@ -49,6 +49,12 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		}
 	}
 
+	public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureContentNegotiation(configurer);
+		}
+	}
+
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);

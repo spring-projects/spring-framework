@@ -26,6 +26,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * use reflection to instantiate StandardServletAsyncWebRequest
 * fix issue with forward before async request processing
 * add exclude patterns for mapped interceptors in MVC namespace and MVC Java config
+* support content negotiation options in MVC namespace and MVC Java config
 
 
 Changes in version 3.2 M1 (2012-05-28)

@@ -70,6 +70,11 @@ public interface WebMvcConfigurer {
 	Validator getValidator();
 
 	/**
+	 * Configure content negotiation options.
+	 */
+	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
+
+	/**
 	 * Add resolvers to support custom controller method argument types.
 	 * <p>This does not override the built-in support for resolving handler
 	 * method arguments. To customize the built-in support for argument

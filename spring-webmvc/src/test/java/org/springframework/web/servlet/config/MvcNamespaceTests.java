@@ -19,6 +19,7 @@ package org.springframework.web.servlet.config;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -38,6 +39,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -49,8 +51,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -98,12 +103,17 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultConfig() throws Exception {
-		loadBeanDefinitions("mvc-config.xml", 11);
+		loadBeanDefinitions("mvc-config.xml", 12);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(0, mapping.getOrder());
 		mapping.setDefaultHandler(handlerMethod);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
+		NativeWebRequest webRequest = new ServletWebRequest(request);
+		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -118,7 +128,7 @@ public class MvcNamespaceTests {
 		assertNotNull(appContext.getBean(Validator.class));
 
 		// default web binding initializer behavior test
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		request = new MockHttpServletRequest("GET", "/");
 		request.addParameter("date", "2009-10-31");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -135,7 +145,7 @@ public class MvcNamespaceTests {
 
 	@Test(expected=TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
-		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 11);
+		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 12);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -161,7 +171,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testCustomValidator() throws Exception {
-		loadBeanDefinitions("mvc-config-custom-validator.xml", 11);
+		loadBeanDefinitions("mvc-config-custom-validator.xml", 12);
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -179,7 +189,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 16);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 17);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -308,7 +318,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testBeanDecoration() throws Exception {
-		loadBeanDefinitions("mvc-config-bean-decoration.xml", 13);
+		loadBeanDefinitions("mvc-config-bean-decoration.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -329,7 +339,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 14);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 15);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -389,7 +399,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 14);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 15);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -440,6 +450,19 @@ public class MvcNamespaceTests {
 		assertEquals(2, beanNameMapping.getOrder());
 	}
 
+	@Test
+	public void testCustomContentNegotiationManager() throws Exception {
+		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 14);
+
+		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
+		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
+		NativeWebRequest webRequest = new ServletWebRequest(request);
+		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+	}
+
+
 	private void loadBeanDefinitions(String fileName, int expectedBeanCount) {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
 		ClassPathResource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
@@ -447,6 +470,7 @@ public class MvcNamespaceTests {
 		assertEquals(expectedBeanCount, appContext.getBeanDefinitionCount());
 		appContext.refresh();
 	}
+
 
 	@Controller
 	public static class TestController {

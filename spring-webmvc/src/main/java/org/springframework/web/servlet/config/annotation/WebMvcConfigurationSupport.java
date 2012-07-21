@@ -17,7 +17,9 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +37,7 @@ import org.springframework.format.Formatter;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
@@ -52,6 +55,7 @@ import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -120,8 +124,9 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  *
  * <p>Both the {@link RequestMappingHandlerAdapter} and the
  * {@link ExceptionHandlerExceptionResolver} are configured with default
- * instances of the following kind, unless custom instances are provided:
+ * instances of the following by default:
  * <ul>
+ * 	<li>A {@link ContentNegotiationManager}
  * 	<li>A {@link DefaultFormattingConversionService}
  * 	<li>A {@link LocalValidatorFactoryBean} if a JSR-303 implementation is
  * 	available on the classpath
@@ -158,6 +163,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<Object> interceptors;
 
+	private ContentNegotiationManager contentNegotiationManager;
+
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	public void setServletContext(ServletContext servletContext) {
@@ -177,6 +184,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
+		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
 		return handlerMapping;
 	}
 
@@ -201,6 +209,43 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see InterceptorRegistry
 	 */
 	protected void addInterceptors(InterceptorRegistry registry) {
+	}
+
+	/**
+	 * Return a {@link ContentNegotiationManager} instance to use to determine
+	 * requested {@linkplain MediaType media types} in a given request.
+	 */
+	@Bean
+	public ContentNegotiationManager mvcContentNegotiationManager() {
+		if (this.contentNegotiationManager == null) {
+			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer();
+			configurer.addMediaTypes(getDefaultMediaTypes());
+			configureContentNegotiation(configurer);
+			this.contentNegotiationManager = configurer.getContentNegotiationManager();
+		}
+		return this.contentNegotiationManager;
+	}
+
+	protected Map<String, MediaType> getDefaultMediaTypes() {
+		Map<String, MediaType> map = new HashMap<String, MediaType>();
+		if (romePresent) {
+			map.put("atom", MediaType.APPLICATION_ATOM_XML);
+			map.put("rss", MediaType.valueOf("application/rss+xml"));
+		}
+		if (jackson2Present || jacksonPresent) {
+			map.put("json", MediaType.APPLICATION_JSON);
+		}
+		if (jaxb2Present) {
+			map.put("xml", MediaType.APPLICATION_XML);
+		}
+		return map;
+	}
+
+	/**
+	 * Override this method to configure content negotiation.
+	 * @see DefaultServletHandlerConfigurer
+	 */
+	protected void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
 	}
 
 	/**
@@ -304,6 +349,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addReturnValueHandlers(returnValueHandlers);
 
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(webBindingInitializer);
 		adapter.setCustomArgumentResolvers(argumentResolvers);
@@ -526,8 +572,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * A method available to subclasses for adding default
-	 * {@link HandlerExceptionResolver}s.
+	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
 	 * <p>Adds the following exception resolvers:
 	 * <ul>
 	 * 	<li>{@link ExceptionHandlerExceptionResolver}
@@ -540,6 +585,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
+		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
 		exceptionHandlerExceptionResolver.afterPropertiesSet();
 

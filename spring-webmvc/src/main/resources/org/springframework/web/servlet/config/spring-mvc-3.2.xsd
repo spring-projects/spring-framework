@@ -120,6 +120,22 @@
 					</xsd:appinfo>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="content-negotiation-manager" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.web.accept.ContentNegotiationManager"><![CDATA[
+	The bean name of a ContentNegotiationManager that is to be used to determine requested media types. If not specified,
+	a default ContentNegotiationManager is configured that checks the request path extension first and the "Accept" header
+	second where path extensions such as ".json", ".xml", ".atom", and ".rss" are recognized if Jackson, JAXB2, or the
+	Rome libraries are available. As a fallback option, the path extension is also used to perform a lookup through
+	the ServletContext and the Java Activation Framework (if available).
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.web.accept.ContentNegotiationManager" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="message-codes-resolver" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[

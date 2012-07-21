@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,6 +35,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,8 +47,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -182,6 +187,24 @@ public class WebMvcConfigurationSupportTests {
 		String actual = webConfig.mvcConversionService().convert(new TestBean(), String.class);
 		assertEquals("converted", actual);
 
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
+		NativeWebRequest webRequest = new ServletWebRequest(request);
+		ContentNegotiationManager manager = webConfig.requestMappingHandlerMapping().getContentNegotiationManager();
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
+
+		request.setRequestURI("/foo.xml");
+		assertEquals(Arrays.asList(MediaType.APPLICATION_XML), manager.resolveMediaTypes(webRequest));
+
+		request.setRequestURI("/foo.rss");
+		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+
+		request.setRequestURI("/foo.atom");
+		assertEquals(Arrays.asList(MediaType.APPLICATION_ATOM_XML), manager.resolveMediaTypes(webRequest));
+
+		request.setRequestURI("/foo");
+		request.setParameter("f", "json");
+		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
+
 		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
 		assertEquals(1, adapter.getMessageConverters().size());
 
@@ -242,7 +265,6 @@ public class WebMvcConfigurationSupportTests {
 	@Controller
 	private static class TestController {
 
-		@SuppressWarnings("unused")
 		@RequestMapping("/")
 		public void handle() {
 		}
@@ -285,6 +307,11 @@ public class WebMvcConfigurationSupportTests {
 					return true;
 				}
 			};
+		}
+
+		@Override
+		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+			configurer.setFavorParameter(true).setParameterName("f");
 		}
 
 		@Override
