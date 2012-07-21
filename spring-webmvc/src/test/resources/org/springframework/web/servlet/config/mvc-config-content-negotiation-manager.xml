@@ -7,23 +7,12 @@
 
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
 
-	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManager">
-		<constructor-arg>
-			<list>
-				<ref bean="pathExtensionStrategy" />			
-				<ref bean="headerStrategy" />			
-			</list>
-		</constructor-arg>
+	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="mediaTypes">
+			<value>
+				xml=application/rss+xml
+			</value>
+		</property>
 	</bean>
-
-	<bean id="pathExtensionStrategy" class="org.springframework.web.accept.PathExtensionContentNegotiationStrategy">
-		<constructor-arg>
-			<map>
-				<entry key="xml" value="application/rss+xml" />
-			</map>
-		</constructor-arg>
-	</bean>
-	
-	<bean id="headerStrategy" class="org.springframework.web.accept.HeaderContentNegotiationStrategy" />
 
 </beans>

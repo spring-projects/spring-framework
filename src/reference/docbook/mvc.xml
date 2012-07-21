@@ -4503,25 +4503,20 @@ public class WebConfig extends WebMvcConfigurerAdapter {
   }
 }</programlisting>
 
-     <para>In XML you'll need to use the <code>content-negotiation-manager</code> property:</para>
+     <para>In XML you'll need to use the <code>content-negotiation-manager</code>
+     property of <code>annotation-driven</code>:</para>
 
 		<programlisting language="xml">&lt;mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" /&gt;
 
-&lt;bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManager"&gt;
-    &lt;constructor-arg&gt;
-        &lt;list&gt;
-            &lt;ref bean="pathExtensionStrategy" /&gt;
-            &lt;bean id="headerStrategy" class="org.springframework.web.accept.HeaderContentNegotiationStrategy"/&gt;
-        &lt;/list&gt;
-    &lt;/constructor-arg&gt;
-&lt;/bean&gt;
-
-&lt;bean id="pathExtensionStrategy" class="org.springframework.web.accept.PathExtensionContentNegotiationStrategy"&gt;
-    &lt;constructor-arg&gt;
-        &lt;map&gt;
-            &lt;entry key="xml" value="application/rss+xml" /&gt;
-        &lt;/map&gt;
-    &lt;/constructor-arg&gt;
+&lt;bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"&gt;
+    &lt;property name="favorPathExtension" value="false" /&gt;
+    &lt;property name="favorParameter" value="true" /&gt;
+    &lt;property name="mediaTypes" &gt;
+        &lt;value&gt;
+            json=application/json
+            xml=application/xml
+        &lt;/value&gt;
+    &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
 
 	</section>
