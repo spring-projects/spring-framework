@@ -26,13 +26,12 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Extends {@link InvocableHandlerMethod} with the ability to handle return
@@ -108,9 +107,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		mavContainer.setRequestHandled(false);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(webRequest.getRequest());
-		chain.push(geAsyncCallable(webRequest, mavContainer, providedArgs));
-
 		try {
 			this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
 		}
@@ -120,33 +116,6 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			}
 			throw ex;
 		}
-		finally {
-			chain.pop();
-		}
-	}
-
-	/**
-	 * Create a Callable to populate the ModelAndViewContainer asynchronously.
-	 */
-	private AbstractDelegatingCallable geAsyncCallable(final ServletWebRequest webRequest,
-			final ModelAndViewContainer mavContainer, final Object... providedArgs) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				mavContainer.setRequestHandled(false);
-				new CallableHandlerMethod(getNext()).invokeAndHandle(webRequest, mavContainer, providedArgs);
-				return null;
-			}
-		};
-	}
-
-	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
-		StringBuilder sb = new StringBuilder(message);
-		if (returnValue != null) {
-			sb.append(" [type=" + returnValue.getClass().getName() + "] ");
-		}
-		sb.append("[value=" + returnValue + "]");
-		return getDetailedErrorMessage(sb.toString());
 	}
 
 	/**
@@ -184,11 +153,39 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return responseStatus != null;
 	}
 
+	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
+		StringBuilder sb = new StringBuilder(message);
+		if (returnValue != null) {
+			sb.append(" [type=" + returnValue.getClass().getName() + "] ");
+		}
+		sb.append("[value=" + returnValue + "]");
+		return getDetailedErrorMessage(sb.toString());
+	}
 
 	/**
-	 * Wraps the Callable returned from a HandlerMethod so may be invoked just
-	 * like the HandlerMethod with the same return value handling guarantees.
-	 * Method-level annotations must be on the HandlerMethod, not the Callable.
+	 * Return a ServletInvocableHandlerMethod that will process the value returned
+	 * from an async operation essentially either applying return value handling or
+	 * raising an exception if the end result is an Exception.
+	 */
+	ServletInvocableHandlerMethod wrapConcurrentProcessingResult(final Object result) {
+
+		return new CallableHandlerMethod(new Callable<Object>() {
+
+			public Object call() throws Exception {
+				if (result instanceof Exception) {
+					throw (Exception) result;
+				}
+				else if (result instanceof Throwable) {
+					throw new NestedServletException("Async processing failed", (Throwable) result);
+				}
+				return result;
+			}
+		});
+	}
+
+
+	/**
+	 * Wrap a Callable as a ServletInvocableHandlerMethod inheriting method-level annotations.
 	 */
 	private class CallableHandlerMethod extends ServletInvocableHandlerMethod {
 

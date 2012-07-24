@@ -16,65 +16,45 @@
 
 package org.springframework.web.servlet;
 
-import java.util.concurrent.Callable;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-
 /**
- * Extends {@link HanderInterceptor} with lifecycle methods specific to async
- * request processing.
+ * Extends the HandlerInterceptor contract for scenarios where a handler may be
+ * executed asynchronously. Since the handler will complete execution in another
+ * thread, the results are not available in the current thread, and therefore the
+ * DispatcherServlet exits quickly and on its way out invokes
+ * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse)}
+ * instead of {@code postHandle} and {@code afterCompletion}.
+ * When the async handler execution completes, and the request is dispatched back
+ * for further processing, the DispatcherServlet will invoke {@code preHandle}
+ * again, as well as {@code postHandle} and {@code afterCompletion}.
  *
- * <p>This is the sequence of events on the main thread in an async scenario:
- * <ol>
- * 	<li>{@link #preHandle(WebRequest)}
- * 	<li>{@link #getAsyncCallable(WebRequest)}
- * 	<li>... <em>handler execution</em>
- * 	<li>{@link #postHandleAsyncStarted(WebRequest)}
- * </ol>
- *
- * <p>This is the sequence of events on the async thread:
- * <ol>
- * 	<li>Async {@link Callable#call()} (the {@code Callable} returned by {@code getAsyncCallable})
- * 	<li>... <em>async handler execution</em>
- * 	<li>{@link #postHandle(WebRequest, org.springframework.ui.ModelMap)}
- * 	<li>{@link #afterCompletion(WebRequest, Exception)}
- * </ol>
+ * <p>Existing implementations should consider the fact that {@code preHandle} may
+ * be invoked twice before {@code postHandle} and {@code afterCompletion} are
+ * called if they don't implement this contract. Once before the start of concurrent
+ * handling and a second time as part of an asynchronous dispatch after concurrent
+ * handling is done. This may be not important in most cases but when some work
+ * needs to be done after concurrent handling starts (e.g. clearing thread locals)
+ * then this contract can be implemented.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
+ *
+ * @see org.springframework.web.context.request.async.WebAsyncManager
  */
 public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 
 	/**
-	 * Invoked <em>after</em> {@link #preHandle(WebRequest)} and <em>before</em>
-	 * the handler is executed. The returned {@link Callable} is used only if
-	 * handler execution leads to teh start of async processing. It is invoked
-	 *  the async thread before the request is handled fro.
-	 * <p>Implementations can use this <code>Callable</code> to initialize
-	 * ThreadLocal attributes on the async thread.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
-	 * @return a {@link Callable} instance or <code>null</code>
+	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
+	 * a handler is being executed concurrently. Implementations may use the provided
+	 * request and response but should avoid modifying them in ways that would
+	 * conflict with the concurrent execution of the handler. A typical use of
+	 * this method would be to clean thread local variables.
+	 *
+	 * @param request the current request
+	 * @param response the current response
 	 */
-	AbstractDelegatingCallable getAsyncCallable(HttpServletRequest request, HttpServletResponse response, Object handler);
-
-	/**
-	 * Invoked <em>after</em> the execution of a handler but only if the handler started
-	 * async processing instead of handling the request. Effectively this method
-	 * is invoked instead of {@link #postHandle(WebRequest, org.springframework.ui.ModelMap)}
-	 * on the way out of the main processing thread allowing implementations
-	 * to ensure ThreadLocal attributes are cleared. The <code>postHandle</code>
-	 * invocation is effectively delayed until after async processing when the
-	 * request has actually been handled.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
-	 */
-	void postHandleAfterAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler);
+	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response);
 
 }

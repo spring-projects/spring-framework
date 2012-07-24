@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate3.support;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,14 +26,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate3.SessionFactoryUtils;
 import org.springframework.orm.hibernate3.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -165,15 +167,26 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 
+	/**
+	 * The default value is "true" so that the filter may re-bind the opened
+	 * {@code Session} to each asynchronously dispatched thread and postpone
+	 * closing it until the very last asynchronous dispatch.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
+
 	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-
 		SessionFactory sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		String key = getAlreadyFilteredAttributeName();
 
 		if (isSingleSession()) {
 			// single session mode
@@ -182,16 +195,20 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				participate = true;
 			}
 			else {
-				logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
-				Session session = getSession(sessionFactory);
-				SessionHolder sessionHolder = new SessionHolder(session);
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+				if (!isAsyncDispatch(request) || !asyncManager.applyAsyncThreadInitializer(key)) {
+					logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
+					Session session = getSession(sessionFactory);
+					SessionHolder sessionHolder = new SessionHolder(session);
+					TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-				chain.push(getAsyncCallable(request, sessionFactory, sessionHolder));
+					AsyncThreadInitializer initializer = createAsyncThreadInitializer(sessionFactory, sessionHolder);
+					asyncManager.registerAsyncThreadInitializer(key, initializer);
+				}
 			}
 		}
 		else {
 			// deferred close mode
+			Assert.state(isLastRequestThread(request), "Deferred close mode is not supported on async dispatches");
 			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
 				// Do not modify deferred close: just set the participate flag.
 				participate = true;
@@ -210,21 +227,30 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					SessionHolder sessionHolder =
 							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					if (!chain.pop()) {
-						return;
+					if (isLastRequestThread(request)) {
+						logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
+						closeSession(sessionHolder.getSession(), sessionFactory);
 					}
-					logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
-					closeSession(sessionHolder.getSession(), sessionFactory);
 				}
 				else {
-					if (chain.isAsyncStarted()) {
-						throw new IllegalStateException("Deferred close is not supported with async requests.");
-					}
 					// deferred close mode
 					SessionFactoryUtils.processDeferredClose(sessionFactory);
 				}
 			}
 		}
+	}
+
+	private AsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
+			final SessionHolder sessionHolder) {
+
+		return new AsyncThreadInitializer() {
+			public void initialize() {
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+			}
+		};
 	}
 
 	/**
@@ -289,30 +315,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 */
 	protected void closeSession(Session session, SessionFactory sessionFactory) {
 		SessionFactoryUtils.closeSession(session);
-	}
-
-	/**
-	 * Create a Callable to extend the use of the open Hibernate Session to the
-	 * async thread completing the request.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request,
-			final SessionFactory sessionFactory, final SessionHolder sessionHolder) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-				try {
-					getNext().call();
-				}
-				finally {
-					SessionHolder sessionHolder =
-							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
-					SessionFactoryUtils.closeSession(sessionHolder.getSession());
-				}
-				return null;
-			}
-		};
 	}
 
 }

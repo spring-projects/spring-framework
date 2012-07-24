@@ -24,8 +24,9 @@ import javax.servlet.ServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
@@ -52,18 +53,15 @@ public class AsyncMethodReturnValueHandler implements HandlerMethodReturnValueHa
 
 		Assert.notNull(returnValue, "A Callable or a DeferredValue is required");
 
-		mavContainer.setRequestHandled(true);
-
 		Class<?> paramType = returnType.getParameterType();
 		ServletRequest servletRequest = webRequest.getNativeRequest(ServletRequest.class);
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(servletRequest);
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(servletRequest);
 
 		if (Callable.class.isAssignableFrom(paramType)) {
-			chain.setLastCallable((Callable<Object>) returnValue);
-			chain.startCallableProcessing();
+			asyncManager.startCallableProcessing((Callable<Object>) returnValue, mavContainer);
 		}
 		else if (DeferredResult.class.isAssignableFrom(paramType)) {
-			chain.startDeferredResultProcessing((DeferredResult<?>) returnValue);
+			asyncManager.startDeferredResultProcessing((DeferredResult<?>) returnValue, mavContainer);
 		}
 		else {
 			// should never happen..

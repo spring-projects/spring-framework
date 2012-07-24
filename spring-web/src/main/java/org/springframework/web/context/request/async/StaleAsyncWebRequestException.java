@@ -21,9 +21,6 @@ package org.springframework.web.context.request.async;
  *
  * @author Rossen Stoyanchev
  * @since 3.2
- *
- * @see DeferredResult#set(Object)
- * @see AsyncExecutionChainRunnable#run()
  */
 @SuppressWarnings("serial")
 public class StaleAsyncWebRequestException extends RuntimeException {

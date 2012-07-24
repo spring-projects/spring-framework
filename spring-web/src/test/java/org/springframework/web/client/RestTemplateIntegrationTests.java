@@ -16,6 +16,14 @@
 
 package org.springframework.web.client;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -25,6 +33,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,14 +47,13 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -59,8 +67,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import static org.junit.Assert.*;
 
 /** @author Arjen Poutsma */
 public class RestTemplateIntegrationTests {
@@ -80,21 +86,22 @@ public class RestTemplateIntegrationTests {
 		int port = FreePortScanner.getFreePort();
 		jettyServer = new Server(port);
 		baseUrl = "http://localhost:" + port;
-		Context jettyContext = new Context(jettyServer, "/");
+		ServletContextHandler handler = new ServletContextHandler();
 		byte[] bytes = helloWorld.getBytes("UTF-8");
-		contentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
-		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
-		jettyContext.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
-		jettyContext.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
-		jettyContext.addServlet(
+		contentType = new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
+		handler.addServlet(new ServletHolder(new GetServlet(bytes, contentType)), "/get");
+		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], contentType)), "/get/nothing");
+		handler.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
+		handler.addServlet(
 				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, contentType)),
 				"/post");
-		jettyContext.addServlet(new ServletHolder(new StatusCodeServlet(204)), "/status/nocontent");
-		jettyContext.addServlet(new ServletHolder(new StatusCodeServlet(304)), "/status/notmodified");
-		jettyContext.addServlet(new ServletHolder(new ErrorServlet(404)), "/status/notfound");
-		jettyContext.addServlet(new ServletHolder(new ErrorServlet(500)), "/status/server");
-		jettyContext.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
-		jettyContext.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
+		handler.addServlet(new ServletHolder(new StatusCodeServlet(204)), "/status/nocontent");
+		handler.addServlet(new ServletHolder(new StatusCodeServlet(304)), "/status/notmodified");
+		handler.addServlet(new ServletHolder(new ErrorServlet(404)), "/status/notfound");
+		handler.addServlet(new ServletHolder(new ErrorServlet(500)), "/status/server");
+		handler.addServlet(new ServletHolder(new UriServlet()), "/uri/*");
+		handler.addServlet(new ServletHolder(new MultipartServlet()), "/multipart");
+		jettyServer.setHandler(handler);
 		jettyServer.start();
 	}
 
@@ -130,7 +137,7 @@ public class RestTemplateIntegrationTests {
 		String s = template.getForObject(baseUrl + "/get/nothing", String.class);
 		assertNull("Invalid content", s);
 	}
-	
+
 	@Test
 	public void getNoContentTypeHeader() throws UnsupportedEncodingException {
 		byte[] bytes = template.getForObject(baseUrl + "/get/nocontenttype", byte[].class);
@@ -141,7 +148,7 @@ public class RestTemplateIntegrationTests {
 	public void getNoContent() {
 		String s = template.getForObject(baseUrl + "/status/nocontent", String.class);
 		assertNull("Invalid content", s);
-		
+
 		ResponseEntity<String> entity = template.getForEntity(baseUrl + "/status/nocontent", String.class);
 		assertEquals("Invalid response code", HttpStatus.NO_CONTENT, entity.getStatusCode());
 		assertNull("Invalid content", entity.getBody());

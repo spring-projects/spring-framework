@@ -29,9 +29,10 @@ import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
 
 /**
  * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
@@ -103,9 +104,18 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 * {@link org.springframework.transaction.support.TransactionSynchronizationManager}.
 	 */
 	public void preHandle(WebRequest request) throws DataAccessException {
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		String participateAttributeName = getParticipateAttributeName();
+
+		if (asyncManager.hasConcurrentResult()) {
+			if (asyncManager.applyAsyncThreadInitializer(participateAttributeName)) {
+				return;
+			}
+		}
+
 		if (TransactionSynchronizationManager.hasResource(getSessionFactory())) {
 			// Do not modify the Session: just mark the request accordingly.
-			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);
 			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
@@ -115,6 +125,9 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 			Session session = openSession();
 			SessionHolder sessionHolder = new SessionHolder(session);
 			TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
+
+			AsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(sessionHolder);
+			asyncManager.registerAsyncThreadInitializer(participateAttributeName, asyncThreadInitializer);
 		}
 	}
 
@@ -122,60 +135,39 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	}
 
 	/**
-	 * Create a <code>Callable</code> to bind the <code>Hibernate</code> session
-	 * to the async request thread.
-	 */
-	public AbstractDelegatingCallable getAsyncCallable(WebRequest request) {
-		String attributeName = getParticipateAttributeName();
-		if (request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) != null) {
-			return null;
-		}
-
-		final SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(getSessionFactory());
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
-				getNext().call();
-				return null;
-			}
-		};
-	}
-
-	/**
-	 * Unbind the Hibernate <code>Session</code> from the main thread leaving
-	 * it open for further use from an async thread.
-	 */
-	public void postHandleAsyncStarted(WebRequest request) {
-		String attributeName = getParticipateAttributeName();
-		if (request.getAttribute(attributeName, WebRequest.SCOPE_REQUEST) == null) {
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		}
-	}
-
-	/**
 	 * Unbind the Hibernate <code>Session</code> from the thread and close it).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
-		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-		if (count != null) {
-			// Do not modify the Session: just clear the marker.
-			if (count > 1) {
-				request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
-			}
-			else {
-				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-			}
-		}
-		else {
+		if (!decrementParticipateCount(request)) {
 			SessionHolder sessionHolder =
 					(SessionHolder) TransactionSynchronizationManager.unbindResource(getSessionFactory());
 			logger.debug("Closing Hibernate Session in OpenSessionInViewInterceptor");
 			SessionFactoryUtils.closeSession(sessionHolder.getSession());
+
 		}
+	}
+
+	public void afterConcurrentHandlingStarted(WebRequest request) {
+		if (!decrementParticipateCount(request)) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		}
+	}
+
+	private boolean decrementParticipateCount(WebRequest request) {
+		String participateAttributeName = getParticipateAttributeName();
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		if (count == null) {
+			return false;
+		}
+		// Do not modify the Session: just clear the marker.
+		if (count > 1) {
+			request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
+		}
+		else {
+			request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		}
+		return true;
 	}
 
 	/**
@@ -206,6 +198,17 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 */
 	protected String getParticipateAttributeName() {
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
+	}
+
+	private AsyncThreadInitializer createThreadInitializer(final SessionHolder sessionHolder) {
+		return new AsyncThreadInitializer() {
+			public void initialize() {
+				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(getSessionFactory());
+			}
+		};
 	}
 
 }

@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.Assert;
 import org.springframework.web.context.request.WebRequestInterceptor;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
 import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -57,25 +56,6 @@ public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerIntercep
 		return true;
 	}
 
-	public AbstractDelegatingCallable getAsyncCallable(HttpServletRequest request,
-			HttpServletResponse response, Object handler) {
-
-		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
-			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
-			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
-			return asyncInterceptor.getAsyncCallable(webRequest);
-		}
-		return null;
-	}
-
-	public void postHandleAfterAsyncStarted(HttpServletRequest request, HttpServletResponse response, Object handler) {
-		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
-			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
-			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
-			asyncInterceptor.postHandleAsyncStarted(webRequest);
-		}
-	}
-
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
 
@@ -87,6 +67,14 @@ public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerIntercep
 			throws Exception {
 
 		this.requestInterceptor.afterCompletion(new DispatcherServletWebRequest(request, response), ex);
+	}
+
+	public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
+		if (this.requestInterceptor instanceof AsyncWebRequestInterceptor) {
+			AsyncWebRequestInterceptor asyncInterceptor = (AsyncWebRequestInterceptor) this.requestInterceptor;
+			DispatcherServletWebRequest webRequest = new DispatcherServletWebRequest(request, response);
+			asyncInterceptor.afterConcurrentHandlingStarted(webRequest);
+		}
 	}
 
 }

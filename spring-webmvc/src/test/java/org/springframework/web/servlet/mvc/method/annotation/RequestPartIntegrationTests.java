@@ -21,14 +21,14 @@ import static org.junit.Assert.assertEquals;
 import java.net.URI;
 import java.util.Arrays;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -59,8 +59,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Test access to parts of a multipart request with {@link RequestPart}. 
- * 
+ * Test access to parts of a multipart request with {@link RequestPart}.
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestPartIntegrationTests {
@@ -71,39 +71,41 @@ public class RequestPartIntegrationTests {
 
 	private static String baseUrl;
 
-	
+
 	@BeforeClass
 	public static void startServer() throws Exception {
-		
+
 		int port = FreePortScanner.getFreePort();
 		baseUrl = "http://localhost:" + port;
 
 		server = new Server(port);
-		Context context = new Context(server, "/");
+		ServletContextHandler handler = new ServletContextHandler();
+		handler.setContextPath("/");
 
 		Class<?> config = CommonsMultipartResolverTestConfig.class;
 		ServletHolder commonsResolverServlet = new ServletHolder(DispatcherServlet.class);
 		commonsResolverServlet.setInitParameter("contextConfigLocation", config.getName());
 		commonsResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-		context.addServlet(commonsResolverServlet, "/commons-resolver/*");
+		handler.addServlet(commonsResolverServlet, "/commons-resolver/*");
 
 		config = StandardMultipartResolverTestConfig.class;
 		ServletHolder standardResolverServlet = new ServletHolder(DispatcherServlet.class);
 		standardResolverServlet.setInitParameter("contextConfigLocation", config.getName());
 		standardResolverServlet.setInitParameter("contextClass", AnnotationConfigWebApplicationContext.class.getName());
-		context.addServlet(standardResolverServlet, "/standard-resolver/*");
+		handler.addServlet(standardResolverServlet, "/standard-resolver/*");
 
-		// TODO: add Servlet 3.0 test case without MultipartResolver 
+		// TODO: add Servlet 3.0 test case without MultipartResolver
 
+		server.setHandler(handler);
 		server.start();
 	}
-	
+
 	@Before
 	public void setUp() {
 		XmlAwareFormHttpMessageConverter converter = new XmlAwareFormHttpMessageConverter();
 		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
 				new ResourceHttpMessageConverter(), new MappingJacksonHttpMessageConverter()));
-		
+
  		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
  		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
 	}
@@ -115,7 +117,7 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
-	
+
 	@Test
 	public void commonsMultipartResolver() throws Exception {
 		testCreate(baseUrl + "/commons-resolver/test");
@@ -147,7 +149,7 @@ public class RequestPartIntegrationTests {
 			return new RequestPartTestController();
 		}
 	}
-	
+
 	@Configuration
 	static class CommonsMultipartResolverTestConfig extends RequestPartTestConfig {
 
@@ -166,7 +168,6 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@Controller
 	private static class RequestPartTestController {
 
@@ -178,10 +179,10 @@ public class RequestPartIntegrationTests {
 	        return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private static class TestData {
-		
+
 		private String name;
 
 		public TestData() {
@@ -200,5 +201,5 @@ public class RequestPartIntegrationTests {
 			this.name = name;
 		}
 	}
-	
+
 }

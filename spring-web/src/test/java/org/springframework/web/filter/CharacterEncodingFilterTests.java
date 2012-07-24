@@ -18,6 +18,7 @@ package org.springframework.web.filter;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.notNull;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.same;
@@ -32,7 +33,7 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncWebUtils;
 
 /**
  * @author Rick Evans
@@ -47,8 +48,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 	public void testForceAlwaysSetsEncoding() throws Exception {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
-		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
-		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		addAsyncManagerExpectations(request);
 		request.setCharacterEncoding(ENCODING);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
@@ -76,8 +76,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 	public void testEncodingIfEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
-		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
-		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
@@ -103,8 +102,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 	public void testDoesNowtIfEncodingIsNotEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
-		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
-		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(ENCODING);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
@@ -128,8 +126,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 	public void testWithBeanInitialization() throws Exception {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
-		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
-		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
@@ -155,8 +152,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 	public void testWithIncompleteInitialization() throws Exception {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
-		expect(request.getAttribute(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE)).andReturn(null);
-		request.setAttribute(same(AsyncExecutionChain.CALLABLE_CHAIN_ATTRIBUTE), notNull());
+		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
 		expect(request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
@@ -178,4 +174,11 @@ public class CharacterEncodingFilterTests extends TestCase {
 		verify(filterChain);
 	}
 
+
+	private void addAsyncManagerExpectations(HttpServletRequest request) {
+		expect(request.getAttribute(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE)).andReturn(null);
+		expectLastCall().anyTimes();
+		request.setAttribute(same(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE), notNull());
+		expectLastCall().anyTimes();
+	}
 }

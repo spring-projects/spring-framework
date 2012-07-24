@@ -19,47 +19,51 @@ package org.springframework.web.context.request.async;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * An implementation of {@link AsyncWebRequest} used when no underlying support
- * for async request processing is available in which case {@link #startAsync()}
- * results in an {@link UnsupportedOperationException}.
+ * An implementation of {@link AsyncWebRequest} to use when no underlying support is available.
+ * The  methods {@link #startAsync()} and {@link #dispatch()} raise {@link UnsupportedOperationException}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class NoOpAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest {
+public class NoSupportAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest {
 
-	public NoOpAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+	public NoSupportAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);
 	}
 
+	public void addCompletionHandler(Runnable runnable) {
+		// ignored
+	}
+
 	public void setTimeout(Long timeout) {
+		// ignored
 	}
 
 	public void setTimeoutHandler(Runnable runnable) {
+		// ignored
 	}
 
 	public boolean isAsyncStarted() {
 		return false;
 	}
 
-	public boolean isAsyncCompleted() {
+	public boolean isDispatched() {
 		return false;
+	}
+
+	public boolean isAsyncComplete() {
+		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 runtime");
 	}
 
 	public void startAsync() {
 		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 runtime");
 	}
 
-	public void complete() {
-		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 environment");
-	}
-
-	public void sendError(HttpStatus status, String message) {
-		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 environment");
+	public void dispatch() {
+		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 runtime");
 	}
 
 }

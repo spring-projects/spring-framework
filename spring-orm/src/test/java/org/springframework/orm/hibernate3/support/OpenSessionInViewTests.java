@@ -16,8 +16,10 @@
 
 package org.springframework.orm.hibernate3.support;
 
+import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
@@ -29,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -59,9 +62,9 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.request.async.AsyncWebRequest;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 
@@ -152,6 +155,8 @@ public class OpenSessionInViewTests {
 	@Test
 	public void testOpenSessionInViewInterceptorAsyncScenario() throws Exception {
 
+		// Initial request thread
+
 		final SessionFactory sf = createStrictMock(SessionFactory.class);
 		Session session = createStrictMock(Session.class);
 
@@ -167,39 +172,52 @@ public class OpenSessionInViewTests {
 		interceptor.preHandle(this.webRequest);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
-		AbstractDelegatingCallable asyncCallable = interceptor.getAsyncCallable(this.webRequest);
-		assertNotNull(asyncCallable);
-
-		interceptor.postHandleAsyncStarted(this.webRequest);
-		assertFalse(TransactionSynchronizationManager.hasResource(sf));
-
 		verify(sf);
 		verify(session);
 
-		asyncCallable.setNext(new Callable<Object>() {
-			public Object call() {
-				return null;
+		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.startAsync();
+		replay(asyncWebRequest);
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+
+		asyncManager.startCallableProcessing(new Callable<String>() {
+			public String call() throws Exception {
+				return "anything";
 			}
 		});
 
-		asyncCallable.call();
+		verify(asyncWebRequest);
+
+		interceptor.afterConcurrentHandlingStarted(this.webRequest);
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+
+		// Async dispatch thread
+
+		interceptor.preHandle(this.webRequest);
 		assertTrue("Session not bound to async thread", TransactionSynchronizationManager.hasResource(sf));
 
 		verify(sf);
-		verify(session);
 		reset(sf);
-		reset(session);
 		replay(sf);
+
+		verify(session);
+		reset(session);
 		replay(session);
 
 		interceptor.postHandle(this.webRequest, null);
 		assertTrue(TransactionSynchronizationManager.hasResource(sf));
 
 		verify(sf);
-		verify(session);
 		reset(sf);
+
+		verify(session);
 		reset(session);
+
 		expect(session.close()).andReturn(null);
+
 		replay(sf);
 		replay(session);
 
@@ -438,9 +456,11 @@ public class OpenSessionInViewTests {
 	}
 
 	@Test
-	public void testOpenSessionInViewFilterWithSingleSessionAsyncScenario() throws Exception {
+	public void testOpenSessionInViewFilterAsyncScenario() throws Exception {
 		final SessionFactory sf = createStrictMock(SessionFactory.class);
 		Session session = createStrictMock(Session.class);
+
+		// Initial request during which concurrent handler execution starts..
 
 		expect(sf.openSession()).andReturn(session);
 		expect(session.getSessionFactory()).andReturn(sf);
@@ -456,55 +476,60 @@ public class OpenSessionInViewTests {
 
 		MockFilterConfig filterConfig = new MockFilterConfig(wac.getServletContext(), "filter");
 
+		final AtomicInteger count = new AtomicInteger(0);
+
 		final OpenSessionInViewFilter filter = new OpenSessionInViewFilter();
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
-				servletRequest.setAttribute("invoked", Boolean.TRUE);
+				count.incrementAndGet();
 			}
 		};
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
+		expectLastCall().anyTimes();
 		replay(asyncWebRequest);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(this.request);
-		chain.setAsyncWebRequest(asyncWebRequest);
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.startCallableProcessing(new Callable<String>() {
+			public String call() throws Exception {
+				return "anything";
+			}
+		});
 
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 		filter.doFilter(this.request, this.response, filterChain);
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
-		assertNotNull(this.request.getAttribute("invoked"));
+		assertEquals(1, count.get());
 
 		verify(sf);
 		verify(session);
 		verify(asyncWebRequest);
 
-		chain.setTaskExecutor(new SyncTaskExecutor());
-		chain.setLastCallable(new Callable<Object>() {
-			public Object call() {
-				assertTrue(TransactionSynchronizationManager.hasResource(sf));
-				return null;
-			}
-		});
-
-		reset(asyncWebRequest);
-		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncCompleted()).andReturn(false);
-		asyncWebRequest.complete();
-		replay(asyncWebRequest);
-
 		reset(sf);
 		reset(session);
+		reset(asyncWebRequest);
+
+		// Async dispatch after concurrent handler execution results ready..
+
 		expect(session.close()).andReturn(null);
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(false);
+		expectLastCall().anyTimes();
+
 		replay(sf);
 		replay(session);
+		replay(asyncWebRequest);
 
-		chain.startCallableProcessing();
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		filter.doFilter(this.request, this.response, filterChain);
+		assertFalse(TransactionSynchronizationManager.hasResource(sf));
+		assertEquals(2, count.get());
 
 		verify(sf);
 		verify(session);

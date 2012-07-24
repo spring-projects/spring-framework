@@ -61,10 +61,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.NoOpAsyncWebRequest;
+import org.springframework.web.context.request.async.NoSupportAsyncWebRequest;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.ErrorsMethodArgumentResolver;
@@ -146,7 +146,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private final Map<Class<?>, Set<Method>> modelFactoryCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
 	private Long asyncRequestTimeout;
 
@@ -652,48 +652,36 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.setAsyncWebRequest(createAsyncWebRequest(request, response));
-		chain.setTaskExecutor(this.taskExecutor);
-		chain.push(getAsyncCallable(mavContainer, modelFactory, webRequest));
+		AsyncWebRequest asyncWebRequest = createAsyncWebRequest(request, response);
+		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
-		try {
-			requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
-		}
-		finally {
-			if (!chain.pop()) {
-				return null;
+		final WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(this.taskExecutor);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+
+		if (asyncManager.hasConcurrentResult()) {
+			Object result = asyncManager.getConcurrentResult();
+			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+			asyncManager.resetConcurrentResult();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found concurrent result value [" + result + "]");
 			}
+			requestMappingMethod = requestMappingMethod.wrapConcurrentProcessingResult(result);
+		}
+
+		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
+
+		if (asyncManager.isConcurrentHandlingStarted()) {
+			return null;
 		}
 
 		return getModelAndView(mavContainer, modelFactory, webRequest);
 	}
 
-	private AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		if (ClassUtils.hasMethod(ServletRequest.class, "startAsync")) {
-			AsyncWebRequest asyncRequest = instantiateStandardServletAsyncWebRequest(request, response);
-			asyncRequest.setTimeout(this.asyncRequestTimeout);
-			return asyncRequest;
-		}
-		else {
-			return new NoOpAsyncWebRequest(request, response);
-		}
-	}
+	private ServletInvocableHandlerMethod createRequestMappingMethod(
+			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 
-	private AsyncWebRequest instantiateStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
-		try {
-			Class<?> clazz = ClassUtils.forName(className, this.getClass().getClassLoader());
-			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
-			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor , request, response);
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
-		}
-	}
-
-	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,
-																	 WebDataBinderFactory binderFactory) {
 		ServletInvocableHandlerMethod requestMethod;
 		requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
 		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -753,18 +741,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
 	}
 
-	/**
-	 * Create a Callable to produce a ModelAndView asynchronously.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final ModelAndViewContainer mavContainer,
-			final ModelFactory modelFactory, final NativeWebRequest webRequest) {
+	private AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
+				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response);
+	}
 
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				getNext().call();
-				return getModelAndView(mavContainer, modelFactory, webRequest);
-			}
-		};
+	private AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
+			Class<?> clazz = ClassUtils.forName(className, this.getClass().getClassLoader());
+			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
+			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor, request, response);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
+		}
 	}
 
 	private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,

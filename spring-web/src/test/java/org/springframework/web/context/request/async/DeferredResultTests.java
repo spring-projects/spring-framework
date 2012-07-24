@@ -25,6 +25,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.StaleAsyncWebRequestException;
 import org.springframework.web.context.request.async.DeferredResult.DeferredResultHandler;
 
 /**

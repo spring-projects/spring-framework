@@ -17,25 +17,25 @@
 package org.springframework.web.context.request.async;
 
 
-import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
-import javax.servlet.http.HttpServletRequest;
 
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockAsyncContext;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 /**
@@ -47,60 +47,55 @@ public class StandardServletAsyncWebRequestTests {
 
 	private StandardServletAsyncWebRequest asyncRequest;
 
-	private HttpServletRequest request;
+	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
 
 	@Before
 	public void setup() {
-		this.request = EasyMock.createMock(HttpServletRequest.class);
+		this.request = new MockHttpServletRequest();
+		this.request.setAsyncSupported(true);
 		this.response = new MockHttpServletResponse();
 		this.asyncRequest = new StandardServletAsyncWebRequest(this.request, this.response);
-		this.asyncRequest.setTimeout(60*1000L);
+		this.asyncRequest.setTimeout(44*1000L);
 	}
 
 	@Test
 	public void isAsyncStarted() throws Exception {
-		replay(this.request);
-		assertEquals("Should be \"false\" before startAsync()", false, this.asyncRequest.isAsyncStarted());
-		verify(this.request);
+		assertFalse(this.asyncRequest.isAsyncStarted());
 
-		startAsync();
-
-		reset(this.request);
-		expect(this.request.isAsyncStarted()).andReturn(true);
-		replay(this.request);
-
-		assertTrue("Should be \"true\" true startAsync()", this.asyncRequest.isAsyncStarted());
-		verify(this.request);
-
-		this.asyncRequest.onComplete(new AsyncEvent(null));
-
-		assertFalse("Should be \"false\" after complete()", this.asyncRequest.isAsyncStarted());
+		this.asyncRequest.startAsync();
+		assertTrue(this.asyncRequest.isAsyncStarted());
 	}
 
 	@Test
 	public void startAsync() throws Exception {
-		AsyncContext asyncContext = EasyMock.createMock(AsyncContext.class);
-
-		reset(this.request);
-		expect(this.request.isAsyncSupported()).andReturn(true);
-		expect(this.request.startAsync(this.request, this.response)).andStubReturn(asyncContext);
-		replay(this.request);
-
-		asyncContext.addListener(this.asyncRequest);
-		asyncContext.setTimeout(60*1000);
-		replay(asyncContext);
-
 		this.asyncRequest.startAsync();
 
-		verify(this.request);
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+
+		assertNotNull(asyncContext);
+		assertEquals("Timeout value not set", 44 * 1000, asyncContext.getTimeout());
+		assertEquals(1, asyncContext.getListeners().size());
+		assertSame(this.asyncRequest, asyncContext.getListeners().get(0));
 	}
 
 	@Test
-	public void startAsync_notSupported() throws Exception {
-		expect(this.request.isAsyncSupported()).andReturn(false);
-		replay(this.request);
+	public void startAsyncMultipleTimes() throws Exception {
+		this.asyncRequest.startAsync();
+		this.asyncRequest.startAsync();
+		this.asyncRequest.startAsync();
+		this.asyncRequest.startAsync();	// idempotent
+
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+
+		assertNotNull(asyncContext);
+		assertEquals(1, asyncContext.getListeners().size());
+	}
+
+	@Test
+	public void startAsyncNotSupported() throws Exception {
+		this.request.setAsyncSupported(false);
 		try {
 			this.asyncRequest.startAsync();
 			fail("expected exception");
@@ -111,60 +106,33 @@ public class StandardServletAsyncWebRequestTests {
 	}
 
 	@Test
-	public void startAsync_alreadyStarted() throws Exception {
-		startAsync();
-
-		reset(this.request);
-
-		expect(this.request.isAsyncSupported()).andReturn(true);
-		expect(this.request.isAsyncStarted()).andReturn(true);
-		replay(this.request);
-
-		try {
-			this.asyncRequest.startAsync();
-			fail("expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals("Async processing already started", ex.getMessage());
-		}
-
-		verify(this.request);
-	}
-
-	@Test
-	public void startAsync_stale() throws Exception {
-		expect(this.request.isAsyncSupported()).andReturn(true);
-		replay(this.request);
+	public void startAsyncAfterCompleted() throws Exception {
 		this.asyncRequest.onComplete(new AsyncEvent(null));
 		try {
 			this.asyncRequest.startAsync();
 			fail("expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals("Cannot use async request that has completed", ex.getMessage());
+			assertEquals("Async processing has already completed", ex.getMessage());
 		}
 	}
 
 	@Test
-	public void complete_stale() throws Exception {
-		this.asyncRequest.onComplete(new AsyncEvent(null));
-		this.asyncRequest.complete();
-
-		assertFalse(this.asyncRequest.isAsyncStarted());
-		assertTrue(this.asyncRequest.isAsyncCompleted());
+	public void onTimeoutDefaultBehavior() throws Exception {
+		this.asyncRequest.onTimeout(new AsyncEvent(null));
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE.value(), this.response.getStatus());
 	}
 
 	@Test
-	public void sendError() throws Exception {
-		this.asyncRequest.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "error");
-		assertEquals(500, this.response.getStatus());
-	}
+	public void onTimeoutTimeoutHandler() throws Exception {
+		Runnable timeoutHandler = EasyMock.createMock(Runnable.class);
+		timeoutHandler.run();
+		replay(timeoutHandler);
 
-	@Test
-	public void sendError_stale() throws Exception {
-		this.asyncRequest.onComplete(new AsyncEvent(null));
-		this.asyncRequest.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "error");
-		assertEquals(200, this.response.getStatus());
+		this.asyncRequest.setTimeoutHandler(timeoutHandler);
+		this.asyncRequest.onTimeout(new AsyncEvent(null));
+
+		verify(timeoutHandler);
 	}
 
 }

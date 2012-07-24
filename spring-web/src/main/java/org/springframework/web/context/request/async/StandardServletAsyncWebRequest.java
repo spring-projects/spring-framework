@@ -17,11 +17,14 @@
 package org.springframework.web.context.request.async;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,27 +51,49 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private Runnable timeoutHandler;
+	private Runnable timeoutHandler = new DefaultTimeoutHandler();
+
+	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
 	public StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>The timeout period begins when the main processing thread has exited.
+	 */
 	public void setTimeout(Long timeout) {
 		this.timeout = timeout;
+	}
+
+	public void setTimeoutHandler(Runnable timeoutHandler) {
+		if (timeoutHandler != null) {
+			this.timeoutHandler = timeoutHandler;
+		}
+	}
+
+	public void addCompletionHandler(Runnable runnable) {
+		this.completionHandlers.add(runnable);
 	}
 
 	public boolean isAsyncStarted() {
 		return ((this.asyncContext != null) && getRequest().isAsyncStarted());
 	}
 
-	public boolean isAsyncCompleted() {
+	public boolean isDispatched() {
+		return (DispatcherType.ASYNC.equals(getRequest().getDispatcherType()));
+	}
+
+	/**
+	 * Whether async request processing has completed.
+	 * <p>It is important to avoid use of request and response objects after async
+	 * processing has completed. Servlet containers often re-use them.
+	 */
+	public boolean isAsyncComplete() {
 		return this.asyncCompleted.get();
 	}
 
-	public void setTimeoutHandler(Runnable timeoutHandler) {
-		this.timeoutHandler = timeoutHandler;
-	}
 
 	public void startAsync() {
 		Assert.state(getRequest().isAsyncSupported(),
@@ -76,8 +101,10 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 				"in async request processing. This is done in Java code using the Servlet API " +
 				"or by adding \"<async-supported>true</async-supported>\" to servlet and " +
 				"filter declarations in web.xml.");
-		Assert.state(!isAsyncStarted(), "Async processing already started");
-		Assert.state(!isAsyncCompleted(), "Cannot use async request that has completed");
+		Assert.state(!isAsyncComplete(), "Async processing has already completed");
+		if (isAsyncStarted()) {
+			return;
+		}
 		this.asyncContext = getRequest().startAsync(getRequest(), getResponse());
 		this.asyncContext.addListener(this);
 		if (this.timeout != null) {
@@ -85,52 +112,44 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		}
 	}
 
-	public void complete() {
-		if (!isAsyncCompleted()) {
-			this.asyncContext.complete();
-			completeInternal();
-		}
-	}
-
-	private void completeInternal() {
-		this.asyncContext = null;
-		this.asyncCompleted.set(true);
-	}
-
-	public void sendError(HttpStatus status, String message) {
-		try {
-			if (!isAsyncCompleted()) {
-				getResponse().sendError(500, message);
-			}
-		}
-		catch (IOException ioEx) {
-			// absorb
-		}
+	public void dispatch() {
+		Assert.notNull(this.asyncContext, "Cannot dispatch without an AsyncContext");
+		this.asyncContext.dispatch();
 	}
 
 	// ---------------------------------------------------------------------
 	// Implementation of AsyncListener methods
 	// ---------------------------------------------------------------------
 
-	public void onTimeout(AsyncEvent event) throws IOException {
-		if (this.timeoutHandler == null) {
-			getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
-		}
-		else {
-			this.timeoutHandler.run();
-		}
-		completeInternal();
-	}
-
-	public void onError(AsyncEvent event) throws IOException {
-		completeInternal();
-	}
-
 	public void onStartAsync(AsyncEvent event) throws IOException {
 	}
 
+	public void onError(AsyncEvent event) throws IOException {
+	}
+
+	public void onTimeout(AsyncEvent event) throws IOException {
+		this.timeoutHandler.run();
+	}
+
 	public void onComplete(AsyncEvent event) throws IOException {
-		completeInternal();
+		for (Runnable runnable : this.completionHandlers) {
+			runnable.run();
+		}
+		this.asyncContext = null;
+		this.asyncCompleted.set(true);
+	}
+
+
+	private class DefaultTimeoutHandler implements Runnable {
+
+		public void run() {
+			try {
+				getResponse().sendError(HttpStatus.SERVICE_UNAVAILABLE.value());
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+		}
 	}
 
 }

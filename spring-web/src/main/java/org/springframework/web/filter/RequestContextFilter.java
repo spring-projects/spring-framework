@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
  * Servlet 2.3 Filter that exposes the request to the current thread,
@@ -72,6 +70,15 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	}
 
 
+	/**
+	 * The default value is "true" in which case the filter will set up the request
+	 * context in each asynchronously dispatched thread.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
+
 	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -80,21 +87,15 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
 		initContextHolders(request, attributes);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.push(getChainedCallable(request, attributes));
-
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
 			resetContextHolders();
-			if (!chain.pop()) {
-				return;
-			}
-			attributes.requestCompleted();
 			if (logger.isDebugEnabled()) {
 				logger.debug("Cleared thread-bound request context: " + request);
 			}
+			attributes.requestCompleted();
 		}
 	}
 
@@ -109,30 +110,6 @@ public class RequestContextFilter extends OncePerRequestFilter {
 	private void resetContextHolders() {
 		LocaleContextHolder.resetLocaleContext();
 		RequestContextHolder.resetRequestAttributes();
-	}
-
-	/**
-	 * Create a Callable to use to complete processing in an async execution chain.
-	 */
-	private AbstractDelegatingCallable getChainedCallable(final HttpServletRequest request,
-			final ServletRequestAttributes requestAttributes) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				initContextHolders(request, requestAttributes);
-				try {
-					getNext().call();
-				}
-				finally {
-					resetContextHolders();
-					requestAttributes.requestCompleted();
-					if (logger.isDebugEnabled()) {
-						logger.debug("Cleared thread-bound request context: " + request);
-					}
-				}
-				return null;
-			}
-		};
 	}
 
 }

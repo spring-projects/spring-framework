@@ -108,9 +108,6 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	@Override
 	protected void handleMatch(String extension, MediaType mediaType) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("Requested media type is '" + mediaType + "' (based on file extension '" + extension + "')");
-		}
 	}
 
 	@Override

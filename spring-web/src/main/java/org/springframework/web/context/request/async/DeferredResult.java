@@ -20,6 +20,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.Assert;
 
@@ -48,6 +50,8 @@ import org.springframework.util.Assert;
  * @since 3.2
  */
 public final class DeferredResult<V> {
+
+	private static final Log logger = LogFactory.getLog(DeferredResult.class);
 
 	private V result;
 
@@ -123,17 +127,26 @@ public final class DeferredResult<V> {
 		Assert.isNull(this.result, "A deferred result can be set once only");
 		this.result = result;
 		this.timeoutValueUsed = (this.timeoutValueSet && (this.result == this.timeoutValue));
-		try {
-			this.initializationLatch.await(10, TimeUnit.SECONDS);
-		}
-		catch (InterruptedException e) {
+		if (!await()) {
 			throw new IllegalStateException(
 					"Gave up on waiting for DeferredResult to be initialized. " +
 					"Are you perhaps creating and setting a DeferredResult in the same thread? " +
 					"The DeferredResult must be fully initialized before you can set it. " +
 					"See the class javadoc for more details");
 		}
+		if (this.timeoutValueUsed) {
+			logger.debug("Using default timeout value");
+		}
 		this.resultHandler.handle(result);
+	}
+
+	private boolean await() {
+		try {
+			return this.initializationLatch.await(10, TimeUnit.SECONDS);
+		}
+		catch (InterruptedException e) {
+			return false;
+		}
 	}
 
 	/**

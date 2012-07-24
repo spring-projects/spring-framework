@@ -366,9 +366,13 @@ project('spring-web') {
         compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
         compile("com.fasterxml.jackson.core:jackson-databind:2.0.1", optional)
         compile("taglibs:standard:1.1.2", optional)
-        compile("org.mortbay.jetty:jetty:6.1.9") { dep ->
+        compile("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") { dep ->
             optional dep
-            exclude group: 'org.mortbay.jetty', module: 'servlet-api-2.5'
+            exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
+        }
+        compile("org.eclipse.jetty:jetty-server:8.1.5.v20120716") { dep ->
+            optional dep
+            exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
         }
         testCompile project(":spring-context-support")  // for JafMediaTypeFactory
         testCompile "xmlunit:xmlunit:1.2"

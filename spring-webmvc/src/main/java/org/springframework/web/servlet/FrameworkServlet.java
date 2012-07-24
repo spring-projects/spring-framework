@@ -47,8 +47,9 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -194,6 +195,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/** Actual ApplicationContextInitializer instances to apply to the context */
 	private ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+
 
 	/**
 	 * Create a new {@code FrameworkServlet} that will create its own internal web
@@ -905,22 +907,55 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		initContextHolders(request, localeContext, requestAttributes);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.push(getAsyncCallable(startTime, request, response,
-				previousLocaleContext, previousAttributes, localeContext, requestAttributes));
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		asyncManager.registerAsyncThreadInitializer(this.getClass().getName(), createAsyncThreadInitializer(request));
 
 		try {
 			doService(request, response);
 		}
-		catch (Throwable t) {
-			failureCause = t;
+		catch (ServletException ex) {
+			failureCause = ex;
+			throw ex;
 		}
+		catch (IOException ex) {
+			failureCause = ex;
+			throw ex;
+		}
+		catch (Throwable ex) {
+			failureCause = ex;
+			throw new NestedServletException("Request processing failed", ex);
+		}
+
 		finally {
 			resetContextHolders(request, previousLocaleContext, previousAttributes);
-			if (!chain.pop()) {
-				return;
+			if (requestAttributes != null) {
+				requestAttributes.requestCompleted();
 			}
-			finalizeProcessing(startTime, request, response, requestAttributes, failureCause);
+
+			if (logger.isDebugEnabled()) {
+				if (failureCause != null) {
+					this.logger.debug("Could not complete request", failureCause);
+				} else {
+					if (asyncManager.isConcurrentHandlingStarted()) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Leaving response open for concurrent processing");
+						}
+					}
+					else {
+						this.logger.debug("Successfully completed request");
+					}
+				}
+			}
+			if (this.publishEvents) {
+				// Whether or not we succeeded, publish an event.
+				long processingTime = System.currentTimeMillis() - startTime;
+				this.webApplicationContext.publishEvent(
+						new ServletRequestHandledEvent(this,
+								request.getRequestURI(), request.getRemoteAddr(),
+								request.getMethod(), getServletConfig().getServletName(),
+								WebUtils.getSessionId(request), getUsernameForRequest(request),
+								processingTime, failureCause));
+			}
 		}
 	}
 
@@ -956,78 +991,14 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 	}
 
-	/**
-	 * Log and re-throw unhandled exceptions, publish a ServletRequestHandledEvent, etc.
-	 */
-	private void finalizeProcessing(long startTime, HttpServletRequest request, HttpServletResponse response,
-			ServletRequestAttributes requestAttributes, Throwable t) throws ServletException, IOException {
+	private AsyncThreadInitializer createAsyncThreadInitializer(final HttpServletRequest request) {
 
-		Throwable failureCause = null;
-		try {
-			if (t != null) {
-				if (t instanceof ServletException) {
-					failureCause = t;
-					throw (ServletException) t;
-				}
-				else if (t instanceof IOException) {
-					failureCause = t;
-					throw (IOException) t;
-				}
-				else {
-					NestedServletException ex = new NestedServletException("Request processing failed", t);
-					failureCause = ex;
-					throw ex;
-				}
+		return new AsyncThreadInitializer() {
+			public void initialize() {
+				initContextHolders(request, buildLocaleContext(request), new ServletRequestAttributes(request));
 			}
-		}
-		finally {
-			if (requestAttributes != null) {
-				requestAttributes.requestCompleted();
-			}
-			if (logger.isDebugEnabled()) {
-				if (failureCause != null) {
-					this.logger.debug("Could not complete request", failureCause);
-				}
-				else {
-					this.logger.debug("Successfully completed request");
-				}
-			}
-			if (this.publishEvents) {
-				// Whether or not we succeeded, publish an event.
-				long processingTime = System.currentTimeMillis() - startTime;
-				this.webApplicationContext.publishEvent(
-						new ServletRequestHandledEvent(this,
-								request.getRequestURI(), request.getRemoteAddr(),
-								request.getMethod(), getServletConfig().getServletName(),
-								WebUtils.getSessionId(request), getUsernameForRequest(request),
-								processingTime, failureCause));
-			}
-		}
-	}
-
-	/**
-	 * Create a Callable to use to complete processing in an async execution chain.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final long startTime,
-			final HttpServletRequest request, final HttpServletResponse response,
-			final LocaleContext previousLocaleContext, final RequestAttributes previousAttributes,
-			final LocaleContext localeContext, final ServletRequestAttributes requestAttributes) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				initContextHolders(request, localeContext, requestAttributes);
-				Throwable unhandledFailure = null;
-				try {
-					getNext().call();
-				}
-				catch (Throwable t) {
-					unhandledFailure = t;
-				}
-				finally {
-					resetContextHolders(request, previousLocaleContext, previousAttributes);
-					finalizeProcessing(startTime, request, response, requestAttributes, unhandledFailure);
-				}
-				return null;
+			public void reset() {
+				resetContextHolders(request, null, null);
 			}
 		};
 	}
@@ -1061,6 +1032,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected abstract void doService(HttpServletRequest request, HttpServletResponse response)
 			throws Exception;
 
+
 	/**
 	 * Close the WebApplicationContext of this servlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
@@ -1072,6 +1044,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			((ConfigurableApplicationContext) this.webApplicationContext).close();
 		}
 	}
+
 
 	/**
 	 * ApplicationListener endpoint that receives events from this servlet's WebApplicationContext

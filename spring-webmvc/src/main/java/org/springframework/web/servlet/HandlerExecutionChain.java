@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 
 /**
  * Handler execution chain, consisting of handler object and any handler interceptors.
@@ -49,7 +47,6 @@ public class HandlerExecutionChain {
 
 	private int interceptorIndex = -1;
 
-	private int pushedCallableCount;
 
 	/**
 	 * Create a new HandlerExecutionChain.
@@ -140,27 +137,6 @@ public class HandlerExecutionChain {
 		return true;
 	}
 
-	void pushInterceptorCallables(HttpServletRequest request, HttpServletResponse response) {
-		if (getInterceptors() == null) {
-			return;
-		}
-		for (HandlerInterceptor interceptor : getInterceptors()) {
-			if (interceptor instanceof AsyncHandlerInterceptor) {
-				try {
-					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptor;
-					AbstractDelegatingCallable callable = asyncInterceptor.getAsyncCallable(request, response, this.handler);
-					if (callable != null) {
-						AsyncExecutionChain.getForCurrentRequest(request).push(callable);
-						this.pushedCallableCount++;
-					}
-				}
-				catch (Throwable ex) {
-					logger.error("HandlerInterceptor failed to return an async Callable", ex);
-				}
-			}
-		}
-	}
-
 	/**
 	 * Apply postHandle methods of registered interceptors.
 	 */
@@ -171,34 +147,6 @@ public class HandlerExecutionChain {
 		for (int i = getInterceptors().length - 1; i >= 0; i--) {
 			HandlerInterceptor interceptor = getInterceptors()[i];
 			interceptor.postHandle(request, response, this.handler, mv);
-		}
-	}
-
-	/**
-	 * Remove pushed callables and apply postHandleAsyncStarted callbacks.
-	 */
-	void popInterceptorCallables(HttpServletRequest request, HttpServletResponse response,
-			boolean asyncStarted) throws Exception {
-
-		if (getInterceptors() == null) {
-			return;
-		}
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		for ( ; this.pushedCallableCount > 0; this.pushedCallableCount--) {
-			chain.pop();
-		}
-		if (asyncStarted) {
-			for (int i = getInterceptors().length - 1; i >= 0; i--) {
-				HandlerInterceptor interceptor = getInterceptors()[i];
-				if (interceptor instanceof AsyncHandlerInterceptor) {
-					try {
-						((AsyncHandlerInterceptor) interceptor).postHandleAfterAsyncStarted(request, response, this.handler);
-					}
-					catch (Throwable ex) {
-						logger.error("HandlerInterceptor.postHandleAsyncStarted(..) failed", ex);
-					}
-				}
-			}
 		}
 	}
 
@@ -224,6 +172,25 @@ public class HandlerExecutionChain {
 		}
 	}
 
+	/**
+	 * Apply afterConcurrentHandlerStarted callback on mapped AsyncHandlerInterceptors.
+	 */
+	void applyAfterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
+		if (getInterceptors() == null) {
+			return;
+		}
+		for (int i = getInterceptors().length - 1; i >= 0; i--) {
+			if (interceptors[i] instanceof AsyncHandlerInterceptor) {
+				try {
+					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptors[i];
+					asyncInterceptor.afterConcurrentHandlingStarted(request, response);
+				}
+				catch (Throwable ex) {
+					logger.error("Interceptor [" + interceptors[i] + "] failed in afterConcurrentHandlingStarted", ex);
+				}
+			}
+		}
+	}
 
 	/**
 	 * Delegates to the handler's <code>toString()</code>.
