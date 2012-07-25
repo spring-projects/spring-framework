@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -45,7 +46,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -673,7 +673,8 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			if (!hasTypeLevelMapping() || ObjectUtils.isEmpty(getTypeLevelMapping().value())) {
 				return false;
 			}
-			return (Boolean) request.getAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
+			Object value = request.getAttribute(HandlerMapping.INTROSPECT_TYPE_LEVEL_MAPPING);
+			return (value != null) ? (Boolean) value : Boolean.TRUE;
 		}
 
 		private boolean useSuffixPattern(HttpServletRequest request) {
