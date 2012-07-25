@@ -1031,7 +1031,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		private final String beanName;
 
 		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
-			this.descriptor = descriptor;
+			this.descriptor = new DependencyDescriptor(descriptor);
 			this.beanName = beanName;
 			this.descriptor.increaseNestingLevel();
 		}

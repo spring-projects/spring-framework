@@ -62,6 +62,20 @@ public class DependencyDescriptor implements Serializable {
 	private transient Annotation[] fieldAnnotations;
 
 
+    public DependencyDescriptor(DependencyDescriptor template) {
+        this.methodParameter=template.methodParameter;
+        this.field=template.field;
+        this.declaringClass=template.declaringClass;
+        this.methodName=template.methodName;
+        this.parameterTypes=template.parameterTypes;
+        this.parameterIndex=template.parameterIndex;
+        this.fieldName=template.fieldName;
+        this.required=template.required;
+        this.eager=template.eager;
+        this.nestingLevel=template.nestingLevel;
+        this.fieldAnnotations=template.fieldAnnotations;
+    }
+
 	/**
 	 * Create a new descriptor for a method or constructor parameter.
 	 * Considers the dependency as 'eager'.
