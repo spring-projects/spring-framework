@@ -53,7 +53,7 @@ public interface TransactionManagementConfigurer {
 	 * <pre class="code">
 	 * &#064;Bean
 	 * &#064;Override
-	 * public PlatformTransactionManager createTransactionManager() {
+	 * public PlatformTransactionManager annotationDrivenTransactionManager() {
 	 *     return new DataSourceTransactionManager(dataSource());
 	 * }</pre>
 	 * <h3>2. Implement the method without {@code @Bean} and delegate to another existing
@@ -65,7 +65,7 @@ public interface TransactionManagementConfigurer {
 	 * }
 	 *
 	 * &#064;Override
-	 * public PlatformTransactionManager createTransactionManager() {
+	 * public PlatformTransactionManager annotationDrivenTransactionManager() {
 	 *     return txManager(); // reference the existing {@code @Bean} method above
 	 * }</pre>
 	 *
