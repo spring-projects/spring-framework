@@ -33,14 +33,13 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ExceptionResolver;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
@@ -164,7 +163,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionResponseWriter() throws UnsupportedEncodingException, NoSuchMethodException {
+	public void resolveExceptionResponseWriter() throws Exception {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseWriterController(), "handle");
 		this.resolver.afterPropertiesSet();
@@ -176,28 +175,24 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void resolveExceptionGlobalHandler() throws UnsupportedEncodingException, NoSuchMethodException {
+	public void resolveExceptionGlobalHandler() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(cxt);
-		this.resolver.setGlobalExceptionHandlers(new GlobalExceptionHandler());
 		this.resolver.afterPropertiesSet();
 
-		IllegalStateException ex = new IllegalStateException();
+		IllegalAccessException ex = new IllegalAccessException();
 		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
 		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
 
 		assertNotNull("Exception was not handled", mav);
 		assertTrue(mav.isEmpty());
-		assertEquals("IllegalStateException", this.response.getContentAsString());
+		assertEquals("AnotherTestExceptionResolver: IllegalAccessException", this.response.getContentAsString());
 	}
 
 	@Test
-	public void resolveExceptionGlobalHandlerOrdered() throws UnsupportedEncodingException, NoSuchMethodException {
+	public void resolveExceptionGlobalHandlerOrdered() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
 		this.resolver.setApplicationContext(cxt);
-		GlobalExceptionHandler globalHandler = new GlobalExceptionHandler();
-		globalHandler.setOrder(2);
-		this.resolver.setGlobalExceptionHandlers(globalHandler);
 		this.resolver.afterPropertiesSet();
 
 		IllegalStateException ex = new IllegalStateException();
@@ -206,7 +201,7 @@ public class ExceptionHandlerExceptionResolverTests {
 
 		assertNotNull("Exception was not handled", mav);
 		assertTrue(mav.isEmpty());
-		assertEquals("@ExceptionResolver: IllegalStateException", this.response.getContentAsString());
+		assertEquals("TestExceptionResolver: IllegalStateException", this.response.getContentAsString());
 	}
 
 
@@ -259,41 +254,37 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
-	static class GlobalExceptionHandler implements Ordered {
-
-		private int order;
-
-		public int getOrder() {
-			return order;
-		}
-
-		public void setOrder(int order) {
-			this.order = order;
-		}
+	@ControllerAdvice
+	@Order(1)
+	static class TestExceptionResolver {
 
 		@ExceptionHandler
 		@ResponseBody
 		public String handleException(IllegalStateException ex) {
-			return ClassUtils.getShortName(ex.getClass());
+			return "TestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
 
-	@ExceptionResolver
-	@Order(1)
-	static class AnnotatedExceptionResolver {
+	@ControllerAdvice
+	@Order(2)
+	static class AnotherTestExceptionResolver {
 
-		@ExceptionHandler
+		@ExceptionHandler({IllegalStateException.class, IllegalAccessException.class})
 		@ResponseBody
-		public String handleException(IllegalStateException ex) {
-			return "@ExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
+		public String handleException(Exception ex) {
+			return "AnotherTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
 
 	@Configuration
 	static class MyConfig {
 
-		@Bean public AnnotatedExceptionResolver exceptionResolver() {
-			return new AnnotatedExceptionResolver();
+		@Bean public TestExceptionResolver testExceptionResolver() {
+			return new TestExceptionResolver();
+		}
+
+		@Bean public AnotherTestExceptionResolver anotherTestExceptionResolver() {
+			return new AnotherTestExceptionResolver();
 		}
 	}
 

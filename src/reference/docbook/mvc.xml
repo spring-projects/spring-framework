@@ -1720,6 +1720,13 @@ public void populateModel(@RequestParam String number, Model model) {
         <interfacename>@RequestMapping</interfacename> methods of the same
         controller.</para>
 
+        <para><interfacename>@ModelAttribute</interfacename> methods can also
+        be defined in an <interfacename>@ControllerAdvice</interfacename>-annotated
+        class and such methods apply to all controllers.
+        The <interfacename>@ControllerAdvice</interfacename> annotation is
+        a component annotation allowing implementation classes to be autodetected
+        through classpath scanning.</para>
+
         <tip>
           <para>What happens when a model attribute name is not explicitly
           specified? In such cases a default name is assigned to the model
@@ -2106,9 +2113,11 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
 
         <para>To customize request parameter binding with PropertyEditors
         through Spring's <classname>WebDataBinder</classname>, you can use
-        either <interfacename>@InitBinder</interfacename>-annotated methods
-        within your controller or externalize your configuration by providing
-        a custom <interfacename>WebBindingInitializer</interfacename>.</para>
+        <interfacename>@InitBinder</interfacename>-annotated methods within
+        your controller, <interfacename>@InitBinder</interfacename> methods
+        within an <interfacename>@ControllerAdvice</interfacename> class,
+        or provide a custom
+        <interfacename>WebBindingInitializer</interfacename>.</para>
 
         <section id="mvc-ann-initbinder">
           <title>Customizing data binding with
@@ -2176,6 +2185,22 @@ public class MyFormController {
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
         </section>
+
+        <section id="mvc-ann-initbinder-advice">
+          <title>Customizing data binding with externalized
+          <interfacename>@InitBinder</interfacename> methods</title>
+
+          <para><interfacename>@InitBinder</interfacename> methods can also
+          be defined in an <interfacename>@ControllerAdvice</interfacename>-annotated
+          class in which case they apply to all controllers. This provides an
+          alternative to using a <interfacename>WebBindingInitializer</interfacename>.
+          </para>
+
+          <para>The <interfacename>@ControllerAdvice</interfacename> annotation is
+          a component annotation allowing implementation classes to be autodetected
+          through classpath scanning.</para>
+        </section>
+
       </section>
 
       <section id="mvc-ann-lastmodified">
@@ -3644,10 +3669,11 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       methods. When present within a controller such methods apply to exceptions
       raised by that contoroller or any of its sub-classes.
       Or you can also declare <interfacename>@ExceptionHandler</interfacename>
-      methods in a type annotated with <interfacename>@ExceptionResolver</interfacename>
-      in which case they apply globally.
-      The <interfacename>@ExceptionResolver</interfacename> annotation is
-      a component annotation that can also be used  with a component scan.
+      methods in an <interfacename>@ControllerAdvice</interfacename>-annotated
+      class and such methods apply to any controller.
+      The <interfacename>@ControllerAdvice</interfacename> annotation is
+      a component annotation allowing implementation classes to be autodetected
+      through classpath scanning.
       </para>
 
       <para>Here is an example with a controller-level
@@ -3810,13 +3836,13 @@ public class SimpleController {
         only sets the status code and doesn't assume how or what content should be written
         to the body.</para>
 
-        <para>Instead you can create an <interfacename>@ExceptionResolver</interfacename>
+        <para>Instead you can create an <interfacename>@ControllerAdvice</interfacename>
         class that handles each of the exceptions handled by the
         <classname>DefaultHandlerExceptionResolver</classname> while also writing
         developer-friendly API error information to the response body consistent with
         the rest of all API error handling of the application. For example:</para>
 
-      <programlisting language="java">@ExceptionResolver
+      <programlisting language="java">@ControllerAdvice
 public class ApplicationExceptionResolver {
 
   @ExceptionHandler

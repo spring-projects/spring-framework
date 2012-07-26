@@ -25,12 +25,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import org.aopalliance.aop.Advice;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -106,7 +104,7 @@ public class HandlerMethodAnnotationDetectionTests {
 			DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 			autoProxyCreator.setBeanFactory(context.getBeanFactory());
 			context.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-			context.registerBeanDefinition("controllerAdvice", new RootBeanDefinition(ControllerAdvice.class));
+			context.registerBeanDefinition("controllerAdvice", new RootBeanDefinition(ControllerAdvisor.class));
 		}
 		context.refresh();
 
@@ -405,9 +403,10 @@ public class HandlerMethodAnnotationDetectionTests {
 	}
 
 
-	static class ControllerAdvice extends DefaultPointcutAdvisor {
+	@SuppressWarnings("serial")
+	static class ControllerAdvisor extends DefaultPointcutAdvisor {
 
-		public ControllerAdvice() {
+		public ControllerAdvisor() {
 			super(getControllerPointcut(), new SimpleTraceInterceptor());
 		}
 

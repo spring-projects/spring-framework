@@ -26,16 +26,16 @@ import org.springframework.web.servlet.ModelAndView;
  * Abstract base class for
  * {@link org.springframework.web.servlet.HandlerExceptionResolver HandlerExceptionResolver}
  * implementations that support handling exceptions from handlers of type {@link HandlerMethod}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	/**
-	 * Checks if the handler is a {@link HandlerMethod} instance and performs the check against the bean 
-	 * instance it contains. If the provided handler is not an instance of {@link HandlerMethod}, 
-	 * {@code false} is returned instead.
+	 * Checks if the handler is a {@link HandlerMethod} and then delegates to the
+	 * base class implementation of {@link #shouldApplyTo(HttpServletRequest, Object)}
+	 * passing the bean of the {@code HandlerMethod}. Otherwise returns {@code false}.
 	 */
 	@Override
 	protected boolean shouldApplyTo(HttpServletRequest request, Object handler) {
@@ -51,7 +51,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 			return false;
 		}
 	}
-	
+
 	@Override
 	protected final ModelAndView doResolveException(
 			HttpServletRequest request, HttpServletResponse response,
@@ -59,7 +59,7 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 
 		return doResolveHandlerMethodException(request, response, (HandlerMethod) handler, ex);
 	}
-	
+
 	/**
 	 * Actually resolve the given exception that got thrown during on handler execution,
 	 * returning a ModelAndView that represents a specific error page if appropriate.
