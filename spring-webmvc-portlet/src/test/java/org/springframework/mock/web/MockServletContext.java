@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import javax.activation.FileTypeMap;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
@@ -41,36 +42,49 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.ServletContext} interface.
  *
+ * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0. Can be configured to
+ * expose a specific version through {@link #setMajorVersion}/{@link #setMinorVersion};
+ * default is 2.5. Note that Servlet 3.0 support is limited: servlet, filter and listener
+ * registration methods are not supported; neither is cookie or JSP configuration.
+ * We generally do not recommend to unit-test your ServletContainerInitializers and
+ * WebApplicationInitializers which is where those registration methods would be used.
+ *
  * <p>Used for testing the Spring web framework; only rarely necessary for testing
  * application controllers. As long as application components don't explicitly
- * access the ServletContext, ClassPathXmlApplicationContext or
- * FileSystemXmlApplicationContext can be used to load the context files for testing,
- * even for DispatcherServlet context definitions.
+ * access the {@code ServletContext}, {@code ClassPathXmlApplicationContext} or
+ * {@code FileSystemXmlApplicationContext} can be used to load the context files
+ * for testing, even for {@code DispatcherServlet} context definitions.
  *
- * <p>For setting up a full WebApplicationContext in a test environment, you can
- * use XmlWebApplicationContext (or GenericWebApplicationContext), passing in an
- * appropriate MockServletContext instance. You might want to configure your
- * MockServletContext with a FileSystemResourceLoader in that case, to make your
- * resource paths interpreted as relative file system locations.
+ * <p>For setting up a full {@code WebApplicationContext} in a test environment,
+ * you can use {@code AnnotationConfigWebApplicationContext},
+ * {@code XmlWebApplicationContext}, or {@code GenericWebApplicationContext},
+ * passing in an appropriate {@code MockServletContext} instance. You might want
+ * to configure your {@code MockServletContext} with a {@code FileSystemResourceLoader}
+ * in that case to ensure that resource paths are interpreted as relative filesystem
+ * locations.
  *
  * <p>A common setup is to point your JVM working directory to the root of your
  * web application directory, in combination with filesystem-based resource loading.
  * This allows to load the context files as used in the web application, with
  * relative paths getting interpreted correctly. Such a setup will work with both
- * FileSystemXmlApplicationContext (which will load straight from the file system)
- * and XmlWebApplicationContext with an underlying MockServletContext (as long as
- * the MockServletContext has been configured with a FileSystemResourceLoader).
+ * {@code FileSystemXmlApplicationContext} (which will load straight from the
+ * filesystem) and {@code XmlWebApplicationContext} with an underlying
+ * {@code MockServletContext} (as long as the {@code MockServletContext} has been
+ * configured with a {@code FileSystemResourceLoader}).
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.0.2
  * @see #MockServletContext(org.springframework.core.io.ResourceLoader)
+ * @see org.springframework.web.context.support.AnnotationConfigWebApplicationContext
  * @see org.springframework.web.context.support.XmlWebApplicationContext
  * @see org.springframework.web.context.support.GenericWebApplicationContext
  * @see org.springframework.context.support.ClassPathXmlApplicationContext
@@ -78,16 +92,12 @@ import org.springframework.web.util.WebUtils;
  */
 public class MockServletContext implements ServletContext {
 
+	/** Default Servlet name used by Tomcat, Jetty, JBoss, and GlassFish: {@value}. */
+	private static final String COMMON_DEFAULT_SERVLET_NAME = "default";
+
 	private static final String TEMP_DIR_SYSTEM_PROPERTY = "java.io.tmpdir";
 
-
 	private final Log logger = LogFactory.getLog(getClass());
-
-	private final ResourceLoader resourceLoader;
-
-	private final String resourceBasePath;
-
-	private String contextPath = "";
 
 	private final Map<String, ServletContext> contexts = new HashMap<String, ServletContext>();
 
@@ -95,7 +105,27 @@ public class MockServletContext implements ServletContext {
 
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
+	private final Set<String> declaredRoles = new HashSet<String>();
+
+	private final Map<String, RequestDispatcher> namedRequestDispatchers = new HashMap<String, RequestDispatcher>();
+
+	private final ResourceLoader resourceLoader;
+
+	private final String resourceBasePath;
+
+	private String contextPath = "";
+
+	private int majorVersion = 2;
+
+	private int minorVersion = 5;
+
+	private int effectiveMajorVersion = 2;
+
+	private int effectiveMinorVersion = 5;
+
 	private String servletContextName = "MockServletContext";
+
+	private String defaultServletName = COMMON_DEFAULT_SERVLET_NAME;
 
 
 	/**
@@ -109,7 +139,7 @@ public class MockServletContext implements ServletContext {
 
 	/**
 	 * Create a new MockServletContext, using a DefaultResourceLoader.
-	 * @param resourceBasePath the WAR root directory (should not end with a slash)
+	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
 	 * @see org.springframework.core.io.DefaultResourceLoader
 	 */
 	public MockServletContext(String resourceBasePath) {
@@ -126,9 +156,13 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/**
-	 * Create a new MockServletContext.
-	 * @param resourceBasePath the WAR root directory (should not end with a slash)
+	 * Create a new MockServletContext using the supplied resource base path and
+	 * resource loader.
+	 * <p>Registers a {@link MockRequestDispatcher} for the Servlet named
+	 * {@value #COMMON_DEFAULT_SERVLET_NAME}.
+	 * @param resourceBasePath the root directory of the WAR (should not end with a slash)
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
+	 * @see #registerNamedDispatcher
 	 */
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
@@ -139,8 +173,9 @@ public class MockServletContext implements ServletContext {
 		if (tempDir != null) {
 			this.attributes.put(WebUtils.TEMP_DIR_CONTEXT_ATTRIBUTE, new File(tempDir));
 		}
-	}
 
+		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
+	}
 
 	/**
 	 * Build a full resource location for the given path,
@@ -154,7 +189,6 @@ public class MockServletContext implements ServletContext {
 		}
 		return this.resourceBasePath + path;
 	}
-
 
 	public void setContextPath(String contextPath) {
 		this.contextPath = (contextPath != null ? contextPath : "");
@@ -176,12 +210,36 @@ public class MockServletContext implements ServletContext {
 		return this.contexts.get(contextPath);
 	}
 
+	public void setMajorVersion(int majorVersion) {
+		this.majorVersion = majorVersion;
+	}
+
 	public int getMajorVersion() {
-		return 2;
+		return this.majorVersion;
+	}
+
+	public void setMinorVersion(int minorVersion) {
+		this.minorVersion = minorVersion;
 	}
 
 	public int getMinorVersion() {
-		return 5;
+		return this.minorVersion;
+	}
+
+	public void setEffectiveMajorVersion(int effectiveMajorVersion) {
+		this.effectiveMajorVersion = effectiveMajorVersion;
+	}
+
+	public int getEffectiveMajorVersion() {
+		return this.effectiveMajorVersion;
+	}
+
+	public void setEffectiveMinorVersion(int effectiveMinorVersion) {
+		this.effectiveMinorVersion = effectiveMinorVersion;
+	}
+
+	public int getEffectiveMinorVersion() {
+		return this.effectiveMinorVersion;
 	}
 
 	public String getMimeType(String filePath) {
@@ -245,11 +303,67 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public RequestDispatcher getRequestDispatcher(String path) {
-		return null;
+		if (!path.startsWith("/")) {
+			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
+		}
+		return new MockRequestDispatcher(path);
 	}
 
 	public RequestDispatcher getNamedDispatcher(String path) {
-		return null;
+		return this.namedRequestDispatchers.get(path);
+	}
+
+	/**
+	 * Register a {@link RequestDispatcher} (typically a {@link MockRequestDispatcher})
+	 * that acts as a wrapper for the named Servlet.
+	 *
+	 * @param name the name of the wrapped Servlet
+	 * @param requestDispatcher the dispatcher that wraps the named Servlet
+	 * @see #getNamedDispatcher
+	 * @see #unregisterNamedDispatcher
+	 */
+	public void registerNamedDispatcher(String name, RequestDispatcher requestDispatcher) {
+		Assert.notNull(name, "RequestDispatcher name must not be null");
+		Assert.notNull(requestDispatcher, "RequestDispatcher must not be null");
+		this.namedRequestDispatchers.put(name, requestDispatcher);
+	}
+
+	/**
+	 * Unregister the {@link RequestDispatcher} with the given name.
+	 *
+	 * @param name the name of the dispatcher to unregister
+	 * @see #getNamedDispatcher
+	 * @see #registerNamedDispatcher
+	 */
+	public void unregisterNamedDispatcher(String name) {
+		Assert.notNull(name, "RequestDispatcher name must not be null");
+		this.namedRequestDispatchers.remove(name);
+	}
+
+	/**
+	 * Get the name of the <em>default</em> {@code Servlet}.
+	 * <p>Defaults to {@value #COMMON_DEFAULT_SERVLET_NAME}.
+	 * @see #setDefaultServletName
+	 */
+	public String getDefaultServletName() {
+		return this.defaultServletName;
+	}
+
+	/**
+	 * Set the name of the <em>default</em> {@code Servlet}.
+	 * <p>Also {@link #unregisterNamedDispatcher unregisters} the current default
+	 * {@link RequestDispatcher} and {@link #registerNamedDispatcher replaces}
+	 * it with a {@link MockRequestDispatcher} for the provided
+	 * {@code defaultServletName}.
+	 * @param defaultServletName the name of the <em>default</em> {@code Servlet};
+	 * never {@code null} or empty
+	 * @see #getDefaultServletName
+	 */
+	public void setDefaultServletName(String defaultServletName) {
+		Assert.hasText(defaultServletName, "defaultServletName must not be null or empty");
+		unregisterNamedDispatcher(this.defaultServletName);
+		this.defaultServletName = defaultServletName;
+		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
 	public Servlet getServlet(String name) {
@@ -296,13 +410,22 @@ public class MockServletContext implements ServletContext {
 		return this.initParameters.get(name);
 	}
 
+	public Enumeration<String> getInitParameterNames() {
+		return Collections.enumeration(this.initParameters.keySet());
+	}
+
+	public boolean setInitParameter(String name, String value) {
+		Assert.notNull(name, "Parameter name must not be null");
+		if (this.initParameters.containsKey(name)) {
+			return false;
+		}
+		this.initParameters.put(name, value);
+		return true;
+	}
+
 	public void addInitParameter(String name, String value) {
 		Assert.notNull(name, "Parameter name must not be null");
 		this.initParameters.put(name, value);
-	}
-
-	public Enumeration<String> getInitParameterNames() {
-		return Collections.enumeration(this.initParameters.keySet());
 	}
 
 	public Object getAttribute(String name) {
@@ -311,7 +434,7 @@ public class MockServletContext implements ServletContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		return new Vector<String>(this.attributes.keySet()).elements();
 	}
 
 	public void setAttribute(String name, Object value) {
@@ -337,9 +460,25 @@ public class MockServletContext implements ServletContext {
 		return this.servletContextName;
 	}
 
+	public ClassLoader getClassLoader() {
+		return ClassUtils.getDefaultClassLoader();
+	}
+
+	public void declareRoles(String... roleNames) {
+		Assert.notNull(roleNames, "Role names array must not be null");
+		for (String roleName : roleNames) {
+			Assert.hasLength(roleName, "Role name must not be empty");
+			this.declaredRoles.add(roleName);
+		}
+	}
+
+	public Set<String> getDeclaredRoles() {
+		return Collections.unmodifiableSet(this.declaredRoles);
+	}
+
 
 	/**
-	 * Inner factory class used to just introduce a Java Activation Framework
+	 * Inner factory class used to introduce a Java Activation Framework
 	 * dependency when actually asked to resolve a MIME type.
 	 */
 	private static class MimeTypeResolver {
