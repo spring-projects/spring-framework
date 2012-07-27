@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
-
 /**
- * TransactionConfiguration defines class-level metadata for configuring
+ * {@code TransactionConfiguration} defines class-level metadata for configuring
  * transactional tests.
  *
  * @author Sam Brannen
  * @since 2.5
- * @see ContextConfiguration
  * @see TransactionalTestExecutionListener
+ * @see org.springframework.test.context.ContextConfiguration
  */
 @Documented
 @Inherited
@@ -42,15 +39,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 public @interface TransactionConfiguration {
 
 	/**
-	 * The bean name of the {@link PlatformTransactionManager} that is to be
-	 * used to drive transactions. This attribute is not required and only needs
-	 * to be specified explicitly if the bean name of the desired
-	 * PlatformTransactionManager is not &quot;transactionManager&quot;.
-	 * <p><b>NOTE:</b> The XML <code>&lt;tx:annotation-driven&gt;</code> element
-	 * also refers to a bean named "transactionManager" by default. If you are
-	 * using both features in combination, make sure to point to the same
-	 * transaction manager bean - here in <code>@TransactionConfiguration</code> and
-	 * also in <code>&lt;tx:annotation-driven transaction-manager="..."&gt;</code>.
+	 * The bean name of the {@link org.springframework.transaction.PlatformTransactionManager
+	 * PlatformTransactionManager} that is to be used to drive transactions.
+	 *
+	 * <p>This attribute is not required and only needs to be specified explicitly
+	 * if there are multiple beans of type {@code PlatformTransactionManager} in
+	 * the test's {@code ApplicationContext} and the bean name of the desired
+	 * {@code PlatformTransactionManager} is not "transactionManager".
+	 *
+	 * <p><b>NOTE:</b> The XML {@code <tx:annotation-driven>} element also refers
+	 * to a bean named "transactionManager" by default. If you are using both
+	 * features in combination, make sure to point to the same transaction manager
+	 * bean - here in {@code @TransactionConfiguration} and also in
+	 * {@code <tx:annotation-driven transaction-manager="...">}.
 	 */
 	String transactionManager() default "transactionManager";
 

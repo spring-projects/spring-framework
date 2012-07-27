@@ -41,6 +41,10 @@
 	</logger>
 -->
 
+	<logger name="org.springframework.test.context.transaction.TransactionalTestExecutionListener">
+		<level value="warn" />
+	</logger>
+
 	<logger name="org.springframework.test.context">
 		<level value="warn" />
 	</logger>
