@@ -630,9 +630,9 @@ public class CustomTestExecutionListenerTests {
 
             <para>Defines class-level metadata for configuring transactional
             tests. Specifically, the bean name of the
-            <interfacename>PlatformTransactionManager</interfacename> that is
-            to be used to drive transactions can be explicitly specified if
-            there are multiple beans of type
+            <interfacename>PlatformTransactionManager</interfacename> that
+            should be used to drive transactions can be explicitly specified
+            if there are multiple beans of type
             <interfacename>PlatformTransactionManager</interfacename> in the
             test's <interfacename>ApplicationContext</interfacename> and the
             bean name of the desired
@@ -657,9 +657,12 @@ public class CustomConfiguredTransactionalTests {
               configuration, you can avoid using
               <interfacename>@TransactionConfiguration</interfacename>
               altogether. In other words, if you have only one transaction
-              manger (or your transaction manager bean is named
-              "transactionManager") and if you want transactions to roll back
-              automatically, there is no need to annotate your test class with
+              manger — or if you have multiple transaction mangers but the
+              transaction manager for tests is named "transactionManager" or
+              specified via a
+              <interfacename>TransactionManagementConfigurer</interfacename> —
+              and if you want transactions to roll back automatically, then
+              there is no need to annotate your test class with
               <interfacename>@TransactionConfiguration</interfacename>.</para>
             </note>
           </listitem>

@@ -40,12 +40,19 @@ public @interface TransactionConfiguration {
 
 	/**
 	 * The bean name of the {@link org.springframework.transaction.PlatformTransactionManager
-	 * PlatformTransactionManager} that is to be used to drive transactions.
+	 * PlatformTransactionManager} that should be used to drive transactions.
 	 *
-	 * <p>This attribute is not required and only needs to be specified explicitly
-	 * if there are multiple beans of type {@code PlatformTransactionManager} in
-	 * the test's {@code ApplicationContext} and the bean name of the desired
-	 * {@code PlatformTransactionManager} is not "transactionManager".
+	 * <p>This attribute is not required and only needs to be declared if there
+	 * are multiple beans of type {@code PlatformTransactionManager} in the test's
+	 * {@code ApplicationContext} <em>and</em> if one of the following is true.
+	 * <ul>
+	 * <li>the bean name of the desired {@code PlatformTransactionManager} is not
+	 * "transactionManager"</li>
+	 * <li>{@link org.springframework.transaction.annotation.TransactionManagementConfigurer
+	 * TransactionManagementConfigurer} was not implemented to specify which
+	 * {@code PlatformTransactionManager} bean should be used for annotation-driven
+	 * transaction management
+	 * </ul>
 	 *
 	 * <p><b>NOTE:</b> The XML {@code <tx:annotation-driven>} element also refers
 	 * to a bean named "transactionManager" by default. If you are using both

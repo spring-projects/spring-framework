@@ -24,8 +24,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.transaction.AfterTransaction;
-import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -42,7 +40,6 @@ public class LookUpNonexistentTxMgrTests {
 
 	private static final CallCountingTransactionManager txManager = new CallCountingTransactionManager();
 
-
 	@Configuration
 	static class Config {
 
@@ -52,26 +49,11 @@ public class LookUpNonexistentTxMgrTests {
 		}
 	}
 
-
-	@BeforeTransaction
-	public void beforeTransaction() {
-		txManager.clear();
-	}
-
 	@Test
-	public void lookUpNothing() {
+	public void nonTransactionalTest() {
 		assertEquals(0, txManager.begun);
 		assertEquals(0, txManager.inflight);
 		assertEquals(0, txManager.commits);
 		assertEquals(0, txManager.rollbacks);
 	}
-
-	@AfterTransaction
-	public void afterTransaction() {
-		assertEquals(0, txManager.begun);
-		assertEquals(0, txManager.inflight);
-		assertEquals(0, txManager.commits);
-		assertEquals(0, txManager.rollbacks);
-	}
-
 }

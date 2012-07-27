@@ -29,6 +29,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * support content negotiation options in MVC namespace and MVC Java config
 * support named dispatchers in MockServletContext (SPR-9587)
 * support single, unqualified tx manager in the TestContext framework (SPR-9645)
+* support TransactionManagementConfigurer in the TestContext framework (SPR-9604)
 
 
 Changes in version 3.2 M1 (2012-05-28)

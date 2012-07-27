@@ -43,6 +43,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
+import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.interceptor.DelegatingTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
@@ -68,11 +69,15 @@ import org.springframework.util.StringUtils;
  *
  * <p>Transactional commit and rollback behavior can be configured via the
  * class-level {@link TransactionConfiguration @TransactionConfiguration} and
- * method-level {@link Rollback @Rollback} annotations. In case there are multiple
- * instances of {@code PlatformTransactionManager} within the test's
- * {@code ApplicationContext}, {@code @TransactionConfiguration} supports
- * configuring the bean name of the {@code PlatformTransactionManager} that is
- * to be used to drive transactions.
+ * method-level {@link Rollback @Rollback} annotations.
+ *
+ * <p>In case there are multiple instances of {@code PlatformTransactionManager}
+ * within the test's {@code ApplicationContext}, @{@code TransactionConfiguration}
+ * supports configuring the bean name of the {@code PlatformTransactionManager}
+ * that should be used to drive transactions. Alternatively,
+ * {@link TransactionManagementConfigurer} can be implemented in an
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * class.
  *
  * <p>When executing transactional tests, it is sometimes useful to be able to
  * execute certain <em>set up</em> or <em>tear down</em> code outside of a
@@ -349,13 +354,25 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				return bf.getBean(tmName, PlatformTransactionManager.class);
 			}
 
-			// look up single bean by type
 			if (bf instanceof ListableBeanFactory) {
 				ListableBeanFactory lbf = (ListableBeanFactory) bf;
-				Map<String, PlatformTransactionManager> beansOfType = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+
+				// look up single bean by type
+				Map<String, PlatformTransactionManager> txMgrs = BeanFactoryUtils.beansOfTypeIncludingAncestors(
 					lbf, PlatformTransactionManager.class);
-				if (beansOfType.size() == 1) {
-					return beansOfType.values().iterator().next();
+				if (txMgrs.size() == 1) {
+					return txMgrs.values().iterator().next();
+				}
+
+				// look up single TransactionManagementConfigurer
+				Map<String, TransactionManagementConfigurer> configurers = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+					lbf, TransactionManagementConfigurer.class);
+				if (configurers.size() > 1) {
+					throw new IllegalStateException(
+						"Only one TransactionManagementConfigurer may exist in the ApplicationContext");
+				}
+				if (configurers.size() == 1) {
+					return configurers.values().iterator().next().annotationDrivenTransactionManager();
 				}
 			}
 

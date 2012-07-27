@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit4.spr9645;
+package org.springframework.test.context.junit4.spr9604;
 
 import static org.junit.Assert.*;
 
@@ -28,11 +28,12 @@ import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.test.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration tests that verify the behavior requested in
- * <a href="https://jira.springsource.org/browse/SPR-9645">SPR-9645</a>.
+ * <a href="https://jira.springsource.org/browse/SPR-9604">SPR-9604</a>.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -40,16 +41,21 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @Transactional
-public class LookUpTxMgrByTypeAndDefaultNameTests {
+public class LookUpTxMgrViaTransactionManagementConfigurerTests {
 
 	private static final CallCountingTransactionManager txManager1 = new CallCountingTransactionManager();
 	private static final CallCountingTransactionManager txManager2 = new CallCountingTransactionManager();
 
+
 	@Configuration
-	static class Config {
+	static class Config implements TransactionManagementConfigurer {
+
+		public PlatformTransactionManager annotationDrivenTransactionManager() {
+			return txManager1();
+		}
 
 		@Bean
-		public PlatformTransactionManager transactionManager() {
+		public PlatformTransactionManager txManager1() {
 			return txManager1;
 		}
 
@@ -58,6 +64,7 @@ public class LookUpTxMgrByTypeAndDefaultNameTests {
 			return txManager2;
 		}
 	}
+
 
 	@BeforeTransaction
 	public void beforeTransaction() {
@@ -71,6 +78,11 @@ public class LookUpTxMgrByTypeAndDefaultNameTests {
 		assertEquals(1, txManager1.inflight);
 		assertEquals(0, txManager1.commits);
 		assertEquals(0, txManager1.rollbacks);
+
+		assertEquals(0, txManager2.begun);
+		assertEquals(0, txManager2.inflight);
+		assertEquals(0, txManager2.commits);
+		assertEquals(0, txManager2.rollbacks);
 	}
 
 	@AfterTransaction
@@ -79,6 +91,11 @@ public class LookUpTxMgrByTypeAndDefaultNameTests {
 		assertEquals(0, txManager1.inflight);
 		assertEquals(0, txManager1.commits);
 		assertEquals(1, txManager1.rollbacks);
+
+		assertEquals(0, txManager2.begun);
+		assertEquals(0, txManager2.inflight);
+		assertEquals(0, txManager2.commits);
+		assertEquals(0, txManager2.rollbacks);
 	}
 
 }

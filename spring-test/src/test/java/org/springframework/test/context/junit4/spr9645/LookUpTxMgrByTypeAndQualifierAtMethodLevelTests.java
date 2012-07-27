@@ -66,7 +66,7 @@ public class LookUpTxMgrByTypeAndQualifierAtMethodLevelTests {
 
 	@Transactional("txManager1")
 	@Test
-	public void lookUpByTypeAndQualifier() {
+	public void transactionalTest() {
 		assertEquals(1, txManager1.begun);
 		assertEquals(1, txManager1.inflight);
 		assertEquals(0, txManager1.commits);

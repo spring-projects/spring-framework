@@ -59,7 +59,7 @@ public class LookUpTxMgrByTypeTests {
 	}
 
 	@Test
-	public void lookUpByType() {
+	public void transactionalTest() {
 		assertEquals(1, txManager.begun);
 		assertEquals(1, txManager.inflight);
 		assertEquals(0, txManager.commits);
