@@ -95,7 +95,7 @@ public class BeanFactoryAnnotationUtils {
 		else {
 			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
 					" bean found for qualifier '" + qualifier + "' - neither qualifier " +
-					"match nor bean name match!");
+					"nor bean name matches!");
 		}
 	}
 
