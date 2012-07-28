@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
- * Simple {@link ConfigurableEnvironment} implementation exposing a
+ * Simple {@link ConfigurableEnvironment} implementation exposing
  * {@link #setProperty(String, String)} and {@link #withProperty(String, String)}
  * methods for testing purposes.
  * 
  * @author Chris Beams
- * @since 3.1
- * @see MockPropertySource
+ * @author Sam Brannen
+ * @since 3.2
+ * @see org.springframework.mock.env.MockPropertySource
  */
 public class MockEnvironment extends AbstractEnvironment {
 
