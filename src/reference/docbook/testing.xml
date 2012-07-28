@@ -47,6 +47,22 @@
     <section xml:id="mock-objects">
       <title>Mock Objects</title>
 
+      <section xml:id="mock-objects-env">
+        <title>Environment</title>
+
+        <para>The <literal>org.springframework.mock.env</literal> package
+        contains mock implementations of the
+        <interfacename>Environment</interfacename> and
+        <interfacename>PropertySource</interfacename> abstractions introduced
+        in Spring 3.1 (see <xref
+        linkend="new-in-3.1-environment-abstraction" /> and <xref
+        linkend="new-in-3.1-property-source-abstraction" />).
+        <classname>MockEnvironment</classname> and
+        <classname>MockPropertySource</classname> are useful for developing
+        <emphasis>out-of-container</emphasis> unit tests for code that depends
+        on environment-specific properties.</para>
+      </section>
+
       <section xml:id="mock-objects-jndi">
         <title>JNDI</title>
 
