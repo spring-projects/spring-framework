@@ -18,6 +18,7 @@ configure(allprojects) {
     targetCompatibility=1.5
 
     ext.aspectjVersion = '1.6.12'
+    ext.hsqldbVersion='1.8.0.10'
     ext.junitVersion = '4.10'
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
@@ -301,7 +302,7 @@ project('spring-jdbc') {
         compile(project(":spring-context"), optional) // for JndiDataSourceLookup
         compile project(":spring-tx")
         compile("c3p0:c3p0:0.9.1.2", optional)
-        compile("hsqldb:hsqldb:1.8.0.7", optional)
+        compile("hsqldb:hsqldb:${hsqldbVersion}", optional)
         compile("com.h2database:h2:1.0.71", optional)
         compile("org.apache.derby:derby:10.5.3.0_1", optional)
         compile("org.apache.derby:derbyclient:10.5.3.0_1", optional)
@@ -330,7 +331,7 @@ project('spring-context-support') {
         compile("commons-digester:commons-digester:1.8.1", optional)
         compile("commons-beanutils:commons-beanutils:1.8.0", optional)
         compile("com.lowagie:itext:2.0.8", optional)
-        testCompile "hsqldb:hsqldb:1.8.0.10"
+        testCompile "hsqldb:hsqldb:${hsqldbVersion}"
         testCompile("org.apache.poi:poi:3.0.2-FINAL") {
             exclude group: 'log4j', module: 'log4j'
         }
