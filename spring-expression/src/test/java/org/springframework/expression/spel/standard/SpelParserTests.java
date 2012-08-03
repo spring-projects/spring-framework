@@ -316,6 +316,12 @@ public class SpelParserTests {
 		assertEquals("test", exprEx.getMessage());
 		assertEquals("Expression 'wibble' @ 3: test", exprEx.toDetailedString());
 	}
+	
+	@Test
+	public void testParseMethodsOnNumbers() {
+		checkNumber("3.14.toString()","3.14",String.class);
+		checkNumber("3.toString()","3",String.class);
+	}
 
 	@Test
 	public void parseMethodsOnNumbers() {
