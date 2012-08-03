@@ -513,7 +513,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatNullReference() {
 		if (peekToken(TokenKind.IDENTIFIER)) {
 			Token nullToken = peekToken();
-			if (!nullToken.stringValue().equals("null")) {
+			if (!nullToken.stringValue().toLowerCase().equals("null")) {
 				return false;
 			}
 			nextToken();
