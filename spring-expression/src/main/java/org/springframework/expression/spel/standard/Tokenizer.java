@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -289,10 +289,19 @@ class Tokenizer {
 		ch = toProcess[pos];
 		if (ch=='.') {
 			isReal = true; 
+			int dotpos = pos;
 			// carry on consuming digits
 			do {
 				pos++;
 			} while (isDigit(toProcess[pos]));
+			if (pos == dotpos + 1) {
+				// the number is something like '3.'. It is really an int but may be
+				// part of something like '3.toString()'. In this case process it as
+				// an int and leave the dot as a separate token.
+				pos = dotpos;
+				pushIntToken(subarray(start, pos), false, start, pos);
+				return;
+			}
 		}
 
 		int endOfNumber = pos;
@@ -307,7 +316,7 @@ class Tokenizer {
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			pos++;
 		} else if (isExponentChar(toProcess[pos])) {
-			isReal = true; // if it wasnt before, it is now
+			isReal = true; // if it wasn't before, it is now
 			pos++;
 			char possibleSign = toProcess[pos];
 			if (isSign(possibleSign)) {
@@ -502,6 +511,5 @@ class Tokenizer {
 			flags[ch]|= IS_ALPHA;
 		}
 	}
-	
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,10 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.Assert;
 
 /**
- * A SpelExpressions represents a parsed (valid) expression that is ready to be evaluated in a specified context. An
- * expression can be evaluated standalone or in a specified context. During expression evaluation the context may be
- * asked to resolve references to types, beans, properties, methods.
+ * A {@code SpelExpression} represents a parsed (valid) expression that is ready
+ * to be evaluated in a specified context. An expression can be evaluated
+ * standalone or in a specified context. During expression evaluation the context
+ * may be asked to resolve references to types, beans, properties, and methods.
  * 
  * @author Andy Clement
  * @since 3.0
@@ -103,22 +104,22 @@ public class SpelExpression implements Expression {
 		return ExpressionUtils.convertTypedValue(context, typedResultValue, expectedResultType);
 	}
 
-	public Class getValueType() throws EvaluationException {
+	public Class<?> getValueType() throws EvaluationException {
 		return getValueType(getEvaluationContext());
 	}
 
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return getValueType(getEvaluationContext(), rootObject);
 	}
 
-	public Class getValueType(EvaluationContext context) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context) throws EvaluationException {
 		Assert.notNull(context, "The EvaluationContext is required");
 		ExpressionState eState = new ExpressionState(context, configuration);
 		TypeDescriptor typeDescriptor = ast.getValueInternal(eState).getTypeDescriptor();
 		return typeDescriptor != null ? typeDescriptor.getType() : null;
 	}
 
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		ExpressionState eState = new ExpressionState(context, toTypedValue(rootObject), configuration);
 		TypeDescriptor typeDescriptor = ast.getValueInternal(eState).getTypeDescriptor();
 		return typeDescriptor != null ? typeDescriptor.getType() : null;
