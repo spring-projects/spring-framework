@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.TestPerson;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests the evaluation of real expressions in a real context.
@@ -556,6 +557,18 @@ public class EvaluationTests extends ExpressionTestCase {
 		expression.setValue(context, "Wibble");
 		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
 		Assert.assertEquals("Wibble",person.getAddress().getCrossStreets().get(3));
+	}
+	
+	@Test 
+	public void uppercaseNullLiteral_spr9613() {
+		ExpressionParser parser = new SpelExpressionParser();
+		Expression exp = parser.parseExpression("null");
+		Object result = exp.getValue();
+		assertNull(result);
+
+		exp = parser.parseExpression("NULL");
+		result = exp.getValue();
+		assertNull(result);
 	}
 	
 }
