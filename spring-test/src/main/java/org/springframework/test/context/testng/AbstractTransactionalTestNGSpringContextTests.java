@@ -23,10 +23,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
-import org.springframework.test.jdbc.SimpleJdbcTestUtils;
+import org.springframework.test.jdbc.JdbcTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@link ApplicationContext application context}.
  *
- * <p>This class exposes a {@link SimpleJdbcTemplate} and provides an easy way
+ * <p>This class exposes a {@link JdbcTemplate} and provides an easy way
  * to {@link #countRowsInTable(String) count the number of rows in a table},
  * {@link #deleteFromTables(String...) delete from tables}, and
  * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
@@ -57,7 +58,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
- * @see org.springframework.test.jdbc.SimpleJdbcTestUtils
+ * @see org.springframework.test.context.transaction.BeforeTransaction
+ * @see org.springframework.test.context.transaction.AfterTransaction
+ * @see org.springframework.test.jdbc.JdbcTestUtils
  * @see org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests
  */
 @TestExecutionListeners(TransactionalTestExecutionListener.class)
@@ -66,20 +69,29 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractTransactionalTestNGSpringContextTests extends AbstractTestNGSpringContextTests {
 
 	/**
-	 * The SimpleJdbcTemplate that this base class manages, available to subclasses.
+	 * The {@code SimpleJdbcTemplate} that this base class manages, available to subclasses.
+	 * @deprecated As of Spring 3.2, use {@link #jdbcTemplate} instead.
 	 */
+	@Deprecated
 	protected SimpleJdbcTemplate simpleJdbcTemplate;
+
+	/**
+	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
+	 */
+	protected JdbcTemplate jdbcTemplate;
 
 	private String sqlScriptEncoding;
 
 
 	/**
-	 * Set the DataSource, typically provided via Dependency Injection.
-	 * @param dataSource the DataSource to inject
+	 * Set the {@code DataSource}, typically provided via Dependency Injection.
+	 * <p>This method also instantiates the {@link #simpleJdbcTemplate} and
+	 * {@link #jdbcTemplate} instance variables.
 	 */
 	@Autowired
-	public void setDataSource(final DataSource dataSource) {
+	public void setDataSource(DataSource dataSource) {
 		this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	/**
@@ -96,24 +108,24 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 * @return the number of rows in the table
 	 */
 	protected int countRowsInTable(String tableName) {
-		return SimpleJdbcTestUtils.countRowsInTable(this.simpleJdbcTemplate, tableName);
+		return JdbcTestUtils.countRowsInTable(this.jdbcTemplate, tableName);
 	}
 
 	/**
-	 * Convenience method for deleting all rows from the specified tables.
-	 * Use with caution outside of a transaction!
+	 * Convenience method for deleting all rows from the specified tables. Use
+	 * with caution outside of a transaction!
 	 * @param names the names of the tables from which to delete
 	 * @return the total number of rows deleted from all specified tables
 	 */
 	protected int deleteFromTables(String... names) {
-		return SimpleJdbcTestUtils.deleteFromTables(this.simpleJdbcTemplate, names);
+		return JdbcTestUtils.deleteFromTables(this.jdbcTemplate, names);
 	}
 
 	/**
 	 * Execute the given SQL script. Use with caution outside of a transaction!
-	 * <p>The script will normally be loaded by classpath. There should be one statement
-	 * per line. Any semicolons will be removed. <b>Do not use this method to execute
-	 * DDL if you expect rollback.</b>
+	 * <p>The script will normally be loaded by classpath. There should be one
+	 * statement per line. Any semicolons will be removed. <b>Do not use this
+	 * method to execute DDL if you expect rollback.</b>
 	 * @param sqlResourcePath the Spring resource path for the SQL script
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
@@ -122,7 +134,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);
-		SimpleJdbcTestUtils.executeSqlScript(this.simpleJdbcTemplate, new EncodedResource(resource,
+		JdbcTestUtils.executeSqlScript(this.jdbcTemplate, new EncodedResource(resource,
 			this.sqlScriptEncoding), continueOnError);
 	}
 

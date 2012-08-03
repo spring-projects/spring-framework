@@ -396,7 +396,7 @@
           </listitem>
 
           <listitem>
-            <para>A <classname>SimpleJdbcTemplate</classname>, for executing
+            <para>A <classname>JdbcTemplate</classname>, for executing
             SQL statements to query the database. Such queries can be used to
             confirm database state both <emphasis>prior to</emphasis> and
             <emphasis>after</emphasis> execution of database-related
@@ -422,7 +422,7 @@
       <title>JDBC Testing Support</title>
 
       <para>The <literal>org.springframework.test.jdbc</literal> package
-      contains <classname>SimpleJdbcTestUtils</classname>, which is a
+      contains <classname>JdbcTestUtils</classname>, which is a
       collection of JDBC related utility functions intended to simplify
       standard database testing scenarios. <emphasis>Note that <link
       linkend="testcontext-support-classes-junit4">
@@ -430,7 +430,7 @@
       </link> and <link linkend="testcontext-support-classes-testng">
       <classname>AbstractTransactionalTestNGSpringContextTests</classname>
       </link> provide convenience methods which delegate to
-      <classname>SimpleJdbcTestUtils</classname> internally.</emphasis></para>
+      <classname>JdbcTestUtils</classname> internally.</emphasis></para>
 
       <para>The <literal>spring-jdbc</literal> module provides support for
       configuring and launching an embedded database which can be used in
@@ -2157,7 +2157,7 @@ public void updateWithSessionFlush() {
                 </listitem>
 
                 <listitem>
-                  <para><literal>simpleJdbcTemplate</literal>: Use this
+                  <para><literal>jdbcTemplate</literal>: Use this
                   variable to execute SQL statements to query the database.
                   Such queries can be used to confirm database state both
                   <emphasis>prior to</emphasis> and <emphasis>after</emphasis>
@@ -2266,7 +2266,7 @@ public class SimpleTest {
                 </listitem>
 
                 <listitem>
-                  <para><literal>simpleJdbcTemplate</literal>: Use this
+                  <para><literal>jdbcTemplate</literal>: Use this
                   variable to execute SQL statements to query the database.
                   Such queries can be used to confirm database state both
                   <emphasis>prior to</emphasis> and <emphasis>after</emphasis>
