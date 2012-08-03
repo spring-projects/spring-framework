@@ -33,6 +33,7 @@ Changes in version 3.2 M2 (2012-08-xx)
 * deprecated SimpleJdbcTestUtils in favor of JdbcTestUtils (SPR-9235)
 * introduced countRowsInTableWhere() and dropTables() in JdbcTestUtils (SPR-9235)
 * introduced JdbcTemplate in tx base classes in the TestContext framework (SPR-8990)
+* introduced countRowsInTableWhere() and dropTables() in tx base test classes (SPR-9665)
 
 
 Changes in version 3.2 M1 (2012-05-28)

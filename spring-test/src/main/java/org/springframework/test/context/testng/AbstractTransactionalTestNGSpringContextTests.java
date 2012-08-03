@@ -32,17 +32,18 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Abstract {@link Transactional transactional} extension of
+ * Abstract {@linkplain Transactional transactional} extension of
  * {@link AbstractTestNGSpringContextTests} which adds convenience functionality
  * for JDBC access. Expects a {@link DataSource} bean and a
  * {@link PlatformTransactionManager} bean to be defined in the Spring
- * {@link ApplicationContext application context}.
+ * {@linkplain ApplicationContext application context}.
  *
- * <p>This class exposes a {@link JdbcTemplate} and provides an easy way
- * to {@link #countRowsInTable(String) count the number of rows in a table},
- * {@link #deleteFromTables(String...) delete from tables}, and
- * {@link #executeSqlScript(String, boolean) execute SQL scripts} within a
- * transaction.
+ * <p>This class exposes a {@link JdbcTemplate} and provides an easy way to
+ * {@linkplain #countRowsInTable count the number of rows in a table}
+ * (potentially {@linkplain #countRowsInTableWhere with a WHERE clause}),
+ * {@linkplain #deleteFromTables delete from tables},
+ * {@linkplain #dropTables drop tables}, and
+ * {@linkplain #executeSqlScript execute SQL scripts} within a transaction.
  *
  * <p>Concrete subclasses must fulfill the same requirements outlined in
  * {@link AbstractTestNGSpringContextTests}.
@@ -77,6 +78,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * The {@code JdbcTemplate} that this base class manages, available to subclasses.
+	 * @since 3.2
 	 */
 	protected JdbcTemplate jdbcTemplate;
 
@@ -112,6 +114,19 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	}
 
 	/**
+	 * Count the rows in the given table, using the provided {@code WHERE} clause.
+	 * <p>See the Javadoc for {@link JdbcTestUtils#countRowsInTableWhere()} for details.
+	 * @param tableName the name of the table to count rows in
+	 * @param whereClause the {@code WHERE} clause to append to the query
+	 * @return the number of rows in the table that match the provided
+	 * {@code WHERE} clause
+	 * @since 3.2
+	 */
+	protected int countRowsInTableWhere(String tableName, String whereClause) {
+		return JdbcTestUtils.countRowsInTableWhere(this.jdbcTemplate, tableName, whereClause);
+	}
+
+	/**
 	 * Convenience method for deleting all rows from the specified tables. Use
 	 * with caution outside of a transaction!
 	 * @param names the names of the tables from which to delete
@@ -119,6 +134,16 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 	 */
 	protected int deleteFromTables(String... names) {
 		return JdbcTestUtils.deleteFromTables(this.jdbcTemplate, names);
+	}
+
+	/**
+	 * Convenience method for dropping all of the specified tables. Use
+	 * with caution outside of a transaction!
+	 * @param names the names of the tables to drop
+	 * @since 3.2
+	 */
+	protected void dropTables(String... names) {
+		JdbcTestUtils.dropTables(this.jdbcTemplate, names);
 	}
 
 	/**

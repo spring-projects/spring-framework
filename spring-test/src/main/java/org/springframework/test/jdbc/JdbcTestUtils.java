@@ -74,7 +74,7 @@ public class JdbcTestUtils {
 	 * @param tableName the name of the table to count rows in
 	 * @param whereClause the {@code WHERE} clause to append to the query
 	 * @return the number of rows in the table that match the provided
-	 * {@code WHERE} clause 
+	 * {@code WHERE} clause
 	 * @since 3.2
 	 */
 	public static int countRowsInTableWhere(JdbcTemplate jdbcTemplate, String tableName, String whereClause) {
@@ -111,7 +111,7 @@ public class JdbcTestUtils {
 	 * Drop the specified tables.
 	 *
 	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
-	 * @param tableNames the names of the tables to drop 
+	 * @param tableNames the names of the tables to drop
 	 * @since 3.2
 	 */
 	public static void dropTables(JdbcTemplate jdbcTemplate, String... tableNames) {
