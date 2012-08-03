@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,12 @@ public class SpelParserTests {
 		Assert.assertEquals("test", exprEx.getMessage());
 		Assert.assertEquals("Expression 'wibble' @ 3: test", exprEx.toDetailedString());
 	}
+	
+	@Test
+	public void testParseMethodsOnNumbers() {
+		checkNumber("3.14.toString()","3.14",String.class);
+		checkNumber("3.toString()","3",String.class);
+	}
 
 	@Test
 	public void testNumerics() {
@@ -339,7 +345,6 @@ public class SpelParserTests {
 		checkNumber("1.2e+3", 1.2e3d, Double.class);
 		checkNumber("1.2e-3", 1.2e-3d, Double.class);
 		checkNumber("1.2e3", 1.2e3d, Double.class);
-		checkNumber("1.e+3", 1.e3d, Double.class);
 		checkNumber("1e+3", 1e3d, Double.class);
 	}
 	
