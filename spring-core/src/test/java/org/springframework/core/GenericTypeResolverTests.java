@@ -73,51 +73,51 @@ public class GenericTypeResolverTests {
 	 * @since 3.2
 	 */
 	@Test
-	public void parameterizedMethodReturnTypes() {
+	public void genericMethodReturnTypes() {
 
 		Method notParameterized = findMethod(MyTypeWithMethods.class, "notParameterized", new Class[] {});
-		assertEquals(String.class, resolveParameterizedReturnType(notParameterized, new Object[] {}));
+		assertEquals(String.class, resolveReturnTypeForGenericMethod(notParameterized, new Object[] {}));
 
 		Method notParameterizedWithArguments = findMethod(MyTypeWithMethods.class, "notParameterizedWithArguments",
 			new Class[] { Integer.class, Boolean.class });
 		assertEquals(String.class,
-			resolveParameterizedReturnType(notParameterizedWithArguments, new Object[] { 99, true }));
+			resolveReturnTypeForGenericMethod(notParameterizedWithArguments, new Object[] { 99, true }));
 
 		Method createProxy = findMethod(MyTypeWithMethods.class, "createProxy", new Class[] { Object.class });
-		assertEquals(String.class, resolveParameterizedReturnType(createProxy, new Object[] { "foo" }));
+		assertEquals(String.class, resolveReturnTypeForGenericMethod(createProxy, new Object[] { "foo" }));
 
 		Method createNamedProxyWithDifferentTypes = findMethod(MyTypeWithMethods.class, "createNamedProxy",
 			new Class[] { String.class, Object.class });
 		// one argument to few
-		assertNull(resolveParameterizedReturnType(createNamedProxyWithDifferentTypes, new Object[] { "enigma" }));
+		assertNull(resolveReturnTypeForGenericMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma" }));
 		assertEquals(Long.class,
-			resolveParameterizedReturnType(createNamedProxyWithDifferentTypes, new Object[] { "enigma", 99L }));
+			resolveReturnTypeForGenericMethod(createNamedProxyWithDifferentTypes, new Object[] { "enigma", 99L }));
 
 		Method createNamedProxyWithDuplicateTypes = findMethod(MyTypeWithMethods.class, "createNamedProxy",
 			new Class[] { String.class, Object.class });
 		assertEquals(String.class,
-			resolveParameterizedReturnType(createNamedProxyWithDuplicateTypes, new Object[] { "enigma", "foo" }));
+			resolveReturnTypeForGenericMethod(createNamedProxyWithDuplicateTypes, new Object[] { "enigma", "foo" }));
 
 		Method createMock = findMethod(MyTypeWithMethods.class, "createMock", new Class[] { Class.class });
-		assertEquals(Runnable.class, resolveParameterizedReturnType(createMock, new Object[] { Runnable.class }));
+		assertEquals(Runnable.class, resolveReturnTypeForGenericMethod(createMock, new Object[] { Runnable.class }));
 
 		Method createNamedMock = findMethod(MyTypeWithMethods.class, "createNamedMock", new Class[] { String.class,
 			Class.class });
 		assertEquals(Runnable.class,
-			resolveParameterizedReturnType(createNamedMock, new Object[] { "foo", Runnable.class }));
+			resolveReturnTypeForGenericMethod(createNamedMock, new Object[] { "foo", Runnable.class }));
 
 		Method createVMock = findMethod(MyTypeWithMethods.class, "createVMock",
 			new Class[] { Object.class, Class.class });
 		assertEquals(Runnable.class,
-			resolveParameterizedReturnType(createVMock, new Object[] { "foo", Runnable.class }));
+			resolveReturnTypeForGenericMethod(createVMock, new Object[] { "foo", Runnable.class }));
 
 		// Ideally we would expect String.class instead of Object.class, but
-		// resolveParameterizedReturnType() does not currently support this form of
+		// resolveReturnTypeForGenericMethod() does not currently support this form of
 		// look-up.
 		Method extractValueFrom = findMethod(MyTypeWithMethods.class, "extractValueFrom",
 			new Class[] { MyInterfaceType.class });
 		assertEquals(Object.class,
-			resolveParameterizedReturnType(extractValueFrom, new Object[] { new MySimpleInterfaceType() }));
+			resolveReturnTypeForGenericMethod(extractValueFrom, new Object[] { new MySimpleInterfaceType() }));
 
 		// Ideally we would expect Boolean.class instead of Object.class, but this
 		// information is not available at run-time due to type erasure.
@@ -125,7 +125,7 @@ public class GenericTypeResolverTests {
 		map.put(0, false);
 		map.put(1, true);
 		Method extractMagicValue = findMethod(MyTypeWithMethods.class, "extractMagicValue", new Class[] { Map.class });
-		assertEquals(Object.class, resolveParameterizedReturnType(extractMagicValue, new Object[] { map }));
+		assertEquals(Object.class, resolveReturnTypeForGenericMethod(extractMagicValue, new Object[] { map }));
 	}
 
 

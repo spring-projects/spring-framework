@@ -646,7 +646,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					&& factoryMethod.getName().equals(mbd.getFactoryMethodName())
 					&& factoryMethod.getParameterTypes().length >= minNrOfArgs) {
 
-				Class<?> returnType = GenericTypeResolver.resolveParameterizedReturnType(factoryMethod, args);
+				Class<?> returnType = GenericTypeResolver.resolveReturnTypeForGenericMethod(factoryMethod, args);
 				if (returnType != null) {
 					returnTypes.add(returnType);
 				}
