@@ -43,8 +43,9 @@ public class OpDivide extends Operator {
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() / op2.doubleValue());
-			}
-			else if (op1 instanceof Long || op2 instanceof Long) {
+			} else if (op1 instanceof Float || op2 instanceof Float) {
+				return new TypedValue(op1.floatValue() / op2.floatValue());
+			} else if (op1 instanceof Long || op2 instanceof Long) {
 				return new TypedValue(op1.longValue() / op2.longValue());
 			}
 			else {

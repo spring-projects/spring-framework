@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.expression.spel;
 
 import junit.framework.Assert;
-
 import org.junit.Test;
 import org.springframework.expression.spel.ast.Operator;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -187,7 +186,7 @@ public class OperatorTests extends ExpressionTestCase {
 		evaluate("5 - 4", "1", Integer.class);
 		evaluate("3 * 5", 15, Integer.class);
 		evaluate("3.2d * 5", 16.0d, Double.class);
-		evaluate("3 * 5f", 15d, Double.class);
+		evaluate("3 * 5f", 15f, Float.class);
 		evaluate("3 / 1", 3, Integer.class);
 		evaluate("3 % 2", 1, Integer.class);
 		evaluate("3 mod 2", 1, Integer.class);
@@ -199,7 +198,7 @@ public class OperatorTests extends ExpressionTestCase {
 	@Test
 	public void testPlus() throws Exception {
 		evaluate("7 + 2", "9", Integer.class);
-		evaluate("3.0f + 5.0f", 8.0d, Double.class);
+		evaluate("3.0f + 5.0f", 8.0f, Float.class);
 		evaluate("3.0d + 5.0d", 8.0d, Double.class);
 
 		evaluate("'ab' + 2", "ab2", String.class);
@@ -229,7 +228,7 @@ public class OperatorTests extends ExpressionTestCase {
 	@Test
 	public void testMinus() throws Exception {
 		evaluate("'c' - 2", "a", String.class);
-		evaluate("3.0f - 5.0f", -2.0d, Double.class);
+		evaluate("3.0f - 5.0f", -2.0f, Float.class);
 		evaluateAndCheckError("'ab' - 2", SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		evaluateAndCheckError("2-'ab'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 		SpelExpression expr = (SpelExpression)parser.parseExpression("-3");
@@ -247,16 +246,16 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testModulus() {
 		evaluate("3%2",1,Integer.class);
 		evaluate("3L%2L",1L,Long.class);
-		evaluate("3.0f%2.0f",1d,Double.class);
+		evaluate("3.0f%2.0f",1f,Float.class);
 		evaluate("5.0d % 3.1d", 1.9d, Double.class);
 		evaluateAndCheckError("'abc'%'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
 
 	@Test
 	public void testDivide() {
-		evaluate("3.0f / 5.0f", 0.6d, Double.class);
+		evaluate("3.0f / 5.0f", 0.6f, Float.class);
 		evaluate("4L/2L",2L,Long.class);
-		evaluate("3.0f div 5.0f", 0.6d, Double.class);
+		evaluate("3.0f div 5.0f", 0.6f, Float.class);
 		evaluate("4L DIV 2L",2L,Long.class);
 		evaluateAndCheckError("'abc'/'def'",SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES);
 	}
@@ -350,9 +349,9 @@ public class OperatorTests extends ExpressionTestCase {
 	public void testMixedOperands_DoublesAndInts() {
 		evaluate("3.0d + 5", 8.0d, Double.class);
 		evaluate("3.0D - 5", -2.0d, Double.class);
-		evaluate("3.0f * 5", 15.0d, Double.class);
-		evaluate("6.0f / 2", 3.0, Double.class);
-		evaluate("6.0f / 4", 1.5d, Double.class);
+		evaluate("3.0f * 5", 15.0f, Float.class);
+		evaluate("6.0f / 2", 3.0f, Float.class);
+		evaluate("6.0f / 4", 1.5f, Float.class);
 		evaluate("5.0D % 3", 2.0d, Double.class);		
 		evaluate("5.5D % 3", 2.5, Double.class);		
 	}
