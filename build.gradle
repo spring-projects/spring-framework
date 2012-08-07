@@ -88,30 +88,27 @@ configure(subprojects) { subproject ->
 }
 
 
-project("spring-asm") {
-    description = 'Spring ASM'
-    ext.asmVersion = '2.2.3'
+project('spring-core') {
+    description = 'Spring Core'
+
+    def asmVersion = '4.0'
 
     configurations {
-        asm
         jarjar
-    }
-    dependencies {
-        asm "asm:asm:${asmVersion}@jar", "asm:asm-commons:${asmVersion}@jar"
-        jarjar 'com.googlecode.jarjar:jarjar:1.3'
+        asm
     }
 
-    task repackageAsm(type: Jar) { jar ->
-        jar.baseName = "asm-repack"
-        jar.version = asmVersion
+    task asmRepackJar(type: Jar) { repackJar ->
+        repackJar.baseName = "spring-asm-repack"
+        repackJar.version = asmVersion
 
         doLast() {
             project.ant {
                 taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
                     classpath: configurations.jarjar.asPath
-                jarjar(destfile: archivePath, index: "true", filesetmanifest: "merge") {
-                    configurations.asm.each { jarfile ->
-                        zipfileset(src: jarfile)
+                jarjar(destfile: repackJar.archivePath) {
+                    configurations.asm.each { originalJar ->
+                        zipfileset(src: originalJar)
                     }
                     rule(pattern: 'org.objectweb.asm.**', result: 'org.springframework.asm.@1')
                 }
@@ -119,24 +116,11 @@ project("spring-asm") {
         }
     }
 
-    jar {
-        dependsOn repackageAsm
-        from(zipTree(repackageAsm.archivePath)) {
-            exclude 'META-INF/INDEX.LIST'
-        }
-    }
-}
-
-project('spring-core') {
-    description = 'Spring Core'
     dependencies {
-        // depend on spring-asm project in order to have it show up as a
-        // <dependency> in the generated pom
-        compile project(":spring-asm")
-        // depend directly on the spring-asm jar to avoid errors in Eclipse/STS
-        compile files(project(":spring-asm").jar.archivePath) {
-            builtBy project(":spring-asm").jar
-        }
+        asm "org.ow2.asm:asm:${asmVersion}@jar", "org.ow2.asm:asm-commons:${asmVersion}@jar"
+        jarjar 'com.googlecode.jarjar:jarjar:1.3'
+
+        compile files(asmRepackJar)
         compile "commons-logging:commons-logging:1.1.1"
         compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
         compile("net.sf.jopt-simple:jopt-simple:3.0") { dep ->
@@ -152,6 +136,13 @@ project('spring-core') {
         }
         testCompile "xmlunit:xmlunit:1.2"
         testCompile "org.codehaus.woodstox:wstx-asl:3.2.7"
+    }
+
+    jar {
+        // inline all repackaged asm classes directly into the spring-core jar
+        from(asmRepackJar) {
+            exclude 'META-INF/**'
+        }
     }
 }
 

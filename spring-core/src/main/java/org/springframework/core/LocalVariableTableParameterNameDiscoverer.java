@@ -29,11 +29,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.asm.ClassReader;
+import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -49,6 +50,7 @@ import org.springframework.util.ClassUtils;
  * @author Adrian Colyer
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Chris Beams
  * @since 2.0
  */
 public class LocalVariableTableParameterNameDiscoverer implements ParameterNameDiscoverer {
@@ -77,7 +79,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		return null;
 	}
 
-	public String[] getParameterNames(Constructor ctor) {
+	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
 		if (map == null) {
@@ -110,7 +112,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		try {
 			ClassReader classReader = new ClassReader(is);
 			Map<Member, String[]> map = new ConcurrentHashMap<Member, String[]>();
-			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), false);
+			classReader.accept(new ParameterNameDiscoveringVisitor(clazz, map), 0);
 			return map;
 		}
 		catch (IOException ex) {
@@ -135,7 +137,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	 * Helper class that inspects all methods (constructor included) and then
 	 * attempts to find the parameter names for that member.
 	 */
-	private static class ParameterNameDiscoveringVisitor extends EmptyVisitor {
+	private static class ParameterNameDiscoveringVisitor extends ClassVisitor {
 
 		private static final String STATIC_CLASS_INIT = "<clinit>";
 
@@ -143,6 +145,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		private final Map<Member, String[]> memberMap;
 
 		public ParameterNameDiscoveringVisitor(Class<?> clazz, Map<Member, String[]> memberMap) {
+			super(SpringAsmInfo.ASM_VERSION);
 			this.clazz = clazz;
 			this.memberMap = memberMap;
 		}
@@ -166,7 +169,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 	}
 
 
-	private static class LocalVariableTableVisitor extends EmptyVisitor {
+	private static class LocalVariableTableVisitor extends MethodVisitor {
 
 		private static final String CONSTRUCTOR = "<init>";
 
@@ -187,6 +190,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 
 		public LocalVariableTableVisitor(Class<?> clazz, Map<Member, String[]> map, String name, String desc,
 				boolean isStatic) {
+			super(SpringAsmInfo.ASM_VERSION);
 			this.clazz = clazz;
 			this.memberMap = map;
 			this.name = name;

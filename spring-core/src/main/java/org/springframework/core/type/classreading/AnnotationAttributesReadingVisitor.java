@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.asm.AnnotationVisitor;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -41,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Juergen Hoeller
  * @since 3.1.1
  */
-abstract class AbstractRecursiveAnnotationVisitor implements AnnotationVisitor {
+abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
@@ -51,6 +52,7 @@ abstract class AbstractRecursiveAnnotationVisitor implements AnnotationVisitor {
 
 
 	public AbstractRecursiveAnnotationVisitor(ClassLoader classLoader, AnnotationAttributes attributes) {
+		super(SpringAsmInfo.ASM_VERSION);
 		this.classLoader = classLoader;
 		this.attributes = attributes;
 	}

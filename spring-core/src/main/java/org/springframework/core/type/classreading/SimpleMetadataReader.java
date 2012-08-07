@@ -56,7 +56,7 @@ final class SimpleMetadataReader implements MetadataReader {
 		}
 
 		AnnotationMetadataReadingVisitor visitor = new AnnotationMetadataReadingVisitor(classLoader);
-		classReader.accept(visitor, true);
+		classReader.accept(visitor, ClassReader.SKIP_DEBUG);
 
 		this.annotationMetadata = visitor;
 		// (since AnnotationMetadataReader extends ClassMetadataReadingVisitor)

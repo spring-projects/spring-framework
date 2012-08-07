@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.asm;
-
 /**
- * Placeholder to allow Javadoc generation. Required because
- * <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4492654">this bug</a>
- * does not allow the generation of Javadoc for packages having only a
- * {@code package-info.java} file.
- * <p>See <a href="package-summary.html">package-level Javadoc</a> for more
- * information on {@code org.springframework.asm}.
+ * Spring's repackaging of <a href="http://asm.ow2.org">org.objectweb.asm 4</a> (for
+ * internal use only).
+ * <p>This repackaging technique avoids any potential conflicts with
+ * dependencies on ASM at the application level or from other third-party
+ * libraries and frameworks.
+ * <p>As this repackaging happens at the classfile level, sources and Javadoc
+ * are not available here. See the original ObjectWeb
+ * <a href="http://asm.ow2.org/asm40/javadoc/user">ASM 4 Javadoc</a>
+ * for details when working with these classes.
  *
- * @author Chris Beams
  * @since 3.2
  */
-public final class SpringAsmInfo {
-}
+package org.springframework.asm;

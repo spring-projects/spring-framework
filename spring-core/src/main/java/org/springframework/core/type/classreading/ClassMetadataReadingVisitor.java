@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.asm.ClassVisitor;
 import org.springframework.asm.FieldVisitor;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
-import org.springframework.asm.commons.EmptyVisitor;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.util.ClassUtils;
 
@@ -38,9 +38,10 @@ import org.springframework.util.ClassUtils;
  * @author Costin Leau
  * @author Mark Fisher
  * @author Ramnivas Laddad
+ * @author Chris Beams
  * @since 2.5
  */
-class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
+class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata {
 
 	private String className;
 
@@ -59,6 +60,11 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 	private String[] interfaces;
 
 	private Set<String> memberClassNames = new LinkedHashSet<String>();
+
+
+	public ClassMetadataReadingVisitor() {
+		super(SpringAsmInfo.ASM_VERSION);
+	}
 
 
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
@@ -99,7 +105,7 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyAnnotationVisitor();
 	}
 
 	public void visitAttribute(Attribute attr) {
@@ -108,12 +114,12 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyFieldVisitor();
 	}
 
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		// no-op
-		return new EmptyVisitor();
+		return new EmptyMethodVisitor();
 	}
 
 	public void visitEnd() {
@@ -167,6 +173,41 @@ class ClassMetadataReadingVisitor implements ClassVisitor, ClassMetadata {
 
 	public String[] getMemberClassNames() {
 		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
+	}
+
+}
+
+
+class EmptyAnnotationVisitor extends AnnotationVisitor {
+
+	public EmptyAnnotationVisitor() {
+		super(SpringAsmInfo.ASM_VERSION);
+	}
+
+	@Override
+	public AnnotationVisitor visitAnnotation(String name, String desc) {
+		return this;
+	}
+
+	@Override
+	public AnnotationVisitor visitArray(String name) {
+		return this;
+	}
+}
+
+
+class EmptyMethodVisitor extends MethodVisitor {
+
+	public EmptyMethodVisitor() {
+		super(SpringAsmInfo.ASM_VERSION);
+	}
+}
+
+
+class EmptyFieldVisitor extends FieldVisitor {
+
+	public EmptyFieldVisitor() {
+		super(SpringAsmInfo.ASM_VERSION);
 	}
 
 }

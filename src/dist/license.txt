@@ -202,18 +202,18 @@
 
 =======================================================================
 
-SPRING FRAMEWORK 3.1 SUBCOMPONENTS:
+SPRING FRAMEWORK 3.2 SUBCOMPONENTS:
 
-Spring Framework 3.1 includes a number of subcomponents with
+Spring Framework 3.2 includes a number of subcomponents with
 separate copyright notices and license terms.  The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
 code for these subcomponents is subject to the terms and
 conditions of the following licenses.
 
->>> asm-2.2.3:
+>>> asm-4.0:
 
-Copyright (c) 2000-2005 INRIA, France Telecom
+Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

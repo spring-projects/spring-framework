@@ -1,9 +1,9 @@
 #com.springsource.sts.gradle.core.actions.GradleRefreshPreferences
-#Thu Feb 23 14:12:55 CET 2012
+#Thu Aug  9 11:34:43 CEST 2012
 enableAfterTasks=true
 afterTasks=afterEclipseImport;
 useHierarchicalNames=false
 enableBeforeTasks=true
 addResourceFilters=false
 enableDSLD=false
-beforeTasks=cleanEclipse;eclipse;\:spring-asm\:jar;\:spring-oxm\:compileTestJava;
+beforeTasks=cleanEclipse;eclipse;\:spring-oxm\:compileTestJava;
