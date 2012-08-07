@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  */
 public class StandardEvaluationContext implements EvaluationContext {
@@ -218,16 +219,23 @@ public class StandardEvaluationContext implements EvaluationContext {
 	}
 
 	/**
-	 * Register a MethodFilter which will be called during method resolution for the
-	 * specified type.  The MethodFilter may remove methods and/or sort the methods
-	 * which will then be used by SpEL as the candidates to look through for a match.
-	 * 
+	 * Register a {@code MethodFilter} which will be called during method resolution
+	 * for the specified type.
+	 *
+	 * <p>The {@code MethodFilter} may remove methods and/or sort the methods which
+	 * will then be used by SpEL as the candidates to look through for a match.
+	 *
 	 * @param type the type for which the filter should be called
-	 * @param filter a MethodFilter, or NULL to deregister a filter for the type
+	 * @param filter a {@code MethodFilter}, or {@code null} to unregister a filter for the type
+	 * @throws IllegalStateException if the {@link ReflectiveMethodResolver} is not in use
 	 */
-	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
+	public void registerMethodFilter(Class<?> type, MethodFilter filter) throws IllegalStateException {
 		ensureMethodResolversInitialized();
-		reflectiveMethodResolver.registerMethodFilter(type,filter);
+		if (reflectiveMethodResolver != null) {
+			reflectiveMethodResolver.registerMethodFilter(type, filter);
+		} else {
+			throw new IllegalStateException("Method filter cannot be set as the reflective method resolver is not in use");
+		}
 	}
 
 	private void ensurePropertyAccessorsInitialized() {

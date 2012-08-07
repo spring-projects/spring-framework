@@ -18,15 +18,22 @@ package org.springframework.expression.spel;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodFilter;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -98,8 +105,8 @@ public class EvaluationTests extends ExpressionTestCase {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	static class TestClass {
-
 		public Foo wibble;
 		private Foo wibble2;
 		public Map map;
@@ -569,6 +576,50 @@ public class EvaluationTests extends ExpressionTestCase {
 
 		exp = parser.parseExpression("NuLl");
 		assertNull(exp.getValue());
+	}
+
+	/**
+	 * Verifies behavior requested in SPR-9621.
+	 */
+	@Test
+	public void customMethodFilter() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		// Register a custom MethodResolver...
+		List<MethodResolver> customResolvers = new ArrayList<MethodResolver>();
+		customResolvers.add(new CustomMethodResolver());
+		context.setMethodResolvers(customResolvers);
+
+		// or simply...
+		// context.setMethodResolvers(new ArrayList<MethodResolver>());
+
+		// Register a custom MethodFilter...
+		MethodFilter filter = new CustomMethodFilter();
+		try {
+			context.registerMethodFilter(String.class, filter);
+			fail("should have failed");
+		} catch (IllegalStateException ise) {
+			assertEquals(
+					"Method filter cannot be set as the reflective method resolver is not in use",
+					ise.getMessage());
+		}
+	}
+
+	static class CustomMethodResolver implements MethodResolver {
+
+		public MethodExecutor resolve(EvaluationContext context,
+				Object targetObject, String name,
+				List<TypeDescriptor> argumentTypes) throws AccessException {
+			return null;
+		}
+	}
+
+	static class CustomMethodFilter implements MethodFilter {
+
+		public List<Method> filter(List<Method> methods) {
+			return null;
+		}
+
 	}
 
 }
