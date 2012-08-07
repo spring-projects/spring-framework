@@ -128,6 +128,16 @@ class Tokenizer {
 						pushCharToken(TokenKind.ASSIGN);
 					}
 					break;
+				case '&':
+					if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+						pushPairToken(TokenKind.SYMBOLIC_AND);
+					}
+					break;
+				case '|':
+					if (isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
+						pushPairToken(TokenKind.SYMBOLIC_OR);
+					}
+					break;					
 				case '?':
 					if (isTwoCharToken(TokenKind.SELECT)) {
 						pushPairToken(TokenKind.SELECT);

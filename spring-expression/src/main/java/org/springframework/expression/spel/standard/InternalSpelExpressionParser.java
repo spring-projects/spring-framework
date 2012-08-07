@@ -169,7 +169,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//logicalOrExpression : logicalAndExpression (OR^ logicalAndExpression)*;
 	private SpelNodeImpl eatLogicalOrExpression() {
 		SpelNodeImpl expr = eatLogicalAndExpression();
-		while (peekIdentifierToken("or")) {
+		while (peekIdentifierToken("or") || peekToken(TokenKind.SYMBOLIC_OR)) {
 			Token t = nextToken(); //consume OR
 			SpelNodeImpl rhExpr = eatLogicalAndExpression();
 			checkRightOperand(t,rhExpr);
@@ -181,7 +181,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// logicalAndExpression : relationalExpression (AND^ relationalExpression)*;
 	private SpelNodeImpl eatLogicalAndExpression() {
 		SpelNodeImpl expr = eatRelationalExpression();
-		while (peekIdentifierToken("and")) {
+		while (peekIdentifierToken("and") || peekToken(TokenKind.SYMBOLIC_AND)) {
 			Token t = nextToken();// consume 'AND'
 			SpelNodeImpl rhExpr = eatRelationalExpression();
 			checkRightOperand(t,rhExpr);
