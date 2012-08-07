@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,6 +104,7 @@ public enum SpelMessage {
 	MISSING_ARRAY_DIMENSION(Kind.ERROR, 1063, "A required array dimension has not been specified"), //
 	INITIALIZER_LENGTH_INCORRECT(
 			Kind.ERROR, 1064, "array initializer size does not match array dimensions"), //
+	UNEXPECTED_ESCAPE_CHAR(Kind.ERROR,1065,"unexpected escape character.");
 	;
 
 	private Kind kind;

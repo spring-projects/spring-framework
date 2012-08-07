@@ -189,6 +189,8 @@ class Tokenizer {
 					// hit sentinel at end of value
 					pos++; // will take us to the end
 					break;
+				case '\\':
+					throw new InternalParseException(new SpelParseException(expressionString,pos,SpelMessage.UNEXPECTED_ESCAPE_CHAR));
 				default:
 					throw new IllegalStateException("Cannot handle ("+Integer.valueOf(ch)+") '"+ch+"'");
 				}
@@ -232,7 +234,12 @@ class Tokenizer {
 			pos++;
 			char ch = toProcess[pos];
 			if (ch=='"') {
-				terminated = true; 
+				// may not be the end if the char after is also a "
+				if (toProcess[pos+1]=='"') {
+					pos++; // skip over that too, and continue
+				} else {
+					terminated = true;
+				}
 			}
 			if (ch==0) {
 				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING));
