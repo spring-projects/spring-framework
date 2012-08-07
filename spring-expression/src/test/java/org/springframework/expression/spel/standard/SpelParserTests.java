@@ -262,6 +262,25 @@ public class SpelParserTests {
 	}
 
 	@Test
+	public void testStringLiterals_DoubleQuotes_spr9620() throws Exception {
+		SpelExpression expr = new SpelExpressionParser().parseRaw("\"double quote: \"\".\"");
+		assertEquals("double quote: \".", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("\"hello \"\" world\"");
+		assertEquals("hello \" world", expr.getValue());
+	}
+
+	@Test
+	public void testStringLiterals_DoubleQuotes_spr9620_2() throws Exception {
+		try {
+			new SpelExpressionParser().parseRaw("\"double quote: \\\"\\\".\"");
+			fail("Should have failed");
+		} catch (SpelParseException spe) {
+			assertEquals(17, spe.getPosition());
+			assertEquals(SpelMessage.UNEXPECTED_ESCAPE_CHAR, spe.getMessageCode());
+		}
+	}
+
+	@Test
 	public void positionalInformation() throws EvaluationException, ParseException {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("true and true or false");
 		SpelNode rootAst = expr.getAST();
