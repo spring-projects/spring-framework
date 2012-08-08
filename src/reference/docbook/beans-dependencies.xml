@@ -1491,14 +1491,18 @@ public class CommandManager implements ApplicationContextAware {
         method.<!--Note was plain text; I made it a note and moved it up.--></para>
 
       <note>
-        <para>For this dynamic subclassing to work, you must have the CGLIB
-          jar(s) in your classpath. The class that the Spring container will
-          subclass cannot be <literal>final</literal>, and the method to be
-          overridden cannot be <literal>final</literal> either. Also, testing a
-          class that has an <literal>abstract</literal> method requires you to
-          subclass the class yourself and to supply a stub implementation of the
-          <literal>abstract</literal> method. Finally, objects that have been
-          the target of method injection cannot be serialized.</para>
+        <para>For this dynamic subclassing to work, the class that the Spring
+          container will subclass cannot be <literal>final</literal>, and the
+          method to be overridden cannot be <literal>final</literal> either. Also,
+          testing a class that has an <literal>abstract</literal> method requires
+          you to subclass the class yourself and to supply a stub implementation
+          of the <literal>abstract</literal> method. Finally, objects that have
+          been the target of method injection cannot be serialized. As of Spring
+          3.2 it is no longer necessary to add CGLIB to your classpath, because
+          CGLIB classes are repackaged under org.springframework and distributed
+          within the spring-core JAR. This is done both for convenience as well
+          as to avoid potential conflicts with other projects that use differing
+          versions of CGLIB.</para>
       </note>
 
       <para>Looking at the <classname>CommandManager</classname> class in the

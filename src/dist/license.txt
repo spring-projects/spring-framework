@@ -211,7 +211,8 @@ subcomponents referred to below. Your use of the source
 code for these subcomponents is subject to the terms and
 conditions of the following licenses.
 
->>> asm-4.0:
+
+>>> ASM 4.0 (org.ow2.asm:asm:4.0, org.ow2.asm:asm-commons:4.0):
 
 Copyright (c) 2000-2011 INRIA, France Telecom
 All rights reserved.
@@ -244,6 +245,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
 Copyright (c) 1999-2009, OW2 Consortium <http://www.ow2.org/>
+
+
+>>> CGLIB 3.0 (cglib:cglib:3.0):
+
+Per the LICENSE file in the CGLIB JAR distribution downloaded from
+http://sourceforge.net/projects/cglib/files/cglib3/3.0/cglib-3.0.jar/download,
+CGLIB 3.0 is licensed under the Apache License, version 2.0, the text of which
+is included above.
+
 
 =======================================================================
 

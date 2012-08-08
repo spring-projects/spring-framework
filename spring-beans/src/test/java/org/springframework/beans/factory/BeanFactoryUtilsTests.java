@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package org.springframework.beans.factory;
 
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import net.sf.cglib.proxy.NoOp;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
 
@@ -37,6 +34,9 @@ import test.beans.DummyFactory;
 import test.beans.ITestBean;
 import test.beans.IndexedTestBean;
 import test.beans.TestBean;
+
+import static org.junit.Assert.*;
+import static test.util.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson

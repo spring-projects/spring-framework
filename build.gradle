@@ -91,11 +91,19 @@ configure(subprojects) { subproject ->
 project('spring-core') {
     description = 'Spring Core'
 
+    // As of Spring 3.2 spring-core repackages both asm 4.0 and cglib 3.0 and inlines both
+    // into the spring-core jar. cglib 3.0 itself depends on asm 4.0, and is therefore
+    // further transformed by the JarJar task to depend on org.springframework.asm; this
+    // avoids including two different copies of asm unnecessarily. If however future cglib
+    // versions drift from the version of asm used by Spring internally, this duplication
+    // will become necessary.
     def asmVersion = '4.0'
+    def cglibVersion = '3.0'
 
     configurations {
         jarjar
         asm
+        cglib
     }
 
     task asmRepackJar(type: Jar) { repackJar ->
@@ -116,8 +124,32 @@ project('spring-core') {
         }
     }
 
+    task cglibRepackJar(type: Jar) { repackJar ->
+        repackJar.baseName = "spring-cglib-repack"
+        repackJar.version = cglibVersion
+
+        doLast() {
+            project.ant {
+                taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+                    classpath: configurations.jarjar.asPath
+                jarjar(destfile: repackJar.archivePath) {
+                    configurations.cglib.each { originalJar ->
+                        zipfileset(src: originalJar)
+                    }
+                    // repackage net.sf.cglib => org.springframework.cglib
+                    rule(pattern: 'net.sf.cglib.**', result: 'org.springframework.cglib.@1')
+                    // as mentioned above, transform cglib's internal asm dependencies from
+                    // org.objectweb.asm => org.springframework.asm. Doing this counts on the
+                    // the fact that Spring and cglib depend on the same version of asm!
+                    rule(pattern: 'org.objectweb.asm.**', result: 'org.springframework.asm.@1')
+                }
+            }
+        }
+    }
+
     dependencies {
         asm "org.ow2.asm:asm:${asmVersion}@jar", "org.ow2.asm:asm-commons:${asmVersion}@jar"
+        cglib "cglib:cglib:${cglibVersion}@jar"
         jarjar 'com.googlecode.jarjar:jarjar:1.3'
 
         compile files(asmRepackJar)
@@ -139,8 +171,11 @@ project('spring-core') {
     }
 
     jar {
-        // inline all repackaged asm classes directly into the spring-core jar
+        // inline all repackaged asm and cglib classes directly into the spring-core jar
         from(asmRepackJar) {
+            exclude 'META-INF/**'
+        }
+        from(cglibRepackJar) {
             exclude 'META-INF/**'
         }
     }
@@ -150,9 +185,9 @@ project('spring-beans') {
     description = 'Spring Beans'
     dependencies {
         compile project(":spring-core")
+        compile files(project(":spring-core").cglibRepackJar)
         compile("javax.el:el-api:1.0", provided)
         compile("javax.inject:javax.inject:1", provided)
-        compile("cglib:cglib-nodep:2.2", optional)
     }
 }
 
@@ -160,6 +195,7 @@ project('spring-aop') {
     description = 'Spring AOP'
     dependencies {
         compile project(":spring-core")
+        compile files(project(":spring-core").cglibRepackJar)
         compile project(":spring-beans")
         compile("aopalliance:aopalliance:1.0")
         compile("com.jamonapi:jamon:2.4", optional)
@@ -200,6 +236,7 @@ project('spring-context') {
         compile project(":spring-beans")
         compile project(":spring-expression")
         compile project(":spring-core")
+        compile files(project(":spring-core").cglibRepackJar)
         compile("backport-util-concurrent:backport-util-concurrent:3.0", optional)
         compile("javax.annotation:jsr250-api:1.0", optional)
         compile("javax.ejb:ejb-api:3.0", optional)

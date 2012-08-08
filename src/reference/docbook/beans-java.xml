@@ -885,14 +885,13 @@ public class AppConfig {
       comes in: All <literal>@Configuration</literal> classes are subclassed at
       startup-time with <literal>CGLIB</literal>. In the subclass, the child
       method checks the container first for any cached (scoped) beans before it
-      calls the parent method and creates a new instance. </para>
+      calls the parent method and creates a new instance. Note that as of Spring
+      3.2, it is no longer necessary to add CGLIB to your classpath because
+      CGLIB classes have been repackaged under org.springframework and included
+      directly within the spring-core JAR.</para>
     <note>
       <para> The behavior could be different according to the scope of your
         bean. We are talking about singletons here. </para>
-    </note>
-    <note>
-      <para> Beware that, in order for JavaConfig to work, you must include the
-        CGLIB jar in your list of dependencies. </para>
     </note>
     <note>
       <para> There are a few restrictions due to the fact that CGLIB dynamically

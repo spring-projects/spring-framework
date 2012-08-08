@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public class ShadowingClassLoader extends DecoratingClassLoader {
 	/** Packages that are excluded by default */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES =
 			new String[] {"java.", "javax.", "sun.", "oracle.", "com.sun.", "com.ibm.", "COM.ibm.",
-					"org.w3c.", "org.xml.", "org.dom4j.", "org.eclipse", "org.aspectj.", "net.sf.cglib.",
-					"org.apache.xerces.", "org.apache.commons.logging."};
+					"org.w3c.", "org.xml.", "org.dom4j.", "org.eclipse", "org.aspectj.", "net.sf.cglib",
+					"org.springframework.cglib", "org.apache.xerces.", "org.apache.commons.logging."};
 
 
 	private final ClassLoader enclosingClassLoader;
