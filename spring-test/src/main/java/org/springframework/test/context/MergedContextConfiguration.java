@@ -18,9 +18,13 @@ package org.springframework.test.context;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -59,10 +63,13 @@ public class MergedContextConfiguration implements Serializable {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
 	private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class<?>[0];
+	private static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES = //
+	Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
 
 	private final Class<?> testClass;
 	private final String[] locations;
 	private final Class<?>[] classes;
+	private final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses;
 	private final String[] activeProfiles;
 	private final ContextLoader contextLoader;
 
@@ -73,6 +80,12 @@ public class MergedContextConfiguration implements Serializable {
 
 	private static Class<?>[] processClasses(Class<?>[] classes) {
 		return classes == null ? EMPTY_CLASS_ARRAY : classes;
+	}
+
+	private static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> processContextInitializerClasses(
+			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses) {
+		return contextInitializerClasses == null ? EMPTY_INITIALIZER_CLASSES
+				: Collections.unmodifiableSet(contextInitializerClasses);
 	}
 
 	private static String[] processActiveProfiles(String[] activeProfiles) {
@@ -111,46 +124,84 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param classes the merged annotated classes
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param contextLoader the resolved <code>ContextLoader</code>
+	 * @see #MergedContextConfiguration(Class, String[], Class[], Set, String[], ContextLoader)
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
+			String[] activeProfiles, ContextLoader contextLoader) {
+		this(testClass, locations, classes, null, activeProfiles, contextLoader);
+	}
+
+	/**
+	 * Create a new {@code MergedContextConfiguration} instance for the
+	 * supplied test class, resource locations, annotated classes, context
+	 * initializers, active profiles, and {@code ContextLoader}.
+	 *
+	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
+	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
+	 * be stored instead. If a <code>null</code> value is supplied for the
+	 * <code>contextInitializerClasses</code> an empty set will be stored instead.
+	 * Furthermore, active profiles will be sorted, and duplicate profiles will
+	 * be removed.
+	 *
+	 * @param testClass the test class for which the configuration was merged
+	 * @param locations the merged resource locations
+	 * @param classes the merged annotated classes
+	 * @param contextInitializerClasses the merged context initializer classes
+	 * @param activeProfiles the merged active bean definition profiles
+	 * @param contextLoader the resolved <code>ContextLoader</code>
+	 */
+	public MergedContextConfiguration(
+			Class<?> testClass,
+			String[] locations,
+			Class<?>[] classes,
+			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader) {
 		this.testClass = testClass;
 		this.locations = processLocations(locations);
 		this.classes = processClasses(classes);
+		this.contextInitializerClasses = processContextInitializerClasses(contextInitializerClasses);
 		this.activeProfiles = processActiveProfiles(activeProfiles);
 		this.contextLoader = contextLoader;
 	}
 
 	/**
-	 * Get the {@link Class test class} associated with this {@code MergedContextConfiguration}.
+	 * Get the {@linkplain Class test class} associated with this {@code MergedContextConfiguration}.
 	 */
 	public Class<?> getTestClass() {
 		return testClass;
 	}
 
 	/**
-	 * Get the merged resource locations for the {@link #getTestClass() test class}.
+	 * Get the merged resource locations for the {@linkplain #getTestClass() test class}.
 	 */
 	public String[] getLocations() {
 		return locations;
 	}
 
 	/**
-	 * Get the merged annotated classes for the {@link #getTestClass() test class}.
+	 * Get the merged annotated classes for the {@linkplain #getTestClass() test class}.
 	 */
 	public Class<?>[] getClasses() {
 		return classes;
 	}
 
 	/**
-	 * Get the merged active bean definition profiles for the {@link #getTestClass() test class}.
+	 * Get the merged {@code ApplicationContextInitializer} classes for the
+	 * {@linkplain #getTestClass() test class}.
+	 */
+	public Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> getContextInitializerClasses() {
+		return contextInitializerClasses;
+	}
+
+	/**
+	 * Get the merged active bean definition profiles for the {@linkplain #getTestClass() test class}.
 	 */
 	public String[] getActiveProfiles() {
 		return activeProfiles;
 	}
 
 	/**
-	 * Get the resolved {@link ContextLoader} for the {@link #getTestClass() test class}.
+	 * Get the resolved {@link ContextLoader} for the {@linkplain #getTestClass() test class}.
 	 */
 	public ContextLoader getContextLoader() {
 		return contextLoader;
@@ -159,7 +210,7 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Generate a unique hash code for all properties of this
 	 * {@code MergedContextConfiguration} excluding the
-	 * {@link #getTestClass() test class}.
+	 * {@linkplain #getTestClass() test class}.
 	 */
 	@Override
 	public int hashCode() {
@@ -167,6 +218,7 @@ public class MergedContextConfiguration implements Serializable {
 		int result = 1;
 		result = prime * result + Arrays.hashCode(locations);
 		result = prime * result + Arrays.hashCode(classes);
+		result = prime * result + contextInitializerClasses.hashCode();
 		result = prime * result + Arrays.hashCode(activeProfiles);
 		result = prime * result + nullSafeToString(contextLoader).hashCode();
 		return result;
@@ -174,10 +226,11 @@ public class MergedContextConfiguration implements Serializable {
 
 	/**
 	 * Determine if the supplied object is equal to this {@code MergedContextConfiguration}
-	 * instance by comparing both object's {@link #getLocations() locations},
-	 * {@link #getClasses() annotated classes}, {@link #getActiveProfiles()
-	 * active profiles}, and the fully qualified names of their
-	 * {@link #getContextLoader() ContextLoaders}.
+	 * instance by comparing both object's {@linkplain #getLocations() locations},
+	 * {@linkplain #getClasses() annotated classes},
+	 * {@linkplain #getContextInitializerClasses() context initializer classes},
+	 * {@linkplain #getActiveProfiles() active profiles}, and the fully qualified
+	 * names of their {@link #getContextLoader() ContextLoaders}.
 	 */
 	@Override
 	public boolean equals(Object obj) {
@@ -197,6 +250,9 @@ public class MergedContextConfiguration implements Serializable {
 		if (!Arrays.equals(this.classes, that.classes)) {
 			return false;
 		}
+		if (!this.contextInitializerClasses.equals(that.contextInitializerClasses)) {
+			return false;
+		}
 		if (!Arrays.equals(this.activeProfiles, that.activeProfiles)) {
 			return false;
 		}
@@ -208,9 +264,10 @@ public class MergedContextConfiguration implements Serializable {
 	}
 
 	/**
-	 * Provide a String representation of the {@link #getTestClass() test class},
-	 * {@link #getLocations() locations}, {@link #getClasses() annotated classes},
-	 * {@link #getActiveProfiles() active profiles}, and the name of the
+	 * Provide a String representation of the {@linkplain #getTestClass() test class},
+	 * {@linkplain #getLocations() locations}, {@linkplain #getClasses() annotated classes},
+	 * {@linkplain #getContextInitializerClasses() context initializer classes},
+	 * {@linkplain #getActiveProfiles() active profiles}, and the name of the
 	 * {@link #getContextLoader() ContextLoader}.
 	 */
 	@Override
@@ -219,6 +276,7 @@ public class MergedContextConfiguration implements Serializable {
 		.append("testClass", testClass)//
 		.append("locations", ObjectUtils.nullSafeToString(locations))//
 		.append("classes", ObjectUtils.nullSafeToString(classes))//
+		.append("contextInitializerClasses", ObjectUtils.nullSafeToString(contextInitializerClasses))//
 		.append("activeProfiles", ObjectUtils.nullSafeToString(activeProfiles))//
 		.append("contextLoader", nullSafeToString(contextLoader))//
 		.toString();
