@@ -70,7 +70,7 @@ public class SpelParserTests {
 		assertEquals(5, expr.getValue());
 		expr = parser.parseRaw("2	+	3");
 		assertEquals(5, expr.getValue());
-		expr = parser.parseRaw("2\n+	3");
+		expr = parser.parseRaw("2\n+\t3");
 		assertEquals(5, expr.getValue());
 		expr = parser.parseRaw("2\r\n+\t3");
 		assertEquals(5, expr.getValue());
@@ -226,6 +226,24 @@ public class SpelParserTests {
 		expr = new SpelExpressionParser().parseRaw("!true");
 		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
 		expr = new SpelExpressionParser().parseRaw("!(false or true)");
+		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
+	}
+
+	@Test
+	public void booleanOperators_symbolic_spr9614() throws EvaluationException, ParseException {
+		SpelExpression expr = new SpelExpressionParser().parseRaw("true");
+		assertEquals(Boolean.TRUE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("false");
+		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("false && false");
+		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("true && (true || false)");
+		assertEquals(Boolean.TRUE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("true && true || false");
+		assertEquals(Boolean.TRUE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("!true");
+		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
+		expr = new SpelExpressionParser().parseRaw("!(false || true)");
 		assertEquals(Boolean.FALSE, expr.getValue(Boolean.class));
 	}
 
