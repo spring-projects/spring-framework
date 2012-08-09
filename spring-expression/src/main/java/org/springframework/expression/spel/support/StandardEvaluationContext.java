@@ -227,7 +227,11 @@ public class StandardEvaluationContext implements EvaluationContext {
 	 */
 	public void registerMethodFilter(Class<?> type, MethodFilter filter) {
 		ensureMethodResolversInitialized();
-		reflectiveMethodResolver.registerMethodFilter(type,filter);
+		if (reflectiveMethodResolver!=null) {
+			reflectiveMethodResolver.registerMethodFilter(type,filter);
+		} else {
+			throw new IllegalStateException("Method filter cannot be set as the reflective method resolver is not in use");
+		}
 	}
 
 	private void ensurePropertyAccessorsInitialized() {
