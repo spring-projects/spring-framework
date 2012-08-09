@@ -85,6 +85,10 @@ configure(subprojects) { subproject ->
         archives sourcesJar
         archives javadocJar
     }
+    ext {
+        groovyVersion = '1.6.3'
+        groovyDependencySpec = "org.codehaus.groovy:groovy-all:$groovyVersion"
+    }
 }
 
 
@@ -165,6 +169,26 @@ project('spring-beans') {
     }
 }
 
+project('spring-lang-groovy') {
+    apply plugin: 'groovy'
+    description 'Spring BeanBuilder'
+    dependencies {
+        groovy groovyDependencySpec
+        compile project(':spring-beans')
+        compile project(':spring-context')
+        compile groovyDependencySpec
+        testCompile project(':spring-test')
+    }
+    compileJava.enabled=false
+    sourceSets {
+        main {
+            groovy {
+                srcDir 'src/main/java'
+            }
+        }
+    }
+}
+
 project('spring-aop') {
     description = 'Spring AOP'
     dependencies {
@@ -222,7 +246,7 @@ project('spring-context') {
             exclude group: 'javax.jws', module: 'jsr181'
         }
         compile("org.beanshell:bsh:2.0b4", optional)
-        compile("org.codehaus.groovy:groovy-all:1.6.3", optional)
+        compile(groovyDependencySpec, optional)
         compile("org.jruby:jruby:1.4.0", optional)
         compile("org.hibernate:hibernate-validator:4.2.0.Final") { dep ->
             optional dep
