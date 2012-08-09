@@ -1,0 +1,3 @@
+beans {
+	company String, 'SpringSource'
+}

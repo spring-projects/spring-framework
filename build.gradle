@@ -260,6 +260,25 @@ project("spring-beans") {
 	}
 }
 
+project('spring-lang-groovy') {
+    apply plugin: 'groovy'
+    description 'Spring BeanBuilder'
+    dependencies {
+        compile project(':spring-beans')
+        compile project(':spring-context')
+        compile "org.codehaus.groovy:groovy-all:1.8.9"
+        testCompile project(':spring-test')
+    }
+    compileJava.enabled=false
+    sourceSets {
+        main {
+            groovy {
+                srcDir 'src/main/java'
+            }
+        }
+    }
+}
+
 project("spring-aop") {
 	description = "Spring AOP"
 
