@@ -1,0 +1,9 @@
+In the commit comment above
+
+    "meaning that CGLIB is that much less likely to work well in a Java
+    7 environment"
+
+should read
+
+    "meaning that CGLIB is that much more likely to work well in a Java
+    7 environment"
