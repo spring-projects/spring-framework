@@ -21,12 +21,15 @@ import static org.springframework.core.annotation.AnnotationUtils.findAnnotation
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -156,8 +159,7 @@ abstract class ContextLoaderUtils {
 			}
 			return (Class<? extends ContextLoader>) ContextLoaderUtils.class.getClassLoader().loadClass(
 				defaultContextLoaderClassName);
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new IllegalStateException("Could not load default ContextLoader class ["
 					+ defaultContextLoaderClassName + "]. Specify @ContextConfiguration's 'loader' "
 					+ "attribute or make the default loader class available.");
@@ -169,17 +171,15 @@ abstract class ContextLoaderUtils {
 	 * attributes} for the supplied {@link Class class} and its superclasses.
 	 *
 	 * <p>Note that the {@link ContextConfiguration#inheritLocations
-	 * inheritLocations} flag of {@link ContextConfiguration
-	 * &#064;ContextConfiguration} will be taken into consideration.
-	 * Specifically, if the <code>inheritLocations</code> flag is set to
-	 * <code>true</code>, configuration attributes defined in the test
-	 * class will be appended to the configuration attributes defined in
-	 * superclasses.
+	 * inheritLocations} and {@link ContextConfiguration#inheritInitializers()
+	 * inheritInitializers} flags of {@link ContextConfiguration
+	 * &#064;ContextConfiguration} will <strong>not</strong> be taken into
+	 * consideration. If these flags need to be honored, that must be handled
+	 * manually when traversing the list returned by this method.
 	 *
 	 * @param clazz the class for which to resolve the configuration attributes (must
 	 * not be <code>null</code>)
-	 * @return the list of configuration attributes for the specified class,
-	 * including configuration attributes from superclasses if appropriate
+	 * @return the list of configuration attributes for the specified class
 	 * (never <code>null</code>)
 	 * @throws IllegalArgumentException if the supplied class is <code>null</code> or
 	 * if {@code @ContextConfiguration} is not <em>present</em> on the supplied class
@@ -211,11 +211,67 @@ abstract class ContextLoaderUtils {
 
 			attributesList.add(0, attributes);
 
-			declaringClass = contextConfiguration.inheritLocations() ? findAnnotationDeclaringClass(annotationType,
-				declaringClass.getSuperclass()) : null;
+			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
 		return attributesList;
+	}
+
+	/**
+	 * Create a copy of the supplied list of {@code ContextConfigurationAttributes}
+	 * in reverse order.
+	 *
+	 * @since 3.2
+	 */
+	private static List<ContextConfigurationAttributes> reverseContextConfigurationAttributes(
+			List<ContextConfigurationAttributes> configAttributesList) {
+		List<ContextConfigurationAttributes> configAttributesListReversed = new ArrayList<ContextConfigurationAttributes>(
+			configAttributesList);
+		Collections.reverse(configAttributesListReversed);
+		return configAttributesListReversed;
+	}
+
+	/**
+	 * Resolve the list of merged {@code ApplicationContextInitializer} classes
+	 * for the supplied list of {@code ContextConfigurationAttributes}.
+	 *
+	 * <p>Note that the {@link ContextConfiguration#inheritInitializers inheritInitializers}
+	 * flag of {@link ContextConfiguration @ContextConfiguration} will be taken into
+	 * consideration. Specifically, if the <code>inheritInitializers</code> flag is
+	 * set to <code>true</code> for a given level in the class hierarchy represented by
+	 * the provided configuration attributes, context initializer classes defined
+	 * at the given level will be merged with those defined in higher levels
+	 * of the class hierarchy.
+	 *
+	 * @param configAttributesList the list of configuration attributes to process
+	 * (must not be <code>null</code>)
+	 * @return the list of merged context initializer classes, including those
+	 * from superclasses if appropriate (never <code>null</code>)
+	 * @since 3.2
+	 */
+	static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> resolveInitializerClasses(
+			List<ContextConfigurationAttributes> configAttributesList) {
+		Assert.notNull(configAttributesList, "configAttributesList must not be null");
+
+		final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
+		new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
+
+		// Traverse config attributes in reverse order (i.e., as if we were traversing up
+		// the class hierarchy).
+		for (ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format("Processing context initializers for context configuration attributes %s",
+					configAttributes));
+			}
+
+			initializerClasses.addAll(Arrays.asList(configAttributes.getInitializers()));
+
+			if (!configAttributes.isInheritInitializers()) {
+				break;
+			}
+		}
+
+		return initializerClasses;
 	}
 
 	/**
@@ -266,8 +322,7 @@ abstract class ContextLoaderUtils {
 					ObjectUtils.nullSafeToString(valueProfiles), ObjectUtils.nullSafeToString(profiles));
 				logger.error(msg);
 				throw new IllegalStateException(msg);
-			}
-			else if (!ObjectUtils.isEmpty(valueProfiles)) {
+			} else if (!ObjectUtils.isEmpty(valueProfiles)) {
 				profiles = valueProfiles;
 			}
 
@@ -309,31 +364,38 @@ abstract class ContextLoaderUtils {
 		final List<String> locationsList = new ArrayList<String>();
 		final List<Class<?>> classesList = new ArrayList<Class<?>>();
 
-		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
+		// Traverse config attributes in reverse order (i.e., as if we were traversing up
+		// the class hierarchy).
+		for (ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format(
-					"Processing locations and classes for context configuration attributes [%s]", configAttributes));
+				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
+					configAttributes));
 			}
 
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 				smartContextLoader.processContextConfiguration(configAttributes);
-				locationsList.addAll(Arrays.asList(configAttributes.getLocations()));
-				classesList.addAll(Arrays.asList(configAttributes.getClasses()));
-			}
-			else {
+				locationsList.addAll(0, Arrays.asList(configAttributes.getLocations()));
+				classesList.addAll(0, Arrays.asList(configAttributes.getClasses()));
+			} else {
 				String[] processedLocations = contextLoader.processLocations(configAttributes.getDeclaringClass(),
 					configAttributes.getLocations());
-				locationsList.addAll(Arrays.asList(processedLocations));
+				locationsList.addAll(0, Arrays.asList(processedLocations));
 				// Legacy ContextLoaders don't know how to process classes
+			}
+
+			if (!configAttributes.isInheritLocations()) {
+				break;
 			}
 		}
 
 		String[] locations = StringUtils.toStringArray(locationsList);
 		Class<?>[] classes = ClassUtils.toClassArray(classesList);
+		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(configAttributesList);
 		String[] activeProfiles = resolveActiveProfiles(testClass);
 
-		return new MergedContextConfiguration(testClass, locations, classes, activeProfiles, contextLoader);
+		return new MergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
+			contextLoader);
 	}
 
 }
