@@ -260,6 +260,27 @@ public class SpelParserTests {
 		SpelExpression expr = new SpelExpressionParser().parseRaw("'howdy'.substring(0,2)");
 		assertEquals("ho", expr.getValue());
 	}
+	
+	@Test
+	public void testStringLiterals_DoubleQuotes_spr9620() throws EvaluationException, ParseException {
+		SpelExpression expr = new SpelExpressionParser()
+				.parseRaw("\"double quote: \"\".\"");
+		assertEquals("double quote: \".", expr.getValue());
+		expr = new SpelExpressionParser().parseRaw("\"hello \"\" world\"");
+		assertEquals("hello \" world", expr.getValue());
+	}
+
+	@Test
+	public void testStringLiterals_DoubleQuotes_spr9620_2() throws EvaluationException, ParseException {
+		try {
+			new SpelExpressionParser().parseRaw("\"double quote: \\\"\\\".\"");
+			fail("Should have failed");
+		} catch (SpelParseException spe) {
+			assertEquals(17, spe.getPosition());
+			assertEquals(SpelMessage.UNEXPECTED_ESCAPE_CHAR,
+					spe.getMessageCode());
+		}
+	}
 
 	@Test
 	public void testStringLiterals_DoubleQuotes_spr9620() throws Exception {
