@@ -20,10 +20,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.asm.AnnotationVisitor;
-import org.springframework.asm.MethodAdapter;
+import org.springframework.asm.MethodVisitor;
 import org.springframework.asm.Opcodes;
+import org.springframework.asm.SpringAsmInfo;
 import org.springframework.asm.Type;
-import org.springframework.asm.commons.EmptyVisitor;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.MultiValueMap;
@@ -39,7 +39,7 @@ import org.springframework.util.MultiValueMap;
  * @author Chris Beams
  * @since 3.0
  */
-final class MethodMetadataReadingVisitor extends MethodAdapter implements MethodMetadata {
+final class MethodMetadataReadingVisitor extends MethodVisitor implements MethodMetadata {
 
 	private final String name;
 
@@ -55,7 +55,7 @@ final class MethodMetadataReadingVisitor extends MethodAdapter implements Method
 
 	public MethodMetadataReadingVisitor(String name, int access, String declaringClassName, ClassLoader classLoader,
 			MultiValueMap<String, MethodMetadata> methodMetadataMap) {
-		super(new EmptyVisitor());
+		super(SpringAsmInfo.ASM_VERSION);
 		this.name = name;
 		this.access = access;
 		this.declaringClassName = declaringClassName;

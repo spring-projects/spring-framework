@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,22 @@ package org.springframework.beans.factory.support;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.CallbackFilter;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
-import net.sf.cglib.proxy.NoOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 
+import org.springframework.cglib.proxy.Callback;
+import org.springframework.cglib.proxy.CallbackFilter;
+import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.MethodInterceptor;
+import org.springframework.cglib.proxy.MethodProxy;
+import org.springframework.cglib.proxy.NoOp;
+
 /**
  * Default object instantiation strategy for use in BeanFactories.
  * Uses CGLIB to generate subclasses dynamically if methods need to be
  * overridden by the container, to implement Method Injection.
- *
- * <p>Using Method Injection features requires CGLIB on the classpath.
- * However, the core IoC container will still run without CGLIB being available.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -81,7 +79,8 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
 
 	/**
-	 * An inner class so we don't have a CGLIB dependency in core.
+	 * An inner class created for historical reasons to avoid external CGLIB dependency
+	 * in Spring versions earlier than 3.2.
 	 */
 	private static class CglibSubclassCreator {
 

@@ -88,11 +88,6 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
 public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
 		ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
 
-	/** Whether the CGLIB2 library is present on the classpath */
-	private static final boolean cglibAvailable = ClassUtils.isPresent(
-			"net.sf.cglib.proxy.Enhancer", ConfigurationClassPostProcessor.class.getClassLoader());
-
-
 	private final Log logger = LogFactory.getLog(getClass());
 
 	private SourceExtractor sourceExtractor = new PassThroughSourceExtractor();
@@ -322,11 +317,6 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (configBeanDefs.isEmpty()) {
 			// nothing to enhance -> return immediately
 			return;
-		}
-		if (!cglibAvailable) {
-			throw new IllegalStateException("CGLIB is required to process @Configuration classes. " +
-					"Either add CGLIB to the classpath or remove the following @Configuration bean definitions: " +
-					configBeanDefs.keySet());
 		}
 		ConfigurationClassEnhancer enhancer = new ConfigurationClassEnhancer(beanFactory);
 		for (Map.Entry<String, AbstractBeanDefinition> entry : configBeanDefs.entrySet()) {

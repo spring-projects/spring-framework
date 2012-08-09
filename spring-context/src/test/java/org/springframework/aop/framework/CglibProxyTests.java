@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import static org.junit.Assert.*;
 
 import java.io.Serializable;
 
-import net.sf.cglib.core.CodeGenerationException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.junit.Test;
+
+import org.springframework.cglib.core.CodeGenerationException;
 
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.MethodMatcher;
@@ -65,7 +67,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
-		return new Cglib2AopProxy(as);
+		return new CglibAopProxy(as);
 	}
 
 	protected boolean requiresTarget() {
@@ -75,7 +77,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	@Test
 	public void testNullConfig() {
 		try {
-			new Cglib2AopProxy(null);
+			new CglibAopProxy(null);
 			fail("Shouldn't allow null interceptors");
 		}
 		catch (IllegalArgumentException ex) {
@@ -105,7 +107,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
-		AopProxy aop = new Cglib2AopProxy(as);
+		AopProxy aop = new CglibAopProxy(as);
 
 		Object proxy = aop.getProxy();
 		assertTrue(AopUtils.isCglibProxy(proxy));
@@ -118,7 +120,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		mockTargetSource.setTarget(raw);
 		AdvisedSupport pc = new AdvisedSupport();
 		pc.setTargetSource(mockTargetSource);
-		AopProxy aop = new Cglib2AopProxy(pc);
+		AopProxy aop = new CglibAopProxy(pc);
 
 		Object proxy = aop.getProxy();
 		assertTrue(AopUtils.isCglibProxy(proxy));
@@ -159,7 +161,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
 		as.setTarget(bean);
 		as.addAdvice(new NopInterceptor());
-		AopProxy aop = new Cglib2AopProxy(as);
+		AopProxy aop = new CglibAopProxy(as);
 
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
 
@@ -176,7 +178,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		pc.setFrozen(true);
 		pc.setTarget(target);
 
-		Cglib2AopProxy aop = new Cglib2AopProxy(pc);
+		CglibAopProxy aop = new CglibAopProxy(pc);
 
 		CglibTestBean proxy = (CglibTestBean) aop.getProxy();
 
@@ -258,7 +260,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		mockTargetSource.setTarget(target);
 		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
 		pc.setTargetSource(mockTargetSource);
-		Cglib2AopProxy aop = new Cglib2AopProxy(pc);
+		CglibAopProxy aop = new CglibAopProxy(pc);
 		aop.setConstructorArguments(new Object[] {"Rob Harrop", new Integer(22)},
 				new Class[] {String.class, int.class});
 
@@ -276,7 +278,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
-		Cglib2AopProxy cglib = new Cglib2AopProxy(as);
+		CglibAopProxy cglib = new CglibAopProxy(as);
 
 		ITestBean proxy1 = (ITestBean) cglib.getProxy();
 
@@ -284,7 +286,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
-		cglib = new Cglib2AopProxy(as);
+		cglib = new CglibAopProxy(as);
 
 		assertThat(cglib.getProxy(), instanceOf(ITestBean.class));
 	}
@@ -298,7 +300,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		as.addInterface(Serializable.class);
-		Cglib2AopProxy cglib = new Cglib2AopProxy(as);
+		CglibAopProxy cglib = new CglibAopProxy(as);
 
 		ITestBean proxy1 = (ITestBean) cglib.getProxy();
 
@@ -306,7 +308,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
-		cglib = new Cglib2AopProxy(as);
+		cglib = new CglibAopProxy(as);
 
 		ITestBean proxy2 = (ITestBean) cglib.getProxy();
 		assertTrue(proxy2 instanceof Serializable);
@@ -320,7 +322,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		AdvisedSupport as = new AdvisedSupport(new Class[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
-		AopProxy aop = new Cglib2AopProxy(as);
+		AopProxy aop = new CglibAopProxy(as);
 
 		ExceptionThrower proxy = (ExceptionThrower) aop.getProxy();
 

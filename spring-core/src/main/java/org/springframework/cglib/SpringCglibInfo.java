@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.springframework.asm;
+package org.springframework.cglib;
 
 /**
- * Placeholder to allow Javadoc generation. Required because
- * <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4492654">this bug</a>
- * does not allow the generation of Javadoc for packages having only a
- * {@code package-info.java} file.
+ * Empty class used to ensure that the {@code org.springframework.cglib} package is
+ * processed during Javadoc generation.
+ *
  * <p>See <a href="package-summary.html">package-level Javadoc</a> for more
- * information on {@code org.springframework.asm}.
+ * information on {@code org.springframework.cglib}.
  *
  * @author Chris Beams
  * @since 3.2
  */
-public final class SpringAsmInfo {
+public final class SpringCglibInfo {
+
 }

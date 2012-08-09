@@ -39,6 +39,8 @@ Changes in version 3.2 M2 (2012-08-xx)
 * introduced countRowsInTableWhere() and dropTables() in JdbcTestUtils (SPR-9235)
 * introduced JdbcTemplate in tx base classes in the TestContext framework (SPR-8990)
 * introduced countRowsInTableWhere() and dropTables() in tx base test classes (SPR-9665)
+* inlined ASM 4.0 into spring-core, removed spring-asm subproject and jar (SPR-9669)
+* inlined CGLIB 3.0 into spring-core, eliminating external dependency (SPR-9669)
 
 
 Changes in version 3.2 M1 (2012-05-28)
