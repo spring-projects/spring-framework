@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package org.springframework.test.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.springframework.test.util.ReflectionTestUtils.getField;
-import static org.springframework.test.util.ReflectionTestUtils.invokeGetterMethod;
-import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
-import static org.springframework.test.util.ReflectionTestUtils.invokeSetterMethod;
-import static org.springframework.test.util.ReflectionTestUtils.setField;
+import static org.junit.Assert.*;
+import static org.springframework.test.util.ReflectionTestUtils.*;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.test.AssertThrows;
 import org.springframework.test.util.subpackage.Component;
+import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
 
 /**
@@ -109,6 +106,17 @@ public class ReflectionTestUtilsTests {
 				setField(person, "likesPets", null, boolean.class);
 			}
 		}.runTest();
+	}
+
+	/**
+	 * Verifies behavior requested in <a href="https://jira.springsource.org/browse/SPR-9571">SPR-9571</a>.
+	 */
+	@Test
+	public void setFieldOnLegacyEntityWithSideEffectsInToString() {
+		String testCollaborator = "test collaborator";
+		LegacyEntity entity = new LegacyEntity();
+		setField(entity, "collaborator", testCollaborator, Object.class);
+		assertTrue(entity.toString().contains(testCollaborator));
 	}
 
 	@Test

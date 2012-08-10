@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,10 +104,18 @@ public class ReflectionTestUtils {
 	public static void setField(Object target, String name, Object value, Class<?> type) {
 		Assert.notNull(target, "Target object must not be null");
 		Field field = ReflectionUtils.findField(target.getClass(), name, type);
-		Assert.notNull(field, "Could not find field [" + name + "] on target [" + target + "]");
+
+		// SPR-9571: inline Assert.notNull() in order to avoid accidentally invoking
+		// toString() on a non-null target.
+		if (field == null) {
+			throw new IllegalArgumentException(String.format("Could not find field [%s] of type [%s] on target [%s]",
+				name, type, target));
+		}
 
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting field [" + name + "] on target [" + target + "]");
+			logger.debug(String.format("Setting field [%s] of type [%s] on target [%s] to value [%s]", name, type,
+				target,
+				value));
 		}
 		ReflectionUtils.makeAccessible(field);
 		ReflectionUtils.setField(field, target, value);
