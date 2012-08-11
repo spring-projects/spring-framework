@@ -172,11 +172,13 @@ project('spring-core') {
 
     jar {
         // inline all repackaged asm and cglib classes directly into the spring-core jar
-        from(asmRepackJar) {
-            exclude 'META-INF/**'
+        dependsOn asmRepackJar
+        from(zipTree(asmRepackJar.archivePath)) {
+            include 'org/springframework/asm/**'
         }
-        from(cglibRepackJar) {
-            exclude 'META-INF/**'
+        dependsOn cglibRepackJar
+        from(zipTree(cglibRepackJar.archivePath)) {
+            include 'org/springframework/cglib/**'
         }
     }
 }

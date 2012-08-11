@@ -202,10 +202,10 @@
 
 =======================================================================
 
-SPRING FRAMEWORK 3.2 SUBCOMPONENTS:
+SPRING FRAMEWORK ${version} SUBCOMPONENTS:
 
-Spring Framework 3.2 includes a number of subcomponents with
-separate copyright notices and license terms.  The product that
+Spring Framework ${version} includes a number of subcomponents
+with separate copyright notices and license terms. The product that
 includes this file does not necessarily use all the open source
 subcomponents referred to below. Your use of the source
 code for these subcomponents is subject to the terms and
