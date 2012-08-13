@@ -425,7 +425,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-		marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
+        if (this.streamDriver != null) {
+            marshal(graph, this.streamDriver.createWriter(outputStream));
+        }
+        else {
+		    marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
+        }
 	}
 
 	@Override
@@ -483,12 +488,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		else {
 			throw new IllegalArgumentException("DOMSource contains neither Document nor Element");
 		}
-		try {
-			return getXStream().unmarshal(streamReader);
-		}
-		catch (Exception ex) {
-			throw convertXStreamException(ex, false);
-		}
+        return unmarshal(streamReader);
 	}
 
 	@Override
@@ -504,36 +504,27 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected Object unmarshalXmlStreamReader(XMLStreamReader streamReader) throws XmlMappingException {
-		try {
-			HierarchicalStreamReader hierarchicalStreamReader =
-					new StaxReader(new QNameMap(),streamReader);
-			return getXStream().unmarshal(hierarchicalStreamReader);
-		}
-		catch (Exception ex) {
-			throw convertXStreamException(ex, false);
-		}
+        return unmarshal(new StaxReader(new QNameMap(), streamReader));
 	}
 
 	@Override
 	protected Object unmarshalInputStream(InputStream inputStream) throws XmlMappingException, IOException {
-		return unmarshalReader(new InputStreamReader(inputStream, this.encoding));
+        if (this.streamDriver != null) {
+            return unmarshal(this.streamDriver.createReader(inputStream));
+        }
+        else {
+		    return unmarshalReader(new InputStreamReader(inputStream, this.encoding));
+        }
 	}
 
 	@Override
 	protected Object unmarshalReader(Reader reader) throws XmlMappingException, IOException {
-		try {
-			HierarchicalStreamReader streamReader;
-			if (this.streamDriver != null) {
-				streamReader = this.streamDriver.createReader(reader);
-			}
-			else {
-				streamReader = new XppReader(reader);
-			}
-			return getXStream().unmarshal(streamReader);
-		}
-		catch (Exception ex) {
-			throw convertXStreamException(ex, false);
-		}
+        if (this.streamDriver != null) {
+            return unmarshal(this.streamDriver.createReader(reader));
+        }
+        else {
+            return unmarshal(new XppReader(reader));
+        }
 	}
 
 	@Override
@@ -544,7 +535,21 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 				"XStreamMarshaller does not support unmarshalling using SAX XMLReaders");
 	}
 
-	/**
+    /**
+     * Unmarshals the given graph to the given XStream HierarchicalStreamWriter.
+     * Converts exceptions using {@link #convertXStreamException}.
+     */
+    private Object unmarshal(HierarchicalStreamReader streamReader) {
+        try {
+            return getXStream().unmarshal(streamReader);
+        }
+        catch (Exception ex) {
+            throw convertXStreamException(ex, false);
+        }
+    }
+
+
+    /**
 	 * Convert the given XStream exception to an appropriate exception from the
 	 * <code>org.springframework.oxm</code> hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
