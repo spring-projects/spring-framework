@@ -434,15 +434,16 @@ project('spring-orm') {
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
         testCompile "org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1"
         testCompile "org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1"
-        compile(project(":spring-web")) {
-            exclude group: 'javax.persistence', module: 'persistence-api'
-        }
         compile project(":spring-core")
         compile project(":spring-beans")
         compile(project(":spring-aop"), optional)
         compile(project(":spring-context"), optional)
         compile project(":spring-tx")
         compile project(":spring-jdbc")
+        compile(project(":spring-web")) { dep ->
+            optional dep
+            exclude group: 'javax.persistence', module: 'persistence-api'
+        }
     }
 }
 
