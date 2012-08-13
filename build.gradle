@@ -202,6 +202,7 @@ project('spring-aop') {
         compile("aopalliance:aopalliance:1.0")
         compile("com.jamonapi:jamon:2.4", optional)
         compile("commons-pool:commons-pool:1.5.3", optional)
+        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
     }
 }
 
@@ -263,6 +264,7 @@ project('spring-context') {
         compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
         compile("org.slf4j:slf4j-api:1.6.1", optional)
         compile("org.codehaus.jsr166-mirror:jsr166:1.7.0", provided)
+        compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
         testCompile "commons-dbcp:commons-dbcp:1.2.2"
         testCompile("javax.xml:jaxrpc-api:1.1")
         testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
