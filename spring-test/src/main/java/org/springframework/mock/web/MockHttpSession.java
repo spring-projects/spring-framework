@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 1.0.2
  */
 @SuppressWarnings("deprecation")
@@ -186,7 +187,17 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	/**
+	 * Invalidates this session then unbinds any objects bound to it.
+	 *
+	 * @throws IllegalStateException if this method is called on an already invalidated session
+	 */
 	public void invalidate() {
+		if (this.invalid) {
+			throw new IllegalStateException("The session has already been invalidated");
+		}
+
+		// else
 		this.invalid = true;
 		clearAttributes();
 	}
