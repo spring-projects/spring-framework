@@ -52,9 +52,9 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	void startAsync();
 
 	/**
-	 * Whether the request is in asynchronous mode after a call to {@link #startAsync()}.
-	 * Returns "false" if asynchronous processing never started, has completed, or the
-	 * request was dispatched for further processing.
+	 * Whether the request is in async mode following a call to {@link #startAsync()}.
+	 * Returns "false" if asynchronous processing never started, has completed,
+	 * or the request was dispatched for further processing.
 	 */
 	boolean isAsyncStarted();
 
@@ -65,13 +65,13 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	void dispatch();
 
 	/**
-	 * Whether the request was dispatched to the container.
+	 * Whether the request was dispatched to the container in order to resume
+	 * processing after concurrent execution in an application thread.
 	 */
 	boolean isDispatched();
 
 	/**
-	 * Whether asynchronous processing has completed in which case the request
-	 * response should no longer be used.
+	 * Whether asynchronous processing has completed.
 	 */
 	boolean isAsyncComplete();
 

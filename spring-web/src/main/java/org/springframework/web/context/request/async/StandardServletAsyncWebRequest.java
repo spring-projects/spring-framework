@@ -55,6 +55,12 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
+
+	/**
+	 * Create a new instance for the given request/response pair.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 */
 	public StandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request, response);
 	}
@@ -93,7 +99,6 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	public boolean isAsyncComplete() {
 		return this.asyncCompleted.get();
 	}
-
 
 	public void startAsync() {
 		Assert.state(getRequest().isAsyncSupported(),

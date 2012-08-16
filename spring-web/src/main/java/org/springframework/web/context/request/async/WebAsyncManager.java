@@ -269,24 +269,35 @@ public final class WebAsyncManager {
 
 		startAsyncProcessing(processingContext);
 
-		deferredResult.init(new DeferredResultHandler() {
+		this.asyncWebRequest.addCompletionHandler(new Runnable() {
+			public void run() {
+				deferredResult.setExpired();
+			}
+		});
 
-			public void handle(Object result) {
+		if (deferredResult.hasTimeoutResult()) {
+			this.asyncWebRequest.setTimeoutHandler(new Runnable() {
+				public void run() {
+					deferredResult.applyTimeoutResult();
+				}
+			});
+		}
+
+		deferredResult.setResultHandler(new DeferredResultHandler() {
+
+			public void handleResult(Object result) {
 				concurrentResult = result;
 				if (logger.isDebugEnabled()) {
 					logger.debug("Deferred result value [" + concurrentResult + "]");
 				}
 
-				if (asyncWebRequest.isAsyncComplete()) {
-					throw new StaleAsyncWebRequestException("Could not complete processing due to a timeout or network error");
-				}
+				Assert.state(!asyncWebRequest.isAsyncComplete(),
+						"Cannot handle DeferredResult [ " + deferredResult + " ] due to a timeout or network error");
 
 				logger.debug("Dispatching request to complete processing");
 				asyncWebRequest.dispatch();
 			}
 		});
-
-		this.asyncWebRequest.setTimeoutHandler(deferredResult.getTimeoutHandler());
 	}
 
 	private void startAsyncProcessing(Object... context) {

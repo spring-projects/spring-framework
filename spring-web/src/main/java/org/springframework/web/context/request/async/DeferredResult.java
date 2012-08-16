@@ -13,136 +13,121 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.context.request.async;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.util.Assert;
 
 /**
- * DeferredResult provides an alternative to using a Callable for async request
- * processing. With a Callable the framework manages a thread on behalf of the
- * application through an {@link AsyncTaskExecutor}. With a DeferredResult the
- * application sets the result in a thread of its choice.
- *
- * <p>The following sequence describes the intended use scenario:
- * <ol>
- * <li>thread-1: framework calls application method
- * <li>thread-1: application method returns a DeferredResult
- * <li>thread-1: framework initializes DeferredResult
- * <li>thread-2: application calls {@link #set(Object)}
- * <li>thread-2: framework completes async processing with given result
- * </ol>
- *
- * <p>If the application calls {@link #set(Object)} in thread-2 before the
- * DeferredResult is initialized by the framework in thread-1, then thread-2
- * will block and wait for the initialization to complete. Therefore an
- * application should never create and set the DeferredResult in the same
- * thread because the initialization will never complete.</p>
+ * {@code DeferredResult} provides an alternative to returning a {@link Callable}
+ * for asynchronous request processing. While with a Callable, a thread is used
+ * to execute it on behalf of the application, with a DeferredResult the application
+ * sets the result whenever it needs to from a thread of its choice.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public final class DeferredResult<V> {
+public final class DeferredResult<T> {
 
 	private static final Log logger = LogFactory.getLog(DeferredResult.class);
 
-	private V result;
+	private static final Object RESULT_NONE = new Object();
+
+	private Object result = RESULT_NONE;
+
+	private final Object timeoutResult;
+
+	private final AtomicBoolean expired = new AtomicBoolean(false);
 
 	private DeferredResultHandler resultHandler;
 
-	private final V timeoutValue;
+	private final Object lock = new Object();
 
-	private final boolean timeoutValueSet;
+	private final CountDownLatch latch = new CountDownLatch(1);
 
-	private boolean timeoutValueUsed;
-
-	private final CountDownLatch initializationLatch = new CountDownLatch(1);
-
-	private final ReentrantLock setLock = new ReentrantLock();
 
 	/**
-	 * Create a new instance.
+	 * Create a DeferredResult instance.
 	 */
 	public DeferredResult() {
-		this.timeoutValue = null;
-		this.timeoutValueSet = false;
+		this(RESULT_NONE);
 	}
 
 	/**
-	 * Create a new instance also providing a default value to set if a timeout
-	 * occurs before {@link #set(Object)} is called.
+	 * Create a DeferredResult with a default result to use in case of a timeout.
+	 * @param timeoutResult the result to use
 	 */
-	public DeferredResult(V timeoutValue) {
-		this.timeoutValue = timeoutValue;
-		this.timeoutValueSet = true;
+	public DeferredResult(Object timeoutResult) {
+		this.timeoutResult = timeoutResult;
 	}
 
 	/**
-	 * Complete async processing with the given value. If the DeferredResult is
-	 * not fully initialized yet, this method will block and wait for that to
-	 * occur before proceeding. See the class level javadoc for more details.
-	 *
-	 * @throws StaleAsyncWebRequestException if the underlying async request
-	 * has already timed out or ended due to a network error.
+	 * Set a handler to handle the result when set. Normally applications do not
+	 * use this method at runtime but may do so during testing.
 	 */
-	public void set(V value) throws StaleAsyncWebRequestException {
-		if (this.setLock.tryLock() && (!this.timeoutValueUsed)) {
+	public void setResultHandler(DeferredResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+		this.latch.countDown();
+	}
+
+	/**
+	 * Set the result value and pass it on for handling.
+	 * @param result the result value
+	 * @return "true" if the result was set and passed on for handling;
+	 * 	"false" if the result was already set or the async request expired.
+	 * @see #isSetOrExpired()
+	 */
+	public boolean setResult(T result) {
+		return processResult(result);
+	}
+
+	/**
+	 * Set an error result value and pass it on for handling. If the result is an
+	 * {@link Exception} or {@link Throwable}, it will be processed as though the
+	 * controller raised the exception. Otherwise it will be processed as if the
+	 * controller returned the given result.
+	 * @param result the error result value
+	 * @return "true" if the result was set to the error value and passed on for handling;
+	 * 	"false" if the result was already set or the async request expired.
+	 * @see #isSetOrExpired()
+	 */
+	public boolean setErrorResult(Object result) {
+		return processResult(result);
+	}
+
+	private boolean processResult(Object result) {
+		synchronized (this.lock) {
+
+			if (isSetOrExpired()) {
+				return false;
+			}
+
+			this.result = result;
+
+			if (!awaitResultHandler()) {
+				throw new IllegalStateException("DeferredResultHandler not set");
+			}
+
 			try {
-				handle(value);
+				this.resultHandler.handleResult(result);
 			}
-			finally {
-				this.setLock.unlock();
+			catch (Throwable t) {
+				logger.trace("DeferredResult not handled", t);
+				return false;
 			}
-		}
-		else {
-			// A timeout is in progress or has already occurred
-			throw new StaleAsyncWebRequestException("Async request timed out");
-		}
-	}
 
-	/**
-	 * An alternative to {@link #set(Object)} that absorbs a potential
-	 * {@link StaleAsyncWebRequestException}.
-	 * @return {@code false} if the outcome was a {@code StaleAsyncWebRequestException}
-	 */
-	public boolean trySet(V result) throws StaleAsyncWebRequestException {
-		try {
-			set(result);
 			return true;
 		}
-		catch (StaleAsyncWebRequestException ex) {
-			// absorb
-		}
-		return false;
 	}
 
-	private void handle(V result) throws StaleAsyncWebRequestException {
-		Assert.isNull(this.result, "A deferred result can be set once only");
-		this.result = result;
-		this.timeoutValueUsed = (this.timeoutValueSet && (this.result == this.timeoutValue));
-		if (!await()) {
-			throw new IllegalStateException(
-					"Gave up on waiting for DeferredResult to be initialized. " +
-					"Are you perhaps creating and setting a DeferredResult in the same thread? " +
-					"The DeferredResult must be fully initialized before you can set it. " +
-					"See the class javadoc for more details");
-		}
-		if (this.timeoutValueUsed) {
-			logger.debug("Using default timeout value");
-		}
-		this.resultHandler.handle(result);
-	}
-
-	private boolean await() {
+	private boolean awaitResultHandler() {
 		try {
-			return this.initializationLatch.await(10, TimeUnit.SECONDS);
+			return this.latch.await(5, TimeUnit.SECONDS);
 		}
 		catch (InterruptedException e) {
 			return false;
@@ -150,43 +135,32 @@ public final class DeferredResult<V> {
 	}
 
 	/**
-	 * Return a handler to use to complete processing using the default timeout value
-	 * provided via {@link #DeferredResult(Object)} or {@code null} if no timeout
-	 * value was provided.
+	 * Whether the DeferredResult can no longer be set either because the async
+	 * request expired or because it was already set.
 	 */
-	Runnable getTimeoutHandler() {
-		if (!this.timeoutValueSet) {
-			return null;
-		}
-		return new Runnable() {
-			public void run() { useTimeoutValue(); }
-		};
+	public boolean isSetOrExpired() {
+		return (this.expired.get() || (this.result != RESULT_NONE));
 	}
 
-	private void useTimeoutValue() {
-		this.setLock.lock();
-		try {
-			if (this.result == null) {
-				handle(this.timeoutValue);
-				this.timeoutValueUsed = true;
-			}
-		} finally {
-			this.setLock.unlock();
-		}
+	void setExpired() {
+		this.expired.set(true);
 	}
 
-	void init(DeferredResultHandler handler) {
-		this.resultHandler = handler;
-		this.initializationLatch.countDown();
+	boolean hasTimeoutResult() {
+		return this.timeoutResult != RESULT_NONE;
+	}
+
+	boolean applyTimeoutResult() {
+		return  hasTimeoutResult() ? processResult(this.timeoutResult) : false;
 	}
 
 
 	/**
-	 * Completes processing when {@link DeferredResult#set(Object)} is called.
+	 * Handles a DeferredResult value when set.
 	 */
-	interface DeferredResultHandler {
+	public interface DeferredResultHandler {
 
-		void handle(Object result) throws StaleAsyncWebRequestException;
+		void handleResult(Object result);
 	}
 
 }

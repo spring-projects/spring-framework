@@ -705,7 +705,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found concurrent result value [" + result + "]");
 			}
-			requestMappingMethod = requestMappingMethod.wrapConcurrentProcessingResult(result);
+			requestMappingMethod = requestMappingMethod.wrapConcurrentResult(result);
 		}
 
 		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);

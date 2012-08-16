@@ -141,17 +141,17 @@ public class WebAsyncManagerTests {
 
 		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
 
-		deferredResult.set(25);
+		deferredResult.setResult(25);
 		assertEquals(25, this.asyncManager.getConcurrentResult());
 	}
 
-	@Test(expected=StaleAsyncWebRequestException.class)
-	public void startDeferredResultProcessing_staleRequest() throws Exception {
+	@Test
+	public void startDeferredResultProcessingStaleRequest() throws Exception {
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 
 		this.stubAsyncWebRequest.setAsyncComplete(true);
-		deferredResult.set(1);
+		assertFalse(deferredResult.setResult(1));
 	}
 
 	@Test
