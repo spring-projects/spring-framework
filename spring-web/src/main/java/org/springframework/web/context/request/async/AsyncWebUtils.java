@@ -15,8 +15,14 @@
  */
 package org.springframework.web.context.request.async;
 
-import javax.servlet.ServletRequest;
+import java.lang.reflect.Constructor;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.WebRequest;
 
@@ -55,6 +61,32 @@ public abstract class AsyncWebUtils {
 			webRequest.setAttribute(WEB_ASYNC_MANAGER_ATTRIBUTE, asyncManager, scope);
 		}
 		return asyncManager;
+	}
+
+	/**
+	 * Create an AsyncWebRequest instance.
+	 * <p>By default an instance of {@link StandardServletAsyncWebRequest} is created
+	 * if running in Servlet 3.0 (or higher) environment or as a fallback option an
+	 * instance of {@link NoSupportAsyncWebRequest} is returned.
+	 * @param request the current request
+	 * @param response the current response
+	 * @return an AsyncWebRequest instance, never {@code null}
+	 */
+	public static AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
+				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response);
+	}
+
+	private static AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
+		try {
+			String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
+			Class<?> clazz = ClassUtils.forName(className, AsyncWebUtils.class.getClassLoader());
+			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
+			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor, request, response);
+		}
+		catch (Throwable t) {
+			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
+		}
 	}
 
 }

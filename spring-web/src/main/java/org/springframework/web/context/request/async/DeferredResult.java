@@ -24,10 +24,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * {@code DeferredResult} provides an alternative to returning a {@link Callable}
- * for asynchronous request processing. While with a Callable, a thread is used
- * to execute it on behalf of the application, with a DeferredResult the application
- * sets the result whenever it needs to from a thread of its choice.
+ * {@code DeferredResult} provides an alternative to using a {@link Callable}
+ * for asynchronous request processing. While a Callable is executed concurrently
+ * on behalf of the application, with a DeferredResult the application can produce
+ * the result from a thread of its choice.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -38,13 +38,16 @@ public final class DeferredResult<T> {
 
 	private static final Object RESULT_NONE = new Object();
 
-	private Object result = RESULT_NONE;
 
 	private final Object timeoutResult;
 
-	private final AtomicBoolean expired = new AtomicBoolean(false);
+	private final Long timeout;
 
 	private DeferredResultHandler resultHandler;
+
+	private Object result = RESULT_NONE;
+
+	private final AtomicBoolean expired = new AtomicBoolean(false);
 
 	private final Object lock = new Object();
 
@@ -52,18 +55,36 @@ public final class DeferredResult<T> {
 
 
 	/**
-	 * Create a DeferredResult instance.
+	 * Create a DeferredResult.
 	 */
 	public DeferredResult() {
-		this(RESULT_NONE);
+		this(null, RESULT_NONE);
 	}
 
 	/**
-	 * Create a DeferredResult with a default result to use in case of a timeout.
-	 * @param timeoutResult the result to use
+	 * Create a DeferredResult with a timeout.
+	 * @param timeout timeout value in milliseconds
 	 */
-	public DeferredResult(Object timeoutResult) {
+	public DeferredResult(long timeout) {
+		this(timeout, RESULT_NONE);
+	}
+
+	/**
+	 * Create a DeferredResult with a timeout and a default result to use on timeout.
+	 * @param timeout timeout value in milliseconds; ignored if {@code null}
+	 * @param timeoutResult the result to use, possibly {@code null}
+	 */
+	public DeferredResult(Long timeout, Object timeoutResult) {
 		this.timeoutResult = timeoutResult;
+		this.timeout = timeout;
+	}
+
+
+	/**
+	 * Return the configured timeout value in milliseconds.
+	 */
+	public Long getTimeoutMilliseconds() {
+		return this.timeout;
 	}
 
 	/**

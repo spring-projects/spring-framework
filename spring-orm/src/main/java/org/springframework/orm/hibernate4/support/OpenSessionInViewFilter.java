@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -126,13 +126,13 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			if (!isAsyncDispatch(request) || !asyncManager.applyAsyncThreadInitializer(key)) {
+			if (!isAsyncDispatch(request) || !asyncManager.initializeAsyncThread(key)) {
 				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
 				Session session = openSession(sessionFactory);
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-				AsyncThreadInitializer initializer = createAsyncThreadInitializer(sessionFactory, sessionHolder);
+				WebAsyncThreadInitializer initializer = createAsyncThreadInitializer(sessionFactory, sessionHolder);
 				asyncManager.registerAsyncThreadInitializer(key, initializer);
 			}
 		}
@@ -153,10 +153,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private AsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
+	private WebAsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
 			final SessionHolder sessionHolder) {
 
-		return new AsyncThreadInitializer() {
+		return new WebAsyncThreadInitializer() {
 			public void initialize() {
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 			}

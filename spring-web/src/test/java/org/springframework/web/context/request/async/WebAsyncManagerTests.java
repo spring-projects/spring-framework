@@ -16,26 +16,26 @@
 
 package org.springframework.web.context.request.async;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createStrictMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.notNull;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.reset;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 
 
 /**
@@ -47,168 +47,140 @@ public class WebAsyncManagerTests {
 
 	private WebAsyncManager asyncManager;
 
-	private MockHttpServletRequest request;
-
-	private StubAsyncWebRequest stubAsyncWebRequest;
+	private AsyncWebRequest asyncWebRequest;
 
 	@Before
 	public void setUp() {
-		this.request = new MockHttpServletRequest();
-		this.stubAsyncWebRequest = new StubAsyncWebRequest(this.request, new MockHttpServletResponse());
-
-		this.asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+		this.asyncManager = AsyncWebUtils.getAsyncManager(new MockHttpServletRequest());
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
-		this.asyncManager.setAsyncWebRequest(this.stubAsyncWebRequest);
-	}
 
-	@Test
-	public void getForCurrentRequest() throws Exception {
-		assertNotNull(this.asyncManager);
-		assertSame(this.asyncManager, AsyncWebUtils.getAsyncManager(this.request));
-		assertSame(this.asyncManager, this.request.getAttribute(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE));
+		this.asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
+		replay(this.asyncWebRequest);
+
+		this.asyncManager.setAsyncWebRequest(this.asyncWebRequest);
+
+		verify(this.asyncWebRequest);
+		reset(this.asyncWebRequest);
 	}
 
 	@Test
 	public void isConcurrentHandlingStarted() {
+
+		expect(this.asyncWebRequest.isAsyncStarted()).andReturn(false);
+		replay(this.asyncWebRequest);
+
 		assertFalse(this.asyncManager.isConcurrentHandlingStarted());
 
-		this.stubAsyncWebRequest.startAsync();
+		verify(this.asyncWebRequest);
+		reset(this.asyncWebRequest);
+
+		expect(this.asyncWebRequest.isAsyncStarted()).andReturn(true);
+		replay(this.asyncWebRequest);
+
 		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
+
+		verify(this.asyncWebRequest);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void setAsyncWebRequestAfterAsyncStarted() {
-		this.stubAsyncWebRequest.startAsync();
+		this.asyncWebRequest.startAsync();
 		this.asyncManager.setAsyncWebRequest(null);
 	}
 
 	@Test
-	public void startCallableChainProcessing() throws Exception {
+	public void startCallableProcessing() throws Exception {
+
+		WebAsyncThreadInitializer initializer = createStrictMock(WebAsyncThreadInitializer.class);
+		initializer.initialize();
+		initializer.reset();
+		replay(initializer);
+
+		this.asyncWebRequest.startAsync();
+		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
+		this.asyncWebRequest.dispatch();
+		replay(this.asyncWebRequest);
+
+		this.asyncManager.registerAsyncThreadInitializer("testInitializer", initializer);
 		this.asyncManager.startCallableProcessing(new Callable<Object>() {
 			public Object call() throws Exception {
 				return 1;
 			}
 		});
 
-		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
-		assertTrue(this.stubAsyncWebRequest.isDispatched());
+		verify(initializer, this.asyncWebRequest);
 	}
 
 	@Test
-	public void startCallableChainProcessingStaleRequest() {
-		this.stubAsyncWebRequest.setAsyncComplete(true);
-		this.asyncManager.startCallableProcessing(new Callable<Object>() {
-			public Object call() throws Exception {
-				return 1;
-			}
-		});
+	public void startCallableProcessingAsyncTask() {
 
-		assertFalse(this.stubAsyncWebRequest.isDispatched());
+		AsyncTaskExecutor executor = createMock(AsyncTaskExecutor.class);
+		expect(executor.submit((Runnable) notNull())).andReturn(null);
+		replay(executor);
+
+		this.asyncWebRequest.setTimeout(1000L);
+		this.asyncWebRequest.startAsync();
+		replay(this.asyncWebRequest);
+
+		AsyncTask asyncTask = new AsyncTask(1000L, executor, createMock(Callable.class));
+		this.asyncManager.startCallableProcessing(asyncTask);
+
+		verify(executor, this.asyncWebRequest);
 	}
 
 	@Test
-	public void startCallableChainProcessingCallableRequired() {
+	public void startCallableProcessingNullCallable() {
 		try {
-			this.asyncManager.startCallableProcessing(null);
+			this.asyncManager.startCallableProcessing((Callable<?>) null);
 			fail("Expected exception");
 		}
 		catch (IllegalArgumentException ex) {
-			assertEquals(ex.getMessage(), "Callable is required");
+			assertEquals(ex.getMessage(), "Callable must not be null");
 		}
 	}
 
 	@Test
-	public void startCallableChainProcessingAsyncWebRequestRequired() {
-		this.request.removeAttribute(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE);
-		this.asyncManager = AsyncWebUtils.getAsyncManager(this.request);
+	public void startCallableProcessingNullRequest() {
+		WebAsyncManager manager = AsyncWebUtils.getAsyncManager(new MockHttpServletRequest());
 		try {
-			this.asyncManager.startCallableProcessing(new Callable<Object>() {
+			manager.startCallableProcessing(new Callable<Object>() {
 				public Object call() throws Exception {
-					return null;
+					return 1;
 				}
 			});
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest was not set");
+			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
 		}
 	}
 
 	@Test
 	public void startDeferredResultProcessing() throws Exception {
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+
+		this.asyncWebRequest.setTimeout(1000L);
+		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
+		this.asyncWebRequest.setTimeoutHandler((Runnable) notNull());
+		this.asyncWebRequest.startAsync();
+		replay(this.asyncWebRequest);
+
+		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>(1000L, 10);
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 
-		assertTrue(this.asyncManager.isConcurrentHandlingStarted());
+		verify(this.asyncWebRequest);
+		reset(this.asyncWebRequest);
+
+		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
+		this.asyncWebRequest.dispatch();
+		replay(this.asyncWebRequest);
 
 		deferredResult.setResult(25);
+
 		assertEquals(25, this.asyncManager.getConcurrentResult());
+		verify(this.asyncWebRequest);
 	}
 
-	@Test
-	public void startDeferredResultProcessingStaleRequest() throws Exception {
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
-		this.asyncManager.startDeferredResultProcessing(deferredResult);
-
-		this.stubAsyncWebRequest.setAsyncComplete(true);
-		assertFalse(deferredResult.setResult(1));
-	}
-
-	@Test
-	public void startDeferredResultProcessingDeferredResultRequired() {
-		try {
-			this.asyncManager.startDeferredResultProcessing(null);
-			fail("Expected exception");
-		}
-		catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), containsString("DeferredResult is required"));
-		}
-	}
-
-
-	private static class StubAsyncWebRequest extends ServletWebRequest implements AsyncWebRequest {
-
-		private boolean asyncStarted;
-
-		private boolean dispatched;
-
-		private boolean asyncComplete;
-
-		public StubAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-			super(request, response);
-		}
-
-		public void setTimeout(Long timeout) { }
-
-		public void setTimeoutHandler(Runnable runnable) { }
-
-		public void startAsync() {
-			this.asyncStarted = true;
-		}
-
-		public boolean isAsyncStarted() {
-			return this.asyncStarted;
-		}
-
-		public void dispatch() {
-			this.dispatched = true;
-		}
-
-		public boolean isDispatched() {
-			return dispatched;
-		}
-
-		public void setAsyncComplete(boolean asyncComplete) {
-			this.asyncComplete = asyncComplete;
-		}
-
-		public boolean isAsyncComplete() {
-			return this.asyncComplete;
-		}
-
-		public void addCompletionHandler(Runnable runnable) {
-		}
-	}
 
 	@SuppressWarnings("serial")
 	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {

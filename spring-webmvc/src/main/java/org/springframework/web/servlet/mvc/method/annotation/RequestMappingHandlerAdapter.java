@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,13 +26,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.transform.Source;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -50,7 +47,6 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -68,7 +64,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.AsyncWebUtils;
-import org.springframework.web.context.request.async.NoSupportAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
@@ -552,7 +547,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
 		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
-		handlers.add(new AsyncMethodReturnValueHandler());
+		handlers.add(new CallableMethodReturnValueHandler());
+		handlers.add(new DeferredResultMethodReturnValueHandler());
+		handlers.add(new AsyncTaskMethodReturnValueHandler(this.beanFactory));
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
@@ -690,7 +687,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		AsyncWebRequest asyncWebRequest = createAsyncWebRequest(request, response);
+		AsyncWebRequest asyncWebRequest = AsyncWebUtils.createAsyncWebRequest(request, response);
 		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
 		final WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
@@ -700,7 +697,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();
 			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
-			asyncManager.resetConcurrentResult();
+			asyncManager.clearConcurrentResult();
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found concurrent result value [" + result + "]");
@@ -800,23 +797,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			throws Exception {
 
 		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
-	}
-
-	private AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
-				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response);
-	}
-
-	private AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
-			Class<?> clazz = ClassUtils.forName(className, this.getClass().getClassLoader());
-			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
-			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor, request, response);
-		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
-		}
 	}
 
 	private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,

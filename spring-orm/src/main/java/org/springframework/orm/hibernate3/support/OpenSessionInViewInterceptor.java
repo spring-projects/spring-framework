@@ -28,7 +28,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 
 /**
  * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
@@ -147,7 +147,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		String participateAttributeName = getParticipateAttributeName();
 
 		if (asyncManager.hasConcurrentResult()) {
-			if (asyncManager.applyAsyncThreadInitializer(participateAttributeName)) {
+			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
 				return;
 			}
 		}
@@ -169,7 +169,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 
-				AsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(sessionHolder);
+				WebAsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(sessionHolder);
 				asyncManager.registerAsyncThreadInitializer(participateAttributeName, asyncThreadInitializer);
 			}
 			else {
@@ -261,8 +261,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 
-	private AsyncThreadInitializer createThreadInitializer(final SessionHolder sessionHolder) {
-		return new AsyncThreadInitializer() {
+	private WebAsyncThreadInitializer createThreadInitializer(final SessionHolder sessionHolder) {
+		return new WebAsyncThreadInitializer() {
 			public void initialize() {
 				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 			}

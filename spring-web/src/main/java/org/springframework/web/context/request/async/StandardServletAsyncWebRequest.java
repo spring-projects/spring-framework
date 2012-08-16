@@ -70,6 +70,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	 * <p>The timeout period begins when the main processing thread has exited.
 	 */
 	public void setTimeout(Long timeout) {
+		Assert.state(!isAsyncStarted(), "Cannot change the timeout with concurrent handling in progress");
 		this.timeout = timeout;
 	}
 
@@ -145,6 +146,9 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 
+	/**
+	 * Sends a SERVICE_UNAVAILABLE (503).
+	 */
 	private class DefaultTimeoutHandler implements Runnable {
 
 		public void run() {

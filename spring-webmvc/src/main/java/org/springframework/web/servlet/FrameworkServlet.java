@@ -49,7 +49,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.AsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -991,9 +991,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 	}
 
-	private AsyncThreadInitializer createAsyncThreadInitializer(final HttpServletRequest request) {
+	private WebAsyncThreadInitializer createAsyncThreadInitializer(final HttpServletRequest request) {
 
-		return new AsyncThreadInitializer() {
+		return new WebAsyncThreadInitializer() {
 			public void initialize() {
 				initContextHolders(request, buildLocaleContext(request), new ServletRequestAttributes(request));
 			}

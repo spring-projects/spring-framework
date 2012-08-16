@@ -29,19 +29,17 @@ public interface AsyncWebRequest extends NativeWebRequest {
 
 	/**
 	 * Set the time required for concurrent handling to complete.
-	 * @param timeout amount of time in milliseconds
+	 * This property should not be set when concurrent handling is in progress,
+	 * i.e. when {@link #isAsyncStarted()} is {@code true}.
+	 * @param timeout amount of time in milliseconds; {@code null} means no
+	 * 	timeout, i.e. rely on the default timeout of the container.
 	 */
 	void setTimeout(Long timeout);
 
 	/**
-	 * Provide a Runnable to invoke on timeout.
+	 * Set a handler to be invoked if concurrent processing times out.
 	 */
 	void setTimeoutHandler(Runnable runnable);
-
-	/**
-	 * Provide a Runnable to invoke at the end of asynchronous request processing.
-	 */
-	void addCompletionHandler(Runnable runnable);
 
 	/**
 	 * Mark the start of asynchronous request processing so that when the main
@@ -69,6 +67,11 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	 * processing after concurrent execution in an application thread.
 	 */
 	boolean isDispatched();
+
+	/**
+	 * Add a Runnable to be invoked when request processing completes.
+	 */
+	void addCompletionHandler(Runnable runnable);
 
 	/**
 	 * Whether asynchronous processing has completed.

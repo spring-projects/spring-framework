@@ -108,7 +108,7 @@ public class DeferredResultTests {
 	@Test
 	public void hasTimeout() {
 		assertFalse(new DeferredResult<String>().hasTimeoutResult());
-		assertTrue(new DeferredResult<String>("timed out").hasTimeoutResult());
+		assertTrue(new DeferredResult<String>(null, "timed out").hasTimeoutResult());
 	}
 
 	@Test
@@ -117,7 +117,7 @@ public class DeferredResultTests {
 		handler.handleResult("timed out");
 		replay(handler);
 
-		DeferredResult<String> result = new DeferredResult<String>("timed out");
+		DeferredResult<String> result = new DeferredResult<String>(null, "timed out");
 		result.setResultHandler(handler);
 
 		assertTrue(result.applyTimeoutResult());
