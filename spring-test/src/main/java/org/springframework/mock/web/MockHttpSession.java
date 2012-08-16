@@ -17,12 +17,12 @@
 package org.springframework.mock.web;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Vector;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -36,6 +36,9 @@ import org.springframework.util.Assert;
  *
  * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
  *
+ * <p>Used for testing the web framework; also useful for testing application
+ * controllers.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
@@ -44,6 +47,8 @@ import org.springframework.util.Assert;
  */
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
+
+	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 	private static int nextId = 1;
 
@@ -136,7 +141,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public String[] getValueNames() {
