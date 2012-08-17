@@ -354,6 +354,17 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setWebBindingInitializer(webBindingInitializer);
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
+
+		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
+		configureAsyncSupport(configurer);
+
+		if (configurer.getTaskExecutor() != null) {
+			adapter.setTaskExecutor(configurer.getTaskExecutor());
+		}
+		if (configurer.getTimeout() != null) {
+			adapter.setAsyncRequestTimeout(configurer.getTimeout());
+		}
+
 		return adapter;
 	}
 
@@ -514,6 +525,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Override this method to add custom {@link Converter}s and {@link Formatter}s.
 	 */
 	protected void addFormatters(FormatterRegistry registry) {
+	}
+
+	/**
+	 * Override this method to configure asynchronous request processing options.
+	 * @see AsyncSupportConfigurer
+	 */
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 	}
 
 	/**

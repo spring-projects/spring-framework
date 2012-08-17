@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +63,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
@@ -400,26 +402,28 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Set the AsyncTaskExecutor to use when a controller method returns a
-	 * {@code Callable}.
-	 * <p>The default instance type is a {@link SimpleAsyncTaskExecutor}.
-	 * It's recommended to change that default in production as the simple
-	 * executor does not re-use threads.
+	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
+	 * return a {@link Callable}. Controller methods can override this default on
+	 * a per-request basis by returning an {@link AsyncTask}.
+	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
+	 * It's recommended to change that default in production as the simple executor
+	 * does not re-use threads.
 	 */
-	public void setAsyncTaskExecutor(AsyncTaskExecutor taskExecutor) {
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * Set the timeout for asynchronous request processing in milliseconds.
-	 * When the timeout begins depends on the underlying async technology.
-	 * With the Servlet 3 async support the timeout begins after the main
-	 * processing thread has exited and has been returned to the container pool.
-	 * <p>If a value is not provided, the default timeout of the underlying
-	 * async technology is used (10 seconds on Tomcat with Servlet 3 async).
+	 * Specify the amount of time, in milliseconds, before concurrent handling
+	 * should time out. In Servlet 3, the timeout begins after the main request
+	 * processing thread has exited and ends when the request is dispatched again
+	 * for further processing of the concurrently produced result.
+	 * <p>If this value is not set, the default timeout of the underlying
+	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	 * @param timeout the timeout value in milliseconds
 	 */
-	public void setAsyncRequestTimeout(long asyncRequestTimeout) {
-		this.asyncRequestTimeout = asyncRequestTimeout;
+	public void setAsyncRequestTimeout(long timeout) {
+		this.asyncRequestTimeout = timeout;
 	}
 
 	/**

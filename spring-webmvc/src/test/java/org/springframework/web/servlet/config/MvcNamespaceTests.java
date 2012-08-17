@@ -45,6 +45,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -451,7 +452,7 @@ public class MvcNamespaceTests {
 	}
 
 	@Test
-	public void testCustomContentNegotiationManager() throws Exception {
+	public void testContentNegotiationManager() throws Exception {
 		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 12);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
@@ -460,6 +461,16 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+	}
+
+	@Test
+	public void testAsyncSupportOptions() throws Exception {
+		loadBeanDefinitions("mvc-config-async-support.xml", 13);
+
+		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
+		assertNotNull(adapter);
+		assertEquals(ConcurrentTaskExecutor.class, new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
+		assertEquals(2500L, new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
 	}
 
 

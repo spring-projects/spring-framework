@@ -21,6 +21,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -54,14 +55,14 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class DelegatingWebMvcConfigurationTests {
 
-	private DelegatingWebMvcConfiguration mvcConfiguration;
+	private DelegatingWebMvcConfiguration delegatingConfig;
 
-	private WebMvcConfigurer configurer;
+	private WebMvcConfigurer webMvcConfigurer;
 
 	@Before
 	public void setUp() {
-		configurer = EasyMock.createMock(WebMvcConfigurer.class);
-		mvcConfiguration = new DelegatingWebMvcConfiguration();
+		webMvcConfigurer = EasyMock.createMock(WebMvcConfigurer.class);
+		delegatingConfig = new DelegatingWebMvcConfiguration();
 	}
 
 	@Test
@@ -71,18 +72,20 @@ public class DelegatingWebMvcConfigurationTests {
 		Capture<FormattingConversionService> conversionService = new Capture<FormattingConversionService>();
 		Capture<List<HandlerMethodArgumentResolver>> resolvers = new Capture<List<HandlerMethodArgumentResolver>>();
 		Capture<List<HandlerMethodReturnValueHandler>> handlers = new Capture<List<HandlerMethodReturnValueHandler>>();
+		Capture<AsyncSupportConfigurer> asyncConfigurer = new Capture<AsyncSupportConfigurer>();
 
-		configurer.configureMessageConverters(capture(converters));
-		configurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
-		expect(configurer.getValidator()).andReturn(null);
-		expect(configurer.getMessageCodesResolver()).andReturn(null);
-		configurer.addFormatters(capture(conversionService));
-		configurer.addArgumentResolvers(capture(resolvers));
-		configurer.addReturnValueHandlers(capture(handlers));
-		replay(configurer);
+		webMvcConfigurer.configureMessageConverters(capture(converters));
+		webMvcConfigurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
+		expect(webMvcConfigurer.getValidator()).andReturn(null);
+		expect(webMvcConfigurer.getMessageCodesResolver()).andReturn(null);
+		webMvcConfigurer.addFormatters(capture(conversionService));
+		webMvcConfigurer.addArgumentResolvers(capture(resolvers));
+		webMvcConfigurer.addReturnValueHandlers(capture(handlers));
+		webMvcConfigurer.configureAsyncSupport(capture(asyncConfigurer));
+		replay(webMvcConfigurer);
 
-		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
+		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 
 		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertSame(conversionService.getValue(), initializer.getConversionService());
@@ -91,8 +94,9 @@ public class DelegatingWebMvcConfigurationTests {
 		assertEquals(0, resolvers.getValue().size());
 		assertEquals(0, handlers.getValue().size());
 		assertEquals(converters.getValue(), adapter.getMessageConverters());
+		assertNotNull(asyncConfigurer);
 
-		verify(configurer);
+		verify(webMvcConfigurer);
 	}
 
 	@Test
@@ -104,33 +108,33 @@ public class DelegatingWebMvcConfigurationTests {
 				converters.add(new StringHttpMessageConverter());
 			}
 		});
-		mvcConfiguration = new DelegatingWebMvcConfiguration();
-		mvcConfiguration.setConfigurers(configurers);
+		delegatingConfig = new DelegatingWebMvcConfiguration();
+		delegatingConfig.setConfigurers(configurers);
 
-		RequestMappingHandlerAdapter adapter = mvcConfiguration.requestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = delegatingConfig.requestMappingHandlerAdapter();
 		assertEquals("Only one custom converter should be registered", 1, adapter.getMessageConverters().size());
 	}
 
 	@Test
 	public void getCustomValidator() {
-		expect(configurer.getValidator()).andReturn(new LocalValidatorFactoryBean());
-		replay(configurer);
+		expect(webMvcConfigurer.getValidator()).andReturn(new LocalValidatorFactoryBean());
+		replay(webMvcConfigurer);
 
-		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.mvcValidator();
+		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.mvcValidator();
 
-		verify(configurer);
+		verify(webMvcConfigurer);
 	}
 
 	@Test
 	public void getCustomMessageCodesResolver() {
-		expect(configurer.getMessageCodesResolver()).andReturn(new DefaultMessageCodesResolver());
-		replay(configurer);
+		expect(webMvcConfigurer.getMessageCodesResolver()).andReturn(new DefaultMessageCodesResolver());
+		replay(webMvcConfigurer);
 
-		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.getMessageCodesResolver();
+		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.getMessageCodesResolver();
 
-		verify(configurer);
+		verify(webMvcConfigurer);
 	}
 
 	@Test
@@ -139,13 +143,13 @@ public class DelegatingWebMvcConfigurationTests {
 		Capture<List<HandlerExceptionResolver>> exceptionResolvers = new Capture<List<HandlerExceptionResolver>>();
 		Capture<ContentNegotiationConfigurer> contentNegotiationConfigurer = new Capture<ContentNegotiationConfigurer>();
 
-		configurer.configureMessageConverters(capture(converters));
-		configurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
-		configurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
-		replay(configurer);
+		webMvcConfigurer.configureMessageConverters(capture(converters));
+		webMvcConfigurer.configureContentNegotiation(capture(contentNegotiationConfigurer));
+		webMvcConfigurer.configureHandlerExceptionResolvers(capture(exceptionResolvers));
+		replay(webMvcConfigurer);
 
-		mvcConfiguration.setConfigurers(Arrays.asList(configurer));
-		mvcConfiguration.handlerExceptionResolver();
+		delegatingConfig.setConfigurers(Arrays.asList(webMvcConfigurer));
+		delegatingConfig.handlerExceptionResolver();
 
 		assertEquals(3, exceptionResolvers.getValue().size());
 		assertTrue(exceptionResolvers.getValue().get(0) instanceof ExceptionHandlerExceptionResolver);
@@ -153,7 +157,7 @@ public class DelegatingWebMvcConfigurationTests {
 		assertTrue(exceptionResolvers.getValue().get(2) instanceof DefaultHandlerExceptionResolver);
 		assertTrue(converters.getValue().size() > 0);
 
-		verify(configurer);
+		verify(webMvcConfigurer);
 	}
 
 	@Test
@@ -165,10 +169,10 @@ public class DelegatingWebMvcConfigurationTests {
 				exceptionResolvers.add(new DefaultHandlerExceptionResolver());
 			}
 		});
-		mvcConfiguration.setConfigurers(configurers);
+		delegatingConfig.setConfigurers(configurers);
 
 		HandlerExceptionResolverComposite composite =
-			(HandlerExceptionResolverComposite) mvcConfiguration.handlerExceptionResolver();
+			(HandlerExceptionResolverComposite) delegatingConfig.handlerExceptionResolver();
 		assertEquals("Only one custom converter is expected", 1, composite.getExceptionResolvers().size());
 	}
 

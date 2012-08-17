@@ -174,6 +174,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> messageConverters = getMessageConverters(element, source, parserContext);
 		ManagedList<?> argumentResolvers = getArgumentResolvers(element, source, parserContext);
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
+		String asyncTimeout = getAsyncTimeout(element, source, parserContext);
+		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element, source, parserContext);
 
 		RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		handlerAdapterDef.setSource(source);
@@ -190,6 +192,12 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (returnValueHandlers != null) {
 			handlerAdapterDef.getPropertyValues().add("customReturnValueHandlers", returnValueHandlers);
+		}
+		if (asyncTimeout != null) {
+			handlerAdapterDef.getPropertyValues().add("asyncRequestTimeout", asyncTimeout);
+		}
+		if (asyncExecutor != null) {
+			handlerAdapterDef.getPropertyValues().add("taskExecutor", asyncExecutor);
 		}
 		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
 
@@ -316,6 +324,21 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		} else {
 			return null;
 		}
+	}
+
+	private String getAsyncTimeout(Element element, Object source, ParserContext parserContext) {
+		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
+		return (asyncElement != null) ? asyncElement.getAttribute("default-timeout") : null;
+	}
+
+	private RuntimeBeanReference getAsyncExecutor(Element element, Object source, ParserContext parserContext) {
+		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
+		if (asyncElement != null) {
+			if (asyncElement.hasAttribute("task-executor")) {
+				return new RuntimeBeanReference(asyncElement.getAttribute("task-executor"));
+			}
+		}
+		return null;
 	}
 
 	private ManagedList<?> getArgumentResolvers(Element element, Object source, ParserContext parserContext) {

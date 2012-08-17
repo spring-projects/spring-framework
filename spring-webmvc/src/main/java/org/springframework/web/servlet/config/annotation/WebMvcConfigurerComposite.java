@@ -55,6 +55,12 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		}
 	}
 
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.configureAsyncSupport(configurer);
+		}
+	}
+
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		for (WebMvcConfigurer delegate : this.delegates) {
 			delegate.configureMessageConverters(converters);

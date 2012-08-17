@@ -75,6 +75,11 @@ public interface WebMvcConfigurer {
 	void configureContentNegotiation(ContentNegotiationConfigurer configurer);
 
 	/**
+	 * Configure asynchronous request handling options.
+	 */
+	void configureAsyncSupport(AsyncSupportConfigurer configurer);
+
+	/**
 	 * Add resolvers to support custom controller method argument types.
 	 * <p>This does not override the built-in support for resolving handler
 	 * method arguments. To customize the built-in support for argument

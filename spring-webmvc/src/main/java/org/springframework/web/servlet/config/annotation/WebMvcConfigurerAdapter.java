@@ -68,6 +68,13 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	 * {@inheritDoc}
 	 * <p>This implementation is empty.
 	 */
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
 	}
 

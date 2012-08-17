@@ -61,6 +61,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		this.configurers.configureAsyncSupport(configurer);
+	}
+
+	@Override
 	protected void addViewControllers(ViewControllerRegistry registry) {
 		this.configurers.addViewControllers(registry);
 	}
