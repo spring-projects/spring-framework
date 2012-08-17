@@ -99,7 +99,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return this.sessionFactoryBeanName;
 	}
 
-
 	/**
 	 * The default value is "true" so that the filter may re-bind the opened
 	 * {@code Session} to each asynchronously dispatched thread and postpone
@@ -119,6 +118,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		boolean isFirstRequest = !isAsyncDispatch(request);
 		String key = getAlreadyFilteredAttributeName();
 
 		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
@@ -126,7 +126,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			if (!isAsyncDispatch(request) || !asyncManager.initializeAsyncThread(key)) {
+			if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
 				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
 				Session session = openSession(sessionFactory);
 				SessionHolder sessionHolder = new SessionHolder(session);
@@ -151,19 +151,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				}
 			}
 		}
-	}
-
-	private WebAsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
-			final SessionHolder sessionHolder) {
-
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-			}
-			public void reset() {
-				TransactionSynchronizationManager.unbindResource(sessionFactory);
-			}
-		};
 	}
 
 	/**
@@ -212,6 +199,19 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		catch (HibernateException ex) {
 			throw new DataAccessResourceFailureException("Could not open Hibernate Session", ex);
 		}
+	}
+
+	private WebAsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
+			final SessionHolder sessionHolder) {
+
+		return new WebAsyncThreadInitializer() {
+			public void initialize() {
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
+			}
+		};
 	}
 
 }

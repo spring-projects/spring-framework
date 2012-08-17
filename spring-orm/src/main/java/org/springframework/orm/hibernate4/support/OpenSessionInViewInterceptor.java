@@ -105,9 +105,9 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 */
 	public void preHandle(WebRequest request) throws DataAccessException {
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
 		String participateAttributeName = getParticipateAttributeName();
 
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
 			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
 				return;
@@ -148,12 +148,6 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 		}
 	}
 
-	public void afterConcurrentHandlingStarted(WebRequest request) {
-		if (!decrementParticipateCount(request)) {
-			TransactionSynchronizationManager.unbindResource(getSessionFactory());
-		}
-	}
-
 	private boolean decrementParticipateCount(WebRequest request) {
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
@@ -168,6 +162,12 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 			request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 		}
 		return true;
+	}
+
+	public void afterConcurrentHandlingStarted(WebRequest request) {
+		if (!decrementParticipateCount(request)) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		}
 	}
 
 	/**

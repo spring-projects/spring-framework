@@ -460,7 +460,7 @@ public class OpenSessionInViewTests {
 		final SessionFactory sf = createStrictMock(SessionFactory.class);
 		Session session = createStrictMock(Session.class);
 
-		// Initial request during which concurrent handler execution starts..
+		// Initial request during which concurrent handling starts..
 
 		expect(sf.openSession()).andReturn(session);
 		expect(session.getSessionFactory()).andReturn(sf);
@@ -516,11 +516,10 @@ public class OpenSessionInViewTests {
 		reset(session);
 		reset(asyncWebRequest);
 
-		// Async dispatch after concurrent handler execution results ready..
+		// Async dispatch after concurrent handling produces result ...
 
 		expect(session.close()).andReturn(null);
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(false);
-		expectLastCall().anyTimes();
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
 
 		replay(sf);
 		replay(session);

@@ -18,8 +18,8 @@ package org.springframework.web.context.request;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
-
 import org.springframework.ui.ModelMap;
+import org.springframework.web.context.request.async.AsyncWebUtils;
 
 /**
  * Request logging interceptor that adds a request context message to the
@@ -60,6 +60,11 @@ public class Log4jNestedDiagnosticContextInterceptor implements WebRequestInterc
 	 * Adds a message the Log4J NDC before the request is processed.
 	 */
 	public void preHandle(WebRequest request) throws Exception {
+
+		if (AsyncWebUtils.getAsyncManager(request).hasConcurrentResult()) {
+			return;
+		}
+
 		NDC.push(getNestedDiagnosticContextMessage(request));
 	}
 

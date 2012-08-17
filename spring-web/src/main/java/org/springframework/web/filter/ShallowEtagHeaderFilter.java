@@ -66,25 +66,25 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		ShallowEtagResponseWrapper responseWrapper;
+		boolean isFirstRequest = !isAsyncDispatch(request);
 
-		if (isAsyncDispatch(request)) {
-			responseWrapper = WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
-			Assert.notNull(responseWrapper, "Expected wrapped response");
-		}
-		else {
-			responseWrapper = new ShallowEtagResponseWrapper(response);
+		if (isFirstRequest) {
+			response = new ShallowEtagResponseWrapper(response);
 		}
 
-		filterChain.doFilter(request, responseWrapper);
+		filterChain.doFilter(request, response);
 
 		if (isLastRequestThread(request)) {
-			updateResponse(request, response, responseWrapper);
+			updateResponse(request, response);
 		}
 	}
 
-	private void updateResponse(HttpServletRequest request, HttpServletResponse response,
-			ShallowEtagResponseWrapper responseWrapper) throws IOException {
+	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		ShallowEtagResponseWrapper  responseWrapper = WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
+		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
+
+		response = (HttpServletResponse) responseWrapper.getResponse();
 
 		byte[] body = responseWrapper.toByteArray();
 		int statusCode = responseWrapper.getStatusCode();

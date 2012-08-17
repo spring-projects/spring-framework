@@ -198,19 +198,15 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		boolean isAsyncDispatch = isAsyncDispatch(request);
+		boolean isFirstRequest = !isAsyncDispatch(request);
 
 		if (isIncludePayload()) {
-			if (isAsyncDispatch) {
-				request = WebUtils.getNativeRequest(request, RequestCachingRequestWrapper.class);
-				Assert.notNull(request, "Expected wrapped request");
-			}
-			else {
+			if (isFirstRequest) {
 				request = new RequestCachingRequestWrapper(request);
 			}
 		}
 
-		if (!isAsyncDispatch) {
+		if (isFirstRequest) {
 			beforeRequest(request, getBeforeMessage(request));
 		}
 		try {
