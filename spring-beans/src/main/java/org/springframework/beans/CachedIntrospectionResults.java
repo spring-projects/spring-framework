@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,25 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -58,6 +64,12 @@ import org.springframework.util.StringUtils;
  */
 public class CachedIntrospectionResults {
 
+	/**
+	 * The location to look for the bean info mapping files. Can be present in multiple JAR files.
+	 */
+	public static final String BEAN_INFO_FACTORIES_LOCATION = "META-INF/spring.beanInfoFactories";
+
+
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
 	/**
@@ -72,6 +84,11 @@ public class CachedIntrospectionResults {
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
 	static final Map<Class, Object> classCache = Collections.synchronizedMap(new WeakHashMap<Class, Object>());
+
+	/** Stores the BeanInfoFactory instances */
+	private static List<BeanInfoFactory> beanInfoFactories;
+
+	private static final Object beanInfoFactoriesMutex = new Object();
 
 
 	/**
@@ -221,7 +238,20 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+
+			BeanInfo beanInfo = null;
+			List<BeanInfoFactory> beanInfoFactories = getBeanInfoFactories(beanClass.getClassLoader());
+			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
+				if (beanInfoFactory.supports(beanClass)) {
+					beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+					break;
+				}
+			}
+			if (beanInfo == null) {
+				// If none of the factories supported the class, use the default
+				beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+			}
+			this.beanInfo = beanInfo;
 
 			// Immediately remove class from Introspector cache, to allow for proper
 			// garbage collection on class loader shutdown - we cache it here anyway,
@@ -305,4 +335,61 @@ public class CachedIntrospectionResults {
 		}
 	}
 
+	private static List<BeanInfoFactory> getBeanInfoFactories(ClassLoader classLoader) {
+		if (beanInfoFactories == null) {
+			synchronized (beanInfoFactoriesMutex) {
+				if (beanInfoFactories == null) {
+					try {
+						Properties properties =
+								PropertiesLoaderUtils.loadAllProperties(
+										BEAN_INFO_FACTORIES_LOCATION, classLoader);
+
+						if (logger.isDebugEnabled()) {
+							logger.debug("Loaded BeanInfoFactories: " + properties.keySet());
+						}
+
+						List<BeanInfoFactory> factories = new ArrayList<BeanInfoFactory>(properties.size());
+
+						for (Object key : properties.keySet()) {
+							if (key instanceof String) {
+								String className = (String) key;
+								BeanInfoFactory factory = instantiateBeanInfoFactory(className, classLoader);
+								factories.add(factory);
+							}
+						}
+
+						Collections.sort(factories, new AnnotationAwareOrderComparator());
+
+						beanInfoFactories = Collections.synchronizedList(factories);
+					}
+					catch (IOException ex) {
+						throw new IllegalStateException(
+								"Unable to load BeanInfoFactories from location [" + BEAN_INFO_FACTORIES_LOCATION + "]", ex);
+					}
+				}
+			}
+		}
+		return beanInfoFactories;
+	}
+
+	private static BeanInfoFactory instantiateBeanInfoFactory(String className,
+	                                                          ClassLoader classLoader) {
+		try {
+			Class<?> factoryClass = ClassUtils.forName(className, classLoader);
+			if (!BeanInfoFactory.class.isAssignableFrom(factoryClass)) {
+				throw new FatalBeanException(
+						"Class [" + className + "] does not implement the [" +
+								BeanInfoFactory.class.getName() + "] interface");
+			}
+			return (BeanInfoFactory) BeanUtils.instantiate(factoryClass);
+		}
+		catch (ClassNotFoundException ex) {
+			throw new FatalBeanException(
+					"BeanInfoFactory class [" + className + "] not found", ex);
+		}
+		catch (LinkageError err) {
+			throw new FatalBeanException("Invalid BeanInfoFactory class [" + className +
+					"]: problem with handler class file or dependent class", err);
+		}
+	}
 }
