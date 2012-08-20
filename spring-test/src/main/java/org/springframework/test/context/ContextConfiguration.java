@@ -23,19 +23,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * {@code ContextConfiguration} defines class-level metadata that is
+ * {@code @ContextConfiguration} defines class-level metadata that is
  * used to determine how to load and configure an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
- * for test classes.
+ * for integration tests.
  *
  * <h3>Supported Resource Types</h3>
  *
  * <p>Prior to Spring 3.1, only path-based resource locations were supported.
- * As of Spring 3.1, {@link #loader context loaders} may choose to support
+ * As of Spring 3.1, {@linkplain #loader context loaders} may choose to support
  * either path-based or class-based resources (but not both). Consequently
  * {@code @ContextConfiguration} can be used to declare either path-based
  * resource locations (via the {@link #locations} or {@link #value}
@@ -47,16 +47,20 @@ import org.springframework.context.annotation.Configuration;
  * <p>The term <em>annotated class</em> can refer to any of the following.
  *
  * <ul>
- * <li>A class annotated with {@link Configuration @Configuration}</li>
+ * <li>A class annotated with
+ * {@link org.springframework.context.annotation.Configuration @Configuration}</li>
  * <li>A component (i.e., a class annotated with
  * {@link org.springframework.stereotype.Component @Component},
  * {@link org.springframework.stereotype.Service @Service},
  * {@link org.springframework.stereotype.Repository @Repository}, etc.)</li>
  * <li>A JSR-330 compliant class that is annotated with {@code javax.inject} annotations</li>
- * <li>Any other class that contains {@link Bean @Bean}-methods</li>
+ * <li>Any other class that contains
+ * {@link org.springframework.context.annotation.Bean @Bean}-methods</li>
  * </ul>
  *
- * Consult the JavaDoc for {@link Configuration @Configuration} and {@link Bean @Bean}
+ * Consult the Javadoc for
+ * {@link org.springframework.context.annotation.Configuration @Configuration} and
+ * {@link org.springframework.context.annotation.Bean @Bean}
  * for further information regarding the configuration and semantics of
  * <em>annotated classes</em>.
  *
@@ -66,8 +70,8 @@ import org.springframework.context.annotation.Configuration;
  * @see SmartContextLoader
  * @see ContextConfigurationAttributes
  * @see MergedContextConfiguration
- * @see org.springframework.context.ApplicationContext
  * @see ActiveProfiles
+ * @see org.springframework.context.ApplicationContext
  */
 @Documented
 @Inherited
@@ -82,6 +86,7 @@ public @interface ContextConfiguration {
 	 * with {@link #locations} or {@link #classes}, but it may be used
 	 * instead of {@link #locations}.
 	 * @since 3.0
+	 * @see #inheritLocations
 	 */
 	String[] value() default {};
 
@@ -111,6 +116,7 @@ public @interface ContextConfiguration {
 	 * {@link #value} or {@link #classes}, but it may be used instead of
 	 * {@link #value}.
 	 * @since 2.5
+	 * @see #inheritLocations
 	 */
 	String[] locations() default {};
 
@@ -131,8 +137,30 @@ public @interface ContextConfiguration {
 	 * @since 3.1
 	 * @see org.springframework.context.annotation.Configuration
 	 * @see org.springframework.test.context.support.AnnotationConfigContextLoader
+	 * @see #inheritLocations
 	 */
 	Class<?>[] classes() default {};
+
+	/**
+	 * The application context <em>initializer classes</em> to use for initializing
+	 * a {@link ConfigurableApplicationContext}.
+	 * 
+	 * <p>The concrete {@code ConfigurableApplicationContext} type supported by each
+	 * declared initializer must be compatible with the type of {@code ApplicationContext}
+	 * created by the {@link SmartContextLoader} in use.
+	 *
+	 * <p>{@code SmartContextLoader} implementations typically detect whether
+	 * Spring's {@link org.springframework.core.Ordered Ordered} interface has been
+	 * implemented or if the @{@link org.springframework.core.annotation.Order Order}
+	 * annotation is present and sort instances accordingly prior to invoking them.
+	 *
+	 * @since 3.2
+	 * @see org.springframework.context.ApplicationContextInitializer
+	 * @see org.springframework.context.ConfigurableApplicationContext
+	 * @see #inheritInitializers
+	 * @see #loader
+	 */
+	Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers() default {};
 
 	/**
 	 * Whether or not {@link #locations resource locations} or <em>annotated
@@ -194,7 +222,45 @@ public @interface ContextConfiguration {
 	boolean inheritLocations() default true;
 
 	/**
-	 * The type of {@link ContextLoader} (or {@link SmartContextLoader}) to use
+	 * Whether or not {@linkplain #initializers context initializers} from test
+	 * superclasses should be <em>inherited</em>.
+	 *
+	 * <p>The default value is <code>true</code>. This means that an annotated
+	 * class will <em>inherit</em> the application context initializers defined
+	 * by test superclasses. Specifically, the initializers for a given test
+	 * class will be added to the set of initializers defined by test
+	 * superclasses. Thus, subclasses have the option of <em>extending</em> the
+	 * set of initializers.
+	 *
+	 * <p>If <code>inheritInitializers</code> is set to <code>false</code>, the
+	 * initializers for the annotated class will <em>shadow</em> and effectively
+	 * replace any initializers defined by superclasses.
+	 *
+	 * <p>In the following example, the
+	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
+	 * for {@code ExtendedTest} will be initialized using
+	 * {@code BaseInitializer} <strong>and</strong> {@code ExtendedInitializer}.
+	 * Note, however, that the order in which the initializers are invoked
+	 * depends on whether they implement {@link org.springframework.core.Ordered
+	 * Ordered} or are annotated with {@link org.springframework.core.annotation.Order
+	 * &#064;Order}.
+	 * <pre class="code">
+	 * &#064;ContextConfiguration(initializers = BaseInitializer.class)
+	 * public class BaseTest {
+	 *     // ...
+	 * }
+	 * 
+	 * &#064;ContextConfiguration(initializers = ExtendedInitializer.class)
+	 * public class ExtendedTest extends BaseTest {
+	 *     // ...
+	 * }
+	 * </pre>
+	 * @since 3.2
+	 */
+	boolean inheritInitializers() default true;
+
+	/**
+	 * The type of {@link SmartContextLoader} (or {@link ContextLoader}) to use
 	 * for loading an {@link org.springframework.context.ApplicationContext
 	 * ApplicationContext}.
 	 * 

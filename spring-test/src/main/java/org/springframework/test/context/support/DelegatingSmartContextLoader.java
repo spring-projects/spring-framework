@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
@@ -50,6 +51,12 @@ import org.springframework.util.ObjectUtils;
  * the default loader, thus providing automatic support for either XML configuration
  * files or annotated classes, but not both simultaneously.
  * 
+ * <p>As of Spring 3.2, a test class may optionally declare neither XML configuration
+ * files nor annotated classes and instead declare only {@linkplain
+ * ContextConfiguration#initializers application context initializers}. In such
+ * cases, an attempt will still be made to detect defaults, but their absence will
+ * not result an an exception.
+ * 
  * @author Sam Brannen
  * @since 3.1
  * @see SmartContextLoader
@@ -78,11 +85,18 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 		loader.processContextConfiguration(configAttributes);
 	}
 
+	private static ApplicationContext delegateLoading(SmartContextLoader loader, MergedContextConfiguration mergedConfig)
+			throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
+		}
+		return loader.loadContext(mergedConfig);
+	}
+
 	private static boolean supports(SmartContextLoader loader, MergedContextConfiguration mergedConfig) {
 		if (loader instanceof AnnotationConfigContextLoader) {
 			return ObjectUtils.isEmpty(mergedConfig.getLocations()) && !ObjectUtils.isEmpty(mergedConfig.getClasses());
-		}
-		else {
+		} else {
 			return !ObjectUtils.isEmpty(mergedConfig.getLocations()) && ObjectUtils.isEmpty(mergedConfig.getClasses());
 		}
 	}
@@ -132,11 +146,9 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 		// appropriate loader process the configuration.
 		if (configAttributes.hasLocations()) {
 			delegateProcessing(xmlLoader, configAttributes);
-		}
-		else if (configAttributes.hasClasses()) {
+		} else if (configAttributes.hasClasses()) {
 			delegateProcessing(annotationConfigLoader, configAttributes);
-		}
-		else {
+		} else {
 			// Else attempt to detect defaults...
 
 			// Let the XML loader process the configuration.
@@ -173,10 +185,12 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 					name(annotationConfigLoader), configAttributes));
 			}
 
-			// If neither loader detected defaults, throw an exception.
-			if (!configAttributes.hasResources()) {
+			// If neither loader detected defaults and no initializers were declared,
+			// throw an exception.
+			if (!configAttributes.hasResources() && ObjectUtils.isEmpty(configAttributes.getInitializers())) {
 				throw new IllegalStateException(String.format(
-					"Neither %s nor %s was able to detect defaults for context configuration %s.", name(xmlLoader),
+					"Neither %s nor %s was able to detect defaults, and no ApplicationContextInitializers "
+							+ "were declared for context configuration %s", name(xmlLoader),
 					name(annotationConfigLoader), configAttributes));
 			}
 
@@ -219,14 +233,17 @@ public class DelegatingSmartContextLoader implements SmartContextLoader {
 		List<SmartContextLoader> candidates = Arrays.asList(xmlLoader, annotationConfigLoader);
 
 		for (SmartContextLoader loader : candidates) {
-			// Determine if each loader can load a context from the
-			// mergedConfig. If it can, let it; otherwise, keep iterating.
+			// Determine if each loader can load a context from the mergedConfig. If it
+			// can, let it; otherwise, keep iterating.
 			if (supports(loader, mergedConfig)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Delegating to %s to load context from %s.", name(loader), mergedConfig));
-				}
-				return loader.loadContext(mergedConfig);
+				return delegateLoading(loader, mergedConfig);
 			}
+		}
+
+		// If neither of the candidates supports the mergedConfig based on resources but
+		// ACIs were declared, then delegate to the ACCL.
+		if (!mergedConfig.getContextInitializerClasses().isEmpty()) {
+			return delegateLoading(annotationConfigLoader, mergedConfig);
 		}
 
 		throw new IllegalStateException(String.format(

@@ -59,8 +59,8 @@
         linkend="new-in-3.1-property-source-abstraction" />).
         <classname>MockEnvironment</classname> and
         <classname>MockPropertySource</classname> are useful for developing
-        <emphasis>out-of-container</emphasis> unit tests for code that depends
-        on environment-specific properties.</para>
+        <emphasis>out-of-container</emphasis> tests for code that depends on
+        environment-specific properties.</para>
       </section>
 
       <section xml:id="mock-objects-jndi">
@@ -271,20 +271,20 @@
         container take time to instantiate. For example, a project with 50 to
         100 Hibernate mapping files might take 10 to 20 seconds to load the
         mapping files, and incurring that cost before running every test in
-        every test fixture leads to slower overall test runs that could reduce
-        productivity.</para>
+        every test fixture leads to slower overall test runs that reduce
+        developer productivity.</para>
 
-        <para>Test classes can provide either an array of <emphasis>resource
-        locations</emphasis> for XML configuration metadata — typically in the
-        classpath — or an array of <emphasis>annotated classes</emphasis> that
-        is used to configure the application. These locations or classes are
-        the same as or similar to those specified in
+        <para>Test classes typically declare either an array of
+        <emphasis>resource locations</emphasis> for XML configuration metadata
+        — often in the classpath — or an array of <emphasis>annotated
+        classes</emphasis> that is used to configure the application. These
+        locations or classes are the same as or similar to those specified in
         <literal>web.xml</literal> or other deployment configuration
         files.</para>
 
         <para>By default, once loaded, the configured
         <interfacename>ApplicationContext</interfacename> is reused for each
-        test. Thus the setup cost is incurred only once (per test suite), and
+        test. Thus the setup cost is incurred only once per test suite, and
         subsequent test execution is much faster. In this context, the term
         <emphasis>test suite</emphasis> means all tests run in the same JVM —
         for example, all tests run from an Ant, Maven, or Gradle build for a
@@ -311,11 +311,10 @@
         contexts across various testing scenarios (e.g., for configuring
         Spring-managed object graphs, transactional proxies,
         <classname>DataSource</classname>s, etc.), thus avoiding the need to
-        duplicate complex test fixture set up for individual test
-        cases.</para>
+        duplicate complex test fixture setup for individual test cases.</para>
 
         <para>As an example, consider the scenario where we have a class,
-        <classname>HibernateTitleRepository</classname>, that performs data
+        <classname>HibernateTitleRepository</classname>, that implements data
         access logic for a <classname>Title</classname> domain entity. We want
         to write integration tests that test the following areas:</para>
 
@@ -348,7 +347,7 @@
         <title>Transaction management</title>
 
         <para>One common issue in tests that access a real database is their
-        affect on the state of the persistence store. Even when you're using a
+        effect on the state of the persistence store. Even when you're using a
         development database, changes to the state may affect future tests.
         Also, many operations — such as inserting or modifying persistent data
         — cannot be performed (or verified) outside a transaction.</para>
@@ -358,11 +357,11 @@
         simply write code that can assume the existence of a transaction. If
         you call transactionally proxied objects in your tests, they will
         behave correctly, according to their configured transactional
-        semantics. In addition, if test methods delete the contents of
-        selected tables while running within a transaction, the transaction
-        will roll back by default, and the database will return to its state
-        prior to execution of the test. Transactional support is provided to
-        your test class via a
+        semantics. In addition, if a test method deletes the contents of
+        selected tables while running within the transaction managed for the
+        test, the transaction will roll back by default, and the database will
+        return to its state prior to execution of the test. Transactional
+        support is provided to a test via a
         <classname>PlatformTransactionManager</classname> bean defined in the
         test's application context.</para>
 
@@ -370,10 +369,10 @@
         useful when you want a particular test to populate or modify the
         database — the TestContext framework can be instructed to cause the
         transaction to commit instead of roll back via the <link
-        linkend="integration-testing-annotations">
-        <interfacename>@TransactionConfiguration</interfacename> </link> and
-        <link linkend="integration-testing-annotations">
-        <interfacename>@Rollback</interfacename> </link> annotations.</para>
+        linkend="integration-testing-annotations"><interfacename>@TransactionConfiguration</interfacename></link>
+        and <link
+        linkend="integration-testing-annotations"><interfacename>@Rollback</interfacename></link>
+        annotations.</para>
 
         <para>See transaction management with the <link
         linkend="testcontext-tx">TestContext framework</link>.</para>
@@ -396,8 +395,8 @@
           </listitem>
 
           <listitem>
-            <para>A <classname>JdbcTemplate</classname>, for executing
-            SQL statements to query the database. Such queries can be used to
+            <para>A <classname>JdbcTemplate</classname>, for executing SQL
+            statements to query the database. Such queries can be used to
             confirm database state both <emphasis>prior to</emphasis> and
             <emphasis>after</emphasis> execution of database-related
             application code, and Spring ensures that such queries run in the
@@ -422,14 +421,13 @@
       <title>JDBC Testing Support</title>
 
       <para>The <literal>org.springframework.test.jdbc</literal> package
-      contains <classname>JdbcTestUtils</classname>, which is a
-      collection of JDBC related utility functions intended to simplify
-      standard database testing scenarios. <emphasis>Note that <link
-      linkend="testcontext-support-classes-junit4">
-      <classname>AbstractTransactionalJUnit4SpringContextTests</classname>
-      </link> and <link linkend="testcontext-support-classes-testng">
-      <classname>AbstractTransactionalTestNGSpringContextTests</classname>
-      </link> provide convenience methods which delegate to
+      contains <classname>JdbcTestUtils</classname>, which is a collection of
+      JDBC related utility functions intended to simplify standard database
+      testing scenarios. <emphasis>Note that <link
+      linkend="testcontext-support-classes-junit4"><classname>AbstractTransactionalJUnit4SpringContextTests</classname></link>
+      and <link
+      linkend="testcontext-support-classes-testng"><classname>AbstractTransactionalTestNGSpringContextTests</classname></link>
+      provide convenience methods which delegate to
       <classname>JdbcTestUtils</classname> internally.</emphasis></para>
 
       <para>The <literal>spring-jdbc</literal> module provides support for
@@ -460,8 +458,8 @@
 
             <para>Defines class-level metadata that is used to determine how
             to load and configure an
-            <interfacename>ApplicationContext</interfacename> for test
-            classes. Specifically,
+            <interfacename>ApplicationContext</interfacename> for integration
+            tests. Specifically,
             <interfacename>@ContextConfiguration</interfacename> declares
             <emphasis>either</emphasis> the application context resource
             <varname>locations</varname> <emphasis>or</emphasis> the annotated
@@ -471,8 +469,8 @@
             <para>Resource locations are typically XML configuration files
             located in the classpath; whereas, annotated classes are typically
             <interfacename>@Configuration</interfacename> classes. However,
-            resource locations could also refer to files in the file system,
-            and annotated classes could be component classes, etc.</para>
+            resource locations can also refer to files in the file system, and
+            annotated classes can be component classes, etc.</para>
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>("/test-config.xml")
 public class XmlApplicationContextTests {
@@ -485,13 +483,27 @@ public class ConfigClassApplicationContextTests {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
 
+            <para>As an alternative or in addition to declaring resource
+            locations or annotated classes,
+            <interfacename>@ContextConfiguration</interfacename> may be used
+            to declare
+            <interfacename>ApplicationContextInitializer</interfacename>
+            classes.</para>
+
+            <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
+                role="bold">initializers</emphasis>=CustomContextIntializer.class)
+public class ContextInitializerTests {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
             <para><interfacename>@ContextConfiguration</interfacename> may
             optionally be used to declare the
             <interfacename>ContextLoader</interfacename> strategy as well.
             Note, however, that you typically do not need to explicitly
             configure the loader since the default loader supports either
             resource <varname>locations</varname> or annotated
-            <varname>classes</varname>.</para>
+            <varname>classes</varname> as well as
+            <varname>initializers</varname>.</para>
 
             <programlisting language="java"><emphasis role="bold">@ContextConfiguration</emphasis>(<emphasis
                 role="bold">locations</emphasis>="/test-context.xml", <emphasis
@@ -503,8 +515,8 @@ public class CustomLoaderXmlApplicationContextTests {
             <note>
               <para><interfacename>@ContextConfiguration</interfacename>
               provides support for <emphasis>inheriting</emphasis> resource
-              locations or configuration classes declared by superclasses by
-              default.</para>
+              locations or configuration classes as well as context
+              initializers declared by superclasses by default.</para>
             </note>
 
             <para>See <link linkend="testcontext-ctx-management">Context
@@ -650,8 +662,8 @@ public class CustomTestExecutionListenerTests {
             should be used to drive transactions can be explicitly specified
             if there are multiple beans of type
             <interfacename>PlatformTransactionManager</interfacename> in the
-            test's <interfacename>ApplicationContext</interfacename> and the
-            bean name of the desired
+            test's <interfacename>ApplicationContext</interfacename> and if
+            the bean name of the desired
             <interfacename>PlatformTransactionManager</interfacename> is not
             "transactionManager". In addition, you can change the
             <literal>defaultRollback</literal> flag to
@@ -1227,15 +1239,21 @@ public class MyTest {
         application context resource <literal>locations</literal> or annotated
         <varname>classes</varname>, the configured
         <interfacename>ContextLoader</interfacename> determines how to load a
-        context from a default location or default configuration
-        classes.</para>
+        context from a default location or default configuration classes. In
+        addition to context resource <varname>locations</varname> and
+        annotated <varname>classes</varname>, an application context can also
+        be configured via application context
+        <varname>initializers</varname>.</para>
 
         <para>The following sections explain how to configure an
         <interfacename>ApplicationContext</interfacename> via XML
-        configuration files or annotated classes (typically
-        <interfacename>@Configuration</interfacename> classes) using Spring's
-        <interfacename>@ContextConfiguration</interfacename>
-        annotation.</para>
+        configuration files, annotated classes (typically
+        <interfacename>@Configuration</interfacename> classes), or context
+        initializers using Spring's
+        <interfacename>@ContextConfiguration</interfacename> annotation.
+        Alternatively, you can implement and configure your own custom
+        <interfacename>SmartContextLoader</interfacename> for advanced use
+        cases.</para>
 
         <section xml:id="testcontext-ctx-management-xml">
           <title>Context configuration with XML resources</title>
@@ -1245,18 +1263,16 @@ public class MyTest {
           class with <interfacename>@ContextConfiguration</interfacename> and
           configure the <literal>locations</literal> attribute with an array
           that contains the resource locations of XML configuration metadata.
-          A plain path — for example <literal>"context.xml"</literal> — will
-          be treated as a classpath resource that is relative to the package
-          in which the test class is defined. A path starting with a slash is
-          treated as an absolute classpath location, for example
+          A plain or relative path — for example
+          <literal>"context.xml"</literal> — will be treated as a classpath
+          resource that is relative to the package in which the test class is
+          defined. A path starting with a slash is treated as an absolute
+          classpath location, for example
           <literal>"/org/example/config.xml"</literal>. A path which
           represents a resource URL (i.e., a path prefixed with
           <literal>classpath:</literal>, <literal>file:</literal>,
           <literal>http:</literal>, etc.) will be used <emphasis>as
-          is</emphasis>. Alternatively, you can implement and configure your
-          own custom <interfacename>ContextLoader</interfacename> or
-          <interfacename>SmartContextLoader</interfacename> for advanced use
-          cases.</para>
+          is</emphasis>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from "/app-config.xml" and
@@ -1269,10 +1285,10 @@ public class MyTest {
           <para><interfacename>@ContextConfiguration</interfacename> supports
           an alias for the <literal>locations</literal> attribute through the
           standard Java <literal>value</literal> attribute. Thus, if you do
-          not need to configure a custom
-          <interfacename>ContextLoader</interfacename>, you can omit the
-          declaration of the <literal>locations</literal> attribute name and
-          declare the resource locations by using the shorthand format
+          not need to declare additional attributes in
+          <interfacename>@ContextConfiguration</interfacename>, you can omit
+          the declaration of the <literal>locations</literal> attribute name
+          and declare the resource locations by using the shorthand format
           demonstrated in the following example.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
@@ -1296,7 +1312,8 @@ public class MyTest {
           <programlisting language="java">package com.example;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from "classpath:/com/example/MyTest-context.xml"</lineannotation>
+<lineannotation>// ApplicationContext will be loaded from
+// "classpath:/com/example/MyTest-context.xml"</lineannotation>
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class MyTest {
     <lineannotation>// class body...</lineannotation>
@@ -1311,15 +1328,11 @@ public class MyTest {
           <xref linkend="beans-java" />), annotate your test class with
           <interfacename>@ContextConfiguration</interfacename> and configure
           the <literal>classes</literal> attribute with an array that contains
-          references to annotated classes. Alternatively, you can implement
-          and configure your own custom
-          <interfacename>ContextLoader</interfacename> or
-          <interfacename>SmartContextLoader</interfacename> for advanced use
-          cases.</para>
+          references to annotated classes.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from AppConfig and TestConfig</lineannotation>
-<emphasis role="bold">@ContextConfiguration(classes={AppConfig.class, TestConfig.class})</emphasis>
+<emphasis role="bold">@ContextConfiguration(classes = {AppConfig.class, TestConfig.class})</emphasis>
 public class MyTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1340,10 +1353,9 @@ public class MyTest {
           arbitrary. In addition, a test class can contain more than one
           static inner configuration class if desired.</para>
 
-          <programlisting language="java">package com.example;
- 
-@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from the static inner Config class</lineannotation>
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be loaded from the
+// static inner Config class</lineannotation>
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class OrderServiceTest {
  
@@ -1406,27 +1418,85 @@ public class OrderServiceTest {
           other type of configuration.</para>
         </section>
 
+        <section xml:id="testcontext-ctx-management-initializers">
+          <title>Context configuration with context initializers</title>
+
+          <para>To configure an
+          <interfacename>ApplicationContext</interfacename> for your tests
+          using context initializers, annotate your test class with
+          <interfacename>@ContextConfiguration</interfacename> and configure
+          the <literal>initializers</literal> attribute with an array that
+          contains references to classes that implement
+          <interfacename>ApplicationContextInitializer</interfacename>. The
+          declared context initializers will then be used to initialize the
+          <interfacename>ConfigurableApplicationContext</interfacename> that
+          is loaded for your tests. Note that the concrete
+          <interfacename>ConfigurableApplicationContext</interfacename> type
+          supported by each declared initializer must be compatible with the
+          type of <interfacename>ApplicationContext</interfacename> created by
+          the <interfacename>SmartContextLoader</interfacename> in use (i.e.,
+          typically a <classname>GenericApplicationContext</classname>).
+          Furthermore, the order in which the initializers are invoked depends
+          on whether they implement Spring's
+          <interfacename>Ordered</interfacename> interface or are annotated
+          with Spring's <interfacename>@Order</interfacename>
+          annotation.</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be loaded from TestConfig
+</lineannotation><lineannotation>// and initialized by TestAppCtxInitializer</lineannotation>
+<emphasis role="bold">@ContextConfiguration(
+    classes = TestConfig.class,
+    initializers = TestAppCtxInitializer.class)</emphasis>
+public class MyTest {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+          <para>It is also possible to omit the declaration of XML
+          configuration files or annotated classes in
+          <interfacename>@ContextConfiguration</interfacename> entirely and
+          instead declare only
+          <interfacename>ApplicationContextInitializer</interfacename> classes
+          which are then responsible for registering beans in the context —
+          for example, by programmatically loading bean definitions from XML
+          files or configuration classes.</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be initialized by EntireAppInitializer
+</lineannotation><lineannotation>// which presumably registers beans in the context</lineannotation>
+<emphasis role="bold">@ContextConfiguration(initializers = EntireAppInitializer.class)</emphasis>
+public class MyTest {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+        </section>
+
         <section xml:id="testcontext-ctx-management-inheritance">
           <title>Context configuration inheritance</title>
 
           <para><interfacename>@ContextConfiguration</interfacename> supports
-          a boolean <literal>inheritLocations</literal> attribute that denotes
-          whether resource locations or annotated classes declared by
-          superclasses should be <emphasis>inherited</emphasis>. The default
-          value is <literal>true</literal>. This means that a test class
-          inherits the resource locations or annotated classes declared by any
-          superclasses. Specifically, the resource locations or annotated
-          classes for a test class are appended to the list of resource
-          locations or annotated classes declared by superclasses. Thus,
-          subclasses have the option of <emphasis>extending</emphasis> the
-          list of resource locations or annotated classes.</para>
+          boolean <varname>inheritLocations</varname> and
+          <varname>inheritInitializers</varname> attributes that denote
+          whether resource locations or annotated classes and context
+          initializers declared by superclasses should be
+          <emphasis>inherited</emphasis>. The default value for both flags is
+          <literal>true</literal>. This means that a test class inherits the
+          resource locations or annotated classes as well as the context
+          initializers declared by any superclasses. Specifically, the
+          resource locations or annotated classes for a test class are
+          appended to the list of resource locations or annotated classes
+          declared by superclasses. Similarly, the initializers for a given
+          test class will be added to the set of initializers defined by test
+          superclasses. Thus, subclasses have the option of
+          <emphasis>extending</emphasis> the resource locations, annotated
+          classes, or context initializers.</para>
 
           <para>If <interfacename>@ContextConfiguration</interfacename>'s
-          <literal>inheritLocations</literal> attribute is set to
+          <literal>inheritLocations</literal> or
+          <varname>inheritInitializers</varname> attribute is set to
           <literal>false</literal>, the resource locations or annotated
-          classes for the test class <emphasis>shadow</emphasis> and
-          effectively replace any resource locations or annotated classes
-          defined by superclasses.</para>
+          classes and the context initializers, respectively, for the test
+          class <emphasis>shadow</emphasis> and effectively replace the
+          configuration defined by superclasses.</para>
 
           <para>In the following example that uses XML resource locations, the
           <interfacename>ApplicationContext</interfacename> for
@@ -1439,14 +1509,15 @@ public class OrderServiceTest {
           <emphasis>"base-config.xml"</emphasis>.</para>
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
-<lineannotation>// ApplicationContext will be loaded from "/base-config.xml" in the root of the classpath</lineannotation>
+<lineannotation>// ApplicationContext will be loaded from "/base-config.xml"
+// in the root of the classpath</lineannotation>
 <emphasis role="bold">@ContextConfiguration("/base-config.xml")</emphasis>
 public class BaseTest {
     <lineannotation>// class body...</lineannotation>
 }
 
-<lineannotation>// ApplicationContext will be loaded from "/base-config.xml" and "/extended-config.xml"</lineannotation>
-<lineannotation>// in the root of the classpath</lineannotation>
+<lineannotation>// ApplicationContext will be loaded from "/base-config.xml" and
+// "/extended-config.xml" </lineannotation><lineannotation>in the root of the classpath</lineannotation>
 <emphasis role="bold">@ContextConfiguration("/extended-config.xml")</emphasis>
 public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
@@ -1463,13 +1534,38 @@ public class ExtendedTest extends BaseTest {
 
           <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
 <lineannotation>// ApplicationContext will be loaded from BaseConfig</lineannotation>
-<emphasis role="bold">@ContextConfiguration(classes=BaseConfig.class)</emphasis>
+<emphasis role="bold">@ContextConfiguration(classes = BaseConfig.class)</emphasis>
 public class BaseTest {
     <lineannotation>// class body...</lineannotation>
 }
 
 <lineannotation>// ApplicationContext will be loaded from BaseConfig and ExtendedConfig</lineannotation>
-<emphasis role="bold">@ContextConfiguration(classes=ExtendedConfig.class)</emphasis>
+<emphasis role="bold">@ContextConfiguration(classes = ExtendedConfig.class)</emphasis>
+public class ExtendedTest extends BaseTest {
+    <lineannotation>// class body...</lineannotation>
+}</programlisting>
+
+          <para>In the following example that uses context initializers, the
+          <interfacename>ApplicationContext</interfacename> for
+          <classname>ExtendedTest</classname> will be initialized using
+          <classname>BaseInitializer</classname> <emphasis
+          role="bold">and</emphasis>
+          <classname>ExtendedInitializer</classname>. Note, however, that the
+          order in which the initializers are invoked depends on whether they
+          implement Spring's <interfacename>Ordered</interfacename> interface
+          or are annotated with Spring's <interfacename>@Order</interfacename>
+          annotation.</para>
+
+          <programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+<lineannotation>// ApplicationContext will be initialized by BaseInitializer</lineannotation>
+<emphasis role="bold">@ContextConfiguration(initializers=BaseInitializer.class)</emphasis>
+public class BaseTest {
+    <lineannotation>// class body...</lineannotation>
+}
+
+<lineannotation>// ApplicationContext will be initialized by BaseInitializer
+// and ExtendedInitializer</lineannotation>
+<emphasis role="bold">@ContextConfiguration(initializers=ExtendedInitializer.class)</emphasis>
 public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
@@ -1478,9 +1574,9 @@ public class ExtendedTest extends BaseTest {
         <section xml:id="testcontext-ctx-management-env-profiles">
           <title>Context configuration with environment profiles</title>
 
-          <para>Spring 3.1 introduces first-class support in the framework for
+          <para>Spring 3.1 introduced first-class support in the framework for
           the notion of environments and profiles (a.k.a., <emphasis>bean
-          definition profiles</emphasis>), and integration tests can now be
+          definition profiles</emphasis>), and integration tests can be
           configured to activate particular bean definition profiles for
           various testing scenarios. This is achieved by annotating a test
           class with the <interfacename>@ActiveProfiles</interfacename>
@@ -1634,7 +1730,7 @@ public class TransferServiceConfig {
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
-   classes={
+   classes = {
        TransferServiceConfig.class,
        StandaloneDataConfig.class,
        JndiDataConfig.class})
@@ -1716,6 +1812,11 @@ public class TransferServiceTest {
             </listitem>
 
             <listitem>
+              <para><varname>contextInitializerClasses</varname>
+              <emphasis>(from @ContextConfiguration)</emphasis></para>
+            </listitem>
+
+            <listitem>
               <para><varname>contextLoader</varname> <emphasis>(from
               @ContextConfiguration)</emphasis></para>
             </listitem>
@@ -1737,8 +1838,8 @@ public class TransferServiceTest {
           also defines <literal>{"app-config.xml",
           "test-config.xml"}</literal> for its locations (either explicitly or
           implicitly through inheritance) and does not define a different
-          <interfacename>ContextLoader</interfacename> or different active
-          profiles, then the same
+          <interfacename>ContextLoader</interfacename>, different active
+          profiles, or different context initializers, then the same
           <interfacename>ApplicationContext</interfacename> will be shared by
           both test classes. This means that the setup cost for loading an
           application context is incurred only once (per test suite), and
@@ -2103,7 +2204,7 @@ public void updateWithSessionFlush() {
       </section>
 
       <section xml:id="testcontext-support-classes">
-        <title>TestContext support classes</title>
+        <title>TestContext Framework support classes</title>
 
         <section xml:id="testcontext-support-classes-junit4">
           <title>JUnit support classes</title>
@@ -2157,14 +2258,14 @@ public void updateWithSessionFlush() {
                 </listitem>
 
                 <listitem>
-                  <para><literal>jdbcTemplate</literal>: Use this
-                  variable to execute SQL statements to query the database.
-                  Such queries can be used to confirm database state both
-                  <emphasis>prior to</emphasis> and <emphasis>after</emphasis>
-                  execution of database-related application code, and Spring
-                  ensures that such queries run in the scope of the same
-                  transaction as the application code. When used in
-                  conjunction with an ORM tool, be sure to avoid <link
+                  <para><literal>jdbcTemplate</literal>: Use this variable to
+                  execute SQL statements to query the database. Such queries
+                  can be used to confirm database state both <emphasis>prior
+                  to</emphasis> and <emphasis>after</emphasis> execution of
+                  database-related application code, and Spring ensures that
+                  such queries run in the scope of the same transaction as the
+                  application code. When used in conjunction with an ORM tool,
+                  be sure to avoid <link
                   linkend="testcontext-tx-false-positives">false
                   positives</link>.</para>
                 </listitem>
@@ -2266,14 +2367,14 @@ public class SimpleTest {
                 </listitem>
 
                 <listitem>
-                  <para><literal>jdbcTemplate</literal>: Use this
-                  variable to execute SQL statements to query the database.
-                  Such queries can be used to confirm database state both
-                  <emphasis>prior to</emphasis> and <emphasis>after</emphasis>
-                  execution of database-related application code, and Spring
-                  ensures that such queries run in the scope of the same
-                  transaction as the application code. When used in
-                  conjunction with an ORM tool, be sure to avoid <link
+                  <para><literal>jdbcTemplate</literal>: Use this variable to
+                  execute SQL statements to query the database. Such queries
+                  can be used to confirm database state both <emphasis>prior
+                  to</emphasis> and <emphasis>after</emphasis> execution of
+                  database-related application code, and Spring ensures that
+                  such queries run in the scope of the same transaction as the
+                  application code. When used in conjunction with an ORM tool,
+                  be sure to avoid <link
                   linkend="testcontext-tx-false-positives">false
                   positives</link>.</para>
                 </listitem>
