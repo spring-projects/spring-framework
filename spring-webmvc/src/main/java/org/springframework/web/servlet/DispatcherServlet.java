@@ -1126,7 +1126,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		throw new ServletException("No adapter for handler [" + handler +
-				"]: Does your handler implement a supported interface like Controller?");
+				"]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler");
 	}
 
 	/**
