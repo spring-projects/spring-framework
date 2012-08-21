@@ -258,7 +258,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
 	}
 
@@ -384,7 +384,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	 */
 	protected ModelAndView handleMissingServletRequestPartException(MissingServletRequestPartException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
- 		response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+		response.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
 		return new ModelAndView();
 	}
 

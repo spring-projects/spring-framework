@@ -98,6 +98,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+		assertEquals("Required bar parameter 'foo' is not present", response.getErrorMessage());
 	}
 
 	@Test
@@ -156,6 +157,7 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+		assertEquals("Required request part 'name' is not present.", response.getErrorMessage());
 	}
 
 	@Test
