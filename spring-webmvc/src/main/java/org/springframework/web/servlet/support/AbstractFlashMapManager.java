@@ -83,28 +83,33 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 	}
 
 	public final FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response) {
-		List<FlashMap> allMaps = retrieveFlashMaps(request);
-		if (CollectionUtils.isEmpty(allMaps)) {
+
+		List<FlashMap> maps = retrieveFlashMaps(request);
+		if (CollectionUtils.isEmpty(maps)) {
 			return null;
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("Retrieved FlashMap(s): " + allMaps);
+			logger.debug("Retrieved FlashMap(s): " + maps);
 		}
-		List<FlashMap> mapsToRemove = getExpiredFlashMaps(allMaps);
-		FlashMap match = getMatchingFlashMap(allMaps, request);
+
+		List<FlashMap> mapsToRemove = getExpiredFlashMaps(maps);
+
+		FlashMap match = getMatchingFlashMap(maps, request);
 		if (match != null) {
 			mapsToRemove.add(match);
 		}
+
 		if (!mapsToRemove.isEmpty()) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Removing FlashMap(s): " + allMaps);
+				logger.debug("Removing FlashMap(s): " + mapsToRemove);
 			}
 			synchronized (writeLock) {
-				allMaps = retrieveFlashMaps(request);
-				allMaps.removeAll(mapsToRemove);
-				updateFlashMaps(allMaps, request, response);
+				maps = retrieveFlashMaps(request);
+				maps.removeAll(mapsToRemove);
+				updateFlashMaps(maps, request, response);
 			}
 		}
+
 		return match;
 	}
 
@@ -177,12 +182,18 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		if (CollectionUtils.isEmpty(flashMap)) {
 			return;
 		}
+
 		String path = decodeAndNormalizePath(flashMap.getTargetRequestPath(), request);
 		flashMap.setTargetRequestPath(path);
-		flashMap.startExpirationPeriod(this.flashMapTimeout);
+
+		decodeParameters(flashMap.getTargetRequestParams(), request);
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving FlashMap=" + flashMap);
 		}
+
+		flashMap.startExpirationPeriod(this.flashMapTimeout);
+
 		synchronized (writeLock) {
 			List<FlashMap> allMaps = retrieveFlashMaps(request);
 			allMaps = (allMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : allMaps;
@@ -201,6 +212,14 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 			}
 		}
 		return path;
+	}
+
+	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
+		for (String name : new ArrayList<String>(params.keySet())) {
+			for (String value : new ArrayList<String>(params.remove(name))) {
+				params.add(name, this.urlPathHelper.decodeRequestString(request, value));
+			}
+		}
 	}
 
 	/**

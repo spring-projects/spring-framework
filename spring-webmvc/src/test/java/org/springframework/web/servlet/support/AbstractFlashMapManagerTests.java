@@ -264,6 +264,21 @@ public class AbstractFlashMapManagerTests {
 		assertEquals("/once/only", flashMap.getTargetRequestPath());
 	}
 
+	@Test
+	public void saveOutputFlashMapDecodeParameters() throws Exception {
+		this.request.setCharacterEncoding("UTF-8");
+
+		FlashMap flashMap = new FlashMap();
+		flashMap.put("anyKey", "anyValue");
+
+		flashMap.addTargetRequestParam("key", "%D0%90%D0%90");
+		flashMap.addTargetRequestParam("key", "%D0%91%D0%91");
+		flashMap.addTargetRequestParam("key", "%D0%92%D0%92");
+		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
+
+		assertEquals(Arrays.asList("АА", "ББ", "ВВ"), flashMap.getTargetRequestParams().get("key"));
+	}
+
 
 	private static class TestFlashMapManager extends AbstractFlashMapManager {
 
