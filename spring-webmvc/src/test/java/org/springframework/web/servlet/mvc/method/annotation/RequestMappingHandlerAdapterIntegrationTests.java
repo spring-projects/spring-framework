@@ -89,29 +89,29 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A test fixture with a controller with all supported method signature styles
- * and arguments. A convenient place to test or confirm a problem with a 
- * specific argument or return value type. 
+ * and arguments. A convenient place to test or confirm a problem with a
+ * specific argument or return value type.
  *
  * @author Rossen Stoyanchev
- * 
+ *
  * @see HandlerMethodAnnotationDetectionTests
  * @see ServletAnnotationControllerHandlerMethodTests
  */
 public class RequestMappingHandlerAdapterIntegrationTests {
 
 	private final Object handler = new Handler();
-	
+
 	private RequestMappingHandlerAdapter handlerAdapter;
-	
+
 	private MockHttpServletRequest request;
-	
+
 	private MockHttpServletResponse response;
 
 	@Before
 	public void setup() throws Exception {
 		ConfigurableWebBindingInitializer bindingInitializer = new ConfigurableWebBindingInitializer();
 		bindingInitializer.setValidator(new StubValidator());
-		
+
 		List<HandlerMethodArgumentResolver> customResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		customResolvers.add(new ServletWebArgumentResolverAdapter(new ColorArgumentResolver()));
 
@@ -127,11 +127,11 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
-		
+
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
 	}
-	
+
 	@After
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
@@ -139,7 +139,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handle() throws Exception {
-		
+
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
@@ -186,7 +186,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals("paramByConventionValue", map.get("paramByConvention"));
 
 		assertEquals("/contextPath", model.get("value"));
-		
+
 		TestBean modelAttr = (TestBean) model.get("modelAttr");
 		assertEquals(25, modelAttr.getAge());
 		assertEquals("Set by model method [modelAttr]", modelAttr.getName());
@@ -208,13 +208,13 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertTrue(model.get("customArg") instanceof Color);
 		assertEquals(User.class, model.get("user").getClass());
 		assertEquals(OtherUser.class, model.get("otherUser").getClass());
-		
+
 		assertEquals(new URI("http://localhost/contextPath/main/path"), model.get("url"));
 	}
-	
+
 	@Test
 	public void handleRequestBody() throws Exception {
-		
+
 		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -226,6 +226,23 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		assertNull(mav);
 		assertEquals("Handled requestBody=[Hello Server]", new String(response.getContentAsByteArray(), "UTF-8"));
+		assertEquals(HttpStatus.ACCEPTED.value(), response.getStatus());
+	}
+
+	@Test
+	public void handleAndValidateRequestBody() throws Exception {
+
+		Class<?>[] parameterTypes = new Class<?>[] { TestBean.class, Errors.class };
+
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.setContent("Hello Server".getBytes("UTF-8"));
+
+		HandlerMethod handlerMethod = handlerMethod("handleAndValidateRequestBody", parameterTypes);
+
+		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+
+		assertNull(mav);
+		assertEquals("Error count [1]", new String(response.getContentAsByteArray(), "UTF-8"));
 		assertEquals(HttpStatus.ACCEPTED.value(), response.getStatus());
 	}
 
@@ -254,11 +271,23 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		HandlerMethod handlerMethod = handlerMethod("handleRequestPart", String.class, Model.class);
 		ModelAndView mav = handlerAdapter.handle(multipartRequest, response, handlerMethod);
-		
+
 		assertNotNull(mav);
 		assertEquals("content", mav.getModelMap().get("requestPart"));
 	}
-	
+
+	@Test
+	public void handleAndValidateRequestPart() throws Exception {
+		MockMultipartHttpServletRequest multipartRequest = new MockMultipartHttpServletRequest();
+		multipartRequest.addFile(new MockMultipartFile("requestPart", "", "text/plain", "content".getBytes("UTF-8")));
+
+		HandlerMethod handlerMethod = handlerMethod("handleAndValidateRequestPart", String.class, Errors.class, Model.class);
+		ModelAndView mav = handlerAdapter.handle(multipartRequest, response, handlerMethod);
+
+		assertNotNull(mav);
+		assertEquals(1, mav.getModelMap().get("error count"));
+	}
+
 	@Test
 	public void handleAndCompleteSession() throws Exception {
 		HandlerMethod handlerMethod = handlerMethod("handleAndCompleteSession", SessionStatus.class);
@@ -266,7 +295,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		assertFalse(request.getSession().getAttributeNames().hasMoreElements());
 	}
-	
+
 	private HandlerMethod handlerMethod(String methodName, Class<?>... paramTypes) throws Exception {
 		Method method = handler.getClass().getDeclaredMethod(methodName, paramTypes);
 		return new InvocableHandlerMethod(handler, method);
@@ -277,7 +306,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	private static class Handler {
 
 		@InitBinder("dateParam")
-		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String datePattern) {			
+		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String datePattern) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
 			dataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 		}
@@ -291,7 +320,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			modelAttr = new TestBean();
 			modelAttr.setName("Set by model method [modelAttrByConvention]");
 			model.addAttribute(modelAttr);
-			
+
 			model.addAttribute(new OtherUser());
 		}
 
@@ -322,18 +351,24 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
 					.addAttribute("customArg", customArg).addAttribute(user)
 					.addAttribute("url", builder.path("/path").build().toUri());
-			
+
 			assertNotNull(request);
 			assertNotNull(response);
 
 			return "viewName";
 		}
-		
+
 		@ResponseStatus(value=HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleRequestBody(@RequestBody byte[] bytes) throws Exception {
 			String requestBody = new String(bytes, "UTF-8");
 			return "Handled requestBody=[" + requestBody + "]";
+		}
+
+		@ResponseStatus(value=HttpStatus.ACCEPTED)
+		@ResponseBody
+		public String handleAndValidateRequestBody(@Valid TestBean modelAttr, Errors errors) throws Exception {
+			return "Error count [" + errors.getErrorCount() + "]";
 		}
 
 		public ResponseEntity<String> handleHttpEntity(HttpEntity<byte[]> httpEntity) throws Exception {
@@ -342,11 +377,17 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			String responseBody = "Handled requestBody=[" + new String(httpEntity.getBody(), "UTF-8") + "]";
 			return new ResponseEntity<String>(responseBody, responseHeaders, HttpStatus.ACCEPTED);
 		}
-		
+
 		public void handleRequestPart(@RequestPart String requestPart, Model model) {
 			model.addAttribute("requestPart", requestPart);
 		}
-		
+
+		public void handleAndValidateRequestPart(@RequestPart @Valid String requestPart,
+				Errors errors, Model model) throws Exception {
+
+			model.addAttribute("error count", errors.getErrorCount());
+		}
+
 		public void handleAndCompleteSession(SessionStatus sessionStatus) {
 			sessionStatus.setComplete();
 		}
@@ -367,7 +408,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			return new Color(0);
 		}
 	}
-	
+
 	private static class User implements Principal {
 		public String getName() {
 			return "user";

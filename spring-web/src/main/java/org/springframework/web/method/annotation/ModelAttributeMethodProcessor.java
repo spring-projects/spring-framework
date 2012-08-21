@@ -157,16 +157,16 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
 				Object hints = AnnotationUtils.getValue(annot);
 				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				break;
 			}
 		}
 	}
 
 	/**
-	 * Whether to raise a {@link BindException} on bind or validation errors.
-	 * The default implementation returns {@code true} if the next method
-	 * argument is not of type {@link Errors}.
+	 * Whether to raise a {@link BindException} on validation errors.
 	 * @param binder the data binder used to perform data binding
 	 * @param parameter the method argument
+	 * @return {@code true} if the next method argument is not of type {@link Errors}.
 	 */
 	protected boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
 		int i = parameter.getParameterIndex();

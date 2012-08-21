@@ -38,8 +38,8 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 
 /**
- * A base class for resolving method argument values by reading from the body of a request 
- * with {@link HttpMessageConverter}s.
+ * A base class for resolving method argument values by reading from the body of
+ * a request with {@link HttpMessageConverter}s.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -48,9 +48,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 public abstract class AbstractMessageConverterMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	protected final List<HttpMessageConverter<?>> messageConverters;
-	
+
 	protected final List<MediaType> allSupportedMediaTypes;
 
 	public AbstractMessageConverterMethodArgumentResolver(List<HttpMessageConverter<?>> messageConverters) {
@@ -60,8 +60,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	}
 
 	/**
-	 * Returns the media types supported by all provided message converters preserving their ordering and 
-	 * further sorting by specificity via {@link MediaType#sortBySpecificity(List)}. 
+	 * Return the media types supported by all provided message converters sorted
+	 * by specificity via {@link MediaType#sortBySpecificity(List)}.
 	 */
 	private static List<MediaType> getAllSupportedMediaTypes(List<HttpMessageConverter<?>> messageConverters) {
 		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<MediaType>();
@@ -72,11 +72,12 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		MediaType.sortBySpecificity(result);
 		return Collections.unmodifiableList(result);
 	}
-	
+
 	/**
-	 * Creates the method argument value of the expected parameter type by reading from the given request.
-	 * 
-	 * @param <T> the expected type of the argument value to be created 
+	 * Creates the method argument value of the expected parameter type by
+	 * reading from the given request.
+	 *
+	 * @param <T> the expected type of the argument value to be created
 	 * @param webRequest the current request
 	 * @param methodParam the method argument
 	 * @param paramType the type of the argument value to be created
@@ -86,15 +87,16 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 */
 	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam, Class<T> paramType) throws IOException,
 			HttpMediaTypeNotSupportedException {
-			
-				HttpInputMessage inputMessage = createInputMessage(webRequest);
-				return readWithMessageConverters(inputMessage, methodParam, paramType);
-			}
+
+		HttpInputMessage inputMessage = createInputMessage(webRequest);
+		return readWithMessageConverters(inputMessage, methodParam, paramType);
+	}
 
 	/**
-	 * Creates the method argument value of the expected parameter type by reading from the given HttpInputMessage. 
-	 * 
-	 * @param <T> the expected type of the argument value to be created 
+	 * Creates the method argument value of the expected parameter type by reading
+	 * from the given HttpInputMessage.
+	 *
+	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
 	 * @param methodParam the method argument
 	 * @param paramType the type of the argument value to be created
@@ -103,14 +105,14 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam, Class<T> paramType) throws IOException,
-			HttpMediaTypeNotSupportedException {
-			
+	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam,
+			Class<T> paramType) throws IOException, HttpMediaTypeNotSupportedException {
+
 				MediaType contentType = inputMessage.getHeaders().getContentType();
 				if (contentType == null) {
 					contentType = MediaType.APPLICATION_OCTET_STREAM;
 				}
-			
+
 				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 					if (messageConverter.canRead(paramType, contentType)) {
 						if (logger.isDebugEnabled()) {
@@ -120,7 +122,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 						return ((HttpMessageConverter<T>) messageConverter).read(paramType, inputMessage);
 					}
 				}
-			
+
 				throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 			}
 

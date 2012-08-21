@@ -100,9 +100,8 @@ import java.util.concurrent.Callable;
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * but do not support access to validation results through a
- * {@link org.springframework.validation.Errors} /
- * {@link org.springframework.validation.BindingResult} argument.
+ * and also support access to validation results through an
+ * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link RequestPart @RequestPart} annotated parameters
@@ -112,9 +111,8 @@ import java.util.concurrent.Callable;
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * but do not support access to validation results through a
- * {@link org.springframework.validation.Errors} /
- * {@link org.springframework.validation.BindingResult} argument.
+ * and support access to validation results through a
+ * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters

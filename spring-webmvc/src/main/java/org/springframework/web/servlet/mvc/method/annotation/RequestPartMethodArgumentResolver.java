@@ -28,6 +28,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,26 +50,26 @@ import org.springframework.web.util.WebUtils;
  * Resolves the following method arguments:
  * <ul>
  * 	<li>Annotated with {@code @RequestPart}
- * 	<li>Of type {@link MultipartFile} in conjunction with Spring's 
+ * 	<li>Of type {@link MultipartFile} in conjunction with Spring's
  *  {@link MultipartResolver} abstraction
- * 	<li>Of type {@code javax.servlet.http.Part} in conjunction with 
+ * 	<li>Of type {@code javax.servlet.http.Part} in conjunction with
  * 	Servlet 3.0 multipart requests
  * </ul>
- * 
- * <p>When a parameter is annotated with {@code @RequestPart} the content of the 
- * part is passed through an {@link HttpMessageConverter} to resolve the method 
- * argument with the 'Content-Type' of the request part in mind. This is 
+ *
+ * <p>When a parameter is annotated with {@code @RequestPart} the content of the
+ * part is passed through an {@link HttpMessageConverter} to resolve the method
+ * argument with the 'Content-Type' of the request part in mind. This is
  * analogous to what @{@link RequestBody} does to resolve an argument based on
  * the content of a regular request.
- * 
- * <p>When a parameter is not annotated or the name of the part is not specified, 
+ *
+ * <p>When a parameter is not annotated or the name of the part is not specified,
  * it is derived from the name of the method argument.
- * 
- * <p>Automatic validation may be applied if the argument is annotated with 
- * {@code @javax.validation.Valid}. In case of validation failure, a 
+ *
+ * <p>Automatic validation may be applied if the argument is annotated with
+ * {@code @javax.validation.Valid}. In case of validation failure, a
  * {@link MethodArgumentNotValidException} is raised and a 400 response status
  * code returned if {@link DefaultHandlerExceptionResolver} is configured.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -111,8 +112,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		assertIsMultipartRequest(servletRequest);
-		
-		MultipartHttpServletRequest multipartRequest = 
+
+		MultipartHttpServletRequest multipartRequest =
 			WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
 		String partName = getPartName(parameter);
@@ -133,20 +134,11 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			try {
 				HttpInputMessage inputMessage = new RequestPartServletServerHttpRequest(servletRequest, partName);
 				arg = readWithMessageConverters(inputMessage, parameter, parameter.getParameterType());
+				WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
 				if (arg != null) {
-					Annotation[] annotations = parameter.getParameterAnnotations();
-					for (Annotation annot : annotations) {
-						if (annot.annotationType().getSimpleName().startsWith("Valid")) {
-							WebDataBinder binder = binderFactory.createBinder(request, arg, partName);
-							Object hints = AnnotationUtils.getValue(annot);
-							binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-							BindingResult bindingResult = binder.getBindingResult();
-							if (bindingResult.hasErrors()) {
-								throw new MethodArgumentNotValidException(parameter, bindingResult);
-							}
-						}
-					}
+					validate(binder, parameter);
 				}
+				mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + partName, binder.getBindingResult());
 			}
 			catch (MissingServletRequestPartException ex) {
 				// handled below
@@ -160,7 +152,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		if (arg == null && isRequired) {
 			throw new MissingServletRequestPartException(partName);
 		}
-		
+
 		return arg;
 	}
 
@@ -170,7 +162,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			throw new MultipartException("The current request is not a multipart request");
 		}
 	}
-	
+
 	private String getPartName(MethodParameter parameter) {
 		RequestPart annot = parameter.getParameterAnnotation(RequestPart.class);
 		String partName = (annot != null) ? annot.value() : "";
@@ -181,7 +173,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 		return partName;
 	}
-	
+
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
@@ -191,6 +183,37 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 		return false;
+	}
+
+	private void validate(WebDataBinder binder, MethodParameter parameter) throws MethodArgumentNotValidException {
+
+		Annotation[] annotations = parameter.getParameterAnnotations();
+		for (Annotation annot : annotations) {
+			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = AnnotationUtils.getValue(annot);
+				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				BindingResult bindingResult = binder.getBindingResult();
+				if (bindingResult.hasErrors()) {
+					if (isBindExceptionRequired(binder, parameter)) {
+						throw new MethodArgumentNotValidException(parameter, bindingResult);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
+	 * @param binder the data binder used to perform data binding
+	 * @param parameter the method argument
+	 * @return {@code true} if the next method argument is not of type {@link Errors}.
+	 */
+	private boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
+		int i = parameter.getParameterIndex();
+		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+
+		return !hasBindingResult;
 	}
 
 }

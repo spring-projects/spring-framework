@@ -144,7 +144,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
 		replay(messageConverter);
 
-		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, new ValidatingBinderFactory());
 
 		assertEquals("Invalid argument", body, result);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
@@ -211,7 +211,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void resolveArgumentNotRequiredNoContent() throws Exception {
-		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, null));
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
 	}
 
 	@Test

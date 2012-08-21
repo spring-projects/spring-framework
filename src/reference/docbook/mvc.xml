@@ -1584,13 +1584,13 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <para>An <classname>@RequestBody</classname> method parameter can be
         annotated with <classname>@Valid</classname>, in which case it will be
         validated using the configured <classname>Validator</classname>
-        instance. When using the MVC namespace a JSR-303 validator is
-        configured automatically assuming a JSR-303 implementation is
+        instance. When using the MVC namespace or Java config, a JSR-303 validator
+        is configured automatically assuming a JSR-303 implementation is
         available on the classpath.</para>
-        <para>Unlike <classname>@ModelAttribute</classname> parameters, for which
-        a <classname>BindingResult</classname> can be used to examine the errors,
-        <classname>@RequestBody</classname> validation errors always result in a
-        <classname>MethodArgumentNotValidException</classname> being raised.
+        <para>Just like with <classname>@ModelAttribute</classname> parameters,
+        an <classname>Errors</classname> argument can be used to examine the errors.
+        If such an argument is not declared, a
+        <classname>MethodArgumentNotValidException</classname> will be raised.
         The exception is handled in the
         <classname>DefaultHandlerExceptionResolver</classname>, which sends
         a <literal>400</literal> error back to the client.</para>
