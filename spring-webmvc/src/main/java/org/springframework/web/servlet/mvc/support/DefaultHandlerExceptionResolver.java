@@ -59,6 +59,8 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.0
+ *
+ * @see org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerSupport
  * @see #handleNoSuchRequestHandlingMethod
  * @see #handleHttpRequestMethodNotSupported
  * @see #handleHttpMediaTypeNotSupported

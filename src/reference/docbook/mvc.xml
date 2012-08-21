@@ -3646,12 +3646,20 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       is only a matter of implementing the
       <literal>resolveException(Exception, Handler)</literal> method and
       returning a <classname>ModelAndView</classname>, you may also use the provided
-      <classname>SimpleMappingExceptionResolver</classname>. This resolver
+      <classname>SimpleMappingExceptionResolver</classname> or create
+      <interfacename>@ExceptionHandler</interfacename> methods.
+      The <classname>SimpleMappingExceptionResolver</classname>
       enables you to take the class name of any exception that might be thrown
       and map it to a view name. This is functionally equivalent to the
       exception mapping feature from the Servlet API, but it is also possible
       to implement more finely grained mappings of exceptions from different
-      handlers.</para>
+      handlers. The <interfacename>@ExceptionHandler</interfacename> annotation on
+      the other hand can be used on methods that should be invoked to handle an
+      exception. Such methods may be defined locally within an
+      <interfacename>@Controller</interfacename> or may apply globally to all
+      <interfacename>@RequestMapping</interfacename> methods when defined within
+      an <interfacename>@ControllerAdvice</interfacename> class.
+      The following sections explain this in more detail.</para>
     </section>
 
     <section id="mvc-ann-exceptionhandler">
@@ -3659,36 +3667,44 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
 
       <para>The <interfacename>HandlerExceptionResolver</interfacename> interface
       and the <classname>SimpleMappingExceptionResolver</classname> implementations
-      allow you to map Exceptions to specific views along with some Java logic
-      before forwarding to those views. However, in some cases, especially when
-      working with programmatic clients (Ajax or non-browser) it is more
-      convenient to set the status and optionally write error information to the
-      response body.</para>
+      allow you to map Exceptions to specific views declaratively along with some
+      optional Java logic before forwarding to those views. However, in some cases,
+      especially when relying on <interfacename>@ResponseBody</interfacename> methods
+      rather than on view resolution, it may be more convenient to directly set the
+      status of the response and optionally write error content to the body of the
+      response.</para>
 
-      <para>For that you can use <interfacename>@ExceptionHandler</interfacename>
-      methods. When present within a controller such methods apply to exceptions
-      raised by that contoroller or any of its sub-classes.
-      Or you can also declare <interfacename>@ExceptionHandler</interfacename>
-      methods in an <interfacename>@ControllerAdvice</interfacename>-annotated
-      class and such methods apply to any controller.
+      <para>You can do that with <interfacename>@ExceptionHandler</interfacename>
+      methods. When declared within a controller such methods apply to exceptions
+      raised by <interfacename>@RequestMapping</interfacename> methods of that
+      contoroller (or any of its sub-classes). You can also declare an
+      <interfacename>@ExceptionHandler</interfacename> method within an
+      <interfacename>@ControllerAdvice</interfacename> class in which case it
+      handles exceptions from <interfacename>@RequestMapping</interfacename>
+      methods from any controller.
       The <interfacename>@ControllerAdvice</interfacename> annotation is
-      a component annotation allowing implementation classes to be autodetected
-      through classpath scanning.
-      </para>
-
-      <para>Here is an example with a controller-level
+      a component annotation, which can be used with classpath scanning. It is
+      automatically enabled when using the MVC namespace and Java config, or
+      otherwise depending on whether the
+      <classname>ExceptionHandlerExceptionResolver</classname> is configured or not.
+      Below is an example of a controller-local
       <interfacename>@ExceptionHandler</interfacename> method:</para>
 
       <programlisting language="java">@Controller
 public class SimpleController {
 
-  // other controller method omitted
+
+  // @RequestMapping methods omitted ...
+
 
   @ExceptionHandler(IOException.class)
-  public ResponseEntity handleIOException(IOException ex) {
+  public ResponseEntity&lt;String&gt; handleIOException(IOException ex) {
+
     // prepare responseEntity
+
     return responseEntity;
   }
+
 }</programlisting>
 
       <para>The <classname>@ExceptionHandler</classname> value can be set to
@@ -3711,30 +3727,25 @@ public class SimpleController {
       <interfacename>@ResponseBody</interfacename> to have the method return value
       converted with message converters and written to the response stream.</para>
 
-      <note><para>To better understand how <interfacename>@ExceptionHandler</interfacename>
-      methods work, consider that in Spring MVC there is only one abstraction
-      for handling exceptions and that's the
-      <interfacename>HandlerExceptionResolver</interfacename>. There is a special
-      implementation of that interface,
-      the <classname>ExceptionHandlerExceptionResolver</classname>, which detects
-      and invokes <interfacename>@ExceptionHandler</interfacename> methods.</para></note>
     </section>
 
     <section id="mvc-ann-rest-spring-mvc-exceptions">
-      <title>Handling of Spring MVC Exceptions</title>
+      <title>Handling Standard Spring MVC Exceptions</title>
 
-      <para>Spring MVC may raise a number of exceptions while processing a request.
-      A <classname>SimpleMappingExceptionResolver</classname> can be used to easily
-      map any exception to a default error view or to more specific error views if
-      desired. However when responding to programmatic clients you may prefer to
-      translate specific exceptions to the appropriate status that indicates a
-      client error (4xx) or a server error (5xx).</para>
+      <para>Spring MVC may raise a number of exceptions while processing
+      a request. The <classname>SimpleMappingExceptionResolver</classname> can easily
+      map any exception to a default error view as needed.
+      However, when working with clients that interpret responses in an automated
+      way you will want to set specific status code on the response. Depending on
+      the exception raised the status code may indicate a client error (4xx) or a
+      server error (5xx).</para>
 
-      <para>For this reason Spring MVC provides the
-      <classname>DefaultHandlerExceptionResolver</classname>, which translates specific
-      Spring MVC exceptions by setting a specific response status code. By default,
-      this resolver is registered by the <classname>DispatcherServlet</classname>.
-      The following table describes some of the exceptions it handles:
+      <para>The <classname>DefaultHandlerExceptionResolver</classname> translates
+      Spring MVC exceptions to specific error status codes. It is registered
+      by default with the MVC namespace, the MVC Java config. and also by the
+      the <classname>DispatcherServlet</classname> (i.e. when not using the MVC
+      namespace or Java config). Listed below are some of the exceptions handled
+      by this resolver and the corresponding status codes:
       <informaltable>
           <tgroup cols="2">
             <thead>
@@ -3822,38 +3833,19 @@ public class SimpleController {
         </informaltable>
         </para>
 
-        <note><para>If you explicitly register one or more
-        <interfacename>HandlerExceptionResolver</interfacename> instances in your configuration
-        then the defaults registered by the <classname>DispatcherServlet</classname> are
-        cancelled. This is standard behavior with regards to
-        <classname>DispatcherServlet</classname> defaults.
-        See <xref linkend="mvc-servlet-special-bean-types"/> for more details.</para></note>
+        <para>The <classname>DefaultHandlerExceptionResolver</classname> works
+        transparently by setting the status of the response. However, it stops short
+        of writing any error content to the body of the response while your
+        application may need to add developer-friendly content to every error
+        response for example when providing a REST API.</para>
 
-        <para>If building a REST API, then it's very likely you will want to
-        write some additional information about the error to the body of the response
-        consistent with the API's error handling throughout. This includes the handling of
-        Spring MVC exceptions, for which the <classname>DefaultHandlerExceptionResolver</classname>
-        only sets the status code and doesn't assume how or what content should be written
-        to the body.</para>
-
-        <para>Instead you can create an <interfacename>@ControllerAdvice</interfacename>
-        class that handles each of the exceptions handled by the
-        <classname>DefaultHandlerExceptionResolver</classname> while also writing
-        developer-friendly API error information to the response body consistent with
-        the rest of all API error handling of the application. For example:</para>
-
-      <programlisting language="java">@ControllerAdvice
-public class ApplicationExceptionResolver {
-
-  @ExceptionHandler
-  public ResponseEntity handleMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex) {
-    MyApiError error = ... ;
-    return new ResponseEntity(error, HttpStatus.SC_NOT_ACCEPTABLE);
-  }
-
-  // more @ExceptionHandler methods ...
-
-}</programlisting>
+        <para>To achieve this extend <classname>ExceptionHandlerSupport</classname>,
+        a convenient base class with an <interfacename>@ExceptionHandler</interfacename>
+        method that handles standard Spring MVC exceptions just as the
+        <classname>DefaultHandlerExceptionResolver</classname> does but also
+        allowing you to prepare error content for the body of the response.
+        See the Javadoc of <classname>ExceptionHandlerSupport</classname>
+        for more details.</para>
     </section>
 
     <section id="mvc-ann-annotated-exceptions">
@@ -3866,6 +3858,59 @@ public class ApplicationExceptionResolver {
       By default the <classname>DispatcherServlet</classname> registers
       the <classname>ResponseStatusExceptionResolver</classname> and it is
       available for use.</para>
+
+    </section>
+
+    <section id="mvc-ann-customer-servlet-container-error-page">
+      <title>Customizing the Default Servlet Container Error Page</title>
+
+        <para>When the status of the response is set to an error status code
+        and the body of the response is empty, Servlet containers commonly render
+        an HTML formatted error page.
+        To customize the default error page of the container, you can
+        declare an <code>&lt;error-page&gt;</code> element in
+        <filename>web.xml</filename>. Up until Servlet 3, that element had to
+        be mapped to a specific status code or exception type. Starting with
+        Servlet 3 an error page does not need to be mapped, which effectively
+        means the specified location customizes the default Servlet container
+        error page.</para>
+
+      <programlisting language="xml">&lt;error-page&gt;
+    &lt;location&gt;/error&lt;/location&gt;
+&lt;/error-page&gt;
+</programlisting>
+
+        <para>Note that the actual location for the error page can be a
+        JSP page or some other URL within the container including one handled
+        through an <interfacename>@Controller</interfacename> method:</para>
+
+        <para>When writing error information, the status code and the error message
+        set on the <interfacename>HttpServletResponse</interfacename> can be
+        accessed through request attributes in a controller:</para>
+
+<programlisting language="java">@Controller
+public class ErrorController {
+
+	@RequestMapping(value="/error", produces="application/json")
+	@ResponseBody
+	public Map&lt;String, Object&gt; handle(HttpServletRequest request) {
+
+		Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+		map.put("status", request.getAttribute("javax.servlet.error.status_code"));
+		map.put("reason", request.getAttribute("javax.servlet.error.message"));
+
+		return map;
+	}
+
+}</programlisting>
+
+        <para>or in a JSP:</para>
+
+      <programlisting language="xml">&lt;%@ page contentType="application/json" pageEncoding="UTF-8"%&gt;
+{
+   status:&lt;%=request.getAttribute("javax.servlet.error.status_code") %&gt;,
+   reason:&lt;%=request.getAttribute("javax.servlet.error.message") %&gt;
+}</programlisting>
 
     </section>
 
