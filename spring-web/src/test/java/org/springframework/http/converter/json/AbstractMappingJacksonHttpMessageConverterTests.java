@@ -43,6 +43,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
  */
 public abstract class AbstractMappingJacksonHttpMessageConverterTests<T extends HttpMessageConverter<Object>> {
 
+	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+
+
 	private T converter;
 
 	@Before

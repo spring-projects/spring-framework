@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJacksonHttpMessageConverterTests<MappingJackson2HttpMessageConverter> {
 
+
 	@Override
 	protected MappingJackson2HttpMessageConverter createConverter() {
 		return new MappingJackson2HttpMessageConverter();
@@ -86,7 +87,7 @@ public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJac
 		getConverter().writeInternal(bean, outputMessage);
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
-		assertEquals("{\n  \"name\" : \"Jason\"\n}", result);
+		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
 	}
 
 

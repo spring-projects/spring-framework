@@ -84,7 +84,7 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 		getConverter().writeInternal(bean, outputMessage);
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
-		assertEquals("{\n  \"name\" : \"Jason\"\n}", result);
+		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
 	}
 
 
