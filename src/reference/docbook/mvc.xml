@@ -868,9 +868,9 @@ public class ClinicController {
         <classname>RequestMappingHandlerAdapter</classname> respectively.
         They are recommended for use and even required to take advantage of
         new features in Spring MVC 3.1 and going forward. The new support
-        classes are enabled by default by the MVC namespace and MVC Java
-        config (<classname>@EnableWebMvc</classname>) but must be configured
-        explicitly if using neither. This section describes a few
+        classes are enabled by default by the MVC namespace and the MVC Java
+        config but must be configured explicitly if using neither.
+        This section describes a few
         important differences between the old and the new support classes.
         </para>
 
@@ -1181,7 +1181,7 @@ public class RelativePathUriTemplateController {
       They are recommended for use and even required to take advantage
       of new features in Spring MVC 3.1 and going forward.
       The new support classes are enabled by default from the MVC namespace and
-      with use of the MVC Java config (<code>@EnableWebMvc</code>) but must be
+      with use of the MVC Java config but must be
       configured explicitly if using neither.
       </para></note>
 
@@ -1550,16 +1550,20 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 
         <para>For more information on these converters, see <link
         linkend="rest-message-conversion">Message Converters</link>. Also note
-        that if using the MVC namespace, a wider range of message converters
-        are registered by default. See <xref
-        linkend="mvc-annotation-driven" /> for more information.</para>
+        that if using the MVC namespace or the MVC Java config, a wider
+        range of message converters are registered by default.
+        See <link linkend="mvc-config-enable">Enabling the MVC Java Config or
+        the MVC XML Namespace</link> for more information.</para>
 
         <para>If you intend to read and write XML, you will need to configure
         the <classname>MarshallingHttpMessageConverter</classname> with a
         specific <interfacename>Marshaller</interfacename> and an
         <interfacename>Unmarshaller</interfacename> implementation from the
-        <classname>org.springframework.oxm</classname> package. For
-        example:</para>
+        <classname>org.springframework.oxm</classname> package. The example
+        below shows how to do that directly in your configuration but if
+        your application is configured through the MVC namespace or the
+        MVC Java config see <link linkend="mvc-config-enable">Enabling
+        the MVC Java Config or the MVC XML Namespace</link> instead.</para>
 
         <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"&gt;
     &lt;property name="messageConverters"&gt;
@@ -1584,7 +1588,7 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <para>An <classname>@RequestBody</classname> method parameter can be
         annotated with <classname>@Valid</classname>, in which case it will be
         validated using the configured <classname>Validator</classname>
-        instance. When using the MVC namespace or Java config, a JSR-303 validator
+        instance. When using the MVC namespace or the MVC Java config, a JSR-303 validator
         is configured automatically assuming a JSR-303 implementation is
         available on the classpath.</para>
         <para>Just like with <classname>@ModelAttribute</classname> parameters,
@@ -1596,9 +1600,10 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         a <literal>400</literal> error back to the client.</para>
 
         <note>
-          <para>Also see <xref linkend="mvc-annotation-driven" /> for
+          <para>Also see <link linkend="mvc-config-enable">Enabling the MVC
+          Java Config or the MVC XML Namespace</link> for
           information on configuring message converters and a validator
-          through the MVC namespace.</para>
+          through the MVC namespace or the MVC Java config.</para>
         </note>
       </section>
 
@@ -1951,8 +1956,7 @@ public class EditPetForm {
         <interfacename>RedirectAttributes</interfacename> or if it doesn't do
         so no attributes should be passed on to
         <classname>RedirectView</classname>. Both the MVC namespace and the
-        MVC Java config (via <interfacename>@EnableWebMvc</interfacename>)
-        keep this flag set to <literal>false</literal> in order to maintain
+        MVC Java config keep this flag set to <literal>false</literal> in order to maintain
         backwards compatibility. However, for new applications we recommend
         setting it to <literal>true</literal></para>
 
@@ -2435,8 +2439,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <para>In the example above, the configured interceptor will apply to
         all requests handled with annotated controller methods. If you want to
         narrow down the URL paths to which an interceptor applies, you can use
-        the MVC namespace to do that. See <xref
-        linkend="mvc-annotation-driven" />.</para>
+        the MVC namespace or the MVC Java config, or declare bean instances
+        of type <classname>MappedInterceptor</classname> to do that. See <link
+        linkend="mvc-config-enable">Enabling the MVC Java Config or the MVC
+        XML Namespace</link>.</para>
       </tip>
     </section>
   </section>
@@ -3684,8 +3690,8 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       methods from any controller.
       The <interfacename>@ControllerAdvice</interfacename> annotation is
       a component annotation, which can be used with classpath scanning. It is
-      automatically enabled when using the MVC namespace and Java config, or
-      otherwise depending on whether the
+      automatically enabled when using the MVC namespace and the MVC Java config,
+      or otherwise depending on whether the
       <classname>ExceptionHandlerExceptionResolver</classname> is configured or not.
       Below is an example of a controller-local
       <interfacename>@ExceptionHandler</interfacename> method:</para>
@@ -3742,7 +3748,7 @@ public class SimpleController {
 
       <para>The <classname>DefaultHandlerExceptionResolver</classname> translates
       Spring MVC exceptions to specific error status codes. It is registered
-      by default with the MVC namespace, the MVC Java config. and also by the
+      by default with the MVC namespace, the MVC Java config, and also by the
       the <classname>DispatcherServlet</classname> (i.e. when not using the MVC
       namespace or Java config). Listed below are some of the exceptions handled
       by this resolver and the corresponding status codes:
@@ -4319,7 +4325,7 @@ public class ErrorController {
 	</para>
 
 	<section id="mvc-config-enable">
-		<title>Enabling MVC Java Config or the MVC XML Namespace</title>
+		<title>Enabling the MVC Java Config or the MVC XML Namespace</title>
 	
 		<para>To enable MVC Java config add the annotation 
 		<interfacename>@EnableWebMvc</interfacename> to one of your 
