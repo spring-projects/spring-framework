@@ -276,7 +276,8 @@ public class AbstractFlashMapManagerTests {
 		flashMap.addTargetRequestParam("key", "%D0%92%D0%92");
 		this.flashMapManager.saveOutputFlashMap(flashMap, this.request, this.response);
 
-		assertEquals(Arrays.asList("АА", "ББ", "ВВ"), flashMap.getTargetRequestParams().get("key"));
+		assertEquals(Arrays.asList("\u0410\u0410", "\u0411\u0411", "\u0412\u0412"),
+				flashMap.getTargetRequestParams().get("key"));
 	}
 
 
