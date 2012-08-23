@@ -79,13 +79,13 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			throws IOException, HttpMediaTypeNotSupportedException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
-		Class<?> paramType = getHttpEntityType(parameter);
+		Type paramType = getHttpEntityType(parameter);
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		return new HttpEntity<Object>(body, inputMessage.getHeaders());
 	}
 
-	private Class<?> getHttpEntityType(MethodParameter parameter) {
+	private Type getHttpEntityType(MethodParameter parameter) {
 		Assert.isAssignable(HttpEntity.class, parameter.getParameterType());
 		ParameterizedType type = (ParameterizedType) parameter.getGenericParameterType();
 		if (type.getActualTypeArguments().length == 1) {
@@ -97,9 +97,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				Type componentType = ((GenericArrayType) typeArgument).getGenericComponentType();
 				if (componentType instanceof Class) {
 					// Surely, there should be a nicer way to determine the array type
-					Object array = Array.newInstance((Class<?>) componentType, 0);
-					return array.getClass();
+					return Array.newInstance((Class<?>) componentType, 0).getClass();
 				}
+			}
+			else if (typeArgument instanceof ParameterizedType) {
+				return typeArgument;
 			}
 		}
 		throw new IllegalArgumentException("HttpEntity parameter (" + parameter.getParameterName() + ") "

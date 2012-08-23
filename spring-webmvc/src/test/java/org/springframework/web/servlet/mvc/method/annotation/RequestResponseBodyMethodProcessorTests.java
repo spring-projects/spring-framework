@@ -16,75 +16,43 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Test fixture with {@link RequestResponseBodyMethodProcessor} and mock {@link HttpMessageConverter}.
+ * Test fixture for a {@link RequestResponseBodyMethodProcessor} with actual delegation
+ * to HttpMessageConverter instances.
  *
- * @author Arjen Poutsma
+ * <p>Also see {@link RequestResponseBodyMethodProcessorMockTests}.
+ *
  * @author Rossen Stoyanchev
  */
 public class RequestResponseBodyMethodProcessorTests {
 
-	private RequestResponseBodyMethodProcessor processor;
-
-	private HttpMessageConverter<String> messageConverter;
-
-	private MethodParameter paramRequestBodyString;
-	private MethodParameter paramInt;
-	private MethodParameter paramValidBean;
-	private MethodParameter paramStringNotRequired;
+	private MethodParameter paramGenericList;
+	private MethodParameter paramSimpleBean;
 	private MethodParameter returnTypeString;
-	private MethodParameter returnTypeInt;
-	private MethodParameter returnTypeStringProduces;
 
 	private ModelAndViewContainer mavContainer;
 
@@ -94,24 +62,13 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	private MockHttpServletResponse servletResponse;
 
-	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
-		messageConverter = createMock(HttpMessageConverter.class);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		replay(messageConverter);
 
-		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
-		reset(messageConverter);
-
-		Method handle = getClass().getMethod("handle1", String.class, Integer.TYPE);
-		paramRequestBodyString = new MethodParameter(handle, 0);
-		paramInt = new MethodParameter(handle, 1);
-		returnTypeString = new MethodParameter(handle, -1);
-		returnTypeInt = new MethodParameter(getClass().getMethod("handle2"), -1);
-		returnTypeStringProduces = new MethodParameter(getClass().getMethod("handle3"), -1);
-		paramValidBean = new MethodParameter(getClass().getMethod("handle4", SimpleBean.class), 0);
-		paramStringNotRequired = new MethodParameter(getClass().getMethod("handle5", String.class), 0);
+		Method method = getClass().getMethod("handle", List.class, SimpleBean.class);
+		paramGenericList = new MethodParameter(method, 0);
+		paramSimpleBean = new MethodParameter(method, 1);
+		returnTypeString = new MethodParameter(method, -1);
 
 		mavContainer = new ModelAndViewContainer();
 
@@ -120,160 +77,41 @@ public class RequestResponseBodyMethodProcessorTests {
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
 
-	@Test
-	public void supportsParameter() {
-		assertTrue("RequestBody parameter not supported", processor.supportsParameter(paramRequestBodyString));
-		assertFalse("non-RequestBody parameter supported", processor.supportsParameter(paramInt));
-	}
 
 	@Test
-	public void supportsReturnType() {
-		assertTrue("ResponseBody return type not supported", processor.supportsReturnType(returnTypeString));
-		assertFalse("non-ResponseBody return type supported", processor.supportsReturnType(returnTypeInt));
+	public void resolveGenericArgument() throws Exception {
+		String content = "[{\"name\" : \"Jad\"}, {\"name\" : \"Robert\"}]";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType("application/json");
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		@SuppressWarnings("unchecked")
+		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
+				paramGenericList, mavContainer, webRequest, new ValidatingBinderFactory());
+
+		assertNotNull(result);
+		assertEquals("Jad", result.get(0).getName());
+		assertEquals("Robert", result.get(1).getName());
 	}
 
 	@Test
 	public void resolveArgument() throws Exception {
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Content-Type", contentType.toString());
+		String content = "{\"name\" : \"Jad\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType("application/json");
 
-		String body = "Foo";
-		servletRequest.setContent(body.getBytes());
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		expect(messageConverter.canRead(String.class, contentType)).andReturn(true);
-		expect(messageConverter.read(eq(String.class), isA(HttpInputMessage.class))).andReturn(body);
-		replay(messageConverter);
+		SimpleBean result = (SimpleBean) processor.resolveArgument(
+				paramSimpleBean, mavContainer, webRequest, new ValidatingBinderFactory());
 
-		Object result = processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, new ValidatingBinderFactory());
-
-		assertEquals("Invalid argument", body, result);
-		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
-		verify(messageConverter);
-	}
-
-	@Test
-	public void resolveArgumentNotValid() throws Exception {
-		try {
-			testResolveArgumentWithValidation(new SimpleBean(null));
-			fail("Expected exception");
-		} catch (MethodArgumentNotValidException e) {
-			assertEquals("simpleBean", e.getBindingResult().getObjectName());
-			assertEquals(1, e.getBindingResult().getErrorCount());
-			assertNotNull(e.getBindingResult().getFieldError("name"));
-		}
-	}
-
-	@Test
-	public void resolveArgumentValid() throws Exception {
-		testResolveArgumentWithValidation(new SimpleBean("name"));
-	}
-
-	private void testResolveArgumentWithValidation(SimpleBean simpleBean) throws IOException, Exception {
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Content-Type", contentType.toString());
-		servletRequest.setContent(new byte[] {});
-
-		@SuppressWarnings("unchecked")
-		HttpMessageConverter<SimpleBean> beanConverter = createMock(HttpMessageConverter.class);
-		expect(beanConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(beanConverter.canRead(SimpleBean.class, contentType)).andReturn(true);
-		expect(beanConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).andReturn(simpleBean);
-		replay(beanConverter);
-
-		processor = new RequestResponseBodyMethodProcessor(Collections.<HttpMessageConverter<?>>singletonList(beanConverter));
-		processor.resolveArgument(paramValidBean, mavContainer, webRequest, new ValidatingBinderFactory());
-
-		verify(beanConverter);
-	}
-
-	@Test(expected = HttpMediaTypeNotSupportedException.class)
-	public void resolveArgumentNotReadable() throws Exception {
-		MediaType contentType = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Content-Type", contentType.toString());
-		servletRequest.setContent(new byte[] {});
-
-		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
-		replay(messageConverter);
-
-		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-	}
-
-	@Test(expected = HttpMediaTypeNotSupportedException.class)
-	public void resolveArgumentNoContentType() throws Exception {
-		servletRequest.setContent(new byte[] {});
-		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-	}
-
-	@Test(expected = HttpMessageNotReadableException.class)
-	public void resolveArgumentRequiredNoContent() throws Exception {
-		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-	}
-
-	@Test
-	public void resolveArgumentNotRequiredNoContent() throws Exception {
-		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
-	}
-
-	@Test
-	public void handleReturnValue() throws Exception {
-		MediaType accepted = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Accept", accepted.toString());
-
-		String body = "Foo";
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
-		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
-		replay(messageConverter);
-
-		processor.handleReturnValue(body, returnTypeString, mavContainer, webRequest);
-
-		assertTrue("The requestHandled flag wasn't set", mavContainer.isRequestHandled());
-		verify(messageConverter);
-	}
-
-	@Test
-	public void handleReturnValueProduces() throws Exception {
-		String body = "Foo";
-
-		servletRequest.addHeader("Accept", "text/*");
-		servletRequest.setAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, Collections.singleton(MediaType.TEXT_HTML));
-
-		expect(messageConverter.canWrite(String.class, MediaType.TEXT_HTML)).andReturn(true);
-		messageConverter.write(eq(body), eq(MediaType.TEXT_HTML), isA(HttpOutputMessage.class));
-		replay(messageConverter);
-
-		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);
-
-		assertTrue(mavContainer.isRequestHandled());
-		verify(messageConverter);
-	}
-
-
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
-	public void handleReturnValueNotAcceptable() throws Exception {
-		MediaType accepted = MediaType.APPLICATION_ATOM_XML;
-		servletRequest.addHeader("Accept", accepted.toString());
-
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Arrays.asList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
-		replay(messageConverter);
-
-		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
-	}
-
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
-	public void handleReturnValueNotAcceptableProduces() throws Exception {
-		MediaType accepted = MediaType.TEXT_PLAIN;
-		servletRequest.addHeader("Accept", accepted.toString());
-
-		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
-		expect(messageConverter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
-		expect(messageConverter.canWrite(String.class, accepted)).andReturn(false);
-		replay(messageConverter);
-
-		processor.handleReturnValue("Foo", returnTypeStringProduces, mavContainer, webRequest);
+		assertNotNull(result);
+		assertEquals("Jad", result.getName());
 	}
 
 	// SPR-9160
@@ -285,9 +123,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
-		RequestResponseBodyMethodProcessor handler = new RequestResponseBodyMethodProcessor(converters);
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		handler.writeWithMessageConverters("Foo", returnTypeStringProduces, webRequest);
+		processor.writeWithMessageConverters("Foo", returnTypeString, webRequest);
 
 		assertEquals("application/json;charset=UTF-8", servletResponse.getHeader("Content-Type"));
 	}
@@ -298,31 +136,31 @@ public class RequestResponseBodyMethodProcessorTests {
 		converters.add(new ByteArrayHttpMessageConverter());
 		converters.add(new StringHttpMessageConverter());
 
-		processor = new RequestResponseBodyMethodProcessor(converters);
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
 
 		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
 		assertEquals("Foo", servletResponse.getContentAsString());
 	}
 
-	@ResponseBody
-	public String handle1(@RequestBody String s, int i) {
-		return s;
-	}
 
-	public int handle2() {
-		return 42;
-	}
-
-	@ResponseBody
-	public String handle3() {
+	public String handle(@RequestBody List<SimpleBean> list, @RequestBody SimpleBean simpleBean) {
 		return null;
 	}
 
-	public void handle4(@Valid @RequestBody SimpleBean b) {
-	}
 
-	public void handle5(@RequestBody(required=false) String s) {
+	private static class SimpleBean {
+
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		@SuppressWarnings("unused")
+		public void setName(String name) {
+			this.name = name;
+		}
 	}
 
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
@@ -332,21 +170,6 @@ public class RequestResponseBodyMethodProcessorTests {
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
 			dataBinder.setValidator(validator);
 			return dataBinder;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private static class SimpleBean {
-
-		@NotNull
-		private final String name;
-
-		public SimpleBean(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
 		}
 	}
 

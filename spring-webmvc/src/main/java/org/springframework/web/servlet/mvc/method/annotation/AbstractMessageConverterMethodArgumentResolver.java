@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -30,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
@@ -85,8 +87,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
-	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam, Class<T> paramType) throws IOException,
-			HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest,
+			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		HttpInputMessage inputMessage = createInputMessage(webRequest);
 		return readWithMessageConverters(inputMessage, methodParam, paramType);
@@ -106,20 +108,34 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam,
-			Class<T> paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 				MediaType contentType = inputMessage.getHeaders().getContentType();
 				if (contentType == null) {
 					contentType = MediaType.APPLICATION_OCTET_STREAM;
 				}
 
+				Class<T> paramClass = (paramType instanceof Class) ? (Class) paramType : null;
+
 				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-					if (messageConverter.canRead(paramType, contentType)) {
-						if (logger.isDebugEnabled()) {
-							logger.debug("Reading [" + paramType.getName() + "] as \"" + contentType + "\" using [" +
-									messageConverter + "]");
+					if (messageConverter instanceof GenericHttpMessageConverter) {
+						GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
+						if (genericMessageConverter.canRead(paramType, contentType)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Reading [" + paramType + "] as \"" +
+										contentType + "\" using [" + messageConverter + "]");
+							}
+							return (T) genericMessageConverter.read(paramType, inputMessage);
 						}
-						return ((HttpMessageConverter<T>) messageConverter).read(paramType, inputMessage);
+					}
+					if (paramClass != null) {
+						if (messageConverter.canRead(paramClass, contentType)) {
+							if (logger.isDebugEnabled()) {
+								logger.debug("Reading [" + paramClass.getName() + "] as \"" + contentType + "\" using [" +
+										messageConverter + "]");
+							}
+							return ((HttpMessageConverter<T>) messageConverter).read(paramClass, inputMessage);
+						}
 					}
 				}
 

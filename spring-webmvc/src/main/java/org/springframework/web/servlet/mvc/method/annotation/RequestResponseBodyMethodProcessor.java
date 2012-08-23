@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.springframework.core.Conventions;
@@ -86,7 +87,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Object argument = readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
+		Object argument = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
 
 		String name = Conventions.getVariableNameForParameter(parameter);
 		WebDataBinder binder = binderFactory.createBinder(webRequest, argument, name);
@@ -134,7 +135,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Class<T> paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		if (inputMessage.getBody() != null) {
 			return super.readWithMessageConverters(inputMessage, methodParam, paramType);
