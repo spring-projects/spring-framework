@@ -243,6 +243,7 @@
 
     <xi:include href="new-in-3.0.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
     <xi:include href="new-in-3.1.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+    <xi:include href="new-in-3.2.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
   <part id="spring-core">
