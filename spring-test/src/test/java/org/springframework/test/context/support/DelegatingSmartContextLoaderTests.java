@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,14 +54,14 @@ public class DelegatingSmartContextLoaderTests {
 	@Test(expected = IllegalStateException.class)
 	public void processContextConfigurationWithoutLocationsAndConfigurationClassesForBogusTestClass() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(getClass(),
-			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, ContextLoader.class);
+			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 	}
 
 	@Test
 	public void processContextConfigurationWithDefaultXmlConfigGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(XmlTestCase.class,
-			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, ContextLoader.class);
+			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 		assertEquals(1, configAttributes.getLocations().length);
 		assertEmpty(configAttributes.getClasses());
@@ -70,7 +70,7 @@ public class DelegatingSmartContextLoaderTests {
 	@Test
 	public void processContextConfigurationWithDefaultConfigurationClassGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(ConfigClassTestCase.class,
-			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, ContextLoader.class);
+			EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 		assertEquals(1, configAttributes.getClasses().length);
 		assertEmpty(configAttributes.getLocations());
@@ -79,8 +79,8 @@ public class DelegatingSmartContextLoaderTests {
 	@Test(expected = IllegalStateException.class)
 	public void processContextConfigurationWithDefaultXmlConfigAndConfigurationClassGeneration() {
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(
-			ImproperDuplicateDefaultXmlAndConfigClassTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true,
-			ContextLoader.class);
+			ImproperDuplicateDefaultXmlAndConfigClassTestCase.class, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, true, null,
+			true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 	}
 
@@ -88,7 +88,7 @@ public class DelegatingSmartContextLoaderTests {
 	public void processContextConfigurationWithLocation() {
 		String[] locations = new String[] { "classpath:/foo.xml" };
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(getClass(), locations,
-			EMPTY_CLASS_ARRAY, true, ContextLoader.class);
+			EMPTY_CLASS_ARRAY, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 		assertArrayEquals(locations, configAttributes.getLocations());
 		assertEmpty(configAttributes.getClasses());
@@ -98,7 +98,7 @@ public class DelegatingSmartContextLoaderTests {
 	public void processContextConfigurationWithConfigurationClass() {
 		Class<?>[] classes = new Class<?>[] { getClass() };
 		ContextConfigurationAttributes configAttributes = new ContextConfigurationAttributes(getClass(),
-			EMPTY_STRING_ARRAY, classes, true, ContextLoader.class);
+			EMPTY_STRING_ARRAY, classes, true, null, true, ContextLoader.class);
 		loader.processContextConfiguration(configAttributes);
 		assertArrayEquals(classes, configAttributes.getClasses());
 		assertEmpty(configAttributes.getLocations());
