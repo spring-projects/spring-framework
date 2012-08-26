@@ -85,6 +85,12 @@ public final class DefaultRequestToViewNameTranslatorTests {
 	}
 
 	@Test
+	public void testGetViewNameWithSemicolonContent() {
+		request.setRequestURI(CONTEXT_PATH + VIEW_NAME + ";a=A;b=B");
+		assertViewName(VIEW_NAME);
+	}
+
+	@Test
 	public void testGetViewNameWithPrefix() {
 		final String prefix = "fiona_";
 		request.setRequestURI(CONTEXT_PATH + VIEW_NAME);

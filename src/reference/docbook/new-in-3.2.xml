@@ -80,6 +80,14 @@
        
     </section>
 
+    <section id="new-in-3.2-matrix-variables">
+      <title>Matrix variables</title>
+
+      <para>A new <interfacename>@MatrixVariable</interfacename> annotation
+      adds support for extracting matrix variables from the request URI.
+      For more details see <xref linkend="mvc-ann-matrix-variables"/>.</para>
+    </section>
+
     <section id="new-in-3.2-webmvc-exception-handler-support">
       <title>New <classname>ResponseEntityExceptionHandler</classname> class</title>
 

@@ -100,11 +100,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void handleResolvedValue(Object arg,
-									   String name,
-									   MethodParameter parameter,
-									   ModelAndViewContainer mavContainer,
-									   NativeWebRequest request) {
+	protected void handleResolvedValue(Object arg, String name, MethodParameter parameter,
+			ModelAndViewContainer mavContainer, NativeWebRequest request) {
+
 		String key = View.PATH_VARIABLES;
 		int scope = RequestAttributes.SCOPE_REQUEST;
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(key, scope);

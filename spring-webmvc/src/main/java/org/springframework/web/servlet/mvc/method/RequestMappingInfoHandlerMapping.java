@@ -19,13 +19,16 @@ package org.springframework.web.servlet.mvc.method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -34,6 +37,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -77,8 +81,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	}
 
 	/**
-	 * Expose URI template variables and producible media types in the request.
+	 * Expose URI template variables, matrix variables, and producible media types in the request.
+	 *
 	 * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE
+	 * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE
 	 * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE
 	 */
 	@Override
@@ -89,14 +95,48 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		String bestPattern = patterns.isEmpty() ? lookupPath : patterns.iterator().next();
 		request.setAttribute(BEST_MATCHING_PATTERN_ATTRIBUTE, bestPattern);
 
-		Map<String, String> vars = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
-		Map<String, String> decodedVars = getUrlPathHelper().decodePathVariables(request, vars);
-		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedVars);
+		Map<String, String> uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
+		Map<String, String> decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
+		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
+
+		if (isMatrixVariableContentAvailable()) {
+			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(uriVariables));
+		}
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
 			Set<MediaType> mediaTypes = info.getProducesCondition().getProducibleMediaTypes();
 			request.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);
 		}
+	}
+
+	private boolean isMatrixVariableContentAvailable() {
+		return !getUrlPathHelper().shouldRemoveSemicolonContent();
+	}
+
+	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(Map<String, String> uriVariables) {
+		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<String, MultiValueMap<String, String>>();
+		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
+			String uriVarValue = uriVar.getValue();
+
+			int equalsIndex = uriVarValue.indexOf('=');
+			if (equalsIndex == -1) {
+				continue;
+			}
+
+			String matrixVariables;
+
+			int semicolonIndex = uriVarValue.indexOf(';');
+			if ((semicolonIndex == -1) || (semicolonIndex == 0) || (equalsIndex < semicolonIndex)) {
+				matrixVariables = uriVarValue;
+			}
+			else {
+				matrixVariables = uriVarValue.substring(semicolonIndex + 1);
+				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
+			}
+
+			result.put(uriVar.getKey(), WebUtils.parseMatrixVariables(matrixVariables));
+		}
+		return result;
 	}
 
 	/**

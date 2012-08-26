@@ -66,6 +66,14 @@ public abstract class AbstractUrlViewController extends AbstractController {
 	}
 
 	/**
+	 * Set if ";" (semicolon) content should be stripped from the request URI.
+	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
+	 */
+	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
+	}
+
+	/**
 	 * Set the UrlPathHelper to use for the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,
 	 * or to share common UrlPathHelper settings across multiple MethodNameResolvers
@@ -87,7 +95,7 @@ public abstract class AbstractUrlViewController extends AbstractController {
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * {@link #getViewNameForRequest}. Also adds the content of 
+	 * {@link #getViewNameForRequest}. Also adds the content of
 	 * {@link RequestContextUtils#getInputFlashMap} to the model.
 	 */
 	@Override

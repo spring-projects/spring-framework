@@ -146,6 +146,14 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
+	 * Set if ";" (semicolon) content should be stripped from the request URI.
+	 * @see org.springframework.web.util.UrlPathHelper#setRemoveSemicolonContent(boolean)
+	 */
+	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
+	}
+
+	/**
 	 * Set the {@link org.springframework.web.util.UrlPathHelper} to use for
 	 * the resolution of lookup paths.
 	 * <p>Use this to override the default UrlPathHelper with a custom subclass,

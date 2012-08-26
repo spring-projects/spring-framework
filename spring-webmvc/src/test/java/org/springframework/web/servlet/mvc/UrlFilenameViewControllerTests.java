@@ -55,6 +55,15 @@ public class UrlFilenameViewControllerTests extends TestCase {
 		assertTrue(mv.getModel().isEmpty());
 	}
 
+	public void testWithFilenameAndMatrixVariables() throws Exception {
+		UrlFilenameViewController ctrl = new UrlFilenameViewController();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index;a=A;b=B");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mv = ctrl.handleRequest(request, response);
+		assertEquals("index", mv.getViewName());
+		assertTrue(mv.getModel().isEmpty());
+	}
+
 	public void testWithPrefixAndSuffix() throws Exception {
 		UrlFilenameViewController ctrl = new UrlFilenameViewController();
 		ctrl.setPrefix("mypre_");

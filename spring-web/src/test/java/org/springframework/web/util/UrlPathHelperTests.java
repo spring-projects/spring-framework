@@ -16,11 +16,14 @@
 
 package org.springframework.web.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.io.UnsupportedEncodingException;
+
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 
 /**
@@ -79,10 +82,32 @@ public class UrlPathHelperTests {
 
 	}
 
+	@Test
+	public void getRequestRemoveSemicolonContent() throws UnsupportedEncodingException {
+		helper.setRemoveSemicolonContent(true);
+
+		request.setRequestURI("/foo;f=F;o=O;o=O/bar;b=B;a=A;r=R");
+		assertEquals("/foo/bar", helper.getRequestUri(request));
+	}
+
+	@Test
+	public void getRequestKeepSemicolonContent() throws UnsupportedEncodingException {
+		helper.setRemoveSemicolonContent(false);
+
+		request.setRequestURI("/foo;a=b;c=d");
+		assertEquals("/foo;a=b;c=d", helper.getRequestUri(request));
+
+		request.setRequestURI("/foo;jsessionid=c0o7fszeb1");
+		assertEquals("jsessionid should always be removed", "/foo", helper.getRequestUri(request));
+
+		request.setRequestURI("/foo;a=b;jsessionid=c0o7fszeb1;c=d");
+		assertEquals("jsessionid should always be removed", "/foo;a=b;c=d", helper.getRequestUri(request));
+	}
+
 	//
 	// suite of tests root requests for default servlets (SRV 11.2) on Websphere vs Tomcat and other containers
 	// see: http://jira.springframework.org/browse/SPR-7064
-	// 
+	//
 
 
 	//
@@ -297,7 +322,7 @@ public class UrlPathHelperTests {
 		request.setAttribute(WebUtils.FORWARD_QUERY_STRING_ATTRIBUTE, "original=on");
 		assertEquals("original=on", this.helper.getOriginatingQueryString(request));
 	}
-	
+
 	@Test
 	public void getOriginatingQueryStringNotPresent() {
 		request.setQueryString("forward=true");

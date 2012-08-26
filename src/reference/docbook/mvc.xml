@@ -1054,6 +1054,93 @@ public class RelativePathUriTemplateController {
         <filename>/owners/*/pets/{petId}</filename>).</para>
       </section>
 
+      <section id="mvc-ann-matrix-variables">
+        <title>Matrix Variables</title>
+
+        <para>The URI specification
+        <ulink url="http://tools.ietf.org/html/rfc3986#section-3.3">RFC 3986</ulink>
+        defines the possibility of including name-value pairs within path segments.
+        There is no specific term used in the spec.
+        The general "URI path parameters" could be applied although the more unique
+        <ulink url="http://www.w3.org/DesignIssues/MatrixURIs.html">"Matrix URIs"</ulink>,
+        originating from an old post by Tim Berners-Lee, is also frequently used
+        and fairly well known. Within Spring MVC these are referred to
+        as matrix variables.</para>
+
+        <para>Matrix variables can appear in any path segment, each matrix variable
+        separated with a ";" (semicolon).
+        For example: <code>"/cars;color=red;year=2012"</code>.
+        Multiple values may be either "," (comma) separated
+        <code>"color=red,green,blue"</code> or the variable name may be repeated
+        <code>"color=red;color=green;color=blue"</code>.</para>
+
+        <para>If a URL is expected to contain matrix variables, the request mapping
+        pattern must represent them with a URI template.
+        This ensures the request can be matched correctly regardless of whether
+        matrix variables are present or not and in what order they are
+        provided.</para>
+
+        <para>Below is an example of extracting the matrix variable "q":</para>
+
+        <programlisting language="java">// GET /pets/42;q=11;r=22
+
+@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET)
+public void findPet(@PathVariable String petId, @MatrixVariable int q) {    
+
+  // petId == 42
+  // q == 11
+
+}</programlisting>
+
+       <para>Since all path segments may contain matrix variables, in some cases
+       you need to be more specific to identify where the variable is expected to be:</para>       
+
+        <programlisting language="java">// GET /owners/42;q=11/pets/21;q=22
+
+@RequestMapping(value = "/owners/{ownerId}/pets/{petId}", method = RequestMethod.GET)
+public void findPet(
+    @MatrixVariable(value="q", pathVar="ownerId") int q1,
+    @MatrixVariable(value="q", pathVar="petId") int q2) {    
+  
+  // q1 == 11
+  // q2 == 22
+
+}</programlisting>
+
+       <para>A matrix variable may be defined as optional and a default value specified:</para>
+
+        <programlisting language="java">// GET /pets/42
+
+@RequestMapping(value = "/pets/{petId}", method = RequestMethod.GET)
+  public void findPet(@MatrixVariable(required=true, defaultValue="1") int q) {    
+
+    // q == 1
+
+  }</programlisting>
+
+        <para>All matrix variables may be obtained in a Map:</para>
+
+        <programlisting language="java">// GET /owners/42;q=11;r=12/pets/21;q=22;s=23
+
+@RequestMapping(value = "/owners/{ownerId}/pets/{petId}", method = RequestMethod.GET)
+  public void findPet(
+        @MatrixVariable Map&lt;String, String&gt; matrixVars,
+        @MatrixVariable(pathVar="petId"") Map&lt;String, String&gt; petMatrixVars) {    
+
+    // matrixVars: ["q" : [11,22], "r" : 12, "s" : 23]
+    // petMatrixVars: ["q" : 11, "s" : 23]
+
+  }</programlisting>
+
+        <para>Note that to enable the use of matrix variables, you must set the
+        <classname>removeSemicolonContent</classname> property of
+        <classname>RequestMappingHandlerMapping</classname> to <code>false</code>.
+        By default it is set to <code>true</code> with the exception of the
+        MVC namespace and the MVC Java config both of which automatically enable
+        the use of matrix variables.</para>
+
+      </section>
+
       <section id="mvc-ann-requestmapping-consumes">
         <title>Consumable Media Types</title>
 
@@ -1252,6 +1339,12 @@ public class RelativePathUriTemplateController {
               <para><classname>@PathVariable</classname> annotated parameters
               for access to URI template variables. See <xref
               linkend="mvc-ann-requestmapping-uri-templates" />.</para>
+            </listitem>
+
+            <listitem>
+              <para><classname>@MatrixVariable</classname> annotated parameters
+              for access to name-value pairs located in URI path segments.
+              See <xref linkend="mvc-ann-matrix-variables" />.</para>
             </listitem>
 
             <listitem>

@@ -31,24 +31,24 @@ import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionRes
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes: 
+ * Base class for tests using on the DispatcherServlet and HandlerMethod infrastructure classes:
  * <ul>
- * 	<li>RequestMappingHandlerMapping 
- * 	<li>RequestMappingHandlerAdapter 
+ * 	<li>RequestMappingHandlerMapping
+ * 	<li>RequestMappingHandlerAdapter
  * 	<li>ExceptionHandlerExceptionResolver
  * </ul>
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class AbstractServletHandlerMethodTests {
 
 	private DispatcherServlet servlet;
-	
+
 	@After
 	public void tearDown() {
 		this.servlet = null;
 	}
-	
+
 	protected DispatcherServlet getServlet() {
 		assertNotNull("DispatcherServlet not initialized", servlet);
 		return servlet;
@@ -68,30 +68,32 @@ public class AbstractServletHandlerMethodTests {
 	 */
 	@SuppressWarnings("serial")
 	protected WebApplicationContext initServlet(
-			final ApplicationContextInitializer<GenericWebApplicationContext> initializer, 
+			final ApplicationContextInitializer<GenericWebApplicationContext> initializer,
 			final Class<?>... controllerClasses) throws ServletException {
-		
+
 		final GenericWebApplicationContext wac = new GenericWebApplicationContext();
-		
+
 		servlet = new DispatcherServlet() {
 			@Override
 			protected WebApplicationContext createWebApplicationContext(WebApplicationContext parent) {
 				for (Class<?> clazz : controllerClasses) {
 					wac.registerBeanDefinition(clazz.getSimpleName(), new RootBeanDefinition(clazz));
 				}
-				
+
 				Class<?> mappingType = RequestMappingHandlerMapping.class;
-				wac.registerBeanDefinition("handlerMapping", new RootBeanDefinition(mappingType));
-				
+				RootBeanDefinition beanDef = new RootBeanDefinition(mappingType);
+				beanDef.getPropertyValues().add("removeSemicolonContent", "false");
+				wac.registerBeanDefinition("handlerMapping", beanDef);
+
 				Class<?> adapterType = RequestMappingHandlerAdapter.class;
 				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));
-				
+
 				Class<?> resolverType = ExceptionHandlerExceptionResolver.class;
 				wac.registerBeanDefinition("requestMappingResolver", new RootBeanDefinition(resolverType));
-				
+
 				resolverType = ResponseStatusExceptionResolver.class;
 				wac.registerBeanDefinition("responseStatusResolver", new RootBeanDefinition(resolverType));
-				
+
 				resolverType = DefaultHandlerExceptionResolver.class;
 				wac.registerBeanDefinition("defaultResolver", new RootBeanDefinition(resolverType));
 
@@ -103,9 +105,9 @@ public class AbstractServletHandlerMethodTests {
 				return wac;
 			}
 		};
-		
+
 		servlet.init(new MockServletConfig());
-		
+
 		return wac;
 	}
 

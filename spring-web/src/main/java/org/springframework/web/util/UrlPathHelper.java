@@ -61,6 +61,8 @@ public class UrlPathHelper {
 
 	private boolean urlDecode = true;
 
+	private boolean removeSemicolonContent = true;
+
 	private String defaultEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
 
 
@@ -90,6 +92,21 @@ public class UrlPathHelper {
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlDecode = urlDecode;
+	}
+
+	/**
+	 * Set if ";" (semicolon) content should be stripped from the request URI.
+	 * <p>Default is "true".
+	 */
+	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
+		this.removeSemicolonContent = removeSemicolonContent;
+	}
+
+	/**
+	 * Whether configured to remove ";" (semicolon) content from the request URI.
+	 */
+	public boolean shouldRemoveSemicolonContent() {
+		return this.removeSemicolonContent;
 	}
 
 	/**
@@ -318,9 +335,9 @@ public class UrlPathHelper {
 	 * Decode the supplied URI string and strips any extraneous portion after a ';'.
 	 */
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
+		uri = removeSemicolonContent(uri);
 		uri = decodeRequestString(request, uri);
-		int semicolonIndex = uri.indexOf(';');
-		return (semicolonIndex != -1 ? uri.substring(0, semicolonIndex) : uri);
+		return uri;
 	}
 
 	/**
@@ -375,10 +392,49 @@ public class UrlPathHelper {
 	}
 
 	/**
-	 * Decode the given URI path variables via {@link #decodeRequestString(HttpServletRequest, String)}
-	 * unless {@link #setUrlDecode(boolean)} is set to {@code true} in which case
-	 * it is assumed the URL path from which the variables were extracted is
-	 * already decoded through a call to {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 * Remove ";" (semicolon) content from the given request URI if the
+	 * {@linkplain #setRemoveSemicolonContent(boolean) removeSemicolonContent}
+	 * property is set to "true". Note that "jssessionid" is always removed.
+	 *
+	 * @param requestUri the request URI string to remove ";" content from
+	 * @return the updated URI string
+	 */
+	public String removeSemicolonContent(String requestUri) {
+		if (this.removeSemicolonContent) {
+			return removeSemicolonContentInternal(requestUri);
+		}
+		return removeJsessionid(requestUri);
+	}
+
+	private String removeSemicolonContentInternal(String requestUri) {
+		int semicolonIndex = requestUri.indexOf(';');
+		while (semicolonIndex != -1) {
+			int slashIndex = requestUri.indexOf('/', semicolonIndex);
+			String start = requestUri.substring(0, semicolonIndex);
+			requestUri = (slashIndex != -1) ? start + requestUri.substring(slashIndex) : start;
+			semicolonIndex = requestUri.indexOf(';', semicolonIndex);
+		}
+		return requestUri;
+	}
+
+	private String removeJsessionid(String requestUri) {
+		int startIndex = requestUri.indexOf(";jsessionid=");
+		if (startIndex != -1) {
+			int endIndex = requestUri.indexOf(';', startIndex + 12);
+			String start = requestUri.substring(0, startIndex);
+			requestUri = (endIndex != -1) ? start + requestUri.substring(endIndex) : start;
+		}
+		return requestUri;
+	}
+
+	/**
+	 * Decode the given URI path variables via
+	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
+	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
+	 * assumed the URL path from which the variables were extracted is already
+	 * decoded through a call to
+	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 *
 	 * @param request current HTTP request
 	 * @param vars URI variables extracted from the URL path
 	 * @return the same Map or a new Map instance

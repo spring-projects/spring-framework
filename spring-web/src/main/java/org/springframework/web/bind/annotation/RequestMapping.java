@@ -82,6 +82,13 @@ import java.util.concurrent.Callable;
  * Additionally, {@code @PathVariable} can be used on a
  * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
  * URI template variables.
+ * <li>{@link MatrixVariable @MatrixVariable} annotated parameters (Servlet-only)
+ * for access to name-value pairs located in URI path segments. Matrix variables
+ * must be represented with a URI template variable. For example /hotels/{hotel}
+ * where the incoming URL may be "/hotels/42;q=1".
+ * Additionally, {@code @MatrixVariable} can be used on a
+ * {@link java.util.Map Map&lt;String, String&gt;} to gain access to all
+ * matrix variables in the URL or to those in a specific path variable.
  * <li>{@link RequestParam @RequestParam} annotated parameters for access to
  * specific Servlet/Portlet request parameters. Parameter values will be
  * converted to the declared method argument type. Additionally,

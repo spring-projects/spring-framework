@@ -30,12 +30,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -65,7 +68,7 @@ import org.springframework.web.util.UrlPathHelper;
  */
 public class RequestMappingInfoHandlerMappingTests {
 
-	private TestRequestMappingInfoHandlerMapping mapping;
+	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
 	private Handler handler;
 
@@ -85,15 +88,16 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.barMethod = new HandlerMethod(handler, "bar");
 		this.emptyMethod = new HandlerMethod(handler, "empty");
 
-		this.mapping = new TestRequestMappingInfoHandlerMapping();
-		this.mapping.registerHandler(this.handler);
+		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
+		this.handlerMapping.registerHandler(this.handler);
+		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
 
 	@Test
 	public void getMappingPathPatterns() throws Exception {
 		RequestMappingInfo info = new RequestMappingInfo(
 				new PatternsRequestCondition("/foo/*", "/foo", "/bar/*", "/bar"), null, null, null, null, null, null);
-		Set<String> paths = this.mapping.getMappingPathPatterns(info);
+		Set<String> paths = this.handlerMapping.getMappingPathPatterns(info);
 		HashSet<String> expected = new HashSet<String>(Arrays.asList("/foo/*", "/foo", "/bar/*", "/bar"));
 
 		assertEquals(expected, paths);
@@ -102,25 +106,25 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test
 	public void directMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
-		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(request).getHandler();
 		assertEquals(this.fooMethod.getMethod(), hm.getMethod());
 	}
 
 	@Test
 	public void globMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bar");
-		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(request).getHandler();
 		assertEquals(this.barMethod.getMethod(), hm.getMethod());
 	}
 
 	@Test
 	public void emptyPathMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
-		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(request).getHandler();
 		assertEquals(this.emptyMethod.getMethod(), hm.getMethod());
 
 		request = new MockHttpServletRequest("GET", "/");
-		hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
+		hm = (HandlerMethod) this.handlerMapping.getHandler(request).getHandler();
 		assertEquals(this.emptyMethod.getMethod(), hm.getMethod());
 	}
 
@@ -128,7 +132,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void bestMatch() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		request.setParameter("p", "anything");
-		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
+		HandlerMethod hm = (HandlerMethod) this.handlerMapping.getHandler(request).getHandler();
 		assertEquals(this.fooParamMethod.getMethod(), hm.getMethod());
 	}
 
@@ -136,7 +140,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void requestMethodNotAllowed() throws Exception {
 		try {
 			MockHttpServletRequest request = new MockHttpServletRequest("POST", "/bar");
-			this.mapping.getHandler(request);
+			this.handlerMapping.getHandler(request);
 			fail("HttpRequestMethodNotSupportedException expected");
 		}
 		catch (HttpRequestMethodNotSupportedException ex) {
@@ -155,7 +159,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		try {
 			MockHttpServletRequest request = new MockHttpServletRequest("PUT", url);
 			request.setContentType("application/json");
-			this.mapping.getHandler(request);
+			this.handlerMapping.getHandler(request);
 			fail("HttpMediaTypeNotSupportedException expected");
 		}
 		catch (HttpMediaTypeNotSupportedException ex) {
@@ -175,7 +179,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		try {
 			MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
 			request.addHeader("Accept", "application/json");
-			this.mapping.getHandler(request);
+			this.handlerMapping.getHandler(request);
 			fail("HttpMediaTypeNotAcceptableException expected");
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
@@ -190,7 +194,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
-		this.mapping.handleMatch(key, lookupPath, request);
+		this.handlerMapping.handleMatch(key, lookupPath, request);
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> uriVariables =
@@ -214,8 +218,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		pathHelper.setUrlDecode(false);
 		String lookupPath = pathHelper.getLookupPathForRequest(request);
 
-		this.mapping.setUrlPathHelper(pathHelper);
-		this.mapping.handleMatch(key, lookupPath, request);
+		this.handlerMapping.setUrlPathHelper(pathHelper);
+		this.handlerMapping.handleMatch(key, lookupPath, request);
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> uriVariables =
@@ -232,7 +236,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
-		this.mapping.handleMatch(key, "/1/2", request);
+		this.handlerMapping.handleMatch(key, "/1/2", request);
 
 		assertEquals("/{path1}/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
@@ -243,7 +247,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
-		this.mapping.handleMatch(key, "/1/2", request);
+		this.handlerMapping.handleMatch(key, "/1/2", request);
 
 		assertEquals("/1/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
@@ -252,14 +256,14 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void producibleMediaTypesAttribute() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/content");
 		request.addHeader("Accept", "application/xml");
-		this.mapping.getHandler(request);
+		this.handlerMapping.getHandler(request);
 
 		assertEquals(Collections.singleton(MediaType.APPLICATION_XML),
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
 
 		request = new MockHttpServletRequest("GET", "/content");
 		request.addHeader("Accept", "application/json");
-		this.mapping.getHandler(request);
+		this.handlerMapping.getHandler(request);
 
 		assertNull("Negated expression should not be listed as a producible type",
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
@@ -285,7 +289,74 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(chain);
 	}
 
-	@SuppressWarnings("unused")
+	@Test
+	public void matrixVariables() {
+
+		MockHttpServletRequest request;
+		MultiValueMap<String, String> matrixVariables;
+		Map<String, String> uriVariables;
+
+		String lookupPath = "/cars;colors=red,blue,green;year=2012";
+
+		// Pattern "/{cars}" : matrix variables stripped from "cars" variable
+
+		request = new MockHttpServletRequest();
+		testHandleMatch(request, "/{cars}", lookupPath);
+
+		matrixVariables = getMatrixVariables(request, "cars");
+		assertNotNull(matrixVariables);
+		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
+		assertEquals("2012", matrixVariables.getFirst("year"));
+
+		uriVariables = getUriTemplateVariables(request);
+		assertEquals("cars", uriVariables.get("cars"));
+
+		// Pattern "/{cars:[^;]+}{params}" : "cars" and "params" variables unchanged
+
+		request = new MockHttpServletRequest();
+		testHandleMatch(request, "/{cars:[^;]+}{params}", lookupPath);
+
+		matrixVariables = getMatrixVariables(request, "params");
+		assertNotNull(matrixVariables);
+		assertEquals(Arrays.asList("red", "blue", "green"), matrixVariables.get("colors"));
+		assertEquals("2012", matrixVariables.getFirst("year"));
+
+		uriVariables = getUriTemplateVariables(request);
+		assertEquals("cars", uriVariables.get("cars"));
+		assertEquals(";colors=red,blue,green;year=2012", uriVariables.get("params"));
+
+		// matrix variables not present : "params" variable is empty
+
+		request = new MockHttpServletRequest();
+		testHandleMatch(request, "/{cars:[^;]+}{params}", "/cars");
+
+		matrixVariables = getMatrixVariables(request, "params");
+		assertNull(matrixVariables);
+
+		uriVariables = getUriTemplateVariables(request);
+		assertEquals("cars", uriVariables.get("cars"));
+		assertEquals("", uriVariables.get("params"));
+	}
+
+	private void testHandleMatch(MockHttpServletRequest request, String pattern, String lookupPath) {
+		PatternsRequestCondition patterns = new PatternsRequestCondition(pattern);
+		RequestMappingInfo info = new RequestMappingInfo(patterns, null, null, null, null, null, null);
+		this.handlerMapping.handleMatch(info, lookupPath, request);
+	}
+
+	@SuppressWarnings("unchecked")
+	private MultiValueMap<String, String> getMatrixVariables(HttpServletRequest request, String uriVarName) {
+		String attrName = HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE;
+		return ((Map<String, MultiValueMap<String, String>>) request.getAttribute(attrName)).get(uriVarName);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, String> getUriTemplateVariables(HttpServletRequest request) {
+		String attrName = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+		return (Map<String, String>) request.getAttribute(attrName);
+	}
+
+
 	@Controller
 	private static class Handler {
 

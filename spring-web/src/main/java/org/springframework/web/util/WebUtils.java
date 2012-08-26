@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import javax.servlet.ServletContext;
@@ -33,6 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -706,6 +709,7 @@ public abstract class WebUtils {
 		}
 		return filename;
 	}
+
 	/**
 	 * Extract the full URL filename (including file extension) from the given request URL path.
 	 * Correctly resolves nested paths such as "/products/view.html" as well.
@@ -724,4 +728,35 @@ public abstract class WebUtils {
 		return urlPath.substring(begin, end);
 	}
 
+	/**
+	 * Parse the given string with matrix variables. An example string would look
+	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
+	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
+	 * {@code ["a","b","c"]} respectively.
+	 *
+	 * @param matrixVariables the unparsed matrix variables string
+	 * @return a map with matrix variable names and values, never {@code null}
+	 */
+	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
+		if (!StringUtils.hasText(matrixVariables)) {
+			return result;
+		}
+		StringTokenizer pairs = new StringTokenizer(matrixVariables, ";");
+		while (pairs.hasMoreTokens()) {
+			String pair = pairs.nextToken();
+			int index = pair.indexOf('=');
+			if (index != -1) {
+				String name = pair.substring(0, index);
+				String rawValue = pair.substring(index + 1);
+				for (String value : StringUtils.commaDelimitedListToStringArray(rawValue)) {
+					result.add(name, value);
+				}
+			}
+			else {
+				result.add(pair, "");
+			}
+		}
+		return result;
+	}
 }
