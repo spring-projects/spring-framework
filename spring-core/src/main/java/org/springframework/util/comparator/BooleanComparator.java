@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,7 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	 */
 	public static final BooleanComparator TRUE_HIGH = new BooleanComparator(false);
 
-
 	private final boolean trueLow;
-
 
 	/**
 	 * Create a BooleanComparator that sorts boolean values based on
@@ -56,7 +54,6 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	public BooleanComparator(boolean trueLow) {
 		this.trueLow = trueLow;
 	}
-
 
 	public int compare(Boolean v1, Boolean v2) {
 		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
@@ -82,5 +79,4 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	public String toString() {
 		return "BooleanComparator: " + (this.trueLow ? "true low" : "true high");
 	}
-
 }
