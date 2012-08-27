@@ -39,7 +39,9 @@ import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
 import org.springframework.aop.framework.Advised;
@@ -67,6 +69,9 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public abstract class AbstractAspectJAdvisorFactoryTests {
+	
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 	
 	/**
 	 * To be overridden by concrete test subclasses.
@@ -571,31 +576,22 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 	@Test
 	public void testFailureWithoutExplicitDeclarePrecedence() {
 		TestBean target = new TestBean();
-		ITestBean itb = (ITestBean) createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(new NoDeclarePrecedenceShouldFail(), "someBean")),
-				ITestBean.class);
-		try {
-			itb.getAge();
-			fail();
-		}
-		catch (IllegalStateException ex) {
-			// expected
-		}
+		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
+			new NoDeclarePrecedenceShouldFail(), "someBean");
+		ITestBean itb = (ITestBean) createProxy(target,
+			getFixture().getAdvisors(aspectInstanceFactory), ITestBean.class);
+		itb.getAge();
 	}
-	
+
 	@Test
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
-		try {
-			createProxy(target, 
-				getFixture().getAdvisors(new SingletonMetadataAwareAspectInstanceFactory(
-						new DeclarePrecedenceShouldSucceed(),"someBean")), 
-				ITestBean.class);
-			fail();
-		}
-		catch (IllegalArgumentException ex) {
-			// Not supported in 2.0
-		}
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("DeclarePrecendence not presently supported in Spring AOP");
+		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
+			new DeclarePrecedenceShouldSucceed(), "someBean");
+		createProxy(target, getFixture().getAdvisors(aspectInstanceFactory),
+			ITestBean.class);
 	}
 
 	/** Not supported in 2.0!
