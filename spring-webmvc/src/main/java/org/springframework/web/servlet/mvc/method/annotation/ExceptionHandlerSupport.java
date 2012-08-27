@@ -48,9 +48,9 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 /**
  * A convenient base for classes with {@link ExceptionHandler} methods providing
  * infrastructure to handle standard Spring MVC exceptions. The functionality is
- * equivalent to that of the {@link DefaultHandlerExceptionResolver} except it
- * can be customized to write error content to the body of the response. If there
- * is no need to write error content, use {@code DefaultHandlerExceptionResolver}
+ * equivalent to that of the {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver DefaultHandlerExceptionResolver}
+ * except it can be customized to write error content to the body of the response. If
+ * there is no need to write error content, use {@code DefaultHandlerExceptionResolver}
  * instead.
  *
  * <p>It is expected the sub-classes will be annotated with
