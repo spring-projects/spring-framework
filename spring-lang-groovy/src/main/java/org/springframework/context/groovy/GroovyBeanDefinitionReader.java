@@ -714,6 +714,13 @@ public class GroovyBeanDefinitionReader extends GroovyObjectSupport {
     protected List resolveConstructorArguments(Object[] args, int start, int end) {
         Object[] constructorArgs = subarray(args, start, end);
         filterGStringReferences(constructorArgs);
+        for(int i = 0; i < constructorArgs.length; i++) {
+        	if(constructorArgs[i] instanceof List) {
+        		constructorArgs[i] = manageListIfNecessary(constructorArgs[i]);
+        	} else if(constructorArgs[i] instanceof Map){
+        		constructorArgs[i] = manageMapIfNecessary(constructorArgs[i]);
+        	}
+        }
         List constructorArgsList = Arrays.asList(constructorArgs);
         return constructorArgsList;
     }

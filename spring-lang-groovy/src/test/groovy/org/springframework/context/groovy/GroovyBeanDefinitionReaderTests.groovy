@@ -772,9 +772,7 @@ beanReader.createApplicationContext()
         assertEquals "Fred", appCtx.getBean("personA").name
     }
 
-	// test for GRAILS-4995
 	void testListOfBeansAsConstructorArg() {
-		if(notYetImplemented()) return
 		def beanReader = new GroovyBeanDefinitionReader()
 
 		beanReader.beans {
@@ -789,6 +787,34 @@ beanReader.createApplicationContext()
 		assert ctx.containsBean('someotherbean')
 		assert ctx.containsBean('someotherbean2')
 		assert ctx.containsBean('somebean')
+	}
+
+	void testBeanWithListAndMapConstructor() {
+		def beanReader = new GroovyBeanDefinitionReader()
+		beanReader.beans {
+			bart(Bean1) {
+				person = "bart"
+				age = 11
+			}
+			lisa(Bean1) {
+				person = "lisa"
+				age = 9
+			}
+
+			beanWithList(Bean5, [bart, lisa])
+
+			// test runtime references both as ref() and as plain name
+			beanWithMap(Bean6, [bart:bart, lisa:ref('lisa')])
+		}
+		def ctx  = beanReader.createApplicationContext()
+
+		def beanWithList = ctx.getBean("beanWithList")
+		assertEquals 2, beanWithList.people.size()
+		assertEquals "bart", beanWithList.people[0].person
+
+		def beanWithMap = ctx.getBean("beanWithMap")
+		assertEquals 9, beanWithMap.peopleByName.lisa.age
+		assertEquals "bart", beanWithMap.peopleByName.bart.person
 	}
 	
     void testAnonymousInnerBeanViaBeanMethod() {
@@ -902,6 +928,20 @@ class Bean4 {
 		return new Bean4()
 	}
 	String person
+}
+// bean with List-valued constructor arg
+class Bean5 {
+    Bean5(List<Bean1> people) {
+        this.people = people
+    }
+    List<Bean1> people
+}
+// bean with Map-valued constructor arg
+class Bean6 {
+    Bean6(Map<String, Bean1> peopleByName) {
+        this.peopleByName = peopleByName
+    }
+    Map<String, Bean1> peopleByName
 }
 // a factory bean
 class Bean1Factory {
