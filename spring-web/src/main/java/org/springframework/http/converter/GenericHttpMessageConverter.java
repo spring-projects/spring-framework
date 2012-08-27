@@ -19,7 +19,6 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 
@@ -30,7 +29,7 @@ import org.springframework.http.MediaType;
  * @author Arjen Poutsma
  * @since 3.2
  *
- * @see ParameterizedTypeReference
+ * @see org.springframework.core.ParameterizedTypeReference
  */
 public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> {
 
@@ -45,7 +44,7 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Read an object of the given type form the given input message, and returns it.
-	 * @param clazz the type of object to return. This type must have previously
+	 * @param type the type of object to return. This type must have previously
 	 * been passed to the {@link #canRead canRead} method of this interface,
 	 * which must have returned {@code true}.
 	 * @param type the type of the target object
