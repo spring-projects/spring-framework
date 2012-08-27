@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 1.2.2
  */
+@SuppressWarnings("serial")
 public class CompoundComparator<T> implements Comparator<T>, Serializable {
 
 	private final List<InvertibleComparator<T>> comparators;
@@ -58,10 +59,12 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * @param comparators the comparators to build into a compound comparator
 	 * @see InvertibleComparator
 	 */
-	public CompoundComparator(Comparator[] comparators) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public CompoundComparator(Comparator... comparators) {
+		Assert.notNull(comparators, "Comparators must not be null");
 		this.comparators = new ArrayList<InvertibleComparator<T>>(comparators.length);
-		for (Comparator<T> comparator : comparators) {
-			addComparator(comparator);
+		for (Comparator comparator : comparators) {
+			this.addComparator(comparator);
 		}
 	}
 
@@ -123,7 +126,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * comparator.
 	 */
 	public void invertOrder() {
-		for (InvertibleComparator comparator : this.comparators) {
+		for (InvertibleComparator<T> comparator : this.comparators) {
 			comparator.invertOrder();
 		}
 	}
@@ -159,7 +162,6 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		return this.comparators.size();
 	}
 
-
 	public int compare(T o1, T o2) {
 		Assert.state(this.comparators.size() > 0,
 				"No sort definitions have been added to this CompoundComparator to compare");
@@ -173,6 +175,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -180,7 +183,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		if (!(obj instanceof CompoundComparator)) {
 			return false;
 		}
-		CompoundComparator other = (CompoundComparator) obj;
+		CompoundComparator<T> other = (CompoundComparator<T>) obj;
 		return this.comparators.equals(other.comparators);
 	}
 
