@@ -133,69 +133,61 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
     void testUseTwoSpringNamespaces() {
 		def beanReader = new GroovyBeanDefinitionReader()
 
-        SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder()
-        try {
+        TestScope scope = new TestScope()
 
-            builder.bind("bar", "success")
-            builder.activate()
-            TestScope scope = new TestScope()
+        GenericApplicationContext appCtx = beanReader.getSpringConfig().getUnrefreshedApplicationContext()
+        appCtx.getBeanFactory().registerScope("test", scope)
+        beanReader.beans {
+            xmlns aop:"http://www.springframework.org/schema/aop"
+            xmlns util:"http://www.springframework.org/schema/util"
+            scopedList(ArrayList) { bean ->
+                bean.scope = "test"
+                aop.'scoped-proxy'()
+            }
+            util.list(id: 'foo') {
+                value 'one'
+                value 'two'
+            }
+		}
 
-            GenericApplicationContext appCtx = beanReader.getSpringConfig().getUnrefreshedApplicationContext()
-            appCtx.getBeanFactory().registerScope("test", scope)
-            beanReader.beans {
-                xmlns aop:"http://www.springframework.org/schema/aop"
-                xmlns jee:"http://www.springframework.org/schema/jee"
-                scopedList(ArrayList) { bean ->
-                    bean.scope = "test"
-                    aop.'scoped-proxy'()
-                }
+        appCtx = beanReader.createApplicationContext()
 
-                jee.'jndi-lookup'(id:"foo", 'jndi-name':"bar")
+        assert ['one', 'two'] == appCtx.getBean("foo")
 
+        assertNotNull appCtx.getBean("scopedList")
+        assertNotNull appCtx.getBean("scopedList").size()
+        assertNotNull appCtx.getBean("scopedList").size()
+
+        // should only be true because bean not initialized until proxy called
+        assertEquals 2, scope.instanceCount
+
+        beanReader = new GroovyBeanDefinitionReader()
+
+        appCtx = beanReader.getSpringConfig().getUnrefreshedApplicationContext()
+        appCtx.getBeanFactory().registerScope("test", scope)
+        beanReader.beans {
+            xmlns aop:"http://www.springframework.org/schema/aop",
+                  util:"http://www.springframework.org/schema/util"
+            scopedList(ArrayList) { bean ->
+                bean.scope = "test"
+                aop.'scoped-proxy'()
             }
 
-            appCtx = beanReader.createApplicationContext()
-
-            assertEquals "success", appCtx.getBean("foo")
-
-            assertNotNull appCtx.getBean("scopedList")
-            assertNotNull appCtx.getBean("scopedList").size()
-            assertNotNull appCtx.getBean("scopedList").size()
-
-            // should only be true because bean not initialized until proxy called
-            assertEquals 2, scope.instanceCount
-
-            beanReader = new GroovyBeanDefinitionReader()
-
-            appCtx = beanReader.getSpringConfig().getUnrefreshedApplicationContext()
-            appCtx.getBeanFactory().registerScope("test", scope)
-            beanReader.beans {
-                xmlns aop:"http://www.springframework.org/schema/aop",
-                      jee:"http://www.springframework.org/schema/jee"
-                scopedList(ArrayList) { bean ->
-                    bean.scope = "test"
-                    aop.'scoped-proxy'()
-                }
-
-                jee.'jndi-lookup'(id:"foo", 'jndi-name':"bar")
-
+            util.list(id: 'foo') {
+                value 'one'
+                value 'two'
             }
-            appCtx = beanReader.createApplicationContext()
-
-            assertEquals "success", appCtx.getBean("foo")
-
-            assertNotNull appCtx.getBean("scopedList")
-            assertNotNull appCtx.getBean("scopedList").size()
-            assertNotNull appCtx.getBean("scopedList").size()
-
-            // should only be true because bean not initialized until proxy called
-            assertEquals 4, scope.instanceCount
-
-
         }
-        finally {
-            builder.deactivate()
-        }
+        appCtx = beanReader.createApplicationContext()
+        
+        assert ['one', 'two'] == appCtx.getBean("foo")
+
+        assertNotNull appCtx.getBean("scopedList")
+        assertNotNull appCtx.getBean("scopedList").size()
+        assertNotNull appCtx.getBean("scopedList").size()
+
+        // should only be true because bean not initialized until proxy called
+        assertEquals 4, scope.instanceCount
     }
 
     void testSpringAOPSupport() {
@@ -262,24 +254,17 @@ class GroovyBeanDefinitionReaderTests extends GroovyTestCase {
     void testSpringNamespaceBean() {
         def beanReader = new GroovyBeanDefinitionReader()
 
-        SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder()
-        try {
-
-            builder.bind("bar", "success")
-            builder.activate()
-
-            beanReader.beans {
-                xmlns jee:"http://www.springframework.org/schema/jee"
-                jee.'jndi-lookup'(id:"foo", 'jndi-name':"bar")
+        beanReader.beans {
+            xmlns util: 'http://www.springframework.org/schema/util'
+            util.list(id: 'foo') {
+                value 'one'
+                value 'two'
             }
-
-            ApplicationContext appCtx = beanReader.createApplicationContext()
-
-            assertEquals "success", appCtx.getBean("foo")            
         }
-        finally {
-            builder.deactivate()
-        }
+        
+        def ctx = beanReader.createApplicationContext()
+        
+        assert ['one', 'two'] == ctx.getBean('foo')
     }
 
     void testNamedArgumentConstructor() {
