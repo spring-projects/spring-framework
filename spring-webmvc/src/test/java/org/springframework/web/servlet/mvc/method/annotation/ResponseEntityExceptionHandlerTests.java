@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -56,13 +55,13 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
- * Test fixture for {@link ExceptionHandlerSupport}.
+ * Test fixture for {@link ResponseEntityExceptionHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class ExceptionHandlerSupportTests {
+public class ResponseEntityExceptionHandlerTests {
 
-	private ExceptionHandlerSupport exceptionHandlerSupport;
+	private ResponseEntityExceptionHandler exceptionHandlerSupport;
 
 	private DefaultHandlerExceptionResolver defaultExceptionResolver;
 
@@ -86,7 +85,7 @@ public class ExceptionHandlerSupportTests {
 	@Test
 	public void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
 
-		Method annotMethod = ExceptionHandlerSupport.class.getMethod("handleException", Exception.class, WebRequest.class);
+		Method annotMethod = ResponseEntityExceptionHandler.class.getMethod("handleException", Exception.class, WebRequest.class);
 		ExceptionHandler annot = annotMethod.getAnnotation(ExceptionHandler.class);
 		List<Class<? extends Throwable>> supportedTypes = Arrays.asList(annot.value());
 
@@ -217,14 +216,14 @@ public class ExceptionHandlerSupportTests {
 	}
 
 	@ControllerAdvice
-	private static class ApplicationExceptionHandler extends ExceptionHandlerSupport {
+	private static class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
 
 		@Override
-		protected Object handleServletRequestBindingException(ServletRequestBindingException ex,
+		protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex,
 				HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 			headers.set("someHeader", "someHeaderValue");
-			return "error content";
+			return handleExceptionInternal(ex, "error content", headers, status, request);
 		}
 
 

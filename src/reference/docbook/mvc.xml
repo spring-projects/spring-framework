@@ -3843,15 +3843,23 @@ public class SimpleController {
         transparently by setting the status of the response. However, it stops short
         of writing any error content to the body of the response while your
         application may need to add developer-friendly content to every error
-        response for example when providing a REST API.</para>
+        response for example when providing a REST API. You can prepare a
+        <classname>ModelAndView</classname> and
+        render error content through view resolution -- i.e. by configuring a
+        <classname>ContentNeogitatingViewResolver</classname>,
+        <classname>MappingJacksonJsonView</classname>, and so on. However, you
+        may prefer to use <interfacename>@ExceptionHandler</interfacename>
+        methods instead.</para>
 
-        <para>To achieve this extend <classname>ExceptionHandlerSupport</classname>,
-        a convenient base class with an <interfacename>@ExceptionHandler</interfacename>
-        method that handles standard Spring MVC exceptions just as the
-        <classname>DefaultHandlerExceptionResolver</classname> does but also
-        allowing you to prepare error content for the body of the response.
-        See the Javadoc of <classname>ExceptionHandlerSupport</classname>
-        for more details.</para>
+        <para>If you prefer to write error content via
+        <interfacename>@ExceptionHandler</interfacename> methods you can extend
+        <classname>ResponseEntityExceptionHandler</classname> instead.
+        This is a convenient base for <interfacename>@ControllerAdvice</interfacename>
+        classes providing an <interfacename>@ExceptionHandler</interfacename>
+        method to handle standard Spring MVC exceptions and return
+        <classname>ResponseEntity</classname>. That allows you to customize the response
+        and write error content with message converters. See the Javadoc of
+        <classname>ResponseEntityExceptionHandler</classname> for more details.</para>
     </section>
 
     <section id="mvc-ann-annotated-exceptions">

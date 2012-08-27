@@ -66,7 +66,7 @@
     </section>
 
     <section id="new-in-3.2-webmvc-controller-advice">
-      <title><interfacename>@ControllerAdvice</interfacename> annotation</title>
+      <title>New <interfacename>@ControllerAdvice</interfacename> annotation</title>
       
       <para>Classes annotated with <interfacename>@ControllerAdvice</interfacename>
       can contain <interfacename>@ExceptionHandler</interfacename>,
@@ -81,13 +81,18 @@
     </section>
 
     <section id="new-in-3.2-webmvc-exception-handler-support">
-      <title><classname>ExceptionHandlerSupport</classname> class</title>
+      <title>New <classname>ResponseEntityExceptionHandler</classname> class</title>
 
       <para>A convenient base class with an
       <interfacename>@ExceptionHandler</interfacename>
-      method that handles standard Spring MVC exceptions, just as the
-      <classname>DefaultHandlerExceptionResolver</classname> does, but also
-      allowing you to prepare error content for the body of the response.</para>
+      method that handles standard Spring MVC exceptions and returns a
+      <classname>ResponseEntity</classname> that allowing customizing and writing
+      the response with HTTP message converters. This servers as an alternative
+      to the <classname>DefaultHandlerExceptionResolver</classname>, which does
+      the same but returns a <classname>ModelAndView</classname> instead.</para>
+
+      <para>See the revised <xref linkend="mvc-exceptionhandlers"/>
+      including information on customizing the default Servlet container error page.</para>
 
     </section>
 

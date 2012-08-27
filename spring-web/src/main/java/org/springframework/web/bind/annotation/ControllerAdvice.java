@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>It is typically used to define {@link ExceptionHandler @ExceptionHandler},
  * {@link InitBinder @InitBinder}, and {@link ModelAttribute @ModelAttribute}
- * methods that apply across controller class hierarchies.
+ * methods that apply to all {@link RequestMapping @RequestMapping} methods.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
