@@ -489,7 +489,7 @@
       <para>A new <classname>UriComponents</classname> class has been added,
       which is an immutable container of URI components providing
       access to all contained URI components.
-      A nenw <classname>UriComponentsBuilder</classname> class is also
+      A new <classname>UriComponentsBuilder</classname> class is also
       provided to help create <classname>UriComponents</classname> instances.
       Together the two classes give fine-grained control over all
       aspects of preparing a URI including construction, expansion
