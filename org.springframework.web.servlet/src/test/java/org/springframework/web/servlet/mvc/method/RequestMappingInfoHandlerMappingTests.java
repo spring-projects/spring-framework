@@ -131,7 +131,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		HandlerMethod hm = (HandlerMethod) this.mapping.getHandler(request).getHandler();
 		assertEquals(this.fooParamMethod.getMethod(), hm.getMethod());
 	}
-	
+
 	@Test
 	public void requestMethodNotAllowed() throws Exception {
 		try {
@@ -143,7 +143,18 @@ public class RequestMappingInfoHandlerMappingTests {
 			assertArrayEquals("Invalid supported methods", new String[]{"GET", "HEAD"}, ex.getSupportedMethods());
 		}
 	}
-	
+
+	// SPR-9603
+
+	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	public void requestMethodMatchFalsePositive() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users");
+		request.addHeader("Accept", "application/xml");
+
+		this.mapping.registerHandler(new UserController());
+		this.mapping.getHandler(request);
+	}
+
 	@Test
 	public void mediaTypeNotSupported() throws Exception {
 		testMediaTypeNotSupported("/person/1");
@@ -159,11 +170,11 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("HttpMediaTypeNotSupportedException expected");
 		}
 		catch (HttpMediaTypeNotSupportedException ex) {
-			assertEquals("Invalid supported consumable media types", 
+			assertEquals("Invalid supported consumable media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
 		}
 	}
-	
+
 	@Test
 	public void mediaTypeNotAccepted() throws Exception {
 		testMediaTypeNotAccepted("/persons");
@@ -179,7 +190,7 @@ public class RequestMappingInfoHandlerMappingTests {
 			fail("HttpMediaTypeNotAcceptableException expected");
 		}
 		catch (HttpMediaTypeNotAcceptableException ex) {
-			assertEquals("Invalid supported producible media types", 
+			assertEquals("Invalid supported producible media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
 		}
 	}
@@ -191,12 +202,12 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 		String lookupPath = new UrlPathHelper().getLookupPathForRequest(request);
 		this.mapping.handleMatch(key, lookupPath, request);
-		
+
 		@SuppressWarnings("unchecked")
-		Map<String, String> uriVariables = 
+		Map<String, String> uriVariables =
 			(Map<String, String>) request.getAttribute(
 					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-		
+
 		assertNotNull(uriVariables);
 		assertEquals("1", uriVariables.get("path1"));
 		assertEquals("2", uriVariables.get("path2"));
@@ -209,7 +220,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
 		this.mapping.handleMatch(key, "/1/2", request);
-		
+
 		assertEquals("/{path1}/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
@@ -220,7 +231,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/1/2");
 
 		this.mapping.handleMatch(key, "/1/2", request);
-		
+
 		assertEquals("/1/2", request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE));
 	}
 
@@ -237,10 +248,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		request.addHeader("Accept", "application/json");
 		this.mapping.getHandler(request);
 
-		assertNull("Negated expression should not be listed as a producible type", 
+		assertNull("Negated expression should not be listed as a producible type",
 				request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE));
 	}
-	
+
 	@Test
 	public void mappedInterceptors() throws Exception {
 		String path = "/foo";
@@ -261,14 +272,13 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertNull(chain);
 	}
 
-	@SuppressWarnings("unused")
 	@Controller
 	private static class Handler {
 
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
-		
+
 		@RequestMapping(value = "/foo", method = RequestMethod.GET, params="p")
 		public void fooParam() {
 		}
@@ -301,12 +311,24 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	@Controller
+	private static class UserController {
+
+		@RequestMapping(value = "/users", method = RequestMethod.GET, produces = "application/json")
+		public void getUser() {
+		}
+
+		@RequestMapping(value = "/users", method = RequestMethod.PUT)
+		public void saveUser() {
+		}
+	}
+
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingInfoHandlerMapping {
 
 		public void registerHandler(Object handler) {
 			super.detectHandlerMethods(handler);
 		}
-		
+
 		@Override
 		protected boolean isHandler(Class<?> beanType) {
 			return AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null;
@@ -329,5 +351,5 @@ public class RequestMappingInfoHandlerMappingTests {
 			}
 		}
 	}
-	
+
 }
