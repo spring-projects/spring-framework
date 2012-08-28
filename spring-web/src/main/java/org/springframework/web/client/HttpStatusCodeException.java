@@ -89,7 +89,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 	 * @param responseHeaders the response headers, may be {@code null}
 	 * @param responseBody the response body content, may be {@code null}
 	 * @param responseCharset the response body charset, may be {@code null}
-	 * @since 3.2
+	 * @since 3.1.2
 	 */
 	protected HttpStatusCodeException(HttpStatus statusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
@@ -118,7 +118,7 @@ public abstract class HttpStatusCodeException extends RestClientException {
 
 	/**
 	 * Return the HTTP response headers.
-	 * @since 3.2
+	 * @since 3.1.2
 	 */
 	public HttpHeaders getResponseHeaders() {
 		return this.responseHeaders;

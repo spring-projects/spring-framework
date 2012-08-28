@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.support;
 
 import java.io.IOException;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
@@ -31,6 +32,9 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -119,6 +123,15 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		return this.persistenceUnitName;
 	}
 
+	/**
+	 * The default value is "true" so that the filter may re-bind the opened
+	 * {@code EntityManager} to each asynchronously dispatched thread and postpone
+	 * closing it until the very last asynchronous dispatch.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
 
 	@Override
 	protected void doFilterInternal(
@@ -128,18 +141,28 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		EntityManagerFactory emf = lookupEntityManagerFactory(request);
 		boolean participate = false;
 
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		boolean isFirstRequest = !isAsyncDispatch(request);
+		String key = getAlreadyFilteredAttributeName();
+
 		if (TransactionSynchronizationManager.hasResource(emf)) {
 			// Do not modify the EntityManager: just set the participate flag.
 			participate = true;
 		}
 		else {
-			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
-			try {
-				EntityManager em = createEntityManager(emf);
-				TransactionSynchronizationManager.bindResource(emf, new EntityManagerHolder(em));
-			}
-			catch (PersistenceException ex) {
-				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
+			if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+				logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
+				try {
+					EntityManager em = createEntityManager(emf);
+					EntityManagerHolder emHolder = new EntityManagerHolder(em);
+					TransactionSynchronizationManager.bindResource(emf, emHolder);
+
+					WebAsyncThreadInitializer initializer = createAsyncThreadInitializer(emf, emHolder);
+					asyncManager.registerAsyncThreadInitializer(key, initializer);
+				}
+				catch (PersistenceException ex) {
+					throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
+				}
 			}
 		}
 
@@ -151,8 +174,10 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				EntityManagerHolder emHolder = (EntityManagerHolder)
 						TransactionSynchronizationManager.unbindResource(emf);
-				logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
-				EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+				if (isLastRequestThread(request)) {
+					logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
+					EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+				}
 			}
 		}
 	}
@@ -203,6 +228,19 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	 */
 	protected EntityManager createEntityManager(EntityManagerFactory emf) {
 		return emf.createEntityManager();
+	}
+
+	private WebAsyncThreadInitializer createAsyncThreadInitializer(final EntityManagerFactory emFactory,
+			final EntityManagerHolder emHolder) {
+
+		return new WebAsyncThreadInitializer() {
+			public void initialize() {
+				TransactionSynchronizationManager.bindResource(emFactory, emHolder);
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(emFactory);
+			}
+		};
 	}
 
 }

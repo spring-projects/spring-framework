@@ -100,9 +100,8 @@ import java.util.concurrent.Callable;
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * but do not support access to validation results through a
- * {@link org.springframework.validation.Errors} /
- * {@link org.springframework.validation.BindingResult} argument.
+ * and also support access to validation results through an
+ * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link RequestPart @RequestPart} annotated parameters
@@ -112,9 +111,8 @@ import java.util.concurrent.Callable;
  * converted to the declared method argument type using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
- * but do not support access to validation results through a
- * {@link org.springframework.validation.Errors} /
- * {@link org.springframework.validation.BindingResult} argument.
+ * and support access to validation results through a
+ * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
@@ -271,7 +269,7 @@ public @interface RequestMapping {
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:
-	 * GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * GET, POST, HEAD, OPTIONS, PUT, PATCH, DELETE, TRACE.
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this HTTP method restriction (i.e. the type-level restriction
@@ -331,8 +329,13 @@ public @interface RequestMapping {
 
 	/**
 	 * The consumable media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Content-Type} matches one of these media types.
+	 * Examples:
+	 * <pre>
+	 * consumes = "text/plain"
+	 * consumes = {"text/plain", "application/*"}
+	 * </pre>
 	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Content-Type} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
@@ -345,8 +348,13 @@ public @interface RequestMapping {
 
 	/**
 	 * The producible media types of the mapped request, narrowing the primary mapping.
-	 * <p>The format is a sequence of media types ("text/plain", "application/*),
+	 * <p>The format is a single media type or a sequence of media types,
 	 * with a request only mapped if the {@code Accept} matches one of these media types.
+	 * Examples:
+	 * <pre>
+	 * produces = "text/plain"
+	 * produces = {"text/plain", "application/*"}
+	 * </pre>
 	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>

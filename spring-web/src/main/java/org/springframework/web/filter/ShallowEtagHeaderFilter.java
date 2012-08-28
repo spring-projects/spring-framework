@@ -29,10 +29,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -54,41 +53,38 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private static String HEADER_IF_NONE_MATCH = "If-None-Match";
 
 
+	/**
+	 * The default value is "true" so that the filter may delay the generation of
+	 * an ETag until the last asynchronously dispatched thread.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		ShallowEtagResponseWrapper responseWrapper = new ShallowEtagResponseWrapper(response);
+		boolean isFirstRequest = !isAsyncDispatch(request);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(request, response, responseWrapper));
-
-		filterChain.doFilter(request, responseWrapper);
-
-		if (chain.isAsyncStarted()) {
-			return;
+		if (isFirstRequest) {
+			response = new ShallowEtagResponseWrapper(response);
 		}
 
-		updateResponse(request, response, responseWrapper);
+		filterChain.doFilter(request, response);
+
+		if (isLastRequestThread(request)) {
+			updateResponse(request, response);
+		}
 	}
 
-	/**
-	 * Create a Callable to use to complete processing in an async execution chain.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request,
-			final HttpServletResponse response, final ShallowEtagResponseWrapper responseWrapper) {
+	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				getNextCallable().call();
-				updateResponse(request, response, responseWrapper);
-				return null;
-			}
-		};
-	}
+		ShallowEtagResponseWrapper  responseWrapper = WebUtils.getNativeResponse(response, ShallowEtagResponseWrapper.class);
+		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
 
-	private void updateResponse(HttpServletRequest request, HttpServletResponse response,
-			ShallowEtagResponseWrapper responseWrapper) throws IOException {
+		response = (HttpServletResponse) responseWrapper.getResponse();
 
 		byte[] body = responseWrapper.toByteArray();
 		int statusCode = responseWrapper.getStatusCode();

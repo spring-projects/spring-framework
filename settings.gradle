@@ -1,7 +1,6 @@
 rootProject.name = 'spring'
 
 include 'spring-aop'
-include 'spring-asm'
 include 'spring-aspects'
 include 'spring-beans'
 include 'spring-context'

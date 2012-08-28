@@ -18,6 +18,7 @@ package org.springframework.test.jdbc;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,8 +40,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
  * @author Juergen Hoeller
  * @author Thomas Risberg
  * @since 2.5
+ * @deprecated As of Spring 3.2, use {@link JdbcTestUtils} instead.
  */
-@SuppressWarnings("deprecation")
+@Deprecated
 public abstract class SimpleJdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(SimpleJdbcTestUtils.class);

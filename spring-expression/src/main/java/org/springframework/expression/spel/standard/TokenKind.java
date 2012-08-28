@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ enum TokenKind {
 	DIV("/"), GE(">="), GT(">"), LE("<="), LT("<"), EQ("=="), NE("!="),
 	MOD("%"), NOT("!"), ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
 	SELECT("?["),   POWER("^"),
-	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@")
+	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@"), SYMBOLIC_OR("||"), SYMBOLIC_AND("&&")
 	;
 	 
 	char[] tokenChars;

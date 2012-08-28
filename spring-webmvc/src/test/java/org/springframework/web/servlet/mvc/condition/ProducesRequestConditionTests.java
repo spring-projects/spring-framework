@@ -36,7 +36,7 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.Pr
 public class ProducesRequestConditionTests {
 
 	@Test
-	public void producesMatch() {
+	public void match() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -46,7 +46,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void negatedProducesMatch() {
+	public void matchNegated() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -56,13 +56,13 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void getProducibleMediaTypesNegatedExpression() {
+	public void getProducibleMediaTypes() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!application/xml");
 		assertEquals(Collections.emptySet(), condition.getProducibleMediaTypes());
 	}
 
 	@Test
-	public void producesWildcardMatch() {
+	public void matchWildcard() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/*");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -72,7 +72,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void producesMultipleMatch() {
+	public void matchMultiple() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain", "application/xml");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -82,7 +82,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void producesSingleNoMatch() {
+	public void matchSingle() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -92,7 +92,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void producesParseError() {
+	public void matchParseError() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
@@ -102,13 +102,22 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void producesParseErrorWithNegation() {
+	public void matchParseErrorWithNegation() {
 		ProducesRequestCondition condition = new ProducesRequestCondition("!text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.addHeader("Accept", "bogus");
 
 		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
+	public void matchByRequestParameter() {
+		ProducesRequestCondition condition = new ProducesRequestCondition(new String[] {"text/plain"}, new String[] {});
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.txt");
+
+		assertNotNull(condition.getMatchingCondition(request));
 	}
 
 	@Test
@@ -286,7 +295,7 @@ public class ProducesRequestConditionTests {
 	}
 
 	@Test
-	public void parseProducesAndHeaders() {
+	public void instantiateWithProducesAndHeaderConditions() {
 		String[] produces = new String[] {"text/plain"};
 		String[] headers = new String[]{"foo=bar", "accept=application/xml,application/pdf"};
 		ProducesRequestCondition condition = new ProducesRequestCondition(produces, headers);
@@ -312,7 +321,7 @@ public class ProducesRequestConditionTests {
 
 	private void assertConditions(ProducesRequestCondition condition, String... expected) {
 		Collection<ProduceMediaTypeExpression> expressions = condition.getContent();
-		assertEquals("Invalid amount of conditions", expressions.size(), expected.length);
+		assertEquals("Invalid number of conditions", expressions.size(), expected.length);
 		for (String s : expected) {
 			boolean found = false;
 			for (ProduceMediaTypeExpression expr : expressions) {

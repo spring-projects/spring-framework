@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,6 +30,7 @@ import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+
 import org.testng.IHookCallBack;
 import org.testng.IHookable;
 import org.testng.ITestResult;
@@ -38,27 +40,23 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 /**
- * <p>
- * Abstract base test class which integrates the
- * <em>Spring TestContext Framework</em> with explicit
- * {@link ApplicationContext} testing support in a <strong>TestNG</strong>
+ * Abstract base test class which integrates the <em>Spring TestContext Framework</em>
+ * with explicit {@link ApplicationContext} testing support in a <strong>TestNG</strong>
  * environment.
- * </p>
- * <p>
- * Concrete subclasses:
- * </p>
+ *
+ * <p>Concrete subclasses:
  * <ul>
  * <li>Typically declare a class-level {@link ContextConfiguration
- * &#064;ContextConfiguration} annotation to configure the
- * {@link ApplicationContext application context}
- * {@link ContextConfiguration#locations() resource locations}.
- * <em>If your test does not need to load an application context, you may choose
- * to omit the {@link ContextConfiguration &#064;ContextConfiguration} declaration
- * and to configure the appropriate
+ * &#064;ContextConfiguration} annotation to configure the {@link ApplicationContext
+ * application context} {@link ContextConfiguration#locations() resource locations}
+ * or {@link ContextConfiguration#classes() annotated classes}. <em>If your test
+ * does not need to load an application context, you may choose to omit the
+ * {@link ContextConfiguration &#064;ContextConfiguration} declaration and to
+ * configure the appropriate
  * {@link org.springframework.test.context.TestExecutionListener TestExecutionListeners}
  * manually.</em></li>
  * <li>Must have constructors which either implicitly or explicitly delegate to
- * <code>super();</code>.</li>
+ * {@code super();}.</li>
  * </ul>
  * 
  * @author Sam Brannen

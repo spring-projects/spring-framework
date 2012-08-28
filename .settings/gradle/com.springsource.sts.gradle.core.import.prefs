@@ -1,9 +1,9 @@
 #com.springsource.sts.gradle.core.preferences.GradleImportPreferences
-#Thu Feb 23 14:10:34 CET 2012
+#Thu Aug  9 11:34:43 CEST 2012
 enableAfterTasks=true
 afterTasks=afterEclipseImport;
 enableDependendencyManagement=false
 enableBeforeTasks=true
-projects=;spring-aop;spring-asm;spring-aspects;spring-beans;spring-context;spring-context-support;spring-core;spring-expression;spring-instrument;spring-instrument-tomcat;spring-jdbc;spring-jms;spring-orm;spring-oxm;spring-struts;spring-test;spring-tx;spring-web;spring-webmvc;spring-webmvc-portlet;
+projects=;spring-aop;spring-aspects;spring-beans;spring-context;spring-context-support;spring-core;spring-expression;spring-instrument;spring-instrument-tomcat;spring-jdbc;spring-jms;spring-orm;spring-oxm;spring-struts;spring-test;spring-tx;spring-web;spring-webmvc;spring-webmvc-portlet;
 enableDSLD=false
-beforeTasks=cleanEclipse;eclipse;\:spring-asm\:jar;\:spring-oxm\:compileTestJava;
+beforeTasks=cleanEclipse;eclipse;\:spring-oxm\:compileTestJava;

@@ -1161,8 +1161,12 @@ public interface IntroductionInfo {
         </listitem>
 
         <listitem>
-          <para>You'll need the CGLIB 2 binaries on your classpath; dynamic
-          proxies are available with the JDK.</para>
+          <para>As of Spring 3.2 it is no longer required to add CGLIB to your
+          project classpath. CGLIB classes have been repackaged under
+          org.springframework and included directly in the spring-core JAR. This
+          is both for user convenience as well as to avoid potential conflicts
+          with other projects that have dependence on a differing version of
+          CGLIB.</para>
         </listitem>
       </itemizedlist>
 

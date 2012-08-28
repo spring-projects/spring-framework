@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,22 +34,24 @@ import org.springframework.util.Assert;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 1.0.2
  */
 public class MockRequestDispatcher implements RequestDispatcher {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
-	private final String url;
+	private final String resource;
 
 
 	/**
-	 * Create a new MockRequestDispatcher for the given URL.
-	 * @param url the URL to dispatch to.
+	 * Create a new MockRequestDispatcher for the given resource.
+	 * @param resource the server resource to dispatch to, located at a
+	 * particular path or given by a particular name
 	 */
-	public MockRequestDispatcher(String url) {
-		Assert.notNull(url, "URL must not be null");
-		this.url = url;
+	public MockRequestDispatcher(String resource) {
+		Assert.notNull(resource, "resource must not be null");
+		this.resource = resource;
 	}
 
 
@@ -59,24 +61,24 @@ public class MockRequestDispatcher implements RequestDispatcher {
 		if (response.isCommitted()) {
 			throw new IllegalStateException("Cannot perform forward - response is already committed");
 		}
-		getMockHttpServletResponse(response).setForwardedUrl(this.url);
+		getMockHttpServletResponse(response).setForwardedUrl(this.resource);
 		if (logger.isDebugEnabled()) {
-			logger.debug("MockRequestDispatcher: forwarding to URL [" + this.url + "]");
+			logger.debug("MockRequestDispatcher: forwarding to [" + this.resource + "]");
 		}
 	}
 
 	public void include(ServletRequest request, ServletResponse response) {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
-		getMockHttpServletResponse(response).addIncludedUrl(this.url);
+		getMockHttpServletResponse(response).addIncludedUrl(this.resource);
 		if (logger.isDebugEnabled()) {
-			logger.debug("MockRequestDispatcher: including URL [" + this.url + "]");
+			logger.debug("MockRequestDispatcher: including [" + this.resource + "]");
 		}
 	}
 
 	/**
-	 * Obtain the underlying MockHttpServletResponse,
-	 * unwrapping {@link HttpServletResponseWrapper} decorators if necessary.
+	 * Obtain the underlying {@link MockHttpServletResponse}, unwrapping
+	 * {@link HttpServletResponseWrapper} decorators if necessary.
 	 */
 	protected MockHttpServletResponse getMockHttpServletResponse(ServletResponse response) {
 		if (response instanceof MockHttpServletResponse) {

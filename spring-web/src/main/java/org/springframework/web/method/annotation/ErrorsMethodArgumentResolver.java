@@ -60,8 +60,8 @@ public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolv
 		}
 
 		throw new IllegalStateException(
-				"An Errors/BindingResult argument is expected to be immediately after the model attribute " +
-				"argument in the controller method signature: " + parameter.getMethod());
+				"An Errors/BindingResult argument is expected to be declared immediately after the model attribute, " +
+				"the @RequestBody or the @RequestPart arguments to which they apply: " + parameter.getMethod());
 	}
 
 }

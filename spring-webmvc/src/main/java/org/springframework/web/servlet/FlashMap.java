@@ -23,38 +23,38 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * A FlashMap provides a way for one request to store attributes intended for 
+ * A FlashMap provides a way for one request to store attributes intended for
  * use in another. This is most commonly needed when redirecting from one URL
- * to another -- e.g. the Post/Redirect/Get pattern. A FlashMap is saved before 
- * the redirect (typically in the session) and is made available after the 
+ * to another -- e.g. the Post/Redirect/Get pattern. A FlashMap is saved before
+ * the redirect (typically in the session) and is made available after the
  * redirect and removed immediately.
- * 
- * <p>A FlashMap can be set up with a request path and request parameters to 
+ *
+ * <p>A FlashMap can be set up with a request path and request parameters to
  * help identify the target request. Without this information, a FlashMap is
- * made available to the next request, which may or may not be the intended 
+ * made available to the next request, which may or may not be the intended
  * recipient. On a redirect, the target URL is known and a FlashMap can be
  * updated with that information. This is done automatically when the
  * {@code org.springframework.web.servlet.view.RedirectView} is used.
- * 
+ *
  * <p>Note: annotated controllers will usually not use FlashMap directly.
  * See {@code org.springframework.web.servlet.mvc.support.RedirectAttributes}
- * for an overview of using flash attributes in annotated controllers. 
- * 
+ * for an overview of using flash attributes in annotated controllers.
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
- * 
+ *
  * @see FlashMapManager
  */
 public final class FlashMap extends HashMap<String, Object> implements Comparable<FlashMap> {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private String targetRequestPath;
-	
+
 	private final MultiValueMap<String, String> targetRequestParams = new LinkedMultiValueMap<String, String>();
-	
+
 	private long expirationStartTime;
-	
+
 	private int timeToLive;
 
 	/**
@@ -100,12 +100,12 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Return the parameters identifying the target request, or an empty map.
 	 */
 	public MultiValueMap<String, String> getTargetRequestParams() {
-		return targetRequestParams;
+		return this.targetRequestParams;
 	}
 
 	/**
@@ -131,7 +131,7 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	}
 
 	/**
-	 * Compare two FlashMaps and prefer the one that specifies a target URL 
+	 * Compare two FlashMaps and prefer the one that specifies a target URL
 	 * path or has more target URL parameters. Before comparing FlashMap
 	 * instances ensure that they match a given request.
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class Tokenizer {
 	int pos;
 	int max;
 	List<Token> tokens = new ArrayList<Token>();
-		
+
 	public Tokenizer(String inputdata) {
 		this.expressionString = inputdata;
 		this.toProcess = (inputdata+"\0").toCharArray();
@@ -46,7 +46,7 @@ class Tokenizer {
 		this.pos = 0;
 		process();
 	}
-	
+
 	public void process() {
 		while (pos<max) {
 			char ch = toProcess[pos];
@@ -128,6 +128,16 @@ class Tokenizer {
 						pushCharToken(TokenKind.ASSIGN);
 					}
 					break;
+				case '&':
+					if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+						pushPairToken(TokenKind.SYMBOLIC_AND);
+					}
+					break;
+				case '|':
+					if (isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
+						pushPairToken(TokenKind.SYMBOLIC_OR);
+					}
+					break;					
 				case '?':
 					if (isTwoCharToken(TokenKind.SELECT)) {
 						pushPairToken(TokenKind.SELECT);
@@ -189,18 +199,19 @@ class Tokenizer {
 					// hit sentinel at end of value
 					pos++; // will take us to the end
 					break;
+				case '\\':
+					throw new InternalParseException(new SpelParseException(expressionString,pos,SpelMessage.UNEXPECTED_ESCAPE_CHAR));
 				default:
 					throw new IllegalStateException("Cannot handle ("+Integer.valueOf(ch)+") '"+ch+"'");
 				}
 			}
 		}
 	}
-	
+
 	public List<Token> getTokens() { 
 		return tokens;
 	}
-		
-	
+
 	// STRING_LITERAL: '\''! (APOS|~'\'')* '\''!;
 	private void lexQuotedStringLiteral() {
 		int start = pos;
@@ -223,7 +234,7 @@ class Tokenizer {
 		pos++;
 		tokens.add(new Token(TokenKind.LITERAL_STRING, subarray(start,pos), start, pos));
 	}
-	
+
 	// DQ_STRING_LITERAL:	'"'! (~'"')* '"'!;
 	private void lexDoubleQuotedStringLiteral() {
 		int start = pos;
@@ -232,7 +243,12 @@ class Tokenizer {
 			pos++;
 			char ch = toProcess[pos];
 			if (ch=='"') {
-				terminated = true; 
+				// may not be the end if the char after is also a "
+				if (toProcess[pos+1]=='"') {
+					pos++; // skip over that too, and continue
+				} else {
+					terminated = true;
+				}
 			}
 			if (ch==0) {
 				throw new InternalParseException(new SpelParseException(expressionString,start,SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING));
@@ -241,8 +257,7 @@ class Tokenizer {
 		pos++;
 		tokens.add(new Token(TokenKind.LITERAL_STRING, subarray(start,pos), start, pos));
 	}
-	
-	
+
 //	REAL_LITERAL :	
 //	  ('.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?) |
 //		((DECIMAL_DIGIT)+ '.' (DECIMAL_DIGIT)+ (EXPONENT_PART)? (REAL_TYPE_SUFFIX)?) |
@@ -256,7 +271,7 @@ class Tokenizer {
 //	fragment REAL_TYPE_SUFFIX : 'F' | 'f' | 'D' | 'd';
 //	INTEGER_LITERAL
 //	: (DECIMAL_DIGIT)+ (INTEGER_TYPE_SUFFIX)?;		
-	
+
 	private void lexNumericLiteral(boolean firstCharIsZero) {
 		boolean isReal = false;
 		int start = pos;
@@ -289,10 +304,19 @@ class Tokenizer {
 		ch = toProcess[pos];
 		if (ch=='.') {
 			isReal = true; 
+			int dotpos = pos;
 			// carry on consuming digits
 			do {
 				pos++;
 			} while (isDigit(toProcess[pos]));
+			if (pos == dotpos + 1) {
+				// the number is something like '3.'. It is really an int but may be
+				// part of something like '3.toString()'. In this case process it as
+				// an int and leave the dot as a separate token.
+				pos = dotpos;
+				pushIntToken(subarray(start, pos), false, start, pos);
+				return;
+			}
 		}
 
 		int endOfNumber = pos;
@@ -307,7 +331,7 @@ class Tokenizer {
 			pushIntToken(subarray(start, endOfNumber), true, start, endOfNumber);
 			pos++;
 		} else if (isExponentChar(toProcess[pos])) {
-			isReal = true; // if it wasnt before, it is now
+			isReal = true; // if it wasn't before, it is now
 			pos++;
 			char possibleSign = toProcess[pos];
 			if (isSign(possibleSign)) {
@@ -344,10 +368,10 @@ class Tokenizer {
 			}
 		}
 	}
-	
+
 	// if this is changed, it must remain sorted
 	private static final String[] alternativeOperatorNames = { "DIV","EQ","GE","GT","LE","LT","MOD","NE","NOT"};
-	
+
 	private void lexIdentifier() {
 		int start = pos;
 		do {
@@ -366,7 +390,7 @@ class Tokenizer {
 		}
 		tokens.add(new Token(TokenKind.IDENTIFIER,subarray,start,pos));
 	}
-	
+
 	private void pushIntToken(char[] data,boolean isLong, int start, int end) {
 		if (isLong) {
 			tokens.add(new Token(TokenKind.LITERAL_LONG,data, start, end));
@@ -389,7 +413,7 @@ class Tokenizer {
 			tokens.add(new Token(TokenKind.LITERAL_HEXINT, data, start, end));
 		}
 	}
-	
+
 	private void pushRealToken(char[] data, boolean isFloat, int start, int end) {
 		if (isFloat) {
 			tokens.add(new Token(TokenKind.LITERAL_REAL_FLOAT, data, start, end));
@@ -397,13 +421,13 @@ class Tokenizer {
 			tokens.add(new Token(TokenKind.LITERAL_REAL, data, start, end));			
 		}
 	}
-	
+
 	private char[] subarray(int start, int end) {
 		char[] result = new char[end - start];
 		System.arraycopy(toProcess, start, result, 0, end - start);
 		return result;
 	}
-	
+
 	/**
 	 * Check if this might be a two character token.
 	 */
@@ -412,7 +436,7 @@ class Tokenizer {
 		Assert.isTrue(toProcess[pos] == kind.tokenChars[0]);
 		return toProcess[pos+1] == kind.tokenChars[1];
 	}
-	
+
 	/**
 	 * Push a token of just one character in length.
 	 */
@@ -420,7 +444,7 @@ class Tokenizer {
 		tokens.add(new Token(kind,pos,pos+1));
 		pos++;
 	}
-	
+
 	/**
 	 * Push a token of two characters in length.
 	 */
@@ -428,7 +452,7 @@ class Tokenizer {
 		tokens.add(new Token(kind,pos,pos+2));
 		pos+=2;
 	}
-	
+
 	private void pushOneCharOrTwoCharToken(TokenKind kind, int pos, char[] data) {
 		tokens.add(new Token(kind,data,pos,pos+kind.getLength()));
 	}
@@ -437,7 +461,7 @@ class Tokenizer {
 	private boolean isIdentifier(char ch) {
 		return isAlphabetic(ch) || isDigit(ch) || ch=='_' || ch=='$';
 	}
-	
+
 	private boolean isChar(char a,char b) {
 		char ch = toProcess[pos];
 		return ch==a || ch==b;
@@ -458,7 +482,7 @@ class Tokenizer {
 	private boolean isSign(char ch) {
 		return ch=='+' || ch=='-';
 	}
-	
+
 	private boolean isDigit(char ch) {
 		if (ch>255) {
 			return false;
@@ -472,14 +496,14 @@ class Tokenizer {
 		}
 		return (flags[ch] & IS_ALPHA)!=0;
 	}
-	
+
 	private boolean isHexadecimalDigit(char ch) {
 		if (ch>255) {
 			return false;
 		}
 		return (flags[ch] & IS_HEXDIGIT)!=0;
 	}
-	
+
 	private static final byte flags[] = new byte[256];	
 	private static final byte IS_DIGIT=0x01;
 	private static final byte IS_HEXDIGIT=0x02;
@@ -502,6 +526,5 @@ class Tokenizer {
 			flags[ch]|= IS_ALPHA;
 		}
 	}
-	
 
 }

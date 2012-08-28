@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,26 @@
 
 package org.springframework.http.client;
 
+import java.net.ProtocolException;
+
+import org.junit.Test;
+import org.springframework.http.HttpMethod;
+
 public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override
 	protected ClientHttpRequestFactory createRequestFactory() {
 		return new SimpleClientHttpRequestFactory();
 	}
+
+	@Test
+	public void httpMethods() throws Exception {
+		try {
+			assertHttpMethod("patch", HttpMethod.PATCH);
+		}
+		catch (ProtocolException ex) {
+			// Currently HttpURLConnection does not support HTTP PATCH
+		}
+	}
+
 }

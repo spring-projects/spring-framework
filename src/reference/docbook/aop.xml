@@ -2549,10 +2549,12 @@ public @interface Idempotent {
       </listitem>
 
       <listitem>
-        <para>You will need the CGLIB 2 binaries on your classpath, whereas
-        dynamic proxies are available with the JDK. Spring will automatically
-        warn you when it needs CGLIB and the CGLIB library classes are not
-        found on the classpath.</para>
+        <para>As of Spring 3.2, it is no longer necessary to add CGLIB to your
+        project classpath, as CGLIB classes are repackaged under
+        org.springframework and included directly in the spring-core JAR. This
+        means that CGLIB-based proxy support 'just works' in the same way that
+        JDK dynamic proxies always have.
+        </para>
       </listitem>
 
       <listitem>

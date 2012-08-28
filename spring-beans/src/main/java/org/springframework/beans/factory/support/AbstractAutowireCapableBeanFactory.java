@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
@@ -106,6 +107,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Costin Leau
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 13.02.2004
  * @see RootBeanDefinition
  * @see DefaultListableBeanFactory
@@ -628,16 +630,26 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return null;
 		}
 
+		List<ValueHolder> argumentValues = mbd.getConstructorArgumentValues().getGenericArgumentValues();
+		Object[] args = new Object[argumentValues.size()];
+		for (int i = 0; i < args.length; i++) {
+			args[i] = argumentValues.get(i).getValue();
+		}
+
 		// If all factory methods have the same return type, return that type.
 		// Can't clearly figure out exact method due to type converting / autowiring!
 		int minNrOfArgs = mbd.getConstructorArgumentValues().getArgumentCount();
 		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
-		Set<Class> returnTypes = new HashSet<Class>(1);
+		Set<Class<?>> returnTypes = new HashSet<Class<?>>(1);
 		for (Method factoryMethod : candidates) {
-			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
-					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
-					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-				returnTypes.add(factoryMethod.getReturnType());
+			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic
+					&& factoryMethod.getName().equals(mbd.getFactoryMethodName())
+					&& factoryMethod.getParameterTypes().length >= minNrOfArgs) {
+
+				Class<?> returnType = GenericTypeResolver.resolveReturnTypeForGenericMethod(factoryMethod, args);
+				if (returnType != null) {
+					returnTypes.add(returnType);
+				}
 			}
 		}
 

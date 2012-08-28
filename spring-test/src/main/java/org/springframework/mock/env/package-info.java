@@ -1,0 +1,10 @@
+/**
+ * This package contains mock implementations of the
+ * {@link org.springframework.core.env.Environment Environment} and
+ * {@link org.springframework.core.env.PropertySource PropertySource}
+ * abstractions introduced in Spring 3.1.
+ * 
+ * <p>These <em>mocks</em> are useful for developing <em>out-of-container</em>
+ * unit tests for code that depends on environment-specific properties.
+ */
+package org.springframework.mock.env;

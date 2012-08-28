@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import org.springframework.core.Conventions;
@@ -27,8 +28,10 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,6 +63,12 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		super(messageConverters);
 	}
 
+	public RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager contentNegotiationManager) {
+
+		super(messageConverters, contentNegotiationManager);
+	}
+
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestBody.class);
 	}
@@ -78,36 +87,55 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
-		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getParameterType());
-		validate(parameter, webRequest, binderFactory, arg);
-		return arg;
+		Object argument = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
+
+		String name = Conventions.getVariableNameForParameter(parameter);
+		WebDataBinder binder = binderFactory.createBinder(webRequest, argument, name);
+
+		if (argument != null) {
+			validate(binder, parameter);
+		}
+
+		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+
+		return argument;
 	}
 
-	private void validate(MethodParameter parameter, NativeWebRequest webRequest,
-			WebDataBinderFactory binderFactory, Object arg) throws Exception, MethodArgumentNotValidException {
+	private void validate(WebDataBinder binder, MethodParameter parameter) throws Exception, MethodArgumentNotValidException {
 
-		if (arg == null) {
-			return;
-		}
 		Annotation[] annotations = parameter.getParameterAnnotations();
 		for (Annotation annot : annotations) {
-			if (!annot.annotationType().getSimpleName().startsWith("Valid")) {
-				continue;
-			}
-			String name = Conventions.getVariableNameForParameter(parameter);
-			WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
-			Object hints = AnnotationUtils.getValue(annot);
-			binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
-			BindingResult bindingResult = binder.getBindingResult();
-			if (bindingResult.hasErrors()) {
-				throw new MethodArgumentNotValidException(parameter, bindingResult);
+			if (annot.annotationType().getSimpleName().startsWith("Valid")) {
+				Object hints = AnnotationUtils.getValue(annot);
+				binder.validate(hints instanceof Object[] ? (Object[]) hints : new Object[] {hints});
+				BindingResult bindingResult = binder.getBindingResult();
+				if (bindingResult.hasErrors()) {
+					if (isBindExceptionRequired(binder, parameter)) {
+						throw new MethodArgumentNotValidException(parameter, bindingResult);
+					}
+				}
+				break;
 			}
 		}
+	}
+
+	/**
+	 * Whether to raise a {@link MethodArgumentNotValidException} on validation errors.
+	 * @param binder the data binder used to perform data binding
+	 * @param parameter the method argument
+	 * @return {@code true} if the next method argument is not of type {@link Errors}.
+	 */
+	private boolean isBindExceptionRequired(WebDataBinder binder, MethodParameter parameter) {
+		int i = parameter.getParameterIndex();
+		Class<?>[] paramTypes = parameter.getMethod().getParameterTypes();
+		boolean hasBindingResult = (paramTypes.length > (i + 1) && Errors.class.isAssignableFrom(paramTypes[i + 1]));
+
+		return !hasBindingResult;
 	}
 
 	@Override
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Class<T> paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		if (inputMessage.getBody() != null) {
 			return super.readWithMessageConverters(inputMessage, methodParam, paramType);

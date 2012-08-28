@@ -35,7 +35,7 @@ import org.springframework.util.ObjectUtils;
  * Spring's {@link Qualifier @Qualifier} annotation.
  *
  * @author Chris Beams
- * @since 3.2
+ * @since 3.1.2
  * @see BeanFactoryUtils
  */
 public class BeanFactoryAnnotationUtils {
@@ -49,7 +49,6 @@ public class BeanFactoryAnnotationUtils {
 	 * @param qualifier the qualifier for selecting between multiple bean matches
 	 * @return the matching bean of type {@code T} (never {@code null})
 	 * @throws IllegalStateException if no matching bean of type {@code T} found
-	 * @since 3.2
 	 */
 	public static <T> T qualifiedBeanOfType(BeanFactory beanFactory, Class<T> beanType, String qualifier) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
@@ -96,7 +95,7 @@ public class BeanFactoryAnnotationUtils {
 		else {
 			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
 					" bean found for qualifier '" + qualifier + "' - neither qualifier " +
-					"match nor bean name match!");
+					"nor bean name matches!");
 		}
 	}
 

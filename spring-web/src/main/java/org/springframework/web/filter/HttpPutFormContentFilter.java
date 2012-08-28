@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,24 +44,24 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * {@link javax.servlet.Filter} that makes form encoded data available through 
- * the {@code ServletRequest.getParameter*()} family of methods during HTTP PUT 
- * requests.
- *  
- * <p>The Servlet spec requires form data to be available for HTTP POST but 
- * not for HTTP PUT requests. This filter intercepts HTTP PUT requests where 
- * content type is {@code 'application/x-www-form-urlencoded'}, reads form
- * encoded content from the body of the request, and wraps the ServletRequest 
+ * {@link javax.servlet.Filter} that makes form encoded data available through
+ * the {@code ServletRequest.getParameter*()} family of methods during HTTP PUT
+ * or PATCH requests.
+ *
+ * <p>The Servlet spec requires form data to be available for HTTP POST but
+ * not for HTTP PUT or PATCH requests. This filter intercepts HTTP PUT and PATCH
+ * requests where content type is {@code 'application/x-www-form-urlencoded'},
+ * reads form encoded content from the body of the request, and wraps the ServletRequest
  * in order to make the form data available as request parameters just like
  * it is for HTTP POST requests.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
 	private final FormHttpMessageConverter formConverter = new XmlAwareFormHttpMessageConverter();
-	
+
 	/**
 	 * The default character set to use for reading form data.
 	 */
@@ -73,7 +73,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(final HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain) throws ServletException, IOException {
 
-		if ("PUT".equals(request.getMethod()) && isFormContentType(request)) {
+		if (("PUT".equals(request.getMethod()) || "PATCH".equals(request.getMethod())) && isFormContentType(request)) {
 			HttpInputMessage inputMessage = new ServletServerHttpRequest(request) {
 				@Override
 				public InputStream getBody() throws IOException {
@@ -102,7 +102,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 	}
 
 	private static class HttpPutFormContentRequestWrapper extends HttpServletRequestWrapper {
-		
+
 		private MultiValueMap<String, String> formParameters;
 
 		public HttpPutFormContentRequestWrapper(HttpServletRequest request, MultiValueMap<String, String> parameters) {

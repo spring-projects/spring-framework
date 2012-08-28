@@ -45,7 +45,18 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * Delegates to {@link #hasError(HttpStatus)} with the response status code.
 	 */
 	public boolean hasError(ClientHttpResponse response) throws IOException {
-		return hasError(response.getStatusCode());
+		return hasError(getStatusCode(response));
+	}
+
+	private HttpStatus getStatusCode(ClientHttpResponse response) throws IOException {
+		HttpStatus statusCode;
+		try {
+			statusCode = response.getStatusCode();
+		}
+		catch (IllegalArgumentException ex) {
+			throw new RestClientException("Unknown status code [" + response.getRawStatusCode() + "]");
+		}
+		return statusCode;
 	}
 
 	/**
@@ -69,7 +80,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * and a {@link RestClientException} in other cases.
 	 */
 	public void handleError(ClientHttpResponse response) throws IOException {
-		HttpStatus statusCode = response.getStatusCode();
+		HttpStatus statusCode = getStatusCode(response);
 		HttpHeaders headers = response.getHeaders();
 		MediaType contentType = headers.getContentType();
 		Charset charset = contentType != null ? contentType.getCharSet() : null;

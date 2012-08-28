@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.w3c.dom.Element;
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a {@code interceptors} element to register
  * a set of {@link MappedInterceptor} definitions.
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -40,37 +40,44 @@ class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
 		parserContext.pushContainingComponent(compDefinition);
-		
+
 		List<Element> interceptors = DomUtils.getChildElementsByTagName(element, new String[] { "bean", "ref", "interceptor" });
 		for (Element interceptor : interceptors) {
 			RootBeanDefinition mappedInterceptorDef = new RootBeanDefinition(MappedInterceptor.class);
 			mappedInterceptorDef.setSource(parserContext.extractSource(interceptor));
 			mappedInterceptorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			
-			String[] pathPatterns;
+
+			String[] includePatterns = null;
+			String[] excludePatterns = null;
 			Object interceptorBean;
 			if ("interceptor".equals(interceptor.getLocalName())) {
-				List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, "mapping");
-				pathPatterns = new String[paths.size()];
-				for (int i = 0; i < paths.size(); i++) {
-					pathPatterns[i] = paths.get(i).getAttribute("path");
-				}
+				includePatterns = getIncludePatterns(interceptor, "mapping");
+				excludePatterns = getIncludePatterns(interceptor, "exclude-mapping");
 				Element beanElem = DomUtils.getChildElementsByTagName(interceptor, new String[] { "bean", "ref"}).get(0);
 				interceptorBean = parserContext.getDelegate().parsePropertySubElement(beanElem, null);
 			}
 			else {
-				pathPatterns = null;
 				interceptorBean = parserContext.getDelegate().parsePropertySubElement(interceptor, null);
 			}
-			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, pathPatterns);
-			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, interceptorBean);
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(0, includePatterns);
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(1, excludePatterns);
+			mappedInterceptorDef.getConstructorArgumentValues().addIndexedArgumentValue(2, interceptorBean);
 
 			String beanName = parserContext.getReaderContext().registerWithGeneratedName(mappedInterceptorDef);
 			parserContext.registerComponent(new BeanComponentDefinition(mappedInterceptorDef, beanName));
 		}
-		
+
 		parserContext.popAndRegisterContainingComponent();
 		return null;
+	}
+
+	private String[] getIncludePatterns(Element interceptor, String elementName) {
+		List<Element> paths = DomUtils.getChildElementsByTagName(interceptor, elementName);
+		String[] patterns = new String[paths.size()];
+		for (int i = 0; i < paths.size(); i++) {
+			patterns[i] = paths.get(i).getAttribute("path");
+		}
+		return patterns;
 	}
 
 }

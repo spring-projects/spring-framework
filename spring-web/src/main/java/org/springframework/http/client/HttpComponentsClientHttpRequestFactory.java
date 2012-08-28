@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,12 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
@@ -40,6 +37,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
@@ -54,6 +55,9 @@ import org.apache.http.protocol.HttpContext;
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
+
+	private static final boolean HTTP_PATCH_AVAILABLE = ClassUtils.isPresent(
+			"org.apache.http.client.methods.HttpPatch", HttpComponentsClientHttpRequestFactory.class.getClassLoader());
 
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
 
@@ -155,8 +159,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				return new HttpPut(uri);
 			case TRACE:
 				return new HttpTrace(uri);
+			case PATCH:
+				return createHttpPatch(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
+		}
+	}
+
+	private HttpUriRequest createHttpPatch(URI uri) {
+		if (!HTTP_PATCH_AVAILABLE) {
+			throw new IllegalArgumentException(
+					"HTTP method PATCH not available before Apache HttpComponents HttpClient 4.2");
+		}
+		else {
+			return new HttpPatch(uri);
 		}
 	}
 

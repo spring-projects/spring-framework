@@ -1,18 +1,18 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2002-2012 the original author or authors.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package org.springframework.web.portlet;
 
@@ -24,7 +24,6 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletSecurityException;
 import javax.portlet.PortletSession;
-import javax.portlet.UnavailableException;
 
 import junit.framework.TestCase;
 
@@ -35,6 +34,9 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
+import org.springframework.mock.web.portlet.MockEvent;
+import org.springframework.mock.web.portlet.MockEventRequest;
+import org.springframework.mock.web.portlet.MockEventResponse;
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
 import org.springframework.mock.web.portlet.MockPortletSession;
@@ -106,7 +108,7 @@ public class DispatcherPortletTests extends TestCase {
 				(FrameworkPortlet.PORTLET_CONTEXT_PREFIX + "simple").equals(simpleDispatcherPortlet.getPortletContextAttributeName()));
 		assertTrue("Context published",
 				simpleDispatcherPortlet.getPortletApplicationContext() ==
-				getPortletContext().getAttribute(FrameworkPortlet.PORTLET_CONTEXT_PREFIX + "simple"));
+						getPortletContext().getAttribute(FrameworkPortlet.PORTLET_CONTEXT_PREFIX + "simple"));
 
 		assertTrue("Correct namespace", "test".equals(complexDispatcherPortlet.getNamespace()));
 		assertTrue("Correct attribute",
@@ -134,6 +136,56 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("action", "invalid");
 		simpleDispatcherPortlet.processAction(request, response);
+		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
+		assertNotNull(exceptionParam);
+		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
+	}
+
+
+	public void testSimpleInvalidActionRequestWithoutHandling() throws Exception {
+		MockActionRequest request = new MockActionRequest();
+		MockActionResponse response = new MockActionResponse();
+		request.setParameter("action", "invalid");
+		simpleDispatcherPortlet.setForwardActionException(false);
+		try {
+			simpleDispatcherPortlet.processAction(request, response);
+			fail("Should have thrown a " + NoHandlerFoundException.class);
+		}
+		catch (NoHandlerFoundException ex) {
+			// expected
+		}
+	}
+
+	public void testSimpleValidEventRequest() throws Exception {
+		MockEvent event = new MockEvent("test-event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "form");
+		simpleDispatcherPortlet.processEvent(request, response);
+		assertEquals("test-event", response.getRenderParameter("event"));
+	}
+
+	public void testSimpleInvalidEventRequest() throws Exception {
+		MockEvent event = new MockEvent("test-event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "invalid");
+		try {
+			simpleDispatcherPortlet.processEvent(request, response);
+			fail("Should have thrown a " + NoHandlerFoundException.class);
+		}
+		catch (NoHandlerFoundException ex) {
+			// expected
+		}
+	}
+
+	public void testSimpleInvalidEventRequestWithHandling() throws Exception {
+		MockEvent event = new MockEvent("event");
+		MockEventRequest request = new MockEventRequest(event);
+		MockEventResponse response = new MockEventResponse();
+		request.setParameter("action", "invalid");
+		simpleDispatcherPortlet.setForwardEventException(true);
+		simpleDispatcherPortlet.processEvent(request, response);
 		String exceptionParam = response.getRenderParameter(DispatcherPortlet.ACTION_EXCEPTION_RENDER_PARAMETER);
 		assertNotNull(exceptionParam);
 		assertTrue(exceptionParam.startsWith(NoHandlerFoundException.class.getName()));
@@ -202,7 +254,7 @@ public class DispatcherPortletTests extends TestCase {
 			fail("Should have thrown PortletSessionRequiredException");
 		}
 		catch (PortletSessionRequiredException ex) {
-			// expected
+// expected
 		}
 	}
 
@@ -247,7 +299,7 @@ public class DispatcherPortletTests extends TestCase {
 			fail("Should have thrown UnavailableException");
 		}
 		catch (NoHandlerFoundException ex) {
-			// expected
+// expected
 		}
 	}
 
@@ -431,7 +483,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setPortletMode(PortletMode.EDIT);
 		ComplexPortletApplicationContext.MockMultipartResolver multipartResolver =
 				(ComplexPortletApplicationContext.MockMultipartResolver)
-				complexDispatcherPortlet.getPortletApplicationContext().getBean("portletMultipartResolver");
+						complexDispatcherPortlet.getPortletApplicationContext().getBean("portletMultipartResolver");
 		MultipartActionRequest multipartRequest = multipartResolver.resolveMultipart(request);
 		complexDispatcherPortlet.processAction(multipartRequest, response);
 		multipartResolver.cleanupMultipart(multipartRequest);
@@ -455,7 +507,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.processAction(request, response);
 		ComplexPortletApplicationContext.TestApplicationListener listener =
 				(ComplexPortletApplicationContext.TestApplicationListener)
-				complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
+						complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
 		assertEquals(1, listener.counter);
 	}
 
@@ -465,7 +517,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.doDispatch(request, response);
 		ComplexPortletApplicationContext.TestApplicationListener listener =
 				(ComplexPortletApplicationContext.TestApplicationListener)
-				complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
+						complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
 		assertEquals(1, listener.counter);
 	}
 
@@ -477,7 +529,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.processAction(request, response);
 		ComplexPortletApplicationContext.TestApplicationListener listener =
 				(ComplexPortletApplicationContext.TestApplicationListener)
-				complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
+						complexDispatcherPortlet.getPortletApplicationContext().getBean("testListener");
 		assertEquals(0, listener.counter);
 	}
 
@@ -611,7 +663,7 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.processAction(request, response);
 		assertEquals("myPortlet action called", response.getRenderParameter("result"));
 		ComplexPortletApplicationContext.MyPortlet myPortlet =
-			(ComplexPortletApplicationContext.MyPortlet) complexDispatcherPortlet.getPortletApplicationContext().getBean("myPortlet");
+				(ComplexPortletApplicationContext.MyPortlet) complexDispatcherPortlet.getPortletApplicationContext().getBean("myPortlet");
 		assertEquals("complex", myPortlet.getPortletConfig().getPortletName());
 		assertEquals(getPortletContext(), myPortlet.getPortletConfig().getPortletContext());
 		assertEquals(complexDispatcherPortlet.getPortletContext(), myPortlet.getPortletConfig().getPortletContext());
@@ -626,12 +678,12 @@ public class DispatcherPortletTests extends TestCase {
 		complexDispatcherPortlet.doDispatch(request, response);
 		assertEquals("myPortlet was here", response.getContentAsString());
 		ComplexPortletApplicationContext.MyPortlet myPortlet =
-			(ComplexPortletApplicationContext.MyPortlet)
-			complexDispatcherPortlet.getPortletApplicationContext().getBean("myPortlet");
+				(ComplexPortletApplicationContext.MyPortlet)
+						complexDispatcherPortlet.getPortletApplicationContext().getBean("myPortlet");
 		assertEquals("complex", myPortlet.getPortletConfig().getPortletName());
 		assertEquals(getPortletContext(), myPortlet.getPortletConfig().getPortletContext());
 		assertEquals(complexDispatcherPortlet.getPortletContext(),
-						 myPortlet.getPortletConfig().getPortletContext());
+				myPortlet.getPortletConfig().getPortletContext());
 		complexDispatcherPortlet.destroy();
 		assertNull(myPortlet.getPortletConfig());
 	}
@@ -769,18 +821,18 @@ public class DispatcherPortletTests extends TestCase {
 	}
 
 	public void testGetMessage() {
-		String message  = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.ENGLISH);
+		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.ENGLISH);
 		assertEquals("test message", message);
 	}
 
 	public void testGetMessageOtherLocale() {
-		String message  = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.CANADA);
+		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test", null, Locale.CANADA);
 		assertEquals("Canadian & test message", message);
 	}
 
 	public void testGetMessageWithArgs() {
 		Object[] args = new String[] {"this", "that"};
-		String message  = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test.args", args, Locale.ENGLISH);
+		String message = complexDispatcherPortlet.getPortletApplicationContext().getMessage("test.args", args, Locale.ENGLISH);
 		assertEquals("test this and that", message);
 	}
 
@@ -793,7 +845,7 @@ public class DispatcherPortletTests extends TestCase {
 			fail("Should have thrown IllegalStateException");
 		}
 		catch (IllegalStateException ex) {
-			// expected
+// expected
 		}
 		portletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
 				new StaticWebApplicationContext());
@@ -813,7 +865,7 @@ public class DispatcherPortletTests extends TestCase {
 		request.setParameter("action", "form");
 		request.setParameter("age", "29");
 
-		// see RequestContextListener.requestInitialized()
+// see RequestContextListener.requestInitialized()
 		try {
 			LocaleContextHolder.setLocale(request.getLocale());
 			RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
@@ -837,7 +889,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.addPreferredLocale(Locale.GERMAN);
 
-		// see RequestContextListener.requestInitialized()
+// see RequestContextListener.requestInitialized()
 		try {
 			LocaleContextHolder.setLocale(request.getLocale());
 			RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
@@ -863,7 +915,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockActionResponse response = new MockActionResponse();
 		request.addPreferredLocale(Locale.GERMAN);
 
-		// see RequestContextListener.requestInitialized()
+// see RequestContextListener.requestInitialized()
 		try {
 			LocaleContextHolder.setLocale(request.getLocale());
 			RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
@@ -890,7 +942,7 @@ public class DispatcherPortletTests extends TestCase {
 		MockRenderResponse response = new MockRenderResponse();
 		request.addPreferredLocale(Locale.GERMAN);
 
-		// see RequestContextListener.requestInitialized()
+// see RequestContextListener.requestInitialized()
 		try {
 			LocaleContextHolder.setLocale(request.getLocale());
 			RequestContextHolder.setRequestAttributes(new PortletRequestAttributes(request));
@@ -903,7 +955,7 @@ public class DispatcherPortletTests extends TestCase {
 				fail("should have failed to find a handler and raised an NoHandlerFoundExceptionException");
 			}
 			catch (NoHandlerFoundException ex) {
-				// expected
+// expected
 			}
 
 			assertSame(servletLocaleContext, LocaleContextHolder.getLocaleContext());

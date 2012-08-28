@@ -31,6 +31,14 @@ import javax.servlet.http.HttpServletResponse;
  * or common handler behavior like locale or theme changes. Its main purpose
  * is to allow for factoring out repetitive handler code.
  *
+ * <p>In an async processing scenario, the handler may be executed in a separate
+ * thread while the main thread exits without rendering or invoking the
+ * {@code postHandle} and {@code afterCompletion} callbacks. When concurrent
+ * handler execution completes, the request is dispatched back in order to
+ * proceed with rendering the model and all methods of this contract are invoked
+ * again. For further options and comments see
+ * {@code org.springframework.web.servlet.HandlerInterceptor}
+ *
  * <p>Typically an interceptor chain is defined per HandlerMapping bean,
  * sharing its granularity. To be able to apply a certain interceptor chain
  * to a group of handlers, one needs to map the desired handlers via one

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,6 +37,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -68,6 +71,10 @@ import org.springframework.web.util.UriUtils;
  * <tr><td>PUT</td><td>{@link #put}</td></tr>
  * <tr><td>any</td><td>{@link #exchange}</td></tr>
  * <tr><td></td><td>{@link #execute}</td></tr> </table>
+ *
+ * <p>The {@code exchange} and {@code execute} methods are generalized versions of the more specific methods listed
+ * above them. They support additional, less frequently used combinations including support for requests using the
+ * HTTP PATCH method. However, note that the underlying HTTP library must also support the desired combination.</p>
  *
  * <p>For each of these HTTP methods, there are three corresponding Java methods in the {@code RestTemplate}. Two
  * variant take a {@code String} URI as first argument (eg. {@link #getForObject(String, Class, Object[])}, {@link
@@ -145,6 +152,10 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new ResourceHttpMessageConverter());
 		this.messageConverters.add(new SourceHttpMessageConverter());
 		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		if (romePresent) {
+			this.messageConverters.add(new AtomFeedHttpMessageConverter());
+			this.messageConverters.add(new RssChannelHttpMessageConverter());
+		}
 		if (jaxb2Present) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
@@ -153,10 +164,6 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		else if (jacksonPresent) {
 			this.messageConverters.add(new MappingJacksonHttpMessageConverter());
-		}
-		if (romePresent) {
-			this.messageConverters.add(new AtomFeedHttpMessageConverter());
-			this.messageConverters.add(new RssChannelHttpMessageConverter());
 		}
 	}
 
@@ -380,6 +387,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Object... uriVariables) throws RestClientException {
+
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
@@ -387,6 +395,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
 		return execute(url, method, requestCallback, responseExtractor, uriVariables);
@@ -394,8 +403,36 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
 			Class<T> responseType) throws RestClientException {
+
 		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, responseType);
 		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(responseType);
+		return execute(url, method, requestCallback, responseExtractor);
+	}
+
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
+
+		Type type = responseType.getType();
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, type);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(type);
+		return execute(url, method, requestCallback, responseExtractor, uriVariables);
+	}
+
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
+
+		Type type = responseType.getType();
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, type);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(type);
+		return execute(url, method, requestCallback, responseExtractor, uriVariables);
+	}
+
+	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType) throws RestClientException {
+
+		Type type = responseType.getType();
+		HttpEntityRequestCallback requestCallback = new HttpEntityRequestCallback(requestEntity, type);
+		ResponseEntityResponseExtractor<T> responseExtractor = new ResponseEntityResponseExtractor<T>(type);
 		return execute(url, method, requestCallback, responseExtractor);
 	}
 
@@ -500,36 +537,61 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 */
 	private class AcceptHeaderRequestCallback implements RequestCallback {
 
-		private final Class<?> responseType;
+		private final Type responseType;
 
-		private AcceptHeaderRequestCallback(Class<?> responseType) {
+		private AcceptHeaderRequestCallback(Type responseType) {
 			this.responseType = responseType;
 		}
 
 		@SuppressWarnings("unchecked")
 		public void doWithRequest(ClientHttpRequest request) throws IOException {
 			if (responseType != null) {
+				Class<?> responseClass = null;
+				if (responseType instanceof Class) {
+					responseClass = (Class) responseType;
+				}
+
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter.canRead(responseType, null)) {
-						List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
-						for (MediaType supportedMediaType : supportedMediaTypes) {
-							if (supportedMediaType.getCharSet() != null) {
-								supportedMediaType =
-										new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
-							}
-							allSupportedMediaTypes.add(supportedMediaType);
+					if (responseClass != null) {
+						if (messageConverter.canRead(responseClass, null)) {
+							allSupportedMediaTypes
+									.addAll(getSupportedMediaTypes(messageConverter));
 						}
 					}
+					else if (messageConverter instanceof GenericHttpMessageConverter) {
+
+						GenericHttpMessageConverter genericMessageConverter =
+								(GenericHttpMessageConverter) messageConverter;
+						if (genericMessageConverter.canRead(responseType, null)) {
+							allSupportedMediaTypes
+									.addAll(getSupportedMediaTypes(messageConverter));
+						}
+					}
+
 				}
 				if (!allSupportedMediaTypes.isEmpty()) {
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
+						logger.debug("Setting request Accept header to " +
+								allSupportedMediaTypes);
 					}
 					request.getHeaders().setAccept(allSupportedMediaTypes);
 				}
 			}
+		}
+
+		private List<MediaType> getSupportedMediaTypes(HttpMessageConverter<?> messageConverter) {
+			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
+			List<MediaType> result = new ArrayList<MediaType>(supportedMediaTypes.size());
+			for (MediaType supportedMediaType : supportedMediaTypes) {
+				if (supportedMediaType.getCharSet() != null) {
+					supportedMediaType =
+							new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
+				}
+				result.add(supportedMediaType);
+			}
+			return result;
 		}
 	}
 
@@ -546,7 +608,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 
 		@SuppressWarnings("unchecked")
-		private HttpEntityRequestCallback(Object requestBody, Class<?> responseType) {
+		private HttpEntityRequestCallback(Object requestBody, Type responseType) {
 			super(responseType);
 			if (requestBody instanceof HttpEntity) {
 				this.requestEntity = (HttpEntity) requestBody;
@@ -614,7 +676,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 
 		private final HttpMessageConverterExtractor<T> delegate;
 
-		public ResponseEntityResponseExtractor(Class<T> responseType) {
+		public ResponseEntityResponseExtractor(Type responseType) {
 			if (responseType != null && !Void.class.equals(responseType)) {
 				this.delegate = new HttpMessageConverterExtractor<T>(responseType, getMessageConverters(), logger);
 			} else {

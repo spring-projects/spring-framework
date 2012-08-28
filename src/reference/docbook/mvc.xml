@@ -868,9 +868,9 @@ public class ClinicController {
         <classname>RequestMappingHandlerAdapter</classname> respectively.
         They are recommended for use and even required to take advantage of
         new features in Spring MVC 3.1 and going forward. The new support
-        classes are enabled by default by the MVC namespace and MVC Java
-        config (<classname>@EnableWebMvc</classname>) but must be configured
-        explicitly if using neither. This section describes a few
+        classes are enabled by default by the MVC namespace and the MVC Java
+        config but must be configured explicitly if using neither.
+        This section describes a few
         important differences between the old and the new support classes.
         </para>
 
@@ -1181,7 +1181,7 @@ public class RelativePathUriTemplateController {
       They are recommended for use and even required to take advantage
       of new features in Spring MVC 3.1 and going forward.
       The new support classes are enabled by default from the MVC namespace and
-      with use of the MVC Java config (<code>@EnableWebMvc</code>) but must be
+      with use of the MVC Java config but must be
       configured explicitly if using neither.
       </para></note>
 
@@ -1550,16 +1550,20 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
 
         <para>For more information on these converters, see <link
         linkend="rest-message-conversion">Message Converters</link>. Also note
-        that if using the MVC namespace, a wider range of message converters
-        are registered by default. See <xref
-        linkend="mvc-annotation-driven" /> for more information.</para>
+        that if using the MVC namespace or the MVC Java config, a wider
+        range of message converters are registered by default.
+        See <link linkend="mvc-config-enable">Enabling the MVC Java Config or
+        the MVC XML Namespace</link> for more information.</para>
 
         <para>If you intend to read and write XML, you will need to configure
         the <classname>MarshallingHttpMessageConverter</classname> with a
         specific <interfacename>Marshaller</interfacename> and an
         <interfacename>Unmarshaller</interfacename> implementation from the
-        <classname>org.springframework.oxm</classname> package. For
-        example:</para>
+        <classname>org.springframework.oxm</classname> package. The example
+        below shows how to do that directly in your configuration but if
+        your application is configured through the MVC namespace or the
+        MVC Java config see <link linkend="mvc-config-enable">Enabling
+        the MVC Java Config or the MVC XML Namespace</link> instead.</para>
 
         <programlisting language="xml">&lt;bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"&gt;
     &lt;property name="messageConverters"&gt;
@@ -1584,21 +1588,22 @@ public void handle(@RequestBody String body, Writer writer) throws IOException {
         <para>An <classname>@RequestBody</classname> method parameter can be
         annotated with <classname>@Valid</classname>, in which case it will be
         validated using the configured <classname>Validator</classname>
-        instance. When using the MVC namespace a JSR-303 validator is
-        configured automatically assuming a JSR-303 implementation is
+        instance. When using the MVC namespace or the MVC Java config, a JSR-303 validator
+        is configured automatically assuming a JSR-303 implementation is
         available on the classpath.</para>
-        <para>Unlike <classname>@ModelAttribute</classname> parameters, for which
-        a <classname>BindingResult</classname> can be used to examine the errors,
-        <classname>@RequestBody</classname> validation errors always result in a
-        <classname>MethodArgumentNotValidException</classname> being raised.
+        <para>Just like with <classname>@ModelAttribute</classname> parameters,
+        an <classname>Errors</classname> argument can be used to examine the errors.
+        If such an argument is not declared, a
+        <classname>MethodArgumentNotValidException</classname> will be raised.
         The exception is handled in the
         <classname>DefaultHandlerExceptionResolver</classname>, which sends
         a <literal>400</literal> error back to the client.</para>
 
         <note>
-          <para>Also see <xref linkend="mvc-annotation-driven" /> for
+          <para>Also see <link linkend="mvc-config-enable">Enabling the MVC
+          Java Config or the MVC XML Namespace</link> for
           information on configuring message converters and a validator
-          through the MVC namespace.</para>
+          through the MVC namespace or the MVC Java config.</para>
         </note>
       </section>
 
@@ -1719,6 +1724,13 @@ public void populateModel(@RequestParam String number, Model model) {
         methods are invoked before
         <interfacename>@RequestMapping</interfacename> methods of the same
         controller.</para>
+
+        <para><interfacename>@ModelAttribute</interfacename> methods can also
+        be defined in an <interfacename>@ControllerAdvice</interfacename>-annotated
+        class and such methods apply to all controllers.
+        The <interfacename>@ControllerAdvice</interfacename> annotation is
+        a component annotation allowing implementation classes to be autodetected
+        through classpath scanning.</para>
 
         <tip>
           <para>What happens when a model attribute name is not explicitly
@@ -1944,8 +1956,7 @@ public class EditPetForm {
         <interfacename>RedirectAttributes</interfacename> or if it doesn't do
         so no attributes should be passed on to
         <classname>RedirectView</classname>. Both the MVC namespace and the
-        MVC Java config (via <interfacename>@EnableWebMvc</interfacename>)
-        keep this flag set to <literal>false</literal> in order to maintain
+        MVC Java config keep this flag set to <literal>false</literal> in order to maintain
         backwards compatibility. However, for new applications we recommend
         setting it to <literal>true</literal></para>
 
@@ -1975,7 +1986,7 @@ public class EditPetForm {
         <literal>ServletRequest.getParameter*()</literal> family of methods to
         support form field access only for HTTP POST, not for HTTP PUT.</para>
 
-        <para>To support HTTP PUT requests, the <literal>spring-web</literal>
+        <para>To support HTTP PUT and PATCH requests, the <literal>spring-web</literal>
         module provides the filter
         <classname>HttpPutFormContentFilter</classname>, which can be
         configured in <filename>web.xml</filename>:</para>
@@ -1995,7 +2006,7 @@ public class EditPetForm {
   &lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;
 &lt;/servlet&gt;</programlisting>
 
-        <para>The above filter intercepts HTTP PUT requests with content type
+        <para>The above filter intercepts HTTP PUT and PATCH requests with content type
         <literal>application/x-www-form-urlencoded</literal>, reads the form
         data from the body of the request, and wraps the
         <classname>ServletRequest</classname> in order to make the form data
@@ -2106,9 +2117,11 @@ public void displayHeaderInfo(<emphasis role="bold">@RequestHeader("Accept-Encod
 
         <para>To customize request parameter binding with PropertyEditors
         through Spring's <classname>WebDataBinder</classname>, you can use
-        either <interfacename>@InitBinder</interfacename>-annotated methods
-        within your controller or externalize your configuration by providing
-        a custom <interfacename>WebBindingInitializer</interfacename>.</para>
+        <interfacename>@InitBinder</interfacename>-annotated methods within
+        your controller, <interfacename>@InitBinder</interfacename> methods
+        within an <interfacename>@ControllerAdvice</interfacename> class,
+        or provide a custom
+        <interfacename>WebBindingInitializer</interfacename>.</para>
 
         <section id="mvc-ann-initbinder">
           <title>Customizing data binding with
@@ -2176,6 +2189,22 @@ public class MyFormController {
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
         </section>
+
+        <section id="mvc-ann-initbinder-advice">
+          <title>Customizing data binding with externalized
+          <interfacename>@InitBinder</interfacename> methods</title>
+
+          <para><interfacename>@InitBinder</interfacename> methods can also
+          be defined in an <interfacename>@ControllerAdvice</interfacename>-annotated
+          class in which case they apply to all controllers. This provides an
+          alternative to using a <interfacename>WebBindingInitializer</interfacename>.
+          </para>
+
+          <para>The <interfacename>@ControllerAdvice</interfacename> annotation is
+          a component annotation allowing implementation classes to be autodetected
+          through classpath scanning.</para>
+        </section>
+
       </section>
 
       <section id="mvc-ann-lastmodified">
@@ -2410,8 +2439,10 @@ public class TimeBasedAccessInterceptor extends HandlerInterceptorAdapter {
         <para>In the example above, the configured interceptor will apply to
         all requests handled with annotated controller methods. If you want to
         narrow down the URL paths to which an interceptor applies, you can use
-        the MVC namespace to do that. See <xref
-        linkend="mvc-annotation-driven" />.</para>
+        the MVC namespace or the MVC Java config, or declare bean instances
+        of type <classname>MappedInterceptor</classname> to do that. See <link
+        linkend="mvc-config-enable">Enabling the MVC Java Config or the MVC
+        XML Namespace</link>.</para>
       </tip>
     </section>
   </section>
@@ -3620,18 +3651,108 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
       <interfacename>HandlerExceptionResolver</interfacename> interface, which
       is only a matter of implementing the
       <literal>resolveException(Exception, Handler)</literal> method and
-      returning a <classname>ModelAndView</classname>, you may also use the
-      <classname>SimpleMappingExceptionResolver</classname>. This resolver
+      returning a <classname>ModelAndView</classname>, you may also use the provided
+      <classname>SimpleMappingExceptionResolver</classname> or create
+      <interfacename>@ExceptionHandler</interfacename> methods.
+      The <classname>SimpleMappingExceptionResolver</classname>
       enables you to take the class name of any exception that might be thrown
       and map it to a view name. This is functionally equivalent to the
       exception mapping feature from the Servlet API, but it is also possible
       to implement more finely grained mappings of exceptions from different
-      handlers.</para>
+      handlers. The <interfacename>@ExceptionHandler</interfacename> annotation on
+      the other hand can be used on methods that should be invoked to handle an
+      exception. Such methods may be defined locally within an
+      <interfacename>@Controller</interfacename> or may apply globally to all
+      <interfacename>@RequestMapping</interfacename> methods when defined within
+      an <interfacename>@ControllerAdvice</interfacename> class.
+      The following sections explain this in more detail.</para>
+    </section>
 
-      <para>By default, the <classname>DispatcherServlet</classname> registers
-      the <classname>DefaultHandlerExceptionResolver</classname>. This
-      resolver handles certain standard Spring MVC exceptions by setting a
-      specific response status code: <informaltable>
+    <section id="mvc-ann-exceptionhandler">
+      <title><interfacename>@ExceptionHandler</interfacename></title>
+
+      <para>The <interfacename>HandlerExceptionResolver</interfacename> interface
+      and the <classname>SimpleMappingExceptionResolver</classname> implementations
+      allow you to map Exceptions to specific views declaratively along with some
+      optional Java logic before forwarding to those views. However, in some cases,
+      especially when relying on <interfacename>@ResponseBody</interfacename> methods
+      rather than on view resolution, it may be more convenient to directly set the
+      status of the response and optionally write error content to the body of the
+      response.</para>
+
+      <para>You can do that with <interfacename>@ExceptionHandler</interfacename>
+      methods. When declared within a controller such methods apply to exceptions
+      raised by <interfacename>@RequestMapping</interfacename> methods of that
+      contoroller (or any of its sub-classes). You can also declare an
+      <interfacename>@ExceptionHandler</interfacename> method within an
+      <interfacename>@ControllerAdvice</interfacename> class in which case it
+      handles exceptions from <interfacename>@RequestMapping</interfacename>
+      methods from any controller.
+      The <interfacename>@ControllerAdvice</interfacename> annotation is
+      a component annotation, which can be used with classpath scanning. It is
+      automatically enabled when using the MVC namespace and the MVC Java config,
+      or otherwise depending on whether the
+      <classname>ExceptionHandlerExceptionResolver</classname> is configured or not.
+      Below is an example of a controller-local
+      <interfacename>@ExceptionHandler</interfacename> method:</para>
+
+      <programlisting language="java">@Controller
+public class SimpleController {
+
+
+  // @RequestMapping methods omitted ...
+
+
+  @ExceptionHandler(IOException.class)
+  public ResponseEntity&lt;String&gt; handleIOException(IOException ex) {
+
+    // prepare responseEntity
+
+    return responseEntity;
+  }
+
+}</programlisting>
+
+      <para>The <classname>@ExceptionHandler</classname> value can be set to
+      an array of Exception types. If an exception is thrown that matches one of
+      the types in the list, then the method annotated with the matching
+      <classname>@ExceptionHandler</classname> will be invoked. If the
+      annotation value is not set then the exception types listed as method
+      arguments are used.</para>
+
+      <para>Much like standard controller methods annotated with a
+      <interfacename>@RequestMapping</interfacename> annotation, the method arguments
+      and return values of <interfacename>@ExceptionHandler</interfacename> methods
+      can be flexible. For example, the
+      <classname>HttpServletRequest</classname> can be accessed in Servlet
+      environments and the <classname>PortletRequest</classname> in Portlet
+      environments. The return type can be a <classname>String</classname>,
+      which is interpreted as a view name, a
+      <classname>ModelAndView</classname> object, a
+      <classname>ResponseEntity</classname>, or you can also add the
+      <interfacename>@ResponseBody</interfacename> to have the method return value
+      converted with message converters and written to the response stream.</para>
+
+    </section>
+
+    <section id="mvc-ann-rest-spring-mvc-exceptions">
+      <title>Handling Standard Spring MVC Exceptions</title>
+
+      <para>Spring MVC may raise a number of exceptions while processing
+      a request. The <classname>SimpleMappingExceptionResolver</classname> can easily
+      map any exception to a default error view as needed.
+      However, when working with clients that interpret responses in an automated
+      way you will want to set specific status code on the response. Depending on
+      the exception raised the status code may indicate a client error (4xx) or a
+      server error (5xx).</para>
+
+      <para>The <classname>DefaultHandlerExceptionResolver</classname> translates
+      Spring MVC exceptions to specific error status codes. It is registered
+      by default with the MVC namespace, the MVC Java config, and also by the
+      the <classname>DispatcherServlet</classname> (i.e. when not using the MVC
+      namespace or Java config). Listed below are some of the exceptions handled
+      by this resolver and the corresponding status codes:
+      <informaltable>
           <tgroup cols="2">
             <thead>
               <row>
@@ -3642,6 +3763,12 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
             </thead>
 
             <tbody>
+              <row>
+                <entry><classname>BindException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
               <row>
                 <entry><classname>ConversionNotSupportedException</classname></entry>
 
@@ -3679,7 +3806,19 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
               </row>
 
               <row>
+                <entry><classname>MethodArgumentNotValidException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
                 <entry><classname>MissingServletRequestParameterException</classname></entry>
+
+                <entry>400 (Bad Request)</entry>
+              </row>
+
+              <row>
+                <entry><classname>MissingServletRequestPartException</classname></entry>
 
                 <entry>400 (Bad Request)</entry>
               </row>
@@ -3697,52 +3836,98 @@ public String onSubmit(<emphasis role="bold">@RequestPart("meta-data") MetaData 
               </row>
             </tbody>
           </tgroup>
-        </informaltable></para>
+        </informaltable>
+        </para>
+
+        <para>The <classname>DefaultHandlerExceptionResolver</classname> works
+        transparently by setting the status of the response. However, it stops short
+        of writing any error content to the body of the response while your
+        application may need to add developer-friendly content to every error
+        response for example when providing a REST API. You can prepare a
+        <classname>ModelAndView</classname> and
+        render error content through view resolution -- i.e. by configuring a
+        <classname>ContentNeogitatingViewResolver</classname>,
+        <classname>MappingJacksonJsonView</classname>, and so on. However, you
+        may prefer to use <interfacename>@ExceptionHandler</interfacename>
+        methods instead.</para>
+
+        <para>If you prefer to write error content via
+        <interfacename>@ExceptionHandler</interfacename> methods you can extend
+        <classname>ResponseEntityExceptionHandler</classname> instead.
+        This is a convenient base for <interfacename>@ControllerAdvice</interfacename>
+        classes providing an <interfacename>@ExceptionHandler</interfacename>
+        method to handle standard Spring MVC exceptions and return
+        <classname>ResponseEntity</classname>. That allows you to customize the response
+        and write error content with message converters. See the Javadoc of
+        <classname>ResponseEntityExceptionHandler</classname> for more details.</para>
     </section>
 
-    <section id="mvc-ann-exceptionhandler">
-      <title><interfacename>@ExceptionHandler</interfacename></title>
+    <section id="mvc-ann-annotated-exceptions">
+      <title>Annotating Business Exceptions With <interfacename>@ResponseStatus</interfacename></title>
 
-      <para>An alternative to the
-      <interfacename>HandlerExceptionResolver</interfacename> interface is the
-      <interfacename>@ExceptionHandler</interfacename> annotation. You use the
-      <classname>@ExceptionHandler</classname> method annotation within a
-      controller to specify which method is invoked when an exception of a
-      specific type is thrown during the execution of controller methods. For
-      example:</para>
+      <para>A business exception can be annotated with
+      <interfacename>@ResponseStatus</interfacename>. When the exception is raised,
+      the <classname>ResponseStatusExceptionResolver</classname> handles it by
+      setting the status of the response accordingly.
+      By default the <classname>DispatcherServlet</classname> registers
+      the <classname>ResponseStatusExceptionResolver</classname> and it is
+      available for use.</para>
 
-      <programlisting language="java">@Controller
-public class SimpleController {
+    </section>
 
-  // other controller method omitted
+    <section id="mvc-ann-customer-servlet-container-error-page">
+      <title>Customizing the Default Servlet Container Error Page</title>
 
-  @ExceptionHandler(IOException.class)
-  public String handleIOException(IOException ex, HttpServletRequest request) {
-    return ClassUtils.getShortName(ex.getClass());
-  }
+        <para>When the status of the response is set to an error status code
+        and the body of the response is empty, Servlet containers commonly render
+        an HTML formatted error page.
+        To customize the default error page of the container, you can
+        declare an <code>&lt;error-page&gt;</code> element in
+        <filename>web.xml</filename>. Up until Servlet 3, that element had to
+        be mapped to a specific status code or exception type. Starting with
+        Servlet 3 an error page does not need to be mapped, which effectively
+        means the specified location customizes the default Servlet container
+        error page.</para>
+
+      <programlisting language="xml">&lt;error-page&gt;
+    &lt;location&gt;/error&lt;/location&gt;
+&lt;/error-page&gt;
+</programlisting>
+
+        <para>Note that the actual location for the error page can be a
+        JSP page or some other URL within the container including one handled
+        through an <interfacename>@Controller</interfacename> method:</para>
+
+        <para>When writing error information, the status code and the error message
+        set on the <interfacename>HttpServletResponse</interfacename> can be
+        accessed through request attributes in a controller:</para>
+
+<programlisting language="java">@Controller
+public class ErrorController {
+
+	@RequestMapping(value="/error", produces="application/json")
+	@ResponseBody
+	public Map&lt;String, Object&gt; handle(HttpServletRequest request) {
+
+		Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();
+		map.put("status", request.getAttribute("javax.servlet.error.status_code"));
+		map.put("reason", request.getAttribute("javax.servlet.error.message"));
+
+		return map;
+	}
+
 }</programlisting>
 
-      <para>will invoke the 'handlerIOException' method when a
-      <classname>java.io.IOException</classname> is thrown.</para>
+        <para>or in a JSP:</para>
 
-      <para>The <classname>@ExceptionHandler</classname> value can be set to
-      an array of Exception types. If an exception is thrown matches one of
-      the types in the list, then the method annotated with the matching
-      <classname>@ExceptionHandler</classname> will be invoked. If the
-      annotation value is not set then the exception types listed as method
-      arguments are used.</para>
+      <programlisting language="xml">&lt;%@ page contentType="application/json" pageEncoding="UTF-8"%&gt;
+{
+   status:&lt;%=request.getAttribute("javax.servlet.error.status_code") %&gt;,
+   reason:&lt;%=request.getAttribute("javax.servlet.error.message") %&gt;
+}</programlisting>
 
-      <para>Much like standard controller methods annotated with a
-      <classname>@RequestMapping</classname> annotation, the method arguments
-      and return values of <classname>@ExceptionHandler</classname> methods
-      are very flexible. For example, the
-      <classname>HttpServletRequest</classname> can be accessed in Servlet
-      environments and the <classname>PortletRequest</classname> in Portlet
-      environments. The return type can be a <classname>String</classname>,
-      which is interpreted as a view name or a
-      <classname>ModelAndView</classname> object. Refer to the API
-      documentation for more details.</para>
     </section>
+
   </section>
 
   <section id="mvc-coc">
@@ -4148,7 +4333,7 @@ public class SimpleController {
 	</para>
 
 	<section id="mvc-config-enable">
-		<title>Enabling MVC Java Config or the MVC XML Namespace</title>
+		<title>Enabling the MVC Java Config or the MVC XML Namespace</title>
 	
 		<para>To enable MVC Java config add the annotation 
 		<interfacename>@EnableWebMvc</interfacename> to one of your 
@@ -4353,7 +4538,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new LocalInterceptor());
+    registry.addInterceptor(new LocaleInterceptor());
+    registry.addInterceptor(new ThemeInterceptor()).addPathPatterns("/**").excludePathPatterns("/admin/**");
     registry.addInterceptor(new SecurityInterceptor()).addPathPatterns("/secure/*");
  }
 
@@ -4364,6 +4550,11 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <programlisting language="xml">&lt;mvc:interceptors&gt;
     &lt;bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" /&gt;
     &lt;mvc:interceptor&gt;
+        &lt;mapping path="/**"/&gt;
+        &lt;exclude-mapping path="/admin/**"/&gt;
+        &lt;bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" /&gt;
+    &lt;/mvc:interceptor&gt;
+    &lt;mvc:interceptor&gt;
         &lt;mapping path="/secure/*"/&gt;
         &lt;bean class="org.example.SecurityInterceptor" /&gt;
     &lt;/mvc:interceptor&gt;
@@ -4371,6 +4562,49 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 </programlisting>
 
     </section>
+
+    <section id="mvc-config-content-negotiation">
+      <title>Configuring Content Negotiation</title>
+
+      <para>You can configure how Spring MVC determines requested media types for content negotiation purposes.
+      The available strategies are to check the request path extension, a
+      request parameter, the "Accept" header, and also to use a default content type.</para>
+
+      <para>By default the path extension is checked first and the "Accept"
+      header is checked second. The path extension check recognizes ".json" if Jackson is available,
+      ".xml" if JAXB2 is available, and ".atom" and ".rss" if the Rome library is available.
+      It also uses the <classname>ServletContext</classname> and the <emphasis>Java Activation Framework</emphasis>
+      to perform lookups as a fallback option.</para>
+
+      <para>An example of customizing content negotiation in Java:</para>
+
+      <programlisting language="java">@EnableWebMvc
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+  @Override
+  public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+    configurer.setFavorPathExtension(false).setFavorParameter(true);
+  }
+}</programlisting>
+
+     <para>In XML you'll need to use the <code>content-negotiation-manager</code>
+     property of <code>annotation-driven</code>:</para>
+
+		<programlisting language="xml">&lt;mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" /&gt;
+
+&lt;bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"&gt;
+    &lt;property name="favorPathExtension" value="false" /&gt;
+    &lt;property name="favorParameter" value="true" /&gt;
+    &lt;property name="mediaTypes" &gt;
+        &lt;value&gt;
+            json=application/json
+            xml=application/xml
+        &lt;/value&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;</programlisting>
+
+	</section>
 
     <section id="mvc-config-view-controller">
       <title>Configuring View Controllers</title>

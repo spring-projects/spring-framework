@@ -1177,8 +1177,10 @@ public interface IntroductionInfo {
         </listitem>
 
         <listitem>
-          <para>You'll need the CGLIB 2 binaries on your classpath; dynamic
-          proxies are available with the JDK.</para>
+          <para>There is no need to add CGLIB to your classpath. As of Spring
+          3.2, CGLIB is repackaged and included in the spring-core JAR. In
+          other words, CGLIB-based AOP will work "out of the box" just as do
+          JDK dynamic proxies.</para>
         </listitem>
       </itemizedlist>
 

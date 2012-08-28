@@ -1,45 +1,42 @@
 ## Spring Framework
-The Spring Framework provides a comprehensive programming and configuration model for modern
-Java-based enterprise applications - on any kind of deployment platform. A key element of Spring is
-infrastructural support at the application level: Spring focuses on the "plumbing" of enterprise
-applications so that teams can focus on application-level business logic, without unnecessary ties
-to specific deployment environments.
+The Spring Framework provides a comprehensive programming and configuration
+model for modern Java-based enterprise applications - on any kind of deployment
+platform. A key element of Spring is infrastructural support at the application
+level: Spring focuses on the "plumbing" of enterprise applications so that teams
+can focus on application-level business logic, without unnecessary ties to
+specific deployment environments.
 
-The framework also serves as the foundation for
-[Spring Integration](https://github.com/SpringSource/spring-integration),
-[Spring Batch](https://github.com/SpringSource/spring-batch) and the rest of the Spring
-[family of projects](http://springsource.org/projects). Browse the repositories under the
-[SpringSource organization](https://github.com/SpringSource) on GitHub for a full list.
+The framework also serves as the foundation for [Spring Integration][], [Spring
+Batch][] and the rest of the Spring [family of projects][]. Browse the
+repositories under the [SpringSource organization][] on GitHub for a full list.
 
-[.NET](https://github.com/SpringSource/spring-net) and
-[Python](https://github.com/SpringSource/spring-python) variants are available as well.
+[.NET][] and [Python][] variants are available as well.
 
 ## Downloading artifacts
-Instructions on
-[downloading Spring artifacts](https://github.com/SpringSource/spring-framework/wiki/Downloading-Spring-artifacts)
-via Maven and other build systems are available via the project wiki.
+See [downloading Spring artifacts][] for Maven repository information. Unable to
+use Maven or other transitive dependency management tools? See [building a
+distribution with dependencies][].
 
 ## Documentation
-See the current [Javadoc](http://static.springsource.org/spring-framework/docs/current/api)
-and [Reference docs](http://static.springsource.org/spring-framework/docs/current/reference).
+See the current [Javadoc][] and [reference docs][].
 
 ## Getting support
-Check out the [Spring forums](http://forum.springsource.org) and the
-[Spring tag](http://stackoverflow.com/questions/tagged/spring) on StackOverflow.
-[Commercial support](http://springsource.com/support/springsupport) is available too.
+Check out the [Spring forums][] and the [spring][spring tag] and
+[spring-mvc][spring-mvc tag] tags on [Stack Overflow][]. [Commercial support][]
+is available too.
 
 ## Issue Tracking
-Spring's JIRA issue tracker can be found [here](http://jira.springsource.org/browse/SPR). Think
-you've found a bug? Please consider submitting a reproduction project via the
-[spring-framework-issues](https://github.com/SpringSource/spring-framework-issues) repository. The
-[readme](https://github.com/SpringSource/spring-framework-issues#readme) provides simple
-step-by-step instructions.  <a name="building_from_source"/>
+Report issues via the [Spring Framework JIRA]. Understand our issue management
+process by reading about [the lifecycle of an issue][]. Think you've found a
+bug? Please consider submitting a reproduction project via the
+[spring-framework-issues][] GitHub repository. The [readme][] there provides
+simple step-by-step instructions.
 
 ## Building from source
-The Spring Framework uses a [Gradle](http://gradle.org)-based build system. In the instructions
-below, [`./gradlew`](http://vimeo.com/34436402) is invoked from the root of the source tree and
-serves as a cross-platform, self-contained bootstrap mechanism for the build. The only
-prerequisites are [git](http://help.github.com/set-up-git-redirect) and JDK 1.6+.
+The Spring Framework uses a [Gradle][]-based build system. In the instructions
+below, [`./gradlew`][] is invoked from the root of the source tree and serves as
+a cross-platform, self-contained bootstrap mechanism for the build. The only
+prerequisites are [Git][] and JDK 1.6+.
 
 ### check out sources
 `git clone git://github.com/SpringSource/spring-framework.git`
@@ -53,19 +50,47 @@ prerequisites are [git](http://help.github.com/set-up-git-redirect) and JDK 1.6+
 ### import sources into your IDE
 Run `./import-into-eclipse.sh` or read `import-into-idea.md` as appropriate.
 
-... and discover more commands with `./gradlew tasks`. See also the
-[Gradle build and release FAQ](https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ).
+... and discover more commands with `./gradlew tasks`. See also the [Gradle
+build and release FAQ][].
 
 ## Contributing
-[Pull requests](http://help.github.com/send-pull-requests) are welcome; see the
-[contributor guidelines](https://github.com/SpringSource/spring-framework/wiki/Contributor-guidelines).
+[Pull requests][] are welcome; see the [contributor guidelines][] for details.
 
 ## Staying in touch
-Follow [@springframework](http://twitter.com/springframework) and its
-[team members](http://twitter.com/springframework/team/members) on Twitter. In-depth articles can be
-found at the SpringSource [team blog](http://blog.springsource.org), and releases are announced via
-our [news feed](http://www.springsource.org/news-events).
+Follow [@springframework][] and its [team members][] on Twitter. In-depth
+articles can be found at the SpringSource [team blog][], and releases are
+announced via our [news feed][].
 
 ## License
-The Spring Framework is released under version 2.0 of the
-[Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+The Spring Framework is released under version 2.0 of the [Apache License][].
+
+[Spring Integration]: https://github.com/SpringSource/spring-integration
+[Spring Batch]: https://github.com/SpringSource/spring-batch
+[family of projects]: http://springsource.org/projects
+[SpringSource organization]: https://github.com/SpringSource
+[.NET]: https://github.com/SpringSource/spring-net
+[Python]: https://github.com/SpringSource/spring-python
+[downloading Spring artifacts]: https://github.com/SpringSource/spring-framework/wiki/Downloading-Spring-artifacts
+[building a distribution with dependencies]: https://github.com/SpringSource/spring-framework/wiki/Building-a-distribution-with-dependencies
+[Javadoc]: http://static.springsource.org/spring-framework/docs/current/javadoc-api
+[reference docs]: http://static.springsource.org/spring-framework/docs/current/spring-framework-reference
+[Spring forums]: http://forum.springsource.org
+[spring tag]: http://stackoverflow.com/questions/tagged/spring
+[spring-mvc tag]: http://stackoverflow.com/questions/tagged/spring-mvc
+[Stack Overflow]: http://stackoverflow.com/faq
+[Commercial support]: http://springsource.com/support/springsupport
+[Spring Framework JIRA]: http://jira.springsource.org/browse/SPR
+[the lifecycle of an issue]: https://github.com/cbeams/spring-framework/wiki/The-Lifecycle-of-an-Issue
+[spring-framework-issues]: https://github.com/SpringSource/spring-framework-issues#readme
+[readme]: https://github.com/SpringSource/spring-framework-issues#readme
+[Gradle]: http://gradle.org
+[`./gradlew`]: http://vimeo.com/34436402
+[Git]: http://help.github.com/set-up-git-redirect
+[Gradle build and release FAQ]: https://github.com/SpringSource/spring-framework/wiki/Gradle-build-and-release-FAQ
+[Pull requests]: http://help.github.com/send-pull-requests
+[contributor guidelines]: https://github.com/SpringSource/spring-framework/wiki/Contributor-guidelines
+[@springframework]: http://twitter.com/springframework
+[team members]: http://twitter.com/springframework/team/members
+[team blog]: http://blog.springsource.org
+[news feed]: http://www.springsource.org/news-events
+[Apache License]: http://www.apache.org/licenses/LICENSE-2.0

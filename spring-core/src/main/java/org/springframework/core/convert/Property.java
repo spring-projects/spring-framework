@@ -57,11 +57,20 @@ public final class Property {
 
 
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
+		this(objectType, readMethod, writeMethod, null);
+	}
+
+	public Property(Class<?> objectType, Method readMethod, Method writeMethod, String name) {
 		this.objectType = objectType;
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
-		this.name = resolveName();
+		if (name != null) {
+			this.name = name;
+		}
+		else {
+			this.name = resolveName();
+		}
 		this.annotations = resolveAnnotations();
 	}
 

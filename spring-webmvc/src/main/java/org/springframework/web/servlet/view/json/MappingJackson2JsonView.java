@@ -48,7 +48,7 @@ import org.springframework.web.servlet.view.AbstractView;
  * @author Jeremy Grelle
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
- * @since 3.2
+ * @since 3.1.2
  * @see org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
  */
 public class MappingJackson2JsonView extends AbstractView {

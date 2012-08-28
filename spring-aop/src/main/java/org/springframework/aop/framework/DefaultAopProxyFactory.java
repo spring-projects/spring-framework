@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.aop.framework;
 import java.io.Serializable;
 
 import org.springframework.aop.SpringProxy;
-import org.springframework.util.ClassUtils;
 
 /**
  * Default {@link AopProxyFactory} implementation,
@@ -48,10 +47,6 @@ import org.springframework.util.ClassUtils;
  */
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
-	/** Whether the CGLIB2 library is present on the classpath */
-	private static final boolean cglibAvailable =
-			ClassUtils.isPresent("net.sf.cglib.proxy.Enhancer", DefaultAopProxyFactory.class.getClassLoader());
-
 
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config)) {
@@ -62,11 +57,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 			}
 			if (targetClass.isInterface()) {
 				return new JdkDynamicAopProxy(config);
-			}
-			if (!cglibAvailable) {
-				throw new AopConfigException(
-						"Cannot proxy target class because CGLIB2 is not available. " +
-						"Add CGLIB to the class path or specify proxy interfaces.");
 			}
 			return CglibProxyFactory.createCglibProxy(config);
 		}
@@ -87,13 +77,13 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 
 
 	/**
-	 * Inner factory class used to just introduce a CGLIB2 dependency
+	 * Inner factory class used to just introduce a CGLIB dependency
 	 * when actually creating a CGLIB proxy.
 	 */
 	private static class CglibProxyFactory {
 
 		public static AopProxy createCglibProxy(AdvisedSupport advisedSupport) {
-			return new Cglib2AopProxy(advisedSupport);
+			return new CglibAopProxy(advisedSupport);
 		}
 	}
 

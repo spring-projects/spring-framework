@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+
+import org.easymock.EasyMock;
 import org.junit.Test;
 import test.beans.GenericBean;
 import test.beans.GenericIntegerBean;
@@ -46,6 +48,7 @@ import org.springframework.core.io.UrlResource;
 /**
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 20.01.2006
  */
 public class BeanFactoryGenericsTests {
@@ -617,6 +620,30 @@ public class BeanFactoryGenericsTests {
 		UrlSet us = (UrlSet) bf.getBean("setBean");
 		assertEquals(1, us.size());
 		assertEquals(new URL("http://www.springframework.org"), us.iterator().next());
+	}
+
+	/**
+	 * Tests support for parameterized {@code factory-method} declarations such
+	 * as EasyMock's {@code createMock()} method which has the following signature.
+	 *
+	 * <pre>{@code
+	 * public static <T> T createMock(Class<T> toMock)
+	 * }</pre>
+	 *
+	 * @since 3.2
+	 * @see SPR-9493
+	 */
+	@Test
+	public void parameterizedFactoryMethod() {
+		RootBeanDefinition rbd = new RootBeanDefinition(EasyMock.class);
+		rbd.setFactoryMethodName("createMock");
+		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
+
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("easyMock", rbd);
+
+		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
+		assertEquals(1, beans.size());
 	}
 
 

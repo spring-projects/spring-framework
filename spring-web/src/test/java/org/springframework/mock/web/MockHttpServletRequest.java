@@ -56,8 +56,8 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.5 API level; throws
- * {@link UnsupportedOperationException} for all methods introduced in Servlet 3.0.
+ * interface. Supports the Servlet 2.5 API leve. Throws
+ * {@link UnsupportedOperationException} for some methods introduced in Servlet 3.0.
  *
  * <p>Used for testing the web framework; also useful for testing
  * application controllers.
@@ -102,7 +102,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-	
+
 	private static final String CHARSET_PREFIX = "charset=";
 
 
@@ -190,6 +190,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
+	private boolean asyncSupported = false;
+
+	private boolean asyncStarted = false;
+
+	private MockAsyncContext asyncContext;
+
+	private DispatcherType dispatcherType = DispatcherType.REQUEST;
 
 	//---------------------------------------------------------------------
 	// Constructors
@@ -312,7 +319,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.characterEncoding = characterEncoding;
 		updateContentTypeHeader();
 	}
-	
+
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
@@ -679,7 +686,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 		doAddHeaderValue(name, value, false);
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	private void doAddHeaderValue(String name, Object value, boolean replace) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -898,33 +905,54 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	//---------------------------------------------------------------------
 
 	public AsyncContext getAsyncContext() {
-		throw new UnsupportedOperationException();
+		return this.asyncContext;
+	}
+
+	public void setAsyncContext(MockAsyncContext asyncContext) {
+		this.asyncContext = asyncContext;
 	}
 
 	public DispatcherType getDispatcherType() {
-		throw new UnsupportedOperationException();
+		return this.dispatcherType;
+	}
+
+	public void setDispatcherType(DispatcherType dispatcherType) {
+		this.dispatcherType = dispatcherType;
+	}
+
+	public void setAsyncSupported(boolean asyncSupported) {
+		this.asyncSupported = asyncSupported;
 	}
 
 	public boolean isAsyncSupported() {
-		throw new UnsupportedOperationException();
+		return this.asyncSupported;
 	}
 
 	public AsyncContext startAsync() {
-		throw new UnsupportedOperationException();
+		return startAsync(this, null);
 	}
 
-	public AsyncContext startAsync(ServletRequest arg0, ServletResponse arg1) {
-		throw new UnsupportedOperationException();
+	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
+		if (!this.asyncSupported) {
+			throw new IllegalStateException("Async not supported");
+		}
+		this.asyncStarted = true;
+		this.asyncContext = new MockAsyncContext(request, response);
+		return this.asyncContext;
+	}
+
+	public void setAsyncStarted(boolean asyncStarted) {
+		this.asyncStarted = asyncStarted;
 	}
 
 	public boolean isAsyncStarted() {
-		throw new UnsupportedOperationException();
+		return this.asyncStarted;
 	}
 
 	public boolean authenticate(HttpServletResponse arg0) throws IOException, ServletException {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	public void addPart(Part part) {
 		parts.put(part.getName(), part);
 	}

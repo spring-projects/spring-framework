@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.web.portlet;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.portlet.EventRequest;
+import javax.portlet.EventResponse;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.support.ManagedMap;
 import org.springframework.validation.BindException;
 import org.springframework.web.portlet.context.StaticPortletApplicationContext;
 import org.springframework.web.portlet.handler.ParameterHandlerMapping;
+import org.springframework.web.portlet.mvc.EventAwareController;
 import org.springframework.web.portlet.mvc.SimpleFormController;
 
 /**
@@ -86,7 +89,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 	}
 
 
-	public static class TestFormController extends SimpleFormController {
+	public static class TestFormController extends SimpleFormController implements EventAwareController {
 
 		TestFormController() {
 			super();
@@ -123,6 +126,10 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 
 		private void writeResponse(RenderResponse response, TestBean testBean, boolean finished) throws IOException {
 			response.getWriter().write((finished ? "finished" : "") + (testBean.getAge() + 5));
+		}
+
+		public void handleEventRequest(EventRequest request, EventResponse response) throws Exception {
+			response.setRenderParameter("event", request.getEvent().getName());
 		}
 	}
 

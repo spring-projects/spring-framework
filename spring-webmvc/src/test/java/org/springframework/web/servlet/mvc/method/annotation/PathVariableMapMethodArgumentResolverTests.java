@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,9 +90,12 @@ public class PathVariableMapMethodArgumentResolverTests {
 		assertEquals(uriTemplateVars, result);
 	}
 
-	@Test(expected=ServletRequestBindingException.class)
+	@Test
+	@SuppressWarnings("unchecked")
 	public void resolveArgumentNoUriVars() throws Exception {
-		resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
+		Map<String, String> map = (Map<String, String>) resolver.resolveArgument(paramMap, mavContainer, webRequest, null);
+
+		assertEquals(Collections.emptyMap(), map);
 	}
 
 

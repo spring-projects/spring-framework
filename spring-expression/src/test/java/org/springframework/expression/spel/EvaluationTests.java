@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,24 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.*;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
+
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodFilter;
+import org.springframework.expression.MethodResolver;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -38,6 +46,7 @@ import org.springframework.expression.spel.testresources.TestPerson;
  * 
  * @author Andy Clement
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 3.0
  */
 public class EvaluationTests extends ExpressionTestCase {
@@ -49,76 +58,66 @@ public class EvaluationTests extends ExpressionTestCase {
 		TestClass testClass = new TestClass();
 		Object o = null;
 		o = expression.getValue(new StandardEvaluationContext(testClass));
-		Assert.assertEquals("",o);
+		assertEquals("", o);
 		o = parser.parseExpression("list[3]").getValue(new StandardEvaluationContext(testClass));
-		Assert.assertEquals("",o);
-		Assert.assertEquals(4, testClass.list.size());
+		assertEquals("", o);
+		assertEquals(4, testClass.list.size());
 		try {
 			o = parser.parseExpression("list2[3]").getValue(new StandardEvaluationContext(testClass));
-			Assert.fail();
+			fail();
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
 			// success!
 		}
 		o = parser.parseExpression("foo[3]").getValue(new StandardEvaluationContext(testClass));
-		Assert.assertEquals("",o);
-		Assert.assertEquals(4, testClass.getFoo().size());
+		assertEquals("", o);
+		assertEquals(4, testClass.getFoo().size());
 	}
-	
-	@Test
-	public void testCreateMapsOnAttemptToIndexNull01() throws EvaluationException, ParseException {
+
+	@Test(expected = SpelEvaluationException.class)
+	public void testCreateMapsOnAttemptToIndexNull01() throws Exception {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("map['a']").getValue(ctx);
-		Assert.assertNull(o);
+		assertNull(o);
 		o = parser.parseExpression("map").getValue(ctx);
-		Assert.assertNotNull(o);
-		
-		try {
-			o = parser.parseExpression("map2['a']").getValue(ctx);
-			// fail!
-			Assert.fail("map2 should be null, there is no setter");
-		} catch (Exception e) {
-			// success!
-		}
+		assertNotNull(o);
+
+		o = parser.parseExpression("map2['a']").getValue(ctx);
+		// map2 should be null, there is no setter
 	}
 
-	@Test
-	public void testCreateObjectsOnAttemptToReferenceNull() throws EvaluationException, ParseException {
+	// wibble2 should be null (cannot be initialized dynamically), there is no setter
+	@Test(expected = SpelEvaluationException.class)
+	public void testCreateObjectsOnAttemptToReferenceNull() throws Exception {
 		TestClass testClass = new TestClass();
 		StandardEvaluationContext ctx = new StandardEvaluationContext(testClass);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		Object o = null;
 		o = parser.parseExpression("wibble.bar").getValue(ctx);
-		Assert.assertEquals("hello",o);
+		assertEquals("hello", o);
 		o = parser.parseExpression("wibble").getValue(ctx);
-		Assert.assertNotNull(o);
-		
-		try {
-			o = parser.parseExpression("wibble2.bar").getValue(ctx);
-			// fail!
-			Assert.fail("wibble2 should be null (cannot be initialized dynamically), there is no setter");
-		} catch (Exception e) {
-			// success!
-		}
+		assertNotNull(o);
+
+		o = parser.parseExpression("wibble2.bar").getValue(ctx);
 	}
-	
+
+
+	@SuppressWarnings("rawtypes")
 	static class TestClass {
-		
 		public Foo wibble;
 		private Foo wibble2;
 		public Map map;
-		public Map<String,Integer> mapStringToInteger;
+		public Map<String, Integer> mapStringToInteger;
 		public List<String> list;
 		public List list2;
 		private Map map2;
-		
+		private List<String> foo;
+
 		public Map getMap2() { return this.map2; }
 		public Foo getWibble2() { return this.wibble2; }
-//		public void setMap2(Map m) { this.map2 = m; }
-		private List<String> foo;
 		public List<String> getFoo() { return this.foo; }
 		public void setFoo(List<String> newfoo) { this.foo = newfoo; }
 	}
@@ -127,18 +126,19 @@ public class EvaluationTests extends ExpressionTestCase {
 		public Foo() {}
 		public String bar = "hello";
 	}
-	
+
+
 	@Test
 	public void testElvis01() {
-		evaluate("'Andy'?:'Dave'","Andy",String.class);
-		evaluate("null?:'Dave'","Dave",String.class);
+		evaluate("'Andy'?:'Dave'", "Andy", String.class);
+		evaluate("null?:'Dave'", "Dave", String.class);
 	}
 
 	@Test
 	public void testSafeNavigation() {
-		evaluate("null?.null?.null",null,null);
+		evaluate("null?.null?.null", null, null);
 	}
-	
+
 	@Test
 	public void testRelOperatorGT01() {
 		evaluate("3 > 6", "false", Boolean.class);
@@ -163,7 +163,7 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testRelOperatorGE02() {
 		evaluate("3 >= 3", "true", Boolean.class);
 	}
-	
+
 	@Test
 	public void testRelOperatorsInstanceof01() {
 		evaluate("'xyz' instanceof T(int)", "false", Boolean.class);
@@ -218,12 +218,12 @@ public class EvaluationTests extends ExpressionTestCase {
 	// property access
 	@Test
 	public void testPropertyField01() {
-		evaluate("name", "Nikola Tesla", String.class, false); 
+		evaluate("name", "Nikola Tesla", String.class, false);
 		// not writable because (1) name is private (2) there is no setter, only a getter
 		evaluateAndCheckError("madeup", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 0, "madeup",
-				"org.springframework.expression.spel.testresources.Inventor");
+			"org.springframework.expression.spel.testresources.Inventor");
 	}
-	
+
 	@Test
 	public void testPropertyField02_SPR7100() {
 		evaluate("_name", "Nikola Tesla", String.class);
@@ -234,15 +234,14 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testRogueTrailingDotCausesNPE_SPR6866() {
 		try {
 			new SpelExpressionParser().parseExpression("placeOfBirth.foo.");
-			Assert.fail("Should have failed to parse");
+			fail("Should have failed to parse");
 		} catch (ParseException e) {
-			Assert.assertTrue(e instanceof SpelParseException);
-			SpelParseException spe = (SpelParseException)e;
-			Assert.assertEquals(SpelMessage.OOD,spe.getMessageCode());
-			Assert.assertEquals(16,spe.getPosition());
-		}	
+			assertTrue(e instanceof SpelParseException);
+			SpelParseException spe = (SpelParseException) e;
+			assertEquals(SpelMessage.OOD, spe.getMessageCode());
+			assertEquals(16, spe.getPosition());
+		}
 	}
-	
 
 	// nested properties
 	@Test
@@ -259,13 +258,13 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testPropertiesNested03() throws ParseException {
 		try {
 			new SpelExpressionParser().parseRaw("placeOfBirth.23");
-			Assert.fail();
+			fail();
 		} catch (SpelParseException spe) {
-			Assert.assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
-			Assert.assertEquals("23", spe.getInserts()[0]);
+			assertEquals(spe.getMessageCode(), SpelMessage.UNEXPECTED_DATA_AFTER_DOT);
+			assertEquals("23", spe.getInserts()[0]);
 		}
 	}
-	
+
 	// methods
 	@Test
 	public void testMethods01() {
@@ -287,21 +286,21 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testConstructorInvocation05() {
 		evaluate("new java.lang.String('foobar')", "foobar", String.class);
 	}
-	
+
 	@Test
 	public void testConstructorInvocation06() throws Exception {
 		// repeated evaluation to drive use of cached executor
-		SpelExpression expr = (SpelExpression)parser.parseExpression("new String('wibble')");
+		SpelExpression expr = (SpelExpression) parser.parseExpression("new String('wibble')");
 		String newString = expr.getValue(String.class);
-		Assert.assertEquals("wibble",newString);
+		assertEquals("wibble", newString);
 		newString = expr.getValue(String.class);
-		Assert.assertEquals("wibble",newString);
-		
+		assertEquals("wibble", newString);
+
 		// not writable
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+
 		// ast
-		Assert.assertEquals("new String('wibble')",expr.toStringAST());
+		assertEquals("new String('wibble')", expr.toStringAST());
 	}
 
 	// unary expressions
@@ -358,38 +357,39 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void testTernaryOperator01() {
-		evaluate("2>4?1:2",2,Integer.class);
+		evaluate("2>4?1:2", 2, Integer.class);
 	}
 
 	@Test
 	public void testTernaryOperator02() {
-		evaluate("'abc'=='abc'?1:2",1,Integer.class);
+		evaluate("'abc'=='abc'?1:2", 1, Integer.class);
 	}
-	
+
 	@Test
 	public void testTernaryOperator03() {
-		evaluateAndCheckError("'hello'?1:2", SpelMessage.TYPE_CONVERSION_ERROR); // cannot convert String to boolean
+		// cannot convert String to boolean
+		evaluateAndCheckError("'hello'?1:2", SpelMessage.TYPE_CONVERSION_ERROR);
 	}
 
 	@Test
 	public void testTernaryOperator04() throws Exception {
 		Expression expr = parser.parseExpression("1>2?3:4");
-		Assert.assertFalse(expr.isWritable(eContext));
+		assertFalse(expr.isWritable(eContext));
 	}
 
 	@Test
 	public void testTernaryOperator05() {
-		evaluate("1>2?#var=4:#var=5",5,Integer.class);
-		evaluate("3?:#var=5",3,Integer.class);
-		evaluate("null?:#var=5",5,Integer.class);
-		evaluate("2>4?(3>2?true:false):(5<3?true:false)",false,Boolean.class);
+		evaluate("1>2?#var=4:#var=5", 5, Integer.class);
+		evaluate("3?:#var=5", 3, Integer.class);
+		evaluate("null?:#var=5", 5, Integer.class);
+		evaluate("2>4?(3>2?true:false):(5<3?true:false)", false, Boolean.class);
 	}
 
 	@Test(expected = EvaluationException.class)
 	public void testTernaryOperatorWithNullValue() {
 		parser.parseExpression("null ? 0 : 1").getValue();
 	}
-	
+
 	@Test
 	public void methodCallWithRootReferenceThroughParameter() {
 		evaluate("placeOfBirth.doubleIt(inventions.length)", 18, Integer.class);
@@ -397,28 +397,29 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	@Test
 	public void ctorCallWithRootReferenceThroughParameter() {
-		evaluate("new org.springframework.expression.spel.testresources.PlaceOfBirth(inventions[0].toString()).city", "Telephone repeater", String.class);
+		evaluate("new org.springframework.expression.spel.testresources.PlaceOfBirth(inventions[0].toString()).city",
+			"Telephone repeater", String.class);
 	}
 
 	@Test
 	public void fnCallWithRootReferenceThroughParameter() {
 		evaluate("#reverseInt(inventions.length, inventions.length, inventions.length)", "int[3]{9,9,9}", int[].class);
 	}
-	
+
 	@Test
 	public void methodCallWithRootReferenceThroughParameterThatIsAFunctionCall() {
 		evaluate("placeOfBirth.doubleIt(#reverseInt(inventions.length,2,3)[2])", 18, Integer.class);
 	}
-	
+
 	@Test
 	public void testIndexer03() {
 		evaluate("'christian'[8]", "n", String.class);
 	}
-	
-	
+
 	@Test
 	public void testIndexerError() {
-		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
+		evaluateAndCheckError("new org.springframework.expression.spel.testresources.Inventor().inventions[1]",
+			SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 	}
 
 	@Test
@@ -447,16 +448,16 @@ public class EvaluationTests extends ExpressionTestCase {
 	public void testTypeReferences01() {
 		evaluate("T(java.lang.String)", "class java.lang.String", Class.class);
 	}
-	
+
 	@Test
 	public void testTypeReferencesAndQualifiedIdentifierCaching() throws Exception {
-		SpelExpression expr = (SpelExpression)parser.parseExpression("T(java.lang.String)");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
-		Assert.assertEquals("T(java.lang.String)",expr.toStringAST());
-		Assert.assertEquals(String.class,expr.getValue(Class.class));
+		SpelExpression expr = (SpelExpression) parser.parseExpression("T(java.lang.String)");
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertEquals("T(java.lang.String)", expr.toStringAST());
+		assertEquals(String.class, expr.getValue(Class.class));
 		// use cached QualifiedIdentifier:
-		Assert.assertEquals("T(java.lang.String)",expr.toStringAST());
-		Assert.assertEquals(String.class,expr.getValue(Class.class));
+		assertEquals("T(java.lang.String)", expr.toStringAST());
+		assertEquals(String.class, expr.getValue(Class.class));
 	}
 
 	@Test
@@ -490,49 +491,50 @@ public class EvaluationTests extends ExpressionTestCase {
 		evaluateAndAskForReturnType("3*4+5", "17", String.class);
 	}
 
-	
 	@Test
 	public void testAdvancedNumerics() throws Exception {
 		int twentyFour = parser.parseExpression("2.0 * 3e0 * 4").getValue(Integer.class);
-		Assert.assertEquals(24,twentyFour);
+		assertEquals(24, twentyFour);
 		double one = parser.parseExpression("8.0 / 5e0 % 2").getValue(Double.class);
-		Assert.assertEquals(1.6d,one);
+		assertEquals(1.6d, one, 0);
 		int o = parser.parseExpression("8.0 / 5e0 % 2").getValue(Integer.class);
-		Assert.assertEquals(1,o);
+		assertEquals(1, o);
 		int sixteen = parser.parseExpression("-2 ^ 4").getValue(Integer.class);
-		Assert.assertEquals(16,sixteen);
+		assertEquals(16, sixteen);
 		int minusFortyFive = parser.parseExpression("1+2-3*8^2/2/2").getValue(Integer.class);
-		Assert.assertEquals(-45,minusFortyFive);
+		assertEquals(-45, minusFortyFive);
 	}
-	
+
 	@Test
 	public void testComparison() throws Exception {
 		EvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
-		boolean trueValue = parser.parseExpression("T(java.util.Date) == Birthdate.Class").getValue(context, Boolean.class);
-		Assert.assertTrue(trueValue);
+		boolean trueValue = parser.parseExpression("T(java.util.Date) == Birthdate.Class").getValue(context,
+			Boolean.class);
+		assertTrue(trueValue);
 	}
-	
+
 	@Test
 	public void testResolvingList() throws Exception {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();
 		try {
-			Assert.assertFalse(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
-			Assert.fail("should have failed to find List");
+			assertFalse(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
+			fail("should have failed to find List");
 		} catch (EvaluationException ee) {
 			// success - List not found
 		}
-		((StandardTypeLocator)context.getTypeLocator()).registerImport("java.util");
-		Assert.assertTrue(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
+		((StandardTypeLocator) context.getTypeLocator()).registerImport("java.util");
+		assertTrue(parser.parseExpression("T(List)!=null").getValue(context, Boolean.class));
 	}
-	
+
 	@Test
 	public void testResolvingString() throws Exception {
-		Class stringClass = parser.parseExpression("T(String)").getValue(Class.class);
-		Assert.assertEquals(String.class,stringClass);
-	} 
-	 
+		Class<?> stringClass = parser.parseExpression("T(String)").getValue(Class.class);
+		assertEquals(String.class, stringClass);
+	}
+
 	/**
-	 * SPR-6984: attempting to index a collection on write using an index that doesn't currently exist in the collection (address.crossStreets[0] below)
+	 * SPR-6984: attempting to index a collection on write using an index that
+	 * doesn't currently exist in the collection (address.crossStreets[0] below)
 	 */
 	@Test
 	public void initializingCollectionElementsOnWrite() throws Exception {
@@ -542,20 +544,82 @@ public class EvaluationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser(config);
 		Expression expression = parser.parseExpression("name");
 		expression.setValue(context, "Oleg");
-		Assert.assertEquals("Oleg",person.getName());
+		assertEquals("Oleg", person.getName());
 
 		expression = parser.parseExpression("address.street");
 		expression.setValue(context, "123 High St");
-		Assert.assertEquals("123 High St",person.getAddress().getStreet());
-		
+		assertEquals("123 High St", person.getAddress().getStreet());
+
 		expression = parser.parseExpression("address.crossStreets[0]");
 		expression.setValue(context, "Blah");
-		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
-		
+		assertEquals("Blah", person.getAddress().getCrossStreets().get(0));
+
 		expression = parser.parseExpression("address.crossStreets[3]");
 		expression.setValue(context, "Wibble");
-		Assert.assertEquals("Blah",person.getAddress().getCrossStreets().get(0));
-		Assert.assertEquals("Wibble",person.getAddress().getCrossStreets().get(3));
+		assertEquals("Blah", person.getAddress().getCrossStreets().get(0));
+		assertEquals("Wibble", person.getAddress().getCrossStreets().get(3));
 	}
-	
+
+	/**
+	 * Verifies behavior requested in SPR-9613.
+	 */
+	@Test
+	public void caseInsensitiveNullLiterals() {
+		ExpressionParser parser = new SpelExpressionParser();
+		Expression exp;
+
+		exp = parser.parseExpression("null");
+		assertNull(exp.getValue());
+
+		exp = parser.parseExpression("NULL");
+		assertNull(exp.getValue());
+
+		exp = parser.parseExpression("NuLl");
+		assertNull(exp.getValue());
+	}
+
+	/**
+	 * Verifies behavior requested in SPR-9621.
+	 */
+	@Test
+	public void customMethodFilter() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+
+		// Register a custom MethodResolver...
+		List<MethodResolver> customResolvers = new ArrayList<MethodResolver>();
+		customResolvers.add(new CustomMethodResolver());
+		context.setMethodResolvers(customResolvers);
+
+		// or simply...
+		// context.setMethodResolvers(new ArrayList<MethodResolver>());
+
+		// Register a custom MethodFilter...
+		MethodFilter filter = new CustomMethodFilter();
+		try {
+			context.registerMethodFilter(String.class, filter);
+			fail("should have failed");
+		} catch (IllegalStateException ise) {
+			assertEquals(
+					"Method filter cannot be set as the reflective method resolver is not in use",
+					ise.getMessage());
+		}
+	}
+
+	static class CustomMethodResolver implements MethodResolver {
+
+		public MethodExecutor resolve(EvaluationContext context,
+				Object targetObject, String name,
+				List<TypeDescriptor> argumentTypes) throws AccessException {
+			return null;
+		}
+	}
+
+	static class CustomMethodFilter implements MethodFilter {
+
+		public List<Method> filter(List<Method> methods) {
+			return null;
+		}
+
+	}
+
 }

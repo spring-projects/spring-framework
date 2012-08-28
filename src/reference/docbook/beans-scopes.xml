@@ -422,10 +422,7 @@
 
       <para>To create such a proxy, you insert a child
         <literal>&lt;aop:scoped-proxy/&gt;</literal> element into a scoped bean
-        definition.
-        <!--To create what such proxy? Is the proxy created above? Also, below added an x-ref that seems relevant.-->(If
-        you choose class-based proxying, you also need the CGLIB library in your
-        classpath. See <xref
+        definition.  See <xref
         linkend="beans-factory-scopes-other-injection-proxies"/> and <xref
         linkend="xsd-config"/>.) Why do definitions of beans scoped at the
         <literal>request</literal>, <literal>session</literal>,
@@ -502,9 +499,7 @@
         <para>By default, when the Spring container creates a proxy for a bean
           that is marked up with the
           <literal>&lt;aop:scoped-proxy/&gt;</literal> element, <emphasis>a
-          CGLIB-based class proxy is created</emphasis>. This means that you
-          need to have the CGLIB library in the classpath of your
-          application.</para>
+          CGLIB-based class proxy is created</emphasis>.</para>
 
         <para><emphasis>Note: CGLIB proxies only intercept public method
           calls!</emphasis> Do not call non-public methods on such a proxy; they

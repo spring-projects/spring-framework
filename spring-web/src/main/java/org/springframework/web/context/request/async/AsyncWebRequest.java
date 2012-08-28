@@ -16,12 +16,11 @@
 
 package org.springframework.web.context.request.async;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.NativeWebRequest;
 
 
 /**
- * Extend {@link NativeWebRequest} with methods for async request processing.
+ * Extends {@link NativeWebRequest} with methods for asynchronous request processing.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -29,50 +28,54 @@ import org.springframework.web.context.request.NativeWebRequest;
 public interface AsyncWebRequest extends NativeWebRequest {
 
 	/**
-	 * Set the timeout for asynchronous request processing in milliseconds.
-	 * In Servlet 3 async request processing, the timeout begins when the
-	 * main processing thread has exited.
+	 * Set the time required for concurrent handling to complete.
+	 * This property should not be set when concurrent handling is in progress,
+	 * i.e. when {@link #isAsyncStarted()} is {@code true}.
+	 * @param timeout amount of time in milliseconds; {@code null} means no
+	 * 	timeout, i.e. rely on the default timeout of the container.
 	 */
 	void setTimeout(Long timeout);
 
 	/**
-	 * Invoked on a timeout to complete the response instead of the default
-	 * behavior that sets the status to 503 (SERVICE_UNAVAILABLE).
+	 * Set a handler to be invoked if concurrent processing times out.
 	 */
 	void setTimeoutHandler(Runnable runnable);
 
 	/**
-	 * Mark the start of async request processing for example ensuring the
-	 * request remains open in order to be completed in a separate thread.
-	 * @throws IllegalStateException if async processing has started, if it is
-	 * 	not supported, or if it has completed.
+	 * Mark the start of asynchronous request processing so that when the main
+	 * processing thread exits, the response remains open for further processing
+	 * in another thread.
+	 * @throws IllegalStateException if async processing has completed or is not supported
 	 */
 	void startAsync();
 
 	/**
-	 * Whether async processing is in progress and has not yet completed.
+	 * Whether the request is in async mode following a call to {@link #startAsync()}.
+	 * Returns "false" if asynchronous processing never started, has completed,
+	 * or the request was dispatched for further processing.
 	 */
 	boolean isAsyncStarted();
 
 	/**
-	 * Complete async request processing making a best effort but without any
-	 * effect if async request processing has already completed for any reason
-	 * including a timeout.
+	 * Dispatch the request to the container in order to resume processing after
+	 * concurrent execution in an application thread.
 	 */
-	void complete();
+	void dispatch();
 
 	/**
-	 * Whether async processing has completed either normally via calls to
-	 * {@link #complete()} or for other reasons such as a timeout likely
-	 * detected in a separate thread during async request processing.
+	 * Whether the request was dispatched to the container in order to resume
+	 * processing after concurrent execution in an application thread.
 	 */
-	boolean isAsyncCompleted();
+	boolean isDispatched();
 
 	/**
-	 * Send an error to the client making a best effort to do so but without any
-	 * effect if async request processing has already completed, for example due
-	 * to a timeout.
+	 * Add a Runnable to be invoked when request processing completes.
 	 */
-	void sendError(HttpStatus status, String message);
+	void addCompletionHandler(Runnable runnable);
+
+	/**
+	 * Whether asynchronous processing has completed.
+	 */
+	boolean isAsyncComplete();
 
 }

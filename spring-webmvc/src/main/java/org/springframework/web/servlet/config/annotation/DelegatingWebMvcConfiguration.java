@@ -56,6 +56,16 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
+	protected void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
+		this.configurers.configureContentNegotiation(configurer);
+	}
+
+	@Override
+	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+		this.configurers.configureAsyncSupport(configurer);
+	}
+
+	@Override
 	protected void addViewControllers(ViewControllerRegistry registry) {
 		this.configurers.addViewControllers(registry);
 	}

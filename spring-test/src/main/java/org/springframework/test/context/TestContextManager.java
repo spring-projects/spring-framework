@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,8 +181,8 @@ public class TestContextManager {
 
 		// Use defaults?
 		if (declaringClass == null) {
-			if (logger.isInfoEnabled()) {
-				logger.info("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
+			if (logger.isDebugEnabled()) {
+				logger.debug("@TestExecutionListeners is not present for class [" + clazz + "]: using defaults.");
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
 			defaultListeners = true;

@@ -17,7 +17,12 @@
 package org.springframework.web;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.ServletException;
+
+import org.springframework.http.HttpMethod;
 
 /**
  * Exception thrown when a request handler does not support a
@@ -93,6 +98,17 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 */
 	public String[] getSupportedMethods() {
 		return this.supportedMethods;
+	}
+
+	/**
+	 * Return the actually supported HTTP methods, if known, as {@link HttpMethod} instances.
+	 */
+	public Set<HttpMethod> getSupportedHttpMethods() {
+		Set<HttpMethod> supportedMethods = new HashSet<HttpMethod>();
+		for (String value : this.supportedMethods) {
+			supportedMethods.add(HttpMethod.valueOf(value));
+		}
+		return supportedMethods;
 	}
 
 }

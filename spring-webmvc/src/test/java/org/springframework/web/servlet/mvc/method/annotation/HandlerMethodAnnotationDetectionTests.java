@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,8 +32,10 @@ import org.junit.runners.Parameterized.Parameters;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
+import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
@@ -91,21 +94,29 @@ public class HandlerMethodAnnotationDetectionTests {
 
 	private ExceptionHandlerExceptionResolver exceptionResolver = new ExceptionHandlerExceptionResolver();
 
-	public HandlerMethodAnnotationDetectionTests(Class<?> controllerType, boolean useAutoProxy) {
+	public HandlerMethodAnnotationDetectionTests(final Class<?> controllerType, boolean useAutoProxy) {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.registerBeanDefinition("controller", new RootBeanDefinition(controllerType));
+		context.registerBeanDefinition("handlerMapping", new RootBeanDefinition(RequestMappingHandlerMapping.class));
+		context.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(RequestMappingHandlerAdapter.class));
+		context.registerBeanDefinition("exceptionResolver", new RootBeanDefinition(ExceptionHandlerExceptionResolver.class));
 		if (useAutoProxy) {
 			DefaultAdvisorAutoProxyCreator autoProxyCreator = new DefaultAdvisorAutoProxyCreator();
 			autoProxyCreator.setBeanFactory(context.getBeanFactory());
 			context.getBeanFactory().addBeanPostProcessor(autoProxyCreator);
-			context.getBeanFactory().registerSingleton("advisor", new DefaultPointcutAdvisor(new SimpleTraceInterceptor()));
+			context.registerBeanDefinition("controllerAdvice", new RootBeanDefinition(ControllerAdvisor.class));
 		}
 		context.refresh();
 
-		handlerMapping.setApplicationContext(context);
-		handlerMapping.afterPropertiesSet();
-		handlerAdapter.afterPropertiesSet();
-		exceptionResolver.afterPropertiesSet();
+		this.handlerMapping = context.getBean(RequestMappingHandlerMapping.class);
+		this.handlerAdapter = context.getBean(RequestMappingHandlerAdapter.class);
+		this.exceptionResolver = context.getBean(ExceptionHandlerExceptionResolver.class);
+	}
+
+	class TestPointcut extends StaticMethodMatcherPointcut {
+		public boolean matches(Method method, Class<?> clazz) {
+			return method.getName().equals("hashCode");
+		}
 	}
 
 	@Test
@@ -232,11 +243,11 @@ public class HandlerMethodAnnotationDetectionTests {
 	/**
 	 * CONTROLLER WITH INTERFACE
 	 *
-	 * No AOP:
-	 * All annotations can be on interface methods except parameter annotations.
-	 *
 	 * JDK Dynamic proxy:
 	 * All annotations must be on the interface.
+	 *
+	 * Without AOP:
+	 * Annotations can be on interface methods except parameter annotations.
 	 */
 	static class InterfaceController implements MappingInterface {
 
@@ -389,6 +400,24 @@ public class HandlerMethodAnnotationDetectionTests {
 	@Controller
 	@RequestMapping("/path1")
 	static class SupportClassController extends MappingSupportClass {
+	}
+
+
+	@SuppressWarnings("serial")
+	static class ControllerAdvisor extends DefaultPointcutAdvisor {
+
+		public ControllerAdvisor() {
+			super(getControllerPointcut(), new SimpleTraceInterceptor());
+		}
+
+		private static StaticMethodMatcherPointcut getControllerPointcut() {
+			return new StaticMethodMatcherPointcut() {
+				public boolean matches(Method method, Class<?> targetClass) {
+					return ((AnnotationUtils.findAnnotation(targetClass, Controller.class) != null) ||
+							(AnnotationUtils.findAnnotation(targetClass, RequestMapping.class) != null));
+				}
+			};
+		}
 	}
 
 }

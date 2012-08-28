@@ -50,8 +50,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.AsyncWebUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -817,12 +817,11 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
-
 		if (logger.isDebugEnabled()) {
 			String requestUri = urlPathHelper.getRequestUri(request);
-			logger.debug("DispatcherServlet with name '" + getServletName() + "' processing " + request.getMethod() +
-					" request for [" + requestUri + "]");
+			String resumed = AsyncWebUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
+			logger.debug("DispatcherServlet with name '" + getServletName() + "'" + resumed +
+					" processing " + request.getMethod() + " request for [" + requestUri + "]");
 		}
 
 		// Keep a snapshot of the request attributes in case of an include,
@@ -853,13 +852,11 @@ public class DispatcherServlet extends FrameworkServlet {
 		request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
 		request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
 
-		asyncChain.addDelegatingCallable(getServiceAsyncCallable(request, attributesSnapshot));
-
 		try {
 			doDispatch(request, response);
 		}
 		finally {
-			if (asyncChain.isAsyncStarted()) {
+			if (AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 				return;
 			}
 			// Restore the original attribute snapshot, in case of an include.
@@ -867,27 +864,6 @@ public class DispatcherServlet extends FrameworkServlet {
 				restoreAttributesAfterInclude(request, attributesSnapshot);
 			}
 		}
-	}
-
-	/**
-	 * Create a Callable to complete doService() processing asynchronously.
-	 */
-	private AbstractDelegatingCallable getServiceAsyncCallable(
-			final HttpServletRequest request, final Map<String, Object> attributesSnapshot) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Resuming asynchronous processing of " + request.getMethod() +
-							" request for [" + urlPathHelper.getRequestUri(request) + "]");
-				}
-				getNextCallable().call();
-				if (attributesSnapshot != null) {
-					restoreAttributesAfterInclude(request, attributesSnapshot);
-				}
-				return null;
-			}
-		};
 	}
 
 	/**
@@ -904,7 +880,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
 		HandlerExecutionChain mappedHandler = null;
-		AsyncExecutionChain asyncChain = AsyncExecutionChain.getForCurrentRequest(request);
+		boolean multipartRequestParsed = false;
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
 
 		try {
 			ModelAndView mv = null;
@@ -912,6 +890,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 			try {
 				processedRequest = checkMultipart(request);
+				multipartRequestParsed = processedRequest != request;
 
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest, false);
@@ -941,22 +920,17 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				mappedHandler.addDelegatingCallables(processedRequest, response);
-
-				asyncChain.addDelegatingCallable(
-						getDispatchAsyncCallable(mappedHandler, request, response, processedRequest));
-
-				// Actually invoke the handler.
-				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
-				if (asyncChain.isAsyncStarted()) {
-					mappedHandler.applyPostHandleAsyncStarted(processedRequest, response);
-					logger.debug("Exiting request thread and leaving the response open");
-					return;
+				try {
+					// Actually invoke the handler.
+					mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+				}
+				finally {
+					if (asyncManager.isConcurrentHandlingStarted()) {
+						return;
+					}
 				}
 
 				applyDefaultViewName(request, mv);
-
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
@@ -971,11 +945,13 @@ public class DispatcherServlet extends FrameworkServlet {
 			triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
 		}
 		finally {
-			if (asyncChain.isAsyncStarted()) {
+			if (asyncManager.isConcurrentHandlingStarted()) {
+				// Instead of postHandle and afterCompletion
+				mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
 				return;
 			}
 			// Clean up any resources used by a multipart request.
-			if (processedRequest != request) {
+			if (multipartRequestParsed) {
 				cleanupMultipart(processedRequest);
 			}
 		}
@@ -1025,48 +1001,14 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
+		if (AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+			// Concurrent handling started during a forward
+			return;
+		}
+
 		if (mappedHandler != null) {
 			mappedHandler.triggerAfterCompletion(request, response, null);
 		}
-	}
-
-	/**
-	 * Create a Callable to complete doDispatch processing asynchronously.
-	 */
-	private AbstractDelegatingCallable getDispatchAsyncCallable(
-			final HandlerExecutionChain mappedHandler,
-			final HttpServletRequest request, final HttpServletResponse response,
-			final HttpServletRequest processedRequest) throws Exception {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				try {
-					ModelAndView mv = null;
-					Exception dispatchException = null;
-					try {
-						mv = (ModelAndView) getNextCallable().call();
-						applyDefaultViewName(processedRequest, mv);
-						mappedHandler.applyPostHandle(request, response, mv);
-					}
-					catch (Exception ex) {
-						dispatchException = ex;
-					}
-					processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
-				}
-				catch (Exception ex) {
-					triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
-				}
-				catch (Error err) {
-					triggerAfterCompletionWithError(processedRequest, response, mappedHandler, err);
-				}
-				finally {
-					if (processedRequest != request) {
-						cleanupMultipart(processedRequest);
-					}
-				}
-				return null;
-			}
-		};
 	}
 
 	/**
@@ -1111,12 +1053,13 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Clean up any resources used by the given multipart request (if any).
-	 * @param request current HTTP request
+	 * @param servletRequest current HTTP request
 	 * @see MultipartResolver#cleanupMultipart
 	 */
-	protected void cleanupMultipart(HttpServletRequest request) {
-		if (request instanceof MultipartHttpServletRequest) {
-			this.multipartResolver.cleanupMultipart((MultipartHttpServletRequest) request);
+	protected void cleanupMultipart(HttpServletRequest servletRequest) {
+		MultipartHttpServletRequest req = WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+		if (req != null) {
+			this.multipartResolver.cleanupMultipart(req);
 		}
 	}
 
@@ -1183,7 +1126,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 		throw new ServletException("No adapter for handler [" + handler +
-				"]: Does your handler implement a supported interface like Controller?");
+				"]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler");
 	}
 
 	/**

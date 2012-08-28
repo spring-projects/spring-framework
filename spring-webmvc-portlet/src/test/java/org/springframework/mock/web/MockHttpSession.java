@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,24 @@ import org.springframework.util.Assert;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpSession} interface.
- * Supports the Servlet 2.4 API level.
  *
- * <p>Used for testing the web framework; also useful for testing
- * application controllers.
+ * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
+ *
+ * <p>Used for testing the web framework; also useful for testing application
+ * controllers.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 1.0.2
  */
+@SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
 
 	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 	private static int nextId = 1;
-
 
 	private final String id;
 
@@ -68,8 +70,9 @@ public class MockHttpSession implements HttpSession {
 
 
 	/**
-	 * Create a new MockHttpSession with a default {@link org.springframework.mock.web.MockServletContext}.
-	 * @see org.springframework.mock.web.MockServletContext
+	 * Create a new MockHttpSession with a default {@link MockServletContext}.
+	 * 
+	 * @see MockServletContext
 	 */
 	public MockHttpSession() {
 		this(null);
@@ -77,6 +80,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
+	 * 
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
@@ -85,6 +89,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
+	 * 
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
@@ -92,7 +97,6 @@ public class MockHttpSession implements HttpSession {
 		this.servletContext = (servletContext != null ? servletContext : new MockServletContext());
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
-
 
 	public long getCreationTime() {
 		return this.creationTime;
@@ -188,7 +192,17 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	/**
+	 * Invalidates this session then unbinds any objects bound to it.
+	 *
+	 * @throws IllegalStateException if this method is called on an already invalidated session
+	 */
 	public void invalidate() {
+		if (this.invalid) {
+			throw new IllegalStateException("The session has already been invalidated");
+		}
+
+		// else
 		this.invalid = true;
 		clearAttributes();
 	}
@@ -205,10 +219,10 @@ public class MockHttpSession implements HttpSession {
 		return this.isNew;
 	}
 
-
 	/**
-	 * Serialize the attributes of this session into an object that can
-	 * be turned into a byte array with standard Java serialization.
+	 * Serialize the attributes of this session into an object that can be
+	 * turned into a byte array with standard Java serialization.
+	 * 
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
@@ -233,8 +247,9 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	/**
-	 * Deserialize the attributes of this session from a state object
-	 * created by {@link #serializeState()}.
+	 * Deserialize the attributes of this session from a state object created by
+	 * {@link #serializeState()}.
+	 * 
 	 * @param state a representation of this session's serialized state
 	 */
 	@SuppressWarnings("unchecked")

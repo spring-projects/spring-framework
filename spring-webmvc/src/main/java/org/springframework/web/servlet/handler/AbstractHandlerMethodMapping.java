@@ -25,13 +25,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -62,6 +60,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	private final MultiValueMap<String, T> urlMap = new LinkedMultiValueMap<String, T>();
 
+
 	/**
 	 * Whether to detect handler methods in beans in ancestor ApplicationContexts.
 	 * <p>Default is "false": Only beans in the current ApplicationContext are
@@ -78,15 +77,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * Return a map with all handler methods and their mappings.
 	 */
 	public Map<T, HandlerMethod> getHandlerMethods() {
-		return Collections.unmodifiableMap(handlerMethods);
-	}
-
-	/**
-	 * ApplicationContext initialization.
-	 */
-	@Override
-	public void initApplicationContext() throws ApplicationContextException {
-		super.initApplicationContext();
+		return Collections.unmodifiableMap(this.handlerMethods);
 	}
 
 	/**
@@ -158,7 +149,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Provide the mapping for a handler method. A method for which no
 	 * mapping can be provided is not a handler method.
-	 *
 	 * @param method the method to provide a mapping for
 	 * @param handlerType the handler type, possibly a sub-type of the method's
 	 * declaring class
@@ -168,7 +158,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 	/**
 	 * Register a handler method and its unique mapping.
-	 *
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
@@ -192,7 +181,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 					+ oldHandlerMethod.getBean() + "' bean method\n" + oldHandlerMethod + " mapped.");
 		}
 
-		handlerMethods.put(mapping, handlerMethod);
+		this.handlerMethods.put(mapping, handlerMethod);
 		if (logger.isInfoEnabled()) {
 			logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
 		}
@@ -200,7 +189,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		Set<String> patterns = getMappingPathPatterns(mapping);
 		for (String pattern : patterns) {
 			if (!getPathMatcher().isPattern(pattern)) {
-				urlMap.add(pattern, mapping);
+				this.urlMap.add(pattern, mapping);
 			}
 		}
 	}
@@ -237,11 +226,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Look up the best-matching handler method for the current request.
 	 * If multiple matches are found, the best match is selected.
-	 *
 	 * @param lookupPath mapping lookup path within the current servlet mapping
 	 * @param request the current request
 	 * @return the best-matching handler method, or {@code null} if no match
-	 *
 	 * @see #handleMatch(Object, String, HttpServletRequest)
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
@@ -298,7 +285,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Check if a mapping matches the current request and return a (potentially
 	 * new) mapping with conditions relevant to the current request.
-	 *
 	 * @param mapping the mapping to get a match for
 	 * @param request the current HTTP servlet request
 	 * @return the match, or {@code null} if the mapping doesn't match
@@ -332,8 +318,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected HandlerMethod handleNoMatch(Set<T> mappings, String lookupPath, HttpServletRequest request)
 			throws Exception {
+
 		return null;
 	}
+
 
 	/**
 	 * A temporary container for a mapping matched to a request.
@@ -351,9 +339,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		@Override
 		public String toString() {
-			return mapping.toString();
+			return this.mapping.toString();
 		}
 	}
+
 
 	private class MatchComparator implements Comparator<Match> {
 
@@ -364,7 +353,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		public int compare(Match match1, Match match2) {
-			return comparator.compare(match1.mapping, match2.mapping);
+			return this.comparator.compare(match1.mapping, match2.mapping);
 		}
 	}
 

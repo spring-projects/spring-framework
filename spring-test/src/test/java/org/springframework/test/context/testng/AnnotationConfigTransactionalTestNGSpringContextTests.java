@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.NotTransactional;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,13 +47,13 @@ import org.testng.annotations.Test;
  * classes with TestNG-based tests.
  * 
  * <p>Configuration will be loaded from
- * {@link AnnotationConfigTransactionalTestNGSpringContextTestsConfig}.
+ * {@link AnnotationConfigTransactionalTestNGSpringContextTests.ContextConfiguration}.
  * 
  * @author Sam Brannen
  * @since 3.1
  */
 @SuppressWarnings("deprecation")
-@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
+@ContextConfiguration
 public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		AbstractTransactionalTestNGSpringContextTests {
 

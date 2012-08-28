@@ -29,7 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.0.2
- * @deprecated as of Spring 3.2 in favor of {@link BeanFactoryUtils}
+ * @deprecated as of Spring 3.1.2 in favor of {@link BeanFactoryUtils}
  */
 @Deprecated
 public abstract class TransactionAspectUtils {
@@ -40,7 +40,7 @@ public abstract class TransactionAspectUtils {
 	 * @param qualifier the qualifier for selecting between multiple {@code PlatformTransactionManager} matches
 	 * @return the chosen {@code PlatformTransactionManager} (never {@code null})
 	 * @throws IllegalStateException if no matching {@code PlatformTransactionManager} bean found
-	 * @deprecated as of Spring 3.2 in favor of
+	 * @deprecated as of Spring 3.1.2 in favor of
 	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
 	public static PlatformTransactionManager getTransactionManager(BeanFactory beanFactory, String qualifier) {
@@ -53,7 +53,7 @@ public abstract class TransactionAspectUtils {
 	 * @param qualifier the qualifier for selecting between multiple {@code PlatformTransactionManager} matches
 	 * @return the chosen {@code PlatformTransactionManager} (never {@code null})
 	 * @throws IllegalStateException if no matching {@code PlatformTransactionManager} bean found
-	 * @deprecated as of Spring 3.2 in favor of
+	 * @deprecated as of Spring 3.1.2 in favor of
 	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
 	public static PlatformTransactionManager getTransactionManager(ConfigurableListableBeanFactory bf, String qualifier) {

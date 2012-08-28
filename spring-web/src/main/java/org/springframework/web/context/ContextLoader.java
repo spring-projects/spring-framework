@@ -470,17 +470,18 @@ public class ContextLoader {
 			return;
 		}
 
+		Class<?> contextClass = applicationContext.getClass();
 		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
-			Class<?> contextClass = applicationContext.getClass();
 			Class<?> initializerContextClass =
 				GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
 			Assert.isAssignable(initializerContextClass, contextClass, String.format(
 					"Could not add context initializer [%s] as its generic parameter [%s] " +
 					"is not assignable from the type of application context used by this " +
-					"context loader [%s]", initializerClass.getName(), initializerContextClass, contextClass));
+					"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+					contextClass.getName()));
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 

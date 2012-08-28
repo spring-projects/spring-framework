@@ -44,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * (like Spring's {@link org.springframework.scheduling.annotation.AsyncResult}
  * or EJB 3.1's <code>javax.ejb.AsyncResult</code>).
  *
- * <p>As of Spring 3.2 the {@code AnnotationAsyncExecutionInterceptor} subclass is
+ * <p>As of Spring 3.1.2 the {@code AnnotationAsyncExecutionInterceptor} subclass is
  * preferred for use due to its support for executor qualification in conjunction with
  * Spring's {@code @Async} annotation.
  *
@@ -101,12 +101,12 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 
 	/**
 	 * {@inheritDoc}
-	 * <p>This implementation is a no-op for compatibility in Spring 3.2. Subclasses may
+	 * <p>This implementation is a no-op for compatibility in Spring 3.1.2. Subclasses may
 	 * override to provide support for extracting qualifier information, e.g. via an
 	 * annotation on the given method.
 	 * @return always {@code null}
 	 * @see #determineAsyncExecutor(Method)
-	 * @since 3.2
+	 * @since 3.1.2
 	 */
 	@Override
 	protected String getExecutorQualifier(Method method) {

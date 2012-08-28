@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -72,7 +73,7 @@ public class InterceptorRegistryTests {
 	public void addInterceptor() {
 		registry.addInterceptor(interceptor1);
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
-		
+
 		assertEquals(Arrays.asList(interceptor1), interceptors);
 	}
 
@@ -81,24 +82,25 @@ public class InterceptorRegistryTests {
 		registry.addInterceptor(interceptor1);
 		registry.addInterceptor(interceptor2);
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
-		
+
 		assertEquals(Arrays.asList(interceptor1, interceptor2), interceptors);
 	}
 
 	@Test
 	public void addInterceptorsWithUrlPatterns() {
-		registry.addInterceptor(interceptor1).addPathPatterns("/path1");
+		registry.addInterceptor(interceptor1).addPathPatterns("/path1/**").excludePathPatterns("/path1/secret");
 		registry.addInterceptor(interceptor2).addPathPatterns("/path2");
-		
+
 		assertEquals(Arrays.asList(interceptor1), getInterceptorsForPath("/path1"));
 		assertEquals(Arrays.asList(interceptor2), getInterceptorsForPath("/path2"));
+		assertEquals(Collections.emptyList(), getInterceptorsForPath("/path1/secret"));
 	}
 
 	@Test
 	public void addWebRequestInterceptor() throws Exception {
 		registry.addWebRequestInterceptor(webRequestInterceptor1);
 		List<HandlerInterceptor> interceptors = getInterceptorsForPath(null);
-		
+
 		assertEquals(1, interceptors.size());
 		verifyAdaptedInterceptor(interceptors.get(0), webRequestInterceptor1);
 	}

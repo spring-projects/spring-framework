@@ -515,16 +515,10 @@ class GroovyMessenger implements Messenger {
         <para>
           The JRuby scripting support in Spring requires the following
           libraries to be on the classpath of your application.
-          (The  versions listed just happen to be the versions that the
-          Spring team used in the development of the JRuby scripting support;
-          you may well be able to use another version of a specific library.)
         </para>
         <itemizedlist>
           <listitem>
             <para><filename>jruby.jar</filename></para>
-          </listitem>
-          <listitem>
-            <para><filename>cglib-nodep-2.1_3.jar</filename></para>
           </listitem>
         </itemizedlist>
       </sidebar>
@@ -802,9 +796,6 @@ public class Main {
         <itemizedlist>
           <listitem>
             <para><filename>bsh-2.0b4.jar</filename></para>
-          </listitem>
-          <listitem>
-            <para><filename>cglib-nodep-2.1_3.jar</filename></para>
           </listitem>
         </itemizedlist>
       </sidebar>

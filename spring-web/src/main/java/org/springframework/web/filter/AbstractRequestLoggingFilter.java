@@ -32,8 +32,6 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -180,6 +178,16 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
+	 * The default value is "true" so that the filter may log a "before" message
+	 * at the start of request processing and an "after" message at the end from
+	 * when the last asynchronously dispatched thread is exiting.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
+
+	/**
 	 * Forwards the request to the next filter in the chain and delegates down to the subclasses to perform the actual
 	 * request logging both before and after the request is processed.
 	 *
@@ -190,22 +198,24 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
+		boolean isFirstRequest = !isAsyncDispatch(request);
+
 		if (isIncludePayload()) {
-			request = new RequestCachingRequestWrapper(request);
+			if (isFirstRequest) {
+				request = new RequestCachingRequestWrapper(request);
+			}
 		}
-		beforeRequest(request, getBeforeMessage(request));
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(request));
-
+		if (isFirstRequest) {
+			beforeRequest(request, getBeforeMessage(request));
+		}
 		try {
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			if (chain.isAsyncStarted()) {
-				return;
+			if (isLastRequestThread(request)) {
+				afterRequest(request, getAfterMessage(request));
 			}
-			afterRequest(request, getAfterMessage(request));
 		}
 	}
 
@@ -289,19 +299,6 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	 * @param message the message to log
 	 */
 	protected abstract void afterRequest(HttpServletRequest request, String message);
-
-	/**
-	 * Create a Callable to use to complete processing in an async execution chain.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request) {
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				getNextCallable().call();
-				afterRequest(request, getAfterMessage(request));
-				return null;
-			}
-		};
-	}
 
 
 	private static class RequestCachingRequestWrapper extends HttpServletRequestWrapper {

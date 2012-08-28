@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Dave Syer
+ * @author Sam Brannen
  * @since 3.0
  */
 public class EmbeddedDatabaseBuilder {
@@ -62,8 +63,8 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Sets the name of the embedded database
-	 * Defaults to 'testdb' if not called.
+	 * Set the name of the embedded database.
+	 * <p>Defaults to "testdb" if not called.
 	 * @param databaseName the database name
 	 * @return this, to facilitate method chaining
 	 */
@@ -73,8 +74,8 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Sets the type of embedded database.
-	 * Defaults to HSQL if not called.
+	 * Set the type of embedded database.
+	 * <p>Defaults to HSQL if not called.
 	 * @param databaseType the database type
 	 * @return this, to facilitate method chaining
 	 */
@@ -84,7 +85,7 @@ public class EmbeddedDatabaseBuilder {
 	}
 
 	/**
-	 * Adds a SQL script to execute to populate the database.
+	 * Add a SQL script to execute to populate the database.
 	 * @param sqlResource the sql resource location
 	 * @return this, to facilitate method chaining
 	 */
@@ -95,8 +96,8 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Add default scripts to execute to populate the database.
-	 * The default scripts are <code>schema.sql</code> to create the db schema and
-	 * <code>data.sql</code> to populate the db with data.
+	 * <p>The default scripts are <code>schema.sql</code> to create the db
+	 * schema and <code>data.sql</code> to populate the db with data.
 	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder addDefaultScripts() {

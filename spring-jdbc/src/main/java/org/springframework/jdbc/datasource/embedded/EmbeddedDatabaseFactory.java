@@ -204,10 +204,6 @@ public class EmbeddedDatabaseFactory {
 			return this.dataSource.isWrapperFor(iface);
 		}
 
-		public Logger getParentLogger() {
-			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-		}
-
 		public void shutdown() {
 			shutdownDatabase();
 		}

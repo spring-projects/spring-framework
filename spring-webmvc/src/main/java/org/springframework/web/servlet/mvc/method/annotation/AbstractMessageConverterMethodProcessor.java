@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -35,7 +34,9 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -52,8 +53,17 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
+	private final ContentNegotiationManager contentNegotiationManager;
+
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
+		this(messageConverters, null);
+	}
+
+	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters,
+			ContentNegotiationManager manager) {
+
 		super(messageConverters);
+		this.contentNegotiationManager = (manager != null) ? manager : new ContentNegotiationManager();
 	}
 
 	/**
@@ -100,14 +110,15 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		Class<?> returnValueClass = returnValue.getClass();
 
-		List<MediaType> acceptableMediaTypes = getAcceptableMediaTypes(inputMessage);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(inputMessage.getServletRequest(), returnValueClass);
+		HttpServletRequest servletRequest = inputMessage.getServletRequest();
+		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass);
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
-		for (MediaType a : acceptableMediaTypes) {
+		for (MediaType r : requestedMediaTypes) {
 			for (MediaType p : producibleMediaTypes) {
-				if (a.isCompatibleWith(p)) {
-					compatibleMediaTypes.add(getMostSpecificMediaType(a, p));
+				if (r.isCompatibleWith(p)) {
+					compatibleMediaTypes.add(getMostSpecificMediaType(r, p));
 				}
 			}
 		}
@@ -175,17 +186,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 	}
 
-	private List<MediaType> getAcceptableMediaTypes(HttpInputMessage inputMessage) {
-		try {
-			List<MediaType> result = inputMessage.getHeaders().getAccept();
-			return result.isEmpty() ? Collections.singletonList(MediaType.ALL) : result;
-		}
-		catch (IllegalArgumentException ex) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Could not parse Accept header: " + ex.getMessage());
-			}
-			return Collections.emptyList();
-		}
+	private List<MediaType> getAcceptableMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
+		List<MediaType> mediaTypes = this.contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request));
+		return mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes;
 	}
 
 	/**

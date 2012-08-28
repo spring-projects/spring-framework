@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -486,7 +486,7 @@ public abstract class AbstractAopProxyTests {
 	/**
 	 * An interceptor throws a checked exception not on the method signature.
 	 * For efficiency, we don't bother unifying java.lang.reflect and
-	 * net.sf.cglib UndeclaredThrowableException
+	 * org.springframework.cglib UndeclaredThrowableException
 	 */
 	@Test
 	public void testUndeclaredCheckedException() throws Throwable {
@@ -514,9 +514,6 @@ public abstract class AbstractAopProxyTests {
 		catch (UndeclaredThrowableException thrown) {
 			assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
 		}
-		//catch (net.sf.cglib.proxy.UndeclaredThrowableException thrown) {			
-		//	assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
-		//}
 		catch (Exception ex) {
 			ex.printStackTrace();
 			fail("Didn't expect exception: " + ex);
@@ -549,9 +546,6 @@ public abstract class AbstractAopProxyTests {
 		catch (RuntimeException thrown) {
 			assertEquals("exception matches", unexpectedException, thrown);
 		}
-		//catch (net.sf.cglib.proxy.UndeclaredThrowableException thrown) {			
-		//	assertEquals("exception matches", unexpectedException, thrown.getUndeclaredThrowable());
-		//}
 	}
 
 	/**

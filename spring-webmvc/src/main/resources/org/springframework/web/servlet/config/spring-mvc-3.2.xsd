@@ -90,6 +90,38 @@
 						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>			
+				<xsd:element name="async-support" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configure options for asynchronous request processing.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="task-executor" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.core.task.AsyncTaskExecutor"><![CDATA[
+	The bean name of a default AsyncTaskExecutor to use when a controller method returns a {@link Callable}.
+	Controller methods can override this default on a per-request basis by returning an AsyncTask.
+	By default a SimpleAsyncTaskExecutor is used which does not re-use threads and is not recommended for production.
+								]]></xsd:documentation>
+								<xsd:appinfo>
+									<tool:annotation kind="ref">
+										<tool:expected-type type="java:org.springframework.core.task.AsyncTaskExecutor" />
+									</tool:annotation>
+								</xsd:appinfo>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="default-timeout" type="xsd:long">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Specify the amount of time, in milliseconds, before asynchronous request handling times out.
+	In Servlet 3, the timeout begins after the main request processing thread has exited and ends when the request is dispatched again for further processing of the concurrently produced result.
+	If this value is not set, the default timeout of the underlying implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 			</xsd:all>
 			<xsd:attribute name="conversion-service" type="xsd:string">
 				<xsd:annotation>
@@ -116,6 +148,22 @@
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
 							<tool:expected-type type="java:org.springframework.validation.Validator" />
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="content-negotiation-manager" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation source="java:org.springframework.web.accept.ContentNegotiationManager"><![CDATA[
+	The bean name of a ContentNegotiationManager that is to be used to determine requested media types. If not specified,
+	a default ContentNegotiationManager is configured that checks the request path extension first and the "Accept" header
+	second where path extensions such as ".json", ".xml", ".atom", and ".rss" are recognized if Jackson, JAXB2, or the
+	Rome libraries are available. As a fallback option, the path extension is also used to perform a lookup through
+	the ServletContext and the Java Activation Framework (if available).
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="java:org.springframework.web.accept.ContentNegotiationManager" />
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>
@@ -268,6 +316,18 @@
 											<xsd:documentation><![CDATA[
 	A path into the application intercepted by this interceptor.
 	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
+											]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="exclude-mapping" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:attribute name="path" type="xsd:string" use="required">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	A path into the application that should not be intercepted by this interceptor.
+	Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path patterns (such as /admin/**).
 											]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>

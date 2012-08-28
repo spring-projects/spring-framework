@@ -18,12 +18,15 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,6 +37,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.OrderComparator;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -44,12 +48,13 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.ModelMap;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.support.ControllerAdviceBean;
 import org.springframework.web.bind.support.DefaultDataBinderFactory;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;
 import org.springframework.web.bind.support.SessionAttributeStore;
@@ -58,10 +63,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.NoOpAsyncWebRequest;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.annotation.ErrorsMethodArgumentResolver;
@@ -139,13 +144,22 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
-	private final Map<Class<?>, Set<Method>> dataBinderFactoryCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
 
-	private final Map<Class<?>, Set<Method>> modelFactoryCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+	private final Map<ControllerAdviceBean, Set<Method>> initBinderAdviceCache =
+			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private final Map<Class<?>, Set<Method>> modelAttributeCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
+
+	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache =
+			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
+
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
 	private Long asyncRequestTimeout;
+
+	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
+
 
 	/**
 	 * Default constructor.
@@ -388,26 +402,36 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Set the AsyncTaskExecutor to use when a controller method returns a
-	 * {@code Callable}.
-	 * <p>The default instance type is a {@link SimpleAsyncTaskExecutor}.
-	 * It's recommended to change that default in production as the simple
-	 * executor does not re-use threads.
+	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
+	 * return a {@link Callable}. Controller methods can override this default on
+	 * a per-request basis by returning an {@link AsyncTask}.
+	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
+	 * It's recommended to change that default in production as the simple executor
+	 * does not re-use threads.
 	 */
-	public void setAsyncTaskExecutor(AsyncTaskExecutor taskExecutor) {
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
 	}
 
 	/**
-	 * Set the timeout for asynchronous request processing in milliseconds.
-	 * When the timeout begins depends on the underlying async technology.
-	 * With the Servlet 3 async support the timeout begins after the main
-	 * processing thread has exited and has been returned to the container pool.
-	 * <p>If a value is not provided, the default timeout of the underlying
-	 * async technology is used (10 seconds on Tomcat with Servlet 3 async).
+	 * Specify the amount of time, in milliseconds, before concurrent handling
+	 * should time out. In Servlet 3, the timeout begins after the main request
+	 * processing thread has exited and ends when the request is dispatched again
+	 * for further processing of the concurrently produced result.
+	 * <p>If this value is not set, the default timeout of the underlying
+	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	 * @param timeout the timeout value in milliseconds
 	 */
-	public void setAsyncRequestTimeout(long asyncRequestTimeout) {
-		this.asyncRequestTimeout = asyncRequestTimeout;
+	public void setAsyncRequestTimeout(long timeout) {
+		this.asyncRequestTimeout = timeout;
+	}
+
+	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 	/**
@@ -441,6 +465,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
+		initControllerAdviceCache();
 	}
 
 	/**
@@ -525,12 +550,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		handlers.add(new ModelAndViewMethodReturnValueHandler());
 		handlers.add(new ModelMethodProcessor());
 		handlers.add(new ViewMethodReturnValueHandler());
-		handlers.add(new HttpEntityMethodProcessor(getMessageConverters()));
-		handlers.add(new AsyncMethodReturnValueHandler());
+		handlers.add(new HttpEntityMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
+		handlers.add(new CallableMethodReturnValueHandler());
+		handlers.add(new DeferredResultMethodReturnValueHandler());
+		handlers.add(new AsyncTaskMethodReturnValueHandler(this.beanFactory));
 
 		// Annotation-based return value types
 		handlers.add(new ModelAttributeMethodProcessor(false));
-		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
+		handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(), this.contentNegotiationManager));
 
 		// Multi-purpose return value types
 		handlers.add(new ViewNameMethodReturnValueHandler());
@@ -550,6 +577,31 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		}
 
 		return handlers;
+	}
+
+	private void initControllerAdviceCache() {
+		if (getApplicationContext() == null) {
+			return;
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Looking for controller advice: " + getApplicationContext());
+		}
+
+		List<ControllerAdviceBean> beans = ControllerAdviceBean.findBeans(getApplicationContext());
+		Collections.sort(beans, new OrderComparator());
+
+		for (ControllerAdviceBean bean : beans) {
+			Set<Method> attrMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), MODEL_ATTRIBUTE_METHODS);
+			if (!attrMethods.isEmpty()) {
+				this.modelAttributeAdviceCache.put(bean, attrMethods);
+				logger.info("Detected @ModelAttribute methods in " + bean);
+			}
+			Set<Method> binderMethods = HandlerMethodSelector.selectMethods(bean.getBeanType(), INIT_BINDER_METHODS);
+			if (!binderMethods.isEmpty()) {
+				this.initBinderAdviceCache.put(bean, binderMethods);
+				logger.info("Detected @InitBinder methods in " + bean);
+			}
+		}
 	}
 
 	/**
@@ -639,34 +691,36 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-		chain.addDelegatingCallable(getAsyncCallable(mavContainer, modelFactory, webRequest));
-		chain.setAsyncWebRequest(createAsyncWebRequest(request, response));
-		chain.setTaskExecutor(this.taskExecutor);
+		AsyncWebRequest asyncWebRequest = AsyncWebUtils.createAsyncWebRequest(request, response);
+		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+		final WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(this.taskExecutor);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+
+		if (asyncManager.hasConcurrentResult()) {
+			Object result = asyncManager.getConcurrentResult();
+			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+			asyncManager.clearConcurrentResult();
+
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found concurrent result value [" + result + "]");
+			}
+			requestMappingMethod = requestMappingMethod.wrapConcurrentResult(result);
+		}
 
 		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
 
-		if (chain.isAsyncStarted()) {
+		if (asyncManager.isConcurrentHandlingStarted()) {
 			return null;
 		}
 
 		return getModelAndView(mavContainer, modelFactory, webRequest);
 	}
 
-	private AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		AsyncWebRequest asyncRequest;
-		if (ClassUtils.hasMethod(ServletRequest.class, "startAsync")) {
-			asyncRequest = new org.springframework.web.context.request.async.StandardServletAsyncWebRequest(request, response);
-			asyncRequest.setTimeout(this.asyncRequestTimeout);
-		}
-		else {
-			asyncRequest = new NoOpAsyncWebRequest(request, response);
-		}
-		return asyncRequest;
-	}
+	private ServletInvocableHandlerMethod createRequestMappingMethod(
+			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 
-	private ServletInvocableHandlerMethod createRequestMappingMethod(HandlerMethod handlerMethod,
-																	 WebDataBinderFactory binderFactory) {
 		ServletInvocableHandlerMethod requestMethod;
 		requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
 		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -679,38 +733,60 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private ModelFactory getModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 		SessionAttributesHandler sessionAttrHandler = getSessionAttributesHandler(handlerMethod);
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> methods = this.modelFactoryCache.get(handlerType);
+		Set<Method> methods = this.modelAttributeCache.get(handlerType);
 		if (methods == null) {
 			methods = HandlerMethodSelector.selectMethods(handlerType, MODEL_ATTRIBUTE_METHODS);
-			this.modelFactoryCache.put(handlerType, methods);
+			this.modelAttributeCache.put(handlerType, methods);
 		}
 		List<InvocableHandlerMethod> attrMethods = new ArrayList<InvocableHandlerMethod>();
 		for (Method method : methods) {
-			InvocableHandlerMethod attrMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
-			attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-			attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-			attrMethod.setDataBinderFactory(binderFactory);
-			attrMethods.add(attrMethod);
+			Object bean = handlerMethod.getBean();
+			attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
+		}
+		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.modelAttributeAdviceCache.entrySet()) {
+			Object bean = entry.getKey().resolveBean();
+			for (Method method : entry.getValue()) {
+				attrMethods.add(createModelAttributeMethod(binderFactory, bean, method));
+			}
 		}
 		return new ModelFactory(attrMethods, binderFactory, sessionAttrHandler);
 	}
 
+	private InvocableHandlerMethod createModelAttributeMethod(WebDataBinderFactory factory, Object bean, Method method) {
+		InvocableHandlerMethod attrMethod = new InvocableHandlerMethod(bean, method);
+		attrMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		attrMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+		attrMethod.setDataBinderFactory(factory);
+		return attrMethod;
+	}
+
 	private WebDataBinderFactory getDataBinderFactory(HandlerMethod handlerMethod) throws Exception {
 		Class<?> handlerType = handlerMethod.getBeanType();
-		Set<Method> methods = this.dataBinderFactoryCache.get(handlerType);
+		Set<Method> methods = this.initBinderCache.get(handlerType);
 		if (methods == null) {
 			methods = HandlerMethodSelector.selectMethods(handlerType, INIT_BINDER_METHODS);
-			this.dataBinderFactoryCache.put(handlerType, methods);
+			this.initBinderCache.put(handlerType, methods);
 		}
-		List<InvocableHandlerMethod> binderMethods = new ArrayList<InvocableHandlerMethod>();
+		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
 		for (Method method : methods) {
-			InvocableHandlerMethod binderMethod = new InvocableHandlerMethod(handlerMethod.getBean(), method);
-			binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
-			binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
-			binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-			binderMethods.add(binderMethod);
+			Object bean = handlerMethod.getBean();
+			initBinderMethods.add(createInitBinderMethod(bean, method));
 		}
-		return createDataBinderFactory(binderMethods);
+		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache .entrySet()) {
+			Object bean = entry.getKey().resolveBean();
+			for (Method method : entry.getValue()) {
+				initBinderMethods.add(createInitBinderMethod(bean, method));
+			}
+		}
+		return createDataBinderFactory(initBinderMethods);
+	}
+
+	private InvocableHandlerMethod createInitBinderMethod(Object bean, Method method) {
+		InvocableHandlerMethod binderMethod = new InvocableHandlerMethod(bean, method);
+		binderMethod.setHandlerMethodArgumentResolvers(this.initBinderArgumentResolvers);
+		binderMethod.setDataBinderFactory(new DefaultDataBinderFactory(this.webBindingInitializer));
+		binderMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+		return binderMethod;
 	}
 
 	/**
@@ -723,21 +799,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	protected ServletRequestDataBinderFactory createDataBinderFactory(List<InvocableHandlerMethod> binderMethods)
 			throws Exception {
+
 		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
-	}
-
-	/**
-	 * Create a Callable to produce a ModelAndView asynchronously.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final ModelAndViewContainer mavContainer,
-			final ModelFactory modelFactory, final NativeWebRequest webRequest) {
-
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
-				getNextCallable().call();
-				return getModelAndView(mavContainer, modelFactory, webRequest);
-			}
-		};
 	}
 
 	private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,

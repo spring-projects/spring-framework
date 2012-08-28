@@ -143,7 +143,19 @@ public class UriComponentsBuilder {
 	/**
 	 * Returns a builder that is initialized with the given URI string.
 	 *
-	 * @param uri the URI string to initialize with
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
+	 *
+	 * @param uri
+	 *            the URI string to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder fromUriString(String uri) {
@@ -172,6 +184,17 @@ public class UriComponentsBuilder {
 
 	/**
 	 * Creates a new {@code UriComponents} object from the string HTTP URL.
+	 *
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
 	 *
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
@@ -213,9 +236,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 * Builds a {@code UriComponents} instance from the various components
+	 * contained in this builder.
 	 *
-	 * @param encoded whether all the components set in this builder are encoded ({@code true}) or not ({@code false}).
+	 * @param encoded whether all the components set in this builder are
+	 * 	encoded ({@code true}) or not ({@code false}).
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
@@ -283,10 +308,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI scheme. The given scheme may contain URI template variables, and may also be {@code null} to clear the
-	 * scheme of this builder.
+	 * Sets the URI scheme. The given scheme may contain URI template variables,
+	 * and may also be {@code null} to clear the scheme of this builder.
 	 *
-	 * @param scheme the URI scheme
+	 * @param scheme
+	 *            the URI scheme
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder scheme(String scheme) {
@@ -295,10 +321,12 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI user info. The given user info may contain URI template variables, and may also be {@code null} to
-	 * clear the user info of this builder.
+	 * Sets the URI user info. The given user info may contain URI template
+	 * variables, and may also be {@code null} to clear the user info of this
+	 * builder.
 	 *
-	 * @param userInfo the URI user info
+	 * @param userInfo
+	 *            the URI user info
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder userInfo(String userInfo) {
@@ -307,10 +335,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI host. The given host may contain URI template variables, and may also be {@code null} to clear the host
-	 * of this builder.
+	 * Sets the URI host. The given host may contain URI template variables, and
+	 * may also be {@code null} to clear the host of this builder.
 	 *
-	 * @param host the URI host
+	 * @param host
+	 *            the URI host
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder host(String host) {
@@ -331,9 +360,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given path to the existing path of this builder. The given path may contain URI template variables.
+	 * Appends the given path to the existing path of this builder. The given
+	 * path may contain URI template variables.
 	 *
-	 * @param path the URI path
+	 * @param path
+	 *            the URI path
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder path(String path) {
@@ -372,7 +403,19 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given query to the existing query of this builder. The given query may contain URI template variables.
+	 * Appends the given query to the existing query of this builder.
+	 * The given query may contain URI template variables.
+	 *
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
 	 *
 	 * @param query the query string
 	 * @return this UriComponentsBuilder
@@ -405,12 +448,15 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Appends the given query parameter to the existing query parameters. The given name or any of the values may contain
-	 * URI template variables. If no values are given, the resulting URI will contain the query parameter name only (i.e.
-	 * {@code ?foo} instead of {@code ?foo=bar}.
+	 * Appends the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
 	 *
-	 * @param name   the query parameter name
-	 * @param values the query parameter values
+	 * @param name
+	 *            the query parameter name
+	 * @param values
+	 *            the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder queryParam(String name, Object... values) {
@@ -428,11 +474,14 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the query parameter values overriding all existing query values for the same parameter.
-	 * If no values are given, the query parameter is removed.
+	 * Sets the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is
+	 * removed.
 	 *
-	 * @param name   the query parameter name
-	 * @param values the query parameter values
+	 * @param name
+	 *            the query parameter name
+	 * @param values
+	 *            the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
@@ -445,10 +494,12 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
-	 * the fragment of this builder.
+	 * Sets the URI fragment. The given fragment may contain URI template
+	 * variables, and may also be {@code null} to clear the fragment of this
+	 * builder.
 	 *
-	 * @param fragment the URI fragment
+	 * @param fragment
+	 *            the URI fragment
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder fragment(String fragment) {

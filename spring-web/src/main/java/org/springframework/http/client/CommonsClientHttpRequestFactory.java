@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,9 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 				return new PutMethod(uri);
 			case TRACE:
 				return new TraceMethod(uri);
+			case PATCH:
+				throw new IllegalArgumentException(
+						"HTTP method PATCH not available before Apache HttpComponents HttpClient 4.2");
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 		}

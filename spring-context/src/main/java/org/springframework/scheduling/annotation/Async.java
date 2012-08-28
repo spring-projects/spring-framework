@@ -57,7 +57,7 @@ public @interface Async {
 	 * <p>When specified on a class level {@code @Async} annotation, indicates that the
 	 * given executor should be used for all methods within the class. Method level use
 	 * of {@link Async#value} always overrides any value set at the class level.
-	 * @since 3.2
+	 * @since 3.1.2
 	 */
 	String value() default "";
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,20 +144,20 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
  * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
- * 
+ *
  * Tests in this class run against the {@link HandlerMethod} infrastructure:
  * <ul>
- * 	<li>RequestMappingHandlerMapping 
- * 	<li>RequestMappingHandlerAdapter 
+ * 	<li>RequestMappingHandlerMapping
+ * 	<li>RequestMappingHandlerAdapter
  * 	<li>ExceptionHandlerExceptionResolver
  * </ul>
- * 
+ *
  * <p>Rather than against the existing infrastructure:
  * <ul>
  * 	<li>DefaultAnnotationHandlerMapping
  * 	<li>AnnotationMethodHandlerAdapter
  * 	<li>AnnotationMethodHandlerExceptionResolver
- * </ul> 
+ * </ul>
  *
  * @author Rossen Stoyanchev
  */
@@ -249,7 +249,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				context.registerBeanDefinition("ppc", ppc);
 			}
 		}, DefaultExpressionValueParamController.class);
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myPath.do");
 		request.setContextPath("/myApp");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -656,7 +656,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		final MockServletContext servletContext = new MockServletContext();
 		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
 
-		WebApplicationContext  webAppContext = 
+		WebApplicationContext  webAppContext =
 			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
 				public void initialize(GenericWebApplicationContext wac) {
 					wac.setServletContext(servletContext);
@@ -705,7 +705,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 		assertEquals("mySurpriseView", response.getContentAsString());
 
-		MyParameterDispatchingController deserialized = 
+		MyParameterDispatchingController deserialized =
 			(MyParameterDispatchingController) SerializationTestUtils.serializeAndDeserialize(
 					webAppContext.getBean(MyParameterDispatchingController.class.getSimpleName()));
 		assertNotNull(deserialized.request);
@@ -804,6 +804,21 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/something");
 		String requestBody = "Hello World";
+		request.setContent(requestBody.getBytes("UTF-8"));
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.addHeader("Accept", "text/*, */*");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(200, response.getStatus());
+		assertEquals(requestBody, response.getContentAsString());
+	}
+
+	@Test
+	public void httpPatch() throws ServletException, IOException {
+		initServletWithControllers(RequestResponseBodyController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PATCH", "/something");
+		String requestBody = "Hello world!";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.addHeader("Accept", "text/*, */*");
@@ -1248,7 +1263,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("Content-Type=[text/html],Custom-Header=[value21,value22]", response.getContentAsString());
 	}
 
-	
+
 	@Test
 	public void requestMappingInterface() throws Exception {
 		initServletWithControllers(IMyControllerImpl.class);
@@ -1298,7 +1313,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("handle", response.getContentAsString());
 
 	}
-	
+
 	@Test
 	public void trailingSlash() throws Exception {
 		initServletWithControllers(TrailingSlashController.class);
@@ -1444,7 +1459,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		
+
 		assertEquals(200, response.getStatus());
 		assertEquals("home", response.getForwardedUrl());
 
@@ -1462,11 +1477,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addHeader("Accept", "application/json");
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		
+
 		assertEquals(200, response.getStatus());
 		assertEquals("application/json", response.getHeader("Content-Type"));
 		assertEquals("homeJson", response.getContentAsString());
-	}	
+	}
 
 	@Test
 	public void redirectAttribute() throws Exception {
@@ -1479,7 +1494,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		// POST -> bind error
 		getServlet().service(request, response);
-		
+
 		assertEquals(200, response.getStatus());
 		assertEquals("messages/new", response.getForwardedUrl());
 		assertTrue(RequestContextUtils.getOutputFlashMap(request).isEmpty());
@@ -1516,20 +1531,20 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 				context.registerBeanDefinition("controller", beanDef);
 			}
 		});
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addParameter("param", "1");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-	
+
 		assertEquals("count:3", response.getContentAsString());
 
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-	
+
 		assertEquals("count:3", response.getContentAsString());
 	}
-	
+
 	/*
 	 * Controllers
 	 */
@@ -2335,6 +2350,12 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public String handle(@RequestBody String body) throws IOException {
 			return body;
 		}
+
+		@RequestMapping(value = "/something", method = RequestMethod.PATCH)
+		@ResponseBody
+		public String handlePartialUpdate(@RequestBody String content) throws IOException {
+			return content;
+		}
 	}
 
 	@Controller
@@ -2366,7 +2387,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@XmlRootElement
 	public static class A {
-		
+
 	}
 
 	@XmlRootElement
@@ -2729,7 +2750,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public void root(Writer writer) throws IOException {
 			writer.write("root");
 		}
-		
+
 		@RequestMapping(value = "/{templatePath}/", method = RequestMethod.GET)
 		public void templatePath(Writer writer) throws IOException {
 			writer.write("templatePath");
@@ -2839,7 +2860,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Controller
 	static class HeadersConditionController {
-		
+
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public String home() {
 			return "home";
@@ -2887,7 +2908,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		public void initBinder(WebDataBinder dataBinder) {
 			this.count++;
 		}
-		
+
 		@ModelAttribute
 		public void populate(Model model) {
 			this.count++;
@@ -2899,16 +2920,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			writer.write("count:" + this.count);
 		}
 	}
-	
+
 // Test cases deleted from the original SevletAnnotationControllerTests:
-	
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")	
+
+//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
 //	public void standardHandleMethod() throws Exception {
-	
+
 //	@Ignore("ControllerClassNameHandlerMapping")
 //	public void emptyRequestMapping() throws Exception {
 
-//	@Ignore("Controller interface => no method-level @RequestMapping annotation")	
+//	@Ignore("Controller interface => no method-level @RequestMapping annotation")
 //	public void proxiedStandardHandleMethod() throws Exception {
 
 //	@Ignore("ServletException no longer thrown for unmatched parameter constraints")
@@ -2919,10 +2940,10 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 //	@Ignore("Method name dispatching")
 //	public void methodNameDispatchingControllerWithSuffix() throws Exception {
-	
+
 //	@Ignore("ControllerClassNameHandlerMapping")
 //	public void controllerClassNamePlusMethodNameDispatchingController() throws Exception {
-	
+
 //	@Ignore("Method name dispatching")
 //	public void postMethodNameDispatchingController() throws Exception {
 

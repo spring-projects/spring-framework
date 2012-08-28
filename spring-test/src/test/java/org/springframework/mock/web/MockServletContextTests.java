@@ -16,13 +16,11 @@
 
 package org.springframework.mock.web;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Set;
+
+import javax.servlet.RequestDispatcher;
 
 import org.junit.Test;
 
@@ -34,39 +32,37 @@ import org.junit.Test;
  */
 public class MockServletContextTests {
 
+	private final MockServletContext sc = new MockServletContext("org/springframework/mock");
+
+
 	@Test
-	public void testListFiles() {
-		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set<?> paths = sc.getResourcePaths("/web");
+	public void listFiles() {
+		Set<String> paths = sc.getResourcePaths("/web");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/MockServletContextTests.class"));
 	}
 
 	@Test
-	public void testListSubdirectories() {
-		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set<?> paths = sc.getResourcePaths("/");
+	public void listSubdirectories() {
+		Set<String> paths = sc.getResourcePaths("/");
 		assertNotNull(paths);
 		assertTrue(paths.contains("/web/"));
 	}
 
 	@Test
-	public void testListNonDirectory() {
-		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set<?> paths = sc.getResourcePaths("/web/MockServletContextTests.class");
+	public void listNonDirectory() {
+		Set<String> paths = sc.getResourcePaths("/web/MockServletContextTests.class");
 		assertNull(paths);
 	}
 
 	@Test
-	public void testListInvalidPath() {
-		MockServletContext sc = new MockServletContext("org/springframework/mock");
-		Set<?> paths = sc.getResourcePaths("/web/invalid");
+	public void listInvalidPath() {
+		Set<String> paths = sc.getResourcePaths("/web/invalid");
 		assertNull(paths);
 	}
 
 	@Test
-	public void testGetContext() {
-		MockServletContext sc = new MockServletContext();
+	public void registerContextAndGetContext() {
 		MockServletContext sc2 = new MockServletContext();
 		sc.setContextPath("/");
 		sc.registerContext("/second", sc2);
@@ -75,18 +71,62 @@ public class MockServletContextTests {
 	}
 
 	@Test
-	public void testGetMimeType() {
-		MockServletContext sc = new MockServletContext();
+	public void getMimeType() {
 		assertEquals("text/html", sc.getMimeType("test.html"));
 		assertEquals("image/gif", sc.getMimeType("test.gif"));
 	}
 
 	@Test
-	public void testMinorVersion() {
-		MockServletContext sc = new MockServletContext();
+	public void minorVersion() {
 		assertEquals(5, sc.getMinorVersion());
 		sc.setMinorVersion(4);
 		assertEquals(4, sc.getMinorVersion());
+	}
+
+	@Test
+	public void registerAndUnregisterNamedDispatcher() throws Exception {
+		final String name = "test-servlet";
+		final String url = "/test";
+
+		assertNull(sc.getNamedDispatcher(name));
+
+		sc.registerNamedDispatcher(name, new MockRequestDispatcher(url));
+		RequestDispatcher namedDispatcher = sc.getNamedDispatcher(name);
+		assertNotNull(namedDispatcher);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		namedDispatcher.forward(new MockHttpServletRequest(sc), response);
+		assertEquals(url, response.getForwardedUrl());
+
+		sc.unregisterNamedDispatcher(name);
+		assertNull(sc.getNamedDispatcher(name));
+	}
+
+	@Test
+	public void getNamedDispatcherForDefaultServlet() throws Exception {
+		final String name = "default";
+		RequestDispatcher namedDispatcher = sc.getNamedDispatcher(name);
+		assertNotNull(namedDispatcher);
+
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		namedDispatcher.forward(new MockHttpServletRequest(sc), response);
+		assertEquals(name, response.getForwardedUrl());
+	}
+
+	@Test
+	public void setDefaultServletName() throws Exception {
+		final String originalDefault = "default";
+		final String newDefault = "test";
+		assertNotNull(sc.getNamedDispatcher(originalDefault));
+
+		sc.setDefaultServletName(newDefault);
+		assertEquals(newDefault, sc.getDefaultServletName());
+		assertNull(sc.getNamedDispatcher(originalDefault));
+
+		RequestDispatcher namedDispatcher = sc.getNamedDispatcher(newDefault);
+		assertNotNull(namedDispatcher);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		namedDispatcher.forward(new MockHttpServletRequest(sc), response);
+		assertEquals(newDefault, response.getForwardedUrl());
 	}
 
 }

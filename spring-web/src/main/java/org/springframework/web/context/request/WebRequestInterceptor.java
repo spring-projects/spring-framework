@@ -28,6 +28,14 @@ import org.springframework.ui.ModelMap;
  * Alternatively, a handler may also process the request completely, with no
  * view to be rendered.
  *
+ * <p>In an async processing scenario, the handler may be executed in a separate
+ * thread while the main thread exits without rendering or invoking the
+ * {@code postHandle} and {@code afterCompletion} callbacks. When concurrent
+ * handler execution completes, the request is dispatched back in order to
+ * proceed with rendering the model and all methods of this contract are invoked
+ * again. For further options and comments see
+ * {@code org.springframework.web.context.request.async.AsyncWebRequestInterceptor}
+ *
  * <p>This interface is deliberately minimalistic to keep the dependencies of
  * generic request interceptors as minimal as feasible.
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package org.springframework.mock.web;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Vector;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -36,13 +36,19 @@ import org.springframework.util.Assert;
  *
  * <p>Compatible with Servlet 2.5 as well as Servlet 3.0.
  *
+ * <p>Used for testing the web framework; also useful for testing application
+ * controllers.
+ *
  * @author Juergen Hoeller
  * @author Rod Johnson
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 1.0.2
  */
 @SuppressWarnings("deprecation")
 public class MockHttpSession implements HttpSession {
+
+	public static final String SESSION_COOKIE_NAME = "JSESSION";
 
 	private static int nextId = 1;
 
@@ -135,7 +141,7 @@ public class MockHttpSession implements HttpSession {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return new Vector<String>(this.attributes.keySet()).elements();
+		return Collections.enumeration(this.attributes.keySet());
 	}
 
 	public String[] getValueNames() {
@@ -186,7 +192,17 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	/**
+	 * Invalidates this session then unbinds any objects bound to it.
+	 *
+	 * @throws IllegalStateException if this method is called on an already invalidated session
+	 */
 	public void invalidate() {
+		if (this.invalid) {
+			throw new IllegalStateException("The session has already been invalidated");
+		}
+
+		// else
 		this.invalid = true;
 		clearAttributes();
 	}

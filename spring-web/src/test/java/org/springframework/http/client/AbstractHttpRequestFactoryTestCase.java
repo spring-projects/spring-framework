@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,16 @@
 
 package org.springframework.http.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Locale;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -30,20 +34,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.FileCopyUtils;
-
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.FileCopyUtils;
 
 public abstract class AbstractHttpRequestFactoryTestCase {
 
@@ -58,16 +58,23 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		int port = FreePortScanner.getFreePort();
 		jettyServer = new Server(port);
 		baseUrl = "http://localhost:" + port;
-		Context jettyContext = new Context(jettyServer, "/");
-		jettyContext.addServlet(new ServletHolder(new EchoServlet()), "/echo");
-		jettyContext.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
-		jettyContext.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("GET")), "/methods/get");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("HEAD")), "/methods/head");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
-		jettyContext.addServlet(new ServletHolder(new PostServlet()), "/methods/post");
-		jettyContext.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
+
+		ServletContextHandler handler = new ServletContextHandler();
+		handler.setContextPath("/");
+
+		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
+		handler.addServlet(new ServletHolder(new EchoServlet()), "/echo");
+		handler.addServlet(new ServletHolder(new StatusServlet(200)), "/status/ok");
+		handler.addServlet(new ServletHolder(new StatusServlet(404)), "/status/notfound");
+		handler.addServlet(new ServletHolder(new MethodServlet("DELETE")), "/methods/delete");
+		handler.addServlet(new ServletHolder(new MethodServlet("GET")), "/methods/get");
+		handler.addServlet(new ServletHolder(new MethodServlet("HEAD")), "/methods/head");
+		handler.addServlet(new ServletHolder(new MethodServlet("OPTIONS")), "/methods/options");
+		handler.addServlet(new ServletHolder(new PostServlet()), "/methods/post");
+		handler.addServlet(new ServletHolder(new MethodServlet("PUT")), "/methods/put");
+		handler.addServlet(new ServletHolder(new MethodServlet("PATCH")), "/methods/patch");
+
+		jettyServer.setHandler(handler);
 		jettyServer.start();
 	}
 
@@ -160,7 +167,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		assertHttpMethod("delete", HttpMethod.DELETE);
 	}
 
-	private void assertHttpMethod(String path, HttpMethod method) throws Exception {
+	protected void assertHttpMethod(String path, HttpMethod method) throws Exception {
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
@@ -178,6 +185,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	/**
 	 * Servlet that sets a given status code.
 	 */
+	@SuppressWarnings("serial")
 	private static class StatusServlet extends GenericServlet {
 
 		private final int sc;
@@ -192,6 +200,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class MethodServlet extends GenericServlet {
 
 		private final String method;
@@ -209,6 +218,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class PostServlet extends MethodServlet {
 
 		private PostServlet() {
@@ -232,6 +242,7 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class EchoServlet extends HttpServlet {
 
         @Override

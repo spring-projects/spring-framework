@@ -22,12 +22,15 @@ import javax.persistence.PersistenceException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
-import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.WebRequestInterceptor;
+import org.springframework.web.context.request.async.AsyncWebRequestInterceptor;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 
 /**
  * Spring web request interceptor that binds a JPA EntityManager to the
@@ -56,7 +59,7 @@ import org.springframework.web.context.request.WebRequestInterceptor;
  * @see org.springframework.orm.jpa.SharedEntityManagerCreator
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
  */
-public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAccessor implements WebRequestInterceptor {
+public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAccessor implements AsyncWebRequestInterceptor {
 
 	/**
 	 * Suffix that gets appended to the EntityManagerFactory toString
@@ -68,9 +71,18 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 
 
 	public void preHandle(WebRequest request) throws DataAccessException {
+
+		String participateAttributeName = getParticipateAttributeName();
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		if (asyncManager.hasConcurrentResult()) {
+			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
+				return;
+			}
+		}
+
 		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
 			// do not modify the EntityManager: just mark the request accordingly
-			String participateAttributeName = getParticipateAttributeName();
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);
 			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);
@@ -79,7 +91,11 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 			logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			try {
 				EntityManager em = createEntityManager();
-				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), new EntityManagerHolder(em));
+				EntityManagerHolder emHolder = new EntityManagerHolder(em);
+				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
+
+				WebAsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(emHolder);
+				asyncManager.registerAsyncThreadInitializer(participateAttributeName, asyncThreadInitializer);
 			}
 			catch (PersistenceException ex) {
 				throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
@@ -91,22 +107,33 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	}
 
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
-		String participateAttributeName = getParticipateAttributeName();
-		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-		if (count != null) {
-			// Do not modify the EntityManager: just clear the marker.
-			if (count > 1) {
-				request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
-			}
-			else {
-				request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
-			}
-		}
-		else {
+		if (!decrementParticipateCount(request)) {
 			EntityManagerHolder emHolder = (EntityManagerHolder)
 					TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
 			logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewInterceptor");
 			EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
+		}
+	}
+
+	private boolean decrementParticipateCount(WebRequest request) {
+		String participateAttributeName = getParticipateAttributeName();
+		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		if (count == null) {
+			return false;
+		}
+		// Do not modify the Session: just clear the marker.
+		if (count > 1) {
+			request.setAttribute(participateAttributeName, count - 1, WebRequest.SCOPE_REQUEST);
+		}
+		else {
+			request.removeAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
+		}
+		return true;
+	}
+
+	public void afterConcurrentHandlingStarted(WebRequest request) {
+		if (!decrementParticipateCount(request)) {
+			TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
 		}
 	}
 
@@ -118,6 +145,17 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 	 */
 	protected String getParticipateAttributeName() {
 		return getEntityManagerFactory().toString() + PARTICIPATE_SUFFIX;
+	}
+
+	private WebAsyncThreadInitializer createThreadInitializer(final EntityManagerHolder emHolder) {
+		return new WebAsyncThreadInitializer() {
+			public void initialize() {
+				TransactionSynchronizationManager.bindResource(getEntityManagerFactory(), emHolder);
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(getEntityManagerFactory());
+			}
+		};
 	}
 
 }

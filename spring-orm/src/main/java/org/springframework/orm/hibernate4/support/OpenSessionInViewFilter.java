@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate4.support;
 
 import java.io.IOException;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,14 +27,14 @@ import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.async.AbstractDelegatingCallable;
-import org.springframework.web.context.request.async.AsyncExecutionChain;
+import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -98,28 +99,42 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return this.sessionFactoryBeanName;
 	}
 
+	/**
+	 * The default value is "true" so that the filter may re-bind the opened
+	 * {@code Session} to each asynchronously dispatched thread and postpone
+	 * closing it until the very last asynchronous dispatch.
+	 */
+	@Override
+	protected boolean shouldFilterAsyncDispatches() {
+		return true;
+	}
 
 	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		AsyncExecutionChain chain = AsyncExecutionChain.getForCurrentRequest(request);
-
 		SessionFactory sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
+
+		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		boolean isFirstRequest = !isAsyncDispatch(request);
+		String key = getAlreadyFilteredAttributeName();
 
 		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
 			// Do not modify the Session: just set the participate flag.
 			participate = true;
 		}
 		else {
-			logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
-			Session session = openSession(sessionFactory);
-			SessionHolder sessionHolder = new SessionHolder(session);
-			TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
+			if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
+				Session session = openSession(sessionFactory);
+				SessionHolder sessionHolder = new SessionHolder(session);
+				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-			chain.addDelegatingCallable(getAsyncCallable(request, sessionFactory, sessionHolder));
+				WebAsyncThreadInitializer initializer = createAsyncThreadInitializer(sessionFactory, sessionHolder);
+				asyncManager.registerAsyncThreadInitializer(key, initializer);
+			}
 		}
 
 		try {
@@ -130,11 +145,10 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-				if (chain.isAsyncStarted()) {
-					return;
+				if (isLastRequestThread(request)) {
+					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
+					SessionFactoryUtils.closeSession(sessionHolder.getSession());
 				}
-				logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
-				SessionFactoryUtils.closeSession(sessionHolder.getSession());
 			}
 		}
 	}
@@ -187,26 +201,15 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 	}
 
-	/**
-	 * Create a Callable to extend the use of the open Hibernate Session to the
-	 * async thread completing the request.
-	 */
-	private AbstractDelegatingCallable getAsyncCallable(final HttpServletRequest request,
-			final SessionFactory sessionFactory, final SessionHolder sessionHolder) {
+	private WebAsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
+			final SessionHolder sessionHolder) {
 
-		return new AbstractDelegatingCallable() {
-			public Object call() throws Exception {
+		return new WebAsyncThreadInitializer() {
+			public void initialize() {
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-				try {
-					getNextCallable().call();
-				}
-				finally {
-					SessionHolder sessionHolder =
-							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
-					SessionFactoryUtils.closeSession(sessionHolder.getSession());
-				}
-				return null;
+			}
+			public void reset() {
+				TransactionSynchronizationManager.unbindResource(sessionFactory);
 			}
 		};
 	}
