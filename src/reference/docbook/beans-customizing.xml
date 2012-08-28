@@ -471,10 +471,10 @@ public final class Boot {
       argument or setter method parameter, respectively. For more flexibility,
       including the ability to autowire fields and multiple parameter methods,
       use the new annotation-based autowiring features. If you do, the
-      <interfacename>ApplicationFactory</interfacename> is autowired into a
+      <interfacename>ApplicationContext</interfacename> is autowired into a
       field, constructor argument, or method parameter that is expecting the
-      <interfacename>BeanFactory</interfacename> type if the field, constructor,
-      or method in question carries the
+      <interfacename>ApplicationContext</interfacename> type if the field,
+      constructor, or method in question carries the
       <interfacename>@Autowired</interfacename> annotation. For more
       information, see <xref linkend="beans-autowired-annotation"/>.</para>
 
