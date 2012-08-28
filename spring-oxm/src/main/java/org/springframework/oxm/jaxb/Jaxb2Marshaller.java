@@ -106,6 +106,7 @@ import org.springframework.util.xml.StaxUtils;
  * listeners, and to refer to it.
  *
  * @author Arjen Poutsma
+ * @since 3.0
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
  * @see #setJaxbContextProperties(Map)
@@ -116,7 +117,6 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setMarshallerListener(javax.xml.bind.Marshaller.Listener)
  * @see #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener)
  * @see #setAdapters(XmlAdapter[])
- * @since 3.0
  */
 public class Jaxb2Marshaller
 		implements MimeMarshaller, MimeUnmarshaller, GenericMarshaller, GenericUnmarshaller, BeanClassLoaderAware,
@@ -225,10 +225,10 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Returns the packages to search for JAXB2 annotations.
+	 * Return the packages to search for JAXB2 annotations.
 	 */
 	public String[] getPackagesToScan() {
-		return packagesToScan;
+		return this.packagesToScan;
 	}
 
 	/**
@@ -317,8 +317,7 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Sets the resource resolver, as used to load the schema resources.
-	 *
+	 * Set the resource resolver, as used to load the schema resources.
 	 * @see SchemaFactory#setResourceResolver(org.w3c.dom.ls.LSResourceResolver)
 	 * @see #setSchema(Resource)
 	 * @see #setSchemas(Resource[])
@@ -352,7 +351,6 @@ public class Jaxb2Marshaller
 	 * <p>This property is typically enabled in combination with usage of classes like
 	 * {@link org.springframework.web.servlet.view.xml.MarshallingView MarshallingView}, since the {@code ModelAndView}
 	 * does not offer type parameter information at runtime.
-	 *
 	 * @see #supports(Class)
 	 * @see #supports(Type)
 	 */
@@ -369,9 +367,9 @@ public class Jaxb2Marshaller
 	}
 
 	public final void afterPropertiesSet() throws Exception {
-		boolean hasContextPath = StringUtils.hasLength(getContextPath());
-		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(getClassesToBeBound());
-		boolean hasPackagesToScan = !ObjectUtils.isEmpty(getPackagesToScan());
+		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
+		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
+		boolean hasPackagesToScan = !ObjectUtils.isEmpty(this.packagesToScan);
 
 		if (hasContextPath && (hasClassesToBeBound || hasPackagesToScan) ||
 				(hasClassesToBeBound && hasPackagesToScan)) {
@@ -393,13 +391,13 @@ public class Jaxb2Marshaller
 	protected synchronized JAXBContext getJaxbContext() {
 		if (this.jaxbContext == null) {
 			try {
-				if (StringUtils.hasLength(getContextPath())) {
+				if (StringUtils.hasLength(this.contextPath)) {
 					this.jaxbContext = createJaxbContextFromContextPath();
 				}
-				else if (!ObjectUtils.isEmpty(getClassesToBeBound())) {
+				else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
 					this.jaxbContext = createJaxbContextFromClasses();
 				}
-				else if (!ObjectUtils.isEmpty(getPackagesToScan())) {
+				else if (!ObjectUtils.isEmpty(this.packagesToScan)) {
 					this.jaxbContext = createJaxbContextFromPackages();
 				}
 			}
@@ -407,27 +405,27 @@ public class Jaxb2Marshaller
 				throw convertJaxbException(ex);
 			}
 		}
-		return jaxbContext;
+		return this.jaxbContext;
 	}
 
 	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
 		if (logger.isInfoEnabled()) {
-			logger.info("Creating JAXBContext with context path [" + getContextPath() + "]");
+			logger.info("Creating JAXBContext with context path [" + this.contextPath + "]");
 		}
 		if (this.jaxbContextProperties != null) {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(getContextPath(), this.beanClassLoader, this.jaxbContextProperties);
+				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
-				return JAXBContext.newInstance(getContextPath(), ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
+				return JAXBContext.newInstance(this.contextPath, ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
 			}
 		}
 		else {
 			if (this.beanClassLoader != null) {
-				return JAXBContext.newInstance(getContextPath(), this.beanClassLoader);
+				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader);
 			}
 			else {
-				return JAXBContext.newInstance(getContextPath());
+				return JAXBContext.newInstance(this.contextPath);
 			}
 		}
 	}
@@ -435,22 +433,22 @@ public class Jaxb2Marshaller
 	private JAXBContext createJaxbContextFromClasses() throws JAXBException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Creating JAXBContext with classes to be bound [" +
-					StringUtils.arrayToCommaDelimitedString(getClassesToBeBound()) + "]");
+					StringUtils.arrayToCommaDelimitedString(this.classesToBeBound) + "]");
 		}
 		if (this.jaxbContextProperties != null) {
-			return JAXBContext.newInstance(getClassesToBeBound(), this.jaxbContextProperties);
+			return JAXBContext.newInstance(this.classesToBeBound, this.jaxbContextProperties);
 		}
 		else {
-			return JAXBContext.newInstance(getClassesToBeBound());
+			return JAXBContext.newInstance(this.classesToBeBound);
 		}
 	}
 
 	private JAXBContext createJaxbContextFromPackages() throws JAXBException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Creating JAXBContext by scanning packages [" +
-					StringUtils.arrayToCommaDelimitedString(getPackagesToScan()) + "]");
+					StringUtils.arrayToCommaDelimitedString(this.packagesToScan) + "]");
 		}
-		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(getPackagesToScan());
+		ClassPathJaxb2TypeScanner scanner = new ClassPathJaxb2TypeScanner(this.packagesToScan);
 		scanner.setResourceLoader(this.resourceLoader);
 		scanner.scanPackages();
 		Class<?>[] jaxb2Classes = scanner.getJaxb2Classes();
@@ -468,7 +466,8 @@ public class Jaxb2Marshaller
 
 	private Schema loadSchema(Resource[] resources, String schemaLanguage) throws IOException, SAXException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Setting validation schema to " + StringUtils.arrayToCommaDelimitedString(this.schemaResources));
+			logger.debug("Setting validation schema to " +
+					StringUtils.arrayToCommaDelimitedString(this.schemaResources));
 		}
 		Assert.notEmpty(resources, "No resources given");
 		Assert.hasLength(schemaLanguage, "No schema language provided");
@@ -482,15 +481,15 @@ public class Jaxb2Marshaller
 			schemaSources[i] = new SAXSource(xmlReader, inputSource);
 		}
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(schemaLanguage);
-		if (schemaResourceResolver != null) {
-			schemaFactory.setResourceResolver(schemaResourceResolver);
+		if (this.schemaResourceResolver != null) {
+			schemaFactory.setResourceResolver(this.schemaResourceResolver);
 		}
 		return schemaFactory.newSchema(schemaSources);
 	}
 
 
 	public boolean supports(Class<?> clazz) {
-		if (supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
+		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
 			return true;
 		}
 		return supportsInternal(clazz, true);
@@ -531,9 +530,9 @@ public class Jaxb2Marshaller
 		if (checkForXmlRootElement && AnnotationUtils.findAnnotation(clazz, XmlRootElement.class) == null) {
 			return false;
 		}
-		if (StringUtils.hasLength(getContextPath())) {
+		if (StringUtils.hasLength(this.contextPath)) {
 			String packageName = ClassUtils.getPackageName(clazz);
-			String[] contextPaths = StringUtils.tokenizeToStringArray(getContextPath(), ":");
+			String[] contextPaths = StringUtils.tokenizeToStringArray(this.contextPath, ":");
 			for (String contextPath : contextPaths) {
 				if (contextPath.equals(packageName)) {
 					return true;
@@ -541,8 +540,8 @@ public class Jaxb2Marshaller
 			}
 			return false;
 		}
-		else if (!ObjectUtils.isEmpty(getClassesToBeBound())) {
-			return Arrays.asList(getClassesToBeBound()).contains(clazz);
+		else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+			return Arrays.asList(this.classesToBeBound).contains(clazz);
 		}
 		return false;
 	}
@@ -709,7 +708,8 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Return a newly created JAXB unmarshaller. JAXB unmarshallers are not necessarily thread safe.
+	 * Return a newly created JAXB unmarshaller.
+	 * Note: JAXB unmarshallers are not necessarily thread-safe.
 	 */
 	protected Unmarshaller createUnmarshaller() {
 		try {
@@ -751,7 +751,6 @@ public class Jaxb2Marshaller
 			unmarshaller.setSchema(this.schema);
 		}
 	}
-
 
 	/**
 	 * Convert the given <code>JAXBException</code> to an appropriate exception from the
@@ -819,7 +818,7 @@ public class Jaxb2Marshaller
 		@Override
 		public String addSwaRefAttachment(DataHandler dataHandler) {
 			String contentId = UUID.randomUUID() + "@" + dataHandler.getName();
-			mimeContainer.addAttachment(contentId, dataHandler);
+			this.mimeContainer.addAttachment(contentId, dataHandler);
 			return contentId;
 		}
 
