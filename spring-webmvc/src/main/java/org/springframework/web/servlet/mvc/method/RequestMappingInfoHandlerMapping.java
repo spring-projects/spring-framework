@@ -152,30 +152,47 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 */
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
-										  String lookupPath,
-										  HttpServletRequest request) throws ServletException {
+			String lookupPath, HttpServletRequest request) throws ServletException {
+
 		Set<String> allowedMethods = new HashSet<String>(6);
-		Set<MediaType> consumableMediaTypes = new HashSet<MediaType>();
-		Set<MediaType> producibleMediaTypes = new HashSet<MediaType>();
+
+		Set<RequestMappingInfo> patternMatches = new HashSet<RequestMappingInfo>();
+		Set<RequestMappingInfo> patternAndMethodMatches = new HashSet<RequestMappingInfo>();
+
 		for (RequestMappingInfo info : requestMappingInfos) {
 			if (info.getPatternsCondition().getMatchingCondition(request) != null) {
-				if (info.getMethodsCondition().getMatchingCondition(request) == null) {
+				patternMatches.add(info);
+				if (info.getMethodsCondition().getMatchingCondition(request) != null) {
+					patternAndMethodMatches.add(info);
+				}
+				else {
 					for (RequestMethod method : info.getMethodsCondition().getMethods()) {
 						allowedMethods.add(method.name());
 					}
 				}
-				if (info.getConsumesCondition().getMatchingCondition(request) == null) {
-					consumableMediaTypes.addAll(info.getConsumesCondition().getConsumableMediaTypes());
-				}
-				if (info.getProducesCondition().getMatchingCondition(request) == null) {
-					producibleMediaTypes.addAll(info.getProducesCondition().getProducibleMediaTypes());
-				}
 			}
 		}
-		if (!allowedMethods.isEmpty()) {
+
+		if (patternMatches.isEmpty()) {
+			return null;
+		}
+		else if (patternAndMethodMatches.isEmpty() && !allowedMethods.isEmpty()) {
 			throw new HttpRequestMethodNotSupportedException(request.getMethod(), allowedMethods);
 		}
-		else if (!consumableMediaTypes.isEmpty()) {
+
+		Set<MediaType> consumableMediaTypes;
+		Set<MediaType> producibleMediaTypes;
+
+		if (patternAndMethodMatches.isEmpty()) {
+			consumableMediaTypes = getConsumableMediaTypes(request, patternMatches);
+			producibleMediaTypes = getProdicubleMediaTypes(request, patternMatches);
+		}
+		else {
+			consumableMediaTypes = getConsumableMediaTypes(request, patternAndMethodMatches);
+			producibleMediaTypes = getProdicubleMediaTypes(request, patternAndMethodMatches);
+		}
+
+		if (!consumableMediaTypes.isEmpty()) {
 			MediaType contentType = null;
 			if (StringUtils.hasLength(request.getContentType())) {
 				contentType = MediaType.parseMediaType(request.getContentType());
@@ -188,6 +205,26 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		else {
 			return null;
 		}
+	}
+
+	private Set<MediaType> getConsumableMediaTypes(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+		Set<MediaType> result = new HashSet<MediaType>();
+		for (RequestMappingInfo partialMatch : partialMatches) {
+			if (partialMatch.getConsumesCondition().getMatchingCondition(request) == null) {
+				result.addAll(partialMatch.getConsumesCondition().getConsumableMediaTypes());
+			}
+		}
+		return result;
+	}
+
+	private Set<MediaType> getProdicubleMediaTypes(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+		Set<MediaType> result = new HashSet<MediaType>();
+		for (RequestMappingInfo partialMatch : partialMatches) {
+			if (partialMatch.getProducesCondition().getMatchingCondition(request) == null) {
+				result.addAll(partialMatch.getProducesCondition().getProducibleMediaTypes());
+			}
+		}
+		return result;
 	}
 
 }

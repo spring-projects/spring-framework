@@ -70,8 +70,6 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	private TestRequestMappingInfoHandlerMapping handlerMapping;
 
-	private Handler handler;
-
 	private HandlerMethod fooMethod;
 
 	private HandlerMethod fooParamMethod;
@@ -82,14 +80,15 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.handler = new Handler();
-		this.fooMethod = new HandlerMethod(handler, "foo");
-		this.fooParamMethod = new HandlerMethod(handler, "fooParam");
-		this.barMethod = new HandlerMethod(handler, "bar");
-		this.emptyMethod = new HandlerMethod(handler, "empty");
+		TestController testController = new TestController();
+
+		this.fooMethod = new HandlerMethod(testController, "foo");
+		this.fooParamMethod = new HandlerMethod(testController, "fooParam");
+		this.barMethod = new HandlerMethod(testController, "bar");
+		this.emptyMethod = new HandlerMethod(testController, "empty");
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
-		this.handlerMapping.registerHandler(this.handler);
+		this.handlerMapping.registerHandler(testController);
 		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
 
@@ -148,10 +147,23 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	// SPR-9603
+
+	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	public void requestMethodMatchFalsePositive() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/users");
+		request.addHeader("Accept", "application/xml");
+
+		this.handlerMapping.registerHandler(new UserController());
+		this.handlerMapping.getHandler(request);
+	}
+
 	@Test
 	public void mediaTypeNotSupported() throws Exception {
 		testMediaTypeNotSupported("/person/1");
-		testMediaTypeNotSupported("/person/1/");	// SPR-8462
+
+		// SPR-8462
+		testMediaTypeNotSupported("/person/1/");
 		testMediaTypeNotSupported("/person/1.json");
 	}
 
@@ -171,7 +183,9 @@ public class RequestMappingInfoHandlerMappingTests {
 	@Test
 	public void mediaTypeNotAccepted() throws Exception {
 		testMediaTypeNotAccepted("/persons");
-		testMediaTypeNotAccepted("/persons/");	// SPR-8462
+
+		// SPR-8462
+		testMediaTypeNotAccepted("/persons/");
 		testMediaTypeNotAccepted("/persons.json");
 	}
 
@@ -276,7 +290,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		MappedInterceptor mappedInterceptor = new MappedInterceptor(new String[] {path}, interceptor);
 
 		TestRequestMappingInfoHandlerMapping hm = new TestRequestMappingInfoHandlerMapping();
-		hm.registerHandler(this.handler);
+		hm.registerHandler(new TestController());
 		hm.setInterceptors(new Object[] { mappedInterceptor });
 		hm.setApplicationContext(new StaticWebApplicationContext());
 
@@ -358,7 +372,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 
 	@Controller
-	private static class Handler {
+	private static class TestController {
 
 		@RequestMapping(value = "/foo", method = RequestMethod.GET)
 		public void foo() {
@@ -393,6 +407,18 @@ public class RequestMappingInfoHandlerMappingTests {
 		@RequestMapping(value = "/content", produces="!application/xml")
 		public String nonXmlContent() {
 			return "";
+		}
+	}
+
+	@Controller
+	private static class UserController {
+
+		@RequestMapping(value = "/users", method = RequestMethod.GET, produces = "application/json")
+		public void getUser() {
+		}
+
+		@RequestMapping(value = "/users", method = RequestMethod.PUT)
+		public void saveUser() {
 		}
 	}
 
