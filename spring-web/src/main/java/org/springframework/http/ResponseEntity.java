@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.http;
 
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Extension of {@link HttpEntity} that adds a {@link HttpStatus} status code.
@@ -92,6 +93,23 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 	 */
 	public HttpStatus getStatusCode() {
 		return statusCode;
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof ResponseEntity)) {
+			return false;
+		}
+		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;
+		return (ObjectUtils.nullSafeEquals(this.statusCode, otherEntity.statusCode) && super.equals(other));
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode() * 29 + ObjectUtils.nullSafeHashCode(this.statusCode);
 	}
 
 	@Override
