@@ -336,7 +336,7 @@ public abstract class ResourceUtils {
 	 * @param con the URLConnection to set the flag on
 	 */
 	public static void useCachesIfNecessary(URLConnection con) {
-		con.setUseCaches(con.getClass().getName().startsWith("JNLP"));
+		con.setUseCaches(con.getClass().getSimpleName().startsWith("JNLP"));
 	}
 
 }
