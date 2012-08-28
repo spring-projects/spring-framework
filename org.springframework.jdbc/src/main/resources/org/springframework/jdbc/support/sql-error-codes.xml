@@ -181,7 +181,7 @@
 			<value>17002,17447</value>
 		</property>
 		<property name="cannotAcquireLockCodes">
-			<value>54</value>
+			<value>54,30006</value>
 		</property>
 		<property name="cannotSerializeTransactionCodes">
 			<value>8177</value>
@@ -239,6 +239,9 @@
 		</property>
 		<property name="transientDataAccessResourceCodes">
 			<value>921,1105</value>
+		</property>
+		<property name="cannotAcquireLockCodes">
+			<value>12205</value>
 		</property>
 		<property name="deadlockLoserCodes">
 			<value>1205</value>
