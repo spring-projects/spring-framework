@@ -16,11 +16,19 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.springframework.core.Conventions;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -44,6 +52,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  *
  * @author Arjen Poutsma
  * @author Chris Beams
+ * @author Rossen Stoyanchev
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer
@@ -87,6 +96,14 @@ public abstract class AbstractDispatcherServletInitializer
 				servletContext.addServlet(servletName, dispatcherServlet);
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
+		registration.setAsyncSupported(isAsyncSupported());
+
+		Filter[] filters = getServletFilters();
+		if (!ObjectUtils.isEmpty(filters)) {
+			for (Filter filter : filters) {
+				registerServletFilter(servletContext, filter);
+			}
+		}
 
 		this.customizeRegistration(registration);
 	}
@@ -111,11 +128,62 @@ public abstract class AbstractDispatcherServletInitializer
 	protected abstract WebApplicationContext createServletApplicationContext();
 
 	/**
-	 * Specify the servlet mapping(s) for the {@code DispatcherServlet}, e.g. '/', '/app',
-	 * etc.
+	 * Specify the servlet mapping(s) for the {@code DispatcherServlet}, e.g. '/', '/app', etc.
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract String[] getServletMappings();
+
+	/**
+	 * Specify filters to add and also map to the {@code DispatcherServlet}.
+	 *
+	 * @return an array of filters or {@code null}
+	 * @see #registerServletFilters(ServletContext, String, Filter...)
+	 */
+	protected Filter[] getServletFilters() {
+		return null;
+	}
+
+	/**
+	 * Add the given filter to the ServletContext and map it to the
+	 * {@code DispatcherServlet} as follows:
+	 * <ul>
+	 * <li>a default filter name is chosen based on its concrete type
+	 * <li>the {@code asyncSupported} flag is set depending on the
+	 * return value of {@link #isAsyncSupported() asyncSupported}
+	 * <li>a filter mapping is created with dispatcher types {@code REQUEST},
+	 * {@code FORWARD}, {@code INCLUDE}, and conditionally {@code ASYNC} depending
+	 * on the return value of {@link #isAsyncSupported() asyncSupported}
+	 * </ul>
+	 * <p>If the above defaults are not suitable or insufficient, register
+	 * filters directly with the {@code ServletContext}.
+	 *
+	 * @param servletContext the servlet context to register filters with
+	 * @param servletName the name of the servlet to map the filters to
+	 * @param filters the filters to be registered
+	 * @return the filter registration
+	 */
+	protected FilterRegistration.Dynamic registerServletFilter(ServletContext servletContext, Filter filter) {
+		String filterName = Conventions.getVariableName(filter);
+		Dynamic registration = servletContext.addFilter(filterName, filter);
+		registration.setAsyncSupported(isAsyncSupported());
+		registration.addMappingForServletNames(getDispatcherTypes(), false, getServletName());
+		return registration;
+	}
+
+	private EnumSet<DispatcherType> getDispatcherTypes() {
+		return isAsyncSupported() ?
+			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC) :
+			EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.INCLUDE);
+	}
+
+	/**
+	 * A single place to control the {@code asyncSupported} flag for the
+	 * {@code DispatcherServlet} and all filters added via {@link #getServletFilters()}.
+	 * <p>The default value is "true".
+	 */
+	protected boolean isAsyncSupported() {
+		return true;
+	}
 
 	/**
 	 * Optionally perform further registration customization once

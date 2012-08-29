@@ -51,14 +51,14 @@ public class DispatcherServletInitializerTests {
 
 	private Map<String, Servlet> servlets;
 
-	private Map<String, MockDynamic> registrations;
+	private Map<String, MockServletRegistration> registrations;
 
 	@Before
 	public void setUp() throws Exception {
 		servletContext = new MyMockServletContext();
 		initializer = new MyDispatcherServletInitializer();
 		servlets = new LinkedHashMap<String, Servlet>(2);
-		registrations = new LinkedHashMap<String, MockDynamic>(2);
+		registrations = new LinkedHashMap<String, MockServletRegistration>(2);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class DispatcherServletInitializerTests {
 		assertEquals(1, registrations.size());
 		assertNotNull(registrations.get(SERVLET_NAME));
 
-		MockDynamic registration = registrations.get(SERVLET_NAME);
+		MockServletRegistration registration = registrations.get(SERVLET_NAME);
 		assertEquals(Collections.singleton(SERVLET_MAPPING), registration.getMappings());
 		assertEquals(1, registration.getLoadOnStartup());
 		assertEquals(ROLE_NAME, registration.getRunAsRole());
@@ -89,7 +89,7 @@ public class DispatcherServletInitializerTests {
 		public ServletRegistration.Dynamic addServlet(String servletName,
 		                                              Servlet servlet) {
 			servlets.put(servletName, servlet);
-			MockDynamic registration = new MockDynamic();
+			MockServletRegistration registration = new MockServletRegistration();
 			registrations.put(servletName, registration);
 			return registration;
 		}

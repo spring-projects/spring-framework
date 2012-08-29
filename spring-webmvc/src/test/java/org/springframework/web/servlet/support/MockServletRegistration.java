@@ -26,13 +26,15 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration;
 import javax.servlet.ServletSecurityElement;
 
-class MockDynamic implements ServletRegistration.Dynamic {
+class MockServletRegistration implements ServletRegistration.Dynamic {
 
 	private int loadOnStartup;
 
 	private Set<String> mappings = new LinkedHashSet<String>();
 
 	private String roleName;
+
+	private boolean asyncSupported = false;
 
 	public int getLoadOnStartup() {
 		return loadOnStartup;
@@ -59,9 +61,15 @@ class MockDynamic implements ServletRegistration.Dynamic {
 		return roleName;
 	}
 
-	// not implemented
 	public void setAsyncSupported(boolean isAsyncSupported) {
+		this.asyncSupported = isAsyncSupported;
 	}
+
+	public boolean isAsyncSupported() {
+		return this.asyncSupported;
+	}
+
+	// not implemented
 
 	public String getName() {
 		return null;
