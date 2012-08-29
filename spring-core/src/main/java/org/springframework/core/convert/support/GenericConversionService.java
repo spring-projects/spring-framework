@@ -351,7 +351,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 					return converter;
 				}
 				Class<?> superClass = currentClass.getSuperclass();
-				if (superClass != null && superClass != Object.class) {
+				if (superClass != null && superClass != Object.class && superClass != Enum.class) {
 					classQueue.addFirst(superClass);
 				}
 				for (Class<?> interfaceType : currentClass.getInterfaces()) {
@@ -365,6 +365,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 					return converter;
 				}
 			}
+			if (sourceObjectType.isEnum()) {
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(Enum.class);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			
 			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
 			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);				
 		}
@@ -430,7 +438,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 					return converter;
 				}
 				Class<?> superClass = currentClass.getSuperclass();
-				if (superClass != null && superClass != Object.class) {
+				if (superClass != null && superClass != Object.class && superClass != Enum.class) {
 					classQueue.addFirst(superClass);
 				}
 				for (Class<?> interfaceType : currentClass.getInterfaces()) {
@@ -440,6 +448,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 			for (Class<?> interfaceType : interfaces) {
 				MatchableConverters matchable = converters.get(interfaceType);
 				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			if (targetObjectType.isEnum()) {
+				GenericConverter converter = matchConverter(converters.get(Enum.class), sourceType, targetType);
 				if (converter != null) {
 					return converter;
 				}
