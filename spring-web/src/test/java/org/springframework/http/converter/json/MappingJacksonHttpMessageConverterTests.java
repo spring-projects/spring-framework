@@ -50,7 +50,7 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter() {
 			@Override
 			protected JavaType getJavaType(Type type) {
-				if (type instanceof Class && List.class.isAssignableFrom((Class)type)) {
+				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
 					return TypeFactory.collectionType(ArrayList.class, MyBean.class);
 				}
 				else {

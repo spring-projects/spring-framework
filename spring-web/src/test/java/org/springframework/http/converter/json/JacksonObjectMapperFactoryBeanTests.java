@@ -32,8 +32,6 @@ import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.introspect.NopAnnotationIntrospector;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.FatalBeanException;
-import org.springframework.http.converter.json.JacksonObjectMapperFactoryBean;
 
 /**
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>

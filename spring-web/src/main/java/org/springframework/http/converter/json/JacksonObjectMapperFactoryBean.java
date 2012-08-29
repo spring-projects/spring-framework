@@ -35,7 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
  * A FactoryBean for creating a Jackson {@link ObjectMapper} with setters to
  * enable or disable Jackson features from within XML configuration.
  *
- * <p>Example usage with MappingJacksonHttpMessageConverter:</p>
+ * <p>Example usage with MappingJacksonHttpMessageConverter:
  * <pre>
  * &lt;bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
  * 	&lt;property name="objectMapper">
@@ -47,7 +47,7 @@ import org.springframework.beans.factory.InitializingBean;
  * &lt;/bean>
  * </pre>
  *
- * <p>Example usage with MappingJacksonJsonView:</p>
+ * <p>Example usage with MappingJacksonJsonView:
  * <pre>
  * &lt;bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
  * 	&lt;property name="objectMapper">
@@ -89,9 +89,9 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	private Map<Object, Boolean> features = new HashMap<Object, Boolean>();
 
-	private AnnotationIntrospector annotationIntrospector;
-
 	private DateFormat dateFormat;
+
+	private AnnotationIntrospector annotationIntrospector;
 
 
 	/**
@@ -103,16 +103,15 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	}
 
 	/**
-	 * Define annotationIntrospector for
-	 * {@link SerializationConfig#setAnnotationIntrospector(AnnotationIntrospector)}.
+	 * Define the format for date/time with the given {@link DateFormat}.
+	 * @see #setSimpleDateFormat(String)
 	 */
-	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
-		this.annotationIntrospector = annotationIntrospector;
+	public void setDateFormat(DateFormat dateFormat) {
+		this.dateFormat = dateFormat;
 	}
 
 	/**
-	 * Define the date/time format with the given string, which is in turn used
-	 * to create a {@link SimpleDateFormat}.
+	 * Define the date/time format with a {@link SimpleDateFormat}.
 	 * @see #setDateFormat(DateFormat)
 	 */
 	public void setSimpleDateFormat(String format) {
@@ -120,11 +119,12 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	}
 
 	/**
-	 * Define the format for date/time with the given {@link DateFormat} instance.
-	 * @see #setSimpleDateFormat(String)
+	 * Set the {@link AnnotationIntrospector} for serialization and deserialization.
+	 * @see SerializationConfig#setAnnotationIntrospector(AnnotationIntrospector)
+	 * @see DeserializationConfig#setAnnotationIntrospector(AnnotationIntrospector)
 	 */
-	public void setDateFormat(DateFormat dateFormat) {
-		this.dateFormat = dateFormat;
+	public void setAnnotationIntrospector(AnnotationIntrospector annotationIntrospector) {
+		this.annotationIntrospector = annotationIntrospector;
 	}
 
 	/**
@@ -161,6 +161,7 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to enable.
+	 *
 	 * @see SerializationConfig.Feature
 	 * @see DeserializationConfig.Feature
 	 * @see JsonParser.Feature
@@ -176,6 +177,7 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 
 	/**
 	 * Specify features to disable.
+	 *
 	 * @see SerializationConfig.Feature
 	 * @see DeserializationConfig.Feature
 	 * @see JsonParser.Feature
@@ -188,7 +190,6 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 			}
 		}
 	}
-
 
 	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
@@ -203,11 +204,11 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 			this.objectMapper.getSerializationConfig().setDateFormat(this.dateFormat);
 		}
 		for (Map.Entry<Object, Boolean> entry : this.features.entrySet()) {
-			setFeatureEnabled(entry.getKey(), entry.getValue());
+			configureFeature(entry.getKey(), entry.getValue().booleanValue());
 		}
 	}
 
-	private void setFeatureEnabled(Object feature, boolean enabled) {
+	private void configureFeature(Object feature, boolean enabled) {
 		if (feature instanceof DeserializationConfig.Feature) {
 			this.objectMapper.configure((DeserializationConfig.Feature) feature, enabled);
 		}
@@ -225,7 +226,9 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 		}
 	}
 
-
+	/**
+	 * Return the singleton ObjectMapper.
+	 */
 	public ObjectMapper getObject() {
 		return this.objectMapper;
 	}
