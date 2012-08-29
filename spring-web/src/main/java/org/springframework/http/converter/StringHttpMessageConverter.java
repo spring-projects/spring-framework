@@ -19,7 +19,6 @@ package org.springframework.http.converter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,14 +75,13 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		this.writeAcceptCharset = writeAcceptCharset;
 	}
 
-
 	@Override
 	public boolean supports(Class<?> clazz) {
 		return String.class.equals(clazz);
 	}
 
 	@Override
-	protected String readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
+	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
 	}
@@ -91,13 +89,7 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 	@Override
 	protected Long getContentLength(String s, MediaType contentType) {
 		Charset charset = getContentTypeCharset(contentType);
-		try {
-			return (long) s.getBytes(charset.name()).length;
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not occur
-			throw new IllegalStateException(ex);
-		}
+		return Long.valueOf(s.getBytes(charset).length);
 	}
 
 	@Override
@@ -126,5 +118,4 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return this.defaultCharset;
 		}
 	}
-
 }
