@@ -272,7 +272,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 	private static abstract class AbstractParameterMappingPredicate implements PortletRequestMappingPredicate {
 
-		protected final String[] params;
+		private final String[] params;
 
 		public AbstractParameterMappingPredicate(String[] params) {
 			this.params = params;
@@ -280,6 +280,17 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public boolean match(PortletRequest request) {
 			return PortletAnnotationMappingUtils.checkParameters(this.params, request);
+		}
+
+		protected int compareParams(AbstractParameterMappingPredicate other) {
+			return new Integer(other.params.length).compareTo(this.params.length);
+		}
+
+		protected int compareParams(Object other) {
+			if (other instanceof AbstractParameterMappingPredicate) {
+				return compareParams((AbstractParameterMappingPredicate) other);
+			}
+			return 0;
 		}
 	}
 
@@ -318,10 +329,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		public int compareTo(Object other) {
-			if (other instanceof AbstractParameterMappingPredicate) {
-				return new Integer(((AbstractParameterMappingPredicate) other).params.length).compareTo(this.params.length);
-			}
-			return (other instanceof SpecialRequestTypePredicate ? -1 : 0);
+			return (other instanceof SpecialRequestTypePredicate ? -1 : compareParams(other));
 		}
 	}
 
@@ -336,13 +344,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 		}
 
 		public int compareTo(Object other) {
-			if (other instanceof SpecialRequestTypePredicate) {
-				return 1;
-			}
-			else if (other instanceof AbstractParameterMappingPredicate) {
-				return new Integer(((AbstractParameterMappingPredicate) other).params.length).compareTo(this.params.length);
-			}
-			return 0;
+			return (other instanceof SpecialRequestTypePredicate ? 1 : compareParams(other));
 		}
 	}
 
@@ -378,10 +380,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasActionName ? -1 : 1);
 				}
 				else {
-					return new Integer(otherAction.params.length).compareTo(this.params.length);
+					return compareParams(otherAction);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			return (other instanceof SpecialRequestTypePredicate ? compareParams(other) : -1);
 		}
 	}
 
@@ -417,10 +419,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasWindowState ? -1 : 1);
 				}
 				else {
-					return new Integer(otherRender.params.length).compareTo(this.params.length);
+					return compareParams(otherRender);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			return (other instanceof SpecialRequestTypePredicate ? compareParams(other) : -1);
 		}
 	}
 
@@ -443,8 +445,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public int compareTo(Object other) {
 			if (other instanceof ResourceMappingPredicate) {
-				boolean hasResourceId = "".equals(this.resourceId);
-				boolean otherHasResourceId = "".equals(((ResourceMappingPredicate) other).resourceId);
+				boolean hasResourceId = !"".equals(this.resourceId);
+				boolean otherHasResourceId = !"".equals(((ResourceMappingPredicate) other).resourceId);
 				if (hasResourceId != otherHasResourceId) {
 					return (hasResourceId ? -1 : 1);
 				}
@@ -478,8 +480,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 
 		public int compareTo(Object other) {
 			if (other instanceof EventMappingPredicate) {
-				boolean hasEventName = "".equals(this.eventName);
-				boolean otherHasEventName = "".equals(((EventMappingPredicate) other).eventName);
+				boolean hasEventName = !"".equals(this.eventName);
+				boolean otherHasEventName = !"".equals(((EventMappingPredicate) other).eventName);
 				if (hasEventName != otherHasEventName) {
 					return (hasEventName ? -1 : 1);
 				}
