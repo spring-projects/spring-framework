@@ -69,7 +69,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * Construct a new {@code MappingJacksonHttpMessageConverter}.
 	 */
 	public MappingJacksonHttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
 	/**

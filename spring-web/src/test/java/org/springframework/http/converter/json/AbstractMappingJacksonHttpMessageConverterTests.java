@@ -45,7 +45,6 @@ public abstract class AbstractMappingJacksonHttpMessageConverterTests<T extends 
 
 	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
 
-
 	private T converter;
 
 	@Before
@@ -69,6 +68,14 @@ public abstract class AbstractMappingJacksonHttpMessageConverterTests<T extends 
 	public void canWrite() {
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "json")));
 		assertTrue(converter.canWrite(Map.class, new MediaType("application", "json")));
+	}
+
+	// SPR-7905
+
+	@Test
+	public void canReadAndWriteMicroformats() {
+		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
+		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
 	}
 
 	@Test
