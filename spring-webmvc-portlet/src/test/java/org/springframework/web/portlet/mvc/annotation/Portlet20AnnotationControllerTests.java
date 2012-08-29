@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
 import javax.portlet.WindowState;
@@ -694,6 +695,32 @@ public class Portlet20AnnotationControllerTests {
 		assertEquals("myDefaultResource", resourceResponse.getContentAsString());
 	}
 
+	@Test
+	public void testPredicatePriorityComparisonAcrossControllers() throws Exception {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
+			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
+				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
+				// The order of handler registration is important to get
+				// the collection with [Render,Action,Render] predicates
+				wac.registerSingleton("firstController", FirstController.class);
+				wac.registerSingleton("secondController", SecondController.class);
+				wac.registerSingleton("handlerMapping", DefaultAnnotationHandlerMapping.class);
+				wac.registerSingleton("handlerAdapter", AnnotationMethodHandlerAdapter.class);
+				wac.setPortletContext(new MockPortletContext());
+				AnnotationConfigUtils.registerAnnotationConfigProcessors(wac);
+				wac.refresh();
+				return wac;
+			}
+		};
+		portlet.init(new MockPortletConfig());
+
+		// Prepare render request with 'page=baz' parameters
+		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
+		MockRenderResponse response = new MockRenderResponse();
+		request.addParameter("page", "baz");
+		portlet.render(request, response);
+	}
+
 
 	/*
 	 * Controllers
@@ -1166,6 +1193,36 @@ public class Portlet20AnnotationControllerTests {
 			List<TestBean> testBeans = (List<TestBean>) model.get("testBeanList");
 			response.getWriter().write(viewName + "-" + tb.getName() + "-" + errors.getFieldError("age").getCode() +
 					"-" + testBeans.get(0).getName() + "-" + model.get("myKey"));
+		}
+	}
+
+
+	@RequestMapping(value="view")
+	public static class FirstController {
+
+		@RenderMapping
+		public String renderBar() {
+			throw new UnsupportedOperationException("Should not be called");
+		}
+
+		@ActionMapping("xyz")
+		public void processXyz() {
+			throw new UnsupportedOperationException("Should not be called");
+		}
+	}
+
+
+	@RequestMapping(value="view")
+	public static class SecondController {
+
+		@ResourceMapping
+		public void processResource(ResourceRequest request, ResourceResponse response) {
+			throw new UnsupportedOperationException("Should not be called");
+		}
+
+		@RenderMapping(params="page=baz")
+		public String renderBaz() {
+			return "SUCCESS";
 		}
 	}
 
