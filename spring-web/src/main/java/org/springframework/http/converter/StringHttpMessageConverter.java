@@ -76,14 +76,13 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 		this.writeAcceptCharset = writeAcceptCharset;
 	}
 
-
 	@Override
 	public boolean supports(Class<?> clazz) {
 		return String.class.equals(clazz);
 	}
 
 	@Override
-	protected String readInternal(Class clazz, HttpInputMessage inputMessage) throws IOException {
+	protected String readInternal(Class<? extends String> clazz, HttpInputMessage inputMessage) throws IOException {
 		Charset charset = getContentTypeCharset(inputMessage.getHeaders().getContentType());
 		return FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(), charset));
 	}
@@ -126,5 +125,4 @@ public class StringHttpMessageConverter extends AbstractHttpMessageConverter<Str
 			return this.defaultCharset;
 		}
 	}
-
 }
