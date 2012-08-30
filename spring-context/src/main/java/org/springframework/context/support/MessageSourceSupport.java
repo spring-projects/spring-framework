@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ public abstract class MessageSourceSupport {
 	 * Used for passed-in default messages. MessageFormats for resolved
 	 * codes are cached on a specific basis in subclasses.
 	 */
-	private final Map<String, MessageFormat> cachedMessageFormats = new HashMap<String, MessageFormat>();
+	private final Map<String, Map<Locale, MessageFormat>> messageFormatsPerMessage =
+			new HashMap<String, Map<Locale, MessageFormat>>();
 
 
 	/**
@@ -114,9 +115,16 @@ public abstract class MessageSourceSupport {
 		if (msg == null || (!this.alwaysUseMessageFormat && ObjectUtils.isEmpty(args))) {
 			return msg;
 		}
-		MessageFormat messageFormat;
-		synchronized (this.cachedMessageFormats) {
-			messageFormat = this.cachedMessageFormats.get(msg);
+		MessageFormat messageFormat = null;
+		synchronized (this.messageFormatsPerMessage) {
+			Map<Locale, MessageFormat> messageFormatsPerLocale = this.messageFormatsPerMessage.get(msg);
+			if (messageFormatsPerLocale != null) {
+				messageFormat = messageFormatsPerLocale.get(locale);
+			}
+			else {
+				messageFormatsPerLocale = new HashMap<Locale, MessageFormat>();
+				this.messageFormatsPerMessage.put(msg, messageFormatsPerLocale);
+			}
 			if (messageFormat == null) {
 				try {
 					messageFormat = createMessageFormat(msg, locale);
@@ -130,7 +138,7 @@ public abstract class MessageSourceSupport {
 					// silently proceed with raw message if format not enforced
 					messageFormat = INVALID_MESSAGE_FORMAT;
 				}
-				this.cachedMessageFormats.put(msg, messageFormat);
+				messageFormatsPerLocale.put(locale, messageFormat);
 			}
 		}
 		if (messageFormat == INVALID_MESSAGE_FORMAT) {
@@ -153,9 +161,8 @@ public abstract class MessageSourceSupport {
 
 	/**
 	 * Template method for resolving argument objects.
-	 * <p>The default implementation simply returns the given argument
-	 * array as-is. Can be overridden in subclasses in order to resolve
-	 * special argument types.
+	 * <p>The default implementation simply returns the given argument array as-is.
+	 * Can be overridden in subclasses in order to resolve special argument types.
 	 * @param args the original argument array
 	 * @param locale the Locale to resolve against
 	 * @return the resolved argument array
