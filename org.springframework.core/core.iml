@@ -14,6 +14,7 @@
     <orderEntry type="library" name="AspectJ" level="project" />
     <orderEntry type="library" name="Commons Logging" level="project" />
     <orderEntry type="library" name="EasyMock" level="project" />
+    <orderEntry type="library" name="Hamcrest" level="project" />
     <orderEntry type="library" name="JUnit" level="project" />
     <orderEntry type="library" name="Log4j" level="project" />
     <orderEntry type="module-library">
