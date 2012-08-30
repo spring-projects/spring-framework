@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -306,19 +306,14 @@ class TypeConverterDelegate {
 	 * @param descriptor the JavaBeans descriptor for the property
 	 * @return the corresponding editor, or <code>null</code> if none
 	 */
-	protected PropertyEditor findDefaultEditor(Class requiredType, TypeDescriptor typeDescriptor) {
-		PropertyEditor editor = null;
-		//if (typeDescriptor instanceof PropertyTypeDescriptor) {
-			//PropertyDescriptor pd = ((PropertyTypeDescriptor) typeDescriptor).getPropertyDescriptor();
-			//editor = pd.createPropertyEditor(this.targetObject);
-		//}
-		if (editor == null && requiredType != null) {
-			// No custom editor -> check BeanWrapperImpl's default editors.
-			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
-			if (editor == null && !String.class.equals(requiredType)) {
-				// No BeanWrapper default editor -> check standard JavaBean editor.
-				editor = BeanUtils.findEditorByConvention(requiredType);
-			}
+	protected PropertyEditor findDefaultEditor(Class<?> requiredType, TypeDescriptor typeDescriptor) {
+		if(requiredType == null) {
+			return null;
+		}
+		PropertyEditor editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
+		if (editor == null && !String.class.equals(requiredType)) {
+			// No BeanWrapper default editor -> check standard JavaBean editor.
+			editor = BeanUtils.findEditorByConvention(requiredType);
 		}
 		return editor;
 	}
