@@ -121,6 +121,24 @@ public class DependencyDescriptor implements Serializable {
 		this.eager = eager;
 	}
 
+	/**
+	 * Copy constructor.
+	 * @param original the original descriptor to create a copy from
+	 */
+	public DependencyDescriptor(DependencyDescriptor original) {
+		this.methodParameter = original.methodParameter;
+		this.field = original.field;
+		this.declaringClass = original.declaringClass;
+		this.methodName = original.methodName;
+		this.parameterTypes = original.parameterTypes;
+		this.parameterIndex = original.parameterIndex;
+		this.fieldName = original.fieldName;
+		this.required = original.required;
+		this.eager = original.eager;
+		this.nestingLevel = original.nestingLevel;
+		this.fieldAnnotations = original.fieldAnnotations;
+	}
+
 
 	/**
 	 * Return the wrapped MethodParameter, if any.
@@ -156,6 +174,10 @@ public class DependencyDescriptor implements Serializable {
 	}
 
 
+	/**
+	 * Increase this descriptor's nesting level.
+	 * @see MethodParameter#increaseNestingLevel()
+	 */
 	public void increaseNestingLevel() {
 		this.nestingLevel++;
 		if (this.methodParameter != null) {

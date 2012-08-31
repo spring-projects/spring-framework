@@ -384,6 +384,26 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testObjectFactoryInjectionIntoPrototypeBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryQualifierInjectionBean.class, false));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "testBean"));
+		bf.registerBeanDefinition("testBean", bd);
+		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class));
+
+		ObjectFactoryQualifierInjectionBean bean = (ObjectFactoryQualifierInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		ObjectFactoryQualifierInjectionBean anotherBean = (ObjectFactoryQualifierInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+	}
+
+	@Test
 	public void testObjectFactoryQualifierInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
