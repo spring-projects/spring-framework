@@ -376,7 +376,12 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	private boolean isQuotedString(String s) {
-		return s.length() > 1 && s.startsWith("\"") && s.endsWith("\"") ;
+		if (s.length() < 2) {
+			return false;
+		}
+		else {
+			return ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")));
+		}
 	}
 
 	private String unquote(String s) {
