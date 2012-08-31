@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,6 +118,11 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
+
+		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
+		assertEquals(2, depBeans.length);
+		assertEquals("testBean", depBeans[0]);
+		assertEquals("nestedTestBean", depBeans[1]);
 	}
 
 	@Test
