@@ -406,15 +406,15 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		try {
 			Method method = ReflectionUtils.findMethod(annotation.annotationType(), this.requiredParameterName);
 			if (method == null) {
-				// annotations like @Inject, @Value and @Resource don't have a method
-				// (attribute) named "required" -> default to required status
+				// annotations like @Inject and @Value don't have a method (attribute) named "required"
+				// -> default to required status
 				return true;
 			}
 			return (this.requiredParameterValue == (Boolean) ReflectionUtils.invokeMethod(method, annotation));
 		}
 		catch (Exception ex) {
-			// an exception was thrown during reflective invocation of the required
-			// attribute -> default to required status
+			// an exception was thrown during reflective invocation of the required attribute
+			// -> default to required status
 			return true;
 		}
 	}
@@ -425,11 +425,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private void registerDependentBeans(String beanName, Set<String> autowiredBeanNames) {
 		if (beanName != null) {
 			for (String autowiredBeanName : autowiredBeanNames) {
-				beanFactory.registerDependentBean(autowiredBeanName, beanName);
+				if (this.beanFactory.containsBean(autowiredBeanName)) {
+					this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
+				}
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							"Autowiring by type from bean name '" + beanName + "' to bean named '" + autowiredBeanName +
-									"'");
+					logger.debug("Autowiring by type from bean name '" + beanName +
+							"' to bean named '" + autowiredBeanName + "'");
 				}
 			}
 		}
@@ -441,11 +442,11 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private Object resolvedCachedArgument(String beanName, Object cachedArgument) {
 		if (cachedArgument instanceof DependencyDescriptor) {
 			DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
-			TypeConverter typeConverter = beanFactory.getTypeConverter();
-			return beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
+			TypeConverter typeConverter = this.beanFactory.getTypeConverter();
+			return this.beanFactory.resolveDependency(descriptor, beanName, null, typeConverter);
 		}
 		else if (cachedArgument instanceof RuntimeBeanReference) {
-			return beanFactory.getBean(((RuntimeBeanReference) cachedArgument).getBeanName());
+			return this.beanFactory.getBean(((RuntimeBeanReference) cachedArgument).getBeanName());
 		}
 		else {
 			return cachedArgument;
