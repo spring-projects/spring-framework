@@ -24,7 +24,6 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 import test.beans.ITestBean;
 import test.beans.IndexedTestBean;
@@ -41,6 +40,8 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.util.SerializationTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AutowiredAnnotationBeanPostProcessor}.
@@ -599,6 +600,22 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
 		assertSame(bf.getBean("testBean"), bean.getTestBean());
 		bf.destroySingletons();
+	}
+
+	@Test
+	public void testObjectFactoryInjectionIntoPrototypeBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryInjectionBean.class, false));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+		ObjectFactoryInjectionBean bean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bf.getBean("testBean"), bean.getTestBean());
+		ObjectFactoryInjectionBean anotherBean = (ObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertSame(bf.getBean("testBean"), anotherBean.getTestBean());
 	}
 
 	@Test

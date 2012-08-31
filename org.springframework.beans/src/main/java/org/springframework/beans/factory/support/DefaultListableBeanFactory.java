@@ -21,14 +21,11 @@ import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-
 import java.lang.annotation.Annotation;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.inject.Provider;
 
 import org.springframework.beans.BeansException;
@@ -1031,9 +1027,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		private final String beanName;
 
 		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
-			this.descriptor = descriptor;
-			this.beanName = beanName;
+			this.descriptor = new DependencyDescriptor(descriptor);
 			this.descriptor.increaseNestingLevel();
+			this.beanName = beanName;
 		}
 
 		public Object getObject() throws BeansException {
