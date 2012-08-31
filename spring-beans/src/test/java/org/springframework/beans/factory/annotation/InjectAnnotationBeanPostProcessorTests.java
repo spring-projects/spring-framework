@@ -65,6 +65,22 @@ public class InjectAnnotationBeanPostProcessorTests {
 		}
 	}
 
+    @Test
+    public void testProviderInjection() throws Exception {
+        DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+        AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+        bpp.setBeanFactory(bf);
+        bf.addBeanPostProcessor(bpp);
+
+        RootBeanDefinition beanDefinition = new RootBeanDefinition(ObjectFactoryInjectionBean.class);
+        beanDefinition.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+        bf.registerBeanDefinition("annotatedBean", beanDefinition);
+        bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class));
+
+        assertNotNull(bf.getBean("annotatedBean"));
+        assertNotNull(bf.getBean("annotatedBean"));
+    }
+
 	@Test
 	public void testResourceInjection() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
