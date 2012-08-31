@@ -16,11 +16,20 @@
 
 package org.springframework.mock.web;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+
+import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Mock implementation of the {@link javax.servlet.FilterChain} interface.
@@ -29,6 +38,8 @@ import org.springframework.util.Assert;
  * custom {@link javax.servlet.Filter} implementations.
  *
  * @author Juergen Hoeller
+ * @author Rob Winch
+ *
  * @since 2.0.3
  * @see MockFilterConfig
  * @see PassThroughFilterChain
@@ -39,16 +50,69 @@ public class MockFilterChain implements FilterChain {
 
 	private ServletResponse response;
 
+	private final Iterator<Filter> iterator;
+
 
 	/**
-	 * Records the request and response.
+	 * Register a single do-nothing {@link Filter} implementation. The first
+	 * invocation saves the request and response. Subsequent invocations raise
+	 * an {@link IllegalStateException}.
 	 */
-	public void doFilter(ServletRequest request, ServletResponse response) {
+	public MockFilterChain() {
+		this.iterator = null;
+	}
+
+	/**
+	 * Create a FilterChain with a {@link Servlet} but without filters.
+	 *
+	 * @param servlet the {@link Servlet} to use in this {@link FilterChain}
+	 * @since 3.2
+	 */
+	public MockFilterChain(Servlet servlet) {
+		this(new ServletFilterProxy(servlet));
+	}
+
+	/**
+	 * Create a FilterChain with one or more {@link Filter} instances and a {@link Servlet}.
+	 *
+	 * @param servlet the {@link Servlet} to use in this {@link FilterChain}
+	 * @param filters the {@link Filter}'s to use in this {@link FilterChain}
+	 * @since 3.2
+	 */
+	public MockFilterChain(Servlet servlet, Filter... filters) {
+		this(ObjectUtils.addObjectToArray(filters, new ServletFilterProxy(servlet)));
+	}
+
+	/**
+	 * Create a {@link FilterChain} with one or more {@link Filter} instances.
+	 *
+	 * @param filters the {@link Filter}'s to use in this {@link FilterChain}
+	 * @since 3.2
+	 */
+	private MockFilterChain(Filter... filters) {
+		Assert.notNull(filters, "filters cannot be null");
+		Assert.notEmpty(filters, "filters cannot be empty");
+		Assert.noNullElements(filters, "filters cannot contain null values");
+		this.iterator = Arrays.asList(filters).iterator();
+	}
+
+	/**
+	 * Invoke registered {@link Filter}s and/or {@link Servlet} also saving the
+	 * request and response.
+	 */
+	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
+
 		if (this.request != null) {
-			throw new IllegalStateException("This FilterChain has already been called!");
+			 throw new IllegalStateException("This FilterChain has already been called!");
 		}
+
+		if ((this.iterator != null) && (this.iterator.hasNext())) {
+			Filter nextFilter = this.iterator.next();
+			nextFilter.doFilter(request, response, this);
+		}
+
 		this.request = request;
 		this.response = response;
 	}
@@ -65,6 +129,37 @@ public class MockFilterChain implements FilterChain {
 	 */
 	public ServletResponse getResponse() {
 		return this.response;
+	}
+
+
+	/**
+	 * A filter that simply delegates to a Servlet.
+	 */
+	private static class ServletFilterProxy implements Filter {
+
+		private final Servlet delegateServlet;
+
+		private ServletFilterProxy(Servlet servlet) {
+			Assert.notNull(servlet, "servlet cannot be null");
+			this.delegateServlet = servlet;
+		}
+
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+				throws IOException, ServletException {
+
+			this.delegateServlet.service(request, response);
+		}
+
+		public void init(FilterConfig filterConfig) throws ServletException {
+		}
+
+		public void destroy() {
+		}
+
+		@Override
+		public String toString() {
+			return this.delegateServlet.toString();
+		}
 	}
 
 }
