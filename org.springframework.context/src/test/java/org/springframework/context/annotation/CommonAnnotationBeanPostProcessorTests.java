@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -162,6 +163,72 @@ public class CommonAnnotationBeanPostProcessorTests {
 		assertTrue(bean.destroyCalled);
 		assertTrue(bean.destroy2Called);
 		assertTrue(bean.destroy3Called);
+	}
+
+	@Test
+	public void testResourceInjectionWithPrototypes() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setResourceFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ResourceInjectionBean.class, false));
+		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, false));
+		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class, false));
+
+		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
+		assertTrue(bean.initCalled);
+		assertTrue(bean.init2Called);
+		assertTrue(bean.init3Called);
+
+		TestBean tb = bean.getTestBean();
+		TestBean tb2 = bean.getTestBean2();
+		assertNotNull(tb);
+		assertNotNull(tb2);
+
+		ResourceInjectionBean anotherBean = (ResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertNotSame(anotherBean.getTestBean(), tb);
+		assertNotSame(anotherBean.getTestBean2(), tb2);
+
+		bf.destroyBean("annotatedBean", bean);
+		assertTrue(bean.destroyCalled);
+		assertTrue(bean.destroy2Called);
+		assertTrue(bean.destroy3Called);
+	}
+
+	@Test
+	public void testResourceInjectionWithResolvableDependencyType() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class, false));
+		bf.registerBeanDefinition("testBean4", new RootBeanDefinition(TestBean.class, false));
+
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory() {
+			public Object getObject() throws BeansException {
+				return new NestedTestBean();
+			}
+		});
+
+		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
+		Properties props = new Properties();
+		props.setProperty("tb", "testBean4");
+		ppc.setProperties(props);
+		ppc.postProcessBeanFactory(bf);
+
+		ExtendedResourceInjectionBean bean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		INestedTestBean tb = bean.getTestBean6();
+		assertNotNull(tb);
+
+		ExtendedResourceInjectionBean anotherBean = (ExtendedResourceInjectionBean) bf.getBean("annotatedBean");
+		assertNotSame(anotherBean, bean);
+		assertNotSame(anotherBean.getTestBean6(), tb);
+
+		String[] depBeans = bf.getDependenciesForBean("annotatedBean");
+		assertEquals(1, depBeans.length);
+		assertEquals("testBean4", depBeans[0]);
 	}
 
 	@Test
@@ -520,6 +587,14 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		public ITestBean getTestBean4() {
 			return testBean4;
+		}
+
+		public INestedTestBean getTestBean5() {
+			return testBean5;
+		}
+
+		public INestedTestBean getTestBean6() {
+			return testBean6;
 		}
 
 		@PostConstruct

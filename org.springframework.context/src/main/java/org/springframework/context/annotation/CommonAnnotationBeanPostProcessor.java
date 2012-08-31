@@ -35,7 +35,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -447,7 +446,9 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (factory instanceof ConfigurableBeanFactory) {
 			ConfigurableBeanFactory beanFactory = (ConfigurableBeanFactory) factory;
 			for (String autowiredBeanName : autowiredBeanNames) {
-				beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+				if (beanFactory.containsBean(autowiredBeanName)) {
+					beanFactory.registerDependentBean(autowiredBeanName, requestingBeanName);
+				}
 			}
 		}
 
@@ -550,20 +551,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			Object value = null;
-			if (this.cached && this.shareable) {
-				value = this.cachedFieldValue;
-			}
-			synchronized (this) {
-				if (!this.cached) {
-					value = getResource(this, requestingBeanName);
-					if (value != null && this.shareable) {
-						this.cachedFieldValue = value;
-						this.cached = true;
-					}
-				}
-			}
-			return value;
+			return getResource(this, requestingBeanName);
 		}
 	}
 
