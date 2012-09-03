@@ -16,8 +16,6 @@
 
 package org.springframework.web.context.support;
 
-import static com.fasterxml.jackson.databind.BeanUtils.getDeserializerFactoryConfig;
-import static com.fasterxml.jackson.databind.BeanUtils.getSerializerFactoryConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -34,12 +32,15 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.DeserializerFactoryConfig;
+import com.fasterxml.jackson.databind.cfg.SerializerFactoryConfig;
 import com.fasterxml.jackson.databind.deser.std.DateDeserializers.DateDeserializer;
 import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.std.StdJdkSerializers.ClassSerializer;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.FatalBeanException;
 
 /**
@@ -135,6 +136,33 @@ public class Jackson2ObjectMapperFactoryBeanTest {
 		assertNotNull(factory.getObject());
 		assertTrue(factory.isSingleton());
 		assertEquals(ObjectMapper.class, factory.getObjectType());
+	}
+
+	/**
+	 * TODO: Replace usage of {@link DirectFieldAccessor} with getters. See <a
+	 * href
+	 * ="https://github.com/FasterXML/jackson-databind/issues/65">issue#65</a>.
+	 */
+	private static final SerializerFactoryConfig getSerializerFactoryConfig(
+			ObjectMapper objectMapper) {
+		DirectFieldAccessor objectMapperAccessor = new DirectFieldAccessor(objectMapper);
+		DirectFieldAccessor serializerFactoryAccessor = new DirectFieldAccessor(
+				objectMapperAccessor.getPropertyValue("_serializerFactory"));
+
+		return (SerializerFactoryConfig) serializerFactoryAccessor
+				.getPropertyValue("_factoryConfig");
+	}
+
+	private static final DeserializerFactoryConfig getDeserializerFactoryConfig(
+			ObjectMapper objectMapper) {
+		DirectFieldAccessor objectMapperAccessor = new DirectFieldAccessor(objectMapper);
+		DirectFieldAccessor deserializationContextAccessor = new DirectFieldAccessor(
+				objectMapperAccessor.getPropertyValue("_deserializationContext"));
+		DirectFieldAccessor deserializerFactoryAccessor = new DirectFieldAccessor(
+				deserializationContextAccessor.getPropertyValue("_factory"));
+
+		return (DeserializerFactoryConfig) deserializerFactoryAccessor
+				.getPropertyValue("_factoryConfig");
 	}
 
 	@Test
