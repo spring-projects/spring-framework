@@ -51,9 +51,17 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 	private volatile Set<Method> ambiguousWriteMethods;
 
 	private Class propertyType;
+	
+	private Class castType;
 
 	private MethodParameter writeMethodParameter;
 
+	public GenericTypeAwarePropertyDescriptor(Class beanClass, Class castClass, String propertyName,
+			Method readMethod, Method writeMethod, Class propertyEditorClass)
+			throws IntrospectionException {
+		this(beanClass, propertyName, readMethod, writeMethod, propertyEditorClass);
+		this.castType = castClass;
+	}
 
 	public GenericTypeAwarePropertyDescriptor(Class beanClass, String propertyName,
 			Method readMethod, Method writeMethod, Class propertyEditorClass)
@@ -151,5 +159,9 @@ class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 		}
 		return this.writeMethodParameter;
 	}
-
+	
+	public Class getCastType()
+	{
+		return this.castType;
+	}
 }
