@@ -3,6 +3,19 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.1.3 (2012-09-24)
+-------------------------------------
+
+* fixed cache handling for JNLP connections
+* @Autowired-driven ObjectFactory/Provider resolution works in non-singleton beans as well
+* @Resource processing properly works with scoped beans and prototypes again
+* Jaxb2Marshaller performs proper "supports" check for scanned packages
+* media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x)
+* fixed Portlet request mapping priorities in cross-controller case
+* deprecated SimpleJdbcTestUtils in favor of JdbcTestUtils
+* introduced "countRowsInTableWhere()" and "dropTables()" in JdbcTestUtils
+
+
 Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
 
