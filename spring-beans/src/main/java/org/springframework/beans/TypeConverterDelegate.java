@@ -95,6 +95,23 @@ class TypeConverterDelegate {
 	}
 
 	/**
+	 * Convert the value to the specified required type.
+	 * @param newValue the proposed new value
+	 * @param requiredType the type we must convert to
+	 * (or <code>null</code> if not known, for example in case of a collection element)
+	 * @param field the reflective field that is the target of the conversion
+	 * (may be <code>null</code>)
+	 * @return the new value, possibly the result of type conversion
+	 * @throws IllegalArgumentException if type conversion failed
+	 */
+	public <T> T convertIfNecessary(Object newValue, Class<T> requiredType, Field field)
+			throws IllegalArgumentException {
+
+		return convertIfNecessary(null, null, newValue, requiredType,
+				(field != null ? new TypeDescriptor(field) : TypeDescriptor.valueOf(requiredType)));
+	}
+
+	/**
 	 * Convert the value to the required type for the specified property.
 	 * @param propertyName name of the property
 	 * @param oldValue the previous value, if available (may be <code>null</code>)

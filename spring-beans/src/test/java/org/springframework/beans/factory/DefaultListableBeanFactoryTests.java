@@ -17,17 +17,13 @@
 package org.springframework.beans.factory;
 
 import java.lang.reflect.Field;
-
 import java.net.MalformedURLException;
-
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,14 +31,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Ignore;
 import org.junit.Test;
+import test.beans.DerivedTestBean;
+import test.beans.DummyFactory;
+import test.beans.ITestBean;
+import test.beans.LifecycleBean;
+import test.beans.NestedTestBean;
+import test.beans.TestBean;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -79,15 +79,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StopWatch;
 
-import test.beans.DerivedTestBean;
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.LifecycleBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
-
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -2432,11 +2424,6 @@ public class DefaultListableBeanFactoryTests {
 
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType) {
-			return convertIfNecessary(value, requiredType, null);
-		}
-
-		@SuppressWarnings("unchecked")
-		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
 				try {
 					return new Float(this.numberFormat.parse((String) value).floatValue());
@@ -2451,6 +2438,16 @@ public class DefaultListableBeanFactoryTests {
 			else {
 				return value;
 			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
+			return convertIfNecessary(value, requiredType);
+		}
+
+		@SuppressWarnings("unchecked")
+		public Object convertIfNecessary(Object value, Class requiredType, Field field) {
+			return convertIfNecessary(value, requiredType);
 		}
 	}
 

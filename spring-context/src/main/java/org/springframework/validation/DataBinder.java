@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.validation;
 
 import java.beans.PropertyEditor;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -547,10 +548,16 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
-	public <T> T convertIfNecessary(
-			Object value, Class<T> requiredType, MethodParameter methodParam) throws TypeMismatchException {
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
+			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
+	}
+
+	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
+			throws TypeMismatchException {
+
+		return getTypeConverter().convertIfNecessary(value, requiredType, field);
 	}
 
 

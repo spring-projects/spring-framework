@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,10 @@ import org.junit.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.convert.ConversionFailedException;
@@ -92,6 +94,16 @@ public class FormattingConversionServiceTests {
 		assertEquals("10/31/09", formatted);
 		LocalDate date = formattingService.convert("10/31/09", LocalDate.class);
 		assertEquals(new LocalDate(2009, 10, 31), date);
+	}
+
+	@Test
+	public void testFormatFieldForValueInjection() {
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(ValueBean.class));
+		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+		ac.refresh();
+		ValueBean valueBean = ac.getBean(ValueBean.class);
+		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
 	}
 
 	@Test
@@ -253,7 +265,7 @@ public class FormattingConversionServiceTests {
 		});
 		formattingService.addConverter(new Converter<MyDate, Long>() {
 			public Long convert(MyDate source) {
-				return  source.getTime();
+				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Date>() {
@@ -264,6 +276,14 @@ public class FormattingConversionServiceTests {
 
 		formattingService.convert(new MyDate(), new TypeDescriptor(ModelWithSubclassField.class.getField("date")),
 				TypeDescriptor.valueOf(String.class));
+	}
+
+
+	public static class ValueBean {
+
+		@Value("10-31-09")
+		@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
+		public Date date;
 	}
 
 

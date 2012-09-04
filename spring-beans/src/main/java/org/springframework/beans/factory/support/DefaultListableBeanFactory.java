@@ -743,7 +743,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				value = evaluateBeanDefinitionString(strVal, bd);
 			}
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
-			return converter.convertIfNecessary(value, type);
+			return (descriptor.getField() != null ?
+					converter.convertIfNecessary(value, type, descriptor.getField()) :
+			        converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 		}
 
 		if (type.isArray()) {

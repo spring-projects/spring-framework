@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,7 @@ import java.util.Map;
  * @see #getPropertyValue
  * @see #setPropertyValue
  */
-public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySupport
-		implements ConfigurablePropertyAccessor {
+public abstract class AbstractPropertyAccessor extends TypeConverterSupport implements ConfigurablePropertyAccessor {
 
 	private boolean extractOldValueForEditor = false;
 
@@ -103,12 +102,8 @@ public abstract class AbstractPropertyAccessor extends PropertyEditorRegistrySup
 		}
 	}
 
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
-		return convertIfNecessary(value, requiredType, null);
-	}
 
-
-	// Redefined with public visibility.
+    // Redefined with public visibility.
 	@Override
 	public Class getPropertyType(String propertyPath) {
 		return null;

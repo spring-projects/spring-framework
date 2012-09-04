@@ -19,6 +19,7 @@ package org.springframework.beans;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -99,8 +100,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	private String nestedPath = "";
 
 	private Object rootObject;
-
-	private TypeConverterDelegate typeConverterDelegate;
 
 	/**
 	 * The security context used for invoking the property methods
@@ -443,25 +442,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			// Cannot be evaluated, so can't be writable.
 		}
 		return false;
-	}
-
-	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
-			throws TypeMismatchException {
-		try {
-			return this.typeConverterDelegate.convertIfNecessary(value, requiredType, methodParam);
-		}
-		catch (ConverterNotFoundException ex) {
-			throw new ConversionNotSupportedException(value, requiredType, ex);
-		}
-		catch (ConversionException ex) {
-			throw new TypeMismatchException(value, requiredType, ex);
-		}
-		catch (IllegalStateException ex) {
-			throw new ConversionNotSupportedException(value, requiredType, ex);
-		}
-		catch (IllegalArgumentException ex) {
-			throw new TypeMismatchException(value, requiredType, ex);
-		}
 	}
 
 	private Object convertIfNecessary(String propertyName, Object oldValue, Object newValue, Class<?> requiredType,
