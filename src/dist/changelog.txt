@@ -3,17 +3,24 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 M2 (2012-08-xx)
+Changes in version 3.2 M2 (2012-09-10)
 --------------------------------------
 
+* inlined ASM 4.0 into spring-core, removed spring-asm subproject and jar (SPR-9669)
+* inlined CGLIB 3.0 into spring-core, eliminating external dependency (SPR-9669)
 * spring-test module now depends on junit:junit-dep (SPR-6966)
-* now inferring return type of generic factory methods (SPR-9493)
 * SpEL now supports method invocations on integers (SPR-9612)
 * SpEL now supports case-insensitive null literals in expressions (SPR-9613)
 * SpEL now supports symbolic boolean operators for OR and AND (SPR-9614)
 * SpEL now supports nested double quotes in expressions (SPR-9620)
 * SpEL now throws an ISE if a MethodFilter is registered against custom resolvers (SPR-9621)
 * now using BufferedInputStream in SimpleMetaDataReader to double performance (SPR-9528)
+* fixed cache handling for JNLP connections (SPR-9547)
+* now inferring return type of generic factory methods (SPR-9493)
+* added Field context variant to TypeConverter interface in beans module
+* @Value injection works in combination with formatting rules such as @DateTimeFormat (SPR-9637)
+* @Autowired-driven ObjectFactory/Provider resolution works in non-singleton beans as well (SPR-9181)
+* @Resource processing properly works with scoped beans and prototypes again (SPR-9627)
 * introduced "repeatCount" property in Quartz SimpleTriggerFactoryBean (SPR-9521)
 * introduced "jtaTransactionManager" property in Hibernate 4 LocalSessionFactoryBean/Builder (SPR-9480)
 * now raising RestClientException instead of IllegalArgumentException for unknown status codes
@@ -21,14 +28,16 @@ Changes in version 3.2 M2 (2012-08-xx)
 * introduced ContentNegotiationManager/ContentNegotiationStrategy for resolving requested media types
 * introduced support for the HTTP PATCH method in Spring MVC and RestTemplate (SPR-7985)
 * enabled smart suffix pattern matching in @RequestMapping methods (SPR-7632)
-* DispatcherPortlet no longer forwards event exceptions to the render phase by default (SPR-9287)
 * introduced "defaultCharset" property in StringHttpMessageConverter (SPR-9487)
 * introduced @ExceptionResolver annotation for detecting classes with @ExceptionHandler methods
-* moved RSS/Atom message converter registration ahead of jackson/jaxb2
+* moved RSS/Atom message converter registration ahead of Jackson/JAXB2
 * now handling BindException in DefaultHandlerExceptionResolver
 * DeferredResult type is now parameterized
 * now using reflection to instantiate StandardServletAsyncWebRequest
 * fixed issue with forward before async request processing
+* media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x) (SPR-8917)
+* DispatcherPortlet no longer forwards event exceptions to the render phase by default (SPR-9287)
+* fixed Portlet request mapping priorities in cross-controller case (SPR-9303, SPR-9605)
 * introduced exclude patterns for mapped interceptors in MVC namespace and MVC Java config
 * introduced support for content negotiation options in MVC namespace and MVC Java config
 * introduced support for named dispatchers in MockServletContext (SPR-9587)
@@ -36,19 +45,17 @@ Changes in version 3.2 M2 (2012-08-xx)
 * introduced support for TransactionManagementConfigurer in the TestContext framework (SPR-9604)
 * introduced MockEnvironment in the spring-test module (SPR-9492)
 * deprecated SimpleJdbcTestUtils in favor of JdbcTestUtils (SPR-9235)
-* introduced countRowsInTableWhere() and dropTables() in JdbcTestUtils (SPR-9235)
+* introduced "countRowsInTableWhere()" and "dropTables()" in JdbcTestUtils (SPR-9235)
 * introduced JdbcTemplate in tx base classes in the TestContext framework (SPR-8990)
-* introduced countRowsInTableWhere() and dropTables() in tx base test classes (SPR-9665)
-* inlined ASM 4.0 into spring-core, removed spring-asm subproject and jar (SPR-9669)
-* inlined CGLIB 3.0 into spring-core, eliminating external dependency (SPR-9669)
+* introduced "countRowsInTableWhere()" and "dropTables()" in tx base test classes (SPR-9665)
 
 
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------
 
-* add Servlet 3.0-based async support
 * upgrade to AspectJ 1.6.12, JUnit 4.10, TestNG 6.5.2
-* add HttpMessageConverter and View types compatible with Jackson 2.0
+* Servlet 3.0-based async support
+* HttpMessageConverter and View types compatible with Jackson 2.0
 * better handling on failure to parse invalid 'Content-Type' or 'Accept' headers
 * handle a controller method's return value based on the actual returned value (vs declared type)
 * fix issue with combining identical controller and method level request mapping paths
@@ -69,8 +76,9 @@ Changes in version 3.2 M1 (2012-05-28)
 * add option in MappingJacksonJsonView for setting the Content-Length header
 * decode path variables when url decoding is turned off in AbstractHandlerMapping
 * add required flag to @RequestBody annotation
-* support executor qualification with @Async#value (SPR-6847)
+* Jaxb2Marshaller performs proper "supports" check for scanned packages (SPR-9152)
 * add convenient WebAppInitializer base classes (SPR-9300)
+* support executor qualification with @Async#value (SPR-6847)
 * support initial delay attribute for scheduled tasks (SPR-7022)
 * cache by-type lookups in DefaultListableBeanFactory (SPR-6870)
 * merge rather than add URI vars to data binding values (SPR-9349)
@@ -83,7 +91,7 @@ Changes in version 3.2 M1 (2012-05-28)
 * fix MultipartResolver Resin compatibility (SPR-9299)
 * handle non-existent files in ServletContextResource (SPR-8461)
 * apply cache settings consistently in EhCacheFactoryBean (SPR-9392)
-* add initial support for JCache (JSR-107) compliant cache providers (SPR-8774)
+* initial support for JCache (JSR-107) compliant cache providers (SPR-8774)
 
 
 Changes in version 3.1.1 (2012-02-16)
