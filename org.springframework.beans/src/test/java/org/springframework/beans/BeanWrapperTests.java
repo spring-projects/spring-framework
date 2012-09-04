@@ -73,6 +73,28 @@ import test.beans.TestBean;
 public final class BeanWrapperTests {
 
 	@Test
+	public void testNullNestedTypeDescriptor() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new DefaultConversionService());
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+
+	@Test
+	public void testNullNestedTypeDescriptor2() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new DefaultConversionService());
+		wrapper.setAutoGrowNestedPaths(true);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("favoriteNumber", "9");
+		wrapper.setPropertyValue("list[0]", map);
+		assertEquals(map, foo.list.get(0));
+	}
+
+	@Test
 	public void testNullNestedTypeDescriptorWithNoConversionService() {
 		Foo foo = new Foo();
 		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
@@ -96,52 +118,6 @@ public final class BeanWrapperTests {
 		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
 	}
 
-	@Test
-	public void testNullNestedTypeDescriptor() {
-		Foo foo = new Foo();
-		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
-		wrapper.setConversionService(new DefaultConversionService());
-		wrapper.setAutoGrowNestedPaths(true);
-		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
-		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
-	}
-	
-	@Test
-	public void testNullNestedTypeDescriptor2() {
-		Foo foo = new Foo();
-		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
-		wrapper.setConversionService(new DefaultConversionService());
-		wrapper.setAutoGrowNestedPaths(true);
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("favoriteNumber", "9");
-		wrapper.setPropertyValue("list[0]", map);
-		assertEquals(map, foo.list.get(0));
-	}
-	
-	static class Foo {
-		
-		private List list;
-		
-		private List<Map> listOfMaps;
-
-		public List getList() {
-			return list;
-		}
-
-		public void setList(List list) {
-			this.list = list;
-		}
-
-		public List<Map> getListOfMaps() {
-			return listOfMaps;
-		}
-
-		public void setListOfMaps(List<Map> listOfMaps) {
-			this.listOfMaps = listOfMaps;
-		}
-
-	}
-	
 	@Test
 	public void testIsReadablePropertyNotReadable() {
 		NoRead nr = new NoRead();
@@ -1475,7 +1451,7 @@ public final class BeanWrapperTests {
 
 	@Test
 	public void testSetNumberProperties() {
-	NumberPropertyBean bean = new NumberPropertyBean();
+		NumberPropertyBean bean = new NumberPropertyBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 
 		String byteValue = " " + Byte.MAX_VALUE + " ";
@@ -1564,6 +1540,31 @@ public final class BeanWrapperTests {
 		bw.setPropertyValue("enumValue", TestEnum.class.getName() + ".TEST_VALUE");
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
 	}
+
+
+	private static class Foo {
+
+		private List list;
+
+		private List<Map> listOfMaps;
+
+		public List getList() {
+			return list;
+		}
+
+		public void setList(List list) {
+			this.list = list;
+		}
+
+		public List<Map> getListOfMaps() {
+			return listOfMaps;
+		}
+
+		public void setListOfMaps(List<Map> listOfMaps) {
+			this.listOfMaps = listOfMaps;
+		}
+	}
+
 
 	private static class DifferentTestBean extends TestBean {
 		// class to test naming of beans in a BeanWrapper error message

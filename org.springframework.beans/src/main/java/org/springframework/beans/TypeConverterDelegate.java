@@ -159,10 +159,12 @@ class TypeConverterDelegate {
 				}
 			}
 			if (editor == null) {
-				editor = findDefaultEditor(requiredType, typeDescriptor);
+				editor = findDefaultEditor(requiredType);
 			}
 			convertedValue = doConvertValue(oldValue, convertedValue, requiredType, editor);
 		}
+
+		boolean standardConversion = false;
 
 		if (requiredType != null) {
 			// Try to apply some standard type conversion rules if appropriate.
@@ -179,14 +181,17 @@ class TypeConverterDelegate {
 					// Convert elements to target type, if determined.
 					convertedValue = convertToTypedCollection(
 							(Collection) convertedValue, propertyName, requiredType, typeDescriptor);
+					standardConversion = true;
 				}
 				else if (convertedValue instanceof Map) {
 					// Convert keys and values to respective target type, if determined.
 					convertedValue = convertToTypedMap(
 							(Map) convertedValue, propertyName, requiredType, typeDescriptor);
+					standardConversion = true;
 				}
 				if (convertedValue.getClass().isArray() && Array.getLength(convertedValue) == 1) {
 					convertedValue = Array.get(convertedValue, 0);
+					standardConversion = true;
 				}
 				if (String.class.equals(requiredType) && ClassUtils.isPrimitiveOrWrapper(convertedValue.getClass())) {
 					// We can stringify any primitive value...
@@ -217,6 +222,7 @@ class TypeConverterDelegate {
 					}
 					
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
+					standardConversion = true;
 				}
 			}
 
@@ -245,8 +251,7 @@ class TypeConverterDelegate {
 		}
 
 		if (firstAttemptEx != null) {
-			if (editor == null && convertedValue == newValue && requiredType != null &&
-					!ClassUtils.isAssignableValue(requiredType, convertedValue)) {
+			if (editor == null && !standardConversion && requiredType != null && !Object.class.equals(requiredType)) {
 				throw firstAttemptEx;
 			}
 			logger.debug("Original ConversionService attempt failed - ignored since " +
@@ -305,16 +310,11 @@ class TypeConverterDelegate {
 	/**
 	 * Find a default editor for the given type.
 	 * @param requiredType the type to find an editor for
-	 * @param descriptor the JavaBeans descriptor for the property
 	 * @return the corresponding editor, or <code>null</code> if none
 	 */
-	protected PropertyEditor findDefaultEditor(Class requiredType, TypeDescriptor typeDescriptor) {
+	private PropertyEditor findDefaultEditor(Class requiredType) {
 		PropertyEditor editor = null;
-		//if (typeDescriptor instanceof PropertyTypeDescriptor) {
-			//PropertyDescriptor pd = ((PropertyTypeDescriptor) typeDescriptor).getPropertyDescriptor();
-			//editor = pd.createPropertyEditor(this.targetObject);
-		//}
-		if (editor == null && requiredType != null) {
+		if (requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
 			if (editor == null && !String.class.equals(requiredType)) {
@@ -336,7 +336,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	protected Object doConvertValue(Object oldValue, Object newValue, Class<?> requiredType, PropertyEditor editor) {
+	private Object doConvertValue(Object oldValue, Object newValue, Class<?> requiredType, PropertyEditor editor) {
 		Object convertedValue = newValue;
 		boolean sharedEditor = false;
 
@@ -423,7 +423,7 @@ class TypeConverterDelegate {
 	 * @param editor the PropertyEditor to use
 	 * @return the converted value
 	 */
-	protected Object doConvertTextValue(Object oldValue, String newTextValue, PropertyEditor editor) {
+	private Object doConvertTextValue(Object oldValue, String newTextValue, PropertyEditor editor) {
 		try {
 			editor.setValue(oldValue);
 		}
@@ -437,7 +437,7 @@ class TypeConverterDelegate {
 		return editor.getValue();
 	}
 
-	protected Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
+	private Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
 		if (input instanceof Collection) {
 			// Convert Collection elements to array elements.
 			Collection coll = (Collection) input;
@@ -476,7 +476,7 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Collection convertToTypedCollection(
+	private Collection convertToTypedCollection(
 			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
@@ -558,7 +558,7 @@ class TypeConverterDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map convertToTypedMap(
+	private Map convertToTypedMap(
 			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
