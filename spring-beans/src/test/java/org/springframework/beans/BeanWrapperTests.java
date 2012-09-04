@@ -43,14 +43,16 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -66,9 +68,34 @@ import test.beans.TestBean;
  * @author Alef Arendsen
  * @author Arjen Poutsma
  * @author Chris Beams
+ * @author Dave Syer
  */
 public final class BeanWrapperTests {
 
+	@Test
+	public void testNullNestedTypeDescriptorWithNoConversionService() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+	
+	@Test
+	public void testNullNestedTypeDescriptorWithBadConversionService() {
+		Foo foo = new Foo();
+		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
+		wrapper.setConversionService(new GenericConversionService() {
+			@Override
+			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+				throw new ConversionFailedException(sourceType, targetType, source, null);
+			}
+		});
+		wrapper.setAutoGrowNestedPaths(true);
+		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
+		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
+	}
+	
 	@Test
 	public void testNullNestedTypeDescriptor() {
 		Foo foo = new Foo();
