@@ -54,7 +54,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 	private ConversionService conversionService;
 
-	private Charset defaultCharset;
+	private Charset defaultCharset = StringHttpMessageConverter.DEFAULT_CHARSET;
 
 	private boolean writeAcceptCharset = true;
 
@@ -122,10 +122,6 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	 */
 	public void afterPropertiesSet() {
 		Assert.notNull(conversionService, "The conversion service must be provided");
-
-		if (defaultCharset == null) {
-			defaultCharset = StringHttpMessageConverter.DEFAULT_CHARSET;
-		}
 
 		stringHttpMessageConverter = new StringHttpMessageConverter(defaultCharset);
 
