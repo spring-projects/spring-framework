@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,15 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.ServletContextResourceLoader;
 
@@ -76,7 +80,8 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * @see #doPost
  */
 @SuppressWarnings("serial")
-public abstract class HttpServletBean extends HttpServlet implements EnvironmentAware {
+public abstract class HttpServletBean extends HttpServlet
+		implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -87,7 +92,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private Environment environment = new StandardServletEnvironment();
+	private ConfigurableWebEnvironment environment;
 
 
 	/**
@@ -120,7 +125,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 			PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.getEnvironment()));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}
@@ -182,11 +187,32 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link StandardServletEnvironment}
-	 * provided by default.
+	 * @throws IllegalArgumentException if environment is not assignable to
+	 * {@code ConfigurableWebEnvironment}.
 	 */
 	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+		Assert.isInstanceOf(ConfigurableWebEnvironment.class, environment);
+		this.environment = (ConfigurableWebEnvironment)environment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>If {@code null}, a new environment will be initialized via
+	 * {@link #createEnvironment()}.
+	 */
+	public ConfigurableWebEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = this.createEnvironment();
+		}
+		return this.environment;
+	}
+
+	/**
+	 * Create and return a new {@link StandardServletEnvironment}. Subclasses may override
+	 * in order to configure the environment or specialize the environment type returned.
+	 */
+	protected ConfigurableWebEnvironment createEnvironment() {
+		return new StandardServletEnvironment();
 	}
 
 

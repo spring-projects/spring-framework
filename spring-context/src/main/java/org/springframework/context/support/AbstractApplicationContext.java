@@ -73,6 +73,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -224,7 +225,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
 		this.resourcePatternResolver = getResourcePatternResolver();
-		this.environment = this.createEnvironment();
 	}
 
 
@@ -276,7 +276,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.parent;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>If {@code null}, a new environment will be initialized via
+	 * {@link #createEnvironment()}.
+	 */
 	public ConfigurableEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = this.createEnvironment();
+		}
 		return this.environment;
 	}
 
@@ -387,9 +395,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
 		if (parent != null) {
-			Object parentEnvironment =  parent.getEnvironment();
+			Environment parentEnvironment = parent.getEnvironment();
 			if (parentEnvironment instanceof ConfigurableEnvironment) {
-				this.environment.merge((ConfigurableEnvironment)parentEnvironment);
+				this.getEnvironment().merge((ConfigurableEnvironment)parentEnvironment);
 			}
 		}
 	}
@@ -505,7 +513,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable
 		// see ConfigurablePropertyResolver#setRequiredProperties
-		this.environment.validateRequiredProperties();
+		this.getEnvironment().validateRequiredProperties();
 	}
 
 	/**

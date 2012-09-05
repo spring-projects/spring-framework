@@ -134,7 +134,8 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 	/**
-	 * Create and return a new {@link StandardServletEnvironment}.
+	 * Create and return a new {@link StandardServletEnvironment}. Subclasses may override
+	 * in order to configure the environment or specialize the environment type returned.
 	 */
 	@Override
 	protected ConfigurableEnvironment createEnvironment() {

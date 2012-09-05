@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -345,6 +345,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 			pac.setId(ConfigurablePortletApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getPortletName());
 		}
 
+		pac.setEnvironment(this.getEnvironment());
 		pac.setParent(parent);
 		pac.setPortletContext(getPortletContext());
 		pac.setPortletConfig(getPortletConfig());

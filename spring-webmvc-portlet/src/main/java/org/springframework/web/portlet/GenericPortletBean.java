@@ -34,13 +34,16 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceEditor;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.portlet.context.StandardPortletEnvironment;
 import org.springframework.web.portlet.context.PortletContextResourceLoader;
+import org.springframework.web.portlet.context.StandardPortletEnvironment;
 
 /**
  * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
@@ -65,7 +68,8 @@ import org.springframework.web.portlet.context.PortletContextResourceLoader;
  * @see #processAction
  * @see FrameworkPortlet
  */
-public abstract class GenericPortletBean extends GenericPortlet implements EnvironmentAware {
+public abstract class GenericPortletBean extends GenericPortlet
+		implements EnvironmentCapable, EnvironmentAware {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
@@ -76,7 +80,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 	 */
 	private final Set<String> requiredProperties = new HashSet<String>();
 
-	private Environment environment = new StandardPortletEnvironment();
+	private ConfigurableEnvironment environment;
 
 
 	/**
@@ -107,7 +111,7 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.environment));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.getEnvironment()));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}
@@ -167,17 +171,39 @@ public abstract class GenericPortletBean extends GenericPortlet implements Envir
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Any environment set here overrides the {@link StandardPortletEnvironment}
-	 * provided by default.
+	 * @throws IllegalArgumentException if environment is not assignable to
+	 * {@code ConfigurableEnvironment}.
 	 */
 	public void setEnvironment(Environment environment) {
-		this.environment = environment;
+		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
+		this.environment = (ConfigurableEnvironment)environment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>If {@code null}, a new environment will be initialized via
+	 * {@link #createEnvironment()}.
+	 */
+	public ConfigurableEnvironment getEnvironment() {
+		if (this.environment == null) {
+			this.environment = this.createEnvironment();
+		}
+		return this.environment;
+	}
+
+	/**
+	 * Create and return a new {@link StandardPortletEnvironment}. Subclasses may override
+	 * in order to configure the environment or specialize the environment type returned.
+	 */
+	protected ConfigurableEnvironment createEnvironment() {
+		return new StandardPortletEnvironment();
 	}
 
 
 	/**
 	 * PropertyValues implementation created from PortletConfig init parameters.
 	 */
+	@SuppressWarnings("serial")
 	private static class PortletConfigPropertyValues extends MutablePropertyValues {
 
 		/**

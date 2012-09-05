@@ -588,6 +588,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		ConfigurableWebApplicationContext wac =
 				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 
+		wac.setEnvironment(this.getEnvironment());
 		wac.setParent(parent);
 		wac.setConfigLocation(getContextConfigLocation());
 

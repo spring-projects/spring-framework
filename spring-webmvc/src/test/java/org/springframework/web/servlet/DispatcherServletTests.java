@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -33,14 +34,18 @@ import org.springframework.beans.PropertyValue;
 import org.springframework.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.bind.EscapedErrors;
+import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletConfigAwareBean;
 import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -54,6 +59,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -821,6 +829,30 @@ public class DispatcherServletTests extends TestCase {
 		assertTrue(multipartResolver != multipartResolver2);
 
 		servlet.destroy();
+	}
+
+	public void testEnvironmentOperations() {
+		DispatcherServlet servlet = new DispatcherServlet();
+		ConfigurableWebEnvironment defaultEnv = servlet.getEnvironment();
+		assertThat(defaultEnv, notNullValue());
+		ConfigurableEnvironment env1 = new StandardServletEnvironment();
+		servlet.setEnvironment(env1); // should succeed
+		assertThat(servlet.getEnvironment(), sameInstance(env1));
+		try {
+			servlet.setEnvironment(new StandardEnvironment());
+			fail("expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+		}
+		class CustomServletEnvironment extends StandardServletEnvironment { }
+		@SuppressWarnings("serial")
+		DispatcherServlet custom = new DispatcherServlet() {
+			@Override
+			protected ConfigurableWebEnvironment createEnvironment() {
+				return new CustomServletEnvironment();
+			}
+		};
+		assertThat(custom.getEnvironment(), instanceOf(CustomServletEnvironment.class));
 	}
 
 
