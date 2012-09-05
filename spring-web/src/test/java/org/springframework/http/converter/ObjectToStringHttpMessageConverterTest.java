@@ -128,7 +128,7 @@ public class ObjectToStringHttpMessageConverterTest {
 		Short shortValue = Short.valueOf((short) 781);
 
 		request.setContent(shortValue.toString().getBytes(
-				ObjectToStringHttpMessageConverter.DEFAULT_CHARSET));
+				StringHttpMessageConverter.DEFAULT_CHARSET));
 
 		assertEquals(shortValue, converter.read(Short.class, new ServletServerHttpRequest(request)));
 

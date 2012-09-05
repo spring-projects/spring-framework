@@ -17,12 +17,7 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.convert.ConversionService;
@@ -30,7 +25,6 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.FileCopyUtils;
 
 /**
  * Implementation of
@@ -62,11 +56,12 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 
 	private Charset defaultCharset;
 
-	private List<Charset> availableCharsets;
-
 	private boolean writeAcceptCharset = true;
 
-	static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+	/**
+	 * This delegate knows how to convert the message body to/from string.
+	 */
+	private StringHttpMessageConverter stringHttpMessageConverter;
 
 	/**
 	 * Sets the conversion service to use.
@@ -103,8 +98,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	@Override
 	protected Object readInternal(Class<? extends Object> clazz, HttpInputMessage inputMessage)
 			throws IOException {
-		String s = FileCopyUtils.copyToString(new InputStreamReader(inputMessage.getBody(),
-				getContentTypeCharset(inputMessage.getHeaders().getContentType())));
+		String s = stringHttpMessageConverter.readInternal(String.class, inputMessage);
 
 		return conversionService.convert(s, clazz);
 	}
@@ -113,31 +107,14 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	protected Long getContentLength(Object obj, MediaType contentType) {
 		String s = conversionService.convert(obj, String.class);
 
-		return Long.valueOf(s.getBytes(getContentTypeCharset(contentType)).length);
+		return stringHttpMessageConverter.getContentLength(s, contentType);
 	}
 
 	@Override
 	protected void writeInternal(Object obj, HttpOutputMessage outputMessage) throws IOException {
-		if (writeAcceptCharset) {
-			outputMessage.getHeaders().setAcceptCharset(getAcceptedCharsets());
-		}
-
 		String s = conversionService.convert(obj, String.class);
 
-		FileCopyUtils.copy(s, new OutputStreamWriter(outputMessage.getBody(),
-				getContentTypeCharset(outputMessage.getHeaders().getContentType())));
-	}
-
-	/**
-	 * Return the list of supported {@link Charset}.
-	 * <p>
-	 * By default, returns {@link Charset#availableCharsets()}. Can be
-	 * overridden in subclasses.
-	 * 
-	 * @return the list of accepted charsets
-	 */
-	protected List<Charset> getAcceptedCharsets() {
-		return availableCharsets;
+		stringHttpMessageConverter.writeInternal(s, outputMessage);
 	}
 
 	/**
@@ -147,20 +124,13 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 		Assert.notNull(conversionService, "The conversion service must be provided");
 
 		if (defaultCharset == null) {
-			defaultCharset = DEFAULT_CHARSET;
+			defaultCharset = StringHttpMessageConverter.DEFAULT_CHARSET;
 		}
 
-		availableCharsets = new ArrayList<Charset>(Charset.availableCharsets().values());
+		stringHttpMessageConverter = new StringHttpMessageConverter(defaultCharset);
 
-		setSupportedMediaTypes(Arrays.asList(new MediaType("text", "plain", defaultCharset),
-				MediaType.ALL));
-	}
+		stringHttpMessageConverter.setWriteAcceptCharset(writeAcceptCharset);
 
-	private Charset getContentTypeCharset(MediaType contentType) {
-		if (contentType != null && contentType.getCharSet() != null) {
-			return contentType.getCharSet();
-		}
-
-		return defaultCharset;
+		setSupportedMediaTypes(stringHttpMessageConverter.getSupportedMediaTypes());
 	}
 }
