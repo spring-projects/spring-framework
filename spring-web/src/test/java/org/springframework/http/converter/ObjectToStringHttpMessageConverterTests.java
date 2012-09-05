@@ -44,7 +44,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
  * 
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  */
-public class ObjectToStringHttpMessageConverterTest {
+public class ObjectToStringHttpMessageConverterTests {
 
 	private ObjectToStringHttpMessageConverter converter;
 
