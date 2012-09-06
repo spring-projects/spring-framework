@@ -315,12 +315,13 @@ class ConfigurationClassParser {
 			AnnotationMetadata importingClassMetadata = configClass.getMetadata();
 			for (String candidate : classesToImport) {
 				MetadataReader reader = this.metadataReaderFactory.getMetadataReader(candidate);
-				if (new AssignableTypeFilter(ImportSelector.class).match(reader, metadataReaderFactory)) {
+				if (new AssignableTypeFilter(ImportSelector.class).match(reader, this.metadataReaderFactory)) {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
 					try {
 						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
 						processImport(configClass, selector.selectImports(importingClassMetadata), false);
-					} catch (ClassNotFoundException ex) {
+					}
+					catch (ClassNotFoundException ex) {
 						throw new IllegalStateException(ex);
 					}
 				}
@@ -329,7 +330,8 @@ class ConfigurationClassParser {
 					try {
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(Class.forName(candidate), ImportBeanDefinitionRegistrar.class);
 						registrar.registerBeanDefinitions(importingClassMetadata, registry);
-					} catch (ClassNotFoundException ex) {
+					}
+					catch (ClassNotFoundException ex) {
 						throw new IllegalStateException(ex);
 					}
 				}
@@ -367,6 +369,7 @@ class ConfigurationClassParser {
 
 
 	interface ImportRegistry {
+
 		String getImportingClassFor(String importedClass);
 	}
 
@@ -374,14 +377,14 @@ class ConfigurationClassParser {
 	@SuppressWarnings("serial")
 	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
 
-		private Map<String, String> imports = new HashMap<String, String>();
-
-		public String getImportingClassFor(String importedClass) {
-			return imports.get(importedClass);
-		}
+		private final Map<String, String> imports = new HashMap<String, String>();
 
 		public void registerImport(String importingClass, String importedClass) {
-			imports.put(importedClass, importingClass);
+			this.imports.put(importedClass, importingClass);
+		}
+
+		public String getImportingClassFor(String importedClass) {
+			return this.imports.get(importedClass);
 		}
 
 		/**
