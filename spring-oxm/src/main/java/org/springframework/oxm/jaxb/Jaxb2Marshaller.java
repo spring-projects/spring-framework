@@ -168,6 +168,8 @@ public class Jaxb2Marshaller
 
 	private boolean supportJaxbElementClass = false;
 
+	private boolean checkForXmlRootElement = true;
+
 	private LSResourceResolver schemaResourceResolver;
 
 
@@ -358,6 +360,21 @@ public class Jaxb2Marshaller
 		this.supportJaxbElementClass = supportJaxbElementClass;
 	}
 
+	/**
+	 * Specify whether the {@link #supports(Class)} should check for
+	 * {@link XmlRootElement @XmlRootElement} annotations.
+	 * <p>Default is {@code true}, meaning that {@code supports(Class)} will check for
+	 * this annotation. However, some JAXB implementations (i.e. EclipseLink MOXy) allow
+	 * for defining the bindings in an external definition file, thus keeping the classes
+	 * annotations free. Setting this property to {@code false} supports these
+	 * JAXB implementations.
+	 * @see #supports(Class)
+	 * @see #supports(Type)
+	 */
+	public void setCheckForXmlRootElement(boolean checkForXmlRootElement) {
+		this.checkForXmlRootElement = checkForXmlRootElement;
+	}
+
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -492,7 +509,7 @@ public class Jaxb2Marshaller
 		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
 			return true;
 		}
-		return supportsInternal(clazz, true);
+		return supportsInternal(clazz, this.checkForXmlRootElement);
 	}
 
 	public boolean supports(Type genericType) {
@@ -521,7 +538,7 @@ public class Jaxb2Marshaller
 		}
 		else if (genericType instanceof Class) {
 			Class<?> clazz = (Class<?>) genericType;
-			return supportsInternal(clazz, true);
+			return supportsInternal(clazz, this.checkForXmlRootElement);
 		}
 		return false;
 	}
