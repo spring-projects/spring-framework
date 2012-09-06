@@ -191,15 +191,17 @@ public class TypeDescriptorTests {
 		assertEquals(String.class, t1.getType());
 		assertEquals(1, t1.getAnnotations().length);
 		assertNotNull(t1.getAnnotation(ParameterAnnotation.class));
+		assertTrue(t1.hasAnnotation(ParameterAnnotation.class));
+		assertEquals(123, t1.getAnnotation(ParameterAnnotation.class).value());
 	}
 
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ParameterAnnotation {
-
+		int value();
 	}
 
-	public void testAnnotatedMethod(@ParameterAnnotation String parameter) {
+	public void testAnnotatedMethod(@ParameterAnnotation(123) String parameter) {
 
 	}
 
@@ -297,6 +299,7 @@ public class TypeDescriptorTests {
 		assertEquals(List.class, desc.getType());
 		assertEquals(Integer.class, desc.getElementTypeDescriptor().getType());
 		assertNotNull(desc.getAnnotation(MethodAnnotation1.class));
+		assertTrue(desc.hasAnnotation(MethodAnnotation1.class));
 	}
 
 	public static class GenericClass<T> {

@@ -211,7 +211,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return sourceType.getAnnotation(annotationType) != null;
+			return sourceType.hasAnnotation(annotationType);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -251,7 +251,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return targetType.getAnnotation(annotationType) != null;
+			return targetType.hasAnnotation(annotationType);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
