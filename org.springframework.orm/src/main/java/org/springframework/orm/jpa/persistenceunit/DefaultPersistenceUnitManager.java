@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -375,10 +374,18 @@ public class DefaultPersistenceUnitManager
 	 * as defined in the JPA specification.
 	 */
 	private List<SpringPersistenceUnitInfo> readPersistenceUnitInfos() {
-		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
 		List<SpringPersistenceUnitInfo> infos = new LinkedList<SpringPersistenceUnitInfo>();
-		infos.addAll(Arrays.asList(reader.readPersistenceUnitInfos(this.persistenceXmlLocations)));
-		if (this.packagesToScan != null || this.mappingResources != null) {
+		boolean buildDefaultUnit = (this.packagesToScan != null || this.mappingResources != null);
+		PersistenceUnitReader reader = new PersistenceUnitReader(this.resourcePatternResolver, this.dataSourceLookup);
+		SpringPersistenceUnitInfo[] readInfos = reader.readPersistenceUnitInfos(this.persistenceXmlLocations);
+		for (SpringPersistenceUnitInfo readInfo : readInfos) {
+			infos.add(readInfo);
+			if (this.defaultPersistenceUnitName != null &&
+					this.defaultPersistenceUnitName.equals(readInfo.getPersistenceUnitName())) {
+				buildDefaultUnit = false;
+			}
+		}
+		if (buildDefaultUnit) {
 			infos.add(buildDefaultPersistenceUnitInfo());
 		}
 		return infos;
