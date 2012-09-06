@@ -133,7 +133,7 @@ public class TypeDescriptor {
 	 * Useful for Converting to typed Maps.
 	 * For example, a Map&lt;String, String&gt; could be converted to a Map&lt;Id, EmailAddress&gt; by converting to a targetType built with this method:
 	 * The method call to construct such a TypeDescriptor would look something like: map(Map.class, TypeDescriptor.valueOf(Id.class), TypeDescriptor.valueOf(EmailAddress.class));
-	 * @param mapType the map type, which must implement {@link Map}.
+	 * @param mapType the map type, which must implement {@link Map}
 	 * @param keyTypeDescriptor a descriptor for the map's key type, used to convert map keys
 	 * @param valueTypeDescriptor the map's value type, used to convert map values
 	 * @return the map type descriptor
@@ -152,12 +152,12 @@ public class TypeDescriptor {
 	 * If the methodParameter is a Map<Integer, String> and the nesting level is 1, the nested type descriptor will be String, derived from the map value.
 	 * If the methodParameter is a List<Map<Integer, String>> and the nesting level is 2, the nested type descriptor will be String, derived from the map value.
 	 * Returns null if a nested type cannot be obtained because it was not declared.
-	 * For example, if the method parameter is a List&lt;?&gt;, the nested type descriptor returned will be null.
+	 * For example, if the method parameter is a List&lt;?&gt;, the nested type descriptor returned will be <tt>null</tt>.
 	 * @param methodParameter the method parameter with a nestingLevel of 1
-	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the method parameter.
-	 * @return the nested type descriptor at the specified nesting level, or null if it could not be obtained.
-	 * @throws IllegalArgumentException if the nesting level of the input {@link MethodParameter} argument is not 1.
-	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the method parameter
+	 * @return the nested type descriptor at the specified nesting level, or null if it could not be obtained
+	 * @throws IllegalArgumentException if the nesting level of the input {@link MethodParameter} argument is not 1
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(MethodParameter methodParameter, int nestingLevel) {
 		if (methodParameter.getNestingLevel() != 1) {
@@ -175,9 +175,9 @@ public class TypeDescriptor {
 	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
 	 * For example, if the field is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
 	 * @param field the field
-	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field.
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field
 	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
-	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(Field field, int nestingLevel) {
 		return nested(new FieldDescriptor(field), nestingLevel);
@@ -192,9 +192,9 @@ public class TypeDescriptor {
 	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
 	 * For example, if the property is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
 	 * @param property the property
-	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property.
+	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property
 	 * @return the nested type descriptor at the specified nestingLevel, or <code>null</code> if it could not be obtained
-	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types.
+	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
 		return nested(new BeanPropertyDescriptor(property), nestingLevel);
@@ -210,7 +210,6 @@ public class TypeDescriptor {
 	public static TypeDescriptor forObject(Object source) {
 		return (source != null ? valueOf(source.getClass()) : null);
 	}
-
 
 	/**
 	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
@@ -266,7 +265,7 @@ public class TypeDescriptor {
 
 	/**
 	 * The annotations associated with this type descriptor, if any.
-	 * @return the annotations, or an empty array if none.
+	 * @return the annotations, or an empty array if none
 	 */
 	public Annotation[] getAnnotations() {
 		return this.annotations;
@@ -274,7 +273,8 @@ public class TypeDescriptor {
 
 	/**
 	 * Obtain the annotation associated with this type descriptor of the specified type.
-	 * @return the annotation, or null if no such annotation exists on this type descriptor.
+	 * @param annotationType the annotation type
+	 * @return the annotation, or null if no such annotation exists on this type descriptor
 	 */
 	public Annotation getAnnotation(Class<? extends Annotation> annotationType) {
 		for (Annotation annotation : getAnnotations()) {
@@ -292,7 +292,7 @@ public class TypeDescriptor {
 	 * <p>
 	 * For arrays, collections, and maps, element and key/value types are checked if declared.
 	 * For example, a List&lt;String&gt; field value is assignable to a Collection&lt;CharSequence&gt; field, but List&lt;Number&gt; is not assignable to List&lt;Integer&gt;.
-	 * @return true if this type is assignable to the type represented by the provided type descriptor.
+	 * @return true if this type is assignable to the type represented by the provided type descriptor
 	 * @see #getObjectType()
 	 */
 	public boolean isAssignableTo(TypeDescriptor typeDescriptor) {
@@ -335,7 +335,7 @@ public class TypeDescriptor {
 	 * If this type is an array, returns the array's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns null indicating the element type is not declared.
-	 * @return the array component type or Collection element type, or <code>null</code> if this type is a Collection but its element type is not parameterized.
+	 * @return the array component type or Collection element type, or <code>null</code> if this type is a Collection but its element type is not parameterized
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
@@ -370,8 +370,8 @@ public class TypeDescriptor {
 	/**
 	 * If this type is a {@link Map} and its key type is parameterized, returns the map's key type.
 	 * If the Map's key type is not parameterized, returns null indicating the key type is not declared.
-	 * @return the Map key type, or <code>null</code> if this type is a Map but its key type is not parameterized.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @return the Map key type, or <code>null</code> if this type is a Map but its key type is not parameterized
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
 		assertMap();
@@ -386,7 +386,7 @@ public class TypeDescriptor {
 	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
 	 * @param mapKey the map key
 	 * @return the map key type descriptor
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 * @see #narrow(Object)
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor(Object mapKey) {
@@ -396,8 +396,8 @@ public class TypeDescriptor {
 	/**
 	 * If this type is a {@link Map} and its value type is parameterized, returns the map's value type.
 	 * If the Map's value type is not parameterized, returns null indicating the value type is not declared.
-	 * @return the Map value type, or <code>null</code> if this type is a Map but its value type is not parameterized.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @return the Map value type, or <code>null</code> if this type is a Map but its value type is not parameterized
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {
 		assertMap();
@@ -412,18 +412,18 @@ public class TypeDescriptor {
 	 * Annotation and nested type context will be preserved in the narrowed TypeDescriptor that is returned.
 	 * @param mapValue the map value
 	 * @return the map value type descriptor
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor(Object mapValue) {
-		return narrow(mapValue, getMapValueTypeDescriptor());		
+		return narrow(mapValue, getMapValueTypeDescriptor());
 	}
 
 
 	// deprecations in Spring 3.1
-	
+
 	/**
 	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getElementTypeDescriptor() elementTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}.
+	 * @deprecated in Spring 3.1 in favor of {@link #getElementTypeDescriptor()}
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 */
 	@Deprecated
@@ -433,8 +433,8 @@ public class TypeDescriptor {
 
 	/**
 	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapKeyTypeDescriptor() getMapKeyTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapKeyTypeDescriptor()}
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	@Deprecated
 	public Class<?> getMapKeyType() {
@@ -443,8 +443,8 @@ public class TypeDescriptor {
 
 	/**
 	 * Returns the value of {@link TypeDescriptor#getType() getType()} for the {@link #getMapValueTypeDescriptor() getMapValueTypeDescriptor}.
-	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}.
-	 * @throws IllegalStateException if this type is not a java.util.Map.
+	 * @deprecated in Spring 3.1 in favor of {@link #getMapValueTypeDescriptor()}
+	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	@Deprecated
 	public Class<?> getMapValueType() {
@@ -521,7 +521,7 @@ public class TypeDescriptor {
 		}
 		else {
 			return (value != null ? new TypeDescriptor(value.getClass(), null, null, null, this.annotations) : null);
-		}		
+		}
 	}
 
 	private boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
