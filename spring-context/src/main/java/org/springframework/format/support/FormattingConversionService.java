@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return sourceType.getAnnotation(annotationType) != null;
+			return sourceType.hasAnnotation(annotationType);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -251,7 +251,7 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-			return targetType.getAnnotation(annotationType) != null;
+			return targetType.hasAnnotation(annotationType);
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {

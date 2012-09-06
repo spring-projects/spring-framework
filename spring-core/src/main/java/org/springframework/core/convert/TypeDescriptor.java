@@ -272,14 +272,24 @@ public class TypeDescriptor {
 	}
 
 	/**
+	 * Determine if this type descriptor has the specified annotation.
+	 * @param annotationType the annotation type
+	 * @return <tt>true</tt> if the annotation is present
+	 */
+	public boolean hasAnnotation(Class<? extends Annotation> annotationType) {
+		return getAnnotation(annotationType) != null;
+	}
+
+	/**
 	 * Obtain the annotation associated with this type descriptor of the specified type.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or null if no such annotation exists on this type descriptor
 	 */
-	public Annotation getAnnotation(Class<? extends Annotation> annotationType) {
+	@SuppressWarnings("unchecked")
+	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
 		for (Annotation annotation : getAnnotations()) {
 			if (annotation.annotationType().equals(annotationType)) {
-				return annotation;
+				return (T) annotation;
 			}
 		}
 		return null;
