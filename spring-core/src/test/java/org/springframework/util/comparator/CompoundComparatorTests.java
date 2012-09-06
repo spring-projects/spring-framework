@@ -18,30 +18,26 @@ package org.springframework.util.comparator;
 
 import java.util.Comparator;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 /**
- * Comparator that adapts Comparables to the Comparator interface.
- * Mainly for internal use in other Comparators, when supposed
- * to work on Comparables.
+ * Test for {@link ComparableComparator}.
  * 
  * @author Keith Donald
- * @since 1.2.2
- * @see Comparable
+ * @author Chris Beams
+ * @author Phillip Webb
  */
-public class ComparableComparator<T extends Comparable<T>> implements Comparator<T> {
+public class CompoundComparatorTests {
 
-	@SuppressWarnings("rawtypes")
-	private static final ComparableComparator INSTANCE = new ComparableComparator();
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
-	public int compare(T o1, T o2) {
-		return o1.compareTo(o2);
-	}
-
-	/**
-	 * Convenience method to return a shared instance of the {@link ComparableComparator}.
-	 * @return the comparator
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T extends Comparable<T>> ComparableComparator<T> get() {
-		return INSTANCE;
+	@Test
+	public void shouldNeedAtLeastOneComparator() {
+		Comparator<String> c = new CompoundComparator<String>();
+		thrown.expect(IllegalStateException.class);
+		c.compare("foo", "bar");
 	}
 }

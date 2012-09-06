@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,19 +35,19 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * A shared default instance of this comparator, treating nulls lower
 	 * than non-null objects.
 	 */
-	public static final NullSafeComparator NULLS_LOW = new NullSafeComparator(true);
+	@SuppressWarnings("rawtypes")
+	public static final NullSafeComparator NULLS_LOW = new NullSafeComparator<Object>(true);
 
 	/**
 	 * A shared default instance of this comparator, treating nulls higher
 	 * than non-null objects.
 	 */
-	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator(false);
-
+	@SuppressWarnings("rawtypes")
+	public static final NullSafeComparator NULLS_HIGH = new NullSafeComparator<Object>(false);
 
 	private final Comparator<T> nonNullComparator;
 
 	private final boolean nullsLow;
-
 
 	/**
 	 * Create a NullSafeComparator that sorts <code>null</code> based on
@@ -63,7 +63,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private NullSafeComparator(boolean nullsLow) {
 		this.nonNullComparator = new ComparableComparator();
 		this.nullsLow = nullsLow;
@@ -99,6 +99,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -106,7 +107,7 @@ public class NullSafeComparator<T> implements Comparator<T> {
 		if (!(obj instanceof NullSafeComparator)) {
 			return false;
 		}
-		NullSafeComparator other = (NullSafeComparator) obj;
+		NullSafeComparator<T> other = (NullSafeComparator<T>) obj;
 		return (this.nonNullComparator.equals(other.nonNullComparator) && this.nullsLow == other.nullsLow);
 	}
 
@@ -120,5 +121,44 @@ public class NullSafeComparator<T> implements Comparator<T> {
 		return "NullSafeComparator: non-null comparator [" + this.nonNullComparator + "]; " +
 				(this.nullsLow ? "nulls low" : "nulls high");
 	}
+	
+	/**
+	 * A shared default instance of this comparator, treating nulls lower than non-null
+	 * objects. Unlike the like-named field, this method is parameterized
+	 */
+	@SuppressWarnings({ "unchecked", "cast" })
+	public static <T> NullSafeComparator<T> nullsLow() {
+		return (NullSafeComparator<T>) NULLS_LOW;
+	}
 
+	/**
+	 * A shared default instance of this comparator, treating nulls higher than non-null
+	 * objects. Unlike the like-named field, this method is parameterized
+	 */
+	@SuppressWarnings({ "unchecked", "cast" })
+	public static <T> NullSafeComparator<T> nullsHigh() {
+		return (NullSafeComparator<T>) NULLS_HIGH;
+	}
+
+	/**
+	 * Convenience method to create a {@link NullSafeComparator} with null values
+	 * considered lower than non-null values.
+	 * 
+	 * @param comparator the comparator to use when comparing two non-null objects
+	 * @return a new {@link NullSafeComparator}
+	 */
+	public static <T> NullSafeComparator<T> nullsLow(Comparator<T> comparator) {
+		return new NullSafeComparator<T>(comparator, true);
+	}
+
+	/**
+	 * Convenience method to create a {@link NullSafeComparator} with null values
+	 * considered higher than non-null values.
+	 * 
+	 * @param comparator the comparator to use when comparing two non-null objects
+	 * @return a new {@link NullSafeComparator}
+	 */
+	public static <T> NullSafeComparator<T> nullsHigh(Comparator<T> comparator) {
+		return new NullSafeComparator<T>(comparator, false);
+	}
 }
