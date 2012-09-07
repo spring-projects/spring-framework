@@ -37,7 +37,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests accessing of properties.
- * 
+ *
  * @author Andy Clement
  */
 public class PropertyAccessTests extends ExpressionTestCase {
@@ -65,9 +65,9 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		// name is ok but foobar does not exist:
 		evaluateAndCheckError("name.foobar", SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE, 5);
 	}
-	
+
 	/**
-	 * The standard reflection resolver cannot find properties on null objects but some 
+	 * The standard reflection resolver cannot find properties on null objects but some
 	 * supplied resolver might be able to - so null shouldn't crash the reflection resolver.
 	 */
 	@Test
@@ -132,25 +132,25 @@ public class PropertyAccessTests extends ExpressionTestCase {
 			// System.out.println(e.getMessage());
 		}
 	}
-	
+
 	@Test
 	public void testAddingRemovingAccessors() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		
+
 		// reflective property accessor is the only one by default
 		List<PropertyAccessor> propertyAccessors = ctx.getPropertyAccessors();
 		Assert.assertEquals(1,propertyAccessors.size());
-		
+
 		StringyPropertyAccessor spa = new StringyPropertyAccessor();
 		ctx.addPropertyAccessor(spa);
 		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
-		
+
 		List<PropertyAccessor> copy = new ArrayList<PropertyAccessor>();
 		copy.addAll(ctx.getPropertyAccessors());
 		Assert.assertTrue(ctx.removePropertyAccessor(spa));
 		Assert.assertFalse(ctx.removePropertyAccessor(spa));
 		Assert.assertEquals(1,ctx.getPropertyAccessors().size());
-		
+
 		ctx.setPropertyAccessors(copy);
 		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
 	}
