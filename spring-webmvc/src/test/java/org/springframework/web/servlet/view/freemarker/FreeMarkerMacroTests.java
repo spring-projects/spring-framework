@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -321,6 +321,7 @@ public class FreeMarkerMacroTests {
 		ClassPathResource resource = new ClassPathResource("test.ftl", getClass());
 		assertTrue(resource.exists());
 		String all = FileCopyUtils.copyToString(new InputStreamReader(resource.getInputStream()));
+		all = all.replace("\r\n", "\n");
 		String[] macros = StringUtils.delimitedListToStringArray(all, "\n\n");
 		for (String macro : macros) {
 			if (macro.startsWith(name)) {

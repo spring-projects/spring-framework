@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class VelocityRenderTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
-	
+
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
@@ -95,12 +95,12 @@ public class VelocityRenderTests {
 		Map<String,Object> model = new HashMap<String,Object>();
 		model.put("command", new TestBean("juergen", 99));
 		view.render(model, request, response);
-		assertEquals("\nNAME\njuergen\n", response.getContentAsString());
+		assertEquals("\nNAME\njuergen\n", response.getContentAsString().replace("\r\n", "\n"));
 
 	}
 
 	@Test
-	@Ignore // This works with Velocity 1.6.2 
+	@Ignore // This works with Velocity 1.6.2
 	public void testSimpleRenderWithError() throws Exception {
 
 		thrown.expect(NestedServletException.class);
@@ -111,10 +111,10 @@ public class VelocityRenderTests {
 			}
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of MethodInvocationException");
-				
+
 			}
-		});		
-		
+		});
+
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setPreferFileSystemAccess(false);
 		vc.setVelocityPropertiesMap(Collections.<String,Object>singletonMap("runtime.references.strict", "true"));
@@ -143,10 +143,10 @@ public class VelocityRenderTests {
 			}
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of IOException");
-				
+
 			}
-		});		
-		
+		});
+
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setPreferFileSystemAccess(false);
 		vc.setVelocityPropertiesMap(Collections.<String,Object>singletonMap("runtime.references.strict", "true"));
