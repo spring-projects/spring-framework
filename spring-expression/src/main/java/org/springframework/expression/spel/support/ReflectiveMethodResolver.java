@@ -53,7 +53,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 
 	private Map<Class<?>, MethodFilter> filters = null;
 
-	// Using distance will ensure a more accurate match is discovered, 
+	// Using distance will ensure a more accurate match is discovered,
 	// more closely following the Java rules.
 	private boolean useDistance = false;
 
@@ -66,7 +66,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * This constructors allows the ReflectiveMethodResolver to be configured such that it will
 	 * use a distance computation to check which is the better of two close matches (when there
 	 * are multiple matches).  Using the distance computation is intended to ensure matches
-	 * are more closely representative of what a Java compiler would do when taking into 
+	 * are more closely representative of what a Java compiler would do when taking into
 	 * account boxing/unboxing and whether the method candidates are declared to handle a
 	 * supertype of the type (of the argument) being passed in.
 	 * @param useDistance true if distance computation should be used when calculating matches
