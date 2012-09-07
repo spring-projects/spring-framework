@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -77,7 +78,7 @@ class ExtendedBeanInfo implements BeanInfo {
 
 		ALL_METHODS:
 		for (MethodDescriptor md : delegate.getMethodDescriptors()) {
-			Method method = md.getMethod();
+			Method method = resolveMethod(md.getMethod());
 
 			// bypass non-getter java.lang.Class methods for efficiency
 			if (ReflectionUtils.isObjectMethod(method) && !method.getName().startsWith("get")) {
@@ -91,8 +92,8 @@ class ExtendedBeanInfo implements BeanInfo {
 					continue ALL_METHODS;
 				}
 				for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-					Method readMethod = pd.getReadMethod();
-					Method writeMethod = pd.getWriteMethod();
+					Method readMethod = readMethodFor(pd);
+					Method writeMethod = writeMethodFor(pd);
 					// has the setter already been found by the wrapped BeanInfo?
 					if (writeMethod != null
 							&& writeMethod.getName().equals(method.getName())) {
@@ -126,10 +127,10 @@ class ExtendedBeanInfo implements BeanInfo {
 						continue DELEGATE_PD;
 					}
 					IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
-					Method readMethod = ipd.getReadMethod();
-					Method writeMethod = ipd.getWriteMethod();
-					Method indexedReadMethod = ipd.getIndexedReadMethod();
-					Method indexedWriteMethod = ipd.getIndexedWriteMethod();
+					Method readMethod = readMethodFor(ipd);
+					Method writeMethod = writeMethodFor(ipd);
+					Method indexedReadMethod = indexedReadMethodFor(ipd);
+					Method indexedWriteMethod = indexedWriteMethodFor(ipd);
 					// has the setter already been found by the wrapped BeanInfo?
 					if (!(indexedWriteMethod != null
 							&& indexedWriteMethod.getName().equals(method.getName()))) {
@@ -149,31 +150,52 @@ class ExtendedBeanInfo implements BeanInfo {
 			for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
 				// have we already copied this read method to a property descriptor locally?
 				String propertyName = pd.getName();
-				Method readMethod = pd.getReadMethod();
+				Method readMethod = readMethodFor(pd);
 				Method mostSpecificReadMethod = ClassUtils.getMostSpecificMethod(readMethod, method.getDeclaringClass());
 				for (PropertyDescriptor existingPD : this.propertyDescriptors) {
 					if (method.equals(mostSpecificReadMethod)
 							&& existingPD.getName().equals(propertyName)) {
-						if (existingPD.getReadMethod() == null) {
+						if (readMethodFor(existingPD) == null) {
 							// no -> add it now
-							this.addOrUpdatePropertyDescriptor(pd, propertyName, method, pd.getWriteMethod());
+							this.addOrUpdatePropertyDescriptor(pd, propertyName, method, writeMethodFor(pd));
 						}
 						// yes -> do not add a duplicate
 						continue ALL_METHODS;
 					}
 				}
 				if (method.equals(mostSpecificReadMethod)
-						|| (pd instanceof IndexedPropertyDescriptor && method.equals(((IndexedPropertyDescriptor) pd).getIndexedReadMethod()))) {
+						|| (pd instanceof IndexedPropertyDescriptor && method.equals(indexedReadMethodFor((IndexedPropertyDescriptor) pd)))) {
 					// yes -> copy it, including corresponding setter method (if any -- may be null)
 					if (pd instanceof IndexedPropertyDescriptor) {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod(), ((IndexedPropertyDescriptor)pd).getIndexedReadMethod(), ((IndexedPropertyDescriptor)pd).getIndexedWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethodFor(pd), indexedReadMethodFor((IndexedPropertyDescriptor)pd), indexedWriteMethodFor((IndexedPropertyDescriptor)pd));
 					} else {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, pd.getWriteMethod());
+						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethodFor(pd));
 					}
 					continue ALL_METHODS;
 				}
 			}
 		}
+	}
+
+
+	private static Method resolveMethod(Method method) {
+		return BridgeMethodResolver.findBridgedMethod(method);
+	}
+
+	private static Method readMethodFor(PropertyDescriptor pd) {
+		return resolveMethod(pd.getReadMethod());
+	}
+
+	private static Method writeMethodFor(PropertyDescriptor pd) {
+		return resolveMethod(pd.getWriteMethod());
+	}
+
+	private static Method indexedReadMethodFor(IndexedPropertyDescriptor ipd) {
+		return resolveMethod(ipd.getIndexedReadMethod());
+	}
+
+	private static Method indexedWriteMethodFor(IndexedPropertyDescriptor ipd) {
+		return resolveMethod(ipd.getIndexedWriteMethod());
 	}
 
 	private void addOrUpdatePropertyDescriptor(PropertyDescriptor pd, String propertyName, Method readMethod, Method writeMethod) throws IntrospectionException {
@@ -186,9 +208,9 @@ class ExtendedBeanInfo implements BeanInfo {
 		for (PropertyDescriptor existingPD : this.propertyDescriptors) {
 			if (existingPD.getName().equals(propertyName)) {
 				// is there already a descriptor that captures this read method or its corresponding write method?
-				if (existingPD.getReadMethod() != null) {
-					if (readMethod != null && existingPD.getReadMethod().getReturnType() != readMethod.getReturnType()
-							|| writeMethod != null && existingPD.getReadMethod().getReturnType() != writeMethod.getParameterTypes()[0]) {
+				if (readMethodFor(existingPD) != null) {
+					if (readMethod != null && readMethodFor(existingPD).getReturnType() != readMethod.getReturnType()
+							|| writeMethod != null && readMethodFor(existingPD).getReturnType() != writeMethod.getParameterTypes()[0]) {
 						// no -> add a new descriptor for it below
 						break;
 					}
@@ -205,9 +227,9 @@ class ExtendedBeanInfo implements BeanInfo {
 				}
 
 				// is there already a descriptor that captures this write method or its corresponding read method?
-				if (existingPD.getWriteMethod() != null) {
-					if (readMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != readMethod.getReturnType()
-							|| writeMethod != null && existingPD.getWriteMethod().getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
+				if (writeMethodFor(existingPD) != null) {
+					if (readMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != readMethod.getReturnType()
+							|| writeMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
 						// no -> add a new descriptor for it below
 						break;
 					}
@@ -224,9 +246,9 @@ class ExtendedBeanInfo implements BeanInfo {
 					IndexedPropertyDescriptor existingIPD = (IndexedPropertyDescriptor) existingPD;
 
 					// is there already a descriptor that captures this indexed read method or its corresponding indexed write method?
-					if (existingIPD.getIndexedReadMethod() != null) {
-						if (indexedReadMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedReadMethod.getReturnType()
-								|| indexedWriteMethod != null && existingIPD.getIndexedReadMethod().getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
+					if (indexedReadMethodFor(existingIPD) != null) {
+						if (indexedReadMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedReadMethod.getReturnType()
+								|| indexedWriteMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
 							// no -> add a new descriptor for it below
 							break;
 						}
@@ -243,9 +265,9 @@ class ExtendedBeanInfo implements BeanInfo {
 					}
 
 					// is there already a descriptor that captures this indexed write method or its corresponding indexed read method?
-					if (existingIPD.getIndexedWriteMethod() != null) {
-						if (indexedReadMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedReadMethod.getReturnType()
-								|| indexedWriteMethod != null && existingIPD.getIndexedWriteMethod().getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
+					if (indexedWriteMethodFor(existingIPD) != null) {
+						if (indexedReadMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedReadMethod.getReturnType()
+								|| indexedWriteMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
 							// no -> add a new descriptor for it below
 							break;
 						}
