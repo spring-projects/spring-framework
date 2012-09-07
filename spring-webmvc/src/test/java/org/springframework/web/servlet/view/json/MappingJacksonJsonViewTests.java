@@ -149,7 +149,7 @@ public class MappingJacksonJsonViewTests {
 		view.setPrettyPrint(true);
 		view.render(model, request, response);
 
-		String result = response.getContentAsString();
+		String result = response.getContentAsString().replace("\r\n", "\n");
 		assertTrue("Pretty printing not applied:\n" + result, result.startsWith("{\n  \"foo\" : {\n    "));
 
 		validateResult();

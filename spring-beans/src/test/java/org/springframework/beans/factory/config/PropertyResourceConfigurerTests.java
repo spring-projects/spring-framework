@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,15 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ge
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.prefs.AbstractPreferences;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.prefs.PreferencesFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,19 +56,24 @@ import test.beans.TestBean;
  * Unit tests for various {@link PropertyResourceConfigurer} implementations including:
  * {@link PropertyPlaceholderConfigurer}, {@link PropertyOverrideConfigurer} and
  * {@link PreferencesPlaceholderConfigurer}.
- * 
+ *
  * @see PropertyPlaceholderConfigurerTests
  * @since 02.10.2003
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public final class PropertyResourceConfigurerTests {
+
+	static {
+		System.setProperty("java.util.prefs.PreferencesFactory", MockPreferencesFactory.class.getName());
+	}
 
 	private static final Class<?> CLASS = PropertyResourceConfigurerTests.class;
 	private static final Resource TEST_PROPS = qualifiedResource(CLASS, "test.properties");
 	private static final Resource XTEST_PROPS = qualifiedResource(CLASS, "xtest.properties"); // does not exist
 	private static final Resource TEST_PROPS_XML = qualifiedResource(CLASS, "test.properties.xml");
-	
+
 	private DefaultListableBeanFactory factory;
 
 	@Before
@@ -808,4 +817,87 @@ public final class PropertyResourceConfigurerTests {
 		}
 	}
 
+	/**
+	 * {@link PreferencesFactory} to create {@link MockPreferences}.
+	 */
+	public static class MockPreferencesFactory implements PreferencesFactory {
+
+		private Preferences systemRoot = new MockPreferences();
+
+		private Preferences userRoot = new MockPreferences();
+
+		public Preferences systemRoot() {
+			return systemRoot;
+		}
+
+		public Preferences userRoot() {
+			return userRoot;
+		}
+	}
+
+	/**
+	 * Mock implementation of {@link Preferences} that behaves the same regardless of the
+	 * underlying operating system and will never throw security exceptions.
+	 */
+	public static class MockPreferences extends AbstractPreferences {
+
+		private static Map<String, String> values = new HashMap<String, String>();
+
+		private static Map<String, AbstractPreferences> children = new HashMap<String, AbstractPreferences>();
+
+		public MockPreferences() {
+			super(null, "");
+		}
+
+		protected MockPreferences(AbstractPreferences parent, String name) {
+			super(parent, name);
+		}
+
+		@Override
+		protected void putSpi(String key, String value) {
+			values.put(key, value);
+		}
+
+		@Override
+		protected String getSpi(String key) {
+			return values.get(key);
+		}
+
+		@Override
+		protected void removeSpi(String key) {
+			values.remove(key);
+		}
+
+		@Override
+		protected void removeNodeSpi() throws BackingStoreException {
+		}
+
+		@Override
+		protected String[] keysSpi() throws BackingStoreException {
+			return values.keySet().toArray(new String[values.size()]);
+		}
+
+		@Override
+		protected String[] childrenNamesSpi() throws BackingStoreException {
+			return children.keySet().toArray(new String[values.size()]);
+		}
+
+		@Override
+		protected AbstractPreferences childSpi(String name) {
+			AbstractPreferences child = children.get(name);
+			if (child == null) {
+				child = new MockPreferences(this, name);
+				children.put(name, child);
+			}
+			return child;
+		}
+
+		@Override
+		protected void syncSpi() throws BackingStoreException {
+		}
+
+		@Override
+		protected void flushSpi() throws BackingStoreException {
+		}
+	}
 }
