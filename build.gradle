@@ -347,6 +347,7 @@ project('spring-jdbc') {
         compile("org.apache.derby:derby:10.5.3.0_1", optional)
         compile("org.apache.derby:derbyclient:10.5.3.0_1", optional)
         compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
+        testCompile "org.easymock:easymock:2.5.1"
     }
 }
 
