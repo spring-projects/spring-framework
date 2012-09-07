@@ -28,6 +28,7 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
@@ -44,6 +45,8 @@ import org.springframework.util.StringUtils;
  * @see ComponentScanBeanDefinitionParser
  */
 class ComponentScanAnnotationParser {
+
+	private static final String PACKAGE_SEPARATOR = ".";
 
 	private final ResourceLoader resourceLoader;
 
@@ -65,7 +68,7 @@ class ComponentScanAnnotationParser {
 	}
 
 
-	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan) {
+	public Set<BeanDefinitionHolder> parse(AnnotationMetadata metadata, AnnotationAttributes componentScan) {
 		ClassPathBeanDefinitionScanner scanner =
 			new ClassPathBeanDefinitionScanner(registry, componentScan.getBoolean("useDefaultFilters"));
 
@@ -118,10 +121,16 @@ class ComponentScanAnnotationParser {
 		}
 
 		if (basePackages.isEmpty()) {
-			throw new IllegalStateException("At least one base package must be specified");
+			basePackages.add(getPackageName(metadata));
 		}
 
 		return scanner.doScan(basePackages.toArray(new String[]{}));
+	}
+
+	private String getPackageName(AnnotationMetadata metadata) {
+		String className = metadata.getClassName();
+		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
+		return (lastDotIndex != -1 ? className.substring(0, lastDotIndex) : "");
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {

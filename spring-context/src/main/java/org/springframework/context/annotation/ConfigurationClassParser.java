@@ -211,7 +211,7 @@ class ConfigurationClassParser {
 		AnnotationAttributes componentScan = attributesFor(metadata, ComponentScan.class);
 		if (componentScan != null) {
 			// the config class is annotated with @ComponentScan -> perform the scan immediately
-			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(componentScan);
+			Set<BeanDefinitionHolder> scannedBeanDefinitions = this.componentScanParser.parse(metadata, componentScan);
 
 			// check the set of scanned definitions for any further config classes and parse recursively if necessary
 			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
