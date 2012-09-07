@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 import java.io.IOException;
@@ -47,6 +45,7 @@ import example.scannable.DefaultNamedComponent;
 import example.scannable.FooService;
 import example.scannable.MessageBean;
 import example.scannable.ScopedProxyTestBean;
+import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
 
@@ -94,6 +93,18 @@ public class ComponentScanAnnotationIntegrationTests {
 	}
 
 	@Test
+	public void viaContextRegistration_FromPackageOfConfigClass() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		ctx.register(ComponentScanAnnotatedConfigWithImplicitBasePackage.class);
+		ctx.refresh();
+		ctx.getBean(ComponentScanAnnotatedConfigWithImplicitBasePackage.class);
+		assertThat("config class bean not found", ctx.containsBeanDefinition("componentScanAnnotatedConfigWithImplicitBasePackage"), is(true));
+		assertThat("@ComponentScan annotated @Configuration class registered directly against " +
+				"AnnotationConfigApplicationContext did not trigger component scanning as expected",
+				ctx.containsBean("scannedComponent"), is(true));
+	}
+
+	@Test
 	public void viaBeanRegistration() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("componentScanAnnotatedConfig",
@@ -108,18 +119,6 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat("@ComponentScan annotated @Configuration class registered " +
 				"as bean definition did not trigger component scanning as expected",
 				ctx.containsBean("fooServiceImpl"), is(true));
-	}
-
-	@Test
-	public void invalidComponentScanDeclaration_noPackagesSpecified() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ComponentScanWithNoPackagesConfig.class);
-		try {
-			ctx.refresh();
-			fail("Expected exception when parsing @ComponentScan definition that declares no packages");
-		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("At least one base package must be specified"));
-		}
 	}
 
 	@Test

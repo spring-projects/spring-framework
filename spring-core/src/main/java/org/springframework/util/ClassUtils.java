@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -462,17 +462,28 @@ public abstract class ClassUtils {
 	}
 
 	/**
-	 * Determine the name of the package of the given class:
-	 * e.g. "java.lang" for the <code>java.lang.String</code> class.
+	 * Determine the name of the package of the given class,
+	 * e.g. "java.lang" for the {@code java.lang.String} class.
 	 * @param clazz the class
 	 * @return the package name, or the empty String if the class
 	 * is defined in the default package
 	 */
 	public static String getPackageName(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
-		String className = clazz.getName();
-		int lastDotIndex = className.lastIndexOf(PACKAGE_SEPARATOR);
-		return (lastDotIndex != -1 ? className.substring(0, lastDotIndex) : "");
+		return getPackageName(clazz.getName());
+	}
+
+	/**
+	 * Determine the name of the package of the given fully-qualified class name,
+	 * e.g. "java.lang" for the {@code java.lang.String} class name.
+	 * @param fqClassName the fully-qualified class name
+	 * @return the package name, or the empty String if the class
+	 * is defined in the default package
+	 */
+	public static String getPackageName(String fqClassName) {
+		Assert.notNull(fqClassName, "Class name must not be null");
+		int lastDotIndex = fqClassName.lastIndexOf(PACKAGE_SEPARATOR);
+		return (lastDotIndex != -1 ? fqClassName.substring(0, lastDotIndex) : "");
 	}
 
 	/**

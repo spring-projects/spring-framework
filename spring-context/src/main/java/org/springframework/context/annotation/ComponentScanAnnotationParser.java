@@ -65,7 +65,7 @@ class ComponentScanAnnotationParser {
 	}
 
 
-	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan) {
+	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner =
 			new ClassPathBeanDefinitionScanner(registry, componentScan.getBoolean("useDefaultFilters"));
 
@@ -118,7 +118,7 @@ class ComponentScanAnnotationParser {
 		}
 
 		if (basePackages.isEmpty()) {
-			throw new IllegalStateException("At least one base package must be specified");
+			basePackages.add(ClassUtils.getPackageName(declaringClass));
 		}
 
 		return scanner.doScan(basePackages.toArray(new String[]{}));
