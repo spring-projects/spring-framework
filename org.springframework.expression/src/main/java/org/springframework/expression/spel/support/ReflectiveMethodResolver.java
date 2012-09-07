@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -90,7 +92,7 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		try {
 			TypeConverter typeConverter = context.getTypeConverter();
 			Class<?> type = (targetObject instanceof Class ? (Class<?>) targetObject : targetObject.getClass());
-			Method[] methods = getMethods(type);
+			Method[] methods = getMethods(type, targetObject);
 
 			// If a filter is registered for this type, call it
 			MethodFilter filter = (this.filters != null ? this.filters.get(type) : null);
@@ -195,6 +197,16 @@ public class ReflectiveMethodResolver implements MethodResolver {
 		else {
 			this.filters.put(type,filter);
 		}
+	}
+
+	private Method[] getMethods(Class<?> type, Object targetObject) {
+		if(targetObject instanceof Class) {
+			Set<Method> methods = new HashSet<Method>();
+			methods.addAll(Arrays.asList(getMethods(type)));
+			methods.addAll(Arrays.asList(getMethods(targetObject.getClass())));
+			return methods.toArray(new Method[methods.size()]);
+		}
+		return getMethods(type);
 	}
 
 	/**
