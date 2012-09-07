@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel;
+
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,6 +155,13 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		ctx.setPropertyAccessors(copy);
 		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
+	}
+
+	@Test
+	public void testAccessingPropertyOfClass() throws Exception {
+		Expression expression = parser.parseExpression("name");
+		Object value = expression.getValue(new StandardEvaluationContext(String.class));
+		assertEquals(value, "java.lang.String");
 	}
 
 

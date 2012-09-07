@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.expression.spel;
+
+import static org.junit.Assert.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -361,4 +363,10 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		evaluateAndCheckError("null.toString()",SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED);
 	}
 
+	@Test
+	public void testMethodOfClass() throws Exception {
+		Expression expression = parser.parseExpression("getName()");
+		Object value = expression.getValue(new StandardEvaluationContext(String.class));
+		assertEquals(value, "java.lang.String");
+	}
 }
