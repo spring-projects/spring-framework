@@ -24,8 +24,6 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -161,7 +159,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(webRequest);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {
 				return "anything";
@@ -169,13 +166,15 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		});
 
 		verify(asyncWebRequest);
-		reset(asyncWebRequest);
-		replay(asyncWebRequest);
 
 		interceptor.afterConcurrentHandlingStarted(webRequest);
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
 
 		// Async dispatch thread
+
+		reset(asyncWebRequest);
+		expect(asyncWebRequest.isDispatched()).andReturn(true);
+		replay(asyncWebRequest);
 
 		reset(manager, factory);
 		replay(manager, factory);
@@ -345,11 +344,11 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
-		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-		expectLastCall().anyTimes();
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
+		expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
@@ -373,6 +372,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		reset(asyncWebRequest);
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
+		expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
 		replay(asyncWebRequest);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));

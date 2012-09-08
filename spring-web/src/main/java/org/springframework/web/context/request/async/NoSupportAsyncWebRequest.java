@@ -22,8 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * An implementation of {@link AsyncWebRequest} to use when no underlying support is available.
- * The  methods {@link #startAsync()} and {@link #dispatch()} raise {@link UnsupportedOperationException}.
+ * An {@code AsyncWebRequest} to use when there is no underlying async support.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -54,11 +53,13 @@ public class NoSupportAsyncWebRequest extends ServletWebRequest implements Async
 		return false;
 	}
 
-	public boolean isAsyncComplete() {
+	// Not supported
+
+	public void startAsync() {
 		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 runtime");
 	}
 
-	public void startAsync() {
+	public boolean isAsyncComplete() {
 		throw new UnsupportedOperationException("No async support in a pre-Servlet 3.0 runtime");
 	}
 

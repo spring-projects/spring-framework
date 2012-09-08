@@ -37,7 +37,7 @@ public interface AsyncWebRequest extends NativeWebRequest {
 	void setTimeout(Long timeout);
 
 	/**
-	 * Set a handler to be invoked if concurrent processing times out.
+	 * Set the handler to use when concurrent handling has timed out.
 	 */
 	void setTimeoutHandler(Runnable runnable);
 

@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.springframework.web.servlet;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+package org.springframework.web.context.request;
 
 /**
- * Extends {@code HandlerInterceptor} with a callback method invoked during
+ * Extends {@code WebRequestInterceptor} with a callback method invoked during
  * asynchronous request handling.
  *
  * <p>When a handler starts asynchronous request handling, the DispatcherServlet
  * exits without invoking {@code postHandle} and {@code afterCompletion}, as it
  * normally does, since the results of request handling (e.g. ModelAndView) are
  * not available in the current thread and handling is not yet complete.
- * In such scenarios, the
- * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse)}
+ * In such scenarios, the {@link #afterConcurrentHandlingStarted(WebRequest)}
  * method is invoked instead allowing implementations to perform tasks such as
  * cleaning up thread bound attributes.
  *
@@ -41,18 +36,14 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @see org.springframework.web.context.request.async.WebAsyncManager
  */
-public interface AsyncHandlerInterceptor extends HandlerInterceptor {
+public interface AsyncWebRequestInterceptor extends WebRequestInterceptor{
 
 	/**
 	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
-	 * a handler is being executed concurrently. Implementations may use the provided
-	 * request and response but should avoid modifying them in ways that would
-	 * conflict with the concurrent execution of the handler. A typical use of
-	 * this method would be to clean thread local variables.
+	 * the handler started handling the request concurrently.
 	 *
 	 * @param request the current request
-	 * @param response the current response
 	 */
-	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response);
+	void afterConcurrentHandlingStarted(WebRequest request);
 
 }

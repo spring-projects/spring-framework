@@ -67,13 +67,19 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	/**
 	 * {@inheritDoc}
-	 * <p>The timeout period begins when the main processing thread has exited.
+	 * <p>In Servlet 3 async processing, the timeout period begins after the
+	 * container processing thread has exited.
 	 */
 	public void setTimeout(Long timeout) {
 		Assert.state(!isAsyncStarted(), "Cannot change the timeout with concurrent handling in progress");
 		this.timeout = timeout;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>If not set, by default a timeout is handled by returning
+	 * SERVICE_UNAVAILABLE (503).
+	 */
 	public void setTimeoutHandler(Runnable timeoutHandler) {
 		if (timeoutHandler != null) {
 			this.timeoutHandler = timeoutHandler;

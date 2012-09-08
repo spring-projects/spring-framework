@@ -52,7 +52,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rossen Stoyanchev
  * @since 3.2
  *
- * @see org.springframework.web.context.request.async.AsyncWebRequestInterceptor
+ * @see org.springframework.web.context.request.AsyncWebRequestInterceptor
  * @see org.springframework.web.servlet.AsyncHandlerInterceptor
  * @see org.springframework.web.filter.OncePerRequestFilter#shouldFilterAsyncDispatches
  * @see org.springframework.web.filter.OncePerRequestFilter#isAsyncDispatch
@@ -115,26 +115,23 @@ public final class WebAsyncManager {
 	}
 
 	/**
-	 * Whether the target handler chose to handle the request asynchronously.
-	 * A return value of "true" indicates concurrent handling is under way and the
-	 * response will remain open. A return value of "false" will be returned again after concurrent
-	 * handling produces a result and the request is dispatched to resume processing.
+	 * Whether the selected handler for the current request chose to handle the
+	 * request asynchronously. A return value of "true" indicates concurrent
+	 * handling is under way and the response will remain open. A return value
+	 * of "false" means concurrent handling was either not started or possibly
+	 * that it has completed and the request was dispatched for further
+	 * processing of the concurrent result.
 	 */
 	public boolean isConcurrentHandlingStarted() {
-		return ((this.asyncWebRequest != null) && (this.asyncWebRequest.isAsyncStarted()));
+		return ((this.asyncWebRequest != null) && this.asyncWebRequest.isAsyncStarted());
 	}
 
 	/**
-	 * Whether the request was dispatched to resume processing the result of
+	 * Whether the request has been dispatched to process the result of
 	 * concurrent handling.
 	 */
 	public boolean hasConcurrentResult() {
-
-		// TODO:
-		//	Add check for asyncWebRequest.isDispatched() once Apache id=53632 is fixed.
-		// 	That ensure "true" is returned in the dispatched thread only.
-
-		return this.concurrentResult != RESULT_NONE;
+		return ((this.concurrentResult != RESULT_NONE) && this.asyncWebRequest.isDispatched());
 	}
 
 	/**

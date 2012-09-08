@@ -17,9 +17,9 @@
 package org.springframework.orm.hibernate3.support;
 
 import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
@@ -195,6 +195,10 @@ public class OpenSessionInViewTests {
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
 		// Async dispatch thread
+
+		reset(asyncWebRequest);
+		expect(asyncWebRequest.isDispatched()).andReturn(true);
+		replay(asyncWebRequest);
 
 		interceptor.preHandle(this.webRequest);
 		assertTrue("Session not bound to async thread", TransactionSynchronizationManager.hasResource(sf));
@@ -488,11 +492,11 @@ public class OpenSessionInViewTests {
 			}
 		};
 
-		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
-		expect(asyncWebRequest.isAsyncStarted()).andReturn(true);
-		expectLastCall().anyTimes();
+		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
+		expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(this.request);
@@ -520,6 +524,7 @@ public class OpenSessionInViewTests {
 
 		expect(session.close()).andReturn(null);
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
+		expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
 
 		replay(sf);
 		replay(session);
