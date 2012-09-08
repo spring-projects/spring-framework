@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.bind.support;
+package org.springframework.web.method;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 /**
  * Encapsulates information about an {@linkplain ControllerAdvice @ControllerAdvice}
- * bean without requiring the bean to be instantiated.
+ * Spring-managed bean without necessarily requiring it to be instantiated.
+ *
+ * <p>The {@link #findAnnotatedBeans(ApplicationContext)} method can be used to discover
+ * such beans. However, an {@code ControllerAdviceBean} may be created from
+ * any object, including ones without an {@code @ControllerAdvice}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -55,7 +59,12 @@ public class ControllerAdviceBean implements Ordered {
 				"Bean factory [" + beanFactory + "] does not contain bean " + "with name [" + beanName + "]");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
-		this.order = initOrder(this.beanFactory.getType(beanName));
+		this.order = initOrderFromBeanType(this.beanFactory.getType(beanName));
+	}
+
+	private static int initOrderFromBeanType(Class<?> beanType) {
+		Order annot = AnnotationUtils.findAnnotation(beanType, Order.class);
+		return (annot != null) ? annot.value() : Ordered.LOWEST_PRECEDENCE;
 	}
 
 	/**
@@ -65,13 +74,12 @@ public class ControllerAdviceBean implements Ordered {
 	public ControllerAdviceBean(Object bean) {
 		Assert.notNull(bean, "'bean' must not be null");
 		this.bean = bean;
-		this.order = initOrder(bean.getClass());
+		this.order = initOrderFromBean(bean);
 		this.beanFactory = null;
 	}
 
-	private static int initOrder(Class<?> beanType) {
-		Order orderAnnot = AnnotationUtils.findAnnotation(beanType, Order.class);
-		return (orderAnnot != null) ? orderAnnot.value() : Ordered.LOWEST_PRECEDENCE;
+	private static int initOrderFromBean(Object bean) {
+		return (bean instanceof Ordered) ? ((Ordered) bean).getOrder() : initOrderFromBeanType(bean.getClass());
 	}
 
 	/**
@@ -79,7 +87,7 @@ public class ControllerAdviceBean implements Ordered {
 	 * {@linkplain ControllerAdvice @ControllerAdvice} in the given
 	 * ApplicationContext and wrap them as {@code ControllerAdviceBean} instances.
 	 */
-	public static List<ControllerAdviceBean> findBeans(ApplicationContext applicationContext) {
+	public static List<ControllerAdviceBean> findAnnotatedBeans(ApplicationContext applicationContext) {
 		List<ControllerAdviceBean> beans = new ArrayList<ControllerAdviceBean>();
 		for (String name : applicationContext.getBeanDefinitionNames()) {
 			if (applicationContext.findAnnotationOnBean(name, ControllerAdvice.class) != null) {
@@ -90,12 +98,9 @@ public class ControllerAdviceBean implements Ordered {
 	}
 
 	/**
-	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
+	 * Returns the order value extracted from the {@link ControllerAdvice}
+	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
 	 */
-	public Object resolveBean() {
-		return (this.bean instanceof String) ? this.beanFactory.getBean((String) this.bean) : this.bean;
-	}
-
 	public int getOrder() {
 		return this.order;
 	}
@@ -109,6 +114,13 @@ public class ControllerAdviceBean implements Ordered {
 				? this.beanFactory.getType((String) this.bean) : this.bean.getClass();
 
 		return ClassUtils.getUserClass(clazz);
+	}
+
+	/**
+	 * Return a bean instance if necessary resolving the bean name through the BeanFactory.
+	 */
+	public Object resolveBean() {
+		return (this.bean instanceof String) ? this.beanFactory.getBean((String) this.bean) : this.bean;
 	}
 
 	@Override

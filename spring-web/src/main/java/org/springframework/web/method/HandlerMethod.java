@@ -29,13 +29,15 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * Encapsulates information about a bean method consisting of a {@linkplain #getMethod() method} and a
- * {@linkplain #getBean() bean}. Provides convenient access to method parameters, the method return value,
- * method annotations.
+ * Encapsulates information about a bean method consisting of a
+ * {@linkplain #getMethod() method} and a {@linkplain #getBean() bean}. Provides
+ * convenient access to method parameters, the method return value, method
+ * annotations.
  *
- * <p>The class may be created with a bean instance or with a bean name (e.g. lazy bean, prototype bean).
- * Use {@link #createWithResolvedBean()} to obtain an {@link HandlerMethod} instance with a bean instance
- * initialized through the bean factory.
+ * <p>The class may be created with a bean instance or with a bean name (e.g. lazy
+ * bean, prototype bean). Use {@link #createWithResolvedBean()} to obtain an
+ * {@link HandlerMethod} instance with a bean instance initialized through the
+ * bean factory.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
