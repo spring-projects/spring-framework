@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  * from a given file location. If a location is not given, the {@linkplain
  * #DEFAULT_FACTORIES_LOCATION default location} is used.
  *
- * <p>The file should be in {@link Properties} format, where the keys is the fully
+ * <p>The file should be in {@link Properties} format, where the key is the fully
  * qualified interface or abstract class name, and the value is a comma separated list of
  * implementations. For instance:
  * <pre class="code">
@@ -119,7 +119,7 @@ public abstract class SpringFactoriesLoader {
 		return result;
 	}
 
-	private static List<String> loadFactoryNames(Class factoryClass,
+	private static List<String> loadFactoryNames(Class<?> factoryClass,
 	                                             ClassLoader classLoader,
 	                                             String factoriesLocation) {
 
@@ -127,7 +127,7 @@ public abstract class SpringFactoriesLoader {
 
 		try {
 			List<String> result = new ArrayList<String>();
-			Enumeration urls = classLoader.getResources(factoriesLocation);
+			Enumeration<URL> urls = classLoader.getResources(factoriesLocation);
 			while (urls.hasMoreElements()) {
 				URL url = (URL) urls.nextElement();
 				Properties properties =

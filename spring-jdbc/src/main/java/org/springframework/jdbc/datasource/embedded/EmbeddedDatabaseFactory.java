@@ -204,6 +204,8 @@ public class EmbeddedDatabaseFactory {
 			return this.dataSource.isWrapperFor(iface);
 		}
 
+		// getParentLogger() is required for JDBC 4.1 compatibility
+		@SuppressWarnings("unused")
 		public Logger getParentLogger() {
 			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		}
