@@ -41,7 +41,7 @@ class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 
 	/**
 	 * Return whether the given bean class declares or inherits any non-void returning
-	 * JavaBeans or <em>indexed</em> setter methods.
+	 * JavaBeans or <em>indexed property</em> setter methods.
 	 */
 	public boolean supports(Class<?> beanClass) {
 		for (Method method : beanClass.getMethods()) {
