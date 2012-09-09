@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,7 @@ import org.aspectj.lang.annotation.DeclarePrecedence;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory.SyntheticInstantiationAdvisor;
@@ -72,9 +70,6 @@ import test.beans.TestBean;
  * @author Phillip Webb
  */
 public abstract class AbstractAspectJAdvisorFactoryTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	/**
 	 * To be overridden by concrete test subclasses.
@@ -586,11 +581,9 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		itb.getAge();
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void testDeclarePrecedenceNotSupported() {
 		TestBean target = new TestBean();
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("DeclarePrecendence not presently supported in Spring AOP");
 		MetadataAwareAspectInstanceFactory aspectInstanceFactory = new SingletonMetadataAwareAspectInstanceFactory(
 			new DeclarePrecedenceShouldSucceed(), "someBean");
 		createProxy(target, getFixture().getAdvisors(aspectInstanceFactory),

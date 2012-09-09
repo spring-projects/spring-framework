@@ -16,8 +16,6 @@
 
 package org.springframework.core.convert.converter;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,14 +23,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.convert.converter.ConvertingComparator;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.comparator.ComparableComparator;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link ConvertingComparator}.
@@ -41,40 +39,29 @@ import org.springframework.util.comparator.ComparableComparator;
  */
 public class ConvertingComparatorTests {
 
-	@Rule
-	public ExpectedException thown = ExpectedException.none();
-
 	private final StringToInteger converter = new StringToInteger();
 
 	private final ConversionService conversionService = new DefaultConversionService();
 
 	private final TestComparator comparator = new TestComparator();
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowOnNullComparator() throws Exception {
-		thown.expect(IllegalArgumentException.class);
-		thown.expectMessage("Comparator must not be null");
 		new ConvertingComparator<String, Integer>(null, this.converter);
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowOnNullConverter() throws Exception {
-		thown.expect(IllegalArgumentException.class);
-		thown.expectMessage("Converter must not be null");
 		new ConvertingComparator<String, Integer>(this.comparator, null);
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowOnNullConversionService() throws Exception {
-		thown.expect(IllegalArgumentException.class);
-		thown.expectMessage("ConversionService must not be null");
 		new ConvertingComparator<String, Integer>(this.comparator, null, Integer.class);
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldThrowOnNullType() throws Exception {
-		thown.expect(IllegalArgumentException.class);
-		thown.expectMessage("TargetType must not be null");
 		new ConvertingComparator<String, Integer>(this.comparator,
 			this.conversionService, null);
 	}
@@ -145,8 +132,8 @@ public class ConvertingComparatorTests {
 		private boolean called;
 
 		public int compare(Integer o1, Integer o2) {
-			assertThat(o1, is(Integer.class));
-			assertThat(o2, is(Integer.class));
+			assertThat(o1, instanceOf(Integer.class));
+			assertThat(o2, instanceOf(Integer.class));
 			this.called = true;
 			return super.compare(o1, o2);
 		};

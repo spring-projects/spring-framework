@@ -16,7 +16,7 @@
 
 package org.springframework.util.comparator;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 import java.util.Comparator;

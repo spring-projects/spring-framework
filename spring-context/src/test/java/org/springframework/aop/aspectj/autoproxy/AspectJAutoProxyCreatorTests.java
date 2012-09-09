@@ -151,7 +151,7 @@ public final class AspectJAutoProxyCreatorTests {
 
 		// What's a reasonable expectation for _any_ server or developer machine load?
 		// 3 seconds?
-		assertStopWatchTimeLimit(sw, 3000);
+		assertStopWatchTimeLimit(sw, 6000);
 	}
 
 	@Test

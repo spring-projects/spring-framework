@@ -16,14 +16,9 @@
 
 package org.springframework.context.annotation;
 
-import static java.lang.String.format;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.junit.matchers.JUnitMatchers.*;
-
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +26,10 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
+
+import static java.lang.String.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.springframework.util.StringUtils.*;
 
 /**
@@ -229,13 +228,13 @@ public class AnnotationConfigApplicationContextTests {
 		}
 	}
 
-	static class UntypedFactoryBean implements FactoryBean {
+	static class UntypedFactoryBean implements FactoryBean<Object> {
 
 		public Object getObject() {
 			return null;
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return null;
 		}
 

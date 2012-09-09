@@ -20,14 +20,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.hamcrest.Matchers;
+import org.hamcrest.CoreMatchers;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.mock.env.MockPropertySource;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -371,7 +372,7 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			pr.getProperty("p5");
 		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), Matchers.containsString(
+			assertThat(ex.getMessage(), containsString(
 					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
 		}
 		assertThat(pr.getProperty("p6"), equalTo("v1:v2:def"));

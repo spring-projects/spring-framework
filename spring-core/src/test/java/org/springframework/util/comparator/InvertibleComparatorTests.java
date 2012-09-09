@@ -16,14 +16,12 @@
 
 package org.springframework.util.comparator;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.util.Comparator;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link InvertibleComparator}.
@@ -35,22 +33,15 @@ import org.junit.rules.ExpectedException;
 
 public class InvertibleComparatorTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	private Comparator<Integer> comparator = new ComparableComparator<Integer>();
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldNeedComparator() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Comparator must not be null");
 		new InvertibleComparator<Object>(null);
 	}
 
-	@Test
+	@Test(expected=IllegalArgumentException.class)
 	public void shouldNeedComparatorWithAscending() throws Exception {
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Comparator must not be null");
 		new InvertibleComparator<Object>(null, true);
 	}
 

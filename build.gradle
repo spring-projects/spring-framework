@@ -19,7 +19,8 @@ configure(allprojects) {
 
     ext.aspectjVersion = '1.6.12'
     ext.hsqldbVersion='1.8.0.10'
-    ext.junitVersion = '4.10'
+    ext.junitVersion = '4.11.20120805.1225' // temporary use of snapshot; spring-test
+                                            // still builds against on 4.10
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
@@ -33,9 +34,6 @@ configure(allprojects) {
     }
 
     dependencies {
-        testCompile ("junit:junit-dep:${junitVersion}") {
-            exclude group: 'org.hamcrest', module: 'hamcrest-core'
-        }
         testCompile "org.hamcrest:hamcrest-all:1.1"
         testCompile "org.easymock:easymock:2.5.1"
     }
@@ -45,6 +43,14 @@ configure(allprojects) {
     // to changing APIs across these versions
     eclipse.classpath.file.whenMerged { classpath ->
         classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
+    }
+}
+
+configure(subprojects - project(":spring-test")) {
+    dependencies {
+        testCompile ("junit:junit-dep:${junitVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest-core'
+        }
     }
 }
 
@@ -521,7 +527,7 @@ project('spring-test') {
         compile(project(":spring-web"), optional)
         compile(project(":spring-webmvc"), optional)
         compile(project(":spring-webmvc-portlet"), optional)
-        compile("junit:junit-dep:${junitVersion}") { dep ->
+        compile("junit:junit-dep:4.10") { dep ->
             optional dep
             // We already have hamcrest-all as a global testCompile dependency.
             exclude group: 'org.hamcrest', module: 'hamcrest-core'

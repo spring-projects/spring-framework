@@ -26,16 +26,12 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.mock.env.MockPropertySource;
 
+
 import static java.lang.String.*;
-
-import static org.hamcrest.CoreMatchers.*;
-
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.*;
-
 import static org.springframework.core.env.AbstractEnvironment.*;
 
 /**

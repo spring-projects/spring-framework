@@ -16,19 +16,17 @@
 
 package org.springframework.test.context;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based unit test which verifies correct {@link ContextCache
@@ -108,7 +106,7 @@ public class SpringRunnerContextCacheTests {
 	}
 
 	@Test
-	public void verifyContextWasDirtied() {
+	public void verifyContextDirty() {
 		assertContextCacheStatistics("verifyContextWasDirtied()", 1, 0, 2);
 		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertNotSame("The application context should have been 'dirtied'.",
@@ -117,7 +115,7 @@ public class SpringRunnerContextCacheTests {
 	}
 
 	@Test
-	public void verifyContextWasNotDirtied() {
+	public void verifyContextNotDirty() {
 		assertContextCacheStatistics("verifyContextWasNotDirtied()", 1, 1, 2);
 		assertNotNull("The application context should have been autowired.", this.applicationContext);
 		assertSame("The application context should NOT have been 'dirtied'.",
