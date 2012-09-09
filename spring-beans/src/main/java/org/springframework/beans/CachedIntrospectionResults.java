@@ -248,8 +248,8 @@ public class CachedIntrospectionResults {
 				}
 			}
 			if (beanInfo == null) {
-				// If none of the factories supported the class, use the default
-				beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+				// If none of the factories supported the class, fall back to the default
+				beanInfo = Introspector.getBeanInfo(beanClass);
 			}
 			this.beanInfo = beanInfo;
 
