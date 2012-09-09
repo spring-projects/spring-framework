@@ -16,11 +16,13 @@
 
 package org.springframework.test.context.junit4.spr9051;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -30,22 +32,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+
 /**
  * This set of tests refutes the claims made in
  * <a href="https://jira.springsource.org/browse/SPR-9051" target="_blank">SPR-9051</a>.
- * 
+ *
  * <p><b>The Claims</b>:
- * 
+ *
  * <blockquote>
  * When a {@code @ContextConfiguration} test class references a config class
  * missing an {@code @Configuration} annotation, {@code @Bean} dependencies are
  * wired successfully but the bean lifecycle is not applied (no init methods are
  * invoked, for example). Adding the missing {@code @Configuration} annotation
- * solves the problem, however the problem and solution isn't obvious since 
+ * solves the problem, however the problem and solution isn't obvious since
  * wiring/injection appeared to work.
  * </blockquote>
- * 
+ *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -85,18 +89,14 @@ public class AnnotatedConfigClassesWithoutAtConfigurationTests {
 	@Autowired
 	private LifecycleBean lifecycleBean;
 
-
 	@Test
-	public void simpleStringBean() {
+	public void testSPR_9051() throws Exception {
 		assertNotNull(enigma);
-		assertEquals("enigma #1", enigma);
-	}
-
-	@Test
-	public void beanWithLifecycleCallback() {
 		assertNotNull(lifecycleBean);
-		assertEquals("enigma #2", lifecycleBean.getName());
 		assertTrue(lifecycleBean.isInitialized());
+		Set<String> names = new HashSet<String>();
+		names.add(enigma.toString());
+		names.add(lifecycleBean.getName());
+		assertEquals(names, new HashSet<String>(Arrays.asList("enigma #1", "enigma #2")));
 	}
-
 }
