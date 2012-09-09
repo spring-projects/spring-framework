@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2005 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,8 @@ import java.io.Serializable;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.BeforeAdvice;
@@ -37,6 +39,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Chris Beams
  */
 public final class AdvisorAdapterRegistrationTests {
+
+	@Before
+	@After
+	public void resetGlobalAdvisorAdapterRegistry() {
+		GlobalAdvisorAdapterRegistry.reset();
+	}
 
 	@Test
 	public void testAdvisorAdapterRegistrationManagerNotPresentInContext() {
@@ -101,7 +109,7 @@ class SimpleBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
 
 class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
-	
+
 	private int invocationCounter;
 
 	public void before() throws Throwable {
@@ -116,9 +124,9 @@ class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
 
 
 final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
-	
+
 	private SimpleBeforeAdvice advice;
-	
+
 	public SimpleBeforeAdviceInterceptor(SimpleBeforeAdvice advice) {
 		this.advice = advice;
 	}
@@ -127,5 +135,4 @@ final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
 		advice.before();
 		return mi.proceed();
 	}
-	
 }
