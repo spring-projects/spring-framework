@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  * {@link Introspector#getBeanInfo(Class)}) by including non-void returning setter
  * methods in the collection of {@link #getPropertyDescriptors() property descriptors}.
  * Both regular and
- * <a href="http://download.oracle.com/javase/tutorial/javabeans/properties/indexed.html">
+ * <a href="http://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
  * indexed properties</a> are fully supported.
  *
  * <p>The wrapped {@code BeanInfo} object is not modified in any way.
@@ -371,7 +371,8 @@ class ExtendedBeanInfo implements BeanInfo {
 
 
 	/**
-	 * Sorts PropertyDescriptor instances alphanumerically to emulate the behavior of {@link java.beans.BeanInfo#getPropertyDescriptors()}.
+	 * Sorts PropertyDescriptor instances alpha-numerically to emulate the behavior of
+	 * {@link java.beans.BeanInfo#getPropertyDescriptors()}.
 	 *
 	 * @see ExtendedBeanInfo#propertyDescriptors
 	 */
