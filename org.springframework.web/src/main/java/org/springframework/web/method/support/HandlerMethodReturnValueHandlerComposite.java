@@ -19,8 +19,6 @@ package org.springframework.web.method.support;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,9 +39,6 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 
 	private final List<HandlerMethodReturnValueHandler> returnValueHandlers =
 		new ArrayList<HandlerMethodReturnValueHandler>();
-
-	private final Map<MethodParameter, HandlerMethodReturnValueHandler> returnValueHandlerCache =
-		new ConcurrentHashMap<MethodParameter, HandlerMethodReturnValueHandler>();
 
 	/**
 	 * Return a read-only list with the registered handlers, or an empty list.
@@ -78,21 +73,16 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	 * Find a registered {@link HandlerMethodReturnValueHandler} that supports the given return type.
 	 */
 	private HandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
-		HandlerMethodReturnValueHandler result = this.returnValueHandlerCache.get(returnType);
-		if (result == null) {
-			for (HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Testing if return value handler [" + returnValueHandler + "] supports [" +
-							returnType.getGenericParameterType() + "]");
-				}
-				if (returnValueHandler.supportsReturnType(returnType)) {
-					result = returnValueHandler;
-					this.returnValueHandlerCache.put(returnType, returnValueHandler);
-					break;
-				}
+		for (HandlerMethodReturnValueHandler returnValueHandler : returnValueHandlers) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Testing if return value handler [" + returnValueHandler + "] supports [" +
+						returnType.getGenericParameterType() + "]");
+			}
+			if (returnValueHandler.supportsReturnType(returnType)) {
+				return returnValueHandler;
 			}
 		}
-		return result;
+		return null;
 	}
 
 	/**

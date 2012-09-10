@@ -22,9 +22,8 @@ import java.lang.reflect.Method;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -32,16 +31,19 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.View;
 
 /**
- * Extends {@link InvocableHandlerMethod} with the ability to handle the value returned from the method through
- * a registered {@link HandlerMethodArgumentResolver} that supports the given return value type.
- * Return value handling may include writing to the response or updating the {@link ModelAndViewContainer} structure.
+ * Extends {@link InvocableHandlerMethod} with the ability to handle return
+ * values through a registered {@link HandlerMethodReturnValueHandler} and
+ * also supports setting the response status based on a method-level
+ * {@code @ResponseStatus} annotation.
  *
- * <p>If the underlying method has a {@link ResponseStatus} instruction, the status on the response is set
- * accordingly after the method is invoked but before the return value is handled.
+ * <p>A {@code null} return value (including void) may be interpreted as the
+ * end of request processing in combination with a {@code @ResponseStatus}
+ * annotation, a not-modified check condition
+ * (see {@link ServletWebRequest#checkNotModified(long)}), or
+ * a method argument that provides access to the response stream.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
- * @see #invokeAndHandle(NativeWebRequest, ModelAndViewContainer, Object...)
  */
 public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
@@ -51,69 +53,111 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
+
+	/**
+	 * Creates an instance from the given handler and method.
+	 */
+	public ServletInvocableHandlerMethod(Object handler, Method method) {
+		super(handler, method);
+		initResponseStatus();
+	}
+
+	/**
+	 * Create an instance from a {@code HandlerMethod}.
+	 */
+	public ServletInvocableHandlerMethod(HandlerMethod handlerMethod) {
+		super(handlerMethod);
+		initResponseStatus();
+	}
+
+	private void initResponseStatus() {
+		ResponseStatus annot = getMethodAnnotation(ResponseStatus.class);
+		if (annot != null) {
+			this.responseStatus = annot.value();
+			this.responseReason = annot.reason();
+		}
+	}
+
+	/**
+	 * Register {@link HandlerMethodReturnValueHandler} instances to use to
+	 * handle return values.
+	 */
 	public void setHandlerMethodReturnValueHandlers(HandlerMethodReturnValueHandlerComposite returnValueHandlers) {
 		this.returnValueHandlers = returnValueHandlers;
 	}
 
 	/**
-	 * Creates a {@link ServletInvocableHandlerMethod} instance with the given bean and method.
-	 * @param handler the object handler
-	 * @param method the method
-	 */
-	public ServletInvocableHandlerMethod(Object handler, Method method) {
-		super(handler, method);
-
-		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
-		if (annotation != null) {
-			this.responseStatus = annotation.value();
-			this.responseReason = annotation.reason();
-		}
-	}
-
-	/**
-	 * Invokes the method and handles the return value through a registered {@link HandlerMethodReturnValueHandler}.
-	 * <p>Return value handling may be skipped entirely when the method returns {@code null} (also possibly due
-	 * to a {@code void} return type) and one of the following additional conditions is true:
-	 * <ul>
-	 * <li>A {@link HandlerMethodArgumentResolver} has set the {@link ModelAndViewContainer#setRequestHandled(boolean)}
-	 * flag to {@code false} -- e.g. method arguments providing access to the response.
-	 * <li>The request qualifies as "not modified" as defined in {@link ServletWebRequest#checkNotModified(long)}
-	 * and {@link ServletWebRequest#checkNotModified(String)}. In this case a response with "not modified" response
-	 * headers will be automatically generated without the need for return value handling.
-	 * <li>The status on the response is set due to a @{@link ResponseStatus} instruction.
-	 * </ul>
-	 * <p>After the return value is handled, callers of this method can use the {@link ModelAndViewContainer}
-	 * to gain access to model attributes, view selection choices, and to check if view resolution is even needed.
+	 * Invokes the method and handles the return value through a registered
+	 * {@link HandlerMethodReturnValueHandler}.
 	 *
-	 * @param request the current request
-	 * @param mavContainer the {@link ModelAndViewContainer} for the current request
-	 * @param providedArgs argument values to try to use without the need for view resolution
+	 * @param webRequest the current request
+	 * @param mavContainer the ModelAndViewContainer for this request
+	 * @param providedArgs "given" arguments matched by type, not resolved
 	 */
-	public final void invokeAndHandle(
-			NativeWebRequest request, ModelAndViewContainer mavContainer,
-			Object... providedArgs) throws Exception {
+	public final void invokeAndHandle(ServletWebRequest webRequest,
+			ModelAndViewContainer mavContainer, Object... providedArgs) throws Exception {
 
-		Object returnValue = invokeForRequest(request, mavContainer, providedArgs);
+		Object returnValue = invokeForRequest(webRequest, mavContainer, providedArgs);
 
-		setResponseStatus((ServletWebRequest) request);
+		setResponseStatus(webRequest);
 
 		if (returnValue == null) {
-			if (isRequestNotModified(request) || hasResponseStatus() || mavContainer.isRequestHandled()) {
+			if (isRequestNotModified(webRequest) || hasResponseStatus() || mavContainer.isRequestHandled()) {
 				mavContainer.setRequestHandled(true);
 				return;
 			}
+		}
+		else if (StringUtils.hasText(this.responseReason)) {
+			mavContainer.setRequestHandled(true);
+			return;
 		}
 
 		mavContainer.setRequestHandled(false);
 
 		try {
-			returnValueHandlers.handleReturnValue(returnValue, getReturnType(), mavContainer, request);
-		} catch (Exception ex) {
+			this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), mavContainer, webRequest);
+		}
+		catch (Exception ex) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
 			}
 			throw ex;
 		}
+	}
+
+	/**
+	 * Set the response status according to the {@link ResponseStatus} annotation.
+	 */
+	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
+		if (this.responseStatus == null) {
+			return;
+		}
+
+		if (StringUtils.hasText(this.responseReason)) {
+			webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
+		}
+		else {
+			webRequest.getResponse().setStatus(this.responseStatus.value());
+		}
+
+		// to be picked up by the RedirectView
+		webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
+	}
+
+	/**
+	 * Does the given request qualify as "not modified"?
+	 * @see ServletWebRequest#checkNotModified(long)
+	 * @see ServletWebRequest#checkNotModified(String)
+	 */
+	private boolean isRequestNotModified(ServletWebRequest webRequest) {
+		return webRequest.isNotModified();
+	}
+
+	/**
+	 * Does this method have the response status instruction?
+	 */
+	private boolean hasResponseStatus() {
+		return responseStatus != null;
 	}
 
 	private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
@@ -125,36 +169,4 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		return getDetailedErrorMessage(sb.toString());
 	}
 
-	/**
-	 * Set the response status according to the {@link ResponseStatus} annotation.
-	 */
-	private void setResponseStatus(ServletWebRequest webRequest) throws IOException {
-		if (this.responseStatus != null) {
-			if (StringUtils.hasText(this.responseReason)) {
-				webRequest.getResponse().sendError(this.responseStatus.value(), this.responseReason);
-			}
-			else {
-				webRequest.getResponse().setStatus(this.responseStatus.value());
-			}
-
-			// to be picked up by the RedirectView
-			webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, this.responseStatus);
-		}
-	}
-
-	/**
-	 * Does the given request qualify as "not modified"?
-	 * @see ServletWebRequest#checkNotModified(long)
-	 * @see ServletWebRequest#checkNotModified(String)
-	 */
-	private boolean isRequestNotModified(NativeWebRequest request) {
-		return ((ServletWebRequest) request).isNotModified();
-	}
-
-	/**
-	 * Does this method have the response status instruction?
-	 */
-	private boolean hasResponseStatus() {
-		return responseStatus != null;
-	}
 }
