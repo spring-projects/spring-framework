@@ -62,6 +62,10 @@ public class CachedIntrospectionResults {
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
+	/** Stores the BeanInfoFactory instances */
+	private static List<BeanInfoFactory> beanInfoFactories =
+			SpringFactoriesLoader.loadFactories(BeanInfoFactory.class, CachedIntrospectionResults.class.getClassLoader());
+
 	/**
 	 * Set of ClassLoaders that this CachedIntrospectionResults class will always
 	 * accept classes from, even if the classes do not qualify as cache-safe.
@@ -74,11 +78,6 @@ public class CachedIntrospectionResults {
 	 * for proper garbage collection in case of multiple class loaders.
 	 */
 	static final Map<Class, Object> classCache = Collections.synchronizedMap(new WeakHashMap<Class, Object>());
-
-	/** Stores the BeanInfoFactory instances */
-	private static List<BeanInfoFactory> beanInfoFactories;
-
-	private static final Object beanInfoFactoriesMutex = new Object();
 
 
 	/**
@@ -230,7 +229,6 @@ public class CachedIntrospectionResults {
 			}
 
 			BeanInfo beanInfo = null;
-			List<BeanInfoFactory> beanInfoFactories = getBeanInfoFactories(beanClass.getClassLoader());
 			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
 				beanInfo = beanInfoFactory.getBeanInfo(beanClass);
 				if (beanInfo != null) {
@@ -323,18 +321,6 @@ public class CachedIntrospectionResults {
 		catch (IntrospectionException ex) {
 			throw new FatalBeanException("Failed to re-introspect class [" + beanClass.getName() + "]", ex);
 		}
-	}
-
-	private static List<BeanInfoFactory> getBeanInfoFactories(ClassLoader classLoader) {
-		if (beanInfoFactories == null) {
-			synchronized (beanInfoFactoriesMutex) {
-				if (beanInfoFactories == null) {
-					beanInfoFactories = Collections.synchronizedList(SpringFactoriesLoader
-							.loadFactories(BeanInfoFactory.class, classLoader));
-				}
-			}
-		}
-		return beanInfoFactories;
 	}
 
 }
