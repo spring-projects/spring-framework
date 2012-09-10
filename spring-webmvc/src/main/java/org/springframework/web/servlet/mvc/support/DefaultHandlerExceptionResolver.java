@@ -294,8 +294,19 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleConversionNotSupported(ConversionNotSupportedException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		sendServerError(ex, request, response);
 		return new ModelAndView();
+	}
+
+	/**
+	 * Invoked to send a server error. Sets the status to 500 and also sets the
+	 * request attribute "javax.servlet.error.exception" to the Exception.
+	 */
+	protected void sendServerError(Exception ex,
+			HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+		request.setAttribute("javax.servlet.error.exception", ex);
+		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -352,7 +363,7 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		sendServerError(ex, request, response);
 		return new ModelAndView();
 	}
 
