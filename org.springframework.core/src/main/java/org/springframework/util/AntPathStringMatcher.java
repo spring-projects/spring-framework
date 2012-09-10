@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,11 @@ class AntPathStringMatcher {
 
 	private final Pattern pattern;
 
-	private String str;
-
 	private final List<String> variableNames = new LinkedList<String>();
 
-	private final Map<String, String> uriTemplateVariables;
 
 	/** Construct a new instance of the <code>AntPatchStringMatcher</code>. */
-	AntPathStringMatcher(String pattern, String str, Map<String, String> uriTemplateVariables) {
-		this.str = str;
-		this.uriTemplateVariables = uriTemplateVariables;
+	AntPathStringMatcher(String pattern) {
 		this.pattern = createPattern(pattern);
 	}
 
@@ -100,14 +95,14 @@ class AntPathStringMatcher {
 	 *
 	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
 	 */
-	public boolean matchStrings() {
+	public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
 		Matcher matcher = pattern.matcher(str);
 		if (matcher.matches()) {
 			if (uriTemplateVariables != null) {
 				// SPR-8455
-				Assert.isTrue(variableNames.size() == matcher.groupCount(), 
-						"The number of capturing groups in the pattern segment " + pattern + 
-						" does not match the number of URI template variables it defines, which can occur if " + 
+				Assert.isTrue(variableNames.size() == matcher.groupCount(),
+						"The number of capturing groups in the pattern segment " + pattern +
+						" does not match the number of URI template variables it defines, which can occur if " +
 						" capturing groups are used in a URI template regex. Use non-capturing groups instead.");
 				for (int i = 1; i <= matcher.groupCount(); i++) {
 					String name = this.variableNames.get(i - 1);
