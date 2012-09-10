@@ -14,7 +14,11 @@ Changes in version 3.1.3 (2012-09-24)
 * fixed Portlet request mapping priorities in cross-controller case
 * deprecated SimpleJdbcTestUtils in favor of JdbcTestUtils
 * introduced "countRowsInTableWhere()" and "dropTables()" in JdbcTestUtils
-
+* optimized performance of HandlerMethod and sub-classes (SPR-9747, SPR-9748)
+* dynamic return value types for @MVC methods (SPR-9622)
+* fixed issue with resolution of WebDataBinder argument (SPR-8946)
+* prevent response updates if @ResponseStatus has a reason (SPR-9159)
+* 
 
 Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
