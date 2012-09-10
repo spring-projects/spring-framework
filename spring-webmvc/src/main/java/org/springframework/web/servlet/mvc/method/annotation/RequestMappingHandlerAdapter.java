@@ -727,7 +727,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
 
 		ServletInvocableHandlerMethod requestMethod;
-		requestMethod = new ServletInvocableHandlerMethod(handlerMethod.getBean(), handlerMethod.getMethod());
+		requestMethod = new ServletInvocableHandlerMethod(handlerMethod);
 		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 		requestMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
 		requestMethod.setDataBinderFactory(binderFactory);

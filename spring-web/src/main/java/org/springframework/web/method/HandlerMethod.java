@@ -46,7 +46,7 @@ import org.springframework.util.ClassUtils;
 public class HandlerMethod {
 
 	/** Logger that is available to subclasses */
-	protected final Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(HandlerMethod.class);
 
 	private final Object bean;
 
@@ -58,14 +58,13 @@ public class HandlerMethod {
 
 	private final Method bridgedMethod;
 
+
 	/**
-	 * Constructs a new handler method with the given bean instance and method.
-	 * @param bean the object bean
-	 * @param method the method
+	 * Create an instance from a bean instance and a method.
 	 */
 	public HandlerMethod(Object bean, Method method) {
-		Assert.notNull(bean, "bean must not be null");
-		Assert.notNull(method, "method must not be null");
+		Assert.notNull(bean, "bean is required");
+		Assert.notNull(method, "method is required");
 		this.bean = bean;
 		this.beanFactory = null;
 		this.method = method;
@@ -73,15 +72,12 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new handler method with the given bean instance, method name and parameters.
-	 * @param bean the object bean
-	 * @param methodName the method name
-	 * @param parameterTypes the method parameter types
+	 * Create an instance from a bean instance, method name, and parameter types.
 	 * @throws NoSuchMethodException when the method cannot be found
 	 */
 	public HandlerMethod(Object bean, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
-		Assert.notNull(bean, "bean must not be null");
-		Assert.notNull(methodName, "method must not be null");
+		Assert.notNull(bean, "bean is required");
+		Assert.notNull(methodName, "method is required");
 		this.bean = bean;
 		this.beanFactory = null;
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
@@ -89,22 +85,32 @@ public class HandlerMethod {
 	}
 
 	/**
-	 * Constructs a new handler method with the given bean name and method. The bean name will be lazily
-	 * initialized when {@link #createWithResolvedBean()} is called.
-	 * @param beanName the bean name
-	 * @param beanFactory the bean factory to use for bean initialization
-	 * @param method the method for the bean
+	 * Create an instance from a bean name, a method, and a {@code BeanFactory}.
+	 * The method {@link #createWithResolvedBean()} may be used later to
+	 * re-create the {@code HandlerMethod} with an initialized the bean.
 	 */
 	public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
-		Assert.hasText(beanName, "'beanName' must not be null");
-		Assert.notNull(beanFactory, "'beanFactory' must not be null");
-		Assert.notNull(method, "'method' must not be null");
+		Assert.hasText(beanName, "beanName is required");
+		Assert.notNull(beanFactory, "beanFactory is required");
+		Assert.notNull(method, "method is required");
 		Assert.isTrue(beanFactory.containsBean(beanName),
-				"Bean factory [" + beanFactory + "] does not contain bean " + "with name [" + beanName + "]");
+				"Bean factory [" + beanFactory + "] does not contain bean [" + beanName + "]");
 		this.bean = beanName;
 		this.beanFactory = beanFactory;
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+	}
+
+	/**
+	 * Create an instance from another {@code HandlerMethod}.
+	 */
+	protected HandlerMethod(HandlerMethod handlerMethod) {
+		Assert.notNull(handlerMethod, "HandlerMethod is required");
+		this.bean = handlerMethod.bean;
+		this.beanFactory = handlerMethod.beanFactory;
+		this.method = handlerMethod.method;
+		this.bridgedMethod = handlerMethod.bridgedMethod;
+		this.parameters = handlerMethod.parameters;
 	}
 
 	/**
@@ -146,11 +152,10 @@ public class HandlerMethod {
 	public MethodParameter[] getMethodParameters() {
 		if (this.parameters == null) {
 			int parameterCount = this.bridgedMethod.getParameterTypes().length;
-			MethodParameter[] p = new MethodParameter[parameterCount];
+			this.parameters = new MethodParameter[parameterCount];
 			for (int i = 0; i < parameterCount; i++) {
-				p[i] = new HandlerMethodParameter(i);
+				this.parameters[i] = new HandlerMethodParameter(i);
 			}
-			this.parameters = p;
 		}
 		return this.parameters;
 	}
@@ -196,7 +201,9 @@ public class HandlerMethod {
 			String beanName = (String) this.bean;
 			handler = this.beanFactory.getBean(beanName);
 		}
-		return new HandlerMethod(handler, this.method);
+		HandlerMethod handlerMethod = new HandlerMethod(handler, this.method);
+		handlerMethod.parameters = getMethodParameters();
+		return handlerMethod;
 	}
 
 	@Override

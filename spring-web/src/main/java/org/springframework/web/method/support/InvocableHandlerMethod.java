@@ -53,13 +53,19 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
+
 	/**
-	 * Constructs a new handler method with the given bean instance and method.
-	 * @param bean the bean instance
-	 * @param method the method
+	 * Creates an instance from the given handler and method.
 	 */
 	public InvocableHandlerMethod(Object bean, Method method) {
 		super(bean, method);
+	}
+
+	/**
+	 * Create an instance from a {@code HandlerMethod}.
+	 */
+	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
+		super(handlerMethod);
 	}
 
 	/**
