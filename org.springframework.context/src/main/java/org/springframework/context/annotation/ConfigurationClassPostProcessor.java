@@ -43,7 +43,6 @@ import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.parsing.SourceExtractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -92,6 +91,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	private static final boolean cglibAvailable = ClassUtils.isPresent(
 			"net.sf.cglib.proxy.Enhancer", ConfigurationClassPostProcessor.class.getClassLoader());
 
+	private static final String IMPORT_AWARE_PROCESSOR_BEAN_NAME =
+			ConfigurationClassPostProcessor.class.getName() + ".importAwareProcessor";
+
+	private static final String IMPORT_REGISTRY_BEAN_NAME =
+			ConfigurationClassPostProcessor.class.getName() + ".importRegistry";
+
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -115,7 +120,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ConfigurationClassBeanDefinitionReader reader;
 
-	private BeanNameGenerator beanNameGenerator = new AnnotationBeanNameGenerator();
+	private boolean localBeanNameGeneratorSet = false;
+
+	/* using short class names as default bean names */
+	private BeanNameGenerator componentScanBeanNameGenerator = new AnnotationBeanNameGenerator();
+
+	/* using fully qualified class names as default bean names */
+	private BeanNameGenerator importBeanNameGenerator = new AnnotationBeanNameGenerator() {
+		@Override
+		protected String buildDefaultBeanName(BeanDefinition definition) {
+			return definition.getBeanClassName();
+		}
+	};
 
 
 	/**
@@ -148,23 +164,27 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
-	 * Set the {@link BeanNameGenerator} to be used when registering imported and nested
-	 * {@link Configuration} classes. The default is {@link AnnotationBeanNameGenerator}.
+	 * Set the {@link BeanNameGenerator} to be used when triggering component scanning
+	 * from {@link Configuration} classes and when registering {@link Import}'ed
+	 * configuration classes. The default is a standard {@link AnnotationBeanNameGenerator}
+	 * for scanned components (compatible with the default in {@link ClassPathBeanDefinitionScanner})
+	 * and a variant thereof for imported configuration classes (using unique fully-qualified
+	 * class names instead of standard component overriding).
 	 * <p>Note that this strategy does <em>not</em> apply to {@link Bean} methods.
 	 * <p>This setter is typically only appropriate when configuring the post-processor as
 	 * a standalone bean definition in XML, e.g. not using the dedicated
 	 * {@code AnnotationConfig*} application contexts or the {@code
 	 * <context:annotation-config>} element. Any bean name generator specified against
 	 * the application context will take precedence over any value set here.
-	 * @param beanNameGenerator the strategy to use when generating configuration class
-	 * bean names
 	 * @since 3.1.1
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 * @see AnnotationConfigUtils#CONFIGURATION_BEAN_NAME_GENERATOR
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
-		this.beanNameGenerator = beanNameGenerator;
+		this.localBeanNameGeneratorSet = true;
+		this.componentScanBeanNameGenerator = beanNameGenerator;
+		this.importBeanNameGenerator = beanNameGenerator;
 	}
 
 	public void setEnvironment(Environment environment) {
@@ -189,7 +209,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
-		BeanDefinitionReaderUtils.registerWithGeneratedName(new RootBeanDefinition(ImportAwareBeanPostProcessor.class), registry);
+		registry.registerBeanDefinition(IMPORT_AWARE_PROCESSOR_BEAN_NAME,
+				new RootBeanDefinition(ImportAwareBeanPostProcessor.class));
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
@@ -244,15 +265,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		SingletonBeanRegistry singletonRegistry = null;
 		if (registry instanceof SingletonBeanRegistry) {
 			singletonRegistry = (SingletonBeanRegistry) registry;
-			if (singletonRegistry.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
-				this.beanNameGenerator = (BeanNameGenerator) singletonRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+			if (!this.localBeanNameGeneratorSet && singletonRegistry.containsSingleton(CONFIGURATION_BEAN_NAME_GENERATOR)) {
+				BeanNameGenerator generator = (BeanNameGenerator) singletonRegistry.getSingleton(CONFIGURATION_BEAN_NAME_GENERATOR);
+				this.componentScanBeanNameGenerator = generator;
+				this.importBeanNameGenerator = generator;
 			}
 		}
 
 		// Parse each @Configuration class
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
-				this.resourceLoader, this.beanNameGenerator, registry);
+				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
 		for (BeanDefinitionHolder holder : configCandidates) {
 			BeanDefinition bd = holder.getBeanDefinition();
 			try {
@@ -287,16 +310,15 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		// Read the model and create bean definitions based on its content
 		if (this.reader == null) {
 			this.reader = new ConfigurationClassBeanDefinitionReader(
-					registry, this.sourceExtractor, this.problemReporter,
-					this.metadataReaderFactory, this.resourceLoader, this.environment,
-					this.beanNameGenerator);
+					registry, this.sourceExtractor, this.problemReporter, this.metadataReaderFactory,
+					this.resourceLoader, this.environment, this.importBeanNameGenerator);
 		}
 		this.reader.loadBeanDefinitions(parser.getConfigurationClasses());
 
 		// Register the ImportRegistry as a bean in order to support ImportAware @Configuration classes
 		if (singletonRegistry != null) {
-			if (!singletonRegistry.containsSingleton("importRegistry")) {
-				singletonRegistry.registerSingleton("importRegistry", parser.getImportRegistry());
+			if (!singletonRegistry.containsSingleton(IMPORT_REGISTRY_BEAN_NAME)) {
+				singletonRegistry.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 			}
 		}
 	}
@@ -359,7 +381,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof ImportAware) {
-				ImportRegistry importRegistry = beanFactory.getBean(ImportRegistry.class);
+				ImportRegistry importRegistry = this.beanFactory.getBean(IMPORT_REGISTRY_BEAN_NAME, ImportRegistry.class);
 				String importingClass = importRegistry.getImportingClassFor(bean.getClass().getSuperclass().getName());
 				if (importingClass != null) {
 					try {

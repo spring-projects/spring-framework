@@ -20,7 +20,6 @@ import java.beans.Introspector;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -122,22 +121,13 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Derive a default bean name from the given bean definition.
-	 * <p>The default implementation delegates to {@link #buildDefaultBeanName(BeanDefinition)},
-	 * appending a counter suffix if necessary to make the bean name unique in the given registry.
+	 * <p>The default implementation delegates to {@link #buildDefaultBeanName(BeanDefinition)}.
 	 * @param definition the bean definition to build a bean name for
 	 * @param registry the registry that the given bean definition is being registered with
 	 * @return the default bean name (never <code>null</code>)
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-		String generatedName = buildDefaultBeanName(definition);
-		// Increase counter until the id is unique.
-		String id = generatedName;
-		int counter = 0;
-		while (registry.containsBeanDefinition(id)) {
-			counter++;
-			id = generatedName + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + counter;
-		}
-		return id;
+		return buildDefaultBeanName(definition);
 	}
 
 	/**

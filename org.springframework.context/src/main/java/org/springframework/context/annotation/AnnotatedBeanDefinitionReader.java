@@ -52,6 +52,7 @@ public class AnnotatedBeanDefinitionReader {
 
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
+
 	/**
 	 * Create a new {@code AnnotatedBeanDefinitionReader} for the given registry.
 	 * If the registry is {@link EnvironmentCapable}, e.g. is an {@code ApplicationContext},
@@ -78,10 +79,8 @@ public class AnnotatedBeanDefinitionReader {
 	public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		Assert.notNull(environment, "Environment must not be null");
-
 		this.registry = registry;
 		this.environment = environment;
-
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 
@@ -115,8 +114,8 @@ public class AnnotatedBeanDefinitionReader {
 	 * <p>The default is an {@link AnnotationScopeMetadataResolver}.
 	 */
 	public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
-		this.scopeMetadataResolver = (scopeMetadataResolver != null ? scopeMetadataResolver
-				: new AnnotationScopeMetadataResolver());
+		this.scopeMetadataResolver =
+				(scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
 	}
 
 	public void register(Class<?>... annotatedClasses) {
@@ -136,7 +135,6 @@ public class AnnotatedBeanDefinitionReader {
 	public void registerBean(Class<?> annotatedClass, String name, Class<? extends Annotation>... qualifiers) {
 		AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(annotatedClass);
 		AnnotationMetadata metadata = abd.getMetadata();
-
 		if (metadata.isAnnotated(Profile.class.getName())) {
 			AnnotationAttributes profile = MetadataUtils.attributesFor(metadata, Profile.class);
 			if (!this.environment.acceptsProfiles(profile.getStringArray("value"))) {
@@ -151,9 +149,11 @@ public class AnnotatedBeanDefinitionReader {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
 				if (Primary.class.equals(qualifier)) {
 					abd.setPrimary(true);
-				} else if (Lazy.class.equals(qualifier)) {
+				}
+				else if (Lazy.class.equals(qualifier)) {
 					abd.setLazyInit(true);
-				} else {
+				}
+				else {
 					abd.addQualifier(new AutowireCandidateQualifier(qualifier));
 				}
 			}
