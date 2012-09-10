@@ -101,9 +101,8 @@ class ConfigurationClassParser {
 	 * to populate the set of configuration classes.
 	 */
 	public ConfigurationClassParser(MetadataReaderFactory metadataReaderFactory,
-			ProblemReporter problemReporter, Environment environment,
-			ResourceLoader resourceLoader, BeanNameGenerator beanNameGenerator,
-			BeanDefinitionRegistry registry) {
+			ProblemReporter problemReporter, Environment environment, ResourceLoader resourceLoader,
+			BeanNameGenerator componentScanBeanNameGenerator, BeanDefinitionRegistry registry) {
 
 		this.metadataReaderFactory = metadataReaderFactory;
 		this.problemReporter = problemReporter;
@@ -111,7 +110,7 @@ class ConfigurationClassParser {
 		this.resourceLoader = resourceLoader;
 		this.registry = registry;
 		this.componentScanParser = new ComponentScanAnnotationParser(
-				resourceLoader, environment, beanNameGenerator, registry);
+				resourceLoader, environment, componentScanBeanNameGenerator, registry);
 	}
 
 
