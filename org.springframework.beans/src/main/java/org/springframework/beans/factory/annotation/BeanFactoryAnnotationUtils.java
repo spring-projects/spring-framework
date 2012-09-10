@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.reflect.Method;
-
 import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
@@ -44,11 +43,11 @@ public class BeanFactoryAnnotationUtils {
 	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a
 	 * qualifier (e.g. via {@code <qualifier>} or {@code @Qualifier}) matching the given
 	 * qualifier, or having a bean name matching the given qualifier.
-	 * @param bf the BeanFactory to get the target bean from
+	 * @param beanFactory the BeanFactory to get the target bean from
 	 * @param beanType the type of bean to retrieve
 	 * @param qualifier the qualifier for selecting between multiple bean matches
 	 * @return the matching bean of type {@code T} (never {@code null})
-	 * @throws IllegalStateException if no matching bean of type {@code T} found
+	 * @throws NoSuchBeanDefinitionException if no matching bean of type {@code T} found
 	 */
 	public static <T> T qualifiedBeanOfType(BeanFactory beanFactory, Class<T> beanType, String qualifier) {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
@@ -60,7 +59,7 @@ public class BeanFactoryAnnotationUtils {
 			return beanFactory.getBean(qualifier, beanType);
 		}
 		else {
-			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
+			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +
 					" bean found for bean name '" + qualifier +
 					"'! (Note: Qualifier matching not supported because given " +
 					"BeanFactory does not implement ConfigurableListableBeanFactory.)");
@@ -68,14 +67,13 @@ public class BeanFactoryAnnotationUtils {
 	}
 
 	/**
-	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a
-	 * qualifier (e.g. {@code <qualifier>} or {@code @Qualifier}) matching the given
-	 * qualifier
+	 * Obtain a bean of type {@code T} from the given {@code BeanFactory} declaring a qualifier
+	 * (e.g. {@code <qualifier>} or {@code @Qualifier}) matching the given qualifier).
 	 * @param bf the BeanFactory to get the target bean from
 	 * @param beanType the type of bean to retrieve
 	 * @param qualifier the qualifier for selecting between multiple bean matches
 	 * @return the matching bean of type {@code T} (never {@code null})
-	 * @throws IllegalStateException if no matching bean of type {@code T} found
+	 * @throws NoSuchBeanDefinitionException if no matching bean of type {@code T} found
 	 */
 	private static <T> T qualifiedBeanOfType(ConfigurableListableBeanFactory bf, Class<T> beanType, String qualifier) {
 		Map<String, T> candidateBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, beanType);
@@ -83,7 +81,7 @@ public class BeanFactoryAnnotationUtils {
 		for (String beanName : candidateBeans.keySet()) {
 			if (isQualifierMatch(qualifier, beanName, bf)) {
 				if (matchingBean != null) {
-					throw new IllegalStateException("No unique " + beanType.getSimpleName() +
+					throw new NoSuchBeanDefinitionException(qualifier, "No unique " + beanType.getSimpleName() +
 							" bean found for qualifier '" + qualifier + "'");
 				}
 				matchingBean = candidateBeans.get(beanName);
@@ -93,9 +91,8 @@ public class BeanFactoryAnnotationUtils {
 			return matchingBean;
 		}
 		else {
-			throw new IllegalStateException("No matching " + beanType.getSimpleName() +
-					" bean found for qualifier '" + qualifier + "' - neither qualifier " +
-					"match nor bean name match!");
+			throw new NoSuchBeanDefinitionException(qualifier, "No matching " + beanType.getSimpleName() +
+					" bean found for qualifier '" + qualifier + "' - neither qualifier " + "match nor bean name match!");
 		}
 	}
 
