@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.Assert;
 
 /**
  * Abstract base class for Spring's {@link javax.sql.DataSource}
@@ -78,17 +76,16 @@ public abstract class AbstractDataSource implements DataSource {
 	//---------------------------------------------------------------------
 
 	@SuppressWarnings("unchecked")
-	public <T> T  unwrap(Class<T> iface) throws SQLException {
-		Assert.notNull(iface, "Interface argument must not be null");
-		if (!DataSource.class.equals(iface)) {
-			throw new SQLException("DataSource of type [" + getClass().getName() +
-					"] can only be unwrapped as [javax.sql.DataSource], not as [" + iface.getName());
+	public <T> T unwrap(Class<T> iface) throws SQLException {
+		if (iface.isInstance(this)) {
+			return (T) this;
 		}
-		return (T) this;
+		throw new SQLException("DataSource of type [" + getClass().getName() +
+				"] cannot be unwrapped as [" + iface.getName() + "]");
 	}
 
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return DataSource.class.equals(iface);
+		return iface.isInstance(this);
 	}
 
 
