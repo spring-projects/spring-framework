@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.util;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +53,9 @@ public class AntPathMatcher implements PathMatcher {
 	public static final String DEFAULT_PATH_SEPARATOR = "/";
 
 	private String pathSeparator = DEFAULT_PATH_SEPARATOR;
+
+	private final Map<String, AntPathStringMatcher> stringMatcherCache =
+			new ConcurrentHashMap<String, AntPathStringMatcher>();
 
 
 	/** Set the path separator to use for pattern parsing. Default is "/", as in Ant. */
@@ -216,8 +220,12 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
 	 */
 	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
-		AntPathStringMatcher matcher = new AntPathStringMatcher(pattern, str, uriTemplateVariables);
-		return matcher.matchStrings();
+		AntPathStringMatcher matcher = this.stringMatcherCache.get(pattern);
+		if (matcher == null) {
+			matcher = new AntPathStringMatcher(pattern);
+			this.stringMatcherCache.put(pattern, matcher);
+		}
+		return matcher.matchStrings(str, uriTemplateVariables);
 	}
 
 	/**
