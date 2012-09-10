@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.core.io.support;
+
+import org.springframework.core.annotation.Order;
 
 /**
  * Used by {@link SpringFactoriesLoaderTests}
  *
  * @author Arjen Poutsma
  */
-public class MyDummyFactory1 implements DummyFactory, Ordered {
-
-	public int getOrder() {
-		return 1;
-	}
+@Order(1)
+public class MyDummyFactory1 implements DummyFactory {
 
 	public String getString() {
 		return "Foo";

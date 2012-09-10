@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.core.io.support;
 
 /**
- * Used by {@link org.springframework.core.SpringFactoriesLoaderTests}
+ * Used by {@link SpringFactoriesLoaderTests}
  *
  * @author Arjen Poutsma
  */
-public class MyDummyFactory2 implements DummyFactory, Ordered {
+public interface DummyFactory {
 
-	public int getOrder() {
-		return 2;
-	}
+	String getString();
 
-	public String getString() {
-		return "Bar";
-	}
 }

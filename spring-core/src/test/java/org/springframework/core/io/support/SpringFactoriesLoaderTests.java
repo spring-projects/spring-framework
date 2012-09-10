@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.core.io.support;
 
 import java.util.List;
 
@@ -25,11 +25,13 @@ import org.junit.Test;
 /** @author Arjen Poutsma */
 public class SpringFactoriesLoaderTests {
 
+	private static final String FACTORIES_LOCATION =
+			"org/springframework/core/io/support/springFactoriesLoaderTests.properties";
+
 	@Test
 	public void loadFactories() {
 		List<DummyFactory> factories = SpringFactoriesLoader
-				.loadFactories(DummyFactory.class, null,
-						"org/springframework/core/springFactoriesLoaderTests.properties");
+				.loadFactories(DummyFactory.class, null, FACTORIES_LOCATION);
 
 		assertEquals(2, factories.size());
 		assertTrue(factories.get(0) instanceof MyDummyFactory1);
@@ -39,7 +41,7 @@ public class SpringFactoriesLoaderTests {
 	@Test(expected = IllegalArgumentException.class)
 	public void loadInvalid() {
 		SpringFactoriesLoader.loadFactories(String.class, null,
-				"org/springframework/core/springFactoriesLoaderTests.properties");
+				FACTORIES_LOCATION);
 	}
 
 }

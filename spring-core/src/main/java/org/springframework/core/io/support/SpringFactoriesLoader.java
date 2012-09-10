@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.core;
+package org.springframework.core.io.support;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,8 +28,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -44,9 +44,9 @@ import org.springframework.util.StringUtils;
  * <p>The file should be in {@link Properties} format, where the key is the fully
  * qualified interface or abstract class name, and the value is a comma separated list of
  * implementations. For instance:
- * <pre class="code">
- * example.MyService=example.MyServiceImpl1,example.MyServiceImpl2
- * </pre>
+ *
+ * <pre class="code">example.MyService=example.MyServiceImpl1,example.MyServiceImpl2</pre>
+ *
  * where {@code MyService} is the name of the interface, and {@code MyServiceImpl1} and
  * {@code MyServiceImpl2} are the two implementations.
  *
@@ -61,18 +61,32 @@ public abstract class SpringFactoriesLoader {
 	public static final String DEFAULT_FACTORIES_LOCATION = "META-INF/spring.factories";
 
 	/**
+	 * Loads the factory implementations of the given type from the default location.
+	 *
+	 * <p>The returned factories are ordered in accordance with the {@link
+	 * AnnotationAwareOrderComparator}.
+	 *
+	 * @param factoryClass the interface or abstract class representing the factory
+	 * @throws IllegalArgumentException in case of errors
+	 */
+	public static <T> List<T> loadFactories(Class<T> factoryClass) {
+		return loadFactories(factoryClass, null, null);
+	}
+
+	/**
 	 * Loads the factory implementations of the given type from the default location, using
 	 * the given class loader.
 	 *
-	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
+	 * <p>The returned factories are ordered in accordance with the {@link
+	 * AnnotationAwareOrderComparator}.
 	 *
 	 * @param factoryClass the interface or abstract class representing the factory
-	 * @param classLoader  the ClassLoader to use for loading, can be {@code null} to use the
-	 *                     default
+	 * @param classLoader the ClassLoader to use for loading, can be {@code null} to use the
+	 * default
 	 * @throws IllegalArgumentException in case of errors
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass,
-	                                        ClassLoader classLoader) {
+			ClassLoader classLoader) {
 		return loadFactories(factoryClass, classLoader, null);
 	}
 
@@ -80,18 +94,18 @@ public abstract class SpringFactoriesLoader {
 	 * Loads the factory implementations of the given type from the given location, using the
 	 * given class loader.
 	 *
-	 * <p>The returned factories are ordered in accordance with the {@link OrderComparator}.
+	 * <p>The returned factories are ordered in accordance with the {@link
+	 * AnnotationAwareOrderComparator}.
 	 *
-	 * @param factoryClass      the interface or abstract class representing the factory
-	 * @param classLoader       the ClassLoader to use for loading, can be {@code null} to
-	 *                          use the default
+	 * @param factoryClass the interface or abstract class representing the factory
+	 * @param classLoader the ClassLoader to use for loading, can be {@code null} to use the
+	 * default
 	 * @param factoriesLocation the factories file location, can be {@code null} to use the
-	 *                          {@linkplain #DEFAULT_FACTORIES_LOCATION default}
+	 * {@linkplain #DEFAULT_FACTORIES_LOCATION default}
 	 * @throws IllegalArgumentException in case of errors
 	 */
 	public static <T> List<T> loadFactories(Class<T> factoryClass,
-	                                        ClassLoader classLoader,
-	                                        String factoriesLocation) {
+			ClassLoader classLoader, String factoriesLocation) {
 		Assert.notNull(factoryClass, "'factoryClass' must not be null");
 
 		if (classLoader == null) {
@@ -114,14 +128,13 @@ public abstract class SpringFactoriesLoader {
 			result.add(instantiateFactory(factoryName, factoryClass, classLoader));
 		}
 
-		Collections.sort(result, new OrderComparator());
+		Collections.sort(result, new AnnotationAwareOrderComparator());
 
 		return result;
 	}
 
 	private static List<String> loadFactoryNames(Class<?> factoryClass,
-	                                             ClassLoader classLoader,
-	                                             String factoriesLocation) {
+			ClassLoader classLoader, String factoriesLocation) {
 
 		String factoryClassName = factoryClass.getName();
 
@@ -129,7 +142,7 @@ public abstract class SpringFactoriesLoader {
 			List<String> result = new ArrayList<String>();
 			Enumeration<URL> urls = classLoader.getResources(factoriesLocation);
 			while (urls.hasMoreElements()) {
-				URL url = (URL) urls.nextElement();
+				URL url = urls.nextElement();
 				Properties properties =
 						PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				String factoryClassNames = properties.getProperty(factoryClassName);
@@ -150,8 +163,7 @@ public abstract class SpringFactoriesLoader {
 
 	@SuppressWarnings("unchecked")
 	private static <T> T instantiateFactory(String instanceClassName,
-	                                        Class<T> factoryClass,
-	                                        ClassLoader classLoader) {
+			Class<T> factoryClass, ClassLoader classLoader) {
 		try {
 			Class<?> instanceClass = ClassUtils.forName(instanceClassName, classLoader);
 			if (!factoryClass.isAssignableFrom(instanceClass)) {
