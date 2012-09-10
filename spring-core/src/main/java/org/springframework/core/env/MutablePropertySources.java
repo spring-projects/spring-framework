@@ -91,8 +91,10 @@ public class MutablePropertySources implements PropertySources {
 	 * Add the given property source object with highest precedence.
 	 */
 	public void addFirst(PropertySource<?> propertySource) {
-		logger.debug(String.format("Adding [%s] PropertySource with highest search precedence",
-				propertySource.getName()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Adding [%s] PropertySource with highest search precedence",
+					propertySource.getName()));
+		}
 		removeIfPresent(propertySource);
 		this.propertySourceList.addFirst(propertySource);
 	}
@@ -101,8 +103,10 @@ public class MutablePropertySources implements PropertySources {
 	 * Add the given property source object with lowest precedence.
 	 */
 	public void addLast(PropertySource<?> propertySource) {
-		logger.debug(String.format("Adding [%s] PropertySource with lowest search precedence",
-				propertySource.getName()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Adding [%s] PropertySource with lowest search precedence",
+					propertySource.getName()));
+		}
 		removeIfPresent(propertySource);
 		this.propertySourceList.addLast(propertySource);
 	}
@@ -112,8 +116,10 @@ public class MutablePropertySources implements PropertySources {
 	 * than the named relative property source.
 	 */
 	public void addBefore(String relativePropertySourceName, PropertySource<?> propertySource) {
-		logger.debug(String.format("Adding [%s] PropertySource with search precedence immediately higher than [%s]",
-				propertySource.getName(), relativePropertySourceName));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Adding [%s] PropertySource with search precedence immediately higher than [%s]",
+					propertySource.getName(), relativePropertySourceName));
+		}
 		assertLegalRelativeAddition(relativePropertySourceName, propertySource);
 		removeIfPresent(propertySource);
 		int index = assertPresentAndGetIndex(relativePropertySourceName);
@@ -125,8 +131,10 @@ public class MutablePropertySources implements PropertySources {
 	 * than the named relative property source.
 	 */
 	public void addAfter(String relativePropertySourceName, PropertySource<?> propertySource) {
-		logger.debug(String.format("Adding [%s] PropertySource with search precedence immediately lower than [%s]",
-				propertySource.getName(), relativePropertySourceName));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Adding [%s] PropertySource with search precedence immediately lower than [%s]",
+					propertySource.getName(), relativePropertySourceName));
+		}
 		assertLegalRelativeAddition(relativePropertySourceName, propertySource);
 		removeIfPresent(propertySource);
 		int index = assertPresentAndGetIndex(relativePropertySourceName);
@@ -145,7 +153,9 @@ public class MutablePropertySources implements PropertySources {
 	 * @param name the name of the property source to find and remove
 	 */
 	public PropertySource<?> remove(String name) {
-		logger.debug(String.format("Removing [%s] PropertySource", name));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Removing [%s] PropertySource", name));
+		}
 		int index = this.propertySourceList.indexOf(PropertySource.named(name));
 		return index == -1 ? null : this.propertySourceList.remove(index);
 	}
@@ -158,8 +168,10 @@ public class MutablePropertySources implements PropertySources {
 	 * @see #contains
 	 */
 	public void replace(String name, PropertySource<?> propertySource) {
-		logger.debug(String.format("Replacing [%s] PropertySource with [%s]",
-				name, propertySource.getName()));
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Replacing [%s] PropertySource with [%s]",
+					name, propertySource.getName()));
+		}
 		int index = assertPresentAndGetIndex(name);
 		this.propertySourceList.set(index, propertySource);
 	}
