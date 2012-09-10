@@ -20,25 +20,21 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -63,12 +59,6 @@ import org.springframework.util.StringUtils;
  * @see #forClass(Class)
  */
 public class CachedIntrospectionResults {
-
-	/**
-	 * The location to look for the bean info mapping files. Can be present in multiple JAR files.
-	 */
-	public static final String BEAN_INFO_FACTORIES_LOCATION = "META-INF/spring.beanInfoFactories";
-
 
 	private static final Log logger = LogFactory.getLog(CachedIntrospectionResults.class);
 
@@ -242,8 +232,8 @@ public class CachedIntrospectionResults {
 			BeanInfo beanInfo = null;
 			List<BeanInfoFactory> beanInfoFactories = getBeanInfoFactories(beanClass.getClassLoader());
 			for (BeanInfoFactory beanInfoFactory : beanInfoFactories) {
-				if (beanInfoFactory.supports(beanClass)) {
-					beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+				beanInfo = beanInfoFactory.getBeanInfo(beanClass);
+				if (beanInfo != null) {
 					break;
 				}
 			}
@@ -339,57 +329,12 @@ public class CachedIntrospectionResults {
 		if (beanInfoFactories == null) {
 			synchronized (beanInfoFactoriesMutex) {
 				if (beanInfoFactories == null) {
-					try {
-						Properties properties =
-								PropertiesLoaderUtils.loadAllProperties(
-										BEAN_INFO_FACTORIES_LOCATION, classLoader);
-
-						if (logger.isDebugEnabled()) {
-							logger.debug("Loaded BeanInfoFactories: " + properties.keySet());
-						}
-
-						List<BeanInfoFactory> factories = new ArrayList<BeanInfoFactory>(properties.size());
-
-						for (Object key : properties.keySet()) {
-							if (key instanceof String) {
-								String className = (String) key;
-								BeanInfoFactory factory = instantiateBeanInfoFactory(className, classLoader);
-								factories.add(factory);
-							}
-						}
-
-						Collections.sort(factories, new AnnotationAwareOrderComparator());
-
-						beanInfoFactories = Collections.synchronizedList(factories);
-					}
-					catch (IOException ex) {
-						throw new IllegalStateException(
-								"Unable to load BeanInfoFactories from location [" + BEAN_INFO_FACTORIES_LOCATION + "]", ex);
-					}
+					beanInfoFactories = Collections.synchronizedList(SpringFactoriesLoader
+							.loadFactories(BeanInfoFactory.class, classLoader));
 				}
 			}
 		}
 		return beanInfoFactories;
 	}
 
-	private static BeanInfoFactory instantiateBeanInfoFactory(String className,
-	                                                          ClassLoader classLoader) {
-		try {
-			Class<?> factoryClass = ClassUtils.forName(className, classLoader);
-			if (!BeanInfoFactory.class.isAssignableFrom(factoryClass)) {
-				throw new FatalBeanException(
-						"Class [" + className + "] does not implement the [" +
-								BeanInfoFactory.class.getName() + "] interface");
-			}
-			return (BeanInfoFactory) BeanUtils.instantiate(factoryClass);
-		}
-		catch (ClassNotFoundException ex) {
-			throw new FatalBeanException(
-					"BeanInfoFactory class [" + className + "] not found", ex);
-		}
-		catch (LinkageError err) {
-			throw new FatalBeanException("Invalid BeanInfoFactory class [" + className +
-					"]: problem with handler class file or dependent class", err);
-		}
-	}
 }

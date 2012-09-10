@@ -19,7 +19,6 @@ package org.springframework.beans;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -37,13 +36,21 @@ import org.springframework.core.Ordered;
  * @since 3.2
  * @see BeanInfoFactory
  */
-class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
+public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
+
+	/**
+	 * Return a new {@link ExtendedBeanInfo} for the given bean class.
+	 */
+	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
+		return supports(beanClass) ?
+				new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null;
+	}
 
 	/**
 	 * Return whether the given bean class declares or inherits any non-void returning
 	 * JavaBeans or <em>indexed property</em> setter methods.
 	 */
-	public boolean supports(Class<?> beanClass) {
+	private boolean supports(Class<?> beanClass) {
 		for (Method method : beanClass.getMethods()) {
 			String methodName = method.getName();
 			Class<?>[] parameterTypes = method.getParameterTypes();
@@ -57,13 +64,6 @@ class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Return a new {@link ExtendedBeanInfo} for the given bean class.
-	 */
-	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
-		return new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
 	}
 
 	public int getOrder() {

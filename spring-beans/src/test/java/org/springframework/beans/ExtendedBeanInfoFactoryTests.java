@@ -18,10 +18,10 @@ package org.springframework.beans;
 
 import java.beans.IntrospectionException;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertThat;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link ExtendedBeanInfoTests}.
@@ -38,7 +38,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public void setFoo(String s) { }
 		}
-		assertThat(factory.supports(C.class), is(false));
+		assertThat(factory.getBeanInfo(C.class), nullValue());
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(String s) { return this; }
 		}
-		assertThat(factory.supports(C.class), is(true));
+		assertThat(factory.getBeanInfo(C.class), notNullValue());
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			public C setFoo(int i, String s) { return this; }
 		}
-		assertThat(factory.supports(C.class), is(true));
+		assertThat(factory.getBeanInfo(C.class), notNullValue());
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			void setBar(String s) { }
 		}
-		assertThat(factory.supports(C.class), is(false));
+		assertThat(factory.getBeanInfo(C.class), nullValue());
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C setBar() { return this; }
 		}
-		assertThat(factory.supports(C.class), is(false));
+		assertThat(factory.getBeanInfo(C.class), nullValue());
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class ExtendedBeanInfoFactoryTests {
 		class C {
 			C set(String s) { return this; }
 		}
-		assertThat(factory.supports(C.class), is(false));
+		assertThat(factory.getBeanInfo(C.class), nullValue());
 	}
 
 }

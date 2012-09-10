@@ -23,17 +23,18 @@ import java.beans.IntrospectionException;
  * Strategy for creating {@link BeanInfo} instances.
  *
  * <p>BeanInfoFactories are are instantiated by the {@link CachedIntrospectionResults},
- * which looks for {@code META-INF/spring.beanInfoFactories} files on the class path.
- * These files contain one or more {@code BeanInfoFactory} class names, each of a single
- * line. When a {@link BeanInfo} is to be created, the {@code CachedIntrospectionResults}
- * will iterate through the discovered factories, asking each one if it {@linkplain
- * #supports(Class) supports} the given bean class. If it does, {@link
- * #getBeanInfo(Class)} will be called; if not, the next factory will be queried. If none
- * of the factories support the class, an standard {@link BeanInfo} is created as a
- * default.
+ * by using the {@link org.springframework.core.io.support.SpringFactoriesLoader} utility
+ * class.
  *
- * <p>Note that the {@link CachedIntrospectionResults} sorts the {@code BeanInfoFactory}
- * instances by {@link org.springframework.core.annotation.Order Order}, so that ones with
+ * When a {@link BeanInfo} is to be created, the {@code CachedIntrospectionResults}
+ * will iterate through the discovered factories, calling {@link
+ * #getBeanInfo(Class)} on each one. If {@code null} is returned, the next factory will
+ * be queried. If none of the factories support the class, an standard {@link BeanInfo}
+ * is created as a default.
+ *
+ * <p>Note that the {@link org.springframework.core.io.support.SpringFactoriesLoader}
+ * sorts the {@code BeanInfoFactory} instances by
+ * {@link org.springframework.core.annotation.Order @Order}, so that ones with
  * a higher precedence come first.
  *
  * @author Arjen Poutsma
@@ -42,18 +43,10 @@ import java.beans.IntrospectionException;
 public interface BeanInfoFactory {
 
 	/**
-	 * Indicates whether a bean with the given class is supported by this factory.
+	 * Returns the bean info for the given class, if supported.
 	 *
 	 * @param beanClass the bean class
-	 * @return {@code true} if supported; {@code false} otherwise
-	 */
-	boolean supports(Class<?> beanClass);
-
-	/**
-	 * Returns the bean info for the given class.
-	 *
-	 * @param beanClass the bean class
-	 * @return the bean info
+	 * @return the bean info, or {@code null} if not the given class is not supported
 	 * @throws IntrospectionException in case of exceptions
 	 */
 	BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException;
