@@ -18,6 +18,7 @@ package org.springframework.test.context;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +40,7 @@ import static org.junit.Assert.*;
  * @since 2.5
  * @see TestContextCacheKeyTests
  */
+@Ignore
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
 public class SpringRunnerContextCacheTests {
