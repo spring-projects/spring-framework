@@ -395,7 +395,7 @@ public class PortletRequestUtilsTests extends TestCase {
 			PortletRequestUtils.getFloatParameter(request, "nonExistingParam", 0f);
 		}
 		sw.stop();
-		assertThat(sw.getTotalTimeMillis(), lessThan(250L));
+		assertThat(sw.getTotalTimeMillis(), lessThan(350L));
 	}
 
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
