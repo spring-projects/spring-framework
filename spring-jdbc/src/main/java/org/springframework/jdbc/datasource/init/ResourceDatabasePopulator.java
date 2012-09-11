@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Oliver Gierke
  * @since 3.0
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
@@ -265,7 +266,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			if (content[i] == '\'') {
 				inLiteral = !inLiteral;
 			}
-			if (!inLiteral && script.substring(i).startsWith(delim)) {
+			if (!inLiteral && startsWithDelimiter(script, i, delim)) {
 				return true;
 			}
 		}
@@ -273,8 +274,30 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided delimiter character.
-	 * Each individual statement will be added to the provided <code>List</code>.
+	 * Returns whether the substring of a given source {@link String} starting at the given index starts with the given
+	 * delimiter.
+	 * 
+	 * @param source the source {@link String} to inspect
+	 * @param startIndex the index to look for the delimiter
+	 * @param delim the delimiter to look for
+	 * @return
+	 */
+	private boolean startsWithDelimiter(String source, int startIndex, String delim) {
+
+		int endIndex = startIndex + delim.length();
+
+		// String to short to contain the delimiter
+		if (source.length() < endIndex) {
+			return false;
+		}
+
+		return source.substring(startIndex, endIndex).equals(delim);
+	}
+
+	/**
+	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each individual
+	 * statement will be added to the provided <code>List</code>.
+	 * 
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement (typically a ';' character)
 	 * @param statements the List that will contain the individual statements
@@ -301,7 +324,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral) {
-				if (script.substring(i).startsWith(delim)) {
+				if (startsWithDelimiter(script, i, delim)) {
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
