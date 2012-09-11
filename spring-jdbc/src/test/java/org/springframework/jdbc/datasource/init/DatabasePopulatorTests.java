@@ -238,4 +238,21 @@ public class DatabasePopulatorTests {
 
 		EasyMock.verify(populator);
 	}
+
+	/**
+	 * @see SPR-9781
+	 */
+	@Test(timeout = 1000)
+	public void executesHugeScriptInReasonableTime() throws SQLException {
+
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-huge.sql"));
+
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		} finally {
+			connection.close();
+		}
+	}
 }
