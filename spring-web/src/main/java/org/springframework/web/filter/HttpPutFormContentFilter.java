@@ -87,14 +87,18 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		else {
 			filterChain.doFilter(request, response);
 		}
-
 	}
 
 	private boolean isFormContentType(HttpServletRequest request) {
 		String contentType = request.getContentType();
 		if (contentType != null) {
-			MediaType mediaType = MediaType.parseMediaType(contentType);
-			return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
+			try {
+				MediaType mediaType = MediaType.parseMediaType(contentType);
+				return (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType));
+			}
+			catch (IllegalArgumentException ex) {
+				return false;
+			}
 		}
 		else {
 			return false;

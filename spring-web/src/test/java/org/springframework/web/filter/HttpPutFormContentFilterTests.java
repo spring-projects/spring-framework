@@ -88,6 +88,15 @@ public class HttpPutFormContentFilterTests {
 	}
 
 	@Test
+	public void invalidMediaType() throws Exception {
+		request.setContent("".getBytes("ISO-8859-1"));
+		request.setContentType("foo");
+		filterChain = new MockFilterChain();
+		filter.doFilter(request, response, filterChain);
+		assertSame(request, filterChain.getRequest());
+	}
+
+	@Test
 	public void getParameter() throws Exception {
 		request.setContent("name=value".getBytes("ISO-8859-1"));
 		filter.doFilter(request, response, filterChain);
