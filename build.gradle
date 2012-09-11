@@ -51,6 +51,10 @@ configure(allprojects) {
 configure(subprojects) { subproject ->
     apply from: "${rootProject.projectDir}/publish-maven.gradle"
 
+    if(project.name != 'spring-core') {
+        dependencies.testCompile project(':spring-core').sourceSets.test.output
+    }
+
     jar {
         manifest.attributes['Implementation-Title'] = subproject.name
         manifest.attributes['Implementation-Version'] = subproject.version
