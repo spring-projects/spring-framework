@@ -58,6 +58,8 @@ configure(subprojects) { subproject ->
     apply from: "${rootProject.projectDir}/publish-maven.gradle"
 
     jar {
+        manifest.attributes['Created-By'] =
+            "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
         manifest.attributes['Implementation-Title'] = subproject.name
         manifest.attributes['Implementation-Version'] = subproject.version
 
