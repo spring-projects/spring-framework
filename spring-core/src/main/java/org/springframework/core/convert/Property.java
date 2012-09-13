@@ -17,6 +17,7 @@
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -24,6 +25,8 @@ import java.util.Map;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -43,6 +46,9 @@ import org.springframework.util.StringUtils;
  * @see TypeDescriptor#nested(Property, int)
  */
 public final class Property {
+
+	private static Map<Property, Annotation[]> annotationCache =
+			new ConcurrentReferenceHashMap<Property, Annotation[]>();
 
 	private final Class<?> objectType;
 
@@ -112,6 +118,9 @@ public final class Property {
 	}
 
 	Annotation[] getAnnotations() {
+		if(this.annotations == null) {
+			this.annotations = resolveAnnotations();
+		}
 		return this.annotations;
 	}
 
@@ -182,26 +191,26 @@ public final class Property {
 	}
 
 	private Annotation[] resolveAnnotations() {
-		Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
-		Method readMethod = getReadMethod();
-		if (readMethod != null) {
-			for (Annotation ann : readMethod.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
+		Annotation[] annotations = annotationCache.get(this);
+		if(annotations == null) {
+			Map<Class<? extends Annotation>, Annotation> annotationMap = new LinkedHashMap<Class<? extends Annotation>, Annotation>();
+			addAnnotationsToMap(annotationMap, getReadMethod());
+			addAnnotationsToMap(annotationMap, getWriteMethod());
+			addAnnotationsToMap(annotationMap, getField());
+			annotations = annotationMap.values().toArray(new Annotation[annotationMap.size()]);
+			annotationCache.put(this, annotations);
+		}
+		return annotations;
+	}
+
+	private void addAnnotationsToMap(
+		Map<Class<? extends Annotation>, Annotation> annotationMap,
+		AnnotatedElement object) {
+		if (object != null) {
+			for (Annotation annotation : object.getAnnotations()) {
+				annotationMap.put(annotation.annotationType(), annotation);
 			}
 		}
-		Method writeMethod = getWriteMethod();
-		if (writeMethod != null) {
-			for (Annotation ann : writeMethod.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
-			}
-		}
-		Field field = getField();
-		if (field != null) {
-			for (Annotation ann : field.getAnnotations()) {
-				annMap.put(ann.annotationType(), ann);
-			}
-		}
-		return annMap.values().toArray(new Annotation[annMap.size()]);
 	}
 
 	private Field getField() {
@@ -232,4 +241,34 @@ public final class Property {
 		}
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int hashCode = 1;
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(objectType);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(readMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(writeMethod);
+		hashCode = prime * hashCode + ObjectUtils.nullSafeHashCode(name);
+		return hashCode;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Property other = (Property) obj;
+		boolean equals = true;
+		equals &= ObjectUtils.nullSafeEquals(objectType, other.objectType);
+		equals &= ObjectUtils.nullSafeEquals(readMethod, other.readMethod);
+		equals &= ObjectUtils.nullSafeEquals(writeMethod, other.writeMethod);
+		equals &= ObjectUtils.nullSafeEquals(name, other.name);
+		return equals;
+	}
 }
