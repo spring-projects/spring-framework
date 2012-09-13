@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * The built TypeDescriptor can then be used to convert from/to the property type.
  *
  * @author Keith Donald
+ * @author Phillip Webb
  * @since 3.1
  * @see TypeDescriptor#TypeDescriptor(Property)
  * @see TypeDescriptor#nested(Property, int)
@@ -53,8 +54,7 @@ public final class Property {
 
 	private final MethodParameter methodParameter;
 
-	private final Annotation[] annotations;
-
+	private Annotation[] annotations;
 
 	public Property(Class<?> objectType, Method readMethod, Method writeMethod) {
 		this(objectType, readMethod, writeMethod, null);
@@ -65,13 +65,7 @@ public final class Property {
 		this.readMethod = readMethod;
 		this.writeMethod = writeMethod;
 		this.methodParameter = resolveMethodParameter();
-		if (name != null) {
-			this.name = name;
-		}
-		else {
-			this.name = resolveName();
-		}
-		this.annotations = resolveAnnotations();
+		this.name = (name == null ? resolveName() : name);
 	}
 
 
