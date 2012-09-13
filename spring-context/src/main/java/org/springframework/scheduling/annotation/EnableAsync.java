@@ -72,6 +72,7 @@ import org.springframework.core.Ordered;
  *     }
  *
  *     &#064;Override
+ *     &#064;Bean
  *     public Executor getAsyncExecutor() {
  *         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
  *         executor.setCorePoolSize(7);
