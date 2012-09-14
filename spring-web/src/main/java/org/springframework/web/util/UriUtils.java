@@ -83,6 +83,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 * @deprecated in favor of {@link UriComponentsBuilder}; see note about query param encoding
 	 */
+	@Deprecated
 	public static String encodeUri(String uri, String encoding) throws UnsupportedEncodingException {
 		Assert.notNull(uri, "'uri' must not be null");
 		Assert.hasLength(encoding, "'encoding' must not be empty");
@@ -123,6 +124,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 * @deprecated in favor of {@link UriComponentsBuilder}; see note about query param encoding
 	 */
+	@Deprecated
 	public static String encodeHttpUrl(String httpUrl, String encoding) throws UnsupportedEncodingException {
 		Assert.notNull(httpUrl, "'httpUrl' must not be null");
 		Assert.hasLength(encoding, "'encoding' must not be empty");
@@ -160,6 +162,7 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 * @deprecated in favor of {@link UriComponentsBuilder}
 	 */
+	@Deprecated
 	public static String encodeUriComponents(String scheme, String authority, String userInfo,
 			String host, String port, String path, String query, String fragment, String encoding)
 			throws UnsupportedEncodingException {
@@ -213,7 +216,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeScheme(String scheme, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(scheme, encoding, UriComponents.Type.SCHEME);
+		return HierarchicalUriComponents.encodeUriComponent(scheme, encoding,
+				HierarchicalUriComponents.Type.SCHEME);
 	}
 
 	/**
@@ -224,7 +228,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeAuthority(String authority, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(authority, encoding, UriComponents.Type.AUTHORITY);
+		return HierarchicalUriComponents.encodeUriComponent(authority, encoding,
+				HierarchicalUriComponents.Type.AUTHORITY);
 	}
 
 	/**
@@ -235,7 +240,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeUserInfo(String userInfo, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(userInfo, encoding, UriComponents.Type.USER_INFO);
+		return HierarchicalUriComponents.encodeUriComponent(userInfo, encoding,
+				HierarchicalUriComponents.Type.USER_INFO);
 	}
 
 	/**
@@ -246,7 +252,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeHost(String host, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(host, encoding, UriComponents.Type.HOST);
+		return HierarchicalUriComponents
+				.encodeUriComponent(host, encoding, HierarchicalUriComponents.Type.HOST);
 	}
 
 	/**
@@ -257,7 +264,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePort(String port, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(port, encoding, UriComponents.Type.PORT);
+		return HierarchicalUriComponents
+				.encodeUriComponent(port, encoding, HierarchicalUriComponents.Type.PORT);
 	}
 
 	/**
@@ -268,7 +276,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePath(String path, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(path, encoding, UriComponents.Type.PATH);
+		return HierarchicalUriComponents
+				.encodeUriComponent(path, encoding, HierarchicalUriComponents.Type.PATH);
 	}
 
 	/**
@@ -279,7 +288,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodePathSegment(String segment, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(segment, encoding, UriComponents.Type.PATH_SEGMENT);
+		return HierarchicalUriComponents.encodeUriComponent(segment, encoding,
+				HierarchicalUriComponents.Type.PATH_SEGMENT);
 	}
 
 	/**
@@ -290,7 +300,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQuery(String query, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(query, encoding, UriComponents.Type.QUERY);
+		return HierarchicalUriComponents
+				.encodeUriComponent(query, encoding, HierarchicalUriComponents.Type.QUERY);
 	}
 
 	/**
@@ -301,7 +312,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeQueryParam(String queryParam, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(queryParam, encoding, UriComponents.Type.QUERY_PARAM);
+		return HierarchicalUriComponents.encodeUriComponent(queryParam, encoding,
+				HierarchicalUriComponents.Type.QUERY_PARAM);
 	}
 
 	/**
@@ -312,7 +324,8 @@ public abstract class UriUtils {
 	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
 	 */
 	public static String encodeFragment(String fragment, String encoding) throws UnsupportedEncodingException {
-		return UriComponents.encodeUriComponent(fragment, encoding, UriComponents.Type.FRAGMENT);
+		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding,
+				HierarchicalUriComponents.Type.FRAGMENT);
 	}
 
 
