@@ -16,8 +16,6 @@
 
 package org.springframework.core;
 
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
@@ -25,16 +23,15 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 
 /**
  * Helper class for resolving generic types against type variables.
@@ -53,9 +50,8 @@ public abstract class GenericTypeResolver {
 	private static final Log logger = LogFactory.getLog(GenericTypeResolver.class);
 
 	/** Cache from Class to TypeVariable Map */
-	private static final Map<Class, Reference<Map<TypeVariable, Type>>> typeVariableCache =
-			Collections.synchronizedMap(new WeakHashMap<Class, Reference<Map<TypeVariable, Type>>>());
-
+	private static final Map<Class, Map<TypeVariable, Type>> typeVariableCache =
+			new ConcurrentReferenceHashMap<Class, Map<TypeVariable,Type>>();
 
 	/**
 	 * Determine the target type for the given parameter specification.
@@ -408,8 +404,8 @@ public abstract class GenericTypeResolver {
 	 * all super types, enclosing types and interfaces.
 	 */
 	public static Map<TypeVariable, Type> getTypeVariableMap(Class clazz) {
-		Reference<Map<TypeVariable, Type>> ref = typeVariableCache.get(clazz);
-		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref.get() : null);
+		Map<TypeVariable, Type> ref = typeVariableCache.get(clazz);
+		Map<TypeVariable, Type> typeVariableMap = (ref != null ? ref : null);
 
 		if (typeVariableMap == null) {
 			typeVariableMap = new HashMap<TypeVariable, Type>();
@@ -441,7 +437,7 @@ public abstract class GenericTypeResolver {
 				type = type.getEnclosingClass();
 			}
 
-			typeVariableCache.put(clazz, new WeakReference<Map<TypeVariable, Type>>(typeVariableMap));
+			typeVariableCache.put(clazz, typeVariableMap);
 		}
 
 		return typeVariableMap;
