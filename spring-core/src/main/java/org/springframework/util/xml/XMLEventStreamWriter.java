@@ -193,7 +193,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 
 	private void writeStartElement(StartElement startElement) throws XMLStreamException {
 		eventWriter.add(startElement);
-		endElements.add(eventFactory.createEndElement(startElement.getName(), null));
+		endElements.add(eventFactory.createEndElement(startElement.getName(), startElement.getNamespaces()));
 	}
 
 	private void writeNamespace(Namespace namespace) throws XMLStreamException {

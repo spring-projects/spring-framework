@@ -338,8 +338,8 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 	@Override
 	protected void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter) {
-		ContentHandler contentHandler = StaxUtils.createContentHandler(eventWriter);
-		marshalSaxHandlers(graph, contentHandler, null);
+		XMLStreamWriter streamWriter = StaxUtils.createEventStreamWriter(eventWriter);
+		marshalXmlStreamWriter(graph, streamWriter);
 	}
 
 

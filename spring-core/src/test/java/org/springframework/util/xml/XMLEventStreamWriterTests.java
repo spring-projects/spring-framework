@@ -29,7 +29,7 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 public class XMLEventStreamWriterTests {
 
 	private static final String XML =
-			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>"
+			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'><!--comment-->content</prefix:child></root>"
 			;
 
 	private XMLEventStreamWriter streamWriter;
@@ -52,6 +52,7 @@ public class XMLEventStreamWriterTests {
 		streamWriter.writeDefaultNamespace("namespace");
 		streamWriter.writeStartElement("prefix", "child", "namespace2");
 		streamWriter.writeNamespace("prefix", "namespace2");
+		streamWriter.writeComment("comment");
 		streamWriter.writeCharacters("content");
 		streamWriter.writeEndElement();
 		streamWriter.writeEndElement();
