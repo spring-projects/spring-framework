@@ -64,13 +64,24 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void fromUri() throws URISyntaxException {
+	public void fromHierarchicalUri() throws URISyntaxException {
 		URI uri = new URI("http://example.com/foo?bar#baz");
         UriComponents result = UriComponentsBuilder.fromUri(uri).build();
         assertEquals("http", result.getScheme());
         assertEquals("example.com", result.getHost());
         assertEquals("/foo", result.getPath());
         assertEquals("bar", result.getQuery());
+        assertEquals("baz", result.getFragment());
+
+		assertEquals("Invalid result URI", uri, result.toUri());
+	}
+
+	@Test
+	public void fromOpaqueUri() throws URISyntaxException {
+		URI uri = new URI("mailto:foo@bar.com#baz");
+        UriComponents result = UriComponentsBuilder.fromUri(uri).build();
+        assertEquals("mailto", result.getScheme());
+        assertEquals("foo@bar.com", result.getSchemeSpecificPart());
         assertEquals("baz", result.getFragment());
 
 		assertEquals("Invalid result URI", uri, result.toUri());
@@ -113,14 +124,15 @@ public class UriComponentsBuilderTests {
 		assertEquals(expectedQueryParams, result.getQueryParams());
         assertEquals("and(java.util.BitSet)", result.getFragment());
 
-        result = UriComponentsBuilder.fromUriString("mailto:java-net@java.sun.com").build();
+        result = UriComponentsBuilder.fromUriString("mailto:java-net@java.sun.com#baz").build();
         assertEquals("mailto", result.getScheme());
         assertNull(result.getUserInfo());
         assertNull(result.getHost());
         assertEquals(-1, result.getPort());
-        assertEquals("java-net@java.sun.com", result.getPathSegments().get(0));
+        assertEquals("java-net@java.sun.com", result.getSchemeSpecificPart());
+        assertNull(result.getPath());
         assertNull(result.getQuery());
-        assertNull(result.getFragment());
+        assertEquals("baz", result.getFragment());
 
         result = UriComponentsBuilder.fromUriString("docs/guide/collections/designfaq.html#28").build();
         assertNull(result.getScheme());
@@ -265,7 +277,7 @@ public class UriComponentsBuilderTests {
 	}
 
 	@Test
-	public void buildAndExpand() {
+	public void buildAndExpandHierarchical() {
 		UriComponents result = UriComponentsBuilder.fromPath("/{foo}").buildAndExpand("fooValue");
 		assertEquals("/fooValue", result.toUriString());
 
@@ -275,4 +287,17 @@ public class UriComponentsBuilderTests {
 		result = UriComponentsBuilder.fromPath("/{foo}/{bar}").buildAndExpand(values);
 		assertEquals("/fooValue/barValue", result.toUriString());
 	}
+
+	@Test
+	public void buildAndExpandOpaque() {
+		UriComponents result = UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand("foo", "example.com");
+		assertEquals("mailto:foo@example.com", result.toUriString());
+
+		Map<String, String> values = new HashMap<String, String>();
+		values.put("user", "foo");
+		values.put("domain", "example.com");
+		UriComponentsBuilder.fromUriString("mailto:{user}@{domain}").buildAndExpand(values);
+		assertEquals("mailto:foo@example.com", result.toUriString());
+	}
+
 }
