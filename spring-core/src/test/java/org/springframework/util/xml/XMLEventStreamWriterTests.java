@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,7 @@ import static org.custommonkey.xmlunit.XMLAssert.*;
 public class XMLEventStreamWriterTests {
 
 	private static final String XML =
-			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'>content</prefix:child></root>"
-			;
+			"<?pi content?><root xmlns='namespace'><prefix:child xmlns:prefix='namespace2'><!--comment-->content</prefix:child></root>";
 
 	private XMLEventStreamWriter streamWriter;
 
@@ -52,6 +51,7 @@ public class XMLEventStreamWriterTests {
 		streamWriter.writeDefaultNamespace("namespace");
 		streamWriter.writeStartElement("prefix", "child", "namespace2");
 		streamWriter.writeNamespace("prefix", "namespace2");
+		streamWriter.writeComment("comment");
 		streamWriter.writeCharacters("content");
 		streamWriter.writeEndElement();
 		streamWriter.writeEndElement();
