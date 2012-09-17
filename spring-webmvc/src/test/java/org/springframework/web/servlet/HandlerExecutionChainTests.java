@@ -92,15 +92,13 @@ public class HandlerExecutionChainTests {
 
 	@Test
 	public void successAsyncScenario() throws Exception {
-		ModelAndView mav = new ModelAndView();
-
 		expect(this.interceptor1.preHandle(this.request, this.response, this.handler)).andReturn(true);
 		expect(this.interceptor2.preHandle(this.request, this.response, this.handler)).andReturn(true);
 		expect(this.interceptor3.preHandle(this.request, this.response, this.handler)).andReturn(true);
 
-		this.interceptor1.afterConcurrentHandlingStarted(request, response);
-		this.interceptor2.afterConcurrentHandlingStarted(request, response);
-		this.interceptor3.afterConcurrentHandlingStarted(request, response);
+		this.interceptor1.afterConcurrentHandlingStarted(request, response, this.handler);
+		this.interceptor2.afterConcurrentHandlingStarted(request, response, this.handler);
+		this.interceptor3.afterConcurrentHandlingStarted(request, response, this.handler);
 
 		replay(this.interceptor1, this.interceptor2, this.interceptor3);
 

@@ -182,8 +182,8 @@ public class HandlerExecutionChain {
 		for (int i = getInterceptors().length - 1; i >= 0; i--) {
 			if (interceptors[i] instanceof AsyncHandlerInterceptor) {
 				try {
-					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) interceptors[i];
-					asyncInterceptor.afterConcurrentHandlingStarted(request, response);
+					AsyncHandlerInterceptor asyncInterceptor = (AsyncHandlerInterceptor) this.interceptors[i];
+					asyncInterceptor.afterConcurrentHandlingStarted(request, response, this.handler);
 				}
 				catch (Throwable ex) {
 					logger.error("Interceptor [" + interceptors[i] + "] failed in afterConcurrentHandlingStarted", ex);

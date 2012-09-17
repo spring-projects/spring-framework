@@ -28,7 +28,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 
@@ -74,7 +74,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 
 		String participateAttributeName = getParticipateAttributeName();
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
 			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
 				return;

@@ -25,7 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * Filter base class that guarantees to be just executed once per request,
@@ -159,7 +159,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * @see org.springframework.web.context.request.async.WebAsyncManager
 	 */
 	protected final boolean isAsyncDispatch(HttpServletRequest request) {
-		return AsyncWebUtils.getAsyncManager(request).hasConcurrentResult();
+		return WebAsyncUtils.getAsyncManager(request).hasConcurrentResult();
 	}
 
 	/**
@@ -175,7 +175,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	 * @see org.springframework.web.context.request.async.WebAsyncManager
 	 */
 	protected final boolean isLastRequestThread(HttpServletRequest request) {
-		return (!AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted());
+		return (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted());
 	}
 
 	/**

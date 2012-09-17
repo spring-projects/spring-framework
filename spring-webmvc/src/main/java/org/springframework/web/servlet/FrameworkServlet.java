@@ -47,7 +47,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
@@ -908,7 +908,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		initContextHolders(request, localeContext, requestAttributes);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerAsyncThreadInitializer(this.getClass().getName(), createAsyncThreadInitializer(request));
 
 		try {

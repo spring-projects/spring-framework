@@ -33,7 +33,7 @@ import junit.framework.TestCase;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * @author Rick Evans
@@ -176,9 +176,9 @@ public class CharacterEncodingFilterTests extends TestCase {
 
 
 	private void addAsyncManagerExpectations(HttpServletRequest request) {
-		expect(request.getAttribute(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE)).andReturn(null);
+		expect(request.getAttribute(WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE)).andReturn(null);
 		expectLastCall().anyTimes();
-		request.setAttribute(same(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE), notNull());
+		request.setAttribute(same(WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE), notNull());
 		expectLastCall().anyTimes();
 	}
 }

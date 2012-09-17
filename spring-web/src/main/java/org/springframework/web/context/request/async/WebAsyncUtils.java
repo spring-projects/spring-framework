@@ -32,7 +32,7 @@ import org.springframework.web.context.request.WebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class AsyncWebUtils {
+public abstract class WebAsyncUtils {
 
 	public static final String WEB_ASYNC_MANAGER_ATTRIBUTE = WebAsyncManager.class.getName() + ".WEB_ASYNC_MANAGER";
 
@@ -80,7 +80,7 @@ public abstract class AsyncWebUtils {
 	private static AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String className = "org.springframework.web.context.request.async.StandardServletAsyncWebRequest";
-			Class<?> clazz = ClassUtils.forName(className, AsyncWebUtils.class.getClassLoader());
+			Class<?> clazz = ClassUtils.forName(className, WebAsyncUtils.class.getClassLoader());
 			Constructor<?> constructor = clazz.getConstructor(HttpServletRequest.class, HttpServletResponse.class);
 			return (AsyncWebRequest) BeanUtils.instantiateClass(constructor, request, response);
 		}

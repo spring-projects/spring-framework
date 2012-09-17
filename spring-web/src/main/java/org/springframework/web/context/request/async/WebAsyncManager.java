@@ -80,8 +80,8 @@ public final class WebAsyncManager {
 
 	/**
 	 * Package private constructor.
-	 * @see AsyncWebUtils#getAsyncManager(javax.servlet.ServletRequest)
-	 * @see AsyncWebUtils#getAsyncManager(org.springframework.web.context.request.WebRequest)
+	 * @see WebAsyncUtils#getAsyncManager(javax.servlet.ServletRequest)
+	 * @see WebAsyncUtils#getAsyncManager(org.springframework.web.context.request.WebRequest)
 	 */
 	WebAsyncManager() {
 	}
@@ -100,7 +100,7 @@ public final class WebAsyncManager {
 		this.asyncWebRequest = asyncWebRequest;
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			public void run() {
-				asyncWebRequest.removeAttribute(AsyncWebUtils.WEB_ASYNC_MANAGER_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+				asyncWebRequest.removeAttribute(WebAsyncUtils.WEB_ASYNC_MANAGER_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 			}
 		});
 	}

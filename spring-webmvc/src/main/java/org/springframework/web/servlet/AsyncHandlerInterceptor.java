@@ -52,7 +52,8 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	 *
 	 * @param request the current request
 	 * @param response the current response
+	 * @param handler handler that started async execution, for type and/or instance examination
 	 */
-	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response);
+	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler);
 
 }

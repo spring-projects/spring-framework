@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -819,7 +819,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 		if (logger.isDebugEnabled()) {
 			String requestUri = urlPathHelper.getRequestUri(request);
-			String resumed = AsyncWebUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
+			String resumed = WebAsyncUtils.getAsyncManager(request).hasConcurrentResult() ? " resumed" : "";
 			logger.debug("DispatcherServlet with name '" + getServletName() + "'" + resumed +
 					" processing " + request.getMethod() + " request for [" + requestUri + "]");
 		}
@@ -856,7 +856,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			doDispatch(request, response);
 		}
 		finally {
-			if (AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+			if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 				return;
 			}
 			// Restore the original attribute snapshot, in case of an include.
@@ -882,7 +882,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		HandlerExecutionChain mappedHandler = null;
 		boolean multipartRequestParsed = false;
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
 			ModelAndView mv = null;
@@ -1001,7 +1001,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			}
 		}
 
-		if (AsyncWebUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+		if (WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
 			// Concurrent handling started during a forward
 			return;
 		}

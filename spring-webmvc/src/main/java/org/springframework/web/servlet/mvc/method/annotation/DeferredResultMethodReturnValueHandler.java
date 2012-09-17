@@ -18,7 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -45,7 +45,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 		}
 
 		DeferredResult<?> deferredResult = (DeferredResult<?>) returnValue;
-		AsyncWebUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
+		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
 	}
 
 }

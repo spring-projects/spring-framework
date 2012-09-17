@@ -32,7 +32,7 @@ import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -117,7 +117,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		SessionFactory sessionFactory = lookupSessionFactory(request);
 		boolean participate = false;
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		boolean isFirstRequest = !isAsyncDispatch(request);
 		String key = getAlreadyFilteredAttributeName();
 

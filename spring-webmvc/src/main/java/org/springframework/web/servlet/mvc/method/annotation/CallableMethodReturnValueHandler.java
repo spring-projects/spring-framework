@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
@@ -46,7 +46,7 @@ public class CallableMethodReturnValueHandler implements HandlerMethodReturnValu
 		}
 
 		Callable<?> callable = (Callable<?>) returnValue;
-		AsyncWebUtils.getAsyncManager(webRequest).startCallableProcessing(callable, mavContainer);
+		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(callable, mavContainer);
 	}
 
 }

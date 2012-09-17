@@ -48,7 +48,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -157,7 +157,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(webRequest);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(webRequest);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {
@@ -351,7 +351,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
 		replay(asyncWebRequest);
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {

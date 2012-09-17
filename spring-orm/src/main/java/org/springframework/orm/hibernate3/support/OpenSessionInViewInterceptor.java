@@ -26,7 +26,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.AsyncWebUtils;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
 
@@ -143,7 +143,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 */
 	public void preHandle(WebRequest request) throws DataAccessException {
 
-		WebAsyncManager asyncManager = AsyncWebUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		String participateAttributeName = getParticipateAttributeName();
 
 		if (asyncManager.hasConcurrentResult()) {

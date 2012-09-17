@@ -51,7 +51,7 @@ public class WebAsyncManagerTests {
 
 	@Before
 	public void setUp() {
-		this.asyncManager = AsyncWebUtils.getAsyncManager(new MockHttpServletRequest());
+		this.asyncManager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
 
 		this.asyncWebRequest = createStrictMock(AsyncWebRequest.class);
@@ -142,7 +142,7 @@ public class WebAsyncManagerTests {
 
 	@Test
 	public void startCallableProcessingNullRequest() {
-		WebAsyncManager manager = AsyncWebUtils.getAsyncManager(new MockHttpServletRequest());
+		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
 		try {
 			manager.startCallableProcessing(new Callable<Object>() {
 				public Object call() throws Exception {
