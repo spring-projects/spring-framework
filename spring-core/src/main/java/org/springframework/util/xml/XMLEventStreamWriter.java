@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 
 	private void writeStartElement(StartElement startElement) throws XMLStreamException {
 		eventWriter.add(startElement);
-		endElements.add(eventFactory.createEndElement(startElement.getName(), null));
+		endElements.add(eventFactory.createEndElement(startElement.getName(), startElement.getNamespaces()));
 	}
 
 	private void writeNamespace(Namespace namespace) throws XMLStreamException {

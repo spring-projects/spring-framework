@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -307,6 +307,15 @@ public abstract class StaxUtils {
 	 */
 	public static XMLStreamReader createEventStreamReader(XMLEventReader eventReader) throws XMLStreamException {
 		return new XMLEventStreamReader(eventReader);
+	}
+
+	/**
+	 * Return a {@link XMLStreamWriter} that writes to a {@link XMLEventWriter}.
+	 * @return a stream writer that writes to an event writer
+	 * @since 3.2
+	 */
+	public static XMLStreamWriter createEventStreamWriter(XMLEventWriter eventWriter) {
+		return new XMLEventStreamWriter(eventWriter, XMLEventFactory.newFactory());
 	}
 
 	/**
