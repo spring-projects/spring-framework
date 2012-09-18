@@ -23,9 +23,9 @@ package org.springframework.web.bind.annotation;
  *
  * <p>Note that, by default, {@link org.springframework.web.servlet.DispatcherServlet}
  * supports GET, HEAD, POST, PUT, PATCH and DELETE only. DispatcherServlet will
- * process TRACE and OPTIONS with the default HttpServlet behavior unless
+ * process other HTTP methods with the default HttpServlet behavior unless
  * explicitly told to dispatch those request types as well: Check out
- * the "dispatchOptionsRequest" and "dispatchTraceRequest" properties,
+ * the "dispatchOptionsRequest", "dispatchTraceRequest" and "dispatchAll" properties,
  * switching them to "true" if necessary.
  *
  * @author Juergen Hoeller
@@ -33,6 +33,7 @@ package org.springframework.web.bind.annotation;
  * @see RequestMapping
  * @see org.springframework.web.servlet.DispatcherServlet#setDispatchOptionsRequest
  * @see org.springframework.web.servlet.DispatcherServlet#setDispatchTraceRequest
+ * @see org.springframework.web.servlet.DispatcherServlet#setDispatchAll
  */
 public enum RequestMethod {
 

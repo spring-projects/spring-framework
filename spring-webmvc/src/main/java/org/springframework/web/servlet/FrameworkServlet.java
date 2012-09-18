@@ -19,10 +19,15 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -38,10 +43,10 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
@@ -152,6 +157,26 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	private static final String INIT_PARAM_DELIMITERS = ",; \t\n";
 
+	/**
+	 * HTTP Methods that are handled by {@link HttpServlet#service}.
+	 */
+	private static final Set<String> SUPERCLASS_HTTP_METHODS =
+			Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+					"GET", "HEAD", "PUT", "DELETE", "OPTIONS", "TRACE")));
+
+	/**
+	 * HTTP Methods that should always delegate to {@link #processRequest}
+	 */
+	private static final Set<String> PROCESSED_HTTP_METHODS;
+	static {
+		Set<String> methods = new HashSet<String>();
+		for (HttpMethod method : EnumSet.allOf(HttpMethod.class)) {
+			methods.add(method.name());
+		}
+		methods.removeAll(SUPERCLASS_HTTP_METHODS);
+		PROCESSED_HTTP_METHODS = Collections.unmodifiableSet(methods);
+	}
+
 
 	/** ServletContext attribute to find the WebApplicationContext in */
 	private String contextAttribute;
@@ -182,6 +207,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/** Should we dispatch an HTTP TRACE request to {@link #doService}? */
 	private boolean dispatchTraceRequest = false;
+
+	/** Should we dispatch all HTTP requests (regardless of their http method) to {@link #doService}? */
+	private boolean dispatchAllRequests = false;
 
 	/** WebApplicationContext for this servlet */
 	private WebApplicationContext webApplicationContext;
@@ -416,6 +444,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>Note that HttpServlet's default OPTIONS processing will be applied
 	 * in any case if your controllers happen to not set the 'Allow' header
 	 * (as required for an OPTIONS response).
+	 * @see #setDispatchAllRequests(boolean)
 	 */
 	public void setDispatchOptionsRequest(boolean dispatchOptionsRequest) {
 		this.dispatchOptionsRequest = dispatchOptionsRequest;
@@ -433,9 +462,30 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>Note that HttpServlet's default TRACE processing will be applied
 	 * in any case if your controllers happen to not generate a response
 	 * of content type 'message/http' (as required for a TRACE response).
+	 * @see #setDispatchAllRequests(boolean)
 	 */
 	public void setDispatchTraceRequest(boolean dispatchTraceRequest) {
 		this.dispatchTraceRequest = dispatchTraceRequest;
+	}
+
+	/**
+	 * Set whether this servlet should dispatch all HTTP requests (regardless of
+	 * their HTTP Method) to the {@link #doService} method.
+	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
+	 * default behavior (i.e. reflecting the message received back to the client).
+	 * <p>Turn this flag on if you prefer all requests to go through the
+	 * regular dispatching chain, just like other HTTP requests. This usually
+	 * means that your controllers will receive those requests; make sure
+	 * that those endpoints are actually able to handle all requests.
+	 * <p>When this property is "true" it will supersede any
+	 * {@link #setDispatchOptionsRequest dispatchOptionsRequest}
+	 * and {@link #setDispatchTraceRequest dispatchTraceRequest} settings.
+	 *
+	 * <p>Note that HttpServlet's default TRACE and OPTIONS processing will be applied
+	 * in any case if your controllers happen to not generate an appropriate response.
+	 */
+	public void setDispatchAllRequests(boolean dispatchAllRequests) {
+		this.dispatchAllRequests = dispatchAllRequests;
 	}
 
 
@@ -780,12 +830,21 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
 		String method = request.getMethod();
-		if (method.equalsIgnoreCase(RequestMethod.PATCH.name())) {
-			doPatch(request, response);
+
+		if(SUPERCLASS_HTTP_METHODS.contains(request)) {
+			super.service(request, response);
+			return;
 		}
-		else {
+
+		if(PROCESSED_HTTP_METHODS.contains(method)) {
+			processRequest(request, response);
+			return;
+		}
+
+		if(this.dispatchAllRequests) {
+			processRequest(request, response);
+		} else {
 			super.service(request, response);
 		}
 	}
@@ -827,16 +886,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate PATCH requests to {@link #processRequest}.
-	 * @see #doService
-	 */
-	protected final void doPatch(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		processRequest(request, response);
-	}
-
-	/**
 	 * Delegate DELETE requests to {@link #processRequest}.
 	 * @see #doService
 	 */
@@ -857,7 +906,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (this.dispatchOptionsRequest) {
+		if (this.dispatchOptionsRequest || this.dispatchAllRequests) {
 			processRequest(request, response);
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.
@@ -876,7 +925,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	protected void doTrace(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (this.dispatchTraceRequest) {
+		if (this.dispatchTraceRequest || this.dispatchAllRequests) {
 			processRequest(request, response);
 			if ("message/http".equals(response.getContentType())) {
 				// Proper TRACE response coming from a handler - we're done.
