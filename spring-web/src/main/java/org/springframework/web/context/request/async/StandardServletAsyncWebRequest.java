@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -92,10 +91,6 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	public boolean isAsyncStarted() {
 		return ((this.asyncContext != null) && getRequest().isAsyncStarted());
-	}
-
-	public boolean isDispatched() {
-		return (DispatcherType.ASYNC.equals(getRequest().getDispatcherType()));
 	}
 
 	/**

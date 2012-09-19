@@ -25,9 +25,9 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@code DeferredResult} provides an alternative to using a {@link Callable}
- * for asynchronous request processing. While a Callable is executed concurrently
- * on behalf of the application, with a DeferredResult the application can produce
- * the result from a thread of its choice.
+ * for asynchronous request processing. While a {@code Callable} is executed
+ * concurrently on behalf of the application, with a {@code DeferredResult} the
+ * application can produce the result from a thread of its choice.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -44,8 +44,6 @@ public final class DeferredResult<T> {
 	private final Long timeout;
 
 	private DeferredResultHandler resultHandler;
-
-	private Object result = RESULT_NONE;
 
 	private final AtomicBoolean expired = new AtomicBoolean(false);
 
@@ -79,7 +77,6 @@ public final class DeferredResult<T> {
 		this.timeout = timeout;
 	}
 
-
 	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
@@ -88,8 +85,12 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Set a handler to handle the result when set. Normally applications do not
-	 * use this method at runtime but may do so during testing.
+	 * Set a handler to handle the result when set. There can be only handler
+	 * for a {@code DeferredResult}. At runtime it will be set by the framework.
+	 * However applications may set it when unit testing.
+	 *
+	 * <p>If you need to be called back when a {@code DeferredResult} is set or
+	 * expires, register a {@link DeferredResultProcessingInterceptor} instead.
 	 */
 	public void setResultHandler(DeferredResultHandler resultHandler) {
 		this.resultHandler = resultHandler;
@@ -122,13 +123,13 @@ public final class DeferredResult<T> {
 	}
 
 	private boolean processResult(Object result) {
+
 		synchronized (this.lock) {
 
-			if (isSetOrExpired()) {
+			boolean wasExpired = getAndSetExpired();
+			if (wasExpired) {
 				return false;
 			}
-
-			this.result = result;
 
 			if (!awaitResultHandler()) {
 				throw new IllegalStateException("DeferredResultHandler not set");
@@ -156,15 +157,24 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Whether the DeferredResult can no longer be set either because the async
-	 * request expired or because it was already set.
+	 * Return {@code true} if this DeferredResult is no longer usable either
+	 * because it was previously set or because the underlying request ended
+	 * before it could be set.
+	 * <p>
+	 * The result may have been set with a call to {@link #setResult(Object)},
+	 * or {@link #setErrorResult(Object)}, or following a timeout, assuming a
+	 * timeout result was provided to the constructor. The request may before
+	 * the result set due to a timeout or network error.
 	 */
 	public boolean isSetOrExpired() {
-		return (this.expired.get() || (this.result != RESULT_NONE));
+		return this.expired.get();
 	}
 
-	void setExpired() {
-		this.expired.set(true);
+	/**
+	 * Atomically set the expired flag and return its previous value.
+	 */
+	boolean getAndSetExpired() {
+		return this.expired.getAndSet(true);
 	}
 
 	boolean hasTimeoutResult() {

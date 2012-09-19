@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.Callable;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -44,12 +45,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
@@ -909,7 +911,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		initContextHolders(request, localeContext, requestAttributes);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.registerAsyncThreadInitializer(this.getClass().getName(), createAsyncThreadInitializer(request));
+		asyncManager.registerCallableInterceptor(this.getClass().getName(), createRequestBindingInterceptor(request));
 
 		try {
 			doService(request, response);
@@ -992,13 +994,15 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 	}
 
-	private WebAsyncThreadInitializer createAsyncThreadInitializer(final HttpServletRequest request) {
+	private CallableProcessingInterceptor createRequestBindingInterceptor(final HttpServletRequest request) {
 
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
+		return new CallableProcessingInterceptor() {
+
+			public void preProcess(NativeWebRequest webRequest, Callable<?> task) {
 				initContextHolders(request, buildLocaleContext(request), new ServletRequestAttributes(request));
 			}
-			public void reset() {
+
+			public void postProcess(NativeWebRequest webRequest, Callable<?> task, Object concurrentResult) {
 				resetContextHolders(request, null, null);
 			}
 		};

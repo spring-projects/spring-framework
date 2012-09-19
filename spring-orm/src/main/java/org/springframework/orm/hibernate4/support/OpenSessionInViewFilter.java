@@ -17,6 +17,7 @@
 package org.springframework.orm.hibernate4.support;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,9 +33,10 @@ import org.springframework.orm.hibernate4.SessionFactoryUtils;
 import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -126,14 +128,14 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+			if (isFirstRequest || !applySessionBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
 				Session session = openSession(sessionFactory);
 				SessionHolder sessionHolder = new SessionHolder(session);
 				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
 
-				WebAsyncThreadInitializer initializer = createAsyncThreadInitializer(sessionFactory, sessionHolder);
-				asyncManager.registerAsyncThreadInitializer(key, initializer);
+				asyncManager.registerCallableInterceptor(key,
+						new SessionBindingCallableInterceptor(sessionFactory, sessionHolder));
 			}
 		}
 
@@ -201,17 +203,39 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private WebAsyncThreadInitializer createAsyncThreadInitializer(final SessionFactory sessionFactory,
-			final SessionHolder sessionHolder) {
-
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
-				TransactionSynchronizationManager.bindResource(sessionFactory, sessionHolder);
-			}
-			public void reset() {
-				TransactionSynchronizationManager.unbindResource(sessionFactory);
-			}
-		};
+	private boolean applySessionBindingInterceptor(WebAsyncManager asyncManager, String key) {
+		if (asyncManager.getCallableInterceptor(key) == null) {
+			return false;
+		}
+		((SessionBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		return true;
 	}
 
+
+	/**
+	 * Bind and unbind the Hibernate {@code Session} to the current thread.
+	 */
+	private static class SessionBindingCallableInterceptor implements CallableProcessingInterceptor {
+
+		private final SessionFactory sessionFactory;
+
+		private final SessionHolder sessionHolder;
+
+		public SessionBindingCallableInterceptor(SessionFactory sessionFactory, SessionHolder sessionHolder) {
+			this.sessionFactory = sessionFactory;
+			this.sessionHolder = sessionHolder;
+		}
+
+		public void preProcess(NativeWebRequest request, Callable<?> task) {
+			initializeThread();
+		}
+
+		private void initializeThread() {
+			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
+		}
+
+		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
+		}
+	}
 }

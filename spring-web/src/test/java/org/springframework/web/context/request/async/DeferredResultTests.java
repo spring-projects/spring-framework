@@ -100,7 +100,7 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<String>();
 		assertFalse(result.isSetOrExpired());
 
-		result.setExpired();
+		result.getAndSetExpired();
 		assertTrue(result.isSetOrExpired());
 		assertFalse(result.setResult("hello"));
 	}

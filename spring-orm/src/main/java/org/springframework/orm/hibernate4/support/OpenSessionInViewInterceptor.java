@@ -16,6 +16,8 @@
 
 package org.springframework.orm.hibernate4.support;
 
+import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
@@ -29,10 +31,11 @@ import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.context.request.AsyncWebRequestInterceptor;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
@@ -109,7 +112,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		if (asyncManager.hasConcurrentResult()) {
-			if (asyncManager.initializeAsyncThread(participateAttributeName)) {
+			if (applySessionBindingInterceptor(asyncManager, participateAttributeName)) {
 				return;
 			}
 		}
@@ -126,8 +129,8 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 			SessionHolder sessionHolder = new SessionHolder(session);
 			TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
 
-			WebAsyncThreadInitializer asyncThreadInitializer = createThreadInitializer(sessionHolder);
-			asyncManager.registerAsyncThreadInitializer(participateAttributeName, asyncThreadInitializer);
+			asyncManager.registerCallableInterceptor(participateAttributeName,
+					new SessionBindingCallableInterceptor(sessionHolder));
 		}
 	}
 
@@ -200,15 +203,37 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;
 	}
 
-	private WebAsyncThreadInitializer createThreadInitializer(final SessionHolder sessionHolder) {
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
-				TransactionSynchronizationManager.bindResource(getSessionFactory(), sessionHolder);
-			}
-			public void reset() {
-				TransactionSynchronizationManager.unbindResource(getSessionFactory());
-			}
-		};
+	private boolean applySessionBindingInterceptor(WebAsyncManager asyncManager, String key) {
+		if (asyncManager.getCallableInterceptor(key) == null) {
+			return false;
+		}
+		((SessionBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		return true;
+	}
+
+
+	/**
+	 * Bind and unbind the Hibernate {@code Session} to the current thread.
+	 */
+	private class SessionBindingCallableInterceptor implements CallableProcessingInterceptor {
+
+		private final SessionHolder sessionHolder;
+
+		public SessionBindingCallableInterceptor(SessionHolder sessionHolder) {
+			this.sessionHolder = sessionHolder;
+		}
+
+		public void preProcess(NativeWebRequest request, Callable<?> task) {
+			initializeThread();
+		}
+
+		private void initializeThread() {
+			TransactionSynchronizationManager.bindResource(getSessionFactory(), this.sessionHolder);
+		}
+
+		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(getSessionFactory());
+		}
 	}
 
 }

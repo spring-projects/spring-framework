@@ -181,6 +181,7 @@ public class OpenSessionInViewTests {
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 
 		asyncManager.startCallableProcessing(new Callable<String>() {
@@ -195,10 +196,6 @@ public class OpenSessionInViewTests {
 		assertFalse(TransactionSynchronizationManager.hasResource(sf));
 
 		// Async dispatch thread
-
-		reset(asyncWebRequest);
-		expect(asyncWebRequest.isDispatched()).andReturn(true);
-		replay(asyncWebRequest);
 
 		interceptor.preHandle(this.webRequest);
 		assertTrue("Session not bound to async thread", TransactionSynchronizationManager.hasResource(sf));
@@ -496,10 +493,10 @@ public class OpenSessionInViewTests {
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
-		expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {
@@ -524,7 +521,6 @@ public class OpenSessionInViewTests {
 
 		expect(session.close()).andReturn(null);
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
-		expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
 
 		replay(sf);
 		replay(session);

@@ -49,10 +49,6 @@ public class NoSupportAsyncWebRequest extends ServletWebRequest implements Async
 		return false;
 	}
 
-	public boolean isDispatched() {
-		return false;
-	}
-
 	// Not supported
 
 	public void startAsync() {

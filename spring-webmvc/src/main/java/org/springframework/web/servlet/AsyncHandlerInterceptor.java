@@ -19,18 +19,19 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.method.HandlerMethod;
+
 /**
  * Extends {@code HandlerInterceptor} with a callback method invoked during
  * asynchronous request handling.
  *
  * <p>When a handler starts asynchronous request handling, the DispatcherServlet
  * exits without invoking {@code postHandle} and {@code afterCompletion}, as it
- * normally does, since the results of request handling (e.g. ModelAndView) are
- * not available in the current thread and handling is not yet complete.
- * In such scenarios, the
+ * normally does, since the results of request handling (e.g. ModelAndView)
+ * will. be produced concurrently in another thread. In such scenarios,
  * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse)}
- * method is invoked instead allowing implementations to perform tasks such as
- * cleaning up thread bound attributes.
+ * is invoked instead allowing implementations to perform tasks such as cleaning
+ * up thread bound attributes.
  *
  * <p>When asynchronous handling completes, the request is dispatched to the
  * container for further processing. At this stage the DispatcherServlet invokes
@@ -40,20 +41,26 @@ import javax.servlet.http.HttpServletResponse;
  * @since 3.2
  *
  * @see org.springframework.web.context.request.async.WebAsyncManager
+ * @see org.springframework.web.context.request.async.CallableProcessingInterceptor
+ * @see org.springframework.web.context.request.async.DeferredResultProcessingInterceptor
  */
 public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 
 	/**
-	 * Called instead of {@code postHandle} and {@code afterCompletion}, when the
-	 * a handler is being executed concurrently. Implementations may use the provided
-	 * request and response but should avoid modifying them in ways that would
-	 * conflict with the concurrent execution of the handler. A typical use of
-	 * this method would be to clean thread local variables.
+	 * Called instead of {@code postHandle} and {@code afterCompletion}, when
+	 * the a handler is being executed concurrently. Implementations may use the
+	 * provided request and response but should avoid modifying them in ways
+	 * that would conflict with the concurrent execution of the handler. A
+	 * typical use of this method would be to clean thread local variables.
 	 *
 	 * @param request the current request
 	 * @param response the current response
-	 * @param handler handler that started async execution, for type and/or instance examination
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
+	 * @throws Exception in case of errors
 	 */
-	void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler);
+	void afterConcurrentHandlingStarted(
+			HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception;
 
 }

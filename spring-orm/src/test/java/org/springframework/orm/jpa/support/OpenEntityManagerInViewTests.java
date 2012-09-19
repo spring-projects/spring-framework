@@ -38,6 +38,7 @@ import javax.servlet.ServletResponse;
 
 import junit.framework.TestCase;
 
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -158,6 +159,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(webRequest);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {
@@ -171,10 +173,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
 
 		// Async dispatch thread
-
-		reset(asyncWebRequest);
-		expect(asyncWebRequest.isDispatched()).andReturn(true);
-		replay(asyncWebRequest);
 
 		reset(manager, factory);
 		replay(manager, factory);
@@ -348,10 +346,10 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
-		expect(asyncWebRequest.isDispatched()).andReturn(false).anyTimes();
 		replay(asyncWebRequest);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
 			public String call() throws Exception {
@@ -372,7 +370,6 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		reset(asyncWebRequest);
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(false).anyTimes();
-		expect(asyncWebRequest.isDispatched()).andReturn(true).anyTimes();
 		replay(asyncWebRequest);
 
 		assertFalse(TransactionSynchronizationManager.hasResource(factory));
@@ -389,4 +386,12 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		wac.close();
 	}
 
+	@SuppressWarnings("serial")
+	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {
+
+		@Override
+		public void execute(Runnable task, long startTimeout) {
+			task.run();
+		}
+	}
 }

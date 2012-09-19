@@ -17,6 +17,7 @@
 package org.springframework.orm.jpa.support;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -32,9 +33,10 @@ import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncManager.WebAsyncThreadInitializer;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -150,15 +152,14 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
-			if (isFirstRequest || !asyncManager.initializeAsyncThread(key)) {
+			if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 				try {
 					EntityManager em = createEntityManager(emf);
 					EntityManagerHolder emHolder = new EntityManagerHolder(em);
 					TransactionSynchronizationManager.bindResource(emf, emHolder);
 
-					WebAsyncThreadInitializer initializer = createAsyncThreadInitializer(emf, emHolder);
-					asyncManager.registerAsyncThreadInitializer(key, initializer);
+					asyncManager.registerCallableInterceptor(key, new EntityManagerBindingCallableInterceptor(emf, emHolder));
 				}
 				catch (PersistenceException ex) {
 					throw new DataAccessResourceFailureException("Could not create JPA EntityManager", ex);
@@ -230,17 +231,40 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		return emf.createEntityManager();
 	}
 
-	private WebAsyncThreadInitializer createAsyncThreadInitializer(final EntityManagerFactory emFactory,
-			final EntityManagerHolder emHolder) {
+	private boolean applyEntityManagerBindingInterceptor(WebAsyncManager asyncManager, String key) {
+		if (asyncManager.getCallableInterceptor(key) == null) {
+			return false;
+		}
+		((EntityManagerBindingCallableInterceptor) asyncManager.getCallableInterceptor(key)).initializeThread();
+		return true;
+	}
 
-		return new WebAsyncThreadInitializer() {
-			public void initialize() {
-				TransactionSynchronizationManager.bindResource(emFactory, emHolder);
-			}
-			public void reset() {
-				TransactionSynchronizationManager.unbindResource(emFactory);
-			}
-		};
+	/**
+	 * Bind and unbind the {@code EntityManager} to the current thread.
+	 */
+	private static class EntityManagerBindingCallableInterceptor implements CallableProcessingInterceptor {
+
+		private final EntityManagerFactory emFactory;
+
+		private final EntityManagerHolder emHolder;
+
+
+		public EntityManagerBindingCallableInterceptor(EntityManagerFactory emFactory, EntityManagerHolder emHolder) {
+			this.emFactory = emFactory;
+			this.emHolder = emHolder;
+		}
+
+		public void preProcess(NativeWebRequest request, Callable<?> task) {
+			initializeThread();
+		}
+
+		private void initializeThread() {
+			TransactionSynchronizationManager.bindResource(this.emFactory, this.emHolder);
+		}
+
+		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(this.emFactory);
+		}
 	}
 
 }

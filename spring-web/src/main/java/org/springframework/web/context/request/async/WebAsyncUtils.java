@@ -64,10 +64,11 @@ public abstract class WebAsyncUtils {
 	}
 
 	/**
-	 * Create an AsyncWebRequest instance.
-	 * <p>By default an instance of {@link StandardServletAsyncWebRequest} is created
-	 * if running in Servlet 3.0 (or higher) environment or as a fallback option an
-	 * instance of {@link NoSupportAsyncWebRequest} is returned.
+	 * Create an AsyncWebRequest instance. By default an instance of
+	 * {@link StandardServletAsyncWebRequest} is created if running in Servlet
+	 * 3.0 (or higher) environment or as a fallback, an instance of
+	 * {@link NoSupportAsyncWebRequest} is returned.
+	 *
 	 * @param request the current request
 	 * @param response the current response
 	 * @return an AsyncWebRequest instance, never {@code null}

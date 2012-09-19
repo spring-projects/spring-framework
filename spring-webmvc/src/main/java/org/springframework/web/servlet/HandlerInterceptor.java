@@ -19,6 +19,8 @@ package org.springframework.web.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.method.HandlerMethod;
+
 /**
  * Workflow interface that allows for customized handler execution chains.
  * Applications can register any number of existing or custom interceptors
@@ -36,8 +38,8 @@ import javax.servlet.http.HttpServletResponse;
  * {@code postHandle} and {@code afterCompletion} callbacks. When concurrent
  * handler execution completes, the request is dispatched back in order to
  * proceed with rendering the model and all methods of this contract are invoked
- * again. For further options and comments see
- * {@code org.springframework.web.servlet.HandlerInterceptor}
+ * again. For further options and details see
+ * {@code org.springframework.web.servlet.AsyncHandlerInterceptor}
  *
  * <p>Typically an interceptor chain is defined per HandlerMapping bean,
  * sharing its granularity. To be able to apply a certain interceptor chain
@@ -100,7 +102,8 @@ public interface HandlerInterceptor {
 	 * getting applied in inverse order of the execution chain.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
 	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
 	 * (can also be <code>null</code>)
 	 * @throws Exception in case of errors
@@ -120,7 +123,8 @@ public interface HandlerInterceptor {
 	 * the last to be invoked.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler chosen handler to execute, for type and/or instance examination
+	 * @param handler handler (or {@link HandlerMethod}) that started async
+	 * execution, for type and/or instance examination
 	 * @param ex exception thrown on handler execution, if any
 	 * @throws Exception in case of errors
 	 */
