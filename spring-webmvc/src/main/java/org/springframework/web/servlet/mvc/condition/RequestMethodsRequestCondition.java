@@ -28,9 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
- * A logical disjunction (' || ') request condition that matches a request 
+ * A logical disjunction (' || ') request condition that matches a request
  * against a set of {@link RequestMethod}s.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -41,7 +41,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 
 	/**
 	 * Create a new instance with the given request methods.
-	 * @param requestMethods 0 or more HTTP request methods; 
+	 * @param requestMethods 0 or more HTTP request methods;
 	 * 		if, 0 the condition will match to every request.
 	 */
 	public RequestMethodsRequestCondition(RequestMethod... requestMethods) {
@@ -51,13 +51,13 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	private static List<RequestMethod> asList(RequestMethod... requestMethods) {
 		return requestMethods != null ? Arrays.asList(requestMethods) : Collections.<RequestMethod>emptyList();
 	}
-	
+
 	/**
 	 * Private constructor.
 	 */
 	private RequestMethodsRequestCondition(Collection<RequestMethod> requestMethods) {
 		this.methods = Collections.unmodifiableSet(new LinkedHashSet<RequestMethod>(requestMethods));
-	} 
+	}
 
 	/**
 	 * Returns all {@link RequestMethod}s contained in this condition.
@@ -75,9 +75,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	protected String getToStringInfix() {
 		return " || ";
 	}
-	
+
 	/**
-	 * Returns a new instance with a union of the HTTP request methods 
+	 * Returns a new instance with a union of the HTTP request methods
 	 * from "this" and the "other" instance.
 	 */
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
@@ -87,36 +87,47 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	/**
-	 * Checks if any of the HTTP request methods match the given request and returns 
-	 * an instance that contains the matching request method only.  
+	 * Check if any of the HTTP request methods match the given request and
+	 * return an instance that contains the matching HTTP request method only.
+	 *
 	 * @param request the current request
-	 * @return the same instance if the condition contains no request method; 
-	 * 		or a new condition with the matching request method; 
-	 * 		or {@code null} if no request methods match.
+	 * @return the same instance if the condition is empty, a new condition with
+	 * the matched request method, or {@code null} if no request methods match
 	 */
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (methods.isEmpty()) {
+		if (this.methods.isEmpty()) {
 			return this;
 		}
-		RequestMethod incomingRequestMethod = RequestMethod.valueOf(request.getMethod());
-		for (RequestMethod method : methods) {
-			if (method.equals(incomingRequestMethod)) {
-				return new RequestMethodsRequestCondition(method);
+		RequestMethod incomingRequestMethod = getRequestMethod(request);
+		if(incomingRequestMethod != null) {
+			for (RequestMethod method : this.methods) {
+				if (method.equals(incomingRequestMethod)) {
+					return new RequestMethodsRequestCondition(method);
+				}
 			}
 		}
 		return null;
 	}
 
+	private RequestMethod getRequestMethod(HttpServletRequest request) {
+		try {
+			return RequestMethod.valueOf(request.getMethod());
+		}
+		catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Returns:
 	 * <ul>
-	 * 	<li>0 if the two conditions contain the same number of HTTP request methods.
-	 * 	<li>Less than 0 if "this" instance has an HTTP request method but "other" doesn't.
-	 * 	<li>Greater than 0 "other" has an HTTP request method but "this" doesn't.
-	 * </ul>   
-	 * 
-	 * <p>It is assumed that both instances have been obtained via 
-	 * {@link #getMatchingCondition(HttpServletRequest)} and therefore each instance 
+	 * 	<li>0 if the two conditions contain the same number of HTTP request methods
+	 * 	<li>Less than 0 if "this" instance has an HTTP request method but "other" doesn't
+	 * 	<li>Greater than 0 "other" has an HTTP request method but "this" doesn't
+	 * </ul>
+	 *
+	 * <p>It is assumed that both instances have been obtained via
+	 * {@link #getMatchingCondition(HttpServletRequest)} and therefore each instance
 	 * contains the matching HTTP request method only or is otherwise empty.
 	 */
 	public int compareTo(RequestMethodsRequestCondition other, HttpServletRequest request) {

@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -47,7 +48,7 @@ public class RequestMethodsRequestConditionTests {
 
 		assertNull(condition.getMatchingCondition(request));
 	}
-	
+
 	@Test
 	public void multipleMethodsMatch() {
 		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
@@ -67,13 +68,22 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
+	public void unknownMethodType() throws Exception {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.POST);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("PROPFIND", "/foo");
+
+		assertNull(condition.getMatchingCondition(request));
+	}
+
+	@Test
 	public void compareTo() {
 		RequestMethodsRequestCondition condition1 = new RequestMethodsRequestCondition(RequestMethod.GET, RequestMethod.HEAD);
 		RequestMethodsRequestCondition condition2 = new RequestMethodsRequestCondition(RequestMethod.POST);
 		RequestMethodsRequestCondition condition3 = new RequestMethodsRequestCondition();
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
-		
+
 		int result = condition1.compareTo(condition2, request);
 		assertTrue("Invalid comparison result: " + result, result < 0);
 
