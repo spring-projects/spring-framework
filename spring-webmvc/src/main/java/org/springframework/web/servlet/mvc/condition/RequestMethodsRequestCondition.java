@@ -87,32 +87,43 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	}
 
 	/**
-	 * Checks if any of the HTTP request methods match the given request and returns
-	 * an instance that contains the matching request method only.
+	 * Check if any of the HTTP request methods match the given request and
+	 * return an instance that contains the matching HTTP request method only.
+	 *
 	 * @param request the current request
-	 * @return the same instance if the condition contains no request method;
-	 * 		or a new condition with the matching request method;
-	 * 		or {@code null} if no request methods match.
+	 * @return the same instance if the condition is empty, a new condition with
+	 * the matched request method, or {@code null} if no request methods match
 	 */
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (methods.isEmpty()) {
+		if (this.methods.isEmpty()) {
 			return this;
 		}
-		RequestMethod incomingRequestMethod = RequestMethod.valueOf(request.getMethod());
-		for (RequestMethod method : methods) {
-			if (method.equals(incomingRequestMethod)) {
-				return new RequestMethodsRequestCondition(method);
+		RequestMethod incomingRequestMethod = getRequestMethod(request);
+		if(incomingRequestMethod != null) {
+			for (RequestMethod method : this.methods) {
+				if (method.equals(incomingRequestMethod)) {
+					return new RequestMethodsRequestCondition(method);
+				}
 			}
 		}
 		return null;
 	}
 
+	private RequestMethod getRequestMethod(HttpServletRequest request) {
+		try {
+			return RequestMethod.valueOf(request.getMethod());
+		}
+		catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Returns:
 	 * <ul>
-	 * 	<li>0 if the two conditions contain the same number of HTTP request methods.
-	 * 	<li>Less than 0 if "this" instance has an HTTP request method but "other" doesn't.
-	 * 	<li>Greater than 0 "other" has an HTTP request method but "this" doesn't.
+	 * 	<li>0 if the two conditions contain the same number of HTTP request methods
+	 * 	<li>Less than 0 if "this" instance has an HTTP request method but "other" doesn't
+	 * 	<li>Greater than 0 "other" has an HTTP request method but "this" doesn't
 	 * </ul>
 	 *
 	 * <p>It is assumed that both instances have been obtained via
