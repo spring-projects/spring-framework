@@ -98,13 +98,26 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		if (methods.isEmpty()) {
 			return this;
 		}
-		RequestMethod incomingRequestMethod = RequestMethod.valueOf(request.getMethod());
-		for (RequestMethod method : methods) {
-			if (method.equals(incomingRequestMethod)) {
-				return new RequestMethodsRequestCondition(method);
+		RequestMethod incomingRequestMethod = getRequestMethod(request);
+		if(incomingRequestMethod != null) {
+			for (RequestMethod method : methods) {
+				if (method.equals(incomingRequestMethod)) {
+					return new RequestMethodsRequestCondition(method);
+				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns the RequestMethod or {@code null} if the method is unknown.
+	 */
+	private RequestMethod getRequestMethod(HttpServletRequest request) {
+		try {
+			return RequestMethod.valueOf(request.getMethod());
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
 	}
 
 	/**
