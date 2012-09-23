@@ -434,4 +434,14 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return this.name;
 	}
 
+    // following are used to help verify the MethodOverride parsing.
+
+    public void replaceMe(String someParam) {
+        throw new UnsupportedOperationException("Please don't call be");
+    }
+
+    public void replaceMe(int anotherParam) {
+        throw new UnsupportedOperationException("Please don't call be");
+    }
+
 }
