@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.beans.factory.xml;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.*;
+import org.springframework.util.ReflectionUtils;
 import org.xml.sax.InputSource;
 
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -154,4 +155,35 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 		assertNotNull(bean);
 	}
 
+
+    /**
+     * Verifies that the arg-type sub element of replaced-method is parsed correctly.
+     *
+     * This relates to SPR-9812.
+     *
+     */
+    public void testReplaceMethodSubElements(){
+        SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
+        ClassPathResource classPathResource = new ClassPathResource("replacedMethodSubElements.xml", getClass());
+        Resource resource = classPathResource;
+        new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
+        GenericBeanDefinition beanDefinition = (GenericBeanDefinition) registry.getBeanDefinition("testBean");
+        assertNotNull(beanDefinition);
+
+        MethodOverrides methodOverrides = beanDefinition.getMethodOverrides();
+        assertEquals("Unexpected number of method overrides for testBean", 2, methodOverrides.getOverrides().size());
+
+        Method replaceMeString = ReflectionUtils.findMethod( TestBean.class, "replaceMe", String.class );
+        Method replaceMeInt = ReflectionUtils.findMethod( TestBean.class, "replaceMe", int.class );
+
+        // check that the override responds to replaceMe(String) but not replaceMe(int)
+        // this indicates that the match attribute (specified via <arg-type>String</arg-type>
+        // is the same as <arg-type match="String"/>
+        assertNotNull(methodOverrides.getOverride( replaceMeString ));
+        assertNull(methodOverrides.getOverride( replaceMeInt ));
+
+        // check that the setInt(int) is still override
+        Method setAgeInt = ReflectionUtils.findMethod( TestBean.class, "setAge", int.class );
+        assertNotNull( methodOverrides.getOverride(setAgeInt) );
+    }
 }

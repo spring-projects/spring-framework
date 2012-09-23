@@ -827,7 +827,13 @@ public class BeanDefinitionParserDelegate {
 				// Look for arg-type match elements.
 				List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
 				for (Element argTypeEle : argTypeEles) {
-					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
+                    String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
+                    // if the 'match' attribute is empty then check the content and use that if not blank
+                    // relates to SPR-9812
+                    if( !StringUtils.hasText(match) && StringUtils.hasText(argTypeEle.getTextContent()) ) {
+                        match = argTypeEle.getTextContent().trim();
+                    }
+                    replaceOverride.addTypeIdentifier(match);
 				}
 				replaceOverride.setSource(extractSource(replacedMethodEle));
 				overrides.addOverride(replaceOverride);
