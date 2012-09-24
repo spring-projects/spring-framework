@@ -209,8 +209,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
-		registry.registerBeanDefinition(IMPORT_AWARE_PROCESSOR_BEAN_NAME,
-				new RootBeanDefinition(ImportAwareBeanPostProcessor.class));
+		RootBeanDefinition iabpp = new RootBeanDefinition(ImportAwareBeanPostProcessor.class);
+		iabpp.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+		registry.registerBeanDefinition(IMPORT_AWARE_PROCESSOR_BEAN_NAME, iabpp);
+
 		int registryId = System.identityHashCode(registry);
 		if (this.registriesPostProcessed.contains(registryId)) {
 			throw new IllegalStateException(
@@ -221,6 +223,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					"postProcessBeanFactory already called for this post-processor against " + registry);
 		}
 		this.registriesPostProcessed.add(registryId);
+
 		processConfigBeanDefinitions(registry);
 	}
 
