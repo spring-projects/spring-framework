@@ -52,7 +52,7 @@ public class MappingJackson2HttpMessageConverterTests extends AbstractMappingJac
 
 			@Override
 			protected JavaType getJavaType(Type type) {
-				if (type instanceof Class && List.class.isAssignableFrom((Class)type)) {
+				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
 					return new ObjectMapper().getTypeFactory().constructCollectionType(ArrayList.class, MyBean.class);
 				}
 				else {
