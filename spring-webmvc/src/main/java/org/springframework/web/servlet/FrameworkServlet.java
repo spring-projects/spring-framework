@@ -785,7 +785,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 		String method = request.getMethod();
 		if (method.equalsIgnoreCase(RequestMethod.PATCH.name())) {
-			doPatch(request, response);
+			processRequest(request, response);
 		}
 		else {
 			super.service(request, response);
@@ -829,16 +829,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Delegate PATCH requests to {@link #processRequest}.
-	 * @see #doService
-	 */
-	protected final void doPatch(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-
-		processRequest(request, response);
-	}
-
-	/**
 	 * Delegate DELETE requests to {@link #processRequest}.
 	 * @see #doService
 	 */
@@ -867,6 +857,9 @@ public abstract class FrameworkServlet extends HttpServletBean {
 			}
 		}
 		super.doOptions(request, response);
+		String allowedMethods = response.getHeader("Allow");
+		allowedMethods += ", " + RequestMethod.PATCH.name();
+		response.setHeader("Allow", allowedMethods);
 	}
 
 	/**

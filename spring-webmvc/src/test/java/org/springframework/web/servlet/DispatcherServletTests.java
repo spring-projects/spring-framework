@@ -16,6 +16,12 @@
 
 package org.springframework.web.servlet;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
+
 import java.io.IOException;
 import java.util.Locale;
 
@@ -59,9 +65,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -853,6 +856,14 @@ public class DispatcherServletTests extends TestCase {
 			}
 		};
 		assertThat(custom.getEnvironment(), instanceOf(CustomServletEnvironment.class));
+	}
+
+	public void testAllowedOptionsIncludesPatchMethod() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest(getServletContext(), "OPTIONS", "/foo");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.service(request, response);
+		assertThat(response.getHeader("Allow"), equalTo("GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH"));
 	}
 
 
