@@ -3,6 +3,14 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2 RC1 (2012-10-05)
+---------------------------------------
+
+* added "getApplicationName()" method to ApplicationContext interface
+* introduced LiveBeansView MBean and LiveBeansViewServlet (SPR-9662)
+* CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
+
+
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
 
