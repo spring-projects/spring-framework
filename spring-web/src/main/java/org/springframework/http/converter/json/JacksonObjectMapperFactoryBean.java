@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.support;
+package org.springframework.http.converter.json;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,7 +27,7 @@ import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
-import org.springframework.beans.FatalBeanException;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -79,12 +79,8 @@ import org.springframework.beans.factory.InitializingBean;
  * &lt;/bean>
  * </pre>
  *
- * <p>Note: This BeanFctory is singleton, so if you need more than one, you'll
- * need to configure multiple instances.
- *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
- *
  * @since 3.2
  */
 public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>, InitializingBean {
@@ -96,6 +92,7 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	private AnnotationIntrospector annotationIntrospector;
 
 	private DateFormat dateFormat;
+
 
 	/**
 	 * Set the ObjectMapper instance to use.
@@ -135,8 +132,8 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * {@link DeserializationConfig.Feature#AUTO_DETECT_FIELDS}.
 	 */
 	public void setAutoDetectFields(boolean autoDetectFields) {
-		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, Boolean.valueOf(autoDetectFields));
-		this.features.put(SerializationConfig.Feature.AUTO_DETECT_FIELDS, Boolean.valueOf(autoDetectFields));
+		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
+		this.features.put(SerializationConfig.Feature.AUTO_DETECT_FIELDS, autoDetectFields);
 	}
 
 	/**
@@ -144,22 +141,22 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * {@link DeserializationConfig.Feature#AUTO_DETECT_SETTERS}.
 	 */
 	public void setAutoDetectGettersSetters(boolean autoDetectGettersSetters) {
-		this.features.put(SerializationConfig.Feature.AUTO_DETECT_GETTERS, Boolean.valueOf(autoDetectGettersSetters));
-		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_SETTERS, Boolean.valueOf(autoDetectGettersSetters));
+		this.features.put(SerializationConfig.Feature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
+		this.features.put(DeserializationConfig.Feature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
 	}
 
 	/**
 	 * Shortcut for {@link SerializationConfig.Feature#FAIL_ON_EMPTY_BEANS}.
 	 */
 	public void setFailOnEmptyBeans(boolean failOnEmptyBeans) {
-		this.features.put(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, Boolean.valueOf(failOnEmptyBeans));
+		this.features.put(SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, failOnEmptyBeans);
 	}
 
 	/**
 	 * Shortcut for {@link SerializationConfig.Feature#INDENT_OUTPUT}.
 	 */
 	public void setIndentOutput(boolean indentOutput) {
-		this.features.put(SerializationConfig.Feature.INDENT_OUTPUT, Boolean.valueOf(indentOutput));
+		this.features.put(SerializationConfig.Feature.INDENT_OUTPUT, indentOutput);
 	}
 
 	/**
@@ -170,11 +167,10 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * @see JsonGenerator.Feature
 	 */
 	public void setFeaturesToEnable(Object[] featuresToEnable) {
-		if (featuresToEnable == null) {
-			throw new FatalBeanException("featuresToEnable property should not be null");
-		}
-		for (Object feature : featuresToEnable) {
-			this.features.put(feature, Boolean.TRUE);
+		if (featuresToEnable != null) {
+			for (Object feature : featuresToEnable) {
+				this.features.put(feature, Boolean.TRUE);
+			}
 		}
 	}
 
@@ -186,47 +182,28 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	 * @see JsonGenerator.Feature
 	 */
 	public void setFeaturesToDisable(Object[] featuresToDisable) {
-		if (featuresToDisable == null) {
-			throw new FatalBeanException("featuresToDisable property should not be null");
+		if (featuresToDisable != null) {
+			for (Object feature : featuresToDisable) {
+				this.features.put(feature, Boolean.FALSE);
+			}
 		}
-		for (Object feature : featuresToDisable) {
-			this.features.put(feature, Boolean.FALSE);
-		}
 	}
 
-	public ObjectMapper getObject() {
-		return this.objectMapper;
-	}
 
-	public Class<?> getObjectType() {
-		return ObjectMapper.class;
-	}
-
-	public boolean isSingleton() {
-		return true;
-	}
-
-	/**
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	public void afterPropertiesSet() throws FatalBeanException {
+	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
 			this.objectMapper = new ObjectMapper();
 		}
-
 		if (this.annotationIntrospector != null) {
 			this.objectMapper.getSerializationConfig().setAnnotationIntrospector(annotationIntrospector);
 			this.objectMapper.getDeserializationConfig().setAnnotationIntrospector(annotationIntrospector);
 		}
-
 		if (this.dateFormat != null) {
-			// Deprecated for 1.8+, use
-			// objectMapper.setDateFormat(dateFormat);
+			// Deprecated for 1.8+, use objectMapper.setDateFormat(dateFormat);
 			this.objectMapper.getSerializationConfig().setDateFormat(this.dateFormat);
 		}
-
-		for (Map.Entry<Object, Boolean> entry : features.entrySet()) {
-			setFeatureEnabled(entry.getKey(), entry.getValue().booleanValue());
+		for (Map.Entry<Object, Boolean> entry : this.features.entrySet()) {
+			setFeatureEnabled(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -244,7 +221,21 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 			this.objectMapper.configure((JsonGenerator.Feature) feature, enabled);
 		}
 		else {
-			throw new FatalBeanException("Unknown feature class " + feature.getClass().getName());
+			throw new IllegalArgumentException("Unknown feature class: " + feature.getClass().getName());
 		}
 	}
+
+
+	public ObjectMapper getObject() {
+		return this.objectMapper;
+	}
+
+	public Class<?> getObjectType() {
+		return ObjectMapper.class;
+	}
+
+	public boolean isSingleton() {
+		return true;
+	}
+
 }

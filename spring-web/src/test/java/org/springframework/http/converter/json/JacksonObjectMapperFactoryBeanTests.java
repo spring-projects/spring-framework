@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.context.support;
+package org.springframework.http.converter.json;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -33,10 +33,9 @@ import org.codehaus.jackson.map.introspect.NopAnnotationIntrospector;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.FatalBeanException;
+import org.springframework.http.converter.json.JacksonObjectMapperFactoryBean;
 
 /**
- * Test cases for {@link JacksonObjectMapperFactoryBean} class.
- *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  */
 public class JacksonObjectMapperFactoryBeanTests {
@@ -50,24 +49,13 @@ public class JacksonObjectMapperFactoryBeanTests {
 		factory = new JacksonObjectMapperFactoryBean();
 	}
 
-	@Test(expected=FatalBeanException.class)
-	public void testSetFeaturesToEnableNull() throws Exception {
-		factory.setFeaturesToEnable(null);
-		factory.setFeaturesToEnable(new Object[0]);
-	}
-
-	@Test(expected=FatalBeanException.class)
-	public void testSetFeaturesToDisableNull() {
-		factory.setFeaturesToDisable(null);
-	}
-
 	@Test
 	public void testSetFeaturesToEnableEmpty() {
 		factory.setFeaturesToEnable(new Object[0]);
 		factory.setFeaturesToDisable(new Object[0]);
 	}
 
-	@Test(expected = FatalBeanException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testUnknownFeature() {
 		factory.setFeaturesToEnable(new Object[] { Boolean.TRUE });
 		factory.afterPropertiesSet();
@@ -168,4 +156,5 @@ public class JacksonObjectMapperFactoryBeanTests {
 		assertFalse(jsonFactory.isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE));
 		assertFalse(jsonFactory.isEnabled(JsonGenerator.Feature.QUOTE_FIELD_NAMES));
 	}
+
 }
