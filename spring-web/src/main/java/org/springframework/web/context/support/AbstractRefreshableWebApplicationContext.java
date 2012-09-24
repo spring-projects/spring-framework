@@ -109,7 +109,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 		if (servletConfig != null && this.servletContext == null) {
-			this.setServletContext(servletConfig.getServletContext());
+			setServletContext(servletConfig.getServletContext());
 		}
 	}
 
@@ -131,6 +131,21 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	@Override
 	public String[] getConfigLocations() {
 		return super.getConfigLocations();
+	}
+
+	@Override
+	public String getApplicationName() {
+		if (this.servletContext == null) {
+			return "";
+		}
+		if (this.servletContext.getMajorVersion() == 2 && this.servletContext.getMinorVersion() < 5) {
+			String name = this.servletContext.getServletContextName();
+			return (name != null ? name : "");
+		}
+		else {
+			// Servlet 2.5 available
+			return this.servletContext.getContextPath();
+		}
 	}
 
 	/**

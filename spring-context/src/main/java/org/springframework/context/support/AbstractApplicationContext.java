@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -242,12 +243,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		this.id = id;
 	}
 
-	/**
-	 * Return the unique id of this application context.
-	 * @return the unique id of the context, or <code>null</code> if none
-	 */
 	public String getId() {
 		return this.id;
+	}
+
+	public String getApplicationName() {
+		return "";
 	}
 
 	/**
@@ -283,7 +284,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
-			this.environment = this.createEnvironment();
+			this.environment = createEnvironment();
 		}
 		return this.environment;
 	}
@@ -397,7 +398,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		if (parent != null) {
 			Environment parentEnvironment = parent.getEnvironment();
 			if (parentEnvironment instanceof ConfigurableEnvironment) {
-				this.getEnvironment().merge((ConfigurableEnvironment)parentEnvironment);
+				getEnvironment().merge((ConfigurableEnvironment)parentEnvironment);
 			}
 		}
 	}
@@ -513,7 +514,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable
 		// see ConfigurablePropertyResolver#setRequiredProperties
-		this.getEnvironment().validateRequiredProperties();
+		getEnvironment().validateRequiredProperties();
 	}
 
 	/**
@@ -549,7 +550,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, this.getEnvironment()));
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -940,6 +941,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Publish the final event.
 		publishEvent(new ContextRefreshedEvent(this));
+
+		// Participate in LiveBeansView MBean, if active.
+		LiveBeansView.registerApplicationContext(this);
 	}
 
 	/**
@@ -1032,6 +1036,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			if (logger.isInfoEnabled()) {
 				logger.info("Closing " + this);
 			}
+
+			LiveBeansView.unregisterApplicationContext(this);
 
 			try {
 				// Publish shutdown event.

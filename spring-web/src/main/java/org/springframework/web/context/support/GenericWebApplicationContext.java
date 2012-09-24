@@ -68,6 +68,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 
 	private ThemeSource themeSource;
 
+
 	/**
 	 * Create a new GenericWebApplicationContext.
 	 * @see #setServletContext
@@ -123,6 +124,20 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		return this.servletContext;
 	}
 
+	@Override
+	public String getApplicationName() {
+		if (this.servletContext == null) {
+			return "";
+		}
+		if (this.servletContext.getMajorVersion() == 2 && this.servletContext.getMinorVersion() < 5) {
+			String name = this.servletContext.getServletContextName();
+			return (name != null ? name : "");
+		}
+		else {
+			// Servlet 2.5 available
+			return this.servletContext.getContextPath();
+		}
+	}
 
 	/**
 	 * Create and return a new {@link StandardServletEnvironment}.
