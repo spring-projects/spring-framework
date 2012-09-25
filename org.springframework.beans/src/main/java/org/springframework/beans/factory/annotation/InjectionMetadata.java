@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,17 +54,22 @@ public class InjectionMetadata {
 
 
 	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
-		this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>());
-		for (InjectedElement element : elements) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+		if (!elements.isEmpty()) {
+			this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>(elements.size()));
+			for (InjectedElement element : elements) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+				}
+				this.injectedElements.add(element);
 			}
-			this.injectedElements.add(element);
+		}
+		else {
+			this.injectedElements = Collections.emptySet();
 		}
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		synchronized(this.injectedElements) {
+		synchronized (this.injectedElements) {
 			for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
 				Member member = it.next().getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
@@ -170,26 +175,30 @@ public class InjectionMetadata {
 		 * affected property as processed for other processors to ignore it.
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.skip == null) {
-				if (pvs != null) {
-					synchronized (pvs) {
-						if (this.skip == null) {
-							if (this.pd != null) {
-								if (pvs.contains(this.pd.getName())) {
-									// Explicit value provided as part of the bean definition.
-									this.skip = true;
-									return true;
-								}
-								else if (pvs instanceof MutablePropertyValues) {
-									((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
-								}
-							}
-						}
+			if (this.skip != null) {
+				return this.skip;
+			}
+			if (pvs == null) {
+				this.skip = false;
+				return false;
+			}
+			synchronized (pvs) {
+				if (this.skip != null) {
+					return this.skip;
+				}
+				if (this.pd != null) {
+					if (pvs.contains(this.pd.getName())) {
+						// Explicit value provided as part of the bean definition.
+						this.skip = true;
+						return true;
+					}
+					else if (pvs instanceof MutablePropertyValues) {
+						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
 					}
 				}
 				this.skip = false;
+				return false;
 			}
-			return this.skip;
 		}
 
 		/**
