@@ -69,7 +69,7 @@ public class InjectionMetadata {
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
-		synchronized(this.injectedElements) {
+		synchronized (this.injectedElements) {
 			for (Iterator<InjectedElement> it = this.injectedElements.iterator(); it.hasNext();) {
 				Member member = it.next().getMember();
 				if (!beanDefinition.isExternallyManagedConfigMember(member)) {
@@ -175,26 +175,30 @@ public class InjectionMetadata {
 		 * affected property as processed for other processors to ignore it.
 		 */
 		protected boolean checkPropertySkipping(PropertyValues pvs) {
-			if (this.skip == null) {
-				if (pvs != null) {
-					synchronized (pvs) {
-						if (this.skip == null) {
-							if (this.pd != null) {
-								if (pvs.contains(this.pd.getName())) {
-									// Explicit value provided as part of the bean definition.
-									this.skip = true;
-									return true;
-								}
-								else if (pvs instanceof MutablePropertyValues) {
-									((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
-								}
-							}
-						}
+			if (this.skip != null) {
+				return this.skip;
+			}
+			if (pvs == null) {
+				this.skip = false;
+				return false;
+			}
+			synchronized (pvs) {
+				if (this.skip != null) {
+					return this.skip;
+				}
+				if (this.pd != null) {
+					if (pvs.contains(this.pd.getName())) {
+						// Explicit value provided as part of the bean definition.
+						this.skip = true;
+						return true;
+					}
+					else if (pvs instanceof MutablePropertyValues) {
+						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
 					}
 				}
 				this.skip = false;
+				return false;
 			}
-			return this.skip;
 		}
 
 		/**
