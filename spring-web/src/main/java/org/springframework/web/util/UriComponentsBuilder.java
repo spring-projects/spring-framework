@@ -83,6 +83,8 @@ public class UriComponentsBuilder {
 
 	private String scheme;
 
+	private String ssp;
+
 	private String userInfo;
 
 	private String host;
@@ -164,16 +166,45 @@ public class UriComponentsBuilder {
 		if (m.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
 
-			builder.scheme(m.group(2));
-			builder.userInfo(m.group(5));
-			builder.host(m.group(6));
+			String scheme = m.group(2);
+			String userInfo = m.group(5);
+			String host = m.group(6);
 			String port = m.group(8);
-			if (StringUtils.hasLength(port)) {
-				builder.port(Integer.parseInt(port));
+			String path = m.group(9);
+			String query = m.group(11);
+			String fragment = m.group(13);
+
+			boolean opaque = false;
+
+			if (StringUtils.hasLength(scheme)) {
+				String s = uri.substring(scheme.length());
+				if (!s.startsWith(":/")) {
+					opaque = true;
+				}
 			}
-			builder.path(m.group(9));
-			builder.query(m.group(11));
-			builder.fragment(m.group(13));
+
+			builder.scheme(scheme);
+
+
+			if (opaque) {
+				String ssp = uri.substring(scheme.length()).substring(1);
+				if (StringUtils.hasLength(fragment)) {
+					ssp =
+							ssp.substring(0, ssp.length() -
+									(fragment.length() + 1));
+				}
+				builder.schemeSpecificPart(ssp);
+			}
+			else {
+				builder.userInfo(userInfo);
+				builder.host(host);
+				if (StringUtils.hasLength(port)) {
+					builder.port(Integer.parseInt(port));
+				}
+				builder.path(path);
+				builder.query(query);
+			}
+			builder.fragment(fragment);
 
 			return builder;
 		}
@@ -244,7 +275,12 @@ public class UriComponentsBuilder {
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
-		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
+		if (ssp != null) {
+			return new OpaqueUriComponents(scheme, ssp, fragment);
+		}
+		else {
+			return new HierarchicalUriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
+		}
 	}
 
 	/**
@@ -281,25 +317,34 @@ public class UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder uri(URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Assert.isTrue(!uri.isOpaque(), "Opaque URI [" + uri + "] not supported");
 
 		this.scheme = uri.getScheme();
 
-		if (uri.getRawUserInfo() != null) {
-			this.userInfo = uri.getRawUserInfo();
+		if (uri.isOpaque()) {
+			this.ssp = uri.getRawSchemeSpecificPart();
+			userInfo(null);
+			host(null);
+			port(-1);
+			path(null);
 		}
-		if (uri.getHost() != null) {
-			this.host = uri.getHost();
-		}
-		if (uri.getPort() != -1) {
-			this.port = uri.getPort();
-		}
-		if (StringUtils.hasLength(uri.getRawPath())) {
-			this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
-		}
-		if (StringUtils.hasLength(uri.getRawQuery())) {
-			this.queryParams.clear();
-			query(uri.getRawQuery());
+		else {
+			this.ssp = null;
+			if (uri.getRawUserInfo() != null) {
+				this.userInfo = uri.getRawUserInfo();
+			}
+			if (uri.getHost() != null) {
+				this.host = uri.getHost();
+			}
+			if (uri.getPort() != -1) {
+				this.port = uri.getPort();
+			}
+			if (StringUtils.hasLength(uri.getRawPath())) {
+				this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
+			}
+			if (StringUtils.hasLength(uri.getRawQuery())) {
+				this.queryParams.clear();
+				query(uri.getRawQuery());
+			}
 		}
 		if (uri.getRawFragment() != null) {
 			this.fragment = uri.getRawFragment();
@@ -317,6 +362,26 @@ public class UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder scheme(String scheme) {
 		this.scheme = scheme;
+		return this;
+	}
+
+	/**
+	 * Set the URI scheme-specific-part. When invoked, this method overwrites
+	 * {@linkplain #userInfo(String) user-info}, {@linkplain #host(String) host},
+	 * {@linkplain #port(int) port} and {@linkplain #path(String) path}.
+	 *
+	 * @param ssp the URI scheme-specific-part, may contain URI template parameters
+	 * @return this UriComponentsBuilder
+	 * @throws IllegalArgumentException if ssp cannot be parsed or is null
+	 */
+	public UriComponentsBuilder schemeSpecificPart(String ssp) {
+		this.ssp = ssp;
+
+		userInfo(null);
+		host(null);
+		port(-1);
+		path(null);
+
 		return this;
 	}
 
@@ -514,11 +579,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Represents a builder for {@link org.springframework.web.util.UriComponents.PathComponent}
+	 * Represents a builder for {@link HierarchicalUriComponents.PathComponent}
 	 */
 	private interface PathComponentBuilder {
 
-		UriComponents.PathComponent build();
+		HierarchicalUriComponents.PathComponent build();
 
 		PathComponentBuilder appendPath(String path);
 
@@ -536,8 +601,8 @@ public class UriComponentsBuilder {
 			this.path = new StringBuilder(path);
 		}
 
-		public UriComponents.PathComponent build() {
-			return new UriComponents.FullPathComponent(path.toString());
+		public HierarchicalUriComponents.PathComponent build() {
+			return new HierarchicalUriComponents.FullPathComponent(path.toString());
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -573,8 +638,8 @@ public class UriComponentsBuilder {
 			return result;
 		}
 
-		public UriComponents.PathComponent build() {
-			return new UriComponents.PathSegmentComponent(pathSegments);
+		public HierarchicalUriComponents.PathComponent build() {
+			return new HierarchicalUriComponents.PathSegmentComponent(pathSegments);
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -600,14 +665,14 @@ public class UriComponentsBuilder {
 			pathComponentBuilders.add(builder);
 		}
 
-		public UriComponents.PathComponent build() {
-			List<UriComponents.PathComponent> pathComponents =
-					new ArrayList<UriComponents.PathComponent>(pathComponentBuilders.size());
+		public HierarchicalUriComponents.PathComponent build() {
+			List<HierarchicalUriComponents.PathComponent> pathComponents =
+					new ArrayList<HierarchicalUriComponents.PathComponent>(pathComponentBuilders.size());
 
 			for (PathComponentBuilder pathComponentBuilder : pathComponentBuilders) {
 				pathComponents.add(pathComponentBuilder.build());
 			}
-			return new UriComponents.PathComponentComposite(pathComponents);
+			return new HierarchicalUriComponents.PathComponentComposite(pathComponents);
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -627,8 +692,8 @@ public class UriComponentsBuilder {
 	 */
 	private static PathComponentBuilder NULL_PATH_COMPONENT_BUILDER = new PathComponentBuilder() {
 
-		public UriComponents.PathComponent build() {
-			return UriComponents.NULL_PATH_COMPONENT;
+		public HierarchicalUriComponents.PathComponent build() {
+			return HierarchicalUriComponents.NULL_PATH_COMPONENT;
 		}
 
 		public PathComponentBuilder appendPath(String path) {
