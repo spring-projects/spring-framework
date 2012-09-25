@@ -108,21 +108,27 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	}
 
 	public Object get() throws InterruptedException, ExecutionException {
+		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.get();
+			curr = this.currentFuture;
 		}
+		return curr.get();
 	}
 
 	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.get(timeout, unit);
+			curr = this.currentFuture;
 		}
+		return curr.get(timeout, unit);
 	}
 
 	public long getDelay(TimeUnit unit) {
+		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
-			return this.currentFuture.getDelay(unit);
+			curr = this.currentFuture;
 		}
+		return curr.getDelay(unit);
 	}
 
 	public int compareTo(Delayed other) {
