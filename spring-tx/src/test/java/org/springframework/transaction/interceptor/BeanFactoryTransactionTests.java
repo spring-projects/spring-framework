@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,16 +127,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		final TransactionStatus ts = (TransactionStatus) statusControl.getMock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
-			public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+			public TransactionStatus getTransaction(TransactionDefinition def) throws TransactionException {
 				if (invoked) {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
 				}
 				invoked = true;
-				System.out.println(definition.getName());
-				if (!((definition.getName().indexOf(TestBean.class.getName()) != -1) &&
-						(definition.getName().indexOf("setAge") != -1))) {
+				if (!(def.getName().contains(DerivedTestBean.class.getName()) && def.getName().contains("setAge"))) {
 					throw new IllegalStateException(
-							"transaction name should contain class and method name: " + definition.getName());
+							"transaction name should contain class and method name: " + def.getName());
 				}
 				return ts;
 			}
