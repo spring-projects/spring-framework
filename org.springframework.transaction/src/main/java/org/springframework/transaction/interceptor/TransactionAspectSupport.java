@@ -33,7 +33,6 @@ import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -260,11 +259,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Create a transaction if necessary, based on the given method and class.
 	 * <p>Performs a default TransactionAttribute lookup for the given method.
-	 * @param method method about to execute
-	 * @param targetClass class the method is on
+	 * @param method the method about to execute
+	 * @param targetClass the class that the method is being invoked on
 	 * @return a TransactionInfo object, whether or not a transaction was created.
-	 * The hasTransaction() method on TransactionInfo can be used to tell if there
-	 * was a transaction created.
+	 * The <code>hasTransaction()</code> method on TransactionInfo can be used to
+	 * tell if there was a transaction created.
 	 * @see #getTransactionAttributeSource()
 	 */
 	protected TransactionInfo createTransactionIfNecessary(Method method, Class targetClass) {
@@ -279,8 +278,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * for use in logging. Can be overridden in subclasses to provide a
 	 * different identifier for the given method.
 	 * @param method the method we're interested in
-	 * @param targetClass class the method is on
-	 * @return log message identifying this method
+	 * @param targetClass the class that the method is being invoked on
+	 * @return a String representation identifying this method
 	 * @see org.springframework.util.ClassUtils#getQualifiedMethodName
 	 */
 	protected String methodIdentification(Method method, Class targetClass) {
@@ -288,8 +287,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		if (simpleMethodId != null) {
 			return simpleMethodId;
 		}
-		Method specificMethod = ClassUtils.getMostSpecificMethod(method, targetClass);
-		return ClassUtils.getQualifiedMethodName(specificMethod);
+		return (targetClass != null ? targetClass : method.getDeclaringClass()).getName() + "." + method.getName();
 	}
 
 	/**
@@ -297,7 +295,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 * for use in logging. Can be overridden in subclasses to provide a
 	 * different identifier for the given method.
 	 * @param method the method we're interested in
-	 * @return log message identifying this method
+	 * @return a String representation identifying this method
 	 * @deprecated in favor of {@link #methodIdentification(Method, Class)}
 	 */
 	@Deprecated
