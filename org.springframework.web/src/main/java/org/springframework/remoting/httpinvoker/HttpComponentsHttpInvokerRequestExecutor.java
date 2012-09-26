@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.remoting.httpinvoker;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -40,6 +41,8 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.remoting.support.RemoteInvocationResult;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -62,6 +65,10 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
 
 	private static final int DEFAULT_READ_TIMEOUT_MILLISECONDS = (60 * 1000);
+
+	// Check whether the HttpComponents 4.2 releaseConnection method is available.
+	private static final Method releaseConnectionMethod =
+			ClassUtils.getMethodIfAvailable(HttpPost.class, "releaseConnection");
 
 	private HttpClient httpClient;
 
@@ -146,10 +153,17 @@ public class HttpComponentsHttpInvokerRequestExecutor extends AbstractHttpInvoke
 
 		HttpPost postMethod = createHttpPost(config);
 		setRequestBody(config, postMethod, baos);
-		HttpResponse response = executeHttpPost(config, getHttpClient(), postMethod);
-		validateResponse(config, response);
-		InputStream responseBody = getResponseBody(config, response);
-		return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
+		try {
+			HttpResponse response = executeHttpPost(config, getHttpClient(), postMethod);
+			validateResponse(config, response);
+			InputStream responseBody = getResponseBody(config, response);
+			return readRemoteInvocationResult(responseBody, config.getCodebaseUrl());
+		}
+		finally {
+			if (releaseConnectionMethod != null){
+				ReflectionUtils.invokeMethod(releaseConnectionMethod, postMethod);
+			}
+		}
 	}
 
 	/**
