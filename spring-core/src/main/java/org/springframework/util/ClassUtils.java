@@ -724,7 +724,7 @@ public abstract class ClassUtils {
 	 * Call {@link org.springframework.core.BridgeMethodResolver#findBridgedMethod}
 	 * if bridge method resolution is desirable (e.g. for obtaining metadata from
 	 * the original method definition).
-	 * <p><b>NOTE:</b>Since Spring 3.1.1, if java security settings disallow reflective
+	 * <p><b>NOTE:</b> Since Spring 3.1.1, if Java security settings disallow reflective
 	 * access (e.g. calls to {@code Class#getDeclaredMethods} etc, this implementation
 	 * will fall back to returning the originally provided method.
 	 * @param method the method to be invoked, which may come from an interface
@@ -734,17 +734,28 @@ public abstract class ClassUtils {
 	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
-		Method specificMethod = null;
 		if (method != null && isOverridable(method, targetClass) &&
 				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
 			try {
-				specificMethod = ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
-			} catch (AccessControlException ex) {
-				// security settings are disallowing reflective access; leave
-				// 'specificMethod' null and fall back to 'method' below
+				if (Modifier.isPublic(method.getModifiers())) {
+					try {
+						return targetClass.getMethod(method.getName(), method.getParameterTypes());
+					}
+					catch (NoSuchMethodException ex) {
+						return method;
+					}
+				}
+				else {
+					Method specificMethod =
+							ReflectionUtils.findMethod(targetClass, method.getName(), method.getParameterTypes());
+					return (specificMethod != null ? specificMethod : method);
+				}
+			}
+			catch (AccessControlException ex) {
+				// Security settings are disallowing reflective access; fall back to 'method' below.
 			}
 		}
-		return (specificMethod != null ? specificMethod : method);
+		return method;
 	}
 
 	/**
@@ -1149,6 +1160,5 @@ public abstract class ClassUtils {
 	public static boolean isCglibProxyClassName(String className) {
 		return (className != null && className.contains(CGLIB_CLASS_SEPARATOR));
 	}
-
 
 }
