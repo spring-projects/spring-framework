@@ -42,9 +42,11 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Before
 	public void setup() {
-		this.factoryBean = new ContentNegotiationManagerFactoryBean();
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
+
+		this.factoryBean = new ContentNegotiationManagerFactoryBean();
+		this.factoryBean.setServletContext(this.servletRequest.getServletContext());
 	}
 
 	@Test

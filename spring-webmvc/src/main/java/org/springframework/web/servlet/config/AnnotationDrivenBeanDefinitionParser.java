@@ -16,10 +16,8 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -49,8 +47,7 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -289,34 +286,32 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			contentNegotiationManagerRef = new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
 		}
 		else {
-			RootBeanDefinition managerDef = new RootBeanDefinition(ContentNegotiationManager.class);
-			managerDef.setSource(source);
-			managerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			PathExtensionContentNegotiationStrategy strategy1 = new PathExtensionContentNegotiationStrategy(getDefaultMediaTypes());
-			HeaderContentNegotiationStrategy strategy2 = new HeaderContentNegotiationStrategy();
-			managerDef.getConstructorArgumentValues().addIndexedArgumentValue(0, Arrays.asList(strategy1,strategy2));
+			RootBeanDefinition factoryBeanDef = new RootBeanDefinition(ContentNegotiationManagerFactoryBean.class);
+			factoryBeanDef.setSource(source);
+			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 
 			String beanName = "mvcContentNegotiationManager";
-			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , managerDef);
-			parserContext.registerComponent(new BeanComponentDefinition(managerDef, beanName));
+			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , factoryBeanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, beanName));
 			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);
 		}
 		return contentNegotiationManagerRef;
 	}
 
-	private Map<String, MediaType> getDefaultMediaTypes() {
-		Map<String, MediaType> map = new HashMap<String, MediaType>();
+	private Properties getDefaultMediaTypes() {
+		Properties props = new Properties();
 		if (romePresent) {
-			map.put("atom", MediaType.APPLICATION_ATOM_XML);
-			map.put("rss", MediaType.valueOf("application/rss+xml"));
+			props.put("atom", MediaType.APPLICATION_ATOM_XML_VALUE);
+			props.put("rss", "application/rss+xml");
 		}
 		if (jackson2Present || jacksonPresent) {
-			map.put("json", MediaType.APPLICATION_JSON);
+			props.put("json", MediaType.APPLICATION_JSON_VALUE);
 		}
 		if (jaxb2Present) {
-			map.put("xml", MediaType.APPLICATION_XML);
+			props.put("xml", MediaType.APPLICATION_XML_VALUE);
 		}
-		return map;
+		return props;
 	}
 
 	private RuntimeBeanReference getMessageCodesResolver(Element element, Object source, ParserContext parserContext) {

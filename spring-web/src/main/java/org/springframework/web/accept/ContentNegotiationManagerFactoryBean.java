@@ -28,6 +28,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * A factory providing convenient access to a {@code ContentNegotiationManager}
@@ -41,7 +42,8 @@ import org.springframework.util.CollectionUtils;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class ContentNegotiationManagerFactoryBean implements FactoryBean<ContentNegotiationManager>, InitializingBean {
+public class ContentNegotiationManagerFactoryBean
+		implements FactoryBean<ContentNegotiationManager>, InitializingBean, ServletContextAware {
 
 	private boolean favorPathExtension = true;
 
@@ -49,7 +51,7 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 
 	private boolean ignoreAcceptHeader = false;
 
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+	private Properties mediaTypes = new Properties();
 
 	private Boolean useJaf;
 
@@ -58,6 +60,9 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 	private MediaType defaultContentType;
 
 	private ContentNegotiationManager contentNegotiationManager;
+
+	private ServletContext servletContext;
+
 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine
@@ -82,6 +87,10 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 				this.mediaTypes.put(extension, MediaType.valueOf((String) entry.getValue()));
 			}
 		}
+	}
+
+	public Properties getMediaTypes() {
+		return this.mediaTypes;
 	}
 
 	/**
@@ -141,11 +150,24 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 		this.defaultContentType = defaultContentType;
 	}
 
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
 	public void afterPropertiesSet() throws Exception {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
 
+		Map<String, MediaType> mediaTypesMap = new HashMap<String, MediaType>();
+		CollectionUtils.mergePropertiesIntoMap(this.mediaTypes, mediaTypesMap);
+
 		if (this.favorPathExtension) {
-			PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
+			PathExtensionContentNegotiationStrategy strategy;
+			if (this.servletContext != null) {
+				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, mediaTypesMap);
+			}
+			else {
+				strategy = new PathExtensionContentNegotiationStrategy(mediaTypesMap);
+			}
 			if (this.useJaf != null) {
 				strategy.setUseJaf(this.useJaf);
 			}
@@ -153,7 +175,7 @@ public class ContentNegotiationManagerFactoryBean implements FactoryBean<Content
 		}
 
 		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
+			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(mediaTypesMap);
 			strategy.setParameterName(this.parameterName);
 			strategies.add(strategy);
 		}

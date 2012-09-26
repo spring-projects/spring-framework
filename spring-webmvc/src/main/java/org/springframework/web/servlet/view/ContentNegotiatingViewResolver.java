@@ -19,7 +19,6 @@ package org.springframework.web.servlet.view;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -43,11 +42,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.FixedContentNegotiationStrategy;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
-import org.springframework.web.accept.ParameterContentNegotiationStrategy;
-import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -99,13 +94,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private ContentNegotiationManager contentNegotiationManager;
 
-	private boolean favorPathExtension = true;
-	private boolean favorParameter = false;
-	private boolean ignoreAcceptHeader = false;
-	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
-	private Boolean useJaf;
-	private String parameterName;
-	private MediaType defaultContentType;
+	private ContentNegotiationManagerFactoryBean cnManagerFactoryBean = new ContentNegotiationManagerFactoryBean();
 
 	private boolean useNotAcceptableStatusCode = false;
 
@@ -144,7 +133,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setFavorPathExtension(boolean favorPathExtension) {
-		this.favorPathExtension = favorPathExtension;
+		this.cnManagerFactoryBean.setFavorParameter(favorPathExtension);
 	}
 
 	/**
@@ -154,7 +143,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setUseJaf(boolean useJaf) {
-		this.useJaf = useJaf;
+		this.cnManagerFactoryBean.setUseJaf(useJaf);
 	}
 
 	/**
@@ -167,7 +156,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setFavorParameter(boolean favorParameter) {
-		this.favorParameter = favorParameter;
+		this.cnManagerFactoryBean.setFavorParameter(favorParameter);
 	}
 
 	/**
@@ -177,7 +166,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setParameterName(String parameterName) {
-		this.parameterName = parameterName;
+		this.cnManagerFactoryBean.setParameterName(parameterName);
 	}
 
 	/**
@@ -189,7 +178,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
-		this.ignoreAcceptHeader = ignoreAcceptHeader;
+		this.cnManagerFactoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
 	}
 
 	/**
@@ -201,11 +190,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 */
 	public void setMediaTypes(Map<String, String> mediaTypes) {
 		if (mediaTypes != null) {
-			for (Map.Entry<String, String> entry : mediaTypes.entrySet()) {
-				String extension = entry.getKey().toLowerCase(Locale.ENGLISH);
-				MediaType mediaType = MediaType.parseMediaType(entry.getValue());
-				this.mediaTypes.put(extension, mediaType);
-			}
+			this.cnManagerFactoryBean.getMediaTypes().putAll(mediaTypes);
 		}
 	}
 
@@ -217,7 +202,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
-		this.defaultContentType = defaultContentType;
+		this.cnManagerFactoryBean.setDefaultContentType(defaultContentType);
 	}
 
 	/**
@@ -277,31 +262,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 					"'viewResolvers' property on the ContentNegotiatingViewResolver");
 		}
 		OrderComparator.sort(this.viewResolvers);
+		this.cnManagerFactoryBean.setServletContext(servletContext);
 	}
 
 	public void afterPropertiesSet() throws Exception {
 		if (this.contentNegotiationManager == null) {
-			List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
-			if (this.favorPathExtension) {
-				PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
-				if (this.useJaf != null) {
-					strategy.setUseJaf(this.useJaf);
-				}
-				strategies.add(strategy);
-			}
-			if (this.favorParameter) {
-				ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
-				strategy.setParameterName(this.parameterName);
-				strategies.add(strategy);
-			}
-			if (!this.ignoreAcceptHeader) {
-				strategies.add(new HeaderContentNegotiationStrategy());
-			}
-			if (this.defaultContentType != null) {
-				strategies.add(new FixedContentNegotiationStrategy(this.defaultContentType));
-			}
-			ContentNegotiationStrategy[] array = strategies.toArray(new ContentNegotiationStrategy[strategies.size()]);
-			this.contentNegotiationManager = new ContentNegotiationManager(array);
+			this.cnManagerFactoryBean.afterPropertiesSet();
+			this.contentNegotiationManager = this.cnManagerFactoryBean.getObject();
 		}
 	}
 

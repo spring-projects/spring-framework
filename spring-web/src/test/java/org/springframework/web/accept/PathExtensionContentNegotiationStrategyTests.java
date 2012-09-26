@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.ServletContext;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
@@ -44,7 +46,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 	@Before
 	public void setup() {
 		this.servletRequest = new MockHttpServletRequest();
-		this.webRequest = new ServletWebRequest(servletRequest );
+		this.webRequest = new ServletWebRequest(servletRequest);
 	}
 
 	@Test
@@ -74,8 +76,12 @@ public class PathExtensionContentNegotiationStrategyTests {
 
 	@Test
 	public void getMediaTypeFromFilenameNoJaf() {
+
 		this.servletRequest.setRequestURI("test.xls");
-		PathExtensionContentNegotiationStrategy strategy = new PathExtensionContentNegotiationStrategy();
+
+		ServletContext servletContext = this.servletRequest.getServletContext();
+		PathExtensionContentNegotiationStrategy strategy =
+				new ServletPathExtensionContentNegotiationStrategy(servletContext);
 		strategy.setUseJaf(false);
 
 		List<MediaType> mediaTypes = strategy.resolveMediaTypes(this.webRequest);

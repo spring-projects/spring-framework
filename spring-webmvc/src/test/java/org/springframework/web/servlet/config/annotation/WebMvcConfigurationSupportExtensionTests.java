@@ -235,7 +235,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-			configurer.setFavorParameter(true).setParameterName("f");
+			configurer.favorParameter(true).parameterName("f");
 		}
 
 		@Override

@@ -167,10 +167,18 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
+
+	/**
+	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
+	 * looking up file extensions, etc.
+	 */
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	/**
+	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
+	 */
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
@@ -219,10 +227,15 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public ContentNegotiationManager mvcContentNegotiationManager() {
 		if (this.contentNegotiationManager == null) {
-			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer();
-			configurer.addMediaTypes(getDefaultMediaTypes());
+			ContentNegotiationConfigurer configurer = new ContentNegotiationConfigurer(this.servletContext);
+			configurer.mediaTypes(getDefaultMediaTypes());
 			configureContentNegotiation(configurer);
-			this.contentNegotiationManager = configurer.getContentNegotiationManager();
+			try {
+				this.contentNegotiationManager = configurer.getContentNegotiationManager();
+			}
+			catch (Exception e) {
+				throw new BeanInitializationException("Could not create ContentNegotiationManager", e);
+			}
 		}
 		return this.contentNegotiationManager;
 	}
@@ -398,9 +411,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 				try {
 					String className = "org.springframework.validation.beanvalidation.LocalValidatorFactoryBean";
 					clazz = ClassUtils.forName(className, WebMvcConfigurationSupport.class.getClassLoader());
-				} catch (ClassNotFoundException e) {
+				}
+				catch (ClassNotFoundException e) {
 					throw new BeanInitializationException("Could not find default validator", e);
-				} catch (LinkageError e) {
+				}
+				catch (LinkageError e) {
 					throw new BeanInitializationException("Could not find default validator", e);
 				}
 				validator = (Validator) BeanUtils.instantiate(clazz);
