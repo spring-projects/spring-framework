@@ -1,0 +1,72 @@
+import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+
+/**
+ * Will merge the distributions of the current project into mergeIntoProject. For
+ * example, to bundle spring-test-mvc in spring-test's jars. This script will perform the
+ * following steps:
+ * <ul>
+ *   <li>Ensure that jar tasks of the project being merged from will execute the tasks of
+ *     the project being merged into</li>
+ *   <li>Add the project being merged into to the classpath of the project being merged
+ *     from</li>
+ *   <li>Update the pom.xml of the project being merged into to contain the entries from
+ *     the project being merged from</li>
+ * </ul>
+ *
+ * Example Usage:
+ *
+ * ext.mergeIntoProject = project(':spring-test')
+ * apply from: "${rootProject.projectDir}/merge-dist.gradle"
+ */
+
+def mergeFromProject = project
+
+// invoking a task on mergeFromProject will invoke the task with the same name on mergeIntoProject
+def taskNamesToMerge = ['sourcesJar','jar','javadocJar','javadoc','install']
+taskNamesToMerge.each { taskName ->
+    def taskToRemove = tasks.getByPath(taskName)
+    taskToRemove.enabled = false
+    taskToRemove.dependsOn mergeIntoProject."$taskName"
+}
+
+// update mergeIntoProject artifacts to contain the mergeFromProject artifact contents
+mergeIntoProject."sourcesJar" {
+    from mergeFromProject.sourcesJar.source
+}
+mergeIntoProject."jar" {
+    from mergeFromProject.jar.source
+}
+mergeIntoProject."javadoc" {
+    source += mergeFromProject.javadoc.source
+    classpath += mergeFromProject.javadoc.classpath
+}
+
+// GRADLE-1116
+mergeFromProject.eclipse.classpath.file.whenMerged { classpath ->
+    classpath.entries.removeAll { entry -> entry.path.contains("/${mergeIntoProject.name}/build/") }
+    def dependency = new ProjectDependency("/${mergeIntoProject.name}", mergeIntoProject.path)
+    dependency.exported = true
+    classpath.entries.add(dependency)
+}
+
+// Update mergeIntoProject to contain additional configurations that contains all the dependencies from mergeFromProject
+// so that Maven pom generation works
+gradle.taskGraph.whenReady {
+    mergeFromProject.configurations.archives.artifacts.clear()
+
+    mergeFromProject.configurations.each { config->
+        def mapping = mergeFromProject.conf2ScopeMappings.getMapping([config])
+        if(mapping.scope) {
+            def newConfigName = mergeFromProject.name + "-"+ config.name
+            mergeIntoProject.configurations.add(newConfigName)
+            config.dependencies.each { dependency ->
+                mergeIntoProject.dependencies.add(newConfigName, dependency)
+            }
+            configure(mergeIntoProject.install.repositories.mavenInstaller.pom.scopeMappings) {
+                addMapping(mapping.priority + 100, mergeIntoProject.configurations."$newConfigName", mapping.scope)
+            }
+            mergeIntoProject.optionalDeps += mergeFromProject.optionalDeps
+            mergeIntoProject.providedDeps += mergeFromProject.providedDeps
+        }
+    }
+}
