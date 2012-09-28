@@ -255,7 +255,8 @@ public abstract class CollectionFactory {
 				return (Collection) collectionType.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Collection type: " + collectionType.getName());
+				throw new IllegalArgumentException("Could not instantiate Collection type: " +
+						collectionType.getName(), ex);
 			}
 		}
 	}
@@ -322,7 +323,8 @@ public abstract class CollectionFactory {
 				return (Map) mapType.newInstance();
 			}
 			catch (Exception ex) {
-				throw new IllegalArgumentException("Could not instantiate Map type: " + mapType.getName());
+				throw new IllegalArgumentException("Could not instantiate Map type: " +
+						mapType.getName(), ex);
 			}
 		}
 	}
