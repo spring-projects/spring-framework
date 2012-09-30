@@ -42,6 +42,7 @@ import org.springframework.format.Printer;
  * @see #setDateTimeStyle
  * @see #setUseIsoFormat
  * @see FormatterRegistrar#registerFormatters
+ * @see DateFormatterRegistrar
  */
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
