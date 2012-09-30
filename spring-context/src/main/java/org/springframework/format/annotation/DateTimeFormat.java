@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * Supports formatting by style pattern, ISO date time pattern, or custom format pattern string.
  * Can be applied to <code>java.util.Date</code>, <code>java.util.Calendar</code>, <code>java.long.Long</code>, or Joda Time fields.
  * <p>
- * For style-based formatting, set the {@link #style()} attribute to be the style pattern code.  
+ * For style-based formatting, set the {@link #style()} attribute to be the style pattern code.
  * The first character of the code is the date style, and the second character is the time style.
  * Specify a character of 'S' for short style, 'M' for medium, 'L' for long, and 'F' for full.
  * A date or time may be omitted by specifying the style character '-'.
@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
  * When the iso attribute is specified, if takes precedence over the style attribute.
  * When no annotation attributes are specified, the default format applied is style-based with a style code of 'SS' (short date, short time).
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  * @see org.joda.time.format.DateTimeFormat
@@ -75,8 +75,8 @@ public @interface DateTimeFormat {
 	 * Common ISO date time format patterns.
 	 */
 	public enum ISO {
-		
-		/** 
+
+		/**
 		 * The most common ISO Date Format <code>yyyy-MM-dd</code> e.g. 2000-10-31.
 		 */
 		DATE,
@@ -91,7 +91,7 @@ public @interface DateTimeFormat {
 		 * The default if no annotation value is specified.
 		 */
 		DATE_TIME,
-		
+
 		/**
 		 * Indicates that no ISO-based format pattern should be applied.
 		 */
