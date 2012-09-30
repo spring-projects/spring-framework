@@ -29,6 +29,7 @@ import org.joda.time.MutableDateTime;
 import org.joda.time.ReadableInstant;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
+import org.springframework.format.datetime.DateFormatterRegistrar;
 
 /**
  * Installs lower-level type converters required to integrate Joda Time support into Spring's field formatting system.
@@ -42,7 +43,8 @@ final class JodaTimeConverters {
 	 * Install the converters into the converter registry.
 	 * @param registry the converter registry
 	 */
-	public static void registerConverters(ConverterRegistry registry) {
+	public static void addConverters(ConverterRegistry registry) {
+		DateFormatterRegistrar.addDateConverters(registry);
 		registry.addConverter(new DateTimeToLocalDateConverter());
 		registry.addConverter(new DateTimeToLocalTimeConverter());
 		registry.addConverter(new DateTimeToLocalDateTimeConverter());
@@ -52,7 +54,6 @@ final class JodaTimeConverters {
 		registry.addConverter(new DateTimeToDateConverter());
 		registry.addConverter(new DateTimeToCalendarConverter());
 		registry.addConverter(new DateTimeToLongConverter());
-		registry.addConverter(new DateToLongConverter());
 		registry.addConverter(new CalendarToReadableInstantConverter());
 	}
 
@@ -147,18 +148,7 @@ final class JodaTimeConverters {
 		}
 	}
 
-	/** 
-	 * Used when printing a java.util.Date field with a MillisecondInstantPrinter.
-	 * @see MillisecondInstantPrinter
-	 * @see JodaDateTimeFormatAnnotationFormatterFactory
-	 */	
-	private static class DateToLongConverter implements Converter<Date, Long> {
-		public Long convert(Date source) {
-			return source.getTime();
-		}
-	}
-
-	/** 
+	/**
 	 * Used when printing a java.util.Calendar field with a ReadableInstantPrinter.
 	 * @see MillisecondInstantPrinter
 	 * @see JodaDateTimeFormatAnnotationFormatterFactory

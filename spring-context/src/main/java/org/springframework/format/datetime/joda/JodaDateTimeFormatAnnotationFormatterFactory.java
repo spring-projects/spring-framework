@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda time.
  *
  * @author Keith Donald
  * @author Juergen Hoeller

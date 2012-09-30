@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.datetime.DateFormatterRegistrar;
 import org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar;
 import org.springframework.format.number.NumberFormatAnnotationFormatterFactory;
 import org.springframework.util.ClassUtils;
@@ -97,38 +98,7 @@ public class DefaultFormattingConversionService extends FormattingConversionServ
 		if (jodaTimePresent) {
 			new JodaTimeFormatterRegistrar().registerFormatters(formatterRegistry);
 		} else {
-			formatterRegistry.addFormatterForFieldAnnotation(new NoJodaDateTimeFormatAnnotationFormatterFactory());
-		}
-	}
-
-
-	/**
-	 * Dummy AnnotationFormatterFactory that simply fails if @DateTimeFormat is being used
-	 * without the JodaTime library being present.
-	 */
-	private static final class NoJodaDateTimeFormatAnnotationFormatterFactory
-			implements AnnotationFormatterFactory<DateTimeFormat> {
-
-		private final Set<Class<?>> fieldTypes;
-
-		public NoJodaDateTimeFormatAnnotationFormatterFactory() {
-			Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(4);
-			rawFieldTypes.add(Date.class);
-			rawFieldTypes.add(Calendar.class);
-			rawFieldTypes.add(Long.class);
-			this.fieldTypes = Collections.unmodifiableSet(rawFieldTypes);
-		}
-
-		public Set<Class<?>> getFieldTypes() {
-			return this.fieldTypes;
-		}
-
-		public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
-			throw new IllegalStateException("JodaTime library not available - @DateTimeFormat not supported");
-		}
-
-		public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-			throw new IllegalStateException("JodaTime library not available - @DateTimeFormat not supported");
+			new DateFormatterRegistrar().registerFormatters(formatterRegistry);
 		}
 	}
 

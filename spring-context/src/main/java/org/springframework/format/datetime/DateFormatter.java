@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,18 @@ package org.springframework.format.datetime;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.springframework.format.Formatter;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A formatter for {@link java.util.Date} types.
@@ -31,14 +38,29 @@ import org.springframework.format.Formatter;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
- * @see SimpleDateFormat 
+ * @see SimpleDateFormat
  */
 public class DateFormatter implements Formatter<Date> {
+
+	private static final Map<ISO, String> ISO_PATTERNS;
+	static {
+		Map<ISO, String> formats = new HashMap<DateTimeFormat.ISO, String>();
+		formats.put(ISO.DATE, "yyyy-MM-dd");
+		formats.put(ISO.TIME, "HH:mm:ss.SSSZ");
+		formats.put(ISO.DATE_TIME, "yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		ISO_PATTERNS = Collections.unmodifiableMap(formats);
+	}
+
 
 	private String pattern;
 
 	private int style = DateFormat.DEFAULT;
+
+	private String stylePattern;
+
+	private ISO iso;
 
 	private TimeZone timeZone;
 
@@ -81,6 +103,32 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 	/**
+	 * Set the two character to use to format date values. The first character used for
+	 * the date style, the second is for the time style. Supported characters are
+	 * <ul>
+	 * <li>'S' = Small</li>
+	 * <li>'M' = Medium</li>
+	 * <li>'L' = Long</li>
+	 * <li>'F' = Full</li>
+	 * <li>'-' = Omitted</li>
+	 * <ul>
+	 * This method mimics the styles supported by Joda Time.
+	 *
+	 * @param stylePattern two characters from the set {"S", "M", "L", "F", "-"}
+	 */
+	public void setStylePattern(String stylePattern) {
+		this.stylePattern = stylePattern;
+	}
+
+	/**
+	 * Set the ISO format used for this date.
+	 *
+	 * @param iso
+	 */
+	public void setIso(ISO iso) {
+		this.iso = iso;
+	}
+	/**
 	 * Set the TimeZone to normalize the date values into, if any.
 	 */
 	public void setTimeZone(TimeZone timeZone) {
@@ -107,13 +155,7 @@ public class DateFormatter implements Formatter<Date> {
 
 
 	protected DateFormat getDateFormat(Locale locale) {
-		DateFormat dateFormat;
-		if (this.pattern != null) {
-			dateFormat = new SimpleDateFormat(this.pattern, locale);
-		}
-		else {
-			dateFormat = DateFormat.getDateInstance(this.style, locale);
-		}
+		DateFormat dateFormat = createDateFormat(locale);
 		if (this.timeZone != null) {
 			dateFormat.setTimeZone(this.timeZone);
 		}
@@ -121,4 +163,45 @@ public class DateFormatter implements Formatter<Date> {
 		return dateFormat;
 	}
 
+	private DateFormat createDateFormat(Locale locale) {
+		if (StringUtils.hasLength(this.pattern)) {
+			return new SimpleDateFormat(this.pattern, locale);
+		}
+		if (iso != null && iso != ISO.NONE) {
+			String pattern = ISO_PATTERNS.get(iso);
+			Assert.state(pattern != null, "Unsupported ISO format " + iso);
+			SimpleDateFormat format = new SimpleDateFormat(pattern);
+			format.setTimeZone(TimeZone.getTimeZone("UTC"));
+			return format;
+		}
+		if(StringUtils.hasLength(stylePattern)) {
+			int dateStyle = getStylePatternForChar(0);
+			int timeStyle = getStylePatternForChar(1);
+			if(dateStyle != -1 && timeStyle != -1) {
+				return DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+			}
+			if(dateStyle != -1) {
+				return DateFormat.getDateInstance(dateStyle, locale);
+			}
+			if(timeStyle != -1) {
+				return DateFormat.getTimeInstance(timeStyle, locale);
+			}
+			throw new IllegalStateException("Unsupported style pattern '"+ stylePattern+ "'");
+
+		}
+		return DateFormat.getDateInstance(this.style, locale);
+	}
+
+	private int getStylePatternForChar(int index) {
+		if(stylePattern != null && stylePattern.length() > index) {
+			switch (stylePattern.charAt(index)) {
+				case 'S': return DateFormat.SHORT;
+				case 'M': return DateFormat.MEDIUM;
+				case 'L': return DateFormat.LONG;
+				case 'F': return DateFormat.FULL;
+				case '-': return -1;
+			}
+		}
+		throw new IllegalStateException("Unsupported style pattern '"+ stylePattern+ "'");
+	}
 }
