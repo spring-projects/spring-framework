@@ -1506,7 +1506,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 
-		assertEquals(200, response.getStatus());
+		assertEquals(302, response.getStatus());
 		assertEquals("/messages/1?name=value", response.getRedirectedUrl());
 		assertEquals("yay!", RequestContextUtils.getOutputFlashMap(request).get("successMessage"));
 
