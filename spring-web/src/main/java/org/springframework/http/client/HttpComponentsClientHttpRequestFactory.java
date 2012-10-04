@@ -34,13 +34,13 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HttpContext;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
@@ -56,9 +56,6 @@ import org.springframework.util.ClassUtils;
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
 
-	private static final boolean HTTP_PATCH_AVAILABLE = ClassUtils.isPresent(
-			"org.apache.http.client.methods.HttpPatch", HttpComponentsClientHttpRequestFactory.class.getClassLoader());
-
 	private static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 100;
 
 	private static final int DEFAULT_MAX_CONNECTIONS_PER_ROUTE = 5;
@@ -70,14 +67,14 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 	/**
 	 * Create a new instance of the HttpComponentsClientHttpRequestFactory with a default
-	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager}.
+	 * {@link HttpClient} that uses a default {@link org.apache.http.impl.conn.PoolingClientConnectionManager}.
 	 */
 	public HttpComponentsClientHttpRequestFactory() {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 		schemeRegistry.register(new Scheme("https", 443, SSLSocketFactory.getSocketFactory()));
 
-		ThreadSafeClientConnManager connectionManager = new ThreadSafeClientConnManager(schemeRegistry);
+		PoolingClientConnectionManager connectionManager = new PoolingClientConnectionManager(schemeRegistry);
 		connectionManager.setMaxTotal(DEFAULT_MAX_TOTAL_CONNECTIONS);
 		connectionManager.setDefaultMaxPerRoute(DEFAULT_MAX_CONNECTIONS_PER_ROUTE);
 
@@ -160,19 +157,9 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			case TRACE:
 				return new HttpTrace(uri);
 			case PATCH:
-				return createHttpPatch(uri);
+				return new HttpPatch(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
-		}
-	}
-
-	private HttpUriRequest createHttpPatch(URI uri) {
-		if (!HTTP_PATCH_AVAILABLE) {
-			throw new IllegalArgumentException(
-					"HTTP method PATCH not available before Apache HttpComponents HttpClient 4.2");
-		}
-		else {
-			return new HttpPatch(uri);
 		}
 	}
 
