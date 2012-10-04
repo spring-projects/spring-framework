@@ -35,12 +35,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * Adapter for live beans view exposure, building a snapshot of current beans
- * and their dependencies from either a local ApplicationContext (with a
- * local LiveBeansView bean definition) or all registered ApplicationContexts
- * (driven by the "spring.liveBeansView.mbean" environment property).
+ * and their dependencies from either a local {@code ApplicationContext} (with a
+ * local {@code LiveBeansView} bean definition) or all registered ApplicationContexts
+ * (driven by the {@value #MBEAN_DOMAIN_PROPERTY_NAME} environment property).
  *
  * <p>Note: This feature is still in beta and primarily designed for use with
- * SpringSource Tool Suite 3.1.
+ * Spring Tool Suite 3.1.
  *
  * @author Juergen Hoeller
  * @since 3.2
@@ -152,7 +152,7 @@ public class LiveBeansView implements LiveBeansViewMBean, ApplicationContextAwar
 						scope = BeanDefinition.SCOPE_SINGLETON;
 					}
 					result.append("\"scope\": \"").append(scope).append("\",\n");
-					Class beanType = bf.getType(beanName);
+					Class<?> beanType = bf.getType(beanName);
 					if (beanType != null) {
 						result.append("\"type\": \"").append(beanType.getName()).append("\",\n");
 					}

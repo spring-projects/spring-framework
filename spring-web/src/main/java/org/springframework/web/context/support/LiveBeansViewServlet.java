@@ -34,6 +34,7 @@ import org.springframework.context.support.LiveBeansView;
  * @since 3.2
  * @see org.springframework.context.support.LiveBeansView#getSnapshotAsJson()
  */
+@SuppressWarnings("serial")
 public class LiveBeansViewServlet extends HttpServlet {
 
 	private LiveBeansView liveBeansView;
