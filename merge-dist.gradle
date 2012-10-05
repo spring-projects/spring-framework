@@ -22,11 +22,13 @@ import org.gradle.plugins.ide.eclipse.model.ProjectDependency
 def mergeFromProject = project
 
 // invoking a task on mergeFromProject will invoke the task with the same name on mergeIntoProject
-def taskNamesToMerge = ['sourcesJar','jar','javadocJar','javadoc','install']
+def taskNamesToMerge = ['sourcesJar','jar','javadocJar','javadoc','install','artifactoryPublish']
 taskNamesToMerge.each { taskName ->
-    def taskToRemove = tasks.getByPath(taskName)
-    taskToRemove.enabled = false
-    taskToRemove.dependsOn mergeIntoProject."$taskName"
+    def taskToRemove = mergeFromProject.tasks.findByPath(taskName)
+    if(taskToRemove) {
+        taskToRemove.enabled = false
+        taskToRemove.dependsOn mergeIntoProject."$taskName"
+    }
 }
 
 // update mergeIntoProject artifacts to contain the mergeFromProject artifact contents
