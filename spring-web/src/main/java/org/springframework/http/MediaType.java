@@ -413,11 +413,12 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code> or not.
+	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code>
+	 * or the wildcard character followed by a sufiix (e.g. <code>&#42;+xml</code>), or not.
 	 * @return whether the subtype is <code>&#42;</code>
 	 */
 	public boolean isWildcardSubtype() {
-		return WILDCARD_TYPE.equals(subtype);
+		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
 	}
 
 	/**
