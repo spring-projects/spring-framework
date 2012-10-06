@@ -482,18 +482,26 @@ public class MediaType implements Comparable<MediaType> {
 			return true;
 		}
 		else if (this.type.equals(other.type)) {
-			if (this.subtype.equals(other.subtype) || this.isWildcardSubtype()) {
+			if (this.subtype.equals(other.subtype)) {
 				return true;
 			}
-			// application/*+xml includes application/soap+xml
-			int thisPlusIdx = this.subtype.indexOf('+');
-			int otherPlusIdx = other.subtype.indexOf('+');
-			if (thisPlusIdx != -1 && otherPlusIdx != -1) {
-				String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
-				String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
-				String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
-				if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {
+			if (this.isWildcardSubtype()) {
+				// wildcard with suffix, e.g. application/*+xml
+				int thisPlusIdx = this.subtype.indexOf('+');
+				if (thisPlusIdx == -1) {
 					return true;
+				}
+				else {
+					// application/*+xml includes application/soap+xml
+					int otherPlusIdx = other.subtype.indexOf('+');
+					if (otherPlusIdx != -1) {
+						String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
+						String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
+						String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
+						if (thisSubtypeSuffix.equals(otherSubtypeSuffix) && WILDCARD_TYPE.equals(thisSubtypeNoSuffix)) {
+							return true;
+						}
+					}
 				}
 			}
 		}
@@ -515,22 +523,29 @@ public class MediaType implements Comparable<MediaType> {
 			return true;
 		}
 		else if (this.type.equals(other.type)) {
-			if (this.subtype.equals(other.subtype) || this.isWildcardSubtype() || other.isWildcardSubtype()) {
+			if (this.subtype.equals(other.subtype)) {
 				return true;
 			}
-			// application/*+xml is compatible with application/soap+xml, and vice-versa
-			int thisPlusIdx = this.subtype.indexOf('+');
-			int otherPlusIdx = other.subtype.indexOf('+');
-			if (thisPlusIdx != -1 && otherPlusIdx != -1) {
-				String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
-				String otherSubtypeNoSuffix = other.subtype.substring(0, otherPlusIdx);
+			// wildcard with suffix? e.g. application/*+xml
+			if (this.isWildcardSubtype() || other.isWildcardSubtype()) {
 
-				String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
-				String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
+				int thisPlusIdx = this.subtype.indexOf('+');
+				int otherPlusIdx = other.subtype.indexOf('+');
 
-				if (thisSubtypeSuffix.equals(otherSubtypeSuffix) &&
-						(WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
+				if (thisPlusIdx == -1 && otherPlusIdx == -1) {
 					return true;
+				}
+				else if (thisPlusIdx != -1 && otherPlusIdx != -1) {
+					String thisSubtypeNoSuffix = this.subtype.substring(0, thisPlusIdx);
+					String otherSubtypeNoSuffix = other.subtype.substring(0, otherPlusIdx);
+
+					String thisSubtypeSuffix = this.subtype.substring(thisPlusIdx + 1);
+					String otherSubtypeSuffix = other.subtype.substring(otherPlusIdx + 1);
+
+					if (thisSubtypeSuffix.equals(otherSubtypeSuffix) &&
+							(WILDCARD_TYPE.equals(thisSubtypeNoSuffix) || WILDCARD_TYPE.equals(otherSubtypeNoSuffix))) {
+						return true;
+					}
 				}
 			}
 		}

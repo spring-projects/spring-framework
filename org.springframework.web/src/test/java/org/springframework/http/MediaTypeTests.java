@@ -59,6 +59,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.includes(applicationSoapXml));
 		assertFalse(applicationSoapXml.includes(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.includes(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -84,6 +86,8 @@ public class MediaTypeTests {
 
 		assertTrue(applicationWildcardXml.isCompatibleWith(applicationSoapXml));
 		assertTrue(applicationSoapXml.isCompatibleWith(applicationWildcardXml));
+
+		assertFalse(applicationWildcardXml.isCompatibleWith(MediaType.APPLICATION_JSON));
 	}
 
 	@Test
