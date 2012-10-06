@@ -264,6 +264,28 @@ public class RequestResponseBodyMethodProcessorTests {
 		fail("Expected exception");
 	}
 
+	// SPR-9841
+
+	@Test
+	public void handleReturnValueMediaTypeSuffix() throws Exception {
+		String body = "Foo";
+		MediaType accepted = MediaType.APPLICATION_XHTML_XML;
+		List<MediaType> supported = Collections.singletonList(MediaType.valueOf("application/*+xml"));
+
+		servletRequest.addHeader("Accept", accepted);
+
+		expect(messageConverter.canWrite(String.class, null)).andReturn(true);
+		expect(messageConverter.getSupportedMediaTypes()).andReturn(supported);
+		expect(messageConverter.canWrite(String.class, accepted)).andReturn(true);
+		messageConverter.write(eq(body), eq(accepted), isA(HttpOutputMessage.class));
+		replay(messageConverter);
+
+		processor.handleReturnValue(body, returnTypeStringProduces, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		verify(messageConverter);
+	}
+
 	// SPR-9160
 
 	@Test
