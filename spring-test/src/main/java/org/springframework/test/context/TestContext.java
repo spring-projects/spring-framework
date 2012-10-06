@@ -114,7 +114,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 */
 	private ApplicationContext loadApplicationContext() throws Exception {
 		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
-		Assert.notNull(contextLoader, "Can not load an ApplicationContext with a NULL 'contextLoader'. "
+		Assert.notNull(contextLoader, "Cannot load an ApplicationContext with a NULL 'contextLoader'. "
 				+ "Consider annotating your test class with @ContextConfiguration.");
 
 		ApplicationContext applicationContext;
@@ -125,7 +125,7 @@ public class TestContext extends AttributeAccessorSupport {
 		}
 		else {
 			String[] locations = mergedContextConfiguration.getLocations();
-			Assert.notNull(locations, "Can not load an ApplicationContext with a NULL 'locations' array. "
+			Assert.notNull(locations, "Cannot load an ApplicationContext with a NULL 'locations' array. "
 					+ "Consider annotating your test class with @ContextConfiguration.");
 			applicationContext = contextLoader.loadContext(locations);
 		}

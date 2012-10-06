@@ -16,9 +16,8 @@
 
 package org.springframework.test.web.mock.servlet.samples.context;
 
-import static org.springframework.test.web.mock.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.mock.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.mock.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.mock.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.mock.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,27 +25,27 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.mock.servlet.MockMvc;
 import org.springframework.test.web.mock.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Tests with Java configuration.
  *
- * The TestContext framework doesn't support WebApplicationContext yet:
- * https://jira.springsource.org/browse/SPR-5243
- *
- * A custom {@link ContextLoader} is used to load the WebApplicationContext.
+ * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(loader=WebContextLoader.class, classes={WebConfig.class})
+@WebAppConfiguration("src/test/resources/META-INF/web-resources")
+@ContextConfiguration(classes = WebConfig.class)
 public class JavaTestContextTests {
 
 	@Autowired
 	private WebApplicationContext wac;
 
 	private MockMvc mockMvc;
+
 
 	@Before
 	public void setup() {
@@ -55,9 +54,9 @@ public class JavaTestContextTests {
 
 	@Test
 	public void tilesDefinitions() throws Exception {
-		this.mockMvc.perform(get("/"))
-				.andExpect(status().isOk())
-				.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
+		this.mockMvc.perform(get("/"))//
+		.andExpect(status().isOk())//
+		.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
 	}
 
 }

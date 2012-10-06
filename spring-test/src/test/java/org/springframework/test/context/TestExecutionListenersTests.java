@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class TestExecutionListenersTests {
 	@Test
 	public void verifyNumDefaultListenersRegistered() throws Exception {
 		TestContextManager testContextManager = new TestContextManager(DefaultListenersExampleTestCase.class);
-		assertEquals("Verifying the number of registered TestExecutionListeners for DefaultListenersExampleTest.", 3,
+		assertEquals("Verifying the number of registered TestExecutionListeners for DefaultListenersExampleTest.", 4,
 			testContextManager.getTestExecutionListeners().size());
 	}
 

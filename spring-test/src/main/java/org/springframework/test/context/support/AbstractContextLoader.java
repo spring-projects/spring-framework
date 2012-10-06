@@ -16,13 +16,24 @@
 
 package org.springframework.test.context.support;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -79,6 +90,64 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
 		configAttributes.setLocations(processedLocations);
+	}
+
+	/**
+	 * Prepare the {@link ConfigurableApplicationContext} created by this 
+	 * {@code SmartContextLoader} <i>before</i> bean definitions are read.
+	 *
+	 * <p>The default implementation:
+	 * <ul>
+	 * <li>Sets the <em>active bean definition profiles</em> from the supplied
+	 * <code>MergedContextConfiguration</code> in the
+	 * {@link org.springframework.core.env.Environment Environment} of the context.</li>
+	 * <li>Determines what (if any) context initializer classes have been supplied
+	 * via the {@code MergedContextConfiguration} and
+	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
+	 * given application context.</li>
+	 * </ul>
+	 *
+	 * <p>Any {@code ApplicationContextInitializers} implementing
+	 * {@link org.springframework.core.Ordered Ordered} or marked with {@link
+	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.
+	 *
+	 * @param context the newly created application context
+	 * @param mergedConfig the merged context configuration
+	 * @see ApplicationContextInitializer#initialize(ConfigurableApplicationContext)
+	 * @see #loadContext(MergedContextConfiguration)
+	 * @see ConfigurableApplicationContext#setId
+	 * @since 3.2
+	 */
+	@SuppressWarnings("unchecked")
+	protected void prepareContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
+
+		context.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
+
+		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = mergedConfig.getContextInitializerClasses();
+
+		if (initializerClasses.size() == 0) {
+			// no ApplicationContextInitializers have been declared -> nothing to do
+			return;
+		}
+
+		final List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+		final Class<?> contextClass = context.getClass();
+
+		for (Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializerClass : initializerClasses) {
+			Class<?> initializerContextClass = GenericTypeResolver.resolveTypeArgument(initializerClass,
+				ApplicationContextInitializer.class);
+			Assert.isAssignable(initializerContextClass, contextClass, String.format(
+				"Could not add context initializer [%s] since its generic parameter [%s] "
+						+ "is not assignable from the type of application context used by this "
+						+ "context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+				contextClass.getName()));
+			initializerInstances.add((ApplicationContextInitializer<ConfigurableApplicationContext>) BeanUtils.instantiateClass(initializerClass));
+		}
+
+		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
+		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
+			initializer.initialize(context);
+		}
 	}
 
 	// --- ContextLoader -------------------------------------------------------
@@ -185,12 +254,10 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 			String path = locations[i];
 			if (path.startsWith(SLASH)) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;
-			}
-			else if (!ResourcePatternUtils.isUrl(path)) {
+			} else if (!ResourcePatternUtils.isUrl(path)) {
 				modifiedLocations[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH
 						+ StringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);
-			}
-			else {
+			} else {
 				modifiedLocations[i] = StringUtils.cleanPath(path);
 			}
 		}

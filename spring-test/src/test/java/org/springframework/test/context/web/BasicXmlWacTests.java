@@ -13,12 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.test.web.mock.servlet.samples.context;
 
-class WebContextLoader extends GenericWebContextLoader {
+package org.springframework.test.context.web;
 
-	public WebContextLoader() {
-		super("src/test/resources/META-INF/web-resources", false);
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+import org.springframework.test.context.ContextConfiguration;
+
+/**
+ * @author Sam Brannen
+ * @since 3.2
+ */
+@ContextConfiguration
+public class BasicXmlWacTests extends AbstractBasicWacTests {
+
+	@Test
+	public void fooBarAutowired() {
+		assertEquals("bar", foo);
 	}
 
 }
