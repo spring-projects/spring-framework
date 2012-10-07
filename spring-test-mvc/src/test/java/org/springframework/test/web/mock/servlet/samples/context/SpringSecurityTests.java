@@ -10,6 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
 package org.springframework.test.web.mock.servlet.samples.context;
 
 import static org.springframework.test.web.mock.servlet.request.MockMvcRequestBuilders.get;
@@ -34,6 +35,7 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.mock.servlet.MockMvc;
 import org.springframework.test.web.mock.servlet.MvcResult;
 import org.springframework.test.web.mock.servlet.ResultMatcher;
@@ -44,32 +46,25 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Basic example that includes Spring Security configuration.
  *
- * <p>Note that currently there are no {@link ResultMatcher}' built specifically
- * for asserting the Spring Security context. However, it's quite easy to put
- * them together as shown below and Spring Security extensions will become
- * available in the near future.
+ * <p>Note that currently there are no {@linkplain ResultMatcher ResultMatchers}
+ * built specifically for asserting the Spring Security context. However, it's
+ * quite easy to put them together as shown below, and Spring Security extensions
+ * will become available in the near future.
  *
  * <p>This also demonstrates a custom {@link RequestPostProcessor} which authenticates
  * a user to a particular {@link HttpServletRequest}.
  *
- * <p>Also see the Javadoc of {@link GenericWebContextLoader}, a class that
- * provides temporary support for loading WebApplicationContext by extending
- * the TestContext framework.
- *
  * @author Rob Winch
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @see SecurityRequestPostProcessors
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(
-		loader=WebContextLoader.class,
-		value={
-			"classpath:org/springframework/test/web/mock/servlet/samples/context/security.xml",
-			"classpath:org/springframework/test/web/mock/servlet/samples/servlet-context.xml"
-		})
+@WebAppConfiguration("src/test/resources/META-INF/web-resources")
+@ContextConfiguration({ "security.xml", "../servlet-context.xml" })
 public class SpringSecurityTests {
 
-	private static String SEC_CONTEXT_ATTR = HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
+	private static final String SEC_CONTEXT_ATTR = HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;
 
 	@Autowired
 	private FilterChainProxy springSecurityFilterChain;
@@ -79,57 +74,67 @@ public class SpringSecurityTests {
 
 	private MockMvc mockMvc;
 
+
 	@Before
 	public void setup() {
-		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)
-				.addFilters(this.springSecurityFilterChain).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac)//
+		.addFilters(this.springSecurityFilterChain)//
+		.build();
 	}
 
 	@Test
 	public void requiresAuthentication() throws Exception {
-		mockMvc.perform(get("/user"))
-			.andExpect(redirectedUrl("http://localhost/spring_security_login"));
+		mockMvc.perform(get("/user")).//
+		andExpect(redirectedUrl("http://localhost/spring_security_login"));
 	}
 
 	@Test
 	public void accessGranted() throws Exception {
-		this.mockMvc.perform(get("/").with(userDeatilsService("user")))
-			.andExpect(status().isOk())
-			.andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
+		this.mockMvc.perform(get("/").//
+		with(userDeatilsService("user"))).//
+		andExpect(status().isOk()).//
+		andExpect(forwardedUrl("/WEB-INF/layouts/standardLayout.jsp"));
 	}
 
 	@Test
 	public void accessDenied() throws Exception {
-		this.mockMvc.perform(get("/").with(user("user").roles("DENIED")))
-			.andExpect(status().isForbidden());
+		this.mockMvc.perform(get("/")//
+		.with(user("user").roles("DENIED")))//
+		.andExpect(status().isForbidden());
 	}
 
 	@Test
 	public void userAuthenticates() throws Exception {
 		final String username = "user";
-		mockMvc.perform(post("/j_spring_security_check").param("j_username", username).param("j_password", "password"))
-			.andExpect(redirectedUrl("/"))
-			.andExpect(new ResultMatcher() {
-				public void match(MvcResult mvcResult) throws Exception {
-					HttpSession session = mvcResult.getRequest().getSession();
-					SecurityContext securityContext = (SecurityContext) session.getAttribute(SEC_CONTEXT_ATTR);
-					Assert.assertEquals(securityContext.getAuthentication().getName(), username);
-				}
-			});
+		mockMvc.perform(post("/j_spring_security_check").//
+		param("j_username", username).//
+		param("j_password", "password")).//
+		andExpect(redirectedUrl("/")).//
+		andExpect(new ResultMatcher() {
+
+			public void match(MvcResult mvcResult) throws Exception {
+				HttpSession session = mvcResult.getRequest().getSession();
+				SecurityContext securityContext = (SecurityContext) session.getAttribute(SEC_CONTEXT_ATTR);
+				Assert.assertEquals(securityContext.getAuthentication().getName(), username);
+			}
+		});
 	}
 
 	@Test
 	public void userAuthenticateFails() throws Exception {
 		final String username = "user";
-		mockMvc.perform(post("/j_spring_security_check").param("j_username", username).param("j_password", "invalid"))
-			.andExpect(redirectedUrl("/spring_security_login?login_error"))
-			.andExpect(new ResultMatcher() {
-				public void match(MvcResult mvcResult) throws Exception {
-					HttpSession session = mvcResult.getRequest().getSession();
-					SecurityContext securityContext = (SecurityContext) session.getAttribute(SEC_CONTEXT_ATTR);
-					Assert.assertNull(securityContext);
-				}
-			});
+		mockMvc.perform(post("/j_spring_security_check").//
+		param("j_username", username).//
+		param("j_password", "invalid")).//
+		andExpect(redirectedUrl("/spring_security_login?login_error")).//
+		andExpect(new ResultMatcher() {
+
+			public void match(MvcResult mvcResult) throws Exception {
+				HttpSession session = mvcResult.getRequest().getSession();
+				SecurityContext securityContext = (SecurityContext) session.getAttribute(SEC_CONTEXT_ATTR);
+				Assert.assertNull(securityContext);
+			}
+		});
 	}
 
 }
