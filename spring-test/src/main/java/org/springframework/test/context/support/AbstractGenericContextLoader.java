@@ -16,25 +16,14 @@
 
 package org.springframework.test.context.support;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.GenericTypeResolver;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -77,7 +66,10 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 *
 	 * <ul>
 	 * <li>Creates a {@link GenericApplicationContext} instance.</li>
-	 * <li>Calls {@link #prepareContext(GenericApplicationContext, MergedContextConfiguration)}
+	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} for backwards
+	 * compatibility with the {@link org.springframework.test.context.ContextLoader
+	 * ContextLoader} SPI.</li>
+	 * <li>Calls {@link #prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)}
 	 * to allow for customizing the context before bean definitions are loaded.</li>
 	 * <li>Calls {@link #customizeBeanFactory(DefaultListableBeanFactory)} to allow for customizing the
 	 * context's <code>DefaultListableBeanFactory</code>.</li>
@@ -105,6 +97,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		}
 
 		GenericApplicationContext context = new GenericApplicationContext();
+		prepareContext(context);
 		prepareContext(context, mergedConfig);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		loadBeanDefinitions(context, mergedConfig);
@@ -181,72 +174,6 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @since 2.5
 	 */
 	protected void prepareContext(GenericApplicationContext context) {
-	}
-
-	/**
-	 * Prepare the {@link GenericApplicationContext} created by this 
-	 * {@code SmartContextLoader} <i>before</i> bean definitions are read.
-	 *
-	 * <p>The default implementation:
-	 * <ul>
-	 * <li>Calls {@link #prepareContext(GenericApplicationContext)} for backwards
-	 * compatibility with the {@link org.springframework.test.context.ContextLoader
-	 * ContextLoader} SPI.</li>
-	 * <li>Sets the <em>active bean definition profiles</em> from the supplied
-	 * <code>MergedContextConfiguration</code> in the
-	 * {@link org.springframework.core.env.Environment Environment} of the context.</li>
-	 * <li>Determines what (if any) context initializer classes have been supplied
-	 * via the {@code MergedContextConfiguration} and
-	 * {@linkplain ApplicationContextInitializer#initialize invokes each} with the
-	 * given application context.</li>
-	 * </ul>
-	 *
-	 * <p>Any {@code ApplicationContextInitializers} implementing
-	 * {@link org.springframework.core.Ordered Ordered} or marked with {@link
-	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.
-	 *
-	 * @param applicationContext the newly created application context
-	 * @param mergedConfig the merged context configuration
-	 * @see ApplicationContextInitializer#initialize(GenericApplicationContext)
-	 * @see #loadContext(MergedContextConfiguration)
-	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
-	 * @see GenericApplicationContext#setResourceLoader
-	 * @see GenericApplicationContext#setId
-	 * @since 3.2
-	 */
-	@SuppressWarnings("unchecked")
-	protected void prepareContext(GenericApplicationContext applicationContext,
-			MergedContextConfiguration mergedConfig) {
-
-		prepareContext(applicationContext);
-
-		applicationContext.getEnvironment().setActiveProfiles(mergedConfig.getActiveProfiles());
-
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = mergedConfig.getContextInitializerClasses();
-
-		if (initializerClasses.size() == 0) {
-			// no ApplicationContextInitializers have been declared -> nothing to do
-			return;
-		}
-
-		final List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances = new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
-		final Class<?> contextClass = applicationContext.getClass();
-
-		for (Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializerClass : initializerClasses) {
-			Class<?> initializerContextClass = GenericTypeResolver.resolveTypeArgument(initializerClass,
-				ApplicationContextInitializer.class);
-			Assert.isAssignable(initializerContextClass, contextClass, String.format(
-				"Could not add context initializer [%s] since its generic parameter [%s] "
-						+ "is not assignable from the type of application context used by this "
-						+ "context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
-				contextClass.getName()));
-			initializerInstances.add((ApplicationContextInitializer<ConfigurableApplicationContext>) BeanUtils.instantiateClass(initializerClass));
-		}
-
-		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
-		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
-			initializer.initialize(applicationContext);
-		}
 	}
 
 	/**

@@ -18,41 +18,21 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.ContextConfigurationAttributes;
-import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * Concrete implementation of {@link AbstractGenericContextLoader} that loads
- * bean definitions from annotated classes.
- * 
- * <p>See the Javadoc for
- * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
- * for a definition of <em>annotated class</em>.
- * 
- * <p>Note: <code>AnnotationConfigContextLoader</code> supports <em>annotated classes</em>
- * rather than the String-based resource locations defined by the legacy
- * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
- * although <code>AnnotationConfigContextLoader</code> extends
- * <code>AbstractGenericContextLoader</code>, <code>AnnotationConfigContextLoader</code>
- * does <em>not</em> support any String-based methods defined by
- * <code>AbstractContextLoader</code> or <code>AbstractGenericContextLoader</code>.
- * Consequently, <code>AnnotationConfigContextLoader</code> should chiefly be
- * considered a {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
- * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}.
+ * TODO [SPR-5243] Document AnnotationConfigWebContextLoader.
  *
  * @author Sam Brannen
- * @since 3.1
- * @see #processContextConfiguration(ContextConfigurationAttributes)
- * @see #detectDefaultConfigurationClasses(Class)
- * @see #loadBeanDefinitions(GenericApplicationContext, MergedContextConfiguration)
+ * @since 3.2
  */
-public class AnnotationConfigContextLoader extends AbstractGenericContextLoader {
+public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextLoader {
 
-	private static final Log logger = LogFactory.getLog(AnnotationConfigContextLoader.class);
+	private static final Log logger = LogFactory.getLog(AnnotationConfigWebContextLoader.class);
 
 
 	// --- SmartContextLoader -----------------------------------------------
@@ -81,8 +61,6 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 		}
 	}
 
-	// --- AnnotationConfigContextLoader ---------------------------------------
-
 	/**
 	 * Detect the default configuration classes for the supplied test class.
 	 *
@@ -101,7 +79,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	// --- AbstractContextLoader -----------------------------------------------
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigWebContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -112,11 +90,11 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	@Override
 	protected String[] modifyLocations(Class<?> clazz, String... locations) {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the modifyLocations(Class, String...) method");
+			"AnnotationConfigWebContextLoader does not support the modifyLocations(Class, String...) method");
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigWebContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -127,11 +105,11 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	@Override
 	protected String[] generateDefaultLocations(Class<?> clazz) {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the generateDefaultLocations(Class) method");
+			"AnnotationConfigWebContextLoader does not support the generateDefaultLocations(Class) method");
 	}
 
 	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
+	 * {@code AnnotationConfigWebContextLoader} should be used as a
 	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
 	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
 	 * Consequently, this method is not supported.
@@ -142,51 +120,32 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	@Override
 	protected String getResourceSuffix() {
 		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the getResourceSuffix() method");
+			"AnnotationConfigWebContextLoader does not support the getResourceSuffix() method");
 	}
 
-	// --- AbstractGenericContextLoader ----------------------------------------
+	// --- AbstractGenericWebContextLoader -------------------------------------
 
 	/**
-	 * Register classes in the supplied {@link GenericApplicationContext context}
-	 * from the classes in the supplied {@link MergedContextConfiguration}.
+	 * Register classes in the supplied {@link GenericWebApplicationContext context}
+	 * from the classes in the supplied {@link WebMergedContextConfiguration}.
 	 *
 	 * <p>Each class must represent an <em>annotated class</em>. An
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
 	 *
-	 * <p>Note that this method does not call {@link #createBeanDefinitionReader()}
-	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
-	 * {@link BeanDefinitionReader}.
-	 *
 	 * @param context the context in which the annotated classes should be registered
-	 * @param mergedConfig the merged configuration from which the classes should be retrieved
+	 * @param webMergedConfig the merged configuration from which the classes should be retrieved
 	 *
-	 * @see AbstractGenericContextLoader#loadBeanDefinitions
+	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override
-	protected void loadBeanDefinitions(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
-		Class<?>[] annotatedClasses = mergedConfig.getClasses();
+	protected void loadBeanDefinitions(GenericWebApplicationContext context,
+			WebMergedContextConfiguration webMergedConfig) {
+		Class<?>[] annotatedClasses = webMergedConfig.getClasses();
 		if (logger.isDebugEnabled()) {
 			logger.debug("Registering annotated classes: " + ObjectUtils.nullSafeToString(annotatedClasses));
 		}
 		new AnnotatedBeanDefinitionReader(context).register(annotatedClasses);
-	}
-
-	/**
-	 * <code>AnnotationConfigContextLoader</code> should be used as a
-	 * {@link org.springframework.test.context.SmartContextLoader SmartContextLoader},
-	 * not as a legacy {@link org.springframework.test.context.ContextLoader ContextLoader}.
-	 * Consequently, this method is not supported.
-	 *
-	 * @see #loadBeanDefinitions
-	 * @see AbstractGenericContextLoader#createBeanDefinitionReader
-	 * @throws UnsupportedOperationException
-	 */
-	@Override
-	protected BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
-		throw new UnsupportedOperationException(
-			"AnnotationConfigContextLoader does not support the createBeanDefinitionReader(GenericApplicationContext) method");
 	}
 
 }

@@ -16,8 +16,8 @@
 
 package org.springframework.test.context;
 
-import static org.springframework.beans.BeanUtils.instantiateClass;
-import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+import static org.springframework.beans.BeanUtils.*;
+import static org.springframework.core.annotation.AnnotationUtils.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -54,6 +56,7 @@ abstract class ContextLoaderUtils {
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
 	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.DelegatingSmartContextLoader";
+	private static final String DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.WebDelegatingSmartContextLoader";
 
 
 	private ContextLoaderUtils() {
@@ -83,7 +86,8 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(testClass, "Test class must not be null");
 
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
-			defaultContextLoaderClassName = DEFAULT_CONTEXT_LOADER_CLASS_NAME;
+			defaultContextLoaderClassName = testClass.isAnnotationPresent(WebAppConfiguration.class) ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
+					: DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
 		Class<? extends ContextLoader> contextLoaderClass = resolveContextLoaderClass(testClass,
@@ -394,6 +398,14 @@ abstract class ContextLoaderUtils {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(configAttributesList);
 		String[] activeProfiles = resolveActiveProfiles(testClass);
 
+		if (testClass.isAnnotationPresent(WebAppConfiguration.class)) {
+			WebAppConfiguration webAppConfig = testClass.getAnnotation(WebAppConfiguration.class);
+			String resourceBasePath = webAppConfig.value();
+			return new WebMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
+				resourceBasePath, contextLoader);
+		}
+
+		// else
 		return new MergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
 			contextLoader);
 	}

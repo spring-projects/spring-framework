@@ -9,6 +9,7 @@
 	<configs>
 		<config>src/test/java/org/springframework/test/context/junit4/profile/xml/DefaultProfileXmlConfigTests-context.xml</config>
 		<config>src/test/java/org/springframework/test/context/junit4/aci/xml/MultipleInitializersXmlConfigTests-context.xml</config>
+		<config>src/test/resources/org/springframework/test/context/web/BasicXmlWacTests-config.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

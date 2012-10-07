@@ -76,6 +76,7 @@ import org.springframework.util.ObjectUtils;
 public class TestContextManager {
 
 	private static final String[] DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES = new String[] {
+		"org.springframework.test.context.web.WebTestExecutionListener",
 		"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
 		"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
 		"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
@@ -126,7 +127,6 @@ public class TestContextManager {
 		return this.testContext;
 	}
 
-
 	/**
 	 * Register the supplied {@link TestExecutionListener TestExecutionListeners}
 	 * by appending them to the set of listeners used by this <code>TestContextManager</code>.
@@ -155,8 +155,8 @@ public class TestContextManager {
 	 * registered for this <code>TestContextManager</code> in reverse order.
 	 */
 	private List<TestExecutionListener> getReversedTestExecutionListeners() {
-		List<TestExecutionListener> listenersReversed =
-				new ArrayList<TestExecutionListener>(getTestExecutionListeners());
+		List<TestExecutionListener> listenersReversed = new ArrayList<TestExecutionListener>(
+			getTestExecutionListeners());
 		Collections.reverse(listenersReversed);
 		return listenersReversed;
 	}
@@ -186,8 +186,7 @@ public class TestContextManager {
 			}
 			classesList.addAll(getDefaultTestExecutionListenerClasses());
 			defaultListeners = true;
-		}
-		else {
+		} else {
 			// Traverse the class hierarchy...
 			while (declaringClass != null) {
 				TestExecutionListeners testExecutionListeners = declaringClass.getAnnotation(annotationType);
@@ -200,22 +199,21 @@ public class TestContextManager {
 				Class<? extends TestExecutionListener>[] listenerClasses = testExecutionListeners.listeners();
 				if (!ObjectUtils.isEmpty(valueListenerClasses) && !ObjectUtils.isEmpty(listenerClasses)) {
 					String msg = String.format(
-						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] " +
-								"and 'listeners' [%s] attributes. Use one or the other, but not both.",
+						"Test class [%s] has been configured with @TestExecutionListeners' 'value' [%s] "
+								+ "and 'listeners' [%s] attributes. Use one or the other, but not both.",
 						declaringClass, ObjectUtils.nullSafeToString(valueListenerClasses),
 						ObjectUtils.nullSafeToString(listenerClasses));
 					logger.error(msg);
 					throw new IllegalStateException(msg);
-				}
-				else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
+				} else if (!ObjectUtils.isEmpty(valueListenerClasses)) {
 					listenerClasses = valueListenerClasses;
 				}
 
 				if (listenerClasses != null) {
 					classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
 				}
-				declaringClass = (testExecutionListeners.inheritListeners() ?
-						AnnotationUtils.findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass()) : null);
+				declaringClass = (testExecutionListeners.inheritListeners() ? AnnotationUtils.findAnnotationDeclaringClass(
+					annotationType, declaringClass.getSuperclass()) : null);
 			}
 		}
 
@@ -223,16 +221,14 @@ public class TestContextManager {
 		for (Class<? extends TestExecutionListener> listenerClass : classesList) {
 			try {
 				listeners.add(BeanUtils.instantiateClass(listenerClass));
-			}
-			catch (NoClassDefFoundError err) {
+			} catch (NoClassDefFoundError err) {
 				if (defaultListeners) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not instantiate default TestExecutionListener class ["
 								+ listenerClass.getName()
 								+ "]. Specify custom listener classes or make the default listener classes available.");
 					}
-				}
-				else {
+				} else {
 					throw err;
 				}
 			}
@@ -245,23 +241,20 @@ public class TestContextManager {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Set<Class<? extends TestExecutionListener>> getDefaultTestExecutionListenerClasses() {
-		Set<Class<? extends TestExecutionListener>> defaultListenerClasses =
-				new LinkedHashSet<Class<? extends TestExecutionListener>>();
+		Set<Class<? extends TestExecutionListener>> defaultListenerClasses = new LinkedHashSet<Class<? extends TestExecutionListener>>();
 		for (String className : DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES) {
 			try {
-				defaultListenerClasses.add(
-						(Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(className));
-			}
-			catch (Throwable ex) {
+				defaultListenerClasses.add((Class<? extends TestExecutionListener>) getClass().getClassLoader().loadClass(
+					className));
+			} catch (Throwable t) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Could not load default TestExecutionListener class [" + className
-							+ "]. Specify custom listener classes or make the default listener classes available.");
+							+ "]. Specify custom listener classes or make the default listener classes available.", t);
 				}
 			}
 		}
 		return defaultListenerClasses;
 	}
-
 
 	/**
 	 * Hook for pre-processing a test class <em>before</em> execution of any
@@ -286,8 +279,7 @@ public class TestContextManager {
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.beforeTestClass(getTestContext());
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 						+ "] to process 'before class' callback for test class [" + testClass + "]", ex);
 				throw ex;
@@ -319,8 +311,7 @@ public class TestContextManager {
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.prepareTestInstance(getTestContext());
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				logger.error("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 						+ "] to prepare test instance [" + testInstance + "]", ex);
 				throw ex;
@@ -356,8 +347,7 @@ public class TestContextManager {
 		for (TestExecutionListener testExecutionListener : getTestExecutionListeners()) {
 			try {
 				testExecutionListener.beforeTestMethod(getTestContext());
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 						+ "] to process 'before' execution of test method [" + testMethod + "] for test instance ["
 						+ testInstance + "]", ex);
@@ -404,8 +394,7 @@ public class TestContextManager {
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestMethod(getTestContext());
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 						+ "] to process 'after' execution for test: method [" + testMethod + "], instance ["
 						+ testInstance + "], exception [" + exception + "]", ex);
@@ -446,8 +435,7 @@ public class TestContextManager {
 		for (TestExecutionListener testExecutionListener : getReversedTestExecutionListeners()) {
 			try {
 				testExecutionListener.afterTestClass(getTestContext());
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				logger.warn("Caught exception while allowing TestExecutionListener [" + testExecutionListener
 						+ "] to process 'after class' callback for test class [" + testClass + "]", ex);
 				if (afterTestClassException == null) {

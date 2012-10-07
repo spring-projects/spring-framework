@@ -105,7 +105,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@link ContextLoader} based solely on the fully qualified name of the
 	 * loader or &quot;null&quot; if the supplied loaded is <code>null</code>.
 	 */
-	private static String nullSafeToString(ContextLoader contextLoader) {
+	protected static String nullSafeToString(ContextLoader contextLoader) {
 		return contextLoader == null ? "null" : contextLoader.getClass().getName();
 	}
 
