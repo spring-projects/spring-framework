@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -110,7 +111,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertEquals("Invalid view name returned", "GenericError", mav.getViewName());
 		assertEquals("Invalid status code returned", 500, response.getStatus());
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void ambiguous() {
 		IllegalArgumentException ex = new IllegalArgumentException();
@@ -127,7 +128,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertTrue("ModelAndView not empty", mav.isEmpty());
 		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
 	}
-	
+
 	@Test
 	public void responseBody() throws UnsupportedEncodingException {
 		IllegalArgumentException ex = new IllegalArgumentException();
@@ -137,6 +138,20 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("ModelAndView not empty", mav.isEmpty());
 		assertEquals("Invalid response written", "IllegalArgumentException", response.getContentAsString());
+	}
+
+	// SPR-9209
+
+	@Test
+	public void cachingSideEffect() {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		SimpleController controller = new SimpleController();
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+
+		mav = exceptionResolver.resolveException(request, response, controller, new NullPointerException());
+		assertNull(mav);
 	}
 
 

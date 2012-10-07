@@ -27,6 +27,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -171,7 +172,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			exceptionHandlerCache.put(handlerType, handlers);
 		}
 
-		final Map<Class<? extends Throwable>, Method> resolverMethods = handlers;
+		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();
 
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
 			public void doWith(Method method) {
@@ -179,11 +180,11 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 				List<Class<? extends Throwable>> handledExceptions = getHandledExceptions(method);
 				for (Class<? extends Throwable> handledException : handledExceptions) {
 					if (handledException.isAssignableFrom(thrownExceptionType)) {
-						if (!resolverMethods.containsKey(handledException)) {
-							resolverMethods.put(handledException, method);
+						if (!matchedHandlers.containsKey(handledException)) {
+							matchedHandlers.put(handledException, method);
 						}
 						else {
-							Method oldMappedMethod = resolverMethods.get(handledException);
+							Method oldMappedMethod = matchedHandlers.get(handledException);
 							if (!oldMappedMethod.equals(method)) {
 								throw new IllegalStateException(
 										"Ambiguous exception handler mapped for " + handledException + "]: {" +
@@ -195,7 +196,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		});
 
-		handlerMethod = getBestMatchingMethod(resolverMethods, thrownException);
+		handlerMethod = getBestMatchingMethod(matchedHandlers, thrownException);
 		handlers.put(thrownExceptionType, (handlerMethod == null ? NO_METHOD_FOUND : handlerMethod));
 		return handlerMethod;
 	}
