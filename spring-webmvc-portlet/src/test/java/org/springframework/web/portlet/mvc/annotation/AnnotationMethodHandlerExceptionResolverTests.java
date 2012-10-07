@@ -16,17 +16,20 @@
 
 package org.springframework.web.portlet.mvc.annotation;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.SocketException;
+
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.stereotype.Controller;
@@ -104,6 +107,20 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		IllegalArgumentException ex = new IllegalArgumentException();
 		AmbiguousController controller = new AmbiguousController();
 		exceptionResolver.resolveException(request, response, controller, ex);
+	}
+
+	// SPR-9209
+
+	@Test
+	public void cachingSideEffect() {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		SimpleController controller = new SimpleController();
+
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+
+		mav = exceptionResolver.resolveException(request, response, controller, new NullPointerException());
+		assertNull(mav);
 	}
 
 
