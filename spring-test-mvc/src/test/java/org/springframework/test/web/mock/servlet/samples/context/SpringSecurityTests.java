@@ -61,7 +61,7 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("src/test/resources/META-INF/web-resources")
-@ContextConfiguration({ "security.xml", "../servlet-context.xml" })
+@ContextConfiguration({ "security.xml", "servlet-context.xml" })
 public class SpringSecurityTests {
 
 	private static final String SEC_CONTEXT_ATTR = HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY;

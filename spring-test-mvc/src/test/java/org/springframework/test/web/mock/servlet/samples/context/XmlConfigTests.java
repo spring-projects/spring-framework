@@ -38,8 +38,8 @@ import org.springframework.web.context.WebApplicationContext;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("src/test/resources/META-INF/web-resources")
-@ContextConfiguration("../servlet-context.xml")
-public class XmlTestContextTests {
+@ContextConfiguration("servlet-context.xml")
+public class XmlConfigTests {
 
 	@Autowired
 	private WebApplicationContext wac;
