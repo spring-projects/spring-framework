@@ -47,6 +47,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 	public void registerFormatters(FormatterRegistry registry) {
 		addDateConverters(registry);
 		registry.addFormatter(dateFormatter);
+		registry.addFormatterForFieldType(Calendar.class, dateFormatter);
 		registry.addFormatterForFieldAnnotation(new DateTimeFormatAnnotationFormatterFactory());
 	}
 
