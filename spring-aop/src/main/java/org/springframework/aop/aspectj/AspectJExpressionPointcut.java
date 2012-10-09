@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.weaver.BCException;
 import org.aspectj.weaver.patterns.NamePattern;
-import org.aspectj.weaver.reflect.ReflectionWorld;
 import org.aspectj.weaver.reflect.ReflectionWorld.ReflectionWorldException;
 import org.aspectj.weaver.reflect.ShadowMatchImpl;
 import org.aspectj.weaver.tools.ContextBasedMatcher;
@@ -355,7 +354,17 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 	private PointcutExpression getFallbackPointcutExpression(
 			Class<?> targetClass) {
 		ClassLoader classLoader = targetClass.getClassLoader();
-		return classLoader == null ? this.pointcutExpression : buildPointcutExpression(classLoader);
+		PointcutExpression result = null;
+		try {
+			result = classLoader == null ? this.pointcutExpression : buildPointcutExpression(classLoader);
+		}
+		catch (BCException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			logger.debug("Failed to build fallback pointcut", e);
+		}
+		return result==null ? this.pointcutExpression : result;
 	}
 
 	/**
@@ -402,13 +411,18 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 					try {
 						shadowMatch = this.pointcutExpression.matchesMethodExecution(targetMethod);
 					}
-					catch (ReflectionWorld.ReflectionWorldException ex) {
+					catch (ReflectionWorldException ex) {
 						// Failed to introspect target method, probably because it has been loaded
 						// in a special ClassLoader. Let's try the original method instead...
 						try {
-							fallbackPointcutExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+							try {
+								fallbackPointcutExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
+							} catch (BCException e) {
+								// In #matches() we catch this explicitly so we should do the same to be safe
+								throw new ReflectionWorldException("Failed to build fallback: " + e.getMessage());
+							} 
 							shadowMatch = fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
-						} catch (ReflectionWorld.ReflectionWorldException e) {
+						} catch (ReflectionWorldException e) {
 							if (targetMethod == originalMethod) {
 								shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
 							}
@@ -416,14 +430,14 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 								try {
 									shadowMatch = this.pointcutExpression.matchesMethodExecution(originalMethod);
 								}
-								catch (ReflectionWorld.ReflectionWorldException ex2) {
+								catch (ReflectionWorldException ex2) {
 									// Could neither introspect the target class nor the proxy class ->
 									// let's simply consider this method as non-matching.
 									methodToMatch = originalMethod;
 									fallbackPointcutExpression = getFallbackPointcutExpression(methodToMatch.getDeclaringClass());
 									try {
 										shadowMatch = fallbackPointcutExpression.matchesMethodExecution(methodToMatch);
-									} catch (ReflectionWorld.ReflectionWorldException e2) {
+									} catch (ReflectionWorldException e2) {
 										shadowMatch = new ShadowMatchImpl(org.aspectj.util.FuzzyBoolean.NO, null, null, null);
 									}
 								}

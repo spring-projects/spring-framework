@@ -67,10 +67,10 @@ public class TrickyAspectJPointcutExpressionTests {
 
 		// Test with default class loader first...
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
-		
+
 		// Then try again with a different class loader on the target...
-		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
-		// Make sure the interface is loaded from the  parent class loader
+		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(getClass().getClassLoader());
+		// Make sure the interface is loaded from the parent class loader
 		loader.excludeClass(TestService.class.getName());
 		loader.excludeClass(TestException.class.getName());
 		TestService other = (TestService) loader.loadClass(TestServiceImpl.class.getName()).newInstance();
@@ -83,26 +83,32 @@ public class TrickyAspectJPointcutExpressionTests {
 		testAdvice(advisor, logAdvice, target, message, false);
 	}
 
-	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, TestService target, String message,
+	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, Object target, String message,
 			boolean proxyTargetClass) throws Exception {
+		testAdvice(advisor, logAdvice, target, message, proxyTargetClass, getClass().getClassLoader());
+	}
+
+	private void testAdvice(Advisor advisor, LogUserAdvice logAdvice, Object target, String message,
+			boolean proxyTargetClass, ClassLoader loader) throws Exception {
 
 		logAdvice.reset();
 
 		ProxyFactory factory = new ProxyFactory(target);
 		factory.setProxyTargetClass(proxyTargetClass);
 		factory.addAdvisor(advisor);
-		TestService bean = (TestService) factory.getProxy();
+		TestService bean = (TestService) factory.getProxy(loader);
 
 		assertEquals(0, logAdvice.getCountThrows());
 		try {
 			bean.sayHello();
 			fail("Expected exception");
-		} catch (TestException e) {
+		}
+		catch (TestException e) {
 			assertEquals(message, e.getMessage());
 		}
 		assertEquals(1, logAdvice.getCountThrows());
 	}
-	
+
 	public static class SimpleThrowawayClassLoader extends OverridingClassLoader {
 
 		/**
@@ -114,7 +120,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		}
 
 	}
-	
+
 	public static class TestException extends RuntimeException {
 
 		public TestException(String string) {
@@ -129,32 +135,32 @@ public class TrickyAspectJPointcutExpressionTests {
 	@Inherited
 	public static @interface Log {
 	}
-	
+
 	public static interface TestService {
-	    public String sayHello();
+		public String sayHello();
 	}
-	
+
 	@Log
-	public static class TestServiceImpl implements TestService{
-	    public String sayHello() {
-	        throw new TestException("TestServiceImpl");
-	    }
+	public static class TestServiceImpl implements TestService {
+		public String sayHello() {
+			throw new TestException("TestServiceImpl");
+		}
 	}
 
 	public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
-		
+
 		private int countBefore = 0;
-		
+
 		private int countThrows = 0;
-		
+
 		public void before(Method method, Object[] objects, Object o) throws Throwable {
 			countBefore++;
-	    }
+		}
 
 		public void afterThrowing(Exception e) throws Throwable {
 			countThrows++;
-	        throw e;
-	    }
+			throw e;
+		}
 
 		public int getCountBefore() {
 			return countBefore;
@@ -163,12 +169,12 @@ public class TrickyAspectJPointcutExpressionTests {
 		public int getCountThrows() {
 			return countThrows;
 		}
-		
+
 		public void reset() {
 			countThrows = 0;
 			countBefore = 0;
 		}
 
 	}
-	
+
 }
