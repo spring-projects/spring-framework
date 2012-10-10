@@ -12,8 +12,11 @@ Changes in version 3.2 RC1 (2012-10-29)
 * fixed potential race condition in concurrent calling of autowired methods on a prototype bean (SPR-9806)
 * cancel on a Future returned by a TaskScheduler works reliably (SPR-9821)
 * Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface (SPR-9770, SPR-9856)
+* optimized ResourceDatabasePopulator to work around JDK 1.7 substring performance regression (SPR-9781)
+* JPA persistence.xml files may use jar-file entries relative to the unit root (as per the JPA spec; SPR-9797)
 * Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility; SPR-9846)
 * HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
+* UriComponentsBuilder is capable of handling opaque URIs as well (SPR-9798)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
 
 
