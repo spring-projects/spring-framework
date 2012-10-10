@@ -45,6 +45,7 @@ final class OpaqueUriComponents extends UriComponents {
 		this.ssp = schemeSpecificPart;
 	}
 
+
 	@Override
 	public String getSchemeSpecificPart() {
 		return this.ssp;
@@ -134,15 +135,15 @@ final class OpaqueUriComponents extends UriComponents {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
+	public boolean equals(Object obj) {
+		if (this == obj) {
 			return true;
 		}
-		if (!(o instanceof OpaqueUriComponents)) {
+		if (!(obj instanceof OpaqueUriComponents)) {
 			return false;
 		}
 
-		OpaqueUriComponents other = (OpaqueUriComponents) o;
+		OpaqueUriComponents other = (OpaqueUriComponents) obj;
 
 		if (ObjectUtils.nullSafeEquals(getScheme(), other.getScheme())) {
 			return false;

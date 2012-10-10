@@ -32,8 +32,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Builder for {@link UriComponents}.
- * <p/>
- * Typical usage involves:
+ *
+ * <p></p>Typical usage involves:
  * <ol>
  *     <li>Create a {@code UriComponentsBuilder} with one of the static factory methods (such as
  *     {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
@@ -46,10 +46,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
  * @see #fromUri(URI)
- * @since 3.1
  */
 public class UriComponentsBuilder {
 

@@ -16,9 +16,6 @@
 
 package org.springframework.web.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -26,10 +23,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-/** @author Arjen Poutsma */
+import static org.junit.Assert.*;
+
+/**
+ * @author Arjen Poutsma
+ */
 public class UriComponentsBuilderTests {
 
 	@Test
