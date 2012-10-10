@@ -17,8 +17,10 @@
 package org.springframework.expression.spel.standard;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
@@ -67,6 +69,7 @@ import org.springframework.expression.spel.ast.Ternary;
 import org.springframework.expression.spel.ast.TypeReference;
 import org.springframework.expression.spel.ast.VariableReference;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Hand written SpEL parser. Instances are reusable but are not thread safe.
@@ -75,6 +78,8 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
+
+	private static final Pattern VALID_QUALIFIED_ID_PATTERN = Pattern.compile("[\\p{L}\\p{N}_$]+");
 
 	// The expression being parsed
 	private String expressionString;
@@ -591,14 +596,35 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	 * TODO AndyC Could create complete identifiers (a.b.c) here rather than a sequence of them? (a, b, c)
 	 */
 	private SpelNodeImpl eatPossiblyQualifiedId() {
-		List<SpelNodeImpl> qualifiedIdPieces = new ArrayList<SpelNodeImpl>();
-		Token startnode = eatToken(TokenKind.IDENTIFIER);
-		qualifiedIdPieces.add(new Identifier(startnode.stringValue(),toPos(startnode)));
-		while (peekToken(TokenKind.DOT,true)) {
-			Token node = eatToken(TokenKind.IDENTIFIER);
-			qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+		LinkedList<SpelNodeImpl> qualifiedIdPieces = new LinkedList<SpelNodeImpl>();
+		Token node = peekToken();
+		while (isValidQualifiedId(node)) {
+			nextToken();
+			if(node.kind != TokenKind.DOT) {
+				qualifiedIdPieces.add(new Identifier(node.stringValue(),toPos(node)));
+			}
+			node = peekToken();
 		}
-		return new QualifiedIdentifier(toPos(startnode.startpos,qualifiedIdPieces.get(qualifiedIdPieces.size()-1).getEndPosition()),qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+		if(qualifiedIdPieces.isEmpty()) {
+			if(node == null) {
+				raiseInternalException( expressionString.length(), SpelMessage.OOD);
+			}
+			raiseInternalException(node.startpos, SpelMessage.NOT_EXPECTED_TOKEN,
+					"qualified ID", node.getKind().toString().toLowerCase());
+		}
+		int pos = toPos(qualifiedIdPieces.getFirst().getStartPosition(), qualifiedIdPieces.getLast().getEndPosition());
+		return new QualifiedIdentifier(pos, qualifiedIdPieces.toArray(new SpelNodeImpl[qualifiedIdPieces.size()]));
+	}
+
+	private boolean isValidQualifiedId(Token node) {
+		if(node == null || node.kind == TokenKind.LITERAL_STRING) {
+			return false;
+		}
+		if(node.kind == TokenKind.DOT || node.kind == TokenKind.IDENTIFIER) {
+			return true;
+		}
+		String value = node.stringValue();
+		return StringUtils.hasLength(value) && VALID_QUALIFIED_ID_PATTERN.matcher(value).matches();
 	}
 
 	// This is complicated due to the support for dollars in identifiers.  Dollars are normally separate tokens but

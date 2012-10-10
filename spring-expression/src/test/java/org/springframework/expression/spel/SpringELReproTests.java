@@ -50,14 +50,15 @@ import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 
 /**
- * Tests based on Jiras up to the release of Spring 3.0.0
+ * Tests based on EL Jiras.
  *
  * @author Andy Clement
  * @author Clark Duplichien
  */
-public class SpringEL300Tests extends ExpressionTestCase {
+public class SpringELReproTests extends ExpressionTestCase {
 
 	@Test
 	public void testNPE_SPR5661() {
@@ -163,12 +164,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
 		Assert.assertEquals(Map.Entry.class,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpringEL300Tests$Outer$Inner).run()");
+		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpringELReproTests$Outer$Inner).run()");
 		Assert.assertEquals(12,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
+		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpringELReproTests$Outer$Inner().run2()");
 		Assert.assertEquals(13,expr.getValue(eContext));
-}
+	}
 
 	static class Outer {
 		static class Inner {
@@ -1048,6 +1049,15 @@ public class SpringEL300Tests extends ExpressionTestCase {
 
 		exp = parser.parseRaw("NE");
 		Assert.assertEquals("abc",exp.getValue(ctx));
+	}
+
+	@Test
+	public void testReservedWordProperties_9862() throws Exception {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
+		Object value = expression.getValue(ctx);
+		assertEquals(value, Reserver.CONST);
 	}
 
 	/**
