@@ -141,9 +141,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
-		selectedMediaType = selectedMediaType.removeQualityValue();
-
 		if (selectedMediaType != null) {
+			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : messageConverters) {
 				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
