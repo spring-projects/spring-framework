@@ -32,8 +32,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Builder for {@link UriComponents}.
- * <p/>
- * Typical usage involves:
+ *
+ * <p></p>Typical usage involves:
  * <ol>
  *     <li>Create a {@code UriComponentsBuilder} with one of the static factory methods (such as
  *     {@link #fromPath(String)} or {@link #fromUri(URI)})</li>
@@ -46,10 +46,10 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
  * @see #fromUri(URI)
- * @since 3.1
  */
 public class UriComponentsBuilder {
 
@@ -83,6 +83,8 @@ public class UriComponentsBuilder {
 
 	private String scheme;
 
+	private String ssp;
+
 	private String userInfo;
 
 	private String host;
@@ -105,7 +107,7 @@ public class UriComponentsBuilder {
 	protected UriComponentsBuilder() {
 	}
 
-    // Factory methods
+	// Factory methods
 
 	/**
 	 * Returns a new, empty builder.
@@ -143,7 +145,19 @@ public class UriComponentsBuilder {
 	/**
 	 * Returns a builder that is initialized with the given URI string.
 	 *
-	 * @param uri the URI string to initialize with
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
+	 *
+	 * @param uri
+	 *            the URI string to initialize with
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder fromUriString(String uri) {
@@ -152,16 +166,43 @@ public class UriComponentsBuilder {
 		if (m.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
 
-			builder.scheme(m.group(2));
-			builder.userInfo(m.group(5));
-			builder.host(m.group(6));
+			String scheme = m.group(2);
+			String userInfo = m.group(5);
+			String host = m.group(6);
 			String port = m.group(8);
-			if (StringUtils.hasLength(port)) {
-				builder.port(Integer.parseInt(port));
+			String path = m.group(9);
+			String query = m.group(11);
+			String fragment = m.group(13);
+
+			boolean opaque = false;
+
+			if (StringUtils.hasLength(scheme)) {
+				String s = uri.substring(scheme.length());
+				if (!s.startsWith(":/")) {
+					opaque = true;
+				}
 			}
-			builder.path(m.group(9));
-			builder.query(m.group(11));
-			builder.fragment(m.group(13));
+
+			builder.scheme(scheme);
+
+
+			if (opaque) {
+				String ssp = uri.substring(scheme.length()).substring(1);
+				if (StringUtils.hasLength(fragment)) {
+					ssp = ssp.substring(0, ssp.length() - (fragment.length() + 1));
+				}
+				builder.schemeSpecificPart(ssp);
+			}
+			else {
+				builder.userInfo(userInfo);
+				builder.host(host);
+				if (StringUtils.hasLength(port)) {
+					builder.port(Integer.parseInt(port));
+				}
+				builder.path(path);
+				builder.query(query);
+			}
+			builder.fragment(fragment);
 
 			return builder;
 		}
@@ -172,6 +213,17 @@ public class UriComponentsBuilder {
 
 	/**
 	 * Creates a new {@code UriComponents} object from the string HTTP URL.
+	 *
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
 	 *
 	 * @param httpUrl the source URI
 	 * @return the URI components of the URI
@@ -201,7 +253,7 @@ public class UriComponentsBuilder {
 
 
 
-    // build methods
+	// build methods
 
 	/**
 	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
@@ -213,13 +265,21 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
+	 * Builds a {@code UriComponents} instance from the various components
+	 * contained in this builder.
 	 *
-	 * @param encoded whether all the components set in this builder are encoded ({@code true}) or not ({@code false}).
+	 * @param encoded whether all the components set in this builder are
+	 * 	encoded ({@code true}) or not ({@code false}).
 	 * @return the URI components
 	 */
 	public UriComponents build(boolean encoded) {
-		return new UriComponents(scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
+		if (ssp != null) {
+			return new OpaqueUriComponents(scheme, ssp, fragment);
+		}
+		else {
+			return new HierarchicalUriComponents(
+					scheme, userInfo, host, port, pathBuilder.build(), queryParams, fragment, encoded, true);
+		}
 	}
 
 	/**
@@ -246,7 +306,7 @@ public class UriComponentsBuilder {
 		return build(false).expand(uriVariableValues);
 	}
 
-    // URI components methods
+	// URI components methods
 
 	/**
 	 * Initializes all components of this URI builder with the components of the given URI.
@@ -256,25 +316,31 @@ public class UriComponentsBuilder {
 	 */
 	public UriComponentsBuilder uri(URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
-		Assert.isTrue(!uri.isOpaque(), "Opaque URI [" + uri + "] not supported");
 
 		this.scheme = uri.getScheme();
 
-		if (uri.getRawUserInfo() != null) {
-			this.userInfo = uri.getRawUserInfo();
+		if (uri.isOpaque()) {
+			this.ssp = uri.getRawSchemeSpecificPart();
+			resetHierarchicalComponents();
 		}
-		if (uri.getHost() != null) {
-			this.host = uri.getHost();
-		}
-		if (uri.getPort() != -1) {
-			this.port = uri.getPort();
-		}
-		if (StringUtils.hasLength(uri.getRawPath())) {
-			this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
-		}
-		if (StringUtils.hasLength(uri.getRawQuery())) {
-			this.queryParams.clear();
-			query(uri.getRawQuery());
+		else {
+			if (uri.getRawUserInfo() != null) {
+				this.userInfo = uri.getRawUserInfo();
+			}
+			if (uri.getHost() != null) {
+				this.host = uri.getHost();
+			}
+			if (uri.getPort() != -1) {
+				this.port = uri.getPort();
+			}
+			if (StringUtils.hasLength(uri.getRawPath())) {
+				this.pathBuilder = new FullPathComponentBuilder(uri.getRawPath());
+			}
+			if (StringUtils.hasLength(uri.getRawQuery())) {
+				this.queryParams.clear();
+				query(uri.getRawQuery());
+			}
+			resetSchemeSpecificPart();
 		}
 		if (uri.getRawFragment() != null) {
 			this.fragment = uri.getRawFragment();
@@ -282,11 +348,24 @@ public class UriComponentsBuilder {
 		return this;
 	}
 
+	private void resetHierarchicalComponents() {
+		this.userInfo = null;
+		this.host = null;
+		this.port = -1;
+		this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
+		this.queryParams.clear();
+	}
+
+	private void resetSchemeSpecificPart() {
+		this.ssp = null;
+	}
+
 	/**
-	 * Sets the URI scheme. The given scheme may contain URI template variables, and may also be {@code null} to clear the
-	 * scheme of this builder.
+	 * Sets the URI scheme. The given scheme may contain URI template variables,
+	 * and may also be {@code null} to clear the scheme of this builder.
 	 *
-	 * @param scheme the URI scheme
+	 * @param scheme
+	 *            the URI scheme
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder scheme(String scheme) {
@@ -295,26 +374,44 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Sets the URI user info. The given user info may contain URI template variables, and may also be {@code null} to
-	 * clear the user info of this builder.
+	 * Set the URI scheme-specific-part. When invoked, this method overwrites
+	 * {@linkplain #userInfo(String) user-info}, {@linkplain #host(String) host},
+	 * {@linkplain #port(int) port}, {@linkplain #path(String) path}, and
+	 * {@link #query(String) query}.
+	 *
+	 * @param ssp the URI scheme-specific-part, may contain URI template parameters
+	 * @return this UriComponentsBuilder
+	 */
+	public UriComponentsBuilder schemeSpecificPart(String ssp) {
+		this.ssp = ssp;
+		resetHierarchicalComponents();
+		return this;
+	}
+
+	/**
+	 * Sets the URI user info. The given user info may contain URI template
+	 * variables, and may also be {@code null} to clear the user info of this
+	 * builder.
 	 *
 	 * @param userInfo the URI user info
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder userInfo(String userInfo) {
 		this.userInfo = userInfo;
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Sets the URI host. The given host may contain URI template variables, and may also be {@code null} to clear the host
-	 * of this builder.
+	 * Sets the URI host. The given host may contain URI template variables, and
+	 * may also be {@code null} to clear the host of this builder.
 	 *
 	 * @param host the URI host
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder host(String host) {
 		this.host = host;
+		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -327,11 +424,13 @@ public class UriComponentsBuilder {
 	public UriComponentsBuilder port(int port) {
 		Assert.isTrue(port >= -1, "'port' must not be < -1");
 		this.port = port;
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Appends the given path to the existing path of this builder. The given path may contain URI template variables.
+	 * Appends the given path to the existing path of this builder. The given
+	 * path may contain URI template variables.
 	 *
 	 * @param path the URI path
 	 * @return this UriComponentsBuilder
@@ -343,6 +442,7 @@ public class UriComponentsBuilder {
 		else {
 			this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 		}
+		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -355,6 +455,7 @@ public class UriComponentsBuilder {
 	public UriComponentsBuilder replacePath(String path) {
 		this.pathBuilder = NULL_PATH_COMPONENT_BUILDER;
 		path(path);
+		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -368,11 +469,24 @@ public class UriComponentsBuilder {
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
 		Assert.notNull(pathSegments, "'segments' must not be null");
 		this.pathBuilder = this.pathBuilder.appendPathSegments(pathSegments);
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Appends the given query to the existing query of this builder. The given query may contain URI template variables.
+	 * Appends the given query to the existing query of this builder.
+	 * The given query may contain URI template variables.
+	 *
+	 * <p><strong>Note:</strong> The presence of reserved characters can prevent
+	 * correct parsing of the URI string. For example if a query parameter
+	 * contains {@code '='} or {@code '&'} characters, the query string cannot
+	 * be parsed unambiguously. Such values should be substituted for URI
+	 * variables to enable correct parsing:
+	 *
+	 * <pre>
+	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
+	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * </pre>
 	 *
 	 * @param query the query string
 	 * @return this UriComponentsBuilder
@@ -389,6 +503,7 @@ public class UriComponentsBuilder {
 		else {
 			this.queryParams.clear();
 		}
+		resetSchemeSpecificPart();
 		return this;
 	}
 
@@ -401,16 +516,20 @@ public class UriComponentsBuilder {
 	public UriComponentsBuilder replaceQuery(String query) {
 		this.queryParams.clear();
 		query(query);
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Appends the given query parameter to the existing query parameters. The given name or any of the values may contain
-	 * URI template variables. If no values are given, the resulting URI will contain the query parameter name only (i.e.
-	 * {@code ?foo} instead of {@code ?foo=bar}.
+	 * Appends the given query parameter to the existing query parameters. The
+	 * given name or any of the values may contain URI template variables. If no
+	 * values are given, the resulting URI will contain the query parameter name
+	 * only (i.e. {@code ?foo} instead of {@code ?foo=bar}.
 	 *
-	 * @param name   the query parameter name
-	 * @param values the query parameter values
+	 * @param name
+	 *            the query parameter name
+	 * @param values
+	 *            the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder queryParam(String name, Object... values) {
@@ -424,15 +543,19 @@ public class UriComponentsBuilder {
 		else {
 			this.queryParams.add(name, null);
 		}
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Sets the query parameter values overriding all existing query values for the same parameter.
-	 * If no values are given, the query parameter is removed.
+	 * Sets the query parameter values overriding all existing query values for
+	 * the same parameter. If no values are given, the query parameter is
+	 * removed.
 	 *
-	 * @param name   the query parameter name
-	 * @param values the query parameter values
+	 * @param name
+	 *            the query parameter name
+	 * @param values
+	 *            the query parameter values
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
@@ -441,14 +564,17 @@ public class UriComponentsBuilder {
 		if (!ObjectUtils.isEmpty(values)) {
 			queryParam(name, values);
 		}
+		resetSchemeSpecificPart();
 		return this;
 	}
 
 	/**
-	 * Sets the URI fragment. The given fragment may contain URI template variables, and may also be {@code null} to clear
-	 * the fragment of this builder.
+	 * Sets the URI fragment. The given fragment may contain URI template
+	 * variables, and may also be {@code null} to clear the fragment of this
+	 * builder.
 	 *
-	 * @param fragment the URI fragment
+	 * @param fragment
+	 *            the URI fragment
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder fragment(String fragment) {
@@ -463,11 +589,11 @@ public class UriComponentsBuilder {
 	}
 
 	/**
-	 * Represents a builder for {@link org.springframework.web.util.UriComponents.PathComponent}
+	 * Represents a builder for {@link HierarchicalUriComponents.PathComponent}
 	 */
 	private interface PathComponentBuilder {
 
-		UriComponents.PathComponent build();
+		HierarchicalUriComponents.PathComponent build();
 
 		PathComponentBuilder appendPath(String path);
 
@@ -485,8 +611,8 @@ public class UriComponentsBuilder {
 			this.path = new StringBuilder(path);
 		}
 
-		public UriComponents.PathComponent build() {
-			return new UriComponents.FullPathComponent(path.toString());
+		public HierarchicalUriComponents.PathComponent build() {
+			return new HierarchicalUriComponents.FullPathComponent(path.toString());
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -522,8 +648,8 @@ public class UriComponentsBuilder {
 			return result;
 		}
 
-		public UriComponents.PathComponent build() {
-			return new UriComponents.PathSegmentComponent(pathSegments);
+		public HierarchicalUriComponents.PathComponent build() {
+			return new HierarchicalUriComponents.PathSegmentComponent(pathSegments);
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -549,14 +675,14 @@ public class UriComponentsBuilder {
 			pathComponentBuilders.add(builder);
 		}
 
-		public UriComponents.PathComponent build() {
-			List<UriComponents.PathComponent> pathComponents =
-					new ArrayList<UriComponents.PathComponent>(pathComponentBuilders.size());
+		public HierarchicalUriComponents.PathComponent build() {
+			List<HierarchicalUriComponents.PathComponent> pathComponents =
+					new ArrayList<HierarchicalUriComponents.PathComponent>(pathComponentBuilders.size());
 
 			for (PathComponentBuilder pathComponentBuilder : pathComponentBuilders) {
 				pathComponents.add(pathComponentBuilder.build());
 			}
-			return new UriComponents.PathComponentComposite(pathComponents);
+			return new HierarchicalUriComponents.PathComponentComposite(pathComponents);
 		}
 
 		public PathComponentBuilder appendPath(String path) {
@@ -576,8 +702,8 @@ public class UriComponentsBuilder {
 	 */
 	private static PathComponentBuilder NULL_PATH_COMPONENT_BUILDER = new PathComponentBuilder() {
 
-		public UriComponents.PathComponent build() {
-			return UriComponents.NULL_PATH_COMPONENT;
+		public HierarchicalUriComponents.PathComponent build() {
+			return HierarchicalUriComponents.NULL_PATH_COMPONENT;
 		}
 
 		public PathComponentBuilder appendPath(String path) {
