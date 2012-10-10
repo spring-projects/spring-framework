@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -303,7 +303,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Callback after singleton creation.
-	 * <p>Default implementation marks the singleton as not in creation anymore.
+	 * <p>The default implementation marks the singleton as not in creation anymore.
 	 * @param beanName the name of the singleton that has been created
 	 * @see #isSingletonCurrentlyInCreation
 	 */
@@ -316,7 +316,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	public final void setCurrentlyInCreation(String beanName, boolean inCreation) {
 		if (!inCreation) {
 			this.inCreationCheckExclusions.add(beanName);
-		} else {
+		}
+		else {
 			this.inCreationCheckExclusions.remove(beanName);
 		}
 	}
@@ -333,7 +334,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 	/**
 	 * Add the given bean to the list of disposable beans in this registry.
-	 * Disposable beans usually correspond to registered singletons,
+	 * <p>Disposable beans usually correspond to registered singletons,
 	 * matching the bean name but potentially being a different instance
 	 * (for example, a DisposableBean adapter for a singleton that does not
 	 * naturally implement Spring's DisposableBean interface).
