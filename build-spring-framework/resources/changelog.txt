@@ -3,17 +3,23 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.3 (2012-10-05)
+Changes in version 3.1.3 (2012-10-12)
 -------------------------------------
 
 * fixed cache handling for JNLP connections
 * LinkedCaseInsensitiveMap checks for uniqueness of case-insensitive keys now
+* ResourceBundleMessageSource supports "defaultEncoding", "fallbackToSystemLocale", "cacheSeconds"
 * @Import'ed configuration classes get properly registered in case of same class name
 * @Autowired-driven ObjectFactory/Provider resolution works in non-singleton beans as well
 * @Resource processing properly works with scoped beans and prototypes again
+* fixed potential race condition in concurrent calling of autowired methods on a prototype bean
+* cancel on a Future returned by a TaskScheduler works reliably
+* Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface
 * same-named unit from persistence.xml overrides in case of conflict with default unit
+* Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility)
 * Jaxb2Marshaller performs proper "supports" check for scanned packages
 * media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x)
+* HttpComponentsHttpInvokerRequestExecutor explicitly releases connection on HttpComponents 4.2
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0
 * dynamic return value types for @MVC methods
 * fixed issue with resolution of WebDataBinder argument
