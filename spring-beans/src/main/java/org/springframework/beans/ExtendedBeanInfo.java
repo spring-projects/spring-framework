@@ -301,6 +301,7 @@ class ExtendedBeanInfo implements BeanInfo {
 			}
 		}
 		else {
+			pd.setWriteMethod(null);
 			pd.setReadMethod(readMethod);
 			try {
 				pd.setWriteMethod(writeMethod);
@@ -310,6 +311,7 @@ class ExtendedBeanInfo implements BeanInfo {
 				// fall through -> add property descriptor as best we can
 			}
 			if (pd instanceof IndexedPropertyDescriptor) {
+				((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(null);
 				((IndexedPropertyDescriptor)pd).setIndexedReadMethod(indexedReadMethod);
 				try {
 					((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(indexedWriteMethod);
