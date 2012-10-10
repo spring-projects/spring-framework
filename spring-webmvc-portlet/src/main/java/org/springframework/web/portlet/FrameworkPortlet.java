@@ -345,7 +345,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 			pac.setId(ConfigurablePortletApplicationContext.APPLICATION_CONTEXT_ID_PREFIX + getPortletName());
 		}
 
-		pac.setEnvironment(this.getEnvironment());
+		pac.setEnvironment(getEnvironment());
 		pac.setParent(parent);
 		pac.setPortletContext(getPortletContext());
 		pac.setPortletConfig(getPortletConfig());

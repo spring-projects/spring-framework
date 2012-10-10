@@ -111,7 +111,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 			ResourceLoader resourceLoader = new PortletContextResourceLoader(getPortletContext());
-			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, this.getEnvironment()));
+			bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 			initBeanWrapper(bw);
 			bw.setPropertyValues(pvs, true);
 		}
