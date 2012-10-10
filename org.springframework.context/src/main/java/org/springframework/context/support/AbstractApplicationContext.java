@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -73,6 +74,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -224,7 +226,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public AbstractApplicationContext(ApplicationContext parent) {
 		this.parent = parent;
 		this.resourcePatternResolver = getResourcePatternResolver();
-		this.environment = this.createEnvironment();
+		this.environment = createEnvironment();
 	}
 
 
@@ -387,9 +389,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	public void setParent(ApplicationContext parent) {
 		this.parent = parent;
 		if (parent != null) {
-			Object parentEnvironment =  parent.getEnvironment();
+			Environment parentEnvironment = parent.getEnvironment();
 			if (parentEnvironment instanceof ConfigurableEnvironment) {
-				this.environment.merge((ConfigurableEnvironment)parentEnvironment);
+				getEnvironment().merge((ConfigurableEnvironment) parentEnvironment);
 			}
 		}
 	}
@@ -505,7 +507,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// Validate that all properties marked as required are resolvable
 		// see ConfigurablePropertyResolver#setRequiredProperties
-		this.environment.validateRequiredProperties();
+		getEnvironment().validateRequiredProperties();
 	}
 
 	/**
@@ -541,7 +543,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader etc.
 		beanFactory.setBeanClassLoader(getClassLoader());
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver());
-		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, this.getEnvironment()));
+		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
@@ -566,15 +568,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
-		if (!beanFactory.containsBean(ENVIRONMENT_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
-
-		if (!beanFactory.containsBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(SYSTEM_PROPERTIES_BEAN_NAME)) {
 			beanFactory.registerSingleton(SYSTEM_PROPERTIES_BEAN_NAME, getEnvironment().getSystemProperties());
 		}
-
-		if (!beanFactory.containsBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
+		if (!beanFactory.containsLocalBean(SYSTEM_ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(SYSTEM_ENVIRONMENT_BEAN_NAME, getEnvironment().getSystemEnvironment());
 		}
 	}
