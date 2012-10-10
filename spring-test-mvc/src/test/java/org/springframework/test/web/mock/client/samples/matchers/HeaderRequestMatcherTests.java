@@ -16,9 +16,9 @@
 package org.springframework.test.web.mock.client.samples.matchers;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.header;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.requestTo;
-import static org.springframework.test.web.mock.client.response.ResponseCreators.withSuccess;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.mock.client.response.MockRestResponseCreators.withSuccess;
 
 import java.net.URI;
 import java.util.ArrayList;

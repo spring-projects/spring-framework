@@ -43,8 +43,8 @@ public class XpathRequestMatchers {
 
 	/**
 	 * Class constructor, not for direct instantiation. Use
-	 * {@link RequestMatchers#xpath(String, Object...)} or
-	 * {@link RequestMatchers#xpath(String, Map, Object...)}.
+	 * {@link MockRestRequestMatchers#xpath(String, Object...)} or
+	 * {@link MockRestRequestMatchers#xpath(String, Map, Object...)}.
 	 *
 	 * @param expression the XPath expression
 	 * @param namespaces XML namespaces referenced in the XPath expression, or {@code null}

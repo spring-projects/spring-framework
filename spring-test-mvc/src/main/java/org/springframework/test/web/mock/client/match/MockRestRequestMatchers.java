@@ -46,13 +46,13 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class RequestMatchers {
+public abstract class MockRestRequestMatchers {
 
 
 	/**
 	 * Private class constructor.
 	 */
-	private RequestMatchers() {
+	private MockRestRequestMatchers() {
 	}
 
 	/**

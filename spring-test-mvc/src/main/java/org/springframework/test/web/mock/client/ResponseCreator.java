@@ -19,11 +19,11 @@ import java.io.IOException;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.test.web.mock.client.response.ResponseCreators;
+import org.springframework.test.web.mock.client.response.MockRestResponseCreators;
 
 /**
  * A contract for creating a {@link ClientHttpResponse}.
- * Implementations can be obtained via {@link ResponseCreators}.
+ * Implementations can be obtained via {@link MockRestResponseCreators}.
  *
  * @author Craig Walls
  * @since 3.2

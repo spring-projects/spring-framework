@@ -17,7 +17,7 @@
 /**
  * Contains built-in {@link org.springframework.test.web.mock.client.ResponseCreator}
  * implementations. Use
- * {@link org.springframework.test.web.mock.client.response.ResponseCreators}
+ * {@link org.springframework.test.web.mock.client.response.MockRestResponseCreators}
  * to gain access to instances of those implementations.
  */
 package org.springframework.test.web.mock.client.response;

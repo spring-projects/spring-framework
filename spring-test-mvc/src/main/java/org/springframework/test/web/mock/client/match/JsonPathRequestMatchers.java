@@ -44,8 +44,8 @@ public class JsonPathRequestMatchers {
 
 	/**
 	 * Class constructor, not for direct instantiation. Use
-	 * {@link RequestMatchers#jsonPath(String, Matcher)} or
-	 * {@link RequestMatchers#jsonPath(String, Object...)}.
+	 * {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
+	 * {@link MockRestRequestMatchers#jsonPath(String, Object...)}.
 	 *
 	 * @param expression the JSONPath expression
 	 * @param args arguments to parameterize the JSONPath expression with using

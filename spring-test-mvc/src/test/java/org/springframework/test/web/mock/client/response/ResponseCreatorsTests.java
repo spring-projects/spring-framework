@@ -27,11 +27,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.mock.client.response.DefaultResponseCreator;
-import org.springframework.test.web.mock.client.response.ResponseCreators;
+import org.springframework.test.web.mock.client.response.MockRestResponseCreators;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * Tests for the {@link ResponseCreators} static factory methods.
+ * Tests for the {@link MockRestResponseCreators} static factory methods.
  *
  * @author Rossen Stoyanchev
  */
@@ -39,7 +39,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void success() throws Exception {
-		MockClientHttpResponse response = (MockClientHttpResponse) ResponseCreators.withSuccess().createResponse(null);
+		MockClientHttpResponse response = (MockClientHttpResponse) MockRestResponseCreators.withSuccess().createResponse(null);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertTrue(response.getHeaders().isEmpty());
@@ -48,7 +48,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void successWithContent() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withSuccess("foo", MediaType.TEXT_PLAIN);
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withSuccess("foo", MediaType.TEXT_PLAIN);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -58,7 +58,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void successWithContentWithoutContentType() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withSuccess("foo", null);
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withSuccess("foo", null);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -69,7 +69,7 @@ public class ResponseCreatorsTests {
 	@Test
 	public void created() throws Exception {
 		URI location = new URI("/foo");
-		DefaultResponseCreator responseCreator = ResponseCreators.withCreatedEntity(location);
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withCreatedEntity(location);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -79,7 +79,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void noContent() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withNoContent();
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withNoContent();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -89,7 +89,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void badRequest() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withBadRequest();
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withBadRequest();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -99,7 +99,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void unauthorized() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withUnauthorizedRequest();
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withUnauthorizedRequest();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
@@ -109,7 +109,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void serverError() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withServerError();
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withServerError();
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
@@ -119,7 +119,7 @@ public class ResponseCreatorsTests {
 
 	@Test
 	public void withStatus() throws Exception {
-		DefaultResponseCreator responseCreator = ResponseCreators.withStatus(HttpStatus.FORBIDDEN);
+		DefaultResponseCreator responseCreator = MockRestResponseCreators.withStatus(HttpStatus.FORBIDDEN);
 		MockClientHttpResponse response = (MockClientHttpResponse) responseCreator.createResponse(null);
 
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());

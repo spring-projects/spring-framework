@@ -35,10 +35,10 @@ import org.springframework.test.web.mock.client.ResponseCreator;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public abstract class ResponseCreators {
+public abstract class MockRestResponseCreators {
 
 
-	private ResponseCreators() {
+	private MockRestResponseCreators() {
 	}
 
 	/**

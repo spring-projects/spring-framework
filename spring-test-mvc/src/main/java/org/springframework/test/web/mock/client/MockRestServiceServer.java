@@ -24,8 +24,8 @@ import java.util.List;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.test.web.mock.client.match.RequestMatchers;
-import org.springframework.test.web.mock.client.response.ResponseCreators;
+import org.springframework.test.web.mock.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.mock.client.response.MockRestResponseCreators;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
@@ -58,9 +58,9 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * {@link ResponseActions#andExpect(RequestMatcher) andExpect(RequestMatcher)} and
  * {@link ResponseActions#andRespond(ResponseCreator) andRespond(ResponseCreator)}
  * to set up request expectations and responses, most likely relying on the default
- * {@code RequestMatcher} implementations provided in {@link RequestMatchers}
+ * {@code RequestMatcher} implementations provided in {@link MockRestRequestMatchers}
  * and the {@code ResponseCreator} implementations provided in
- * {@link ResponseCreators} both of which can be statically imported.
+ * {@link MockRestResponseCreators} both of which can be statically imported.
  *
  * <p>At the end of the test use {@link #verify()} to ensure all expected
  * requests were actually performed.
@@ -132,7 +132,7 @@ public class MockRestServiceServer {
 	 * before using the {@code RestTemplate}, to set up expectations for multiple
 	 * requests.
 	 *
-	 * @param requestMatcher a request expectation, see {@link RequestMatchers}
+	 * @param requestMatcher a request expectation, see {@link MockRestRequestMatchers}
 	 * @return used to set up further expectations or to define a response
 	 */
 	public ResponseActions expect(RequestMatcher requestMatcher) {

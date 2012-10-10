@@ -18,7 +18,7 @@ package org.springframework.test.web.mock.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.anything;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.anything;
 
 import java.net.URI;
 

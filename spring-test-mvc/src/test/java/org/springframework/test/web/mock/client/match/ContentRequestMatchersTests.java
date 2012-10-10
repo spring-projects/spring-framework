@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.web.mock.client.match.ContentRequestMatchers;
-import org.springframework.test.web.mock.client.match.RequestMatchers;
+import org.springframework.test.web.mock.client.match.MockRestRequestMatchers;
 
 /**
  * Tests for {@link ContentRequestMatchers}.
@@ -42,36 +42,36 @@ public class ContentRequestMatchersTests {
 	public void testContentType() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		RequestMatchers.content().mimeType("application/json").match(this.request);
-		RequestMatchers.content().mimeType(MediaType.APPLICATION_JSON).match(this.request);
+		MockRestRequestMatchers.content().mimeType("application/json").match(this.request);
+		MockRestRequestMatchers.content().mimeType(MediaType.APPLICATION_JSON).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testContentTypeNoMatch1() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		RequestMatchers.content().mimeType("application/xml").match(this.request);
+		MockRestRequestMatchers.content().mimeType("application/xml").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testContentTypeNoMatch2() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		RequestMatchers.content().mimeType(MediaType.APPLICATION_ATOM_XML).match(this.request);
+		MockRestRequestMatchers.content().mimeType(MediaType.APPLICATION_ATOM_XML).match(this.request);
 	}
 
 	@Test
 	public void testString() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
-		RequestMatchers.content().string("test").match(this.request);
+		MockRestRequestMatchers.content().string("test").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testStringNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
-		RequestMatchers.content().string("Test").match(this.request);
+		MockRestRequestMatchers.content().string("Test").match(this.request);
 	}
 
 	@Test
@@ -79,14 +79,14 @@ public class ContentRequestMatchersTests {
 		byte[] content = "test".getBytes();
 		this.request.getBody().write(content);
 
-		RequestMatchers.content().bytes(content).match(this.request);
+		MockRestRequestMatchers.content().bytes(content).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testBytesNoMatch() throws Exception {
 		this.request.getBody().write("test".getBytes());
 
-		RequestMatchers.content().bytes("Test".getBytes()).match(this.request);
+		MockRestRequestMatchers.content().bytes("Test".getBytes()).match(this.request);
 	}
 
 	@Test
@@ -94,14 +94,14 @@ public class ContentRequestMatchersTests {
 		String content = "<foo><bar>baz</bar><bar>bazz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
-		RequestMatchers.content().xml(content).match(this.request);
+		MockRestRequestMatchers.content().xml(content).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testXmlNoMatch() throws Exception {
 		this.request.getBody().write("<foo>11</foo>".getBytes());
 
-		RequestMatchers.content().xml("<foo>22</foo>").match(this.request);
+		MockRestRequestMatchers.content().xml("<foo>22</foo>").match(this.request);
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class ContentRequestMatchersTests {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
-		RequestMatchers.content().node(hasXPath("/foo/bar")).match(this.request);
+		MockRestRequestMatchers.content().node(hasXPath("/foo/bar")).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
@@ -117,7 +117,7 @@ public class ContentRequestMatchersTests {
 		String content = "<foo><bar>baz</bar></foo>";
 		this.request.getBody().write(content.getBytes());
 
-		RequestMatchers.content().node(hasXPath("/foo/bar/bar")).match(this.request);
+		MockRestRequestMatchers.content().node(hasXPath("/foo/bar/bar")).match(this.request);
 	}
 
 }

@@ -21,10 +21,10 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.content;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.requestTo;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.xpath;
-import static org.springframework.test.web.mock.client.response.ResponseCreators.withSuccess;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.xpath;
+import static org.springframework.test.web.mock.client.response.MockRestResponseCreators.withSuccess;
 
 import java.net.URI;
 import java.util.ArrayList;

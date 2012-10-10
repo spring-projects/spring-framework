@@ -16,9 +16,9 @@
 package org.springframework.test.web.mock.client.samples;
 
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.method;
-import static org.springframework.test.web.mock.client.match.RequestMatchers.requestTo;
-import static org.springframework.test.web.mock.client.response.ResponseCreators.withSuccess;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.mock.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.mock.client.response.MockRestResponseCreators.withSuccess;
 
 import org.junit.Before;
 import org.junit.Test;

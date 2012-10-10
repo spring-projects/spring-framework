@@ -24,10 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.client.MockClientHttpRequest;
-import org.springframework.test.web.mock.client.match.RequestMatchers;
+import org.springframework.test.web.mock.client.match.MockRestRequestMatchers;
 
 /**
- * Tests for {@link RequestMatchers}.
+ * Tests for {@link MockRestRequestMatchers}.
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -45,54 +45,54 @@ public class RequestMatchersTests {
 	public void requestTo() throws Exception {
 		this.request.setURI(new URI("http://foo.com/bar"));
 
-		RequestMatchers.requestTo("http://foo.com/bar").match(this.request);
+		MockRestRequestMatchers.requestTo("http://foo.com/bar").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void requestToNoMatch() throws Exception {
 		this.request.setURI(new URI("http://foo.com/bar"));
 
-		RequestMatchers.requestTo("http://foo.com/wrong").match(this.request);
+		MockRestRequestMatchers.requestTo("http://foo.com/wrong").match(this.request);
 	}
 
 	@Test
 	public void requestToContains() throws Exception {
 		this.request.setURI(new URI("http://foo.com/bar"));
 
-		RequestMatchers.requestTo(containsString("bar")).match(this.request);
+		MockRestRequestMatchers.requestTo(containsString("bar")).match(this.request);
 	}
 
 	@Test
 	public void method() throws Exception {
 		this.request.setMethod(HttpMethod.GET);
 
-		RequestMatchers.method(HttpMethod.GET).match(this.request);
+		MockRestRequestMatchers.method(HttpMethod.GET).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void methodNoMatch() throws Exception {
 		this.request.setMethod(HttpMethod.POST);
 
-		RequestMatchers.method(HttpMethod.GET).match(this.request);
+		MockRestRequestMatchers.method(HttpMethod.GET).match(this.request);
 	}
 
 	@Test
 	public void header() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		RequestMatchers.header("foo", "bar", "baz").match(this.request);
+		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void headerMissing() throws Exception {
-		RequestMatchers.header("foo", "bar").match(this.request);
+		MockRestRequestMatchers.header("foo", "bar").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void headerMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		RequestMatchers.header("foo", "bad").match(this.request);
+		MockRestRequestMatchers.header("foo", "bad").match(this.request);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -100,13 +100,13 @@ public class RequestMatchersTests {
 	public void headerContains() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		RequestMatchers.header("foo", containsString("ba")).match(this.request);
+		MockRestRequestMatchers.header("foo", containsString("ba")).match(this.request);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test(expected=AssertionError.class)
 	public void headerContainsWithMissingHeader() throws Exception {
-		RequestMatchers.header("foo", containsString("baz")).match(this.request);
+		MockRestRequestMatchers.header("foo", containsString("baz")).match(this.request);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -114,26 +114,26 @@ public class RequestMatchersTests {
 	public void headerContainsWithMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		RequestMatchers.header("foo", containsString("bx")).match(this.request);
+		MockRestRequestMatchers.header("foo", containsString("bx")).match(this.request);
 	}
 
 	@Test
 	public void headers() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar", "baz"));
 
-		RequestMatchers.header("foo", "bar", "baz").match(this.request);
+		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void headersWithMissingHeader() throws Exception {
-		RequestMatchers.header("foo", "bar").match(this.request);
+		MockRestRequestMatchers.header("foo", "bar").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void headersWithMissingValue() throws Exception {
 		this.request.getHeaders().put("foo", Arrays.asList("bar"));
 
-		RequestMatchers.header("foo", "bar", "baz").match(this.request);
+		MockRestRequestMatchers.header("foo", "bar", "baz").match(this.request);
 	}
 
 }

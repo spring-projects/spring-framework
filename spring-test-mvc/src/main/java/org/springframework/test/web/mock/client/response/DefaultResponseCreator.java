@@ -49,7 +49,7 @@ public class DefaultResponseCreator implements ResponseCreator {
 
 	/**
 	 * Protected constructor.
-	 * Use static factory methods in {@link ResponseCreators}.
+	 * Use static factory methods in {@link MockRestResponseCreators}.
 	 */
 	protected DefaultResponseCreator(HttpStatus statusCode) {
 		Assert.notNull(statusCode);

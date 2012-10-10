@@ -35,7 +35,7 @@ import org.w3c.dom.Node;
 
 /**
  * Factory for request content {@code RequestMatcher}'s. An instance of this
- * class is typically accessed via {@link RequestMatchers#content()}.
+ * class is typically accessed via {@link MockRestRequestMatchers#content()}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -47,7 +47,7 @@ public class ContentRequestMatchers {
 
 	/**
 	 * Class constructor, not for direct instantiation.
-	 * Use {@link RequestMatchers#content()}.
+	 * Use {@link MockRestRequestMatchers#content()}.
 	 */
 	protected ContentRequestMatchers() {
 		this.xmlHelper = new XmlExpectationsHelper();

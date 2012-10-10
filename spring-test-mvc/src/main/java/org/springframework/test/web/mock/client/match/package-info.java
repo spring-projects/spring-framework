@@ -17,7 +17,7 @@
 /**
  * Contains built-in {@link org.springframework.test.web.mock.client.RequestMatcher}
  * implementations. Use
- * {@link org.springframework.test.web.mock.client.match.RequestMatchers}
+ * {@link org.springframework.test.web.mock.client.match.MockRestRequestMatchers}
  * to gain access to instances of those implementations.
  */
 package org.springframework.test.web.mock.client.match;
