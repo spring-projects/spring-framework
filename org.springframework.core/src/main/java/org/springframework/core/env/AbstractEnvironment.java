@@ -17,7 +17,6 @@
 package org.springframework.core.env;
 
 import java.security.AccessControlException;
-
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -87,15 +86,14 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 */
 	protected static final String RESERVED_DEFAULT_PROFILE_NAME = "default";
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Set<String> activeProfiles = new LinkedHashSet<String>();
 
-	private Set<String> defaultProfiles =
-			new LinkedHashSet<String>(this.getReservedDefaultProfiles());
+	private Set<String> defaultProfiles = new LinkedHashSet<String>(getReservedDefaultProfiles());
 
-	private final MutablePropertySources propertySources =
-			new MutablePropertySources(this.logger);
+	private final MutablePropertySources propertySources = new MutablePropertySources(this.logger);
 
 	private final ConfigurablePropertyResolver propertyResolver =
 			new PropertySourcesPropertyResolver(this.propertySources);
@@ -109,13 +107,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #customizePropertySources(MutablePropertySources)
 	 */
 	public AbstractEnvironment() {
-		String name = this.getClass().getSimpleName();
+		String name = getClass().getSimpleName();
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format("Initializing new %s", name));
 		}
-
-		this.customizePropertySources(this.propertySources);
-
+		customizePropertySources(this.propertySources);
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format(
 					"Initialized %s with PropertySources %s", name, this.propertySources));
@@ -244,7 +240,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notNull(profiles, "Profile array must not be null");
 		this.activeProfiles.clear();
 		for (String profile : profiles) {
-			this.addActiveProfile(profile);
+			addActiveProfile(profile);
 		}
 	}
 
@@ -252,7 +248,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		if (this.logger.isDebugEnabled()) {
 			this.logger.debug(format("Activating profile '%s'", profile));
 		}
-		this.validateProfile(profile);
+		validateProfile(profile);
 		this.activeProfiles.add(profile);
 	}
 
@@ -273,10 +269,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * @see #getReservedDefaultProfiles()
 	 */
 	protected Set<String> doGetDefaultProfiles() {
-		if (this.defaultProfiles.equals(this.getReservedDefaultProfiles())) {
+		if (this.defaultProfiles.equals(getReservedDefaultProfiles())) {
 			String profiles = this.getProperty(DEFAULT_PROFILES_PROPERTY_NAME);
 			if (StringUtils.hasText(profiles)) {
-				this.setDefaultProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
+				setDefaultProfiles(commaDelimitedListToStringArray(trimAllWhitespace(profiles)));
 			}
 		}
 		return this.defaultProfiles;
@@ -293,38 +289,49 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notNull(profiles, "Profile array must not be null");
 		this.defaultProfiles.clear();
 		for (String profile : profiles) {
-			this.validateProfile(profile);
+			validateProfile(profile);
 			this.defaultProfiles.add(profile);
 		}
 	}
 
 	public boolean acceptsProfiles(String... profiles) {
 		Assert.notEmpty(profiles, "Must specify at least one profile");
-		boolean activeProfileFound = false;
-		Set<String> activeProfiles = this.doGetActiveProfiles();
-		Set<String> defaultProfiles = this.doGetDefaultProfiles();
 		for (String profile : profiles) {
-			this.validateProfile(profile);
-			if (activeProfiles.contains(profile)
-					|| (activeProfiles.isEmpty() && defaultProfiles.contains(profile))) {
-				activeProfileFound = true;
-				break;
+			if (profile != null && profile.length() > 0 && profile.charAt(0) == '!') {
+				return !isProfileActive(profile.substring(1));
+			}
+			if (isProfileActive(profile)) {
+				return true;
 			}
 		}
-		return activeProfileFound;
+		return false;
+	}
+
+	/**
+	 * Return whether the given profile is active, or if active profiles are empty
+	 * whether the profile should be active by default.
+	 * @throws IllegalArgumentException per {@link #validateProfile(String)}
+	 */
+	protected boolean isProfileActive(String profile) {
+		validateProfile(profile);
+		return doGetActiveProfiles().contains(profile) ||
+				(doGetActiveProfiles().isEmpty() && doGetDefaultProfiles().contains(profile));
 	}
 
 	/**
 	 * Validate the given profile, called internally prior to adding to the set of
 	 * active or default profiles.
 	 * <p>Subclasses may override to impose further restrictions on profile syntax.
-	 * @throws IllegalArgumentException if the profile is null, empty or whitespace-only
+	 * @throws IllegalArgumentException if the profile is null, empty, whitespace-only or
+	 * begins with the profile NOT operator (!).
 	 * @see #acceptsProfiles
 	 * @see #addActiveProfile
 	 * @see #setDefaultProfiles
 	 */
 	protected void validateProfile(String profile) {
 		Assert.hasText(profile, "Invalid profile [" + profile + "]: must contain text");
+		Assert.isTrue(profile.charAt(0) != '!',
+				"Invalid profile [" + profile + "]: must not begin with the ! operator");
 	}
 
 	public MutablePropertySources getPropertySources() {
@@ -396,8 +403,11 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		for (String profile : parent.getActiveProfiles()) {
 			this.activeProfiles.add(profile);
 		}
-		for (String profile : parent.getDefaultProfiles()) {
-			this.defaultProfiles.add(profile);
+		if (parent.getDefaultProfiles().length > 0) {
+			this.defaultProfiles.remove(RESERVED_DEFAULT_PROFILE_NAME);
+			for (String profile : parent.getDefaultProfiles()) {
+				this.defaultProfiles.add(profile);
+			}
 		}
 	}
 
@@ -466,11 +476,9 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		this.propertyResolver.setPlaceholderPrefix(placeholderPrefix);
 	}
 
-
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.propertyResolver.setPlaceholderSuffix(placeholderSuffix);
 	}
-
 
 	public void setValueSeparator(String valueSeparator) {
 		this.propertyResolver.setValueSeparator(valueSeparator);
