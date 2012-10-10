@@ -15,11 +15,14 @@ Changes in version 3.1.3 (2012-10-12)
 * fixed potential race condition in concurrent calling of autowired methods on a prototype bean
 * cancel on a Future returned by a TaskScheduler works reliably
 * Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface
+* optimized ResourceDatabasePopulator to work around JDK 1.7 substring performance regression
 * same-named unit from persistence.xml overrides in case of conflict with default unit
+* JPA persistence.xml files may use jar-file entries relative to the unit root (as per the JPA spec)
 * Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility)
 * Jaxb2Marshaller performs proper "supports" check for scanned packages
 * media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x)
 * HttpComponentsHttpInvokerRequestExecutor explicitly releases connection on HttpComponents 4.2
+* UriComponentsBuilder is capable of handling opaque URIs as well
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0
 * dynamic return value types for @MVC methods
 * fixed issue with resolution of WebDataBinder argument
