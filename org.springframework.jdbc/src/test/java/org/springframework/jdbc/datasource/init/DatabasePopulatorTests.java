@@ -41,10 +41,15 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class DatabasePopulatorTests {
 
 	private final EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
+
 	private final EmbeddedDatabase db = builder.build();
+
 	private final ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator();
+
 	private final ClassRelativeResourceLoader resourceLoader = new ClassRelativeResourceLoader(getClass());
+
 	private final JdbcTemplate jdbcTemplate = new JdbcTemplate(db);
+
 
 	private void assertTestDatabaseCreated() {
 		assertTestDatabaseCreated("Keith");
@@ -61,14 +66,13 @@ public class DatabasePopulatorTests {
 
 	@After
 	public void shutDown() {
-
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			TransactionSynchronizationManager.clear();
 			TransactionSynchronizationManager.unbindResource(db);
 		}
-
 		db.shutdown();
 	}
+
 
 	@Test
 	public void testBuildWithCommentsAndFailedDrop() throws Exception {
@@ -78,7 +82,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -92,7 +97,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -106,7 +112,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -120,7 +127,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -136,7 +144,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -152,7 +161,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -167,7 +177,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -183,7 +194,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -198,7 +210,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -212,7 +225,8 @@ public class DatabasePopulatorTests {
 		Connection connection = db.getConnection();
 		try {
 			databasePopulator.populate(connection);
-		} finally {
+		}
+		finally {
 			connection.close();
 		}
 
@@ -225,7 +239,6 @@ public class DatabasePopulatorTests {
 	 */
 	@Test
 	public void usesBoundConnectionIfAvailable() throws SQLException {
-
 		TransactionSynchronizationManager.initSynchronization();
 		Connection connection = DataSourceUtils.getConnection(db);
 
@@ -238,4 +251,22 @@ public class DatabasePopulatorTests {
 
 		EasyMock.verify(populator);
 	}
+
+	/**
+	 * @see SPR-9781
+	 */
+	@Test(timeout = 1000)
+	public void executesHugeScriptInReasonableTime() throws SQLException {
+		databasePopulator.addScript(resourceLoader.getResource("db-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("db-test-data-huge.sql"));
+
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		}
+		finally {
+			connection.close();
+		}
+	}
+
 }
