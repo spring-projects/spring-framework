@@ -16,32 +16,49 @@
 
 package org.springframework.expression.spel;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import junit.framework.Assert;
+
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.expression.*;
+import org.springframework.expression.AccessException;
+import org.springframework.expression.BeanResolver;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.MethodExecutor;
+import org.springframework.expression.MethodResolver;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.PropertyAccessor;
+import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.ReflectiveMethodResolver;
 import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
+import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
- * Tests based on Jiras up to the release of Spring 3.0.0
+ * Reproduction tests cornering various SpEL JIRA issues.
  *
  * @author Andy Clement
  * @author Clark Duplichien
  */
-public class SpringEL300Tests extends ExpressionTestCase {
+public class SpelReproTests extends ExpressionTestCase {
 
 	@Test
 	public void testNPE_SPR5661() {
@@ -147,12 +164,12 @@ public class SpringEL300Tests extends ExpressionTestCase {
 		Expression expr = new SpelExpressionParser().parseRaw("T(java.util.Map$Entry)");
 		Assert.assertEquals(Map.Entry.class,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpringEL300Tests$Outer$Inner).run()");
+		expr = new SpelExpressionParser().parseRaw("T(org.springframework.expression.spel.SpelReproTests$Outer$Inner).run()");
 		Assert.assertEquals(12,expr.getValue(eContext));
 
-		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpringEL300Tests$Outer$Inner().run2()");
+		expr = new SpelExpressionParser().parseRaw("new org.springframework.expression.spel.SpelReproTests$Outer$Inner().run2()");
 		Assert.assertEquals(13,expr.getValue(eContext));
-}
+	}
 
 	static class Outer {
 		static class Inner {
@@ -1032,6 +1049,15 @@ public class SpringEL300Tests extends ExpressionTestCase {
 
 		exp = parser.parseRaw("NE");
 		Assert.assertEquals("abc",exp.getValue(ctx));
+	}
+
+	@Test
+	public void testReservedWordProperties_9862() throws Exception {
+		StandardEvaluationContext ctx = new StandardEvaluationContext();
+		SpelExpressionParser parser = new SpelExpressionParser();
+		SpelExpression expression = parser.parseRaw("T(org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver).CONST");
+		Object value = expression.getValue(ctx);
+		assertEquals(value, Reserver.CONST);
 	}
 
 	/**
