@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import javax.persistence.spi.PersistenceUnitInfo;
 import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.sql.DataSource;
 
-import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -37,12 +36,31 @@ import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.jdbc.datasource.lookup.MapDataSourceLookup;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
+import static org.junit.Assert.*;
+
 /**
  * Unit and integration tests for the JPA XML resource parsing support.
  * 
  * @author Costin Leau
+ * @author Juergen Hoeller
  */
 public class PersistenceXmlParsingTests {
+
+	@Test
+	public void testMetaInfCase() throws Exception {
+		PersistenceUnitReader reader = new PersistenceUnitReader(
+				new PathMatchingResourcePatternResolver(), new JndiDataSourceLookup());
+		String resource = "/org/springframework/orm/jpa/META-INF/persistence.xml";
+		PersistenceUnitInfo[] info = reader.readPersistenceUnitInfos(resource);
+
+		assertNotNull(info);
+		assertEquals(1, info.length);
+		assertEquals("OrderManagement", info[0].getPersistenceUnitName());
+
+		assertEquals(2, info[0].getJarFileUrls().size());
+		assertEquals(new ClassPathResource("order.jar").getURL(), info[0].getJarFileUrls().get(0));
+		assertEquals(new ClassPathResource("order-supplemental.jar").getURL(), info[0].getJarFileUrls().get(1));
+	}
 
 	@Test
 	public void testExample1() throws Exception {
@@ -87,6 +105,7 @@ public class PersistenceXmlParsingTests {
 		assertEquals(2, info[0].getJarFileUrls().size());
 		assertEquals(new ClassPathResource("order.jar").getURL(), info[0].getJarFileUrls().get(0));
 		assertEquals(new ClassPathResource("order-supplemental.jar").getURL(), info[0].getJarFileUrls().get(1));
+
 		assertEquals(0, info[0].getProperties().keySet().size());
 		assertNull(info[0].getJtaDataSource());
 		assertNull(info[0].getNonJtaDataSource());
@@ -119,12 +138,6 @@ public class PersistenceXmlParsingTests {
 
 		assertSame(PersistenceUnitTransactionType.RESOURCE_LOCAL, info[0].getTransactionType());
 		assertEquals(0, info[0].getProperties().keySet().size());
-
-		// TODO this is undefined as yet. Do we look up Spring datasource?
-		// assertNotNull(info[0].getNonJtaDataSource());
-		//
-		// assertEquals(ds .toString(),
-		// info[0].getNonJtaDataSource().toString());
 
 		builder.clear();
 	}
@@ -202,9 +215,6 @@ public class PersistenceXmlParsingTests {
 		assertEquals(1, pu2.getMappingFileNames().size());
 		assertEquals("order2.xml", pu2.getMappingFileNames().get(0));
 
-		@SuppressWarnings("unused")
-		Ignore ignore; // the following assertions fail only during coverage runs
-		/*
 		assertEquals(1, pu2.getJarFileUrls().size());
 		assertEquals(new ClassPathResource("order-supplemental.jar").getURL(), pu2.getJarFileUrls().get(0));
 		assertTrue(pu2.excludeUnlistedClasses());
@@ -213,7 +223,6 @@ public class PersistenceXmlParsingTests {
 
 		// TODO need to define behaviour with non jta datasource
 		assertEquals(ds, pu2.getNonJtaDataSource());
-		*/
 	}
 
 	@Test
@@ -265,7 +274,7 @@ public class PersistenceXmlParsingTests {
 		assertNull(url);
 
 		url = reader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
-		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa/"));
+		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa"));
 	}
 	
 	@Test
