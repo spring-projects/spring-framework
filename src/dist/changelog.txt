@@ -3,11 +3,17 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 RC1 (2012-10-05)
+Changes in version 3.2 RC1 (2012-10-29)
 ---------------------------------------
 
 * added "getApplicationName()" method to ApplicationContext interface
 * introduced LiveBeansView MBean and LiveBeansViewServlet (SPR-9662)
+* ResourceBundleMessageSource supports "defaultEncoding", "fallbackToSystemLocale", "cacheSeconds" (SPR-7392)
+* fixed potential race condition in concurrent calling of autowired methods on a prototype bean (SPR-9806)
+* cancel on a Future returned by a TaskScheduler works reliably (SPR-9821)
+* Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface (SPR-9770, SPR-9856)
+* Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility; SPR-9846)
+* HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
 
 
