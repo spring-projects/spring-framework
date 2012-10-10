@@ -48,9 +48,9 @@ import org.springframework.util.StringUtils;
  */
 public class ResourceDatabasePopulator implements DatabasePopulator {
 
-	private static String DEFAULT_COMMENT_PREFIX = "--";
+	private static final String DEFAULT_COMMENT_PREFIX = "--";
 
-	private static String DEFAULT_STATEMENT_SEPARATOR = ";";
+	private static final String DEFAULT_STATEMENT_SEPARATOR = ";";
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
@@ -276,27 +276,22 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Return whether the substring of a given source {@link String} starting at the
 	 * given index starts with the given delimiter.
-	 *
 	 * @param source the source {@link String} to inspect
 	 * @param startIndex the index to look for the delimiter
 	 * @param delim the delimiter to look for
 	 */
 	private boolean startsWithDelimiter(String source, int startIndex, String delim) {
-
 		int endIndex = startIndex + delim.length();
-
 		if (source.length() < endIndex) {
 			// String is too short to contain the delimiter
 			return false;
 		}
-
 		return source.substring(startIndex, endIndex).equals(delim);
 	}
 
 	/**
 	 * Split an SQL script into separate statements delimited with the provided delimiter
 	 * character. Each individual statement will be added to the provided {@code List}.
-	 *
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement (typically a ';' character)
 	 * @param statements the List that will contain the individual statements
