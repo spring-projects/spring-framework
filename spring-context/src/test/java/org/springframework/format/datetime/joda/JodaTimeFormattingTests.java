@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.format.datetime.joda;
-
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +32,7 @@ import org.joda.time.MutableDateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -41,6 +40,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.validation.DataBinder;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -96,7 +97,7 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindLocalDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localDate", new String[] {"10/31/09"});
+		propertyValues.add("localDate", new String[]{"10/31/09"});
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
@@ -238,6 +239,24 @@ public class JodaTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("10/31/09 12:00 PM", binder.getBindingResult().getFieldValue("date"));
+	}
+
+	@Test
+	public void testBindDateWithErrorAvoidingDateConstructor() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("date", "Sat, 12 Aug 1995 13:30:00 GMT");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+		assertEquals("Sat, 12 Aug 1995 13:30:00 GMT", binder.getBindingResult().getFieldValue("date"));
+	}
+
+	@Test
+	public void testBindDateWithoutErrorFallingBackToDateConstructor() {
+		DataBinder binder = new DataBinder(new JodaTimeBean());
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("date", "Sat, 12 Aug 1995 13:30:00 GMT");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
 	}
 
 	@Test
