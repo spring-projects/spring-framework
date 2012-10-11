@@ -198,7 +198,7 @@ class TypeConverterDelegate {
 					return (T) convertedValue.toString();
 				}
 				else if (convertedValue instanceof String && !requiredType.isInstance(convertedValue)) {
-					if (!requiredType.isInterface() && !requiredType.isEnum()) {
+					if (firstAttemptEx == null && !requiredType.isInterface() && !requiredType.isEnum()) {
 						try {
 							Constructor strCtor = requiredType.getConstructor(String.class);
 							return (T) BeanUtils.instantiateClass(strCtor, convertedValue);
@@ -220,7 +220,6 @@ class TypeConverterDelegate {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
-					
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
