@@ -32,6 +32,7 @@ import javax.portlet.EventResponse;
 import javax.portlet.MimeResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
@@ -246,6 +247,9 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/** Whether exceptions thrown during doEvent should be forwarded to doRender */
 	private boolean forwardEventException = false;
+	
+	/** Whether include or forward is used to render views for resource requests */
+	private boolean renderResourceViewViaInclude = false;
 
 	/** URL that points to the ViewRendererServlet */
 	private String viewRendererUrl = DEFAULT_VIEW_RENDERER_URL;
@@ -331,6 +335,17 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 */
 	public void setForwardEventException(boolean forwardEventException) {
 		this.forwardEventException = forwardEventException;
+	}
+	
+	/**
+	 * Set whether to use {@link PortletRequestDispatcher#include(PortletRequest, PortletResponse)}
+	 * or {@link PortletRequestDispatcher#forward(PortletRequest, PortletResponse)} to render the
+	 * view for {@link PortletRequest#RESOURCE_PHASE} requests.
+	 * <p>Default is false. Turn this on if you want {@link PortletRequestDispatcher#include(PortletRequest, PortletResponse)}
+	 * to be used to render the view for resource requests.
+	 */
+	public void setRenderResourceViewViaInclude(boolean renderResourceViewViaInclude) {
+		this.renderResourceViewViaInclude = renderResourceViewViaInclude;
 	}
 
 	/**
@@ -1171,7 +1186,12 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, model);
 
 		// Include the content of the view in the render response.
-		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
+        if (PortletRequest.RESOURCE_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE)) && !this.renderResourceViewViaInclude) {
+            getPortletContext().getRequestDispatcher(this.viewRendererUrl).forward(request, response);
+        }
+        else {
+            getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
+        }
 	}
 
 
