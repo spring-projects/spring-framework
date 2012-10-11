@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>com.caucho</groupId>
-      <artifactId>com.springsource.com.caucho</artifactId>
+      <artifactId>hessian</artifactId>
       <version>3.2.1</version>
       <optional>true</optional>
     </dependency>
