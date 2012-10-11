@@ -101,11 +101,12 @@ import org.springframework.util.xml.StaxUtils;
 /**
  * Implementation of the <code>Marshaller</code> interface for JAXB 2.0.
  *
- * <p>The typical usage will be to set either the <code>contextPath</code> or the <code>classesToBeBound</code> property
- * on this bean, possibly customize the marshaller and unmarshaller by setting properties, schemas, adapters, and
- * listeners, and to refer to it.
+ * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
+ * property on this bean, possibly customize the marshaller and unmarshaller by setting
+ * properties, schemas, adapters, and listeners, and to refer to it.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
  * @since 3.0
  * @see #setContextPath(String)
  * @see #setClassesToBeBound(Class[])
@@ -125,9 +126,7 @@ public class Jaxb2Marshaller
 	private static final String CID = "cid:";
 
 
-	/**
-	 * Logger available to subclasses.
-	 */
+	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String contextPath;
@@ -154,15 +153,9 @@ public class Jaxb2Marshaller
 
 	private String schemaLanguage = XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
+	private LSResourceResolver schemaResourceResolver;
+
 	private boolean mtomEnabled = false;
-
-	private ClassLoader beanClassLoader;
-
-	private ResourceLoader resourceLoader;
-
-	private JAXBContext jaxbContext;
-
-	private Schema schema;
 
 	private boolean lazyInit = false;
 
@@ -170,7 +163,15 @@ public class Jaxb2Marshaller
 
 	private boolean checkForXmlRootElement = true;
 
-	private LSResourceResolver schemaResourceResolver;
+	private ClassLoader beanClassLoader;
+
+	private ResourceLoader resourceLoader;
+
+	private final Object jaxbContextMonitor = new Object();
+
+	private volatile JAXBContext jaxbContext;
+
+	private Schema schema;
 
 
 	/**
@@ -405,24 +406,29 @@ public class Jaxb2Marshaller
 		}
 	}
 
-	protected synchronized JAXBContext getJaxbContext() {
-		if (this.jaxbContext == null) {
-			try {
-				if (StringUtils.hasLength(this.contextPath)) {
-					this.jaxbContext = createJaxbContextFromContextPath();
-				}
-				else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
-					this.jaxbContext = createJaxbContextFromClasses();
-				}
-				else if (!ObjectUtils.isEmpty(this.packagesToScan)) {
-					this.jaxbContext = createJaxbContextFromPackages();
-				}
-			}
-			catch (JAXBException ex) {
-				throw convertJaxbException(ex);
-			}
+	protected JAXBContext getJaxbContext() {
+		if (this.jaxbContext != null) {
+			return this.jaxbContext;
 		}
-		return this.jaxbContext;
+		synchronized (this.jaxbContextMonitor) {
+			if (this.jaxbContext == null) {
+				try {
+					if (StringUtils.hasLength(this.contextPath)) {
+						this.jaxbContext = createJaxbContextFromContextPath();
+					}
+					else if (!ObjectUtils.isEmpty(this.classesToBeBound)) {
+						this.jaxbContext = createJaxbContextFromClasses();
+					}
+					else if (!ObjectUtils.isEmpty(this.packagesToScan)) {
+						this.jaxbContext = createJaxbContextFromPackages();
+					}
+				}
+				catch (JAXBException ex) {
+					throw convertJaxbException(ex);
+				}
+			}
+			return this.jaxbContext;
+		}
 	}
 
 	private JAXBContext createJaxbContextFromContextPath() throws JAXBException {
@@ -434,7 +440,9 @@ public class Jaxb2Marshaller
 				return JAXBContext.newInstance(this.contextPath, this.beanClassLoader, this.jaxbContextProperties);
 			}
 			else {
-				return JAXBContext.newInstance(this.contextPath, ClassUtils.getDefaultClassLoader(), this.jaxbContextProperties);
+				// analogous to the JAXBContext.newInstance(String) implementation
+				return JAXBContext.newInstance(this.contextPath, Thread.currentThread().getContextClassLoader(),
+						this.jaxbContextProperties);
 			}
 		}
 		else {
