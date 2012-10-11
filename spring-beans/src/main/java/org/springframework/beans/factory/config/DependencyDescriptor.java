@@ -126,7 +126,7 @@ public class DependencyDescriptor implements Serializable {
 	 * @param original the original descriptor to create a copy from
 	 */
 	public DependencyDescriptor(DependencyDescriptor original) {
-		this.methodParameter = original.methodParameter;
+		this.methodParameter = (original.methodParameter != null ? new MethodParameter(original.methodParameter) : null);
 		this.field = original.field;
 		this.declaringClass = original.declaringClass;
 		this.methodName = original.methodName;
