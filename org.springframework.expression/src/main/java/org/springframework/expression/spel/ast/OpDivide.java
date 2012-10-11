@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.expression.spel.ExpressionState;
  * Implements division operator.
  *
  * @author Andy Clement
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class OpDivide extends Operator {
@@ -42,14 +43,16 @@ public class OpDivide extends Operator {
 			Number op2 = (Number) operandTwo;
 			if (op1 instanceof Double || op2 instanceof Double) {
 				return new TypedValue(op1.doubleValue() / op2.doubleValue());
-			} else if (op1 instanceof Long || op2 instanceof Long) {
+			}
+			else if (op1 instanceof Long || op2 instanceof Long) {
 				return new TypedValue(op1.longValue() / op2.longValue());
-			} else { // TODO what about non-int result of the division?
+			}
+			else {
+				// TODO what about non-int result of the division?
 				return new TypedValue(op1.intValue() / op2.intValue());
 			}
 		}
-		Object result = state.operate(Operation.DIVIDE, operandOne, operandTwo);
-		return new TypedValue(result);
+		return state.operate(Operation.DIVIDE, operandOne, operandTwo);
 	}
 
 }
