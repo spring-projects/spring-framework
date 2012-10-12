@@ -590,6 +590,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 		}
+		if (FactoryBean.class.equals(beanClass) && mbd.isSingleton() &&
+				(typesToMatch.length > 1 || (typesToMatch.length == 1 && !typesToMatch[0].equals(FactoryBean.class)))) {
+			return getSingletonFactoryBeanForTypeCheck(beanName, mbd).getClass();
+		}
 		return beanClass;
 	}
 
@@ -642,10 +646,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Method[] candidates = ReflectionUtils.getUniqueDeclaredMethods(factoryClass);
 		Set<Class<?>> returnTypes = new HashSet<Class<?>>(1);
 		for (Method factoryMethod : candidates) {
-			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic
-					&& factoryMethod.getName().equals(mbd.getFactoryMethodName())
-					&& factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-
+			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
+					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
+					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
 				Class<?> returnType = GenericTypeResolver.resolveReturnTypeForGenericMethod(factoryMethod, args);
 				if (returnType != null) {
 					returnTypes.add(returnType);
@@ -684,12 +687,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
 			if (fbDef instanceof AbstractBeanDefinition) {
-				Class<?> fbClass = ((AbstractBeanDefinition)fbDef).getBeanClass();
+				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
 				if (ClassUtils.isCglibProxyClass(fbClass)) {
 					// CGLIB subclass methods hide generic parameters. look at the superclass.
 					fbClass = fbClass.getSuperclass();
 				}
-				// find the given factory method, taking into account that in the case of
+				// Find the given factory method, taking into account that in the case of
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
 					new ReflectionUtils.MethodCallback() {
