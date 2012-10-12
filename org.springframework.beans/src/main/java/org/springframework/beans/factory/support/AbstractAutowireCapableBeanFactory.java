@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -588,6 +588,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 		}
+		if (FactoryBean.class.equals(beanClass) && mbd.isSingleton() &&
+				(typesToMatch.length > 1 || (typesToMatch.length == 1 && !typesToMatch[0].equals(FactoryBean.class)))) {
+			return getSingletonFactoryBeanForTypeCheck(beanName, mbd).getClass();
+		}
 		return beanClass;
 	}
 
@@ -672,12 +676,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			// Try to obtain the FactoryBean's object type without instantiating it at all.
 			BeanDefinition fbDef = getBeanDefinition(factoryBeanName);
 			if (fbDef instanceof AbstractBeanDefinition) {
-				Class<?> fbClass = ((AbstractBeanDefinition)fbDef).getBeanClass();
+				Class<?> fbClass = ((AbstractBeanDefinition) fbDef).getBeanClass();
 				if (ClassUtils.isCglibProxyClass(fbClass)) {
 					// CGLIB subclass methods hide generic parameters. look at the superclass.
 					fbClass = fbClass.getSuperclass();
 				}
-				// find the given factory method, taking into account that in the case of
+				// Find the given factory method, taking into account that in the case of
 				// @Bean methods, there may be parameters present.
 				ReflectionUtils.doWithMethods(fbClass,
 					new ReflectionUtils.MethodCallback() {
