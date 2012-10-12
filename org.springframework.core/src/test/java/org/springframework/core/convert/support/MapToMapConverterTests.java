@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -199,5 +200,27 @@ public class MapToMapConverterTests {
 	}
 
 	public LinkedHashMap<String, String> emptyMapDifferentTarget;
+
+	@Test
+	public void noDefaultConstructorCopyNotRequired() throws Exception {
+		// SPR-9284
+		NoDefaultConstructorMap<String, Integer> map = new NoDefaultConstructorMap<String,Integer>(
+				Collections.<String, Integer> singletonMap("1", 1));
+		TypeDescriptor sourceType = TypeDescriptor.map(NoDefaultConstructorMap.class,
+				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		TypeDescriptor targetType = TypeDescriptor.map(NoDefaultConstructorMap.class,
+				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		assertTrue(conversionService.canConvert(sourceType, targetType));
+		@SuppressWarnings("unchecked")
+		Map<String, Integer> result = (Map<String, Integer>) conversionService.convert(map, sourceType, targetType);
+		assertEquals(map, result);
+		assertEquals(NoDefaultConstructorMap.class, result.getClass());
+	}
+
+	public static class NoDefaultConstructorMap<K, V> extends HashMap<K, V> {
+		public NoDefaultConstructorMap(Map<? extends K, ? extends V> m) {
+			super(m);
+		}
+	}
 
 }
