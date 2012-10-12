@@ -16,7 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -36,8 +36,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -380,6 +380,15 @@ public class GenericConversionServiceTests {
 		WithCopyConstructor value = new WithCopyConstructor();
 		Object result = service.convert(value, WithCopyConstructor.class);
 		assertSame(value, result);
+	}
+
+	@Test
+	public void testConvertUUID() throws Exception {
+		GenericConversionService service = new DefaultConversionService();
+		UUID uuid = UUID.randomUUID();
+		String convertToString = service.convert(uuid, String.class);
+		UUID convertToUUID = service.convert(convertToString, UUID.class);
+		assertEquals(uuid, convertToUUID);
 	}
 
 	@Test

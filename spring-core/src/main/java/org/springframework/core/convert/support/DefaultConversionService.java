@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.convert.support;
 
 import java.util.Locale;
+import java.util.UUID;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.ConverterRegistry;
@@ -80,6 +81,9 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new PropertiesToStringConverter());
 		converterRegistry.addConverter(new StringToPropertiesConverter());
+
+		converterRegistry.addConverter(new StringToUUIDConverter());
+		converterRegistry.addConverter(UUID.class, String.class, new ObjectToStringConverter());
 	}
 
 	private static void addCollectionConverters(ConverterRegistry converterRegistry) {
