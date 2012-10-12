@@ -51,7 +51,7 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return canConvertKey(sourceType, targetType) && canConvertValue(sourceType, targetType);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
@@ -75,19 +75,19 @@ final class MapToMapConverter implements ConditionalGenericConverter {
 		}
 		return (copyRequired ? targetMap : sourceMap);
 	}
-	
+
 	// internal helpers
 
 	private boolean canConvertKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return ConversionUtils.canConvertElements(sourceType.getMapKeyTypeDescriptor(),
 				targetType.getMapKeyTypeDescriptor(), this.conversionService);
 	}
-	
+
 	private boolean canConvertValue(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return ConversionUtils.canConvertElements(sourceType.getMapValueTypeDescriptor(),
 				targetType.getMapValueTypeDescriptor(), this.conversionService);
 	}
-	
+
 	private Object convertKey(Object sourceKey, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType == null) {
 			return sourceKey;
