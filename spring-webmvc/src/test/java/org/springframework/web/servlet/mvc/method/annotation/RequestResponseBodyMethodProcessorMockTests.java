@@ -301,35 +301,6 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		verify(messageConverter);
 	}
 
-	// SPR-9160
-
-	@Test
-	public void handleReturnValueSortByQuality() throws Exception {
-		this.servletRequest.addHeader("Accept", "text/plain; q=0.5, application/json");
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new MappingJackson2HttpMessageConverter());
-		converters.add(new StringHttpMessageConverter());
-		RequestResponseBodyMethodProcessor handler = new RequestResponseBodyMethodProcessor(converters);
-
-		handler.writeWithMessageConverters("Foo", returnTypeStringProduces, webRequest);
-
-		assertEquals("application/json;charset=UTF-8", servletResponse.getHeader("Content-Type"));
-	}
-
-	@Test
-	public void handleReturnValueString() throws Exception {
-		List<HttpMessageConverter<?>>converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new ByteArrayHttpMessageConverter());
-		converters.add(new StringHttpMessageConverter());
-
-		processor = new RequestResponseBodyMethodProcessor(converters);
-		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
-
-		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
-		assertEquals("Foo", servletResponse.getContentAsString());
-	}
-
 
 	@ResponseBody
 	public String handle1(@RequestBody String s, int i) {

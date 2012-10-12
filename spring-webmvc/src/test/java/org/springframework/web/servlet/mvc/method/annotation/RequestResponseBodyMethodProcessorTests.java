@@ -143,11 +143,24 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("Foo", servletResponse.getContentAsString());
 	}
 
+	@Test
+	public void handleReturnValueStringAcceptCharset() throws Exception {
+		this.servletRequest.addHeader("Accept", "text/plain;charset=UTF-8");
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		processor.writeWithMessageConverters("Foo", returnTypeString, webRequest);
+
+		assertEquals("text/plain;charset=UTF-8", servletResponse.getHeader("Content-Type"));
+	}
+
 
 	public String handle(@RequestBody List<SimpleBean> list, @RequestBody SimpleBean simpleBean) {
 		return null;
 	}
-
 
 	private static class SimpleBean {
 
