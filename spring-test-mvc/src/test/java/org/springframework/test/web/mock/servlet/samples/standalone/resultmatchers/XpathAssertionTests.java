@@ -63,7 +63,7 @@ public class XpathAssertionTests {
 		this.mockMvc = standaloneSetup(new MusicController())
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_XML))
 				.alwaysExpect(status().isOk())
-				.alwaysExpect(content().mimeType(MediaType.APPLICATION_XML))
+				.alwaysExpect(content().contentType(MediaType.APPLICATION_XML))
 				.build();
 	}
 

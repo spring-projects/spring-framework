@@ -29,12 +29,12 @@ public class ContentResultMatchersTests {
 
 	@Test
 	public void typeMatches() throws Exception {
-		new ContentResultMatchers().mimeType("application/json;charset=UTF-8").match(getStubMvcResult());
+		new ContentResultMatchers().contentType("application/json;charset=UTF-8").match(getStubMvcResult());
 	}
 
 	@Test(expected=AssertionError.class)
 	public void typeNoMatch() throws Exception {
-		new ContentResultMatchers().mimeType("text/plain").match(getStubMvcResult());
+		new ContentResultMatchers().contentType("text/plain").match(getStubMvcResult());
 	}
 	
 	@Test

@@ -85,6 +85,11 @@ public class XmlExpectationsHelper {
 	 * @see MockMvcResultMatchers#xpath(String, Map, Object...)
 	 */
 	public void assertXmlEqual(String expected, String actual) throws Exception {
+
+		XMLUnit.setIgnoreWhitespace(true);
+		XMLUnit.setIgnoreComments(true);
+		XMLUnit.setIgnoreAttributeOrder(true);
+
 		Document control = XMLUnit.buildControlDocument(expected);
 		Document test = XMLUnit.buildTestDocument(actual);
 		Diff diff = new Diff(control, test);

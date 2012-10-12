@@ -57,14 +57,14 @@ public class ContentResultMatchers {
 	/**
 	 * Assert the ServletResponse content type.
 	 */
-	public ResultMatcher mimeType(String contentType) {
-		return mimeType(MediaType.parseMediaType(contentType));
+	public ResultMatcher contentType(String contentType) {
+		return contentType(MediaType.parseMediaType(contentType));
 	}
 
 	/**
 	 * Assert the ServletResponse content type after parsing it as a MediaType.
 	 */
-	public ResultMatcher mimeType(final MediaType contentType) {
+	public ResultMatcher contentType(final MediaType contentType) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				String actual = result.getResponse().getContentType();

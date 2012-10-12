@@ -24,7 +24,9 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.mock.servlet.MvcResult;
 import org.springframework.test.web.mock.servlet.ResultMatcher;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -51,8 +53,7 @@ public class ModelResultMatchers {
 		return new ResultMatcher() {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
-				ModelAndView mav = result.getModelAndView();
-				assertTrue("No ModelAndView found", mav != null);
+				ModelAndView mav = getModelAndView(result);
 				MatcherAssert.assertThat("Model attribute '" + name + "'", (T) mav.getModel().get(name), matcher);
 			}
 		};
@@ -82,13 +83,27 @@ public class ModelResultMatchers {
 	/**
 	 * Assert the given model attribute(s) have errors.
 	 */
+	public ResultMatcher attributeErrorCount(final String name, final int expectedCount) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				ModelAndView mav = getModelAndView(result);
+				Errors errors = getBindingResult(mav, name);
+				assertEquals("Binding/validation error count for attribute [" + name + "], ",
+						expectedCount, errors.getErrorCount());
+			}
+		};
+	}
+
+	/**
+	 * Assert the given model attribute(s) have errors.
+	 */
 	public ResultMatcher attributeHasErrors(final String... names) {
 		return new ResultMatcher() {
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				for (String name : names) {
 					BindingResult result = getBindingResult(mav, name);
-					assertTrue("No errors for attribute: " + name, result.hasErrors());
+					assertTrue("No errors for attribute [" + name + "]", result.hasErrors());
 				}
 			}
 		};
@@ -103,7 +118,7 @@ public class ModelResultMatchers {
 				ModelAndView mav = getModelAndView(mvcResult);
 				for (String name : names) {
 					BindingResult result = getBindingResult(mav, name);
-					assertTrue("No errors for attribute: " + name, !result.hasErrors());
+					assertTrue("No errors for attribute [" + name + "]", !result.hasErrors());
 				}
 			}
 		};
@@ -117,11 +132,35 @@ public class ModelResultMatchers {
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				BindingResult result = getBindingResult(mav, name);
-				assertTrue("No errors for attribute: '" + name + "'", result.hasErrors());
+				assertTrue("No errors for attribute: [" + name + "]", result.hasErrors());
 				for (final String fieldName : fieldNames) {
-					assertTrue("No errors for field: '" + fieldName + "' of attribute: " + name,
+					assertTrue("No errors for field: [" + fieldName + "] of attribute [" + name + "]",
 							result.hasFieldErrors(fieldName));
 				}
+			}
+		};
+	}
+
+	/**
+	 * Assert the total number of errors in the model.
+	 */
+	public <T> ResultMatcher errorCount(final int expectedCount) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				int actualCount = getErrorCount(getModelAndView(result).getModelMap());
+				assertEquals("Binding/validation error count", expectedCount, actualCount);
+			}
+		};
+	}
+
+	/**
+	 * Assert the model has errors.
+	 */
+	public <T> ResultMatcher hasErrors() {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				int count = getErrorCount(getModelAndView(result).getModelMap());
+				assertTrue("Expected binding/validation errors", count != 0);
 			}
 		};
 	}
@@ -134,8 +173,9 @@ public class ModelResultMatchers {
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				for (Object value : mav.getModel().values()) {
-					if (value instanceof BindingResult) {
-						assertTrue("Unexpected binding error(s): " + value, !((BindingResult) value).hasErrors());
+					if (value instanceof Errors) {
+						assertTrue("Unexpected binding/validation error(s) [" + value + "]",
+								!((Errors) value).hasErrors());
 					}
 				}
 			}
@@ -170,6 +210,16 @@ public class ModelResultMatchers {
 		BindingResult result = (BindingResult) mav.getModel().get(BindingResult.MODEL_KEY_PREFIX + name);
 		assertTrue("No BindingResult for attribute: " + name, result != null);
 		return result;
+	}
+
+	private int getErrorCount(ModelMap model) {
+		int count = 0;
+		for (Object value : model.values()) {
+			if (value instanceof Errors) {
+				count += ((Errors) value).getErrorCount();
+			}
+		}
+		return count;
 	}
 
 }

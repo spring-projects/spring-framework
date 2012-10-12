@@ -57,7 +57,7 @@ public class JsonPathAssertionTests {
 		this.mockMvc = standaloneSetup(new MusicController())
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON))
 				.alwaysExpect(status().isOk())
-				.alwaysExpect(content().mimeType("application/json;charset=UTF-8"))
+				.alwaysExpect(content().contentType("application/json;charset=UTF-8"))
 				.build();
 	}
 

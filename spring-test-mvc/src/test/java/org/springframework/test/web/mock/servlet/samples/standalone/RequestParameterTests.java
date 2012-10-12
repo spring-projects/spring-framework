@@ -42,7 +42,7 @@ public class RequestParameterTests {
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/search?name=George").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(content().mimeType("application/json;charset=UTF-8"))
+				.andExpect(content().contentType("application/json;charset=UTF-8"))
 				.andExpect(jsonPath("$.name").value("George"));
 	}
 

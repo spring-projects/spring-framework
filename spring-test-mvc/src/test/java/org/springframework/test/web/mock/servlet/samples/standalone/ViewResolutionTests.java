@@ -77,7 +77,7 @@ public class ViewResolutionTests {
 		standaloneSetup(new PersonController()).setSingleView(new MappingJacksonJsonView()).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
-				.andExpect(content().mimeType(MediaType.APPLICATION_JSON))
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(jsonPath("$.person.name").value("Corea"));
 	}
 
@@ -90,7 +90,7 @@ public class ViewResolutionTests {
 		standaloneSetup(new PersonController()).setSingleView(new MarshallingView(marshaller)).build()
 			.perform(get("/person/Corea"))
 				.andExpect(status().isOk())
-				.andExpect(content().mimeType(MediaType.APPLICATION_XML))
+				.andExpect(content().contentType(MediaType.APPLICATION_XML))
 				.andExpect(xpath("/person/name/text()").string(equalTo("Corea")));
 	}
 
@@ -125,12 +125,12 @@ public class ViewResolutionTests {
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(content().mimeType(MediaType.APPLICATION_JSON))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.person.name").value("Corea"));
 
 		mockMvc.perform(get("/person/Corea").accept(MediaType.APPLICATION_XML))
 			.andExpect(status().isOk())
-			.andExpect(content().mimeType(MediaType.APPLICATION_XML))
+			.andExpect(content().contentType(MediaType.APPLICATION_XML))
 			.andExpect(xpath("/person/name/text()").string(equalTo("Corea")));
 	}
 
