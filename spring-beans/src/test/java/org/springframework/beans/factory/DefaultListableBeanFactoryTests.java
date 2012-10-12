@@ -2173,10 +2173,12 @@ public class DefaultListableBeanFactoryTests {
 	public void testByTypeLookupIsFastEnough() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		for (int i=0; i<1000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
 		}
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+
+		bf.freezeConfiguration();
 
 		for (int i=0; i<10000; i++) {
 			bf.getBean(B.class);
