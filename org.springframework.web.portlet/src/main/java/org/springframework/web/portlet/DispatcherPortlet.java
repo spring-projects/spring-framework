@@ -32,6 +32,7 @@ import javax.portlet.EventResponse;
 import javax.portlet.MimeResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletRequestDispatcher;
 import javax.portlet.PortletResponse;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
@@ -1158,8 +1159,8 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	 * {@link org.springframework.web.servlet.ViewRendererServlet}.
 	 * @param view the View to render
 	 * @param model the associated model
-	 * @param request current portlet render request
-	 * @param response current portlet render response
+	 * @param request current portlet render/resource request
+	 * @param response current portlet render/resource response
 	 * @throws Exception if there's a problem rendering the view
 	 */
 	protected void doRender(View view, Map model, PortletRequest request, MimeResponse response) throws Exception {
@@ -1170,8 +1171,28 @@ public class DispatcherPortlet extends FrameworkPortlet {
 		request.setAttribute(ViewRendererServlet.VIEW_ATTRIBUTE, view);
 		request.setAttribute(ViewRendererServlet.MODEL_ATTRIBUTE, model);
 
-		// Include the content of the view in the render response.
-		getPortletContext().getRequestDispatcher(this.viewRendererUrl).include(request, response);
+		// Include the content of the view in the render/resource response.
+		doDispatch(getPortletContext().getRequestDispatcher(this.viewRendererUrl), request, response);
+	}
+
+	/**
+	 * Perform a dispatch on the given PortletRequestDispatcher.
+	 * <p>The default implementation uses a forward for resource requests
+	 * and an include for render requests.
+	 * @param dispatcher the PortletRequestDispatcher to use
+	 * @param request current portlet render/resource request
+	 * @param response current portlet render/resource response
+	 * @throws Exception if there's a problem performing the dispatch
+	 */
+	protected void doDispatch(PortletRequestDispatcher dispatcher, PortletRequest request, MimeResponse response)
+			throws Exception {
+
+		if (PortletRequest.RESOURCE_PHASE.equals(request.getAttribute(PortletRequest.LIFECYCLE_PHASE))) {
+			dispatcher.forward(request, response);
+		}
+		else {
+			dispatcher.include(request, response);
+		}
 	}
 
 
