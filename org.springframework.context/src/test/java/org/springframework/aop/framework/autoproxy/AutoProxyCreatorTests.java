@@ -20,7 +20,6 @@ import java.lang.reflect.Proxy;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.TargetSource;
@@ -36,6 +35,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.context.support.StaticMessageSource;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -113,20 +114,18 @@ public final class AutoProxyCreatorTests {
 		ITestBean singletonToBeProxied = (ITestBean) sac.getBean("singletonToBeProxied");
 		assertTrue(Proxy.isProxyClass(singletonToBeProxied.getClass()));
 
-		// 4 invocations coming from FactoryBean inspection during lifecycle startup
-
 		TestInterceptor ti = (TestInterceptor) sac.getBean("testInterceptor");
-		assertEquals(4, ti.nrOfInvocations);
+		int initialNr = ti.nrOfInvocations;
 		singletonToBeProxied.getName();
-		assertEquals(5, ti.nrOfInvocations);
+		assertEquals(initialNr + 1, ti.nrOfInvocations);
 
 		FactoryBean<?> factory = (FactoryBean<?>) sac.getBean("&singletonFactoryToBeProxied");
 		assertTrue(Proxy.isProxyClass(factory.getClass()));
 		TestBean tb = (TestBean) sac.getBean("singletonFactoryToBeProxied");
 		assertFalse(AopUtils.isAopProxy(tb));
-		assertEquals(7, ti.nrOfInvocations);
+		assertEquals(initialNr + 3, ti.nrOfInvocations);
 		tb.getAge();
-		assertEquals(7, ti.nrOfInvocations);
+		assertEquals(initialNr + 3, ti.nrOfInvocations);
 	}
 
 	@Test
