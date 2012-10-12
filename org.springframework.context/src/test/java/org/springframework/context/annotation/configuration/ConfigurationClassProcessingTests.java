@@ -145,8 +145,8 @@ public class ConfigurationClassProcessingTests {
 		assertTrue(factory.isTypeMatch("factoryBean", List.class));
 		assertEquals(FactoryBean.class, factory.getType("&factoryBean"));
 		assertTrue(factory.isTypeMatch("&factoryBean", FactoryBean.class));
-		assertTrue(factory.isTypeMatch("&factoryBean", BeanClassLoaderAware.class));
-		assertTrue(factory.isTypeMatch("&factoryBean", ListFactoryBean.class));
+		assertFalse(factory.isTypeMatch("&factoryBean", BeanClassLoaderAware.class));
+		assertFalse(factory.isTypeMatch("&factoryBean", ListFactoryBean.class));
 		assertTrue(factory.getBean("factoryBean") instanceof List);
 
 		String[] beanNames = factory.getBeanNamesForType(FactoryBean.class);

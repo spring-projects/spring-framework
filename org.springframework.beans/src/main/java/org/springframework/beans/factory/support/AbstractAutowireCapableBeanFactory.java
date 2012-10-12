@@ -588,10 +588,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 		}
-		if (FactoryBean.class.equals(beanClass) && mbd.isSingleton() &&
-				(typesToMatch.length > 1 || (typesToMatch.length == 1 && !typesToMatch[0].equals(FactoryBean.class)))) {
-			return getSingletonFactoryBeanForTypeCheck(beanName, mbd).getClass();
-		}
 		return beanClass;
 	}
 
