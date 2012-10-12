@@ -43,7 +43,7 @@ public class DefaultConversionService extends GenericConversionService {
 	}
 
 	// static utility methods
-	
+
 	/**
 	 * Add converters appropriate for most environments.
 	 * @param converterRegistry the registry of converters to add to (must also be castable to ConversionService)
@@ -54,9 +54,9 @@ public class DefaultConversionService extends GenericConversionService {
 		addCollectionConverters(converterRegistry);
 		addFallbackConverters(converterRegistry);
 	}
-	
+
 	// internal helpers
-	
+
 	private static void addScalarConverters(ConverterRegistry converterRegistry) {
 		converterRegistry.addConverter(new StringToBooleanConverter());
 		converterRegistry.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
@@ -65,16 +65,16 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(Number.class, String.class, new ObjectToStringConverter());
 
 		converterRegistry.addConverterFactory(new NumberToNumberConverterFactory());
-		
+
 		converterRegistry.addConverter(new StringToCharacterConverter());
 		converterRegistry.addConverter(Character.class, String.class, new ObjectToStringConverter());
 
 		converterRegistry.addConverter(new NumberToCharacterConverter());
 		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
-		
+
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
 		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter());
-		
+
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
 
@@ -83,13 +83,13 @@ public class DefaultConversionService extends GenericConversionService {
 	}
 
 	private static void addCollectionConverters(ConverterRegistry converterRegistry) {
-		ConversionService conversionService = (ConversionService) converterRegistry;		
+		ConversionService conversionService = (ConversionService) converterRegistry;
 		converterRegistry.addConverter(new ArrayToCollectionConverter(conversionService));
 		converterRegistry.addConverter(new CollectionToArrayConverter(conversionService));
 
 		converterRegistry.addConverter(new ArrayToArrayConverter(conversionService));
 		converterRegistry.addConverter(new CollectionToCollectionConverter(conversionService));
-		converterRegistry.addConverter(new MapToMapConverter(conversionService));		
+		converterRegistry.addConverter(new MapToMapConverter(conversionService));
 
 		converterRegistry.addConverter(new ArrayToStringConverter(conversionService));
 		converterRegistry.addConverter(new StringToArrayConverter(conversionService));
@@ -103,12 +103,12 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
 	}
-	
+
 	private static void addFallbackConverters(ConverterRegistry converterRegistry) {
 		ConversionService conversionService = (ConversionService) converterRegistry;
 		converterRegistry.addConverter(new ObjectToObjectConverter());
 		converterRegistry.addConverter(new IdToEntityConverter(conversionService));
-		converterRegistry.addConverter(new FallbackObjectToStringConverter());		
+		converterRegistry.addConverter(new FallbackObjectToStringConverter());
 	}
 
 }

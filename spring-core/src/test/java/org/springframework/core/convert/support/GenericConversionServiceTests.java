@@ -61,9 +61,9 @@ public class GenericConversionServiceTests {
 	public void canConvert() {
 		assertFalse(conversionService.canConvert(String.class, Integer.class));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(String.class, Integer.class));		
+		assertTrue(conversionService.canConvert(String.class, Integer.class));
 	}
-	
+
 	@Test
 	public void canConvertAssignable() {
 		assertTrue(conversionService.canConvert(String.class, String.class));
@@ -71,29 +71,29 @@ public class GenericConversionServiceTests {
 		assertTrue(conversionService.canConvert(boolean.class, boolean.class));
 		assertTrue(conversionService.canConvert(boolean.class, Boolean.class));
 	}
-	
+
 	@Test
 	public void canConvertIllegalArgumentNullTargetType() {
 		try {
 			assertFalse(conversionService.canConvert(String.class, null));
 			fail("Should have failed");
 		} catch (IllegalArgumentException e) {
-			
+
 		}
 		try {
 			assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), null));
 			fail("Should have failed");
 		} catch (IllegalArgumentException e) {
-			
+
 		}
 	}
-	
+
 	@Test
 	public void canConvertNullSourceType() {
 		assertTrue(conversionService.canConvert(null, Integer.class));
 		assertTrue(conversionService.canConvert(null, TypeDescriptor.valueOf(Integer.class)));
 	}
-	
+
 	@Test
 	public void convert() {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
@@ -208,7 +208,7 @@ public class GenericConversionServiceTests {
 	}
 
 	// SPR-8718
-	
+
 	@Test(expected=ConverterNotFoundException.class)
 	public void convertSuperTarget() {
 		conversionService.addConverter(new ColorConverter());
@@ -235,11 +235,11 @@ public class GenericConversionServiceTests {
 	public void convertObjectToPrimitiveViaConverterFactory() {
 		assertFalse(conversionService.canConvert(String.class, int.class));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(String.class, int.class));		
+		assertTrue(conversionService.canConvert(String.class, int.class));
 		Integer three = conversionService.convert("3", int.class);
 		assertEquals(3, three.intValue());
 	}
-	
+
 	@Test
 	public void genericConverterDelegatingBackToConversionServiceConverterNotFound() {
 		conversionService.addConverter(new ObjectToArrayConverter(conversionService));
@@ -398,7 +398,7 @@ public class GenericConversionServiceTests {
 		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
-	
+
 	@Test
 	public void testPerformance2() throws Exception {
 		GenericConversionService conversionService = new DefaultConversionService();
@@ -420,7 +420,7 @@ public class GenericConversionServiceTests {
 				target.add(Integer.valueOf(element));
 			}
 		}
-		watch.stop();		
+		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
 
@@ -435,7 +435,7 @@ public class GenericConversionServiceTests {
 		source.put("1", "1");
 		source.put("2", "2");
 		source.put("3", "3");
-		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));		
+		TypeDescriptor td = new TypeDescriptor(getClass().getField("map"));
 		for (int i = 0; i < 1000000; i++) {
 			conversionService.convert(source, TypeDescriptor.forObject(source), td);
 		}
@@ -447,10 +447,10 @@ public class GenericConversionServiceTests {
 				target.put(entry.getKey(), Integer.valueOf(entry.getValue()));
 			}
 		}
-		watch.stop();		
+		watch.stop();
 		System.out.println(watch.prettyPrint());
 	}
-	
+
 	public static Map<String, Integer> map;
 
 	@Test
@@ -554,19 +554,19 @@ public class GenericConversionServiceTests {
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(String.class, Integer[].class));
 	}
-	
+
 	@Test
 	public void stringToCollectionCanConvert() throws Exception {
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
 		assertTrue(conversionService.canConvert(String.class, Collection.class));
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("stringToCollection"));
-		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+		assertFalse(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
-		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));		
+		assertTrue(conversionService.canConvert(TypeDescriptor.valueOf(String.class), targetType));
 	}
-	
+
 	public Collection<Integer> stringToCollection;
-	
+
 	@Test
 	public void testConvertiblePairsInSet() throws Exception {
 		Set<GenericConverter.ConvertiblePair> set = new HashSet<GenericConverter.ConvertiblePair>();
