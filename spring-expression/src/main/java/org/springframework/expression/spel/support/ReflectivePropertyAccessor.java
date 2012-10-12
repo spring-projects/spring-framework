@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Simple PropertyAccessor that uses reflection to access properties for reading and writing. A property can be accessed
- * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written). 
- * 
+ * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written).
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -48,7 +48,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	protected final Map<CacheKey, InvokerPair> readerCache = new ConcurrentHashMap<CacheKey, InvokerPair>();
 
 	protected final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>();
-	
+
 	protected final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey, TypeDescriptor>();
 
 
@@ -71,7 +71,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (this.readerCache.containsKey(cacheKey)) {
 			return true;
 		}
-		Method method = findGetterForProperty(name, type, target instanceof Class);
+		Method method = findGetterForProperty(name, type, target);
 		if (method != null) {
 			// Treat it like a property
 			// The readerCache will only contain gettable properties (let's not worry about setters for now)
@@ -82,10 +82,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return true;
 		}
 		else {
-			Field field = findField(name, type, target instanceof Class);
+			Field field = findField(name, type, target);
 			if (field != null) {
 				TypeDescriptor typeDescriptor = new TypeDescriptor(field);
-				this.readerCache.put(cacheKey, new InvokerPair(field,typeDescriptor));	
+				this.readerCache.put(cacheKey, new InvokerPair(field,typeDescriptor));
 				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 				return true;
 			}
@@ -112,7 +112,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invoker == null || invoker.member instanceof Method) {
 			Method method = (Method) (invoker != null ? invoker.member : null);
 			if (method == null) {
-				method = findGetterForProperty(name, type, target instanceof Class);
+				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					// TODO remove the duplication here between canRead and read
 					// Treat it like a property
@@ -138,7 +138,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invoker == null || invoker.member instanceof Field) {
 			Field field = (Field) (invoker == null ? null : invoker.member);
 			if (field == null) {
-				field = findField(name, type, target instanceof Class);
+				field = findField(name, type, target);
 				if (field != null) {
 					invoker = new InvokerPair(field, new TypeDescriptor(field));
 					this.readerCache.put(cacheKey, invoker);
@@ -168,7 +168,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (this.writerCache.containsKey(cacheKey)) {
 			return true;
 		}
-		Method method = findSetterForProperty(name, type, target instanceof Class);
+		Method method = findSetterForProperty(name, type, target);
 		if (method != null) {
 			// Treat it like a property
 			Property property = new Property(type, null, method);
@@ -178,7 +178,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return true;
 		}
 		else {
-			Field field = findField(name, type, target instanceof Class);
+			Field field = findField(name, type, target);
 			if (field != null) {
 				this.writerCache.put(cacheKey, field);
 				this.typeDescriptorCache.put(cacheKey, new TypeDescriptor(field));
@@ -211,7 +211,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (cachedMember == null || cachedMember instanceof Method) {
 			Method method = (Method) cachedMember;
 			if (method == null) {
-				method = findSetterForProperty(name, type, target instanceof Class);
+				method = findSetterForProperty(name, type, target);
 				if (method != null) {
 					cachedMember = method;
 					this.writerCache.put(cacheKey, cachedMember);
@@ -232,7 +232,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (cachedMember == null || cachedMember instanceof Field) {
 			Field field = (Field) cachedMember;
 			if (field == null) {
-				field = findField(name, type, target instanceof Class);
+				field = findField(name, type, target);
 				if (field != null) {
 					cachedMember = field;
 					this.writerCache.put(cacheKey, cachedMember);
@@ -252,7 +252,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		throw new AccessException("Neither setter nor field found for property '" + name + "'");
 	}
-	
+
 	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
 		if (target == null) {
 			return null;
@@ -279,6 +279,30 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 		return typeDescriptor;
+	}
+
+	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
+		Method method = findGetterForProperty(propertyName, clazz, target instanceof Class);
+		if(method == null && target instanceof Class) {
+			method = findGetterForProperty(propertyName, target.getClass(), false);
+		}
+		return method;
+	}
+
+	private Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
+		Method method = findSetterForProperty(propertyName, clazz, target instanceof Class);
+		if(method == null && target instanceof Class) {
+			method = findSetterForProperty(propertyName, target.getClass(), false);
+		}
+		return method;
+	}
+
+	private Field findField(String name, Class<?> clazz, Object target) {
+		Field field = findField(name, clazz, target instanceof Class);
+		if(field == null && target instanceof Class) {
+			field = findField(name, target.getClass(), false);
+		}
+		return field;
 	}
 
 	/**
@@ -340,22 +364,22 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Captures the member (method/field) to call reflectively to access a property value and the type descriptor for the
 	 * value returned by the reflective call.
 	 */
 	private static class InvokerPair {
-		
+
 		final Member member;
-		
+
 		final TypeDescriptor typeDescriptor;
 
 		public InvokerPair(Member member, TypeDescriptor typeDescriptor) {
 			this.member = member;
 			this.typeDescriptor = typeDescriptor;
-		}	
-		
+		}
+
 	}
 
 	private static class CacheKey {
@@ -387,9 +411,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 	}
 
-	/** 
+	/**
 	 * Attempt to create an optimized property accessor tailored for a property of a particular name on
-	 * a particular class. The general ReflectivePropertyAccessor will always work but is not optimal 
+	 * a particular class. The general ReflectivePropertyAccessor will always work but is not optimal
 	 * due to the need to lookup which reflective member (method/field) to use each time read() is called.
 	 * This method will just return the ReflectivePropertyAccessor instance if it is unable to build
 	 * something more optimal.
@@ -410,7 +434,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
 			Method method = (Method) (invocationTarget==null?null:invocationTarget.member);
 			if (method == null) {
-				method = findGetterForProperty(name, type, target instanceof Class);
+				method = findGetterForProperty(name, type, target);
 				if (method != null) {
 					invocationTarget = new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
 					ReflectionUtils.makeAccessible(method);
@@ -438,10 +462,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		}
 		return this;
 	}
-	
+
 	/**
-	 * An optimized form of a PropertyAccessor that will use reflection but only knows how to access a particular property 
-	 * on a particular class.  This is unlike the general ReflectivePropertyResolver which manages a cache of methods/fields that 
+	 * An optimized form of a PropertyAccessor that will use reflection but only knows how to access a particular property
+	 * on a particular class.  This is unlike the general ReflectivePropertyResolver which manages a cache of methods/fields that
 	 * may be invoked to access different properties on different classes.  This optimal accessor exists because looking up
 	 * the appropriate reflective object by class/name on each read is not cheap.
 	 */
@@ -449,13 +473,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		private final Member member;
 		private final TypeDescriptor typeDescriptor;
 		private final boolean needsToBeMadeAccessible;
-		
+
 		OptimalPropertyAccessor(InvokerPair target) {
-			this.member = target.member;			
+			this.member = target.member;
 			this.typeDescriptor = target.typeDescriptor;
 			if (this.member instanceof Field) {
 				Field field = (Field)member;
-				needsToBeMadeAccessible = (!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers())) 
+				needsToBeMadeAccessible = (!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()))
 				&& !field.isAccessible();
 			}
 			else {
@@ -468,7 +492,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public Class[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
-		
+
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			if (target == null) {
 				return false;
@@ -504,7 +528,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				catch (Exception ex) {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
 				}
-			}		
+			}
 			if (member instanceof Field) {
 				try {
 					if (needsToBeMadeAccessible) {
@@ -523,7 +547,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
-		
+
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
