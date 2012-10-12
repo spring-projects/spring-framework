@@ -304,8 +304,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
-		if (type == null || !allowEagerInit) {
-			return this.doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
+			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		}
 		Map<Class<?>, String[]> cache = includeNonSingletons ?
 				this.nonSingletonBeanNamesByType : this.singletonBeanNamesByType;
@@ -313,7 +313,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (resolvedBeanNames != null) {
 			return resolvedBeanNames;
 		}
-		resolvedBeanNames = this.doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		resolvedBeanNames = doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
 		cache.put(type, resolvedBeanNames);
 		return resolvedBeanNames;
 	}
