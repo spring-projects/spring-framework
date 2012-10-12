@@ -17,17 +17,13 @@
 package org.springframework.beans.factory;
 
 import java.lang.reflect.Field;
-
 import java.net.MalformedURLException;
-
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
-
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -35,14 +31,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Ignore;
 import org.junit.Test;
+import test.beans.DerivedTestBean;
+import test.beans.DummyFactory;
+import test.beans.ITestBean;
+import test.beans.LifecycleBean;
+import test.beans.NestedTestBean;
+import test.beans.TestBean;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
@@ -79,15 +79,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.StopWatch;
 
-import test.beans.DerivedTestBean;
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.LifecycleBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
-
 import static org.hamcrest.CoreMatchers.*;
-
 import static org.junit.Assert.*;
 
 /**
@@ -2181,10 +2173,12 @@ public class DefaultListableBeanFactoryTests {
 	public void testByTypeLookupIsFastEnough() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		for (int i=0; i<1000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
 		}
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+
+		bf.freezeConfiguration();
 
 		for (int i=0; i<10000; i++) {
 			bf.getBean(B.class);
