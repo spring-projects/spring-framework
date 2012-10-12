@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.context.annotation;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
@@ -29,6 +27,7 @@ import net.sf.cglib.proxy.NoOp;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -53,11 +52,28 @@ class ConfigurationClassEnhancer {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
-	private final List<Callback> callbackInstances = new ArrayList<Callback>();
+	private static final Class<?>[] CALLBACK_TYPES = { BeanMethodInterceptor.class,
+		DisposableBeanMethodInterceptor.class, NoOp.class };
 
-	private final List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+	private static final CallbackFilter CALLBACK_FILTER = new CallbackFilter() {
 
-	private final CallbackFilter callbackFilter;
+		public int accept(Method candidateMethod) {
+			// Set up the callback filter to return the index of the BeanMethodInterceptor when
+			// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
+			if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
+				return 0;
+			}
+			if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
+				return 1;
+			}
+			return 2;
+		}
+	};
+
+	private static final Callback DISPOSABLE_BEAN_METHOD_INTERCEPTOR = new DisposableBeanMethodInterceptor();
+
+
+	private final Callback[] callbackInstances;
 
 
 	/**
@@ -65,28 +81,11 @@ class ConfigurationClassEnhancer {
 	 */
 	public ConfigurationClassEnhancer(ConfigurableBeanFactory beanFactory) {
 		Assert.notNull(beanFactory, "BeanFactory must not be null");
-
-		this.callbackInstances.add(new BeanMethodInterceptor(beanFactory));
-		this.callbackInstances.add(new DisposableBeanMethodInterceptor());
-		this.callbackInstances.add(NoOp.INSTANCE);
-
-		for (Callback callback : this.callbackInstances) {
-			this.callbackTypes.add(callback.getClass());
-		}
-
-		// Set up the callback filter to return the index of the BeanMethodInterceptor when
-		// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
-		callbackFilter = new CallbackFilter() {
-			public int accept(Method candidateMethod) {
-				if (BeanAnnotationHelper.isBeanAnnotated(candidateMethod)) {
-					return 0;
-				}
-				if (DisposableBeanMethodInterceptor.isDestroyMethod(candidateMethod)) {
-					return 1;
-				}
-				return 2;
-			}
-		};
+		// Callback instances must be ordered in the same way as CALLBACK_TYPES and CALLBACK_FILTER
+		this.callbackInstances = new Callback[] {
+				new BeanMethodInterceptor(beanFactory),
+				DISPOSABLE_BEAN_METHOD_INTERCEPTOR,
+				NoOp.INSTANCE };
 	}
 
 	/**
@@ -134,15 +133,11 @@ class ConfigurationClassEnhancer {
 	 */
 	private Enhancer newEnhancer(Class<?> superclass) {
 		Enhancer enhancer = new Enhancer();
-		// Because callbackFilter and callbackTypes are dynamically populated
-		// there's no opportunity for caching. This does not appear to be causing
-		// any performance problem.
-		enhancer.setUseCache(false);
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
-		enhancer.setCallbackFilter(this.callbackFilter);
-		enhancer.setCallbackTypes(this.callbackTypes.toArray(new Class[this.callbackTypes.size()]));
+		enhancer.setCallbackFilter(CALLBACK_FILTER);
+		enhancer.setCallbackTypes(CALLBACK_TYPES);
 		return enhancer;
 	}
 
@@ -153,7 +148,7 @@ class ConfigurationClassEnhancer {
 	private Class<?> createClass(Enhancer enhancer) {
 		Class<?> subclass = enhancer.createClass();
 		// registering callbacks statically (as opposed to threadlocal) is critical for usage in an OSGi env (SPR-5932)
-		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances.toArray(new Callback[this.callbackInstances.size()]));
+		Enhancer.registerStaticCallbacks(subclass, this.callbackInstances);
 		return subclass;
 	}
 
@@ -165,7 +160,7 @@ class ConfigurationClassEnhancer {
 	 * @see BeanMethodInterceptor#enhanceFactoryBean(Class, String)
 	 */
 	private static class GetObjectMethodInterceptor implements MethodInterceptor {
-		
+
 		private final ConfigurableBeanFactory beanFactory;
 		private final String beanName;
 
@@ -177,7 +172,7 @@ class ConfigurationClassEnhancer {
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			return beanFactory.getBean(beanName);
 		}
-		
+
 	}
 
 
@@ -215,7 +210,18 @@ class ConfigurationClassEnhancer {
 	 */
 	private static class BeanMethodInterceptor implements MethodInterceptor {
 
+		private static final Class<?>[] CALLBACK_TYPES = {
+			GetObjectMethodInterceptor.class, NoOp.class };
+
+		private static final CallbackFilter CALLBACK_FITLER = new CallbackFilter() {
+			public int accept(Method method) {
+				return method.getName().equals("getObject") ? 0 : 1;
+			}
+		};
+
+
 		private final ConfigurableBeanFactory beanFactory;
+
 
 		public BeanMethodInterceptor(ConfigurableBeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
@@ -245,7 +251,7 @@ class ConfigurationClassEnhancer {
 
 			// to handle the case of an inter-bean method reference, we must explicitly check the
 			// container for already cached instances
-			
+
 			// first, check to see if the requested bean is a FactoryBean. If so, create a subclass
 			// proxy that intercepts calls to getObject() and returns any cached bean instance.
 			// this ensures that the semantics of calling a FactoryBean from within @Bean methods
@@ -327,26 +333,18 @@ class ConfigurationClassEnhancer {
 		 */
 		private Object enhanceFactoryBean(Class<?> fbClass, String beanName) throws InstantiationException, IllegalAccessException {
 			Enhancer enhancer = new Enhancer();
-			enhancer.setUseCache(false);
 			enhancer.setSuperclass(fbClass);
 			enhancer.setUseFactory(false);
-			enhancer.setCallbackFilter(new CallbackFilter() {
-				public int accept(Method method) {
-					return method.getName().equals("getObject") ? 0 : 1;
-				}
-			});
-			List<Callback> callbackInstances = new ArrayList<Callback>();
-			callbackInstances.add(new GetObjectMethodInterceptor(this.beanFactory, beanName));
-			callbackInstances.add(NoOp.INSTANCE);
-			
-			List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
-			for (Callback callback : callbackInstances) {
-				callbackTypes.add(callback.getClass());
-			}
-			
-			enhancer.setCallbackTypes(callbackTypes.toArray(new Class[callbackTypes.size()]));
+			enhancer.setCallbackFilter(CALLBACK_FITLER);
+			// Callback instances must be ordered in the same way as CALLBACK_TYPES and CALLBACK_FILTER
+			Callback[] callbackInstances = new Callback[] {
+					new GetObjectMethodInterceptor(this.beanFactory, beanName),
+					NoOp.INSTANCE
+			};
+
+			enhancer.setCallbackTypes(CALLBACK_TYPES);
 			Class<?> fbSubclass = enhancer.createClass();
-			Enhancer.registerCallbacks(fbSubclass, callbackInstances.toArray(new Callback[callbackInstances.size()]));
+			Enhancer.registerCallbacks(fbSubclass, callbackInstances);
 			return fbSubclass.newInstance();
 		}
 
