@@ -60,6 +60,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -521,7 +522,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	 * @throws NoSuchBeanDefinitionException if there is no single EntityManagerFactory in the context
 	 */
 	protected EntityManagerFactory findDefaultEntityManagerFactory(String requestingBeanName)
-			throws NoSuchBeanDefinitionException{
+			throws NoSuchBeanDefinitionException {
 
 		String[] beanNames =
 				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.beanFactory, EntityManagerFactory.class);
@@ -535,7 +536,8 @@ public class PersistenceAnnotationBeanPostProcessor
 		}
 		else {
 			throw new NoSuchBeanDefinitionException(
-					EntityManagerFactory.class, "expected single bean but found " + beanNames.length);
+					EntityManagerFactory.class, "expected single bean but found " + beanNames.length + ": " +
+					StringUtils.arrayToCommaDelimitedString(beanNames));
 		}
 	}
 
