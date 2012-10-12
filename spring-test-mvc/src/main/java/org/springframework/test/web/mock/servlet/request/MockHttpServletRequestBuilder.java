@@ -636,7 +636,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 				createServlet3Request(servletContext) : new MockHttpServletRequest(servletContext);
 	}
 
-	private static MockHttpServletRequest createServlet3Request(ServletContext servletContext) {
+	private MockHttpServletRequest createServlet3Request(ServletContext servletContext) {
 		try {
 			String className = "org.springframework.test.web.mock.servlet.request.Servlet3MockHttpServletRequest";
 			Class<?> clazz = ClassUtils.forName(className, MockHttpServletRequestBuilder.class.getClassLoader());

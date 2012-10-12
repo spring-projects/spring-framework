@@ -108,11 +108,11 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 		return request;
 	}
 
-	private static MockMultipartHttpServletRequest createServlet3Request() {
+	private MockMultipartHttpServletRequest createServlet3Request() {
 		try {
 			String className = "org.springframework.test.web.mock.servlet.request.Servlet3MockMultipartHttpServletRequest";
 			Class<?> clazz = ClassUtils.forName(className, MockMultipartHttpServletRequestBuilder.class.getClassLoader());
-			Constructor<?> constructor = clazz.getConstructor(ServletContext.class);
+			Constructor<?> constructor = clazz.getDeclaredConstructor();
 			return (MockMultipartHttpServletRequest) BeanUtils.instantiateClass(constructor);
 		}
 		catch (Throwable t) {
