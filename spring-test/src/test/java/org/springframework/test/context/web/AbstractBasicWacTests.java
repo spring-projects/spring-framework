@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.ServletContextAware;
@@ -56,6 +57,9 @@ public abstract class AbstractBasicWacTests implements ServletContextAware {
 	protected MockHttpServletResponse response;
 
 	@Autowired
+	protected MockHttpSession session;
+
+	@Autowired
 	protected ServletWebRequest webRequest;
 
 	@Autowired
@@ -75,6 +79,7 @@ public abstract class AbstractBasicWacTests implements ServletContextAware {
 		assertNotNull("ServletContext should have been autowired from the WAC.", mockServletContext);
 		assertNotNull("MockHttpServletRequest should have been autowired from the WAC.", request);
 		assertNotNull("MockHttpServletResponse should have been autowired from the WAC.", response);
+		assertNotNull("MockHttpSession should have been autowired from the WAC.", session);
 		assertNotNull("ServletWebRequest should have been autowired from the WAC.", webRequest);
 
 		Object rootWac = mockServletContext.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);

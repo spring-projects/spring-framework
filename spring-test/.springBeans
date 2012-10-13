@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beansProjectDescription>
 	<version>1</version>
-	<pluginVersion><![CDATA[3.0.0.201208090952-RELEASE]]></pluginVersion>
+	<pluginVersion><![CDATA[3.1.0.201210040510-RELEASE]]></pluginVersion>
 	<configSuffixes>
 		<configSuffix><![CDATA[xml]]></configSuffix>
 	</configSuffixes>
@@ -9,7 +9,7 @@
 	<configs>
 		<config>src/test/java/org/springframework/test/context/junit4/profile/xml/DefaultProfileXmlConfigTests-context.xml</config>
 		<config>src/test/java/org/springframework/test/context/junit4/aci/xml/MultipleInitializersXmlConfigTests-context.xml</config>
-		<config>src/test/resources/org/springframework/test/context/web/BasicXmlWacTests-config.xml</config>
+		<config>src/test/resources/org/springframework/test/context/web/RequestAndSessionScopedBeansWacTests-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
