@@ -24,7 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO [SPR-5243] Document WebAppConfiguration.
+ * TODO [SPR-9864] Document WebAppConfiguration.
  * 
  * @author Sam Brannen
  * @since 3.2

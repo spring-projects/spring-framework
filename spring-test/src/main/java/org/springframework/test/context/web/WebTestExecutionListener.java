@@ -33,7 +33,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * TODO [SPR-5243] Document WebTestExecutionListener.
+ * TODO [SPR-9864] Document WebTestExecutionListener.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -44,7 +44,7 @@ public class WebTestExecutionListener extends AbstractTestExecutionListener {
 
 
 	/**
-	 * TODO [SPR-5243] Document overridden prepareTestInstance().
+	 * TODO [SPR-9864] Document overridden prepareTestInstance().
 	 *
 	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#prepareTestInstance(org.springframework.test.context.TestContext)
 	 */
@@ -54,7 +54,7 @@ public class WebTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document overridden beforeTestMethod().
+	 * TODO [SPR-9864] Document overridden beforeTestMethod().
 	 *
 	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
 	 */
@@ -64,7 +64,7 @@ public class WebTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document setUpRequestContext().
+	 * TODO [SPR-9864] Document setUpRequestContext().
 	 *
 	 * @param testContext
 	 * @param servletContext
@@ -107,7 +107,7 @@ public class WebTestExecutionListener extends AbstractTestExecutionListener {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document overridden afterTestMethod().
+	 * TODO [SPR-9864] Document overridden afterTestMethod().
 	 *
 	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#afterTestMethod(org.springframework.test.context.TestContext)
 	 */

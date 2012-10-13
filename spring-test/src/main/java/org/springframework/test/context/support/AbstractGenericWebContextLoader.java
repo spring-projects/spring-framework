@@ -34,7 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * TODO [SPR-5243] Document AbstractGenericWebContextLoader.
+ * TODO [SPR-9864] Document AbstractGenericWebContextLoader.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -47,7 +47,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	// --- SmartContextLoader -----------------------------------------------
 
 	/**
-	 * TODO [SPR-5243] Document overridden loadContext(MergedContextConfiguration).
+	 * TODO [SPR-9864] Document overridden loadContext(MergedContextConfiguration).
 	 *
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(org.springframework.test.context.MergedContextConfiguration)
 	 */
@@ -78,7 +78,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	}
 
 	/**
-	 * TODO [SPR-5243] Document configureWebResources().
+	 * TODO [SPR-9864] Document configureWebResources().
 	 */
 	protected void configureWebResources(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig) {
@@ -93,20 +93,20 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	}
 
 	/**
-	 * TODO [SPR-5243] Document customizeBeanFactory().
+	 * TODO [SPR-9864] Document customizeBeanFactory().
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory,
 			WebMergedContextConfiguration webMergedConfig) {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document loadBeanDefinitions().
+	 * TODO [SPR-9864] Document loadBeanDefinitions().
 	 */
 	protected abstract void loadBeanDefinitions(GenericWebApplicationContext context,
 			WebMergedContextConfiguration webMergedConfig);
 
 	/**
-	 * TODO [SPR-5243] Document customizeContext().
+	 * TODO [SPR-9864] Document customizeContext().
 	 */
 	protected void customizeContext(GenericWebApplicationContext context, WebMergedContextConfiguration webMergedConfig) {
 	}
@@ -114,7 +114,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	// --- ContextLoader -------------------------------------------------------
 
 	/**
-	 * TODO [SPR-5243] Document overridden loadContext(String...).
+	 * TODO [SPR-9864] Document overridden loadContext(String...).
 	 *
 	 * @see org.springframework.test.context.ContextLoader#loadContext(java.lang.String[])
 	 */

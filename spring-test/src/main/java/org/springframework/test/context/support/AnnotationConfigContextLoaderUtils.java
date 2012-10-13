@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.Assert;
 
 /**
- * TODO [SPR-5243] Document AnnotationConfigContextLoaderUtils.
+ * TODO [SPR-9864] Document AnnotationConfigContextLoaderUtils.
  *
  * @author Sam Brannen
  * @since 3.2

@@ -21,7 +21,7 @@ import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * TODO [SPR-5243] Document XmlWebContextLoader.
+ * TODO [SPR-9864] Document XmlWebContextLoader.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -36,7 +36,7 @@ public class XmlWebContextLoader extends AbstractGenericWebContextLoader {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document overridden loadBeanDefinitions().
+	 * TODO [SPR-9864] Document overridden loadBeanDefinitions().
 	 *
 	 * @see org.springframework.test.context.support.AbstractGenericWebContextLoader#loadBeanDefinitions(org.springframework.web.context.support.GenericWebApplicationContext, org.springframework.test.context.web.WebMergedContextConfiguration)
 	 */

@@ -25,7 +25,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * TODO [SPR-5243] Document AnnotationConfigWebContextLoader.
+ * TODO [SPR-9864] Document AnnotationConfigWebContextLoader.
  *
  * @author Sam Brannen
  * @since 3.2

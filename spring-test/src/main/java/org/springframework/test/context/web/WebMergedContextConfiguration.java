@@ -27,7 +27,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * TODO [SPR-5243] Document WebMergedContextConfiguration.
+ * TODO [SPR-9864] Document WebMergedContextConfiguration.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -40,7 +40,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
 
 	/**
-	 * TODO [SPR-5243] Document WebMergedContextConfiguration constructor.
+	 * TODO [SPR-9864] Document WebMergedContextConfiguration constructor.
 	 */
 	public WebMergedContextConfiguration(
 			Class<?> testClass,
@@ -55,7 +55,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	}
 
 	/**
-	 * TODO [SPR-5243] Document getResourceBasePath().
+	 * TODO [SPR-9864] Document getResourceBasePath().
 	 */
 	public String getResourceBasePath() {
 		return this.resourceBasePath;
