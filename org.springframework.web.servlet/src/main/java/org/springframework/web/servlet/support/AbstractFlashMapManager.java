@@ -177,12 +177,18 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 		if (CollectionUtils.isEmpty(flashMap)) {
 			return;
 		}
+
 		String path = decodeAndNormalizePath(flashMap.getTargetRequestPath(), request);
 		flashMap.setTargetRequestPath(path);
-		flashMap.startExpirationPeriod(this.flashMapTimeout);
+
+		decodeParameters(flashMap.getTargetRequestParams(), request);
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("Saving FlashMap=" + flashMap);
 		}
+
+		flashMap.startExpirationPeriod(this.flashMapTimeout);
+
 		synchronized (writeLock) {
 			List<FlashMap> allMaps = retrieveFlashMaps(request);
 			allMaps = (allMaps == null) ? new CopyOnWriteArrayList<FlashMap>() : allMaps;
@@ -201,6 +207,14 @@ public abstract class AbstractFlashMapManager implements FlashMapManager {
 			}
 		}
 		return path;
+	}
+
+	private void decodeParameters(MultiValueMap<String, String> params, HttpServletRequest request) {
+		for (String name : new ArrayList<String>(params.keySet())) {
+			for (String value : new ArrayList<String>(params.remove(name))) {
+				params.add(name, this.urlPathHelper.decodeRequestString(request, value));
+			}
+		}
 	}
 
 	/**
