@@ -111,7 +111,10 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 		if (fileExtensions != null) {
 			for (String fileExtension : fileExtensions) {
-				this.fileExtensions.add("." + fileExtension);
+				if (fileExtension.charAt(0) != '.') {
+					fileExtension = "." + fileExtension;
+				}
+				this.fileExtensions.add(fileExtension);
 			}
 		}
 	}
