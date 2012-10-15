@@ -224,6 +224,18 @@ public class ModelAndViewContainer {
 	}
 
 	/**
+	 * Remove the given attributes from the model.
+	 */
+	public ModelAndViewContainer removeAttributes(Map<String, ?> attributes) {
+		if (attributes != null) {
+			for (String key : attributes.keySet()) {
+				getModel().remove(key);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Whether the underlying model contains the given attribute name.
 	 * @see ModelMap#containsAttribute(String)
 	 */
