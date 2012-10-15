@@ -260,7 +260,7 @@ public final class WebAsyncManager {
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
 	 */
-	public void startCallableProcessing(AsyncTask asyncTask, Object... processingContext) {
+	public void startCallableProcessing(AsyncTask<?> asyncTask, Object... processingContext) {
 		Assert.notNull(asyncTask, "AsyncTask must not be null");
 
 		Long timeout = asyncTask.getTimeout();

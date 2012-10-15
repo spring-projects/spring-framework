@@ -124,7 +124,8 @@ public class WebAsyncManagerTests {
 		this.asyncWebRequest.startAsync();
 		replay(this.asyncWebRequest);
 
-		AsyncTask asyncTask = new AsyncTask(1000L, executor, createMock(Callable.class));
+		@SuppressWarnings("unchecked")
+		AsyncTask<Object> asyncTask = new AsyncTask<Object>(1000L, executor, createMock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor, this.asyncWebRequest);

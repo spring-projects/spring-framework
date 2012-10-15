@@ -27,9 +27,9 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class AsyncTask {
+public class AsyncTask<V> {
 
-	private final Callable<?> callable;
+	private final Callable<V> callable;
 
 	private final Long timeout;
 
@@ -45,7 +45,7 @@ public class AsyncTask {
 	 * @param timeout timeout value in milliseconds
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(long timeout, Callable<?> callable) {
+	public AsyncTask(long timeout, Callable<V> callable) {
 		this(timeout, null, null, callable);
 		Assert.notNull(timeout, "Timeout must not be null");
 	}
@@ -55,7 +55,7 @@ public class AsyncTask {
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(Long timeout, String executorName, Callable<?> callable) {
+	public AsyncTask(Long timeout, String executorName, Callable<V> callable) {
 		this(timeout, null, executorName, callable);
 		Assert.notNull(executor, "Executor name must not be null");
 	}
@@ -65,12 +65,12 @@ public class AsyncTask {
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<?> callable) {
+	public AsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
 		this(timeout, executor, null, callable);
 		Assert.notNull(executor, "Executor must not be null");
 	}
 
-	private AsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<?> callable) {
+	private AsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<V> callable) {
 		Assert.notNull(callable, "Callable must not be null");
 		this.callable = callable;
 		this.timeout = timeout;
