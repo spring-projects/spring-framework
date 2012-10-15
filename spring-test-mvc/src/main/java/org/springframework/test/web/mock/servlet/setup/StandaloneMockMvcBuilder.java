@@ -31,6 +31,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Validator;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -42,6 +43,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
@@ -87,9 +89,13 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 
 	private Validator validator = null;
 
+	private ContentNegotiationManager contentNegotiationManager;
+
 	private FormattingConversionService conversionService = null;
 
 	private List<HandlerExceptionResolver> handlerExceptionResolvers = new ArrayList<HandlerExceptionResolver>();
+
+	private Long asyncRequestTimeout;
 
 	private List<ViewResolver> viewResolvers;
 
@@ -158,6 +164,23 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 			this.mappedInterceptors.add(new MappedInterceptor(pathPatterns, interceptor));
 		}
 		return this;
+	}
+
+	/**
+	 * Set a ContentNegotiationManager.
+	 */
+	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
+	 * Specify the timeout value for async execution. In Spring MVC Test, this
+	 * value is used to determine how to long to wait for async execution to
+	 * complete so that a test can verify the results synchronously.
+	 * @param timeout the timeout value in milliseconds
+	 */
+	public void setAsyncRequestTimeout(long timeout) {
+		this.asyncRequestTimeout = timeout;
 	}
 
 	/**
@@ -331,8 +354,20 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 		}
 
 		@Override
+		public ContentNegotiationManager mvcContentNegotiationManager() {
+			return (contentNegotiationManager != null) ? contentNegotiationManager : super.mvcContentNegotiationManager();
+		}
+
+		@Override
 		public FormattingConversionService mvcConversionService() {
 			return (conversionService != null) ? conversionService : super.mvcConversionService();
+		}
+
+		@Override
+		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+			if (asyncRequestTimeout != null) {
+				configurer.setDefaultTimeout(asyncRequestTimeout);
+			}
 		}
 
 		@Override
