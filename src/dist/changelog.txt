@@ -18,6 +18,8 @@ Changes in version 3.2 RC1 (2012-10-29)
 * HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
 * UriComponentsBuilder is capable of handling opaque URIs as well (SPR-9798)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
+* introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
+* introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
 
 
 Changes in version 3.2 M2 (2012-09-11)
@@ -57,6 +59,7 @@ Changes in version 3.2 M2 (2012-09-11)
 * fixed Portlet request mapping priorities in cross-controller case (SPR-9303, SPR-9605)
 * introduced exclude patterns for mapped interceptors in MVC namespace and MVC Java config
 * introduced support for content negotiation options in MVC namespace and MVC Java config
+* introduced support for ApplicationContextInitializers in the TestContext framework (SPR-9011)
 * introduced support for named dispatchers in MockServletContext (SPR-9587)
 * introduced support for single, unqualified tx manager in the TestContext framework (SPR-9645)
 * introduced support for TransactionManagementConfigurer in the TestContext framework (SPR-9604)
