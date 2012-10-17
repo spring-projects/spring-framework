@@ -203,6 +203,21 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	}
 
 	/**
+	 * Set the request body as a UTF-8 String.
+	 *
+	 * @param content the body content
+	 */
+	public MockHttpServletRequestBuilder content(String content) {
+		try {
+			this.content = content.getBytes("UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			// should never happen
+		}
+		return this;
+	}
+
+	/**
 	 * Add the given cookies to the request. Cookies are always added.
 	 *
 	 * @param cookies the cookies to add

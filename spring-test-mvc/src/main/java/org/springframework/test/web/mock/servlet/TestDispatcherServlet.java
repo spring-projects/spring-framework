@@ -73,6 +73,8 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 		super.service(request, response);
 
+		// TODO: add CountDownLatch to DeferredResultInterceptor and wait in request().asyncResult(..)
+
 		Object handler = getMvcResult(request).getHandler();
 		if (asyncManager.isConcurrentHandlingStarted() && !deferredResultInterceptor.wasInvoked) {
 			if (!callableInterceptor.await()) {

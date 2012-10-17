@@ -84,9 +84,6 @@ public class RequestResultMatchers {
 
 	/**
 	 * Assert the result from asynchronous processing with the given matcher.
-	 * This method can be used when a controller method returns {@link Callable}
-	 * or {@link AsyncTask}. The value matched is the value returned from the
-	 * {@code Callable} or the exception raised.
 	 */
 	public <T> ResultMatcher asyncResult(final Matcher<T> matcher) {
 		return new ResultMatcher() {
@@ -95,7 +92,7 @@ public class RequestResultMatchers {
 				HttpServletRequest request = result.getRequest();
 				WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 				MatcherAssert.assertThat("Async started", request.isAsyncStarted(), equalTo(true));
-				MatcherAssert.assertThat("Callable result", (T) asyncManager.getConcurrentResult(), matcher);
+				MatcherAssert.assertThat("Async result", (T) asyncManager.getConcurrentResult(), matcher);
 			}
 		};
 	}
