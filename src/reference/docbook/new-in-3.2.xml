@@ -38,6 +38,21 @@
     
     </section>
 
+    <section id="new-in-3.2-spring-mvc-test">
+      <title>Spring MVC Test framework</title>
+
+      <para>First-class support for testing Spring MVC applications with a
+      fluent API and without a servlet container. Server-side tests involve
+      use of the <classname>DispatcherServlet</classname> while client-side
+      REST tests rely on the <classname>RestTemplate</classname>.
+      See the following presentation for more information before
+      documentation is added:
+      <ulink url="https://github.com/rstoyanchev/spring-32-test-webapps">
+        "Testing Web Applications with Spring 3.2"</ulink>.
+      </para>
+
+    </section>
+
     <section id="new-in-3.2-webmvc-content-negotiation">
       <title>Content negotiation improvements</title>
 

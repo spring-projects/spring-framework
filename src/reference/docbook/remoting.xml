@@ -1389,15 +1389,15 @@ String result =
       specifying an implementation of
       <interfacename>ClientHttpRequestFactory</interfacename>. Spring provides
       the implementation
-      <classname>CommonsClientHttpRequestFactory</classname> that uses the
-      Jakarta Commons <classname>HttpClient</classname> to create requests.
-      <classname>CommonsClientHttpRequestFactory</classname> is configured
+      <classname>HttpComponentsClientHttpRequestFactory</classname> that uses the
+      Apache HttpComponents <classname>HttpClient</classname> to create requests.
+      <classname>HttpComponentsClientHttpRequestFactory</classname> is configured
       using an instance of
-      <classname>org.apache.commons.httpclient.HttpClient</classname> which
+      <classname>org.apache.http.client.HttpClient</classname> which
       can in turn be configured with credentials information or connection
       pooling functionality.</para>
 
-      <para>The previous example using Jakarta Commons
+      <para>The previous example using Apache HttpComponents
       <classname>HttpClient</classname> directly rewritten to use the
       <classname>RestTemplate</classname> is shown below</para>
 
