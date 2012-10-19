@@ -43,13 +43,14 @@ import java.lang.annotation.Target;
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 3.0
  * @see AutowiredAnnotationBeanPostProcessor
  * @see Autowired
  * @see org.springframework.beans.factory.config.BeanExpressionResolver
  * @see org.springframework.beans.factory.support.AutowireCandidateResolver#getSuggestedValue
  */
-@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Value {

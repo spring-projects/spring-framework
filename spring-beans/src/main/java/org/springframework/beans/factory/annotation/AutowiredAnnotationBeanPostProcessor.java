@@ -55,6 +55,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -96,6 +97,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired
@@ -372,7 +374,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private Annotation findAutowiredAnnotation(AccessibleObject ao) {
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
-			Annotation annotation = ao.getAnnotation(type);
+			Annotation annotation = AnnotationUtils.getAnnotation(ao, type);
 			if (annotation != null) {
 				return annotation;
 			}

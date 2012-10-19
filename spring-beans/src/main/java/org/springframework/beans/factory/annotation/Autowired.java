@@ -59,12 +59,13 @@ import java.lang.annotation.Target;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 2.5
  * @see AutowiredAnnotationBeanPostProcessor
  * @see Qualifier
  * @see Value
  */
-@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Autowired {
