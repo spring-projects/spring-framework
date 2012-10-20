@@ -246,6 +246,7 @@ project("spring-beans") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
+		optional("org.yaml:snakeyaml:1.11")
 		provided("javax.el:javax.el-api:2.2.4")
 		provided("javax.inject:javax.inject:1")
 		testCompile("log4j:log4j:1.2.17")
