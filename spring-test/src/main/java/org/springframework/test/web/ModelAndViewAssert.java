@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.test.web;
+
+import static org.springframework.test.util.AssertionErrors.*;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,12 +57,12 @@ public abstract class ModelAndViewAssert {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T assertAndReturnModelAttributeOfType(ModelAndView mav, String modelName, Class<T> expectedType) {
-		assertCondition(mav != null, "ModelAndView is null");
-		assertCondition(mav.getModel() != null, "Model is null");
+		assertTrue("ModelAndView is null", mav != null);
+		assertTrue("Model is null", mav.getModel() != null);
 		Object obj = mav.getModel().get(modelName);
-		assertCondition(obj != null, "Model attribute with name '" + modelName + "' is null");
-		assertCondition(expectedType.isAssignableFrom(obj.getClass()), "Model attribute is not of expected type '"
-				+ expectedType.getName() + "' but rather of type '" + obj.getClass().getName() + "'");
+		assertTrue("Model attribute with name '" + modelName + "' is null", obj != null);
+		assertTrue("Model attribute is not of expected type '" + expectedType.getName() + "' but rather of type '"
+				+ obj.getClass().getName() + "'", expectedType.isAssignableFrom(obj.getClass()));
 		return (T) obj;
 	}
 
@@ -74,12 +76,13 @@ public abstract class ModelAndViewAssert {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static void assertCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList) {
-		assertCondition(mav != null, "ModelAndView is null");
+		assertTrue("ModelAndView is null", mav != null);
 		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
-		assertCondition(expectedList.size() == modelList.size(), "Size of model list is '" + modelList.size()
-				+ "' while size of expected list is '" + expectedList.size() + "'");
-		assertCondition(expectedList.equals(modelList), "List in model under name '" + modelName
-				+ "' is not equal to the expected list.");
+		assertTrue(
+			"Size of model list is '" + modelList.size() + "' while size of expected list is '" + expectedList.size()
+					+ "'", expectedList.size() == modelList.size());
+		assertTrue("List in model under name '" + modelName + "' is not equal to the expected list.",
+			expectedList.equals(modelList));
 	}
 
 	/**
@@ -90,10 +93,10 @@ public abstract class ModelAndViewAssert {
 	 * <code>null</code>)
 	 */
 	public static void assertModelAttributeAvailable(ModelAndView mav, String modelName) {
-		assertCondition(mav != null, "ModelAndView is null");
-		assertCondition(mav.getModel() != null, "Model is null");
-		assertCondition(mav.getModel().containsKey(modelName), "Model attribute with name '" + modelName
-				+ "' is not available");
+		assertTrue("ModelAndView is null", mav != null);
+		assertTrue("Model is null", mav.getModel() != null);
+		assertTrue("Model attribute with name '" + modelName + "' is not available",
+			mav.getModel().containsKey(modelName));
 	}
 
 	/**
@@ -106,10 +109,10 @@ public abstract class ModelAndViewAssert {
 	 * @param expectedValue the model value
 	 */
 	public static void assertModelAttributeValue(ModelAndView mav, String modelName, Object expectedValue) {
-		assertCondition(mav != null, "ModelAndView is null");
+		assertTrue("ModelAndView is null", mav != null);
 		Object modelValue = assertAndReturnModelAttributeOfType(mav, modelName, Object.class);
-		assertCondition(modelValue.equals(expectedValue), "Model value with name '" + modelName
-				+ "' is not the same as the expected value which was '" + expectedValue + "'");
+		assertTrue("Model value with name '" + modelName + "' is not the same as the expected value which was '"
+				+ expectedValue + "'", modelValue.equals(expectedValue));
 	}
 
 	/**
@@ -120,8 +123,8 @@ public abstract class ModelAndViewAssert {
 	 * @param expectedModel the expected model
 	 */
 	public static void assertModelAttributeValues(ModelAndView mav, Map<String, Object> expectedModel) {
-		assertCondition(mav != null, "ModelAndView is null");
-		assertCondition(mav.getModel() != null, "Model is null");
+		assertTrue("ModelAndView is null", mav != null);
+		assertTrue("Model is null", mav.getModel() != null);
 
 		if (!mav.getModel().keySet().equals(expectedModel.keySet())) {
 			StringBuilder sb = new StringBuilder("Keyset of expected model does not match.\n");
@@ -161,11 +164,12 @@ public abstract class ModelAndViewAssert {
 	public static void assertSortAndCompareListModelAttribute(ModelAndView mav, String modelName, List expectedList,
 			Comparator comparator) {
 
-		assertCondition(mav != null, "ModelAndView is null");
+		assertTrue("ModelAndView is null", mav != null);
 		List modelList = assertAndReturnModelAttributeOfType(mav, modelName, List.class);
 
-		assertCondition(expectedList.size() == modelList.size(), "Size of model list is '" + modelList.size()
-				+ "' while size of expected list is '" + expectedList.size() + "'");
+		assertTrue(
+			"Size of model list is '" + modelList.size() + "' while size of expected list is '" + expectedList.size()
+					+ "'", expectedList.size() == modelList.size());
 
 		if (comparator != null) {
 			Collections.sort(modelList, comparator);
@@ -176,8 +180,8 @@ public abstract class ModelAndViewAssert {
 			Collections.sort(expectedList);
 		}
 
-		assertCondition(expectedList.equals(modelList), "List in model under name '" + modelName
-				+ "' is not equal to the expected list.");
+		assertTrue("List in model under name '" + modelName + "' is not equal to the expected list.",
+			expectedList.equals(modelList));
 	}
 
 	/**
@@ -188,35 +192,9 @@ public abstract class ModelAndViewAssert {
 	 * @param expectedName the name of the model value
 	 */
 	public static void assertViewName(ModelAndView mav, String expectedName) {
-		assertCondition(mav != null, "ModelAndView is null");
-		assertCondition(ObjectUtils.nullSafeEquals(expectedName, mav.getViewName()), "View name is not equal to '"
-				+ expectedName + "' but was '" + mav.getViewName() + "'");
-	}
-
-	/**
-	 * Fails by throwing an <code>AssertionError</code> with the supplied
-	 * <code>message</code>.
-	 * 
-	 * @param message the exception message to use
-	 * @see #assertCondition(boolean,String)
-	 */
-	private static void fail(String message) {
-		throw new AssertionError(message);
-	}
-
-	/**
-	 * Assert the provided boolean <code>condition</code>, throwing
-	 * <code>AssertionError</code> with the supplied <code>message</code> if the
-	 * test result is <code>false</code>.
-	 * 
-	 * @param condition a boolean expression
-	 * @param message the exception message to use if the assertion fails
-	 * @see #fail(String)
-	 */
-	private static void assertCondition(boolean condition, String message) {
-		if (!condition) {
-			fail(message);
-		}
+		assertTrue("ModelAndView is null", mav != null);
+		assertTrue("View name is not equal to '" + expectedName + "' but was '" + mav.getViewName() + "'",
+			ObjectUtils.nullSafeEquals(expectedName, mav.getViewName()));
 	}
 
 	private static void appendNonMatchingSetsErrorMessage(Set<String> assertionSet, Set<String> incorrectSet,
