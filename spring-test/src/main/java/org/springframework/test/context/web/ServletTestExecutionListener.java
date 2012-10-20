@@ -33,14 +33,14 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * TODO [SPR-9864] Document WebTestExecutionListener.
+ * TODO [SPR-9864] Document ServletTestExecutionListener.
  *
  * @author Sam Brannen
  * @since 3.2
  */
-public class WebTestExecutionListener extends AbstractTestExecutionListener {
+public class ServletTestExecutionListener extends AbstractTestExecutionListener {
 
-	private static final Log logger = LogFactory.getLog(WebTestExecutionListener.class);
+	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
 
 	/**

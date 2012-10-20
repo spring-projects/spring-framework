@@ -76,7 +76,7 @@ import org.springframework.util.ObjectUtils;
 public class TestContextManager {
 
 	private static final String[] DEFAULT_TEST_EXECUTION_LISTENER_CLASS_NAMES = new String[] {
-		"org.springframework.test.context.web.WebTestExecutionListener",
+		"org.springframework.test.context.web.ServletTestExecutionListener",
 		"org.springframework.test.context.support.DependencyInjectionTestExecutionListener",
 		"org.springframework.test.context.support.DirtiesContextTestExecutionListener",
 		"org.springframework.test.context.transaction.TransactionalTestExecutionListener" };
