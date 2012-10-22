@@ -44,6 +44,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 public abstract class AbstractMappingJacksonHttpMessageConverterTests<T extends HttpMessageConverter<Object>> {
 
 	protected static final String NEWLINE_SYSTEM_PROPERTY = System.getProperty("line.separator");
+	protected static final MediaType JSON_MICROFORMAT = new MediaType("application", "vnd.test-micro-type+json");
 
 	private T converter;
 
@@ -76,6 +77,18 @@ public abstract class AbstractMappingJacksonHttpMessageConverterTests<T extends 
 	public void canReadAndWriteMicroformats() {
 		assertTrue(converter.canRead(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
 		assertTrue(converter.canWrite(MyBean.class, new MediaType("application", "vnd.test-micro-type+json")));
+	}
+
+	@Test
+	public void canReadMicroformatSpr7905() {
+		assertTrue("Cannot read MyBean as microformat", converter.canRead(MyBean.class, JSON_MICROFORMAT));
+		assertTrue("Cannot read Map as microformat", converter.canRead(Map.class, JSON_MICROFORMAT));
+	}
+
+	@Test
+	public void canWriteMicroformatSpr7905() {
+		assertTrue("Cannot write MyBean as microformat", converter.canWrite(MyBean.class, JSON_MICROFORMAT));
+		assertTrue("Cannot write Map as microformat", converter.canWrite(Map.class, JSON_MICROFORMAT));
 	}
 
 	@Test
