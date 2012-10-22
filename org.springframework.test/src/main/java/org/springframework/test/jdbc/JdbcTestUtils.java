@@ -30,6 +30,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 
 /**
@@ -46,6 +47,10 @@ import org.springframework.util.StringUtils;
 public class JdbcTestUtils {
 
 	private static final Log logger = LogFactory.getLog(JdbcTestUtils.class);
+
+	private static final String DEFAULT_COMMENT_PREFIX = "--";
+
+	private static final char DEFAULT_STATEMENT_SEPARATOR = ';';
 
 
 	/**
@@ -124,10 +129,10 @@ public class JdbcTestUtils {
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
+	 * @see ResourceDatabasePopulator
 	 */
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
-
 		Resource resource = resourceLoader.getResource(sqlResourcePath);
 		executeSqlScript(jdbcTemplate, resource, continueOnError);
 	}
@@ -145,10 +150,10 @@ public class JdbcTestUtils {
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
+	 * @see ResourceDatabasePopulator
 	 */
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, Resource resource, boolean continueOnError)
 			throws DataAccessException {
-
 		executeSqlScript(jdbcTemplate, new EncodedResource(resource), continueOnError);
 	}
 
@@ -164,6 +169,7 @@ public class JdbcTestUtils {
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
+	 * @see ResourceDatabasePopulator
 	 */
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, EncodedResource resource, boolean continueOnError)
 			throws DataAccessException {
@@ -177,12 +183,14 @@ public class JdbcTestUtils {
 		try {
 			reader = new LineNumberReader(resource.getReader());
 			String script = readScript(reader);
-			char delimiter = ';';
+			char delimiter = DEFAULT_STATEMENT_SEPARATOR;
 			if (!containsSqlScriptDelimiters(script, delimiter)) {
 				delimiter = '\n';
 			}
 			splitSqlScript(script, delimiter, statements);
+			int lineNumber = 0;
 			for (String statement : statements) {
+				lineNumber++;
 				try {
 					int rowsAffected = jdbcTemplate.update(statement);
 					if (logger.isDebugEnabled()) {
@@ -192,7 +200,8 @@ public class JdbcTestUtils {
 				catch (DataAccessException ex) {
 					if (continueOnError) {
 						if (logger.isWarnEnabled()) {
-							logger.warn("SQL statement [" + statement + "] failed", ex);
+							logger.warn("Failed to execute SQL script statement at line " + lineNumber
+									+ " of resource " + resource + ": " + statement, ex);
 						}
 					}
 					else {
@@ -213,24 +222,40 @@ public class JdbcTestUtils {
 				if (reader != null) {
 					reader.close();
 				}
-			} catch (IOException ex) {
+			}
+			catch (IOException ex) {
 				// ignore
 			}
 		}
 	}
 
 	/**
-	 * Read a script from the provided {@code LineNumberReader} and build a
-	 * {@code String} containing the lines.
+	 * Read a script from the provided {@code LineNumberReader}, using
+	 * "{@code --}" as the comment prefix, and build a {@code String} containing
+	 * the lines.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
 	 * @return a {@code String} containing the script lines
+	 * @see #readScript(LineNumberReader, String)
 	 */
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
+		return readScript(lineNumberReader, DEFAULT_COMMENT_PREFIX);
+	}
+
+	/**
+	 * Read a script from the provided {@code LineNumberReader}, using the supplied
+	 * comment prefix, and build a {@code String} containing the lines.
+	 * @param lineNumberReader the {@code LineNumberReader} containing the script
+	 * to be processed
+	 * @param commentPrefix the line prefix that identifies comments in the SQL script
+	 * @return a {@code String} containing the script lines
+	 */
+	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix) throws IOException {
 		String currentStatement = lineNumberReader.readLine();
 		StringBuilder scriptBuilder = new StringBuilder();
 		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement)) {
+			if (StringUtils.hasText(currentStatement)
+					&& (commentPrefix != null && !currentStatement.startsWith(commentPrefix))) {
 				if (scriptBuilder.length() > 0) {
 					scriptBuilder.append('\n');
 				}
@@ -270,26 +295,71 @@ public class JdbcTestUtils {
 	 * @param statements the list that will contain the individual statements
 	 */
 	public static void splitSqlScript(String script, char delim, List<String> statements) {
+		splitSqlScript(script, "" + delim, statements);
+	}
+
+	/**
+	 * Split an SQL script into separate statements delimited with the provided delimiter
+	 * character. Each individual statement will be added to the provided {@code List}.
+	 * @param script the SQL script
+	 * @param delim character delimiting each statement &mdash; typically a ';' character
+	 * @param statements the List that will contain the individual statements
+	 */
+	private static void splitSqlScript(String script, String delim, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
+		boolean inEscape = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
-			if (content[i] == '\'') {
+			char c = content[i];
+			if (inEscape) {
+				inEscape = false;
+				sb.append(c);
+				continue;
+			}
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				sb.append(c);
+				continue;
+			}
+			if (c == '\'') {
 				inLiteral = !inLiteral;
 			}
-			if (content[i] == delim && !inLiteral) {
-				if (sb.length() > 0) {
-					statements.add(sb.toString());
-					sb = new StringBuilder();
+			if (!inLiteral) {
+				if (startsWithDelimiter(script, i, delim)) {
+					if (sb.length() > 0) {
+						statements.add(sb.toString());
+						sb = new StringBuilder();
+					}
+					i += delim.length() - 1;
+					continue;
+				}
+				else if (c == '\n' || c == '\t') {
+					c = ' ';
 				}
 			}
-			else {
-				sb.append(content[i]);
-			}
+			sb.append(c);
 		}
-		if (sb.length() > 0) {
+		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
+	}
+
+	/**
+	 * Return whether the substring of a given source {@link String} starting at the
+	 * given index starts with the given delimiter.
+	 * @param source the source {@link String} to inspect
+	 * @param startIndex the index to look for the delimiter
+	 * @param delim the delimiter to look for
+	 */
+	private static boolean startsWithDelimiter(String source, int startIndex, String delim) {
+		int endIndex = startIndex + delim.length();
+		if (source.length() < endIndex) {
+			// String is too short to contain the delimiter
+			return false;
+		}
+		return source.substring(startIndex, endIndex).equals(delim);
 	}
 
 }

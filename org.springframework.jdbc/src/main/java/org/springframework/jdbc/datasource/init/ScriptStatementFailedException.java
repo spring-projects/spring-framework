@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,18 @@ import org.springframework.core.io.support.EncodedResource;
  * failed when executing it against the target database.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0.5
  */
+@SuppressWarnings("serial")
 public class ScriptStatementFailedException extends RuntimeException {
 
 	/**
-	 * Constructor a new ScriptStatementFailedException.
+	 * Construct a new {@code ScriptStatementFailedException}.
 	 * @param statement the actual SQL statement that failed
 	 * @param lineNumber the line number in the SQL script
-	 * @param resource the resource that could not be read from
-	 * @param cause the underlying cause of the resource access failure
+	 * @param resource the resource from which the SQL statement was read
+	 * @param cause the underlying cause of the failure
 	 */
 	public ScriptStatementFailedException(String statement, int lineNumber, EncodedResource resource, Throwable cause) {
 		super("Failed to execute SQL script statement at line " + lineNumber +
