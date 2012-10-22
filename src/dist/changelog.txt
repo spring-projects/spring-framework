@@ -20,7 +20,16 @@ Changes in version 3.2 RC1 (2012-10-29)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
 * introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
 * introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
-
+* improved regular expression for parsing query params (SPR-9832)
+* fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
+* fixed issue in AnnotationMethodHandlerExceptionResolver (SPR-9209)
+* MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
+* added Spring MVC Test framework (SPR-9859, SPR-7951)
+* added mock implementations of Http[Input|Output]Message
+* added support for opaque URIs in UriComponentsBuilder (SPR-9798)
+* added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
+* added Jackson2ObjectMapperBeanFactory (SPR-9739)
+* added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
@@ -45,20 +54,25 @@ Changes in version 3.2 M2 (2012-09-11)
 * now raising RestClientException instead of IllegalArgumentException for unknown status codes
 * introduced JacksonObjectMapperFactoryBean for configuring a Jackson ObjectMapper in XML
 * introduced ContentNegotiationManager/ContentNegotiationStrategy for resolving requested media types
+* introduced support for content negotiation options in MVC namespace and MVC Java config
+* added ContentNegotiationManagerFactoryBean (SPR-8420)
 * introduced support for the HTTP PATCH method in Spring MVC and RestTemplate (SPR-7985)
 * enabled smart suffix pattern matching in @RequestMapping methods (SPR-7632)
 * introduced "defaultCharset" property in StringHttpMessageConverter (SPR-9487)
 * introduced @ExceptionResolver annotation for detecting classes with @ExceptionHandler methods
 * moved RSS/Atom message converter registration ahead of Jackson/JAXB2
 * now handling BindException in DefaultHandlerExceptionResolver
-* DeferredResult type is now parameterized
+* now setting "javax.servlet.error.exception" in DefaultHandlerExceptionResolver (SPR-9653)
+* added ResponseEntityExceptionHandler alternative to DefaultHandlerExceptionResolver (SPR-9290)
 * now using reflection to instantiate StandardServletAsyncWebRequest
 * fixed issue with forward before async request processing
+* DeferredResult type is now parameterized
+* added async options to MVC namespace and Java config (SPR-9694)
+* refactored Spring MVC async support (SPR-9433)
 * media types in HTTP Accept headers can be parsed with single quotes (-> Android 2.x) (SPR-8917)
 * DispatcherPortlet no longer forwards event exceptions to the render phase by default (SPR-9287)
 * fixed Portlet request mapping priorities in cross-controller case (SPR-9303, SPR-9605)
 * introduced exclude patterns for mapped interceptors in MVC namespace and MVC Java config
-* introduced support for content negotiation options in MVC namespace and MVC Java config
 * introduced support for ApplicationContextInitializers in the TestContext framework (SPR-9011)
 * introduced support for named dispatchers in MockServletContext (SPR-9587)
 * introduced support for single, unqualified tx manager in the TestContext framework (SPR-9645)
@@ -70,7 +84,19 @@ Changes in version 3.2 M2 (2012-09-11)
 * introduced "countRowsInTableWhere()" and "dropTables()" in tx base test classes (SPR-9665)
 * introduced support for @ComponentScan base package inference (SPR-9586)
 * now building, testing and publishing against JDK7, maintaining compat with JDKs 5&6 (SPR-9715)
-
+* added support for filter registrations in AbstractDispatcherServletInitializer (SPR-9696)
+* improved no-match handling for @RequestMapping methods (SPR-9603)
+* added support for matrix variables (SPR-5499, SPR-7818)
+* added support generic types in @RequestBody arguments (SPR-9570)
+* added support for generic types in the RestTemplate (SPR-7023)
+* added fix to decode target parameters prior to saving a FlashMap (SPR-9657)
+* now allowing an Errors argument after @RequestBody and @RequestPart (SPR-7114)
+* introduced @ControllerAdvice annotation (SPR-9112)
+* added exclude patterns for mapped interceptors (SPR-6570)
+* now ignoring parse errors in HttpPutFormContentFilter (SPR-9769)
+* optimized performance of HandlerMethod (SPR-9747, SPR-9748)
+* optimized performance of AntPathStringMatcher (SPR-9749)
+* added support for Filters/Servlet invocation in MockFilterChain (SPR-9745)
 
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------
