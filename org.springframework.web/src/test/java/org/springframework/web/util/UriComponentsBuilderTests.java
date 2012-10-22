@@ -146,6 +146,16 @@ public class UriComponentsBuilderTests {
 		assertEquals("28", result.getFragment());
 	}
 
+	// SPR-9832
+
+	@Test
+	public void fromUriStringQueryParamWithReservedCharInValue() throws URISyntaxException {
+        String uri = "http://www.google.com/ig/calculator?q=1USD=?EUR";
+		UriComponents result = UriComponentsBuilder.fromUriString(uri).build();
+
+		assertEquals("q=1USD=?EUR", result.getQuery());
+		assertEquals("1USD=?EUR", result.getQueryParams().getFirst("q"));
+	}
 
 	@Test
 	public void path() throws URISyntaxException {
