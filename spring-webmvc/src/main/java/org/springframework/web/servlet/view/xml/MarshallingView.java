@@ -96,8 +96,8 @@ public class MarshallingView extends AbstractView {
 	}
 
 	@Override
-	protected void renderMergedOutputModel(Map<String, Object> model, 
-										   HttpServletRequest request, 
+	protected void renderMergedOutputModel(Map<String, Object> model,
+										   HttpServletRequest request,
 										   HttpServletResponse response) throws Exception {
 		Object toBeMarshalled = locateToBeMarshalled(model);
 		if (toBeMarshalled == null) {
@@ -106,7 +106,7 @@ public class MarshallingView extends AbstractView {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(2048);
 		marshaller.marshal(toBeMarshalled, new StreamResult(bos));
 
-		response.setContentType(getContentType());
+		setResponseContentType(request, response);
 		response.setContentLength(bos.size());
 
 		FileCopyUtils.copy(bos.toByteArray(), response.getOutputStream());

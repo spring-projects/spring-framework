@@ -54,7 +54,7 @@ public abstract class AbstractFeedView<T extends WireFeed> extends AbstractView 
 		buildFeedMetadata(model, wireFeed, request);
 		buildFeedEntries(model, wireFeed, request, response);
 
-		response.setContentType(getContentType());
+		setResponseContentType(request, response);
 		if (!StringUtils.hasText(wireFeed.getEncoding())) {
 			wireFeed.setEncoding("UTF-8");
 		}

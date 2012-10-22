@@ -278,7 +278,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		List<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());
 		if (requestedMediaTypes != null) {
 			List<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);
-			View bestView = getBestView(candidateViews, requestedMediaTypes);
+			View bestView = getBestView(candidateViews, requestedMediaTypes, attrs);
 			if (bestView != null) {
 				return bestView;
 			}
@@ -378,7 +378,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		return candidateViews;
 	}
 
-	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes) {
+	private View getBestView(List<View> candidateViews, List<MediaType> requestedMediaTypes, RequestAttributes attrs) {
 		for (View candidateView : candidateViews) {
 			if (candidateView instanceof SmartView) {
 				SmartView smartView = (SmartView) candidateView;
@@ -394,11 +394,12 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 			for (View candidateView : candidateViews) {
 				if (StringUtils.hasText(candidateView.getContentType())) {
 					MediaType candidateContentType = MediaType.parseMediaType(candidateView.getContentType());
-					if (mediaType.includes(candidateContentType)) {
+					if (mediaType.isCompatibleWith(candidateContentType)) {
 						if (logger.isDebugEnabled()) {
 							logger.debug("Returning [" + candidateView + "] based on requested media type '"
 									+ mediaType + "'");
 						}
+						attrs.setAttribute(View.SELECTED_CONTENT_TYPE, mediaType, RequestAttributes.SCOPE_REQUEST);
 						return candidateView;
 					}
 				}

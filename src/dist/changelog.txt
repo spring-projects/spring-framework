@@ -30,6 +30,8 @@ Changes in version 3.2 RC1 (2012-10-29)
 * added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
 * added Jackson2ObjectMapperBeanFactory (SPR-9739)
 * added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
+* added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
+* the jackson message converters now include "application/*+json" in supported media types (SPR-7905)
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
