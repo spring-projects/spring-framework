@@ -4167,7 +4167,7 @@ public class WebConfig {
 
     &lt;mvc:annotation-driven /&gt;
 
-&lt;beans&gt;</programlisting>
+&lt;/beans&gt;</programlisting>
 	
       <para>The above registers a
       <classname>RequestMappingHandlerMapping</classname>, a 
