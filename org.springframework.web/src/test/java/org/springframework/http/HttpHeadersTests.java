@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,16 @@ public class HttpHeadersTests {
 		headers.setAccept(mediaTypes);
 		assertEquals("Invalid Accept header", mediaTypes, headers.getAccept());
 		assertEquals("Invalid Accept header", "text/html, text/plain", headers.getFirst("Accept"));
+	}
+
+	// SPR-9655
+
+	@Test
+	public void acceptiPlanet() {
+		headers.add("Accept", "text/html");
+		headers.add("Accept", "text/plain");
+		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
+		assertEquals("Invalid Accept header", expected, headers.getAccept());
 	}
 
 	@Test
