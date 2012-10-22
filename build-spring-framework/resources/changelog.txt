@@ -27,11 +27,20 @@ Changes in version 3.1.3 (2012-10-12)
 * dynamic return value types for @MVC methods
 * fixed issue with resolution of WebDataBinder argument
 * prevent response updates if @ResponseStatus has a reason
-* optimized performance of HandlerMethod and subclasses
+* optimized use of AntPathStringMatcher (SPR-9749)
+* optimized use of HandlerMethod and sub-classes (SPR-9747, SPR-9748)
 * fixed Portlet request mapping priorities in cross-controller case
 * deprecated SimpleJdbcTestUtils in favor of JdbcTestUtils
 * introduced "countRowsInTableWhere()" and "dropTables()" in JdbcTestUtils
-
+* improved regex for parsing query params (SPR-9832)
+* now decoding target parameters prior to saving a FlashMap (SPR-9657)
+* fixed issue with resolving Errors controller argument (SPR-9378)
+* fixed issue in message conversion where producible and acceptable headers are equally specific
+* fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
+* fixed side effect from caching in AnnotationMethodHandlerExceptionResolver (SPR-9202)
+* MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
+* added support for recognizing wildcards in media types with a suffix (SPR-9841)
+* improved no-match handling for @RequestMapping methods (SPR-9603)
 
 Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
