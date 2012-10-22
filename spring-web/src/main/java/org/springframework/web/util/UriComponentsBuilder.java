@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
  */
 public class UriComponentsBuilder {
 
-	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&=]+)?");
+	private static final Pattern QUERY_PARAM_PATTERN = Pattern.compile("([^&=]+)=?([^&]+)?");
 
 	private static final String SCHEME_PATTERN = "([^:/?#]+):";
 
