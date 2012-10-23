@@ -42,22 +42,22 @@ public class ContentRequestMatchersTests {
 	public void testContentType() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		MockRestRequestMatchers.content().mimeType("application/json").match(this.request);
-		MockRestRequestMatchers.content().mimeType(MediaType.APPLICATION_JSON).match(this.request);
+		MockRestRequestMatchers.content().contentType("application/json").match(this.request);
+		MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_JSON).match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testContentTypeNoMatch1() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		MockRestRequestMatchers.content().mimeType("application/xml").match(this.request);
+		MockRestRequestMatchers.content().contentType("application/xml").match(this.request);
 	}
 
 	@Test(expected=AssertionError.class)
 	public void testContentTypeNoMatch2() throws Exception {
 		this.request.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-		MockRestRequestMatchers.content().mimeType(MediaType.APPLICATION_ATOM_XML).match(this.request);
+		MockRestRequestMatchers.content().contentType(MediaType.APPLICATION_ATOM_XML).match(this.request);
 	}
 
 	@Test

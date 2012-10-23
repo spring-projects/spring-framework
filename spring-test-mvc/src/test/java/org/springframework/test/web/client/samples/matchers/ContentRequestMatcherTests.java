@@ -62,14 +62,14 @@ public class ContentRequestMatcherTests {
 
 	@Test
 	public void contentType() throws Exception {
-		this.mockServer.expect(content().mimeType("application/json;charset=UTF-8")).andRespond(withSuccess());
+		this.mockServer.expect(content().contentType("application/json;charset=UTF-8")).andRespond(withSuccess());
 		this.restTemplate.put(new URI("/foo"), new Person());
 		this.mockServer.verify();
 	}
 
 	@Test
 	public void contentTypeNoMatch() throws Exception {
-		this.mockServer.expect(content().mimeType("application/json;charset=UTF-8")).andRespond(withSuccess());
+		this.mockServer.expect(content().contentType("application/json;charset=UTF-8")).andRespond(withSuccess());
 		try {
 			this.restTemplate.put(new URI("/foo"), "foo");
 		}

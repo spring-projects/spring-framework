@@ -89,7 +89,7 @@ public class XmlContentRequestMatcherTests {
 	@Test
 	public void testXmlEqualTo() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().xml(PEOPLE_XML))
 			.andRespond(withSuccess());
 
@@ -101,7 +101,7 @@ public class XmlContentRequestMatcherTests {
 	public void testHamcrestNodeMatcher() throws Exception {
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(content().node(hasXPath("/people/composers/composer[1]")))
 			.andRespond(withSuccess());
 

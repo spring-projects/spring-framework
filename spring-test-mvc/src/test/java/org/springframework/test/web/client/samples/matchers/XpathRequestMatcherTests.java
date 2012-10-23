@@ -97,7 +97,7 @@ public class XpathRequestMatcherTests {
 		String performer = "/ns:people/performers/performer[%s]";
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath(composer, NS, 1).exists())
 			.andExpect(xpath(composer, NS, 2).exists())
 			.andExpect(xpath(composer, NS, 3).exists())
@@ -117,7 +117,7 @@ public class XpathRequestMatcherTests {
 		String performer = "/ns:people/performers/performer[%s]";
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath(composer, NS, 0).doesNotExist())
 			.andExpect(xpath(composer, NS, 5).doesNotExist())
 			.andExpect(xpath(performer, NS, 0).doesNotExist())
@@ -135,7 +135,7 @@ public class XpathRequestMatcherTests {
 		String performerName = "/ns:people/performers/performer[%s]/name";
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath(composerName, NS, 1).string("Johann Sebastian Bach"))
 			.andExpect(xpath(composerName, NS, 2).string("Johannes Brahms"))
 			.andExpect(xpath(composerName, NS, 3).string("Edvard Grieg"))
@@ -157,7 +157,7 @@ public class XpathRequestMatcherTests {
 		String composerDouble = "/ns:people/composers/composer[%s]/someDouble";
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath(composerDouble, NS, 1).number(21d))
 			.andExpect(xpath(composerDouble, NS, 2).number(.0025))
 			.andExpect(xpath(composerDouble, NS, 3).number(1.6035))
@@ -176,7 +176,7 @@ public class XpathRequestMatcherTests {
 		String performerBooleanValue = "/ns:people/performers/performer[%s]/someBoolean";
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath(performerBooleanValue, NS, 1).booleanValue(false))
 			.andExpect(xpath(performerBooleanValue, NS, 2).booleanValue(true))
 			.andRespond(withSuccess());
@@ -189,7 +189,7 @@ public class XpathRequestMatcherTests {
 	public void testNodeCount() throws Exception {
 
 		this.mockServer.expect(requestTo("/composers"))
-			.andExpect(content().mimeType("application/xml"))
+			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
 			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(2))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(lessThan(5))) // Hamcrest..

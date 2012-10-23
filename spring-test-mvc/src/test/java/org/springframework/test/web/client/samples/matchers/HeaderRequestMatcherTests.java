@@ -63,7 +63,7 @@ public class HeaderRequestMatcherTests {
 	public void testString() throws Exception {
 
 		this.mockServer.expect(requestTo("/person/1"))
-			.andExpect(header("Accept", "application/json"))
+			.andExpect(header("Accept", "application/json, application/*+json"))
 			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
 
 		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
