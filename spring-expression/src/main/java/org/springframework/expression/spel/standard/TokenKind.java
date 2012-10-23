@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.expression.spel.standard;
 
 /**
@@ -29,12 +30,12 @@ enum TokenKind {
 	DIV("/"), GE(">="), GT(">"), LE("<="), LT("<"), EQ("=="), NE("!="),
 	MOD("%"), NOT("!"), ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
 	SELECT("?["),   POWER("^"),
-	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@"), SYMBOLIC_OR("||"), SYMBOLIC_AND("&&")
+	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@"), SYMBOLIC_OR("||"), SYMBOLIC_AND("&&"), INC("++"), DEC("--")
 	;
-	 
+
 	char[] tokenChars;
 	private boolean hasPayload; // is there more to this token than simply the kind
-	
+
 	private TokenKind(String tokenString) {
 		tokenChars = tokenString.toCharArray();
 		hasPayload = tokenChars.length==0;
@@ -43,15 +44,15 @@ enum TokenKind {
 	private TokenKind() {
 		this("");
 	}
-	
+
 	public String toString() {
 		return this.name()+(tokenChars.length!=0?"("+new String(tokenChars)+")":"");
 	}
-	
+
 	public boolean hasPayload() {
 		return hasPayload;
 	}
-	
+
 	public int getLength() {
 		return tokenChars.length;
 	}
