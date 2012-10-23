@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Ignore;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -48,6 +47,7 @@ import org.springframework.jmx.export.assembler.MBeanInfoAssembler;
 import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
+import org.springframework.jmx.support.RegistrationPolicy;
 
 import test.interceptor.NopInterceptor;
 
@@ -324,7 +324,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(server);
 		exporter.setBeans(beans);
-		exporter.setRegistrationBehavior(MBeanExporter.REGISTRATION_REPLACE_EXISTING);
+		exporter.setRegistrationPolicy(RegistrationPolicy.REPLACE_EXISTING);
 
 		exporter.afterPropertiesSet();
 
