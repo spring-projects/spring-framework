@@ -55,13 +55,21 @@ class Tokenizer {
 			} else {
 				switch (ch) {
 				case '+':
-					pushCharToken(TokenKind.PLUS);
+					if (isTwoCharToken(TokenKind.INC)) {
+						pushPairToken(TokenKind.INC);
+					} else {
+						pushCharToken(TokenKind.PLUS);
+					}
 					break;
 				case '_': // the other way to start an identifier
 					lexIdentifier();
 					break;
 				case '-':
-					pushCharToken(TokenKind.MINUS);
+					if (isTwoCharToken(TokenKind.DEC)) {
+						pushPairToken(TokenKind.DEC);
+					} else {
+						pushCharToken(TokenKind.MINUS);
+					}
 					break;
 				case ':':
 					pushCharToken(TokenKind.COLON);

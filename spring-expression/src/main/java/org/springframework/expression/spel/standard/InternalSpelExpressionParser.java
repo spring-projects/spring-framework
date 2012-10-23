@@ -27,45 +27,7 @@ import org.springframework.expression.spel.InternalParseException;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.expression.spel.SpelParserConfiguration;
-import org.springframework.expression.spel.ast.Assign;
-import org.springframework.expression.spel.ast.BeanReference;
-import org.springframework.expression.spel.ast.BooleanLiteral;
-import org.springframework.expression.spel.ast.CompoundExpression;
-import org.springframework.expression.spel.ast.ConstructorReference;
-import org.springframework.expression.spel.ast.Elvis;
-import org.springframework.expression.spel.ast.FunctionReference;
-import org.springframework.expression.spel.ast.Identifier;
-import org.springframework.expression.spel.ast.Indexer;
-import org.springframework.expression.spel.ast.InlineList;
-import org.springframework.expression.spel.ast.Literal;
-import org.springframework.expression.spel.ast.MethodReference;
-import org.springframework.expression.spel.ast.NullLiteral;
-import org.springframework.expression.spel.ast.OpAnd;
-import org.springframework.expression.spel.ast.OpDivide;
-import org.springframework.expression.spel.ast.OpEQ;
-import org.springframework.expression.spel.ast.OpGE;
-import org.springframework.expression.spel.ast.OpGT;
-import org.springframework.expression.spel.ast.OpLE;
-import org.springframework.expression.spel.ast.OpLT;
-import org.springframework.expression.spel.ast.OpMinus;
-import org.springframework.expression.spel.ast.OpModulus;
-import org.springframework.expression.spel.ast.OpMultiply;
-import org.springframework.expression.spel.ast.OpNE;
-import org.springframework.expression.spel.ast.OpOr;
-import org.springframework.expression.spel.ast.OpPlus;
-import org.springframework.expression.spel.ast.OperatorInstanceof;
-import org.springframework.expression.spel.ast.OperatorMatches;
-import org.springframework.expression.spel.ast.OperatorNot;
-import org.springframework.expression.spel.ast.OperatorPower;
-import org.springframework.expression.spel.ast.Projection;
-import org.springframework.expression.spel.ast.PropertyOrFieldReference;
-import org.springframework.expression.spel.ast.QualifiedIdentifier;
-import org.springframework.expression.spel.ast.Selection;
-import org.springframework.expression.spel.ast.SpelNodeImpl;
-import org.springframework.expression.spel.ast.StringLiteral;
-import org.springframework.expression.spel.ast.Ternary;
-import org.springframework.expression.spel.ast.TypeReference;
-import org.springframework.expression.spel.ast.VariableReference;
+import org.springframework.expression.spel.ast.*;
 import org.springframework.util.Assert;
 
 /**
@@ -231,14 +193,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//sumExpression: productExpression ( (PLUS^ | MINUS^) productExpression)*;
 	private SpelNodeImpl eatSumExpression() {
 		SpelNodeImpl expr = eatProductExpression();
-		while (peekToken(TokenKind.PLUS,TokenKind.MINUS)) {
-			Token t = nextToken();//consume PLUS or MINUS
+		while (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.INC)) {
+			Token t = nextToken();//consume PLUS or MINUS or INC
 			SpelNodeImpl rhExpr = eatProductExpression();
 			checkRightOperand(t,rhExpr);
 			if (t.kind==TokenKind.PLUS) {
 				expr = new OpPlus(toPos(t),expr,rhExpr);
-			} else {
-				Assert.isTrue(t.kind==TokenKind.MINUS);
+			} else if (t.kind==TokenKind.MINUS) {
 				expr = new OpMinus(toPos(t),expr,rhExpr);
 			}
 		}
@@ -247,10 +208,10 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 
 	// productExpression: powerExpr ((STAR^ | DIV^| MOD^) powerExpr)* ;
 	private SpelNodeImpl eatProductExpression() {
-		SpelNodeImpl expr = eatPowerExpression();
+		SpelNodeImpl expr = eatPowerIncDecExpression();
 		while (peekToken(TokenKind.STAR,TokenKind.DIV,TokenKind.MOD)) {
 			Token t = nextToken(); // consume STAR/DIV/MOD
-			SpelNodeImpl rhExpr = eatPowerExpression();
+			SpelNodeImpl rhExpr = eatPowerIncDecExpression();
 			checkRightOperand(t,rhExpr);
 			if (t.kind==TokenKind.STAR) {
 				expr = new OpMultiply(toPos(t),expr,rhExpr);
@@ -264,19 +225,26 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		return expr;
 	}
 
-	// powerExpr  : unaryExpression (POWER^ unaryExpression)? ;
-	private SpelNodeImpl eatPowerExpression() {
+	// powerExpr  : unaryExpression (POWER^ unaryExpression)? (INC || DEC) ;
+	private SpelNodeImpl eatPowerIncDecExpression() {
 		SpelNodeImpl expr = eatUnaryExpression();
 		if (peekToken(TokenKind.POWER)) {
 			Token t = nextToken();//consume POWER
 			SpelNodeImpl rhExpr = eatUnaryExpression();
 			checkRightOperand(t,rhExpr);
 			return new OperatorPower(toPos(t),expr, rhExpr);
+		} else if (expr!=null && peekToken(TokenKind.INC,TokenKind.DEC)) {
+			Token t = nextToken();//consume INC/DEC
+			if (t.getKind()==TokenKind.INC) { 
+				return new OpInc(toPos(t),true,expr);
+			} else {
+				return new OpDec(toPos(t),true,expr);
+			}
 		}
 		return expr;
 	}
 
-	// unaryExpression: (PLUS^ | MINUS^ | BANG^) unaryExpression | primaryExpression ;
+	// unaryExpression: (PLUS^ | MINUS^ | BANG^ | INC^ | DEC^) unaryExpression | primaryExpression ;
 	private SpelNodeImpl eatUnaryExpression() {
 		if (peekToken(TokenKind.PLUS,TokenKind.MINUS,TokenKind.NOT)) {
 			Token t = nextToken();
@@ -288,6 +256,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			} else {
 				Assert.isTrue(t.kind==TokenKind.MINUS);
 				return new OpMinus(toPos(t),expr);
+			}
+		} else if (peekToken(TokenKind.INC,TokenKind.DEC)) {
+			Token t = nextToken();
+			SpelNodeImpl expr = eatUnaryExpression();
+			if (t.getKind()==TokenKind.INC) { 
+				return new OpInc(toPos(t),false,expr);
+			} else {
+				return new OpDec(toPos(t),false,expr);
 			}
 		} else {
 			return eatPrimaryExpression();

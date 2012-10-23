@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2010-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ public class AstUtils {
 	 * @param targetType the type upon which property access is being attempted
 	 * @return a list of resolvers that should be tried in order to access the property
 	 */
-	public static List<PropertyAccessor> getPropertyAccessorsToTry(Class<?> targetType, ExpressionState state) {
+	public static List<PropertyAccessor> getPropertyAccessorsToTry(Class<?> targetType, List<PropertyAccessor> propertyAccessors) {
 		List<PropertyAccessor> specificAccessors = new ArrayList<PropertyAccessor>();
 		List<PropertyAccessor> generalAccessors = new ArrayList<PropertyAccessor>();
-		for (PropertyAccessor resolver : state.getPropertyAccessors()) {
+		for (PropertyAccessor resolver : propertyAccessors) {
 			Class<?>[] targets = resolver.getSpecificTargetClasses();
 			if (targets == null) { // generic resolver that says it can be used for any type
 				generalAccessors.add(resolver);

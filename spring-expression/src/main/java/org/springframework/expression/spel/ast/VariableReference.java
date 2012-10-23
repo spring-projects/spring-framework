@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -39,7 +40,46 @@ public class VariableReference extends SpelNodeImpl {
 		super(pos);
 		name = variableName;
 	}
+	
+	class VariableRef implements ValueRef {
+		
+		private String name;
+		private TypedValue value;
+		private EvaluationContext eContext;
 
+		public VariableRef(String name, TypedValue value,
+				EvaluationContext evaluationContext) {
+			this.name = name;
+			this.value = value;
+			this.eContext = evaluationContext;
+		}
+
+		public TypedValue getValue() {
+			return value;
+		}
+
+		public void setValue(Object newValue) {
+			eContext.setVariable(name, newValue);
+		}
+
+		public boolean isWritable() {
+			return true;
+		}
+		
+	}
+	
+	@Override
+	public ValueRef getValueRef(ExpressionState state) throws SpelEvaluationException {
+		if (this.name.equals(THIS)) {
+			return new ValueRef.TypedValueHolderValueRef(state.getActiveContextObject(),this);
+		}
+		if (this.name.equals(ROOT)) {
+			return new ValueRef.TypedValueHolderValueRef(state.getRootContextObject(),this);
+		}
+		TypedValue result = state.lookupVariable(this.name);
+		// a null value will mean either the value was null or the variable was not found
+		return new VariableRef(this.name,result,state.getEvaluationContext());
+	}
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws SpelEvaluationException {

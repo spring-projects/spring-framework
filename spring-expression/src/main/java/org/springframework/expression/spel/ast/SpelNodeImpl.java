@@ -154,6 +154,10 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	public int getEndPosition() {
 		return (pos&0xffff);
+	}
+
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
+		throw new SpelEvaluationException(pos,SpelMessage.NOT_ASSIGNABLE,toStringAST());
 	} 
 
 }
