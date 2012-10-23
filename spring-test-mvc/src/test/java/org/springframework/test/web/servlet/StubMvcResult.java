@@ -120,4 +120,8 @@ public class StubMvcResult implements MvcResult {
 		this.response = response;
 	}
 
+	public Object getAsyncResult() {
+		return null;
+	}
+
 }

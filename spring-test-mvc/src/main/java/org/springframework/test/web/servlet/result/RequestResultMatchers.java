@@ -30,8 +30,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.context.request.async.AsyncTask;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
  * Factory for assertions on the request. An instance of this class is
@@ -90,9 +88,8 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 				MatcherAssert.assertThat("Async started", request.isAsyncStarted(), equalTo(true));
-				MatcherAssert.assertThat("Async result", (T) asyncManager.getConcurrentResult(), matcher);
+				MatcherAssert.assertThat("Async result", (T) result.getAsyncResult(), matcher);
 			}
 		};
 	}

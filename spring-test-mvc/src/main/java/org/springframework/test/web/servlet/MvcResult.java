@@ -75,4 +75,14 @@ public interface MvcResult {
 	 */
 	FlashMap getFlashMap();
 
+	/**
+	 * Get the result of asynchronous execution or {@code null} if concurrent
+	 * handling did not start. This method will hold and await the completion
+	 * of concurrent handling.
+	 *
+	 * @throws IllegalStateException if concurrent handling does not complete
+	 * within the allocated async timeout value.
+	 */
+	Object getAsyncResult();
+
 }

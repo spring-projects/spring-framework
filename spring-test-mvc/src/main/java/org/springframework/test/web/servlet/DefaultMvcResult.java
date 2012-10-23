@@ -15,8 +15,15 @@
  */
 package org.springframework.test.web.servlet;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,6 +49,8 @@ class DefaultMvcResult implements MvcResult {
 	private ModelAndView modelAndView;
 
 	private Exception resolvedException;
+
+	private CountDownLatch asyncResultLatch;
 
 
 	/**
@@ -94,6 +103,38 @@ class DefaultMvcResult implements MvcResult {
 
 	public FlashMap getFlashMap() {
 		return RequestContextUtils.getOutputFlashMap(mockRequest);
+	}
+
+	public void setAsyncResultLatch(CountDownLatch asyncResultLatch) {
+		this.asyncResultLatch = asyncResultLatch;
+	}
+
+	public Object getAsyncResult() {
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.mockRequest);
+		if (asyncManager.isConcurrentHandlingStarted()) {
+			if (!awaitAsyncResult()) {
+				throw new IllegalStateException(
+						"Gave up waiting on async result from [" + this.handler + "] to complete");
+			}
+			if (asyncManager.hasConcurrentResult()) {
+				return asyncManager.getConcurrentResult();
+			}
+		}
+
+		return null;
+	}
+
+	private boolean awaitAsyncResult() {
+		if (this.asyncResultLatch == null) {
+			return true;
+		}
+		long timeout = ((HttpServletRequest) this.mockRequest).getAsyncContext().getTimeout();
+		try {
+			return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);
+		}
+		catch (InterruptedException e) {
+			return false;
+		}
 	}
 
 }

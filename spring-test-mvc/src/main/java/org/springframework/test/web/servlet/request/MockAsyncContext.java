@@ -48,7 +48,7 @@ class MockAsyncContext implements AsyncContext {
 
 	private String dispatchedPath;
 
-	private long timeout = 10 * 60 * 1000L;	// 10 seconds is Tomcat's default
+	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
 
 
 	public MockAsyncContext(ServletRequest request, ServletResponse response) {
