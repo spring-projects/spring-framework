@@ -62,6 +62,12 @@ public class Selection extends SpelNodeImpl {
 	@SuppressWarnings("unchecked")
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		return getValueRef(state).getValue();
+	}
+
+	
+	@Override
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();
 		Object operand = op.getValue();
 		
@@ -80,7 +86,7 @@ public class Selection extends SpelNodeImpl {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
 								result.put(entry.getKey(),entry.getValue());
-								return new TypedValue(result);
+								return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 							}
 							result.put(entry.getKey(),entry.getValue());
 							lastKey = entry.getKey();
@@ -94,15 +100,15 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return new TypedValue(null);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(null),this);
 			}
 			if (variant == LAST) {
 				Map resultMap = new HashMap();
 				Object lastValue = result.get(lastKey);
 				resultMap.put(lastKey,lastValue);
-				return new TypedValue(resultMap);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultMap),this);
 			}
-			return new TypedValue(result);
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		} else if ((operand instanceof Collection) || ObjectUtils.isArray(operand)) {
 			List<Object> data = new ArrayList<Object>();
 			Collection<?> c = (operand instanceof Collection) ?
@@ -118,7 +124,7 @@ public class Selection extends SpelNodeImpl {
 					if (o instanceof Boolean) {
 						if (((Boolean) o).booleanValue() == true) {
 							if (variant == FIRST) {
-								return new TypedValue(element);
+								return new ValueRef.TypedValueHolderValueRef(new TypedValue(element),this);
 							}
 							result.add(element);
 						}
@@ -133,24 +139,24 @@ public class Selection extends SpelNodeImpl {
 				}
 			}
 			if ((variant == FIRST || variant == LAST) && result.size() == 0) {
-				return TypedValue.NULL;
+				return ValueRef.NullValueRef.instance;
 			}
 			if (variant == LAST) {
-				return new TypedValue(result.get(result.size() - 1));
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result.get(result.size() - 1)),this);
 			}
 			if (operand instanceof Collection) {
-				return new TypedValue(result);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 			}
 			else {
 				Class<?> elementType = ClassUtils.resolvePrimitiveIfNecessary(op.getTypeDescriptor().getElementTypeDescriptor().getType());
 				Object resultArray = Array.newInstance(elementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new TypedValue(resultArray);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 			}
 		} else {
 			if (operand==null) {
 				if (nullSafe) { 
-					return TypedValue.NULL;
+					return ValueRef.NullValueRef.instance;
 				} else {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 							"null");

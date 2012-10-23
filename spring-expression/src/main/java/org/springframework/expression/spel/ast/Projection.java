@@ -51,6 +51,11 @@ public class Projection extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
+		return getValueRef(state).getValue();
+	}
+	
+	@Override
+	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue op = state.getActiveContextObject();
 
 		Object operand = op.getValue();
@@ -74,7 +79,7 @@ public class Projection extends SpelNodeImpl {
 					state.popActiveContextObject();
 				}
 			}
-			return new TypedValue(result); // TODO unable to build correct type descriptor
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this); // TODO unable to build correct type descriptor
 		}
 		else if (operand instanceof Collection || operandIsArray) {
 			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
@@ -104,14 +109,14 @@ public class Projection extends SpelNodeImpl {
 				}
 				Object resultArray = Array.newInstance(arrayElementType, result.size());
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
-				return new TypedValue(resultArray);
+				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 			}
-			return new TypedValue(result);
+			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		}
 		else {
 			if (operand==null) {
 				if (this.nullSafe) {
-					return TypedValue.NULL;
+					return ValueRef.NullValueRef.instance;
 				}
 				else {
 					throw new SpelEvaluationException(getStartPosition(),

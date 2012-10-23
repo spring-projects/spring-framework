@@ -29,7 +29,7 @@ enum TokenKind {
 	DIV("/"), GE(">="), GT(">"), LE("<="), LT("<"), EQ("=="), NE("!="),
 	MOD("%"), NOT("!"), ASSIGN("="), INSTANCEOF("instanceof"), MATCHES("matches"), BETWEEN("between"),
 	SELECT("?["),   POWER("^"),
-	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@"), SYMBOLIC_OR("||"), SYMBOLIC_AND("&&")
+	ELVIS("?:"), SAFE_NAVI("?."), BEAN_REF("@"), SYMBOLIC_OR("||"), SYMBOLIC_AND("&&"), INC("++"), DEC("--")
 	;
 	 
 	char[] tokenChars;
