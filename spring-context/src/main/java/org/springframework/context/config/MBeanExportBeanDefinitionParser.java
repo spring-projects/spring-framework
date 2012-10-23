@@ -62,11 +62,11 @@ class MBeanExportBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationMBeanExporter.class);
-		
+
 		// Mark as infrastructure bean and attach source location.
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
-		
+
 		String defaultDomain = element.getAttribute(DEFAULT_DOMAIN_ATTRIBUTE);
 		if (StringUtils.hasText(defaultDomain)) {
 			builder.addPropertyValue("defaultDomain", defaultDomain);

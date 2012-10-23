@@ -53,7 +53,7 @@ import test.interceptor.NopInterceptor;
 
 /**
  * Integration tests for the {@link MBeanExporter} class.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
