@@ -128,32 +128,16 @@ abstract class ContextLoaderUtils {
 		Assert.notNull(testClass, "Class must not be null");
 		Assert.hasText(defaultContextLoaderClassName, "Default ContextLoader class name must not be null or empty");
 
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
-		Assert.notNull(declaringClass, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and test class [%s]",
-			annotationType, testClass));
-
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format(
-					"Processing ContextLoader for @ContextConfiguration [%s] and declaring class [%s]",
-					contextConfiguration, declaringClass));
-			}
-
-			Class<? extends ContextLoader> contextLoaderClass = contextConfiguration.loader();
+		final List<ContextConfigurationAttributes> attributesList = getConfigurationAttributes(testClass);
+		for (ContextConfigurationAttributes attributes : attributesList) {
+			Class<? extends ContextLoader> contextLoaderClass = attributes.getContextLoaderClass();
 			if (!ContextLoader.class.equals(contextLoaderClass)) {
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format(
-						"Found explicit ContextLoader class [%s] for @ContextConfiguration [%s] and declaring class [%s]",
-						contextLoaderClass, contextConfiguration, declaringClass));
+					logger.debug(String.format("Found explicit ContextLoader class [%s] for declaring class [%s]",
+							contextLoaderClass, attributes.getDeclaringClass()));
 				}
 				return contextLoaderClass;
 			}
-
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
 		try {
@@ -191,34 +175,37 @@ abstract class ContextLoaderUtils {
 	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> clazz) {
 		Assert.notNull(clazz, "Class must not be null");
 
-		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
-
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, clazz);
-		Assert.notNull(declaringClass, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]", annotationType,
-			clazz));
-
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass));
-			}
-
-			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
-				contextConfiguration);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved context configuration attributes: " + attributes);
-			}
-
-			attributesList.add(0, attributes);
-
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
+		final List<ContextConfigurationAttributes> attributesList = getConfigurationAttributes(clazz);
+		if (attributesList.isEmpty()) {
+			String msg = String.format(
+					"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
+					ContextConfiguration.class, clazz);
+			throw new IllegalArgumentException(msg);
 		}
 
-		return attributesList;
+		return reverseContextConfigurationAttributes(attributesList);  // parent class first
+	}
+
+
+	private static List<ContextConfigurationAttributes> getConfigurationAttributes(Class<?> baseSearchClass) {
+
+		List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
+		Class<?> searchClass = baseSearchClass;
+		while (true) {
+			Class<?> declaringClass = findAnnotationDeclaringClass(ContextConfiguration.class, searchClass);
+
+			if (declaringClass == null) {
+				break;
+			}
+
+			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(ContextConfiguration.class);
+			ContextConfigurationAttributes attributes =
+					new ContextConfigurationAttributes(declaringClass, contextConfiguration);
+			attributesList.add(attributes);
+			searchClass = declaringClass.getSuperclass();
+		}
+
+		return attributesList; // child class first
 	}
 
 	/**
@@ -247,22 +234,22 @@ abstract class ContextLoaderUtils {
 	 * at the given level will be merged with those defined in higher levels
 	 * of the class hierarchy.
 	 *
-	 * @param configAttributesList the list of configuration attributes to process
+	 * @param reversedConfigAttributeList the reversed list of configuration attributes to process
 	 * (must not be <code>null</code>)
 	 * @return the list of merged context initializer classes, including those
 	 * from superclasses if appropriate (never <code>null</code>)
 	 * @since 3.2
 	 */
 	static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> resolveInitializerClasses(
-			List<ContextConfigurationAttributes> configAttributesList) {
-		Assert.notNull(configAttributesList, "configAttributesList must not be null");
+			List<ContextConfigurationAttributes> reversedConfigAttributeList) {
+		Assert.notNull(reversedConfigAttributeList, "reversedConfigAttributeList must not be null");
 
 		final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
 		new HashSet<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>>();
 
 		// Traverse config attributes in reverse order (i.e., as if we were traversing up
 		// the class hierarchy).
-		for (ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
+		for (ContextConfigurationAttributes configAttributes : reversedConfigAttributeList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing context initializers for context configuration attributes %s",
 					configAttributes));
@@ -364,13 +351,19 @@ abstract class ContextLoaderUtils {
 			String defaultContextLoaderClassName) {
 
 		final ContextLoader contextLoader = resolveContextLoader(testClass, defaultContextLoaderClassName);
+
+		// parent class first order
 		final List<ContextConfigurationAttributes> configAttributesList = resolveContextConfigurationAttributes(testClass);
+
+		// child class first
+		final List<ContextConfigurationAttributes> reversedConfigAttributeList = reverseContextConfigurationAttributes(configAttributesList);
+
 		final List<String> locationsList = new ArrayList<String>();
 		final List<Class<?>> classesList = new ArrayList<Class<?>>();
 
 		// Traverse config attributes in reverse order (i.e., as if we were traversing up
 		// the class hierarchy).
-		for (ContextConfigurationAttributes configAttributes : reverseContextConfigurationAttributes(configAttributesList)) {
+		for (ContextConfigurationAttributes configAttributes : reversedConfigAttributeList) {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Processing locations and classes for context configuration attributes %s",
 					configAttributes));
@@ -395,7 +388,7 @@ abstract class ContextLoaderUtils {
 
 		String[] locations = StringUtils.toStringArray(locationsList);
 		Class<?>[] classes = ClassUtils.toClassArray(classesList);
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(configAttributesList);
+		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(reversedConfigAttributeList);
 		String[] activeProfiles = resolveActiveProfiles(testClass);
 
 		if (testClass.isAnnotationPresent(WebAppConfiguration.class)) {
