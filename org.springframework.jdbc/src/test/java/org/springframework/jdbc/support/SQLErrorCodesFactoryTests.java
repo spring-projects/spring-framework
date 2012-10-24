@@ -45,7 +45,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertTrue(sec.getBadSqlGrammarCodes().length == 0);
 		assertTrue(sec.getDataIntegrityViolationCodes().length == 0);
 	}
-	
+
 	/**
 	 * Check that a known database produces recognizable codes.
 	 */
@@ -62,7 +62,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		// This had better NOT be
 		assertFalse(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42") >= 0);
 	}
-	
+
 	private void assertIsHsql(SQLErrorCodes sec) {
 		assertTrue(sec.getBadSqlGrammarCodes().length > 0);
 		assertTrue(sec.getDataIntegrityViolationCodes().length > 0);
@@ -75,12 +75,12 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	private void assertIsDB2(SQLErrorCodes sec) {
 		assertTrue(sec.getBadSqlGrammarCodes().length > 0);
 		assertTrue(sec.getDataIntegrityViolationCodes().length > 0);
-		
+
 		assertFalse(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942") >= 0);
 		// This had better NOT be
 		assertTrue(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-204") >= 0);
 	}
-	
+
 	public void testLookupOrder() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			private int lookups = 0;
@@ -98,13 +98,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				}
 			}
 		}
-		
+
 		// Should have failed to load without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertTrue(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0);
 		assertTrue(sf.getErrorCodes("Oracle").getDataIntegrityViolationCodes().length == 0);
 	}
-	
+
 	/**
 	 * Check that user defined error codes take precedence.
 	 */
@@ -117,7 +117,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				return null;
 			}
 		}
-	
+
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertTrue(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0);
@@ -125,7 +125,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals("1", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[0]);
 		assertEquals("2", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]);
 	}
-	
+
 	public void testInvalidUserDefinedCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			protected Resource loadResource(String path) {
@@ -142,7 +142,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertTrue(sf.getErrorCodes("XX").getBadSqlGrammarCodes().length == 0);
 		assertEquals(0, sf.getErrorCodes("Oracle").getBadSqlGrammarCodes().length);
 	}
-	
+
 	/**
 	 * Check that custom error codes take precedence.
 	 */
@@ -155,7 +155,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				return null;
 			}
 		}
-	
+
 		// Should have loaded without error
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().length);
@@ -164,9 +164,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals(CustomErrorCodeException.class, translation.getExceptionClass());
 		assertEquals(1, translation.getErrorCodes().length);
 	}
-	
+
 	public void testDataSourceWithNullMetadata() throws Exception {
-		
+
 		MockControl ctrlConnection = MockControl.createControl(Connection.class);
 		Connection mockConnection = (Connection) ctrlConnection.getMock();
 		mockConnection.getMetaData();
@@ -180,16 +180,16 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		mockDataSource.getConnection();
 		ctrlDataSource.setDefaultReturnValue(mockConnection);
 		ctrlDataSource.replay();
-	
+
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
 		assertIsEmpty(sec);
-	
+
 		ctrlConnection.verify();
 		ctrlDataSource.verify();
 	}
-	
+
 	public void testGetFromDataSourceWithSQLException() throws Exception {
-		
+
 		SQLException expectedSQLException = new SQLException();
 
 		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
@@ -216,7 +216,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		md.getDatabaseProductName();
 		mdControl.setReturnValue(productName);
 		mdControl.replay();
-		
+
 		MockControl ctrlConnection = MockControl.createControl(Connection.class);
 		Connection mockConnection = (Connection) ctrlConnection.getMock();
 		mockConnection.getMetaData();
@@ -250,12 +250,12 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 
 		return sec;
 	}
-	
+
 	public void testOracleRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("Oracle", null);
 		assertIsOracle(sec);
 	}
-	
+
 	public void testHsqlRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("HSQL Database Engine", null);
 		assertIsHsql(sec);
@@ -282,13 +282,13 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 				return null;
 			}
 		}
-	
+
 		WildcardSQLErrorCodesFactory factory = new WildcardSQLErrorCodesFactory();
 		SQLErrorCodes sec = getErrorCodesFromDataSource("DB2", factory);
 		assertIsDB2(sec);
 		sec = getErrorCodesFromDataSource("DB2 UDB for Xxxxx", factory);
 		assertIsDB2(sec);
-		
+
 		sec = getErrorCodesFromDataSource("DB3", factory);
 		assertIsDB2(sec);
 		sec = getErrorCodesFromDataSource("DB3/", factory);
