@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,14 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 
 /**
- * Abstract base class for testing tags: provides createPageContext.
+ * Abstract base class for testing tags; provides {@link #createPageContext()}.
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public abstract class AbstractTagTests extends TestCase {
-	
+
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();

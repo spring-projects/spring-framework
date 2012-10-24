@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest}
- * interface. Supports the Servlet 2.5 API leve. Throws
+ * interface. Supports the Servlet 2.5 API level; throws
  * {@link UnsupportedOperationException} for some methods introduced in Servlet 3.0.
  *
  * <p>Used for testing the web framework; also useful for testing
@@ -67,6 +67,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @author Rick Evans
  * @author Mark Fisher
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -198,50 +199,54 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private DispatcherType dispatcherType = DispatcherType.REQUEST;
 
+
 	//---------------------------------------------------------------------
 	// Constructors
 	//---------------------------------------------------------------------
 
 	/**
-	 * Create a new MockHttpServletRequest with a default
+	 * Create a new {@code MockHttpServletRequest} with a default
 	 * {@link MockServletContext}.
-	 * @see MockServletContext
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest() {
 		this(null, "", "");
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest with a default
+	 * Create a new {@code MockHttpServletRequest} with a default
 	 * {@link MockServletContext}.
 	 * @param method the request method (may be <code>null</code>)
 	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
 	 * @see #setRequestURI
-	 * @see MockServletContext
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(String method, String requestURI) {
 		this(null, method, requestURI);
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in
-	 * (may be <code>null</code> to use a default MockServletContext)
-	 * @see MockServletContext
+	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext}.
+	 * @param servletContext the ServletContext that the request runs in (may be
+	 * <code>null</code> to use a default {@link MockServletContext})
+	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
 		this(servletContext, "", "");
 	}
 
 	/**
-	 * Create a new MockHttpServletRequest.
-	 * @param servletContext the ServletContext that the request runs in
-	 * (may be <code>null</code> to use a default MockServletContext)
+	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext},
+	 * {@code method}, and {@code requestURI}.
+	 * <p>The preferred locale will be set to {@link Locale#ENGLISH}.
+	 * @param servletContext the ServletContext that the request runs in (may be
+	 * <code>null</code> to use a default {@link MockServletContext})
 	 * @param method the request method (may be <code>null</code>)
 	 * @param requestURI the request URI (may be <code>null</code>)
 	 * @see #setMethod
 	 * @see #setRequestURI
+	 * @see #setPreferredLocales
 	 * @see MockServletContext
 	 */
 	public MockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
@@ -251,14 +256,13 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.add(Locale.ENGLISH);
 	}
 
-
 	//---------------------------------------------------------------------
 	// Lifecycle methods
 	//---------------------------------------------------------------------
 
 	/**
-	 * Return the ServletContext that this request is associated with.
-	 * (Not available in the standard HttpServletRequest interface for some reason.)
+	 * Return the ServletContext that this request is associated with. (Not
+	 * available in the standard HttpServletRequest interface for some reason.)
 	 */
 	public ServletContext getServletContext() {
 		return this.servletContext;
@@ -323,7 +327,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (this.contentType.toLowerCase().indexOf(CHARSET_PREFIX) == -1 && this.characterEncoding != null) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.characterEncoding != null) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
@@ -383,10 +387,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Sets all provided parameters <emphasis>replacing</emphasis> any
-	 * existing values for the provided parameter names. To add without
-	 * replacing existing values, use {@link #addParameters(java.util.Map)}.
+	 * Sets all provided parameters <strong>replacing</strong> any existing
+	 * values for the provided parameter names. To add without replacing
+	 * existing values, use {@link #addParameters(java.util.Map)}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		for (Object key : params.keySet()) {
@@ -436,10 +441,11 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Adds all provided parameters <emphasis>without</emphasis> replacing
-	 * any existing values. To replace existing values, use
+	 * Adds all provided parameters <strong>without</strong> replacing any
+	 * existing values. To replace existing values, use
 	 * {@link #setParameters(java.util.Map)}.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void addParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		for (Object key : params.keySet()) {
@@ -579,10 +585,23 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a new preferred locale, before any existing locales.
+	 * @see #setPreferredLocales
 	 */
 	public void addPreferredLocale(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.locales.add(0, locale);
+	}
+
+	/**
+	 * Set the list of preferred locales, in descending order, effectively replacing
+	 * any existing locales.
+	 * @see #addPreferredLocale
+	 * @since 3.2
+	 */
+	public void setPreferredLocales(List<Locale> locales) {
+		Assert.notEmpty(locales, "preferred locales list must not be empty");
+		this.locales.clear();
+		this.locales.addAll(locales);
 	}
 
 	public Locale getLocale() {
@@ -804,7 +823,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public boolean isUserInRole(String role) {
-		return this.userRoles.contains(role);
+		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext && ((MockServletContext) this.servletContext).getDeclaredRoles().contains(
+			role)));
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {
