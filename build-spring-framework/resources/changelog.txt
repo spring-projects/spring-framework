@@ -41,6 +41,7 @@ Changes in version 3.1.3 (2012-10-12)
 * MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
 * added support for recognizing wildcards in media types with a suffix (SPR-9841)
 * improved no-match handling for @RequestMapping methods (SPR-9603)
+* support SQL exception translation for ORA-06550 (SPR-9853)
 
 Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
