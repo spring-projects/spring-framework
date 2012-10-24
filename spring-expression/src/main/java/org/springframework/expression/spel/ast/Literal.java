@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,7 @@
 package org.springframework.expression.spel.ast;
 
 import org.springframework.expression.TypedValue;
-import org.springframework.expression.spel.ExpressionState;
-import org.springframework.expression.spel.SpelEvaluationException;
-import org.springframework.expression.spel.SpelMessage;
-import org.springframework.expression.spel.SpelParseException;
-import org.springframework.expression.spel.InternalParseException;
+import org.springframework.expression.spel.*;
 
 /**
  * Common superclass for nodes representing literals (boolean, string, number, etc).
@@ -80,12 +76,12 @@ public abstract class Literal extends SpelNodeImpl {
 		}
 	}
 
-	// TODO should allow for 'f' for float, not just double
+
 	public static Literal getRealLiteral(String numberToken, int pos, boolean isFloat) {
 		try {
 			if (isFloat) {
 				float value = Float.parseFloat(numberToken);
-				return new RealLiteral(numberToken, pos, value);
+				return new FloatLiteral(numberToken, pos, value);
 			} else {
 				double value = Double.parseDouble(numberToken);
 				return new RealLiteral(numberToken, pos, value);				

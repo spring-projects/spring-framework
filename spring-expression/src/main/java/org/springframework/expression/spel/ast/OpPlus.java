@@ -55,6 +55,8 @@ public class OpPlus extends Operator {
 			if (operandOne instanceof Number) {
 				if (operandOne instanceof Double || operandOne instanceof Long) {
 					return new TypedValue(operandOne);
+				} else if (operandOne instanceof Float) {
+					return new TypedValue(((Number) operandOne).floatValue());
 				} else {
 					return new TypedValue(((Number) operandOne).intValue());
 				}
@@ -73,6 +75,8 @@ public class OpPlus extends Operator {
 				Number op2 = (Number) operandTwo;
 				if (op1 instanceof Double || op2 instanceof Double) {
 					return new TypedValue(op1.doubleValue() + op2.doubleValue());
+				} else if (op1 instanceof Float || op2 instanceof Float) {
+					return new TypedValue(op1.floatValue() + op2.floatValue());
 				} else if (op1 instanceof Long || op2 instanceof Long) {
 					return new TypedValue(op1.longValue() + op2.longValue());
 				} else { // TODO what about overflow?

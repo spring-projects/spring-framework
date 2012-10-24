@@ -66,6 +66,9 @@ public class OpMultiply extends Operator {
 			if (leftNumber instanceof Double || rightNumber instanceof Double) {
 				return new TypedValue(leftNumber.doubleValue() * rightNumber.doubleValue());
 			}
+			else if (leftNumber instanceof Float || rightNumber instanceof Float) {
+				return new TypedValue(leftNumber.floatValue() * rightNumber.floatValue());
+			}
 			else if (leftNumber instanceof Long || rightNumber instanceof Long) {
 				return new TypedValue(leftNumber.longValue() * rightNumber.longValue());
 			}
