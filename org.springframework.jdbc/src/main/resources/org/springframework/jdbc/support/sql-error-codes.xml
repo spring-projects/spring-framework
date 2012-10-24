@@ -166,7 +166,7 @@
 
 	<bean id="Oracle" class="org.springframework.jdbc.support.SQLErrorCodes">
 		<property name="badSqlGrammarCodes">
-			<value>900,903,904,917,936,942,17006</value>
+			<value>900,903,904,917,936,942,17006,6550</value>
 		</property>
 		<property name="invalidResultSetAccessCodes">
 			<value>17003</value>

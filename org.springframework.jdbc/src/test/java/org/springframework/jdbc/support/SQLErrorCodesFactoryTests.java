@@ -57,8 +57,9 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	private void assertIsOracle(SQLErrorCodes sec) {
 		assertTrue(sec.getBadSqlGrammarCodes().length > 0);
 		assertTrue(sec.getDataIntegrityViolationCodes().length > 0);
-		// This had better be a Bad SQL Grammar code
+		// These had better be a Bad SQL Grammar code
 		assertTrue(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "942") >= 0);
+		assertTrue(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "6550") >= 0);
 		// This had better NOT be
 		assertFalse(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "9xx42") >= 0);
 	}
