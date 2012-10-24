@@ -1160,35 +1160,6 @@ public class SpringEL300Tests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void testArray() {
-		ExpressionParser parser = new SpelExpressionParser();
-		StandardEvaluationContext context = new StandardEvaluationContext();
-		Expression expression = null;
-		Object result = null;
-
-		expression = parser.parseExpression("new java.lang.Long[0].class");
-		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [Ljava.lang.Long;", result.toString());
-
-		expression = parser.parseExpression("T(java.lang.Long[])");
-		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [Ljava.lang.Long;", result.toString());
-
-		expression = parser.parseExpression("T(java.lang.String[][][])");
-		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [[[Ljava.lang.String;", result.toString());
-		assertEquals("T(java.lang.String[][][])",((SpelExpression)expression).toStringAST());
-
-		expression = parser.parseExpression("new int[0].class");
-		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [I", result.toString());
-
-		expression = parser.parseExpression("T(int[][])");
-		result = expression.getValue(context, "");
-		assertEquals("Equal assertion failed: ", "class [[I", result.toString());
-	}
-
-	@Test
 	public void SPR_9486_floatFunctionResolverTest() {
 		try {
 			Number expectedResult = Math.abs(-10.2f);
