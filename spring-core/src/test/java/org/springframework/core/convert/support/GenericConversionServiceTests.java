@@ -43,6 +43,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -598,5 +599,80 @@ public class GenericConversionServiceTests {
 		assertFalse(pair.equals(pairOpposite));
 		assertFalse(pair.hashCode() == pairOpposite.hashCode());
 	}
+	
+	// SPR-9692
+	@Test
+	public void testStringToEnumWithInterfaceConversion() {
+		conversionService.addConverterFactory(new StringToEnumConverterFactory());
+		conversionService.addConverterFactory(new StringToMyEnumInterfaceConverterFactory());
+		MyEnum result = conversionService.convert("1", MyEnum.class);
+		assertEquals(MyEnum.A, result);
+	}
+	
+	@Test
+	public void testEnumWithInterfaceToStringConversion() {
+		conversionService.addConverter(new EnumToStringConverter());
+		conversionService.addConverter(new MyEnumInterfaceToStringConverter<MyEnum>());
+		String result = conversionService.convert(MyEnum.A, String.class);
+		assertEquals("1", result);
+	}
+	
+	interface MyEnumInterface {
+		String getCode();
+	}	
+	
+	public static enum MyEnum implements MyEnumInterface {
+		A("1"), B("2");
+		
+		private String code;
+		
+		MyEnum(String code) {
+			this.code = code;
+		}
+		
+		public String getCode() {
+			return code;
+		}
+	}
+	
+	public static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface> implements Converter<T, String> {
+		public String convert(T source) {	
+			return source.getCode();
+		}
+	}
 
+	public static class StringToMyEnumInterfaceConverterFactory implements ConverterFactory<String, MyEnumInterface> {
+		
+		public <T extends MyEnumInterface> Converter<String, T> getConverter(Class<T> targetType) {
+			return new StringToMyEnumInterfaceConverter(targetType);
+		}
+		
+		private static class StringToMyEnumInterfaceConverter<T extends Enum & MyEnumInterface> implements Converter<String, T> {
+			private final Class<T> enumType;
+
+			public StringToMyEnumInterfaceConverter(Class<T> enumType) {
+				this.enumType = enumType;
+			}
+
+			public T convert(String source) {
+				for (T value : enumType.getEnumConstants()) {
+					if (value.getCode().equals(source)) {
+						return value;
+					}
+				}
+				return null;
+			}
+		}
+	}
+	
+	private static class StringToMyEnumInterfaceConverter implements Converter<String, MyEnumInterface> {
+		public MyEnumInterface convert(String source) {
+			for (MyEnumInterface value : MyEnum.values()) {
+				if (value.getCode().equals(source)) {
+					return value;
+				}
+			}
+			return null;
+		}
+	}	
 }
