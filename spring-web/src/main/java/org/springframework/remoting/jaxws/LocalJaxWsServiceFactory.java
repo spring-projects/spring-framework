@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.remoting.jaxws;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.Executor;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.handler.HandlerResolver;
 
+import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
@@ -53,9 +55,20 @@ public class LocalJaxWsServiceFactory {
 
 	/**
 	 * Set the URL of the WSDL document that describes the service.
+	 * @see #setWsdlDocumentResource(Resource)
 	 */
 	public void setWsdlDocumentUrl(URL wsdlDocumentUrl) {
 		this.wsdlDocumentUrl = wsdlDocumentUrl;
+	}
+
+	/**
+	 * Set the WSDL document URL as a {@link Resource}.
+	 * @throws IOException
+	 * @since 3.2
+	 */
+	public void setWsdlDocumentResource(Resource wsdlDocumentResource) throws IOException {
+		Assert.notNull(wsdlDocumentResource, "WSDL Resource must not be null.");
+		this.wsdlDocumentUrl = wsdlDocumentResource.getURL();
 	}
 
 	/**
