@@ -316,7 +316,7 @@ public final class WebAsyncManager {
 
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			public void run() {
-				if (!deferredResult.getAndSetExpired()) {
+				if (deferredResult.expire()) {
 					chain.triggerAfterExpiration(asyncWebRequest, deferredResult);
 				}
 			}

@@ -16,12 +16,10 @@
 package org.springframework.web.context.request.async;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 
 /**
  * {@code DeferredResult} provides an alternative to using a {@link Callable}
@@ -39,17 +37,15 @@ public final class DeferredResult<T> {
 	private static final Object RESULT_NONE = new Object();
 
 
-	private final Object timeoutResult;
-
 	private final Long timeout;
+
+	private final Object timeoutResult;
 
 	private DeferredResultHandler resultHandler;
 
-	private final AtomicBoolean expired = new AtomicBoolean(false);
+	private Object result = RESULT_NONE;
 
-	private final Object lock = new Object();
-
-	private final CountDownLatch latch = new CountDownLatch(1);
+	private boolean expired;
 
 
 	/**
@@ -85,96 +81,93 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Set a handler to handle the result when set. There can be only handler
-	 * for a {@code DeferredResult}. At runtime it will be set by the framework.
-	 * However applications may set it when unit testing.
-	 *
-	 * <p>If you need to be called back when a {@code DeferredResult} is set or
-	 * expires, register a {@link DeferredResultProcessingInterceptor} instead.
+	 * Provide a handler to use to handle the result value.
+	 * @param resultHandler the handler
+	 * @see {@link DeferredResultProcessingInterceptor}
 	 */
 	public void setResultHandler(DeferredResultHandler resultHandler) {
-		this.resultHandler = resultHandler;
-		this.latch.countDown();
+		Assert.notNull(resultHandler, "DeferredResultHandler is required");
+		synchronized (this) {
+			this.resultHandler = resultHandler;
+			if ((this.result != RESULT_NONE) && (!this.expired)) {
+				try {
+					this.resultHandler.handleResult(this.result);
+				}
+				catch (Throwable t) {
+					logger.trace("DeferredResult not handled", t);
+				}
+			}
+		}
 	}
 
 	/**
-	 * Set the result value and pass it on for handling.
-	 * @param result the result value
-	 * @return "true" if the result was set and passed on for handling;
-	 * 	"false" if the result was already set or the async request expired.
+	 * Set the value for the DeferredResult and handle it.
+	 * @param result the value to set
+	 * @return "true" if the result was set and passed on for handling; "false"
+	 * if the result was already set or the async request expired.
 	 * @see #isSetOrExpired()
 	 */
 	public boolean setResult(T result) {
-		return processResult(result);
+		return setResultInternal(result);
+	}
+
+	private boolean setResultInternal(Object result) {
+		synchronized (this) {
+			if (isSetOrExpired()) {
+				return false;
+			}
+			this.result = result;
+			if (this.resultHandler != null) {
+				try {
+					this.resultHandler.handleResult(this.result);
+				}
+				catch (Throwable t) {
+					logger.trace("DeferredResult not handled", t);
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
-	 * Set an error result value and pass it on for handling. If the result is an
-	 * {@link Exception} or {@link Throwable}, it will be processed as though the
-	 * controller raised the exception. Otherwise it will be processed as if the
-	 * controller returned the given result.
+	 * Set an error value for the {@link DeferredResult} and handle it. The value
+	 * may be an {@link Exception} or {@link Throwable} in which case it will be
+	 * processed as if a handler raised the exception.
 	 * @param result the error result value
-	 * @return "true" if the result was set to the error value and passed on for handling;
-	 * 	"false" if the result was already set or the async request expired.
+	 * @return "true" if the result was set to the error value and passed on for
+	 * handling; "false" if the result was already set or the async request
+	 * expired.
 	 * @see #isSetOrExpired()
 	 */
 	public boolean setErrorResult(Object result) {
-		return processResult(result);
-	}
-
-	private boolean processResult(Object result) {
-
-		synchronized (this.lock) {
-
-			boolean wasExpired = getAndSetExpired();
-			if (wasExpired) {
-				return false;
-			}
-
-			if (!awaitResultHandler()) {
-				throw new IllegalStateException("DeferredResultHandler not set");
-			}
-
-			try {
-				this.resultHandler.handleResult(result);
-			}
-			catch (Throwable t) {
-				logger.trace("DeferredResult not handled", t);
-				return false;
-			}
-
-			return true;
-		}
-	}
-
-	private boolean awaitResultHandler() {
-		try {
-			return this.latch.await(5, TimeUnit.SECONDS);
-		}
-		catch (InterruptedException e) {
-			return false;
-		}
+		return setResultInternal(result);
 	}
 
 	/**
 	 * Return {@code true} if this DeferredResult is no longer usable either
-	 * because it was previously set or because the underlying request ended
-	 * before it could be set.
+	 * because it was previously set or because the underlying request expired.
 	 * <p>
 	 * The result may have been set with a call to {@link #setResult(Object)},
-	 * or {@link #setErrorResult(Object)}, or following a timeout, assuming a
-	 * timeout result was provided to the constructor. The request may before
-	 * the result set due to a timeout or network error.
+	 * or {@link #setErrorResult(Object)}, or as a result of a timeout, if a
+	 * timeout result was provided to the constructor. The request may also
+	 * expire due to a timeout or network error.
 	 */
 	public boolean isSetOrExpired() {
-		return this.expired.get();
+		return ((this.result != RESULT_NONE) || this.expired);
 	}
 
 	/**
-	 * Atomically set the expired flag and return its previous value.
+	 * Set the "expired" flag if and only if the result value was not already set.
+	 * @return {@code true} if expiration succeeded, {@code false} otherwise
 	 */
-	boolean getAndSetExpired() {
-		return this.expired.getAndSet(true);
+	boolean expire() {
+		synchronized (this) {
+			if (!isSetOrExpired()) {
+				this.expired = true;
+			}
+		}
+		return this.expired;
 	}
 
 	boolean hasTimeoutResult() {
@@ -182,7 +175,7 @@ public final class DeferredResult<T> {
 	}
 
 	boolean applyTimeoutResult() {
-		return  hasTimeoutResult() ? processResult(this.timeoutResult) : false;
+		return  hasTimeoutResult() ? setResultInternal(this.timeoutResult) : false;
 	}
 
 

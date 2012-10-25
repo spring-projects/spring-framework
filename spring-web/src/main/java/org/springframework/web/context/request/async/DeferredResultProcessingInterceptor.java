@@ -53,9 +53,11 @@ public interface DeferredResultProcessingInterceptor {
 	void preProcess(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception;
 
 	/**
-	 * Invoked when a {@link DeferredResult} is set either with a normal value
-	 * or with a {@link DeferredResult#DeferredResult(Long, Object) timeout
-	 * result}. The invocation occurs in the thread that set the result.
+	 * Invoked when a {@link DeferredResult} is set via
+	 * {@link DeferredResult#setResult(Object) setResult}, or
+	 * {@link DeferredResult#setErrorResult(Object) setErrorResult}, or after
+	 * a timeout if a {@code DeferredResult} was created with a constructor
+	 * accepting a default timeout result.
 	 * <p>
 	 * If the request ends before the {@code DeferredResult} is set, then
 	 * {@link #afterExpiration(NativeWebRequest, DeferredResult)} is called.
@@ -68,12 +70,9 @@ public interface DeferredResultProcessingInterceptor {
 	void postProcess(NativeWebRequest request, DeferredResult<?> deferredResult,
 			Object concurrentResult) throws Exception;
 
-
 	/**
-	 * Invoked when a {@link DeferredResult} expires before a result has been
-	 * set possibly due to a timeout or a network error. This invocation occurs
-	 * in the thread where the timeout or network error notification is
-	 * processed.
+	 * Invoked when a {@link DeferredResult} was never set before the request
+	 * completed due to a timeout or network error.
 	 *
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult that has been set
