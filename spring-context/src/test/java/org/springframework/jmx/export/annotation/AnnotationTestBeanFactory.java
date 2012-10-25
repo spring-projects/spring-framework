@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.jmx.IJmxTestBean;
 /**
  * @author Juergen Hoeller
  */
-public class AnnotationTestBeanFactory implements FactoryBean<IJmxTestBean> {
+public class AnnotationTestBeanFactory implements FactoryBean<FactoryCreatedAnnotationTestBean> {
 
 	private final FactoryCreatedAnnotationTestBean instance = new FactoryCreatedAnnotationTestBean();
 
@@ -30,7 +30,7 @@ public class AnnotationTestBeanFactory implements FactoryBean<IJmxTestBean> {
 		this.instance.setName("FACTORY");
 	}
 
-	public IJmxTestBean getObject() throws Exception {
+	public FactoryCreatedAnnotationTestBean getObject() throws Exception {
 		return this.instance;
 	}
 
