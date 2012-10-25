@@ -91,11 +91,7 @@ public class WebAsyncManagerTests {
 	@Test
 	public void startCallableProcessing() throws Exception {
 
-		Callable<Object> task = new Callable<Object>() {
-			public Object call() throws Exception {
-				return 1;
-			}
-		};
+		Callable<Object> task = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
 		interceptor.preProcess(this.asyncWebRequest, task);
@@ -146,11 +142,7 @@ public class WebAsyncManagerTests {
 	public void startCallableProcessingNullRequest() {
 		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
 		try {
-			manager.startCallableProcessing(new Callable<Object>() {
-				public Object call() throws Exception {
-					return 1;
-				}
-			});
+			manager.startCallableProcessing(new StubCallable());
 			fail("Expected exception");
 		}
 		catch (IllegalStateException ex) {
@@ -191,6 +183,29 @@ public class WebAsyncManagerTests {
 		verify(this.asyncWebRequest, interceptor);
 	}
 
+	@Test
+	public void setTimeoutHandler() throws Exception {
+
+		Runnable timeoutHandler = new Runnable() { public void run() {} };
+		this.asyncManager.setTimeoutHandler(timeoutHandler);
+
+		this.asyncWebRequest.startAsync();
+		this.asyncWebRequest.setTimeoutHandler(timeoutHandler);
+		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
+		this.asyncWebRequest.dispatch();
+		replay(this.asyncWebRequest);
+
+		this.asyncManager.startCallableProcessing(new StubCallable());
+
+		verify(this.asyncWebRequest);
+	}
+
+
+	private final class StubCallable implements Callable<Object> {
+		public Object call() throws Exception {
+			return 1;
+		}
+	}
 
 	@SuppressWarnings("serial")
 	private static class SyncTaskExecutor extends SimpleAsyncTaskExecutor {

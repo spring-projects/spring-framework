@@ -66,6 +66,8 @@ public final class WebAsyncManager {
 
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(this.getClass().getSimpleName());
 
+	private Runnable timeoutHandler;
+
 	private Object concurrentResult = RESULT_NONE;
 
 	private Object[] concurrentResultContext;
@@ -115,6 +117,15 @@ public final class WebAsyncManager {
 	 */
 	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Set the handler to use when concurrent handling times out. If not set, by
+	 * default a timeout is handled by returning SERVICE_UNAVAILABLE (503).
+	 * @param timeoutHandler the handler
+	 */
+	public void setTimeoutHandler(Runnable timeoutHandler) {
+		this.timeoutHandler = timeoutHandler;
 	}
 
 	/**
@@ -347,6 +358,10 @@ public final class WebAsyncManager {
 
 		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 		this.asyncWebRequest.startAsync();
+
+		if (this.timeoutHandler != null) {
+			this.asyncWebRequest.setTimeoutHandler(this.timeoutHandler);
+		}
 
 		if (logger.isDebugEnabled()) {
 			HttpServletRequest request = asyncWebRequest.getNativeRequest(HttpServletRequest.class);
