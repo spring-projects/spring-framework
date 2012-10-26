@@ -25,7 +25,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.MBeanExportConfiguration;
 import org.springframework.jmx.export.MBeanExporterTests;
 import org.springframework.jmx.export.TestDynamicMBean;
 import org.springframework.jmx.support.MBeanServerFactoryBean;
