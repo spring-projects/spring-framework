@@ -3,7 +3,7 @@ buildscript {
         maven { url 'http://repo.springsource.org/plugins-release' }
     }
     dependencies {
-        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.5'
+        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.6'
     }
 }
 
@@ -637,6 +637,7 @@ configure(rootProject) {
 
     reference {
         sourceDir = file('src/reference/docbook')
+        pdfFilename = 'spring-framework-reference.pdf'
     }
 
     // don't publish the default jar for the root project
