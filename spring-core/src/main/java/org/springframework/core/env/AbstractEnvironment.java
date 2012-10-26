@@ -464,6 +464,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		return this.propertyResolver.resolveRequiredPlaceholders(text);
 	}
 
+	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
+		this.propertyResolver.setIgnoreUnresolvableNestedPlaceholders(ignoreUnresolvableNestedPlaceholders);
+	}
+
 	public void setConversionService(ConfigurableConversionService conversionService) {
 		this.propertyResolver.setConversionService(conversionService);
 	}
