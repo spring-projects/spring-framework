@@ -223,20 +223,25 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @throws IOException in case of I/O errors
 	 */
 	private String readScript(EncodedResource resource) throws IOException {
-		LineNumberReader lnr = new LineNumberReader(resource.getReader());
-		String currentStatement = lnr.readLine();
-		StringBuilder scriptBuilder = new StringBuilder();
-		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement) &&
-					(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
-				if (scriptBuilder.length() > 0) {
-					scriptBuilder.append('\n');
-				}
-				scriptBuilder.append(currentStatement);
-			}
-			currentStatement = lnr.readLine();
-		}
-		maybeAddSeparatorToScript(scriptBuilder);
+        LineNumberReader lnr = new LineNumberReader(resource.getReader());
+        StringBuilder scriptBuilder = new StringBuilder();
+        try {
+            String currentStatement = lnr.readLine();
+            while (currentStatement != null) {
+                if (StringUtils.hasText(currentStatement) &&
+                        (this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
+                    if (scriptBuilder.length() > 0) {
+                        scriptBuilder.append('\n');
+                    }
+                    scriptBuilder.append(currentStatement);
+                }
+                currentStatement = lnr.readLine();
+            }
+            maybeAddSeparatorToScript(scriptBuilder);
+        }
+        finally {
+            lnr.close();
+        }
 		return scriptBuilder.toString();
 	}
 
