@@ -47,5 +47,5 @@ public interface ConditionalGenericConverter extends GenericConverter {
 	 * @return true if conversion should be performed, false otherwise
 	 */
 	boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
-	
+
 }

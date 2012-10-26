@@ -63,7 +63,7 @@ public interface ConversionService {
 	 * @throws IllegalArgumentException if targetType is null
 	 */
 	<T> T convert(Object source, Class<T> targetType);
-	
+
 	/**
 	 * Convert the source to targetType.
 	 * The TypeDescriptors provide additional context about the source and target locations where conversion will occur, often object fields or property locations.

@@ -21,6 +21,8 @@ package org.springframework.core.convert.converter;
  * Implementations of this interface are thread-safe and can be shared.
  *
  * @author Keith Donald
+ * @param <S> The source type
+ * @param <T> The target type
  * @since 3.0
  */
 public interface Converter<S, T> {

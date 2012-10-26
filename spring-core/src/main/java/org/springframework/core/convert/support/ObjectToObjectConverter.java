@@ -84,7 +84,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	private static Method getValueOfMethodOn(Class<?> clazz, Class<?> sourceParameterType) {
 		return ClassUtils.getStaticMethod(clazz, "valueOf", sourceParameterType);
 	}
-	
+
 	private static Constructor<?> getConstructor(Class<?> clazz, Class<?> sourceParameterType) {
 		return ClassUtils.getConstructorIfAvailable(clazz, sourceParameterType);
 	}

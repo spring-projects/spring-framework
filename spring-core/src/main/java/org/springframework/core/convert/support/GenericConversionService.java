@@ -102,7 +102,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		GenericConverter.ConvertiblePair typeInfo = new GenericConverter.ConvertiblePair(sourceType, targetType);
 		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
-	
+
 	public void addConverter(GenericConverter converter) {
 		Set<GenericConverter.ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
 		for (GenericConverter.ConvertiblePair convertibleType : convertibleTypes) {
@@ -119,7 +119,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
-	
+
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		getSourceConverterMap(sourceType).remove(targetType);
 		invalidateCache();
@@ -131,7 +131,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		if (targetType == null) {
 			throw new IllegalArgumentException("The targetType to convert to cannot be null");
-		}		
+		}
 		return canConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType) : null, TypeDescriptor.valueOf(targetType));
 	}
 
@@ -150,7 +150,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	public <T> T convert(Object source, Class<T> targetType) {
 		if (targetType == null) {
 			throw new IllegalArgumentException("The targetType to convert to cannot be null");
-		}		
+		}
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
@@ -172,7 +172,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return handleResult(sourceType, targetType, result);
 		}
 		else {
-			return handleConverterNotFound(source, sourceType, targetType);			
+			return handleConverterNotFound(source, sourceType, targetType);
 		}
 	}
 
@@ -189,7 +189,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	public Object convert(Object source, TypeDescriptor targetType) {
 		return convert(source, TypeDescriptor.forObject(source), targetType);
 	}
-	
+
 	public String toString() {
 		List<String> converterStrings = new ArrayList<String>();
 		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {
@@ -203,7 +203,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		for (String converterString : converterStrings) {
 			builder.append("\t");
 			builder.append(converterString);
-			builder.append("\n");			
+			builder.append("\n");
 		}
 		return builder.toString();
 	}
@@ -243,7 +243,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		else {
 			converter = findConverterForClassPair(sourceType, targetType);
 			if (converter == null) {
-				converter = getDefaultConverter(sourceType, targetType);				
+				converter = getDefaultConverter(sourceType, targetType);
 			}
 			if (converter != null) {
 				this.converterCache.put(key, converter);
@@ -285,7 +285,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 		return matchable;
 	}
-	
+
 	private void invalidateCache() {
 		this.converterCache.clear();
 	}
@@ -366,7 +366,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 				}
 			}
 			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
-			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);				
+			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);
 		}
 	}
 
@@ -473,9 +473,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 		else {
 			throw new ConverterNotFoundException(sourceType, targetType);
-		}		
+		}
 	}
-	
+
 	private Object handleResult(TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
 		if (result == null) {
 			assertNotPrimitiveTargetType(sourceType, targetType);
@@ -486,9 +486,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (targetType.isPrimitive()) {
 			throw new ConversionFailedException(sourceType, targetType, null,
 					new IllegalArgumentException("A null value cannot be assigned to a primitive type"));
-		}		
+		}
 	}
-	
+
 
 	@SuppressWarnings("unchecked")
 	private final class ConverterAdapter implements GenericConverter {
@@ -516,7 +516,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			}
 			return this.converter.convert(source);
 		}
-		
+
 		public String toString() {
 			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
 					" : " + this.converter.toString();
@@ -613,14 +613,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 	private static final class ConverterCacheKey {
 
 		private final TypeDescriptor sourceType;
-		
+
 		private final TypeDescriptor targetType;
-		
+
 		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			this.sourceType = sourceType;
 			this.targetType = targetType;
 		}
-		
+
 		public boolean equals(Object other) {
 			if (this == other) {
 				return true;
@@ -631,11 +631,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 			ConverterCacheKey otherKey = (ConverterCacheKey) other;
 			return this.sourceType.equals(otherKey.sourceType) && this.targetType.equals(otherKey.targetType);
 		}
-		
+
 		public int hashCode() {
 			return this.sourceType.hashCode() * 29 + this.targetType.hashCode();
 		}
-		
+
 		public String toString() {
 			return "ConverterCacheKey [sourceType = " + this.sourceType + ", targetType = " + this.targetType + "]";
 		}

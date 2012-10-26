@@ -50,7 +50,7 @@ public final class Property {
 	private final Method writeMethod;
 
 	private final String name;
-	
+
 	private final MethodParameter methodParameter;
 
 	private final Annotation[] annotations;
@@ -112,7 +112,7 @@ public final class Property {
 
 
 	// package private
-	
+
 	MethodParameter getMethodParameter() {
 		return this.methodParameter;
 	}
@@ -123,7 +123,7 @@ public final class Property {
 
 
 	// internal helpers
-	
+
 	private String resolveName() {
 		if (this.readMethod != null) {
 			int index = this.readMethod.getName().indexOf("get");
@@ -166,27 +166,27 @@ public final class Property {
 		}
 		return write;
 	}
-	
+
 	private MethodParameter resolveReadMethodParameter() {
 		if (getReadMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getReadMethod(), -1));			
+		return resolveParameterType(new MethodParameter(getReadMethod(), -1));
 	}
 
 	private MethodParameter resolveWriteMethodParameter() {
 		if (getWriteMethod() == null) {
 			return null;
 		}
-		return resolveParameterType(new MethodParameter(getWriteMethod(), 0));			
+		return resolveParameterType(new MethodParameter(getWriteMethod(), 0));
 	}
 
 	private MethodParameter resolveParameterType(MethodParameter parameter) {
 		// needed to resolve generic property types that parameterized by sub-classes e.g. T getFoo();
 		GenericTypeResolver.resolveParameterType(parameter, getObjectType());
-		return parameter;			
+		return parameter;
 	}
-	
+
 	private Annotation[] resolveAnnotations() {
 		Map<Class<?>, Annotation> annMap = new LinkedHashMap<Class<?>, Annotation>();
 		Method readMethod = getReadMethod();

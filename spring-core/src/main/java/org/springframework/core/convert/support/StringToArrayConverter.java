@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
 /**
  * Converts a comma-delimited String to an Array.
  * Only matches if String.class can be converted to the target array element type.
- * 
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -47,11 +47,11 @@ final class StringToArrayConverter implements ConditionalGenericConverter {
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.conversionService.canConvert(sourceType, targetType.getElementTypeDescriptor());
 	}
-	
+
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;
-		}		
+		}
 		String string = (String) source;
 		String[] fields = StringUtils.commaDelimitedListToStringArray(string);
 		Object target = Array.newInstance(targetType.getElementTypeDescriptor().getType(), fields.length);

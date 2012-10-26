@@ -52,5 +52,5 @@ class ClassDescriptor extends AbstractDescriptor {
 	protected AbstractDescriptor nested(Class<?> type, int typeIndex) {
 		return new ClassDescriptor(type);
 	}
-	
+
 }

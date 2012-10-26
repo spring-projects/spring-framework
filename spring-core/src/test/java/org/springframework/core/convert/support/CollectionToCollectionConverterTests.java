@@ -68,13 +68,13 @@ public class CollectionToCollectionConverterTests {
 		}
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		assertTrue(conversionService.canConvert(sourceType, targetType));
-		@SuppressWarnings("unchecked")		
+		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) conversionService.convert(list, sourceType, targetType);
 		assertFalse(list.equals(result));
 		assertEquals((Integer) 9, result.get(0));
 		assertEquals((Integer) 37, result.get(1));
 	}
-	
+
 	public ArrayList<Integer> scalarListTarget;
 
 	@Test
@@ -148,7 +148,7 @@ public class CollectionToCollectionConverterTests {
 	}
 
 	public List<List<List<Integer>>> objectToCollection;
-	
+
 	@Test
 	@SuppressWarnings("unchecked")
 	public void stringToCollection() throws Exception {
@@ -157,7 +157,7 @@ public class CollectionToCollectionConverterTests {
 		list.add(Arrays.asList("37,23"));
 		conversionService.addConverterFactory(new StringToNumberConverterFactory());
 		conversionService.addConverter(new StringToCollectionConverter(conversionService));
-		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));		
+		conversionService.addConverter(new ObjectToCollectionConverter(conversionService));
 		conversionService.addConverter(new CollectionToObjectConverter(conversionService));
 		TypeDescriptor sourceType = TypeDescriptor.forObject(list);
 		TypeDescriptor targetType = new TypeDescriptor(getClass().getField("objectToCollection"));
@@ -204,10 +204,10 @@ public class CollectionToCollectionConverterTests {
 		List<String> resources = new ArrayList<String>();
 		resources.add(null);
 		resources.add(null);
-		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("strings")); 
+		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("strings"));
 		assertEquals(resources, conversionService.convert(resources, sourceType, new TypeDescriptor(getClass().getField("resources"))));
 	}
-	
+
 	public List<String> strings;
 
 	@Test(expected=ConversionFailedException.class)
@@ -271,9 +271,9 @@ public class CollectionToCollectionConverterTests {
 			return null;
 		}
 	}
-	
+
 	public static class TestResource extends BaseResource {
-		
+
 	}
 
 	@Test

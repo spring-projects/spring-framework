@@ -27,8 +27,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Converts an Array to another Array.
- * First adapts the source array to a List, then delegates to {@link CollectionToArrayConverter} to perform the target array conversion. 
- * 
+ * First adapts the source array to a List, then delegates to {@link CollectionToArrayConverter} to perform the target array conversion.
+ *
  * @author Keith Donald
  * @since 3.0
  */
@@ -48,7 +48,7 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 		return this.helperConverter.matches(sourceType, targetType);
 	}
 
-	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {		
+	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}
 
