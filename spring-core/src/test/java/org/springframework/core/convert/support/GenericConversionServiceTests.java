@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
@@ -52,6 +52,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class GenericConversionServiceTests {
 
@@ -599,4 +600,48 @@ public class GenericConversionServiceTests {
 		assertFalse(pair.hashCode() == pairOpposite.hashCode());
 	}
 
+	@Test
+	public void convertPrimitiveArray() throws Exception {
+		GenericConversionService conversionService = new DefaultConversionService();
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
+		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+	}
+
+	@Test
+	public void canConvertIllegalArgumentNullTargetTypeFromClass() {
+		try {
+			conversionService.canConvert(String.class, null);
+			fail("Did not thow IllegalArgumentException");
+		} catch(IllegalArgumentException e) {
+		}
+	}
+
+	@Test
+	public void canConvertIllegalArgumentNullTargetTypeFromTypeDescriptor() {
+		try {
+			conversionService.canConvert(TypeDescriptor.valueOf(String.class), null);
+			fail("Did not thow IllegalArgumentException");
+		} catch(IllegalArgumentException e) {
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes" })
+	public void convertHashMapValuesToList() throws Exception {
+		GenericConversionService conversionService = new DefaultConversionService();
+		Map<String, Integer> hashMap = new LinkedHashMap<String, Integer>();
+		hashMap.put("1", 1);
+		hashMap.put("2", 2);
+		List converted = conversionService.convert(hashMap.values(), List.class);
+		assertEquals(Arrays.asList(1, 2), converted);
+	}
+
+	@Test
+	public void removeConvertible() throws Exception {
+		conversionService.addConverter(new ColorConverter());
+		assertTrue(conversionService.canConvert(String.class, Color.class));
+		conversionService.removeConvertible(String.class, Color.class);
+		assertFalse(conversionService.canConvert(String.class, Color.class));
+	}
 }
