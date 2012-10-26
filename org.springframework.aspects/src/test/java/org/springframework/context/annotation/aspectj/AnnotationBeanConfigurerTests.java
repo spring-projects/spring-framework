@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.context.annotation.aspectj;
 
 import org.springframework.beans.factory.aspectj.AbstractBeanConfigurerTests;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.aspectj.EnableSpringConfigured;
 
 /**
  * Tests that @EnableSpringConfigured properly registers an

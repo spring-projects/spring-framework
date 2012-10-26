@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.context.annotation;
+package org.springframework.context.annotation.aspectj;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
