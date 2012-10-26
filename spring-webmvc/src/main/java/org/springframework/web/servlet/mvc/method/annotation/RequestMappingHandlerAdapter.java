@@ -64,8 +64,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.ControllerAdviceBean;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
@@ -115,34 +115,41 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
 
+	private HandlerMethodArgumentResolverComposite argumentResolvers;
+
+	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
+
 	private List<HandlerMethodReturnValueHandler> customReturnValueHandlers;
 
+	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
 	private List<ModelAndViewResolver> modelAndViewResolvers;
+
+	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private WebBindingInitializer webBindingInitializer;
 
+	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
+
+	private Long asyncRequestTimeout;
+
+	private boolean ignoreDefaultModelOnRedirect = false;
+
 	private int cacheSecondsForSessionAttributeHandlers = 0;
 
 	private boolean synchronizeOnSession = false;
+
+	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	private ConfigurableBeanFactory beanFactory;
 
-	private SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
-
-	private boolean ignoreDefaultModelOnRedirect = false;
 
 	private final Map<Class<?>, SessionAttributesHandler> sessionAttributesHandlerCache =
 		new ConcurrentHashMap<Class<?>, SessionAttributesHandler>();
-
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
-
-	private HandlerMethodArgumentResolverComposite initBinderArgumentResolvers;
-
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
 	private final Map<Class<?>, Set<Method>> initBinderCache = new ConcurrentHashMap<Class<?>, Set<Method>>();
 
@@ -153,12 +160,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private final Map<ControllerAdviceBean, Set<Method>> modelAttributeAdviceCache =
 			new LinkedHashMap<ControllerAdviceBean, Set<Method>>();
-
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
-
-	private Long asyncRequestTimeout;
-
-	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 
 	/**
@@ -308,6 +309,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
+	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * If not set, the default constructor is used.
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	/**
 	 * Return the configured message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
@@ -327,6 +336,49 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public WebBindingInitializer getWebBindingInitializer() {
 		return webBindingInitializer;
+	}
+
+	/**
+	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
+	 * return a {@link Callable}. Controller methods can override this default on
+	 * a per-request basis by returning an {@link AsyncTask}.
+	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
+	 * It's recommended to change that default in production as the simple executor
+	 * does not re-use threads.
+	 */
+	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
+		this.taskExecutor = taskExecutor;
+	}
+
+	/**
+	 * Specify the amount of time, in milliseconds, before concurrent handling
+	 * should time out. In Servlet 3, the timeout begins after the main request
+	 * processing thread has exited and ends when the request is dispatched again
+	 * for further processing of the concurrently produced result.
+	 * <p>If this value is not set, the default timeout of the underlying
+	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
+	 * @param timeout the timeout value in milliseconds
+	 */
+	public void setAsyncRequestTimeout(long timeout) {
+		this.asyncRequestTimeout = timeout;
+	}
+
+	/**
+	 * By default the content of the "default" model is used both during
+	 * rendering and redirect scenarios. Alternatively a controller method
+	 * can declare a {@link RedirectAttributes} argument and use it to provide
+	 * attributes for a redirect.
+	 * <p>Setting this flag to {@code true} guarantees the "default" model is
+	 * never used in a redirect scenario even if a RedirectAttributes argument
+	 * is not declared. Setting it to {@code false} means the "default" model
+	 * may be used in a redirect if the controller method doesn't declare a
+	 * RedirectAttributes argument.
+	 * <p>The default setting is {@code false} but new applications should
+	 * consider setting it to {@code true}.
+	 * @see RedirectAttributes
+	 */
+	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
+		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
 	}
 
 	/**
@@ -381,57 +433,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public void setParameterNameDiscoverer(ParameterNameDiscoverer parameterNameDiscoverer) {
 		this.parameterNameDiscoverer = parameterNameDiscoverer;
-	}
-
-	/**
-	 * By default the content of the "default" model is used both during
-	 * rendering and redirect scenarios. Alternatively a controller method
-	 * can declare a {@link RedirectAttributes} argument and use it to provide
-	 * attributes for a redirect.
-	 * <p>Setting this flag to {@code true} guarantees the "default" model is
-	 * never used in a redirect scenario even if a RedirectAttributes argument
-	 * is not declared. Setting it to {@code false} means the "default" model
-	 * may be used in a redirect if the controller method doesn't declare a
-	 * RedirectAttributes argument.
-	 * <p>The default setting is {@code false} but new applications should
-	 * consider setting it to {@code true}.
-	 * @see RedirectAttributes
-	 */
-	public void setIgnoreDefaultModelOnRedirect(boolean ignoreDefaultModelOnRedirect) {
-		this.ignoreDefaultModelOnRedirect = ignoreDefaultModelOnRedirect;
-	}
-
-	/**
-	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
-	 * return a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning an {@link AsyncTask}.
-	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
-	 * It's recommended to change that default in production as the simple executor
-	 * does not re-use threads.
-	 */
-	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
-		this.taskExecutor = taskExecutor;
-	}
-
-	/**
-	 * Specify the amount of time, in milliseconds, before concurrent handling
-	 * should time out. In Servlet 3, the timeout begins after the main request
-	 * processing thread has exited and ends when the request is dispatched again
-	 * for further processing of the concurrently produced result.
-	 * <p>If this value is not set, the default timeout of the underlying
-	 * implementation is used, e.g. 10 seconds on Tomcat with Servlet 3.
-	 * @param timeout the timeout value in milliseconds
-	 */
-	public void setAsyncRequestTimeout(long timeout) {
-		this.asyncRequestTimeout = timeout;
-	}
-
-	/**
-	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
-	 * If not set, the default constructor is used.
-	 */
-	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
-		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 	/**
