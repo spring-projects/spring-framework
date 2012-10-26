@@ -19,6 +19,7 @@ package org.springframework.web.context.request.async;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.notNull;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
@@ -30,15 +31,15 @@ import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
 
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.mock.web.MockHttpServletRequest;
 
-
 /**
- * Test fixture with an {@link WebAsyncManager}.
+ * Test fixture with an {@link WebAsyncManager} with a mock AsyncWebRequest.
  *
  * @author Rossen Stoyanchev
  */
@@ -47,6 +48,7 @@ public class WebAsyncManagerTests {
 	private WebAsyncManager asyncManager;
 
 	private AsyncWebRequest asyncWebRequest;
+
 
 	@Before
 	public void setUp() {
@@ -61,6 +63,27 @@ public class WebAsyncManagerTests {
 
 		verify(this.asyncWebRequest);
 		reset(this.asyncWebRequest);
+	}
+
+	@Test
+	public void startAsyncProcessingWithoutAsyncWebRequest() {
+		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
+
+		try {
+			manager.startCallableProcessing(new StubCallable(1));
+			fail("Expected exception");
+		}
+		catch (IllegalStateException ex) {
+			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+		}
+
+		try {
+			manager.startDeferredResultProcessing(new DeferredResult<String>());
+			fail("Expected exception");
+		}
+		catch (IllegalStateException ex) {
+			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
+		}
 	}
 
 	@Test
@@ -91,32 +114,102 @@ public class WebAsyncManagerTests {
 	@Test
 	public void startCallableProcessing() throws Exception {
 
-		Callable<Object> task = new StubCallable();
+		int concurrentResult = 21;
+		Callable<Object> task = new StubCallable(concurrentResult);
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
 		interceptor.preProcess(this.asyncWebRequest, task);
-		interceptor.postProcess(this.asyncWebRequest, task, new Integer(1));
+		interceptor.postProcess(this.asyncWebRequest, task, new Integer(concurrentResult));
 		replay(interceptor);
 
-		this.asyncWebRequest.startAsync();
-		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
-		this.asyncWebRequest.dispatch();
-		replay(this.asyncWebRequest);
+		setupDefaultAsyncScenario();
 
 		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
 		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(concurrentResult, this.asyncManager.getConcurrentResult());
 
 		verify(interceptor, this.asyncWebRequest);
 	}
 
 	@Test
-	public void startCallableProcessingAsyncTask() {
+	public void startCallableProcessingCallableException() throws Exception {
+
+		Exception concurrentResult = new Exception();
+		Callable<Object> task = new StubCallable(concurrentResult);
+
+		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.preProcess(this.asyncWebRequest, task);
+		interceptor.postProcess(this.asyncWebRequest, task, concurrentResult);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
+		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(concurrentResult, this.asyncManager.getConcurrentResult());
+
+		verify(interceptor, this.asyncWebRequest);
+	}
+
+	@Test
+	public void startCallableProcessingPreProcessException() throws Exception {
+
+		Callable<Object> task = new StubCallable(21);
+		Exception exception = new Exception();
+
+		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.preProcess(this.asyncWebRequest, task);
+		expectLastCall().andThrow(exception);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
+		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+
+		verify(interceptor, this.asyncWebRequest);
+	}
+
+	@Test
+	public void startCallableProcessingPostProcessException() throws Exception {
+
+		Callable<Object> task = new StubCallable(21);
+		Exception exception = new Exception();
+
+		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.preProcess(this.asyncWebRequest, task);
+		interceptor.postProcess(this.asyncWebRequest, task, 21);
+		expectLastCall().andThrow(exception);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
+		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+
+		verify(interceptor, this.asyncWebRequest);
+	}
+
+	@Test
+	public void startCallableProcessingWithAsyncTask() {
 
 		AsyncTaskExecutor executor = createMock(AsyncTaskExecutor.class);
 		expect(executor.submit((Runnable) notNull())).andReturn(null);
 		replay(executor);
 
 		this.asyncWebRequest.setTimeout(1000L);
+		this.asyncWebRequest.setTimeoutHandler(EasyMock.<Runnable>anyObject());
+		this.asyncWebRequest.addCompletionHandler(EasyMock.<Runnable>anyObject());
 		this.asyncWebRequest.startAsync();
 		replay(this.asyncWebRequest);
 
@@ -128,7 +221,7 @@ public class WebAsyncManagerTests {
 	}
 
 	@Test
-	public void startCallableProcessingNullCallable() {
+	public void startCallableProcessingNullInput() {
 		try {
 			this.asyncManager.startCallableProcessing((Callable<?>) null);
 			fail("Expected exception");
@@ -139,71 +232,107 @@ public class WebAsyncManagerTests {
 	}
 
 	@Test
-	public void startCallableProcessingNullRequest() {
-		WebAsyncManager manager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
-		try {
-			manager.startCallableProcessing(new StubCallable());
-			fail("Expected exception");
-		}
-		catch (IllegalStateException ex) {
-			assertEquals(ex.getMessage(), "AsyncWebRequest must not be null");
-		}
-	}
-
-	@Test
 	public void startDeferredResultProcessing() throws Exception {
 
-		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>(1000L, 10);
-
-		this.asyncWebRequest.setTimeout(1000L);
-		this.asyncWebRequest.setTimeoutHandler((Runnable) notNull());
-		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
-		this.asyncWebRequest.startAsync();
-		replay(this.asyncWebRequest);
+		DeferredResult<String> deferredResult = new DeferredResult<String>(1000L);
+		String concurrentResult = "abc";
 
 		DeferredResultProcessingInterceptor interceptor = createStrictMock(DeferredResultProcessingInterceptor.class);
 		interceptor.preProcess(this.asyncWebRequest, deferredResult);
+		interceptor.postProcess(asyncWebRequest, deferredResult, concurrentResult);
 		replay(interceptor);
+
+		this.asyncWebRequest.setTimeout(1000L);
+		setupDefaultAsyncScenario();
 
 		this.asyncManager.registerDeferredResultInterceptor("interceptor", interceptor);
 		this.asyncManager.startDeferredResultProcessing(deferredResult);
 
-		verify(this.asyncWebRequest, interceptor);
-		reset(this.asyncWebRequest, interceptor);
+		deferredResult.setResult(concurrentResult);
 
-		this.asyncWebRequest.dispatch();
-		replay(this.asyncWebRequest);
-
-		interceptor.postProcess(asyncWebRequest, deferredResult, 25);
-		replay(interceptor);
-
-		deferredResult.setResult(25);
-
-		assertEquals(25, this.asyncManager.getConcurrentResult());
+		assertEquals(concurrentResult, this.asyncManager.getConcurrentResult());
 		verify(this.asyncWebRequest, interceptor);
 	}
 
 	@Test
-	public void setTimeoutHandler() throws Exception {
+	public void startDeferredResultProcessingPreProcessException() throws Exception {
 
-		Runnable timeoutHandler = new Runnable() { public void run() {} };
-		this.asyncManager.setTimeoutHandler(timeoutHandler);
+		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		Exception exception = new Exception();
 
+		DeferredResultProcessingInterceptor interceptor = createStrictMock(DeferredResultProcessingInterceptor.class);
+		interceptor.preProcess(this.asyncWebRequest, deferredResult);
+		expectLastCall().andThrow(exception);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerDeferredResultInterceptor("interceptor", interceptor);
+		this.asyncManager.startDeferredResultProcessing(deferredResult);
+
+		deferredResult.setResult(25);
+
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+		verify(this.asyncWebRequest, interceptor);
+	}
+
+	@Test
+	public void startDeferredResultProcessingPostProcessException() throws Exception {
+
+		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
+		Exception exception = new Exception();
+
+		DeferredResultProcessingInterceptor interceptor = createStrictMock(DeferredResultProcessingInterceptor.class);
+		interceptor.preProcess(this.asyncWebRequest, deferredResult);
+		interceptor.postProcess(this.asyncWebRequest, deferredResult, 25);
+		expectLastCall().andThrow(exception);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerDeferredResultInterceptor("interceptor", interceptor);
+		this.asyncManager.startDeferredResultProcessing(deferredResult);
+
+		deferredResult.setResult(25);
+
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+		verify(this.asyncWebRequest, interceptor);
+	}
+
+	@Test
+	public void startDeferredResultProcessingNullInput() {
+		try {
+			this.asyncManager.startDeferredResultProcessing((DeferredResult<?>) null);
+			fail("Expected exception");
+		}
+		catch (IllegalArgumentException ex) {
+			assertEquals(ex.getMessage(), "DeferredResult must not be null");
+		}
+	}
+
+	private void setupDefaultAsyncScenario() {
+		this.asyncWebRequest.setTimeoutHandler((Runnable) notNull());
+		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
 		this.asyncWebRequest.startAsync();
-		this.asyncWebRequest.setTimeoutHandler(timeoutHandler);
 		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
 		this.asyncWebRequest.dispatch();
 		replay(this.asyncWebRequest);
-
-		this.asyncManager.startCallableProcessing(new StubCallable());
-
-		verify(this.asyncWebRequest);
 	}
 
 
 	private final class StubCallable implements Callable<Object> {
+
+		private Object value;
+
+		public StubCallable(Object value) {
+			this.value = value;
+		}
+
 		public Object call() throws Exception {
-			return 1;
+			if (this.value instanceof Exception) {
+				throw ((Exception) this.value);
+			}
+			return this.value;
 		}
 	}
 

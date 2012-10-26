@@ -36,7 +36,7 @@ class CallableInterceptorChain {
 
 	private final List<CallableProcessingInterceptor> interceptors;
 
-	private int interceptorIndex = -1;
+	private int preProcessIndex = -1;
 
 
 	public CallableInterceptorChain(Collection<CallableProcessingInterceptor> interceptors) {
@@ -44,21 +44,47 @@ class CallableInterceptorChain {
 	}
 
 	public void applyPreProcess(NativeWebRequest request, Callable<?> task) throws Exception {
-		for (int i = 0; i < this.interceptors.size(); i++) {
-			this.interceptors.get(i).preProcess(request, task);
-			this.interceptorIndex = i;
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			interceptor.preProcess(request, task);
+			this.preProcessIndex++;
 		}
 	}
 
-	public void applyPostProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
-		for (int i = this.interceptorIndex; i >= 0; i--) {
+	public Object applyPostProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
+		for (int i = this.preProcessIndex; i >= 0; i--) {
 			try {
 				this.interceptors.get(i).postProcess(request, task, concurrentResult);
 			}
-			catch (Exception ex) {
-				logger.error("CallableProcessingInterceptor.postProcess threw exception", ex);
+			catch (Throwable t) {
+				return t;
+			}
+		}
+		return concurrentResult;
+	}
+
+	public Object triggerAfterTimeout(NativeWebRequest request, Callable<?> task) {
+		for (int i = this.interceptors.size()-1; i >= 0; i--) {
+			try {
+				Object result = this.interceptors.get(i).afterTimeout(request, task);
+				if (result != CallableProcessingInterceptor.RESULT_NONE) {
+					return result;
+				}
+			}
+			catch (Throwable t) {
+				return t;
+			}
+		}
+		return CallableProcessingInterceptor.RESULT_NONE;
+	}
+
+	public void triggerAfterCompletion(NativeWebRequest request, Callable<?> task) {
+		for (int i = this.interceptors.size()-1; i >= 0; i--) {
+			try {
+				this.interceptors.get(i).afterCompletion(request, task);
+			}
+			catch (Throwable t) {
+				logger.error("afterCompletion error", t);
 			}
 		}
 	}
-
 }

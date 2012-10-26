@@ -27,9 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -47,6 +47,8 @@ import org.springframework.web.servlet.ModelAndView;
  */
 @SuppressWarnings("serial")
 final class TestDispatcherServlet extends DispatcherServlet {
+
+	private static final String KEY = TestDispatcherServlet.class.getName() + "-interceptor";
 
 	/**
 	 * Create a new instance with the given web application context.
@@ -70,19 +72,15 @@ final class TestDispatcherServlet extends DispatcherServlet {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
-		asyncManager.registerCallableInterceptor("mockmvc", new CallableProcessingInterceptor() {
-			public void preProcess(NativeWebRequest request, Callable<?> task) throws Exception { }
-			public void postProcess(NativeWebRequest request, Callable<?> task, Object value) throws Exception {
+		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
+			public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object value) throws Exception {
 				asyncResultLatch.countDown();
 			}
 		});
-
-		asyncManager.registerDeferredResultInterceptor("mockmvc", new DeferredResultProcessingInterceptor() {
-			public void preProcess(NativeWebRequest request, DeferredResult<?> result) throws Exception { }
-			public void postProcess(NativeWebRequest request, DeferredResult<?> result, Object value) throws Exception {
+		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
+			public <T> void postProcess(NativeWebRequest request, DeferredResult<T> result, Object value) throws Exception {
 				asyncResultLatch.countDown();
 			}
-			public void afterExpiration(NativeWebRequest request, DeferredResult<?> result) throws Exception { }
 		});
 
 		return asyncResultLatch;

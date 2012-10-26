@@ -17,7 +17,6 @@
 package org.springframework.web.context.request.async;
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertFalse;
@@ -63,21 +62,6 @@ public class DeferredResultTests {
 	}
 
 	@Test
-	public void setResultWithException() {
-		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
-		handler.handleResult("hello");
-		expectLastCall().andThrow(new IllegalStateException());
-		replay(handler);
-
-		DeferredResult<String> result = new DeferredResult<String>();
-		result.setResultHandler(handler);
-
-		assertFalse(result.setResult("hello"));
-
-		verify(handler);
-	}
-
-	@Test
 	public void isSetOrExpired() {
 		DeferredResultHandler handler = createMock(DeferredResultHandler.class);
 		handler.handleResult("hello");
@@ -103,12 +87,6 @@ public class DeferredResultTests {
 		result.expire();
 		assertTrue(result.isSetOrExpired());
 		assertFalse(result.setResult("hello"));
-	}
-
-	@Test
-	public void hasTimeout() {
-		assertFalse(new DeferredResult<String>().hasTimeoutResult());
-		assertTrue(new DeferredResult<String>(null, "timed out").hasTimeoutResult());
 	}
 
 	@Test

@@ -50,6 +50,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
@@ -988,14 +989,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	private CallableProcessingInterceptor createRequestBindingInterceptor(final HttpServletRequest request) {
-
-		return new CallableProcessingInterceptor() {
-
-			public void preProcess(NativeWebRequest webRequest, Callable<?> task) {
+		return new CallableProcessingInterceptorAdapter() {
+			@Override
+			public <T> void preProcess(NativeWebRequest webRequest, Callable<T> task) {
 				initContextHolders(request, buildLocaleContext(request), new ServletRequestAttributes(request));
 			}
-
-			public void postProcess(NativeWebRequest webRequest, Callable<?> task, Object concurrentResult) {
+			@Override
+			public <T> void postProcess(NativeWebRequest webRequest, Callable<T> task, Object concurrentResult) {
 				resetContextHolders(request, null, null);
 			}
 		};

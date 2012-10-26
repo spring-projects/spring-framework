@@ -66,7 +66,7 @@ public final class DeferredResult<T> {
 	/**
 	 * Create a DeferredResult with a timeout and a default result to use on timeout.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
-	 * @param timeoutResult the result to use, possibly {@code null}
+	 * @param timeoutResult the result to use
 	 */
 	public DeferredResult(Long timeout, Object timeoutResult) {
 		this.timeoutResult = timeoutResult;
@@ -118,13 +118,7 @@ public final class DeferredResult<T> {
 			}
 			this.result = result;
 			if (this.resultHandler != null) {
-				try {
-					this.resultHandler.handleResult(this.result);
-				}
-				catch (Throwable t) {
-					logger.trace("DeferredResult not handled", t);
-					return false;
-				}
+				this.resultHandler.handleResult(this.result);
 			}
 		}
 		return true;
@@ -158,24 +152,19 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Set the "expired" flag if and only if the result value was not already set.
-	 * @return {@code true} if expiration succeeded, {@code false} otherwise
+	 * Mark this instance expired so it may no longer be used.
+	 * @return the previous value of the expiration flag
 	 */
 	boolean expire() {
 		synchronized (this) {
-			if (!isSetOrExpired()) {
-				this.expired = true;
-			}
+			boolean previous = this.expired;
+			this.expired = true;
+			return previous;
 		}
-		return this.expired;
-	}
-
-	boolean hasTimeoutResult() {
-		return this.timeoutResult != RESULT_NONE;
 	}
 
 	boolean applyTimeoutResult() {
-		return  hasTimeoutResult() ? setResultInternal(this.timeoutResult) : false;
+		return  (this.timeoutResult != RESULT_NONE) ? setResultInternal(this.timeoutResult) : false;
 	}
 
 

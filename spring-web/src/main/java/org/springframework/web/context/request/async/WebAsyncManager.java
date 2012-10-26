@@ -44,8 +44,6 @@ import org.springframework.web.util.UrlPathHelper;
  * result can be accessed via {@link #getConcurrentResult()} or its presence
  * detected via {@link #hasConcurrentResult()}.
  *
- * <p>TODO .. Servlet 3 config
- *
  * @author Rossen Stoyanchev
  * @since 3.2
  *
@@ -61,12 +59,12 @@ public final class WebAsyncManager {
 
 	private static final Log logger = LogFactory.getLog(WebAsyncManager.class);
 
+	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
+
 
 	private AsyncWebRequest asyncWebRequest;
 
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor(this.getClass().getSimpleName());
-
-	private Runnable timeoutHandler;
 
 	private Object concurrentResult = RESULT_NONE;
 
@@ -77,8 +75,6 @@ public final class WebAsyncManager {
 
 	private final Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
 			new LinkedHashMap<Object, DeferredResultProcessingInterceptor>();
-
-	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
 
 	/**
@@ -117,15 +113,6 @@ public final class WebAsyncManager {
 	 */
 	public void setTaskExecutor(AsyncTaskExecutor taskExecutor) {
 		this.taskExecutor = taskExecutor;
-	}
-
-	/**
-	 * Set the handler to use when concurrent handling times out. If not set, by
-	 * default a timeout is handled by returning SERVICE_UNAVAILABLE (503).
-	 * @param timeoutHandler the handler
-	 */
-	public void setTimeoutHandler(Runnable timeoutHandler) {
-		this.timeoutHandler = timeoutHandler;
 	}
 
 	/**
@@ -226,40 +213,63 @@ public final class WebAsyncManager {
 	 */
 	public void startCallableProcessing(final Callable<?> callable, Object... processingContext) {
 		Assert.notNull(callable, "Callable must not be null");
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
+
+		final CallableInterceptorChain chain = new CallableInterceptorChain(this.callableInterceptors.values());
+
+		this.asyncWebRequest.setTimeoutHandler(new Runnable() {
+			public void run() {
+				logger.debug("Processing timeout");
+				Object result = chain.triggerAfterTimeout(asyncWebRequest, callable);
+				if (result != CallableProcessingInterceptor.RESULT_NONE) {
+					setConcurrentResultAndDispatch(result);
+				}
+			}
+		});
+
+		this.asyncWebRequest.addCompletionHandler(new Runnable() {
+			public void run() {
+				chain.triggerAfterCompletion(asyncWebRequest, callable);
+			}
+		});
 
 		startAsyncProcessing(processingContext);
 
 		this.taskExecutor.submit(new Runnable() {
-
 			public void run() {
-
-				CallableInterceptorChain chain =
-						new CallableInterceptorChain(callableInterceptors.values());
-
+				Object result = null;
 				try {
 					chain.applyPreProcess(asyncWebRequest, callable);
-					concurrentResult = callable.call();
+					result = callable.call();
 				}
 				catch (Throwable t) {
-					concurrentResult = t;
+					result = t;
 				}
 				finally {
-					chain.applyPostProcess(asyncWebRequest, callable, concurrentResult);
+					result = chain.applyPostProcess(asyncWebRequest, callable, result);
 				}
-
-				if (logger.isDebugEnabled()) {
-					logger.debug("Concurrent result value [" + concurrentResult + "]");
-				}
-
-				if (asyncWebRequest.isAsyncComplete()) {
-					logger.error("Could not complete processing due to a timeout or network error");
-					return;
-				}
-
-				logger.debug("Dispatching request to continue processing");
-				asyncWebRequest.dispatch();
+				setConcurrentResultAndDispatch(result);
 			}
 		});
+	}
+
+	private void setConcurrentResultAndDispatch(Object result) {
+		synchronized (WebAsyncManager.this) {
+			if (hasConcurrentResult()) {
+				return;
+			}
+			concurrentResult = result;
+		}
+
+		if (asyncWebRequest.isAsyncComplete()) {
+			logger.error("Could not complete async processing due to timeout or network error");
+			return;
+		}
+
+		logger.debug("Concurrent result value [" + concurrentResult + "]");
+		logger.debug("Dispatching request to resume processing");
+
+		asyncWebRequest.dispatch();
 	}
 
 	/**
@@ -273,6 +283,7 @@ public final class WebAsyncManager {
 	 */
 	public void startCallableProcessing(AsyncTask<?> asyncTask, Object... processingContext) {
 		Assert.notNull(asyncTask, "AsyncTask must not be null");
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 
 		Long timeout = asyncTask.getTimeout();
 		if (timeout != null) {
@@ -302,53 +313,54 @@ public final class WebAsyncManager {
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
-	public void startDeferredResultProcessing(final DeferredResult<?> deferredResult,
-			Object... processingContext) throws Exception {
+	public void startDeferredResultProcessing(
+			final DeferredResult<?> deferredResult, Object... processingContext) {
 
 		Assert.notNull(deferredResult, "DeferredResult must not be null");
+		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 
 		Long timeout = deferredResult.getTimeoutMilliseconds();
 		if (timeout != null) {
 			this.asyncWebRequest.setTimeout(timeout);
 		}
 
-		if (deferredResult.hasTimeoutResult()) {
-			this.asyncWebRequest.setTimeoutHandler(new Runnable() {
-				public void run() {
-					deferredResult.applyTimeoutResult();
-				}
-			});
-		}
-
 		final DeferredResultInterceptorChain chain =
 				new DeferredResultInterceptorChain(this.deferredResultInterceptors.values());
 
-		chain.applyPreProcess(this.asyncWebRequest, deferredResult);
+		this.asyncWebRequest.setTimeoutHandler(new Runnable() {
+			public void run() {
+				if (!deferredResult.applyTimeoutResult()) {
+					try {
+						chain.triggerAfterTimeout(asyncWebRequest, deferredResult);
+					}
+					catch (Throwable t) {
+						setConcurrentResultAndDispatch(t);
+					}
+				}
+			}
+		});
 
 		this.asyncWebRequest.addCompletionHandler(new Runnable() {
 			public void run() {
-				if (deferredResult.expire()) {
-					chain.triggerAfterExpiration(asyncWebRequest, deferredResult);
-				}
+				deferredResult.expire();
+				chain.triggerAfterCompletion(asyncWebRequest, deferredResult);
 			}
 		});
 
 		startAsyncProcessing(processingContext);
 
-		deferredResult.setResultHandler(new DeferredResultHandler() {
-
-			public void handleResult(Object result) {
-				concurrentResult = result;
-				if (logger.isDebugEnabled()) {
-					logger.debug("Deferred result value [" + concurrentResult + "]");
+		try {
+			chain.applyPreProcess(this.asyncWebRequest, deferredResult);
+			deferredResult.setResultHandler(new DeferredResultHandler() {
+				public void handleResult(Object result) {
+					result = chain.applyPostProcess(asyncWebRequest, deferredResult, result);
+					setConcurrentResultAndDispatch(result);
 				}
-
-				chain.applyPostProcess(asyncWebRequest, deferredResult, result);
-
-				logger.debug("Dispatching request to complete processing");
-				asyncWebRequest.dispatch();
-			}
-		});
+			});
+		}
+		catch (Throwable t) {
+			setConcurrentResultAndDispatch(t);
+		}
 	}
 
 	private void startAsyncProcessing(Object[] processingContext) {
@@ -356,15 +368,10 @@ public final class WebAsyncManager {
 		clearConcurrentResult();
 		this.concurrentResultContext = processingContext;
 
-		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 		this.asyncWebRequest.startAsync();
 
-		if (this.timeoutHandler != null) {
-			this.asyncWebRequest.setTimeoutHandler(this.timeoutHandler);
-		}
-
 		if (logger.isDebugEnabled()) {
-			HttpServletRequest request = asyncWebRequest.getNativeRequest(HttpServletRequest.class);
+			HttpServletRequest request = this.asyncWebRequest.getNativeRequest(HttpServletRequest.class);
 			String requestUri = urlPathHelper.getRequestUri(request);
 			logger.debug("Concurrent handling starting for " + request.getMethod() + " [" + requestUri + "]");
 		}

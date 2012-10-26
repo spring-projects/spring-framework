@@ -16,26 +16,24 @@
 package org.springframework.web.context.request.async;
 
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.WebRequestInterceptor;
 
 /**
  * Intercepts concurrent request handling, where the concurrent result is
  * obtained by waiting for a {@link DeferredResult} to be set from a thread
  * chosen by the application (e.g. in response to some external event).
  *
- * <p>A {@code DeferredResultProcessingInterceptor} is invoked before the start of
- * asynchronous processing and either when the {@code DeferredResult} is set or
- * when when the underlying request ends, whichever comes fist.
+ * <p>A {@code DeferredResultProcessingInterceptor} is invoked before the start
+ * of async processing, after the {@code DeferredResult} is set as well as on
+ * timeout, or or after completing for any reason including a timeout or network
+ * error.
  *
- * <p>A {@code DeferredResultProcessingInterceptor} may be registered as follows:
- * <pre>
- * DeferredResultProcessingInterceptor interceptor = ... ;
- * WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
- * asyncManager.registerDeferredResultInterceptor("key", interceptor);
- * </pre>
+ * <p>As a general rule exceptions raised by interceptor methods will cause
+ * async processing to resume by dispatching back to the container and using
+ * the Exception instance as the concurrent result. Such exceptions will then
+ * be processed through the {@code HandlerExceptionResolver} mechanism.
  *
- * <p>To register an interceptor for every request, the above can be done through
- * a {@link WebRequestInterceptor} during pre-handling.
+ * <p>The {@link #afterTimeout(NativeWebRequest, DeferredResult) afterTimeout}
+ * method can set the {@code DeferredResult} in order to resume processing.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -43,40 +41,59 @@ import org.springframework.web.context.request.WebRequestInterceptor;
 public interface DeferredResultProcessingInterceptor {
 
 	/**
-	 * Invoked before the start of concurrent handling using a
-	 * {@link DeferredResult}. The invocation occurs in the thread that
-	 * initiated concurrent handling.
+	 * Invoked immediately after the start of concurrent handling, in the same
+	 * thread that started it. This method may be used to detect the start of
+	 * concurrent processing with the given {@code DeferredResult}.
+	 *
+	 * <p>The {@code DeferredResult} may have already been set, for example at
+	 * the time of its creation or by another thread.
 	 *
 	 * @param request the current request
-	 * @param deferredResult the DeferredResult instance
+	 * @param deferredResult the DeferredResult for the current request
+	 * @throws Exception in case of errors
 	 */
-	void preProcess(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception;
+	<T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
 
 	/**
-	 * Invoked when a {@link DeferredResult} is set via
-	 * {@link DeferredResult#setResult(Object) setResult}, or
-	 * {@link DeferredResult#setErrorResult(Object) setErrorResult}, or after
-	 * a timeout if a {@code DeferredResult} was created with a constructor
-	 * accepting a default timeout result.
-	 * <p>
-	 * If the request ends before the {@code DeferredResult} is set, then
-	 * {@link #afterExpiration(NativeWebRequest, DeferredResult)} is called.
+	 * Invoked after a {@code DeferredResult} has been set, via
+	 * {@link DeferredResult#setResult(Object)} or
+	 * {@link DeferredResult#setErrorResult(Object)}, and is also ready to
+	 * handle the concurrent result.
+	 *
+	 * <p>This method may also be invoked after a timeout when the
+	 * {@code DeferredResult} was created with a constructor accepting a default
+	 * timeout result.
 	 *
 	 * @param request the current request
-	 * @param deferredResult the DeferredResult that has been set
+	 * @param deferredResult the DeferredResult for the current request
 	 * @param concurrentResult the result to which the {@code DeferredResult}
-	 * was set
+	 * @throws Exception in case of errors
 	 */
-	void postProcess(NativeWebRequest request, DeferredResult<?> deferredResult,
-			Object concurrentResult) throws Exception;
+	<T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object concurrentResult) throws Exception;
 
 	/**
-	 * Invoked when a {@link DeferredResult} was never set before the request
-	 * completed due to a timeout or network error.
+	 * Invoked from a container thread when an async request times out before
+	 * the {@code DeferredResult} has been set. Implementations may invoke
+	 * {@link DeferredResult#setResult(Object) setResult} or
+	 * {@link DeferredResult#setErrorResult(Object) to resume processing.
 	 *
 	 * @param request the current request
-	 * @param deferredResult the DeferredResult that has been set
+	 * @param deferredResult the DeferredResult for the current request; if the
+	 * {@code DeferredResult} is set, then concurrent processing is resumed and
+	 * subsequent interceptors are not invoked
+	 * @throws Exception in case of errors
 	 */
-	void afterExpiration(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception;
+	<T> void afterTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+
+	/**
+	 * Invoked from a container thread when an async request completed for any
+	 * reason including timeout and network error. This method is useful for
+	 * detecting that a {@code DeferredResult} instance is no longer usable.
+	 *
+	 * @param request the current request
+	 * @param deferredResult the DeferredResult for the current request
+	 * @throws Exception in case of errors
+	 */
+	<T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
 
 }

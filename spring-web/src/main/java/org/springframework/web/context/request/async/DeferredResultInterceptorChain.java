@@ -35,35 +35,48 @@ class DeferredResultInterceptorChain {
 
 	private final List<DeferredResultProcessingInterceptor> interceptors;
 
+	private int preProcessingIndex = -1;
+
 
 	public DeferredResultInterceptorChain(Collection<DeferredResultProcessingInterceptor> interceptors) {
 		this.interceptors = new ArrayList<DeferredResultProcessingInterceptor>(interceptors);
 	}
 
-	public void applyPreProcess(NativeWebRequest request, DeferredResult<?> task) throws Exception {
+	public void applyPreProcess(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
 		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
-			interceptor.preProcess(request, task);
+			interceptor.preProcess(request, deferredResult);
+			this.preProcessingIndex++;
 		}
 	}
 
-	public void applyPostProcess(NativeWebRequest request, DeferredResult<?> task, Object concurrentResult) {
-		for (int i = this.interceptors.size()-1; i >= 0; i--) {
-			try {
-				this.interceptors.get(i).postProcess(request, task, concurrentResult);
+	public Object applyPostProcess(NativeWebRequest request,  DeferredResult<?> deferredResult, Object concurrentResult) {
+		try {
+			for (int i = this.preProcessingIndex; i >= 0; i--) {
+				this.interceptors.get(i).postProcess(request, deferredResult, concurrentResult);
 			}
-			catch (Exception ex) {
-				logger.error("DeferredResultProcessingInterceptor.postProcess threw exception", ex);
+		}
+		catch (Throwable t) {
+			return t;
+		}
+		return concurrentResult;
+	}
+
+	public void triggerAfterTimeout(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
+		for (int i = this.preProcessingIndex; i >= 0; i--) {
+			if (deferredResult.isSetOrExpired()) {
+				return;
 			}
+			this.interceptors.get(i).afterTimeout(request, deferredResult);
 		}
 	}
 
-	public void triggerAfterExpiration(NativeWebRequest request, DeferredResult<?> task) {
-		for (int i = this.interceptors.size()-1; i >= 0; i--) {
+	public void triggerAfterCompletion(NativeWebRequest request, DeferredResult<?> deferredResult) {
+		for (int i = this.preProcessingIndex; i >= 0; i--) {
 			try {
-				this.interceptors.get(i).afterExpiration(request, task);
+				this.interceptors.get(i).afterCompletion(request, deferredResult);
 			}
-			catch (Exception ex) {
-				logger.error("DeferredResultProcessingInterceptor.afterExpiration threw exception", ex);
+			catch (Throwable t) {
+				logger.error("afterCompletion error", t);
 			}
 		}
 	}

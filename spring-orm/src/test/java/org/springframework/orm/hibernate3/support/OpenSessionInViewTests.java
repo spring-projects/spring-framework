@@ -16,7 +16,7 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.*;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
@@ -39,6 +39,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.transaction.TransactionManager;
 
+import org.easymock.EasyMock;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionFactory;
@@ -63,8 +64,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 
@@ -176,6 +177,8 @@ public class OpenSessionInViewTests {
 		verify(session);
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
@@ -490,6 +493,8 @@ public class OpenSessionInViewTests {
 		};
 
 		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.setTimeoutHandler(EasyMock.<Runnable>anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();

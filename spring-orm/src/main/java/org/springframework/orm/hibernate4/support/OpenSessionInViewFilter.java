@@ -34,7 +34,7 @@ import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -215,7 +215,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Bind and unbind the Hibernate {@code Session} to the current thread.
 	 */
-	private static class SessionBindingCallableInterceptor implements CallableProcessingInterceptor {
+	private static class SessionBindingCallableInterceptor extends CallableProcessingInterceptorAdapter {
 
 		private final SessionFactory sessionFactory;
 
@@ -226,16 +226,18 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			this.sessionHolder = sessionHolder;
 		}
 
-		public void preProcess(NativeWebRequest request, Callable<?> task) {
+		@Override
+		public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
 			initializeThread();
+		}
+
+		@Override
+		public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) {
+			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 
 		private void initializeThread() {
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
-		}
-
-		public void postProcess(NativeWebRequest request, Callable<?> task, Object concurrentResult) {
-			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
 		}
 	}
 }

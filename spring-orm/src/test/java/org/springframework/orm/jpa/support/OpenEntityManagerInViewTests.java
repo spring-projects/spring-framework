@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,6 +154,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		verify(manager, factory);
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
@@ -343,6 +345,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		FilterChain filterChain3 = new PassThroughFilterChain(filter2, filterChain2);
 
 		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
+		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
+		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();
