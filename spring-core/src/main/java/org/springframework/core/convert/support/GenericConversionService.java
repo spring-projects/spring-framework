@@ -126,6 +126,21 @@ public class GenericConversionService implements ConfigurableConversionService {
 		return (converter != null);
 	}
 
+	public boolean canBypassConvert(Class<?> sourceType, Class<?> targetType) {
+		Assert.notNull(targetType, "The targetType to convert to cannot be null");
+		return canBypassConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType)
+				: null, TypeDescriptor.valueOf(targetType));
+	}
+
+	public boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Assert.notNull(targetType, "The targetType to convert to cannot be null");
+		if (sourceType == null) {
+			return true;
+		}
+		GenericConverter converter = getConverter(sourceType, targetType);
+		return (converter == NO_OP_CONVERTER);
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
 		Assert.notNull(targetType,"The targetType to convert to cannot be null");

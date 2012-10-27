@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package org.springframework.core.convert;
  * Call {@link #convert(Object, Class)} to perform a thread-safe type conversion using this system.
  *
  * @author Keith Donald
+ * @author Phillip Webb
  * @since 3.0
  */
 public interface ConversionService {
@@ -53,6 +54,28 @@ public interface ConversionService {
 	 * @throws IllegalArgumentException if targetType is null
 	 */
 	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
+
+	/**
+	 * Returns true if conversion between the sourceType and targetType can be bypassed.
+	 * More precisely this method will return true if objects of sourceType can be
+	 * converted to the targetType by returning the source object unchanged.
+	 * @param sourceType context about the source type to convert from (may be null if source is null)
+	 * @param targetType context about the target type to convert to (required)
+	 * @return true if conversion can be bypassed
+	 * @throws IllegalArgumentException if targetType is null
+	 */
+	boolean canBypassConvert(Class<?> sourceType, Class<?> targetType);
+
+	/**
+	 * Returns true if conversion between the sourceType and targetType can be bypassed.
+	 * More precisely this method will return true if objects of sourceType can be
+	 * converted to the targetType by returning the source object unchanged.
+	 * @param sourceType context about the source type to convert from (may be null if source is null)
+	 * @param targetType context about the target type to convert to (required)
+	 * @return true if conversion can be bypassed
+	 * @throws IllegalArgumentException if targetType is null
+	 */
+	boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
 	 * Convert the source to targetType.

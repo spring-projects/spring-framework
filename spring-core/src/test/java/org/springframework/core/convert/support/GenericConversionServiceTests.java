@@ -19,6 +19,7 @@ package org.springframework.core.convert.support;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -707,6 +708,30 @@ public class GenericConversionServiceTests {
 			last = iterator.next();
 		}
 		assertEquals(Object.class, last.getType());
+	}
+
+	@Test
+	public void convertOptimizeArray() throws Exception {
+		// SPR-9566
+		GenericConversionService conversionService = new DefaultConversionService();
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] converted = conversionService.convert(byteArray, byte[].class);
+		assertSame(byteArray, converted);
+	}
+
+	@Test
+	public void convertCannotOptimizeArray() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		conversionService.addConverter(new Converter<Byte, Byte>() {
+			public Byte convert(Byte source) {
+				return (byte) (source + 1);
+			}
+		});
+		DefaultConversionService.addDefaultConverters(conversionService);
+		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] converted = conversionService.convert(byteArray, byte[].class);
+		assertNotSame(byteArray, converted);
+		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
 	}
 
 	private static class MyConditionalConverter implements Converter<String, Color>,
