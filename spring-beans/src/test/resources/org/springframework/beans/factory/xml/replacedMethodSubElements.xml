@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+  <bean id="noOpMethodReplacer" class="test.beans.NoOpMethodReplacer"/>
+
+  <bean id="testBean" class="test.beans.TestBean">
+
+    <replaced-method name="replaceMe" replacer="noOpMethodReplacer">
+      <!-- use of the content rather than the match attribute-->
+      <arg-type>String</arg-type>
+    </replaced-method>
+
+    <replaced-method name="setAge" replacer="noOpMethodReplacer">
+      <!-- both attribute and content can be specified .. the match attribute takes
+           precedence -->
+      <arg-type match="int">String</arg-type>
+    </replaced-method>
+  </bean>
+</beans>
