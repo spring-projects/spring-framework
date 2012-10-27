@@ -32,6 +32,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -178,13 +180,13 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * The default value is "true" so that the filter may log a "before" message
+	 * The default value is "false" so that the filter may log a "before" message
 	 * at the start of request processing and an "after" message at the end from
 	 * when the last asynchronously dispatched thread is exiting.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
 	}
 
 	/**
@@ -198,7 +200,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		boolean isFirstRequest = !isAsyncDispatch(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 
 		if (isIncludePayload()) {
 			if (isFirstRequest) {
@@ -213,7 +216,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 			filterChain.doFilter(request, response);
 		}
 		finally {
-			if (isLastRequestThread(request)) {
+			if (!asyncManager.isConcurrentHandlingStarted()) {
 				afterRequest(request, getAfterMessage(request));
 			}
 		}

@@ -25,6 +25,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
@@ -36,7 +37,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * as part of an {@linkplain javax.servlet.DispatcherType.ASYNC ASYNC} dispatch.
  * Sub-classes may decide whether to be invoked once per request or once per
  * request thread for as long as the same request is being processed.
- * See {@link #shouldFilterAsyncDispatches()}.
+ * See {@link #shouldNotFilterAsyncDispatch()}.
  *
  * <p>The {@link #getAlreadyFilteredAttributeName} method determines how
  * to identify that a request is already filtered. The default implementation
@@ -73,12 +74,13 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-		boolean processAsyncRequestThread = isAsyncDispatch(httpRequest) && shouldFilterAsyncDispatches();
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		boolean processAsyncDispatch = asyncManager.hasConcurrentResult() && !shouldNotFilterAsyncDispatch();
 
 		String alreadyFilteredAttributeName = getAlreadyFilteredAttributeName();
 		boolean hasAlreadyFilteredAttribute = request.getAttribute(alreadyFilteredAttributeName) != null;
 
-		if ((hasAlreadyFilteredAttribute && (!processAsyncRequestThread)) || shouldNotFilter(httpRequest)) {
+		if ((hasAlreadyFilteredAttribute && (!processAsyncDispatch)) || shouldNotFilter(httpRequest)) {
 
 			// Proceed without invoking this filter...
 			filterChain.doFilter(request, response);
@@ -90,7 +92,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 				doFilterInternal(httpRequest, httpResponse, filterChain);
 			}
 			finally {
-				if (isLastRequestThread(httpRequest)) {
+				if (!asyncManager.isConcurrentHandlingStarted()) {
 					// Remove the "already filtered" request attribute for this request.
 					request.removeAttribute(alreadyFilteredAttributeName);
 				}
@@ -128,60 +130,30 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
-	 * Whether to filter once per request or once per request thread. The dispatcher
-	 * type {@code javax.servlet.DispatcherType.ASYNC} introduced in Servlet 3.0
-	 * means a filter can be invoked in more than one thread (and exited) over the
-	 * course of a single request. Some filters only need to filter the initial
-	 * thread (e.g. request wrapping) while others may need to be invoked at least
-	 * once in each additional thread for example for setting up thread locals or
-	 * to perform final processing at the very end.
+	 * Whether to filter async dispatches, which occur in a different thread.
+	 * The dispatcher type {@code javax.servlet.DispatcherType.ASYNC} introduced
+	 * in Servlet 3.0 means a filter can be invoked in more than one thread (and
+	 * exited) over the course of a single request. Some filters only need to
+	 * filter the initial thread (e.g. request wrapping) while others may need
+	 * to be invoked at least once in each additional thread for example for
+	 * setting up thread locals or to perform final processing at the very end.
 	 * <p>Note that although a filter can be mapped to handle specific dispatcher
 	 * types via {@code web.xml} or in Java through the {@code ServletContext},
-	 * servlet containers may enforce different defaults with regards to dispatcher
-	 * types. This flag enforces the design intent of the filter.
-	 * <p>The default setting is "false",  which means the filter will be invoked
-	 * once only per request and only on the initial request thread. If "true", the
-	 * filter will also be invoked once only on each additional thread.
-	 *
-	 * @see org.springframework.web.context.request.async.WebAsyncManager
+	 * servlet containers may enforce different defaults with regards to
+	 * dispatcher types. This flag enforces the design intent of the filter.
+	 * <p>The default setting is "true", which means the filter will not be
+	 * invoked during subsequent async dispatches. If "false", the filter will
+	 * be invoked during async dispatches with the same guarantees of being
+	 * invoked only once during a request within a single thread.
 	 */
-	protected boolean shouldFilterAsyncDispatches() {
-		return false;
-	}
-
-	/**
-	 * Whether the request was dispatched to complete processing of results produced
-	 * in another thread. This aligns with the Servlet 3.0 dispatcher type
-	 * {@code javax.servlet.DispatcherType.ASYNC} and can be used by filters that
-	 * return "true" from {@link #shouldFilterAsyncDispatches()} to detect when
-	 * the filter is being invoked subsequently in additional thread(s).
-	 *
-	 * @see org.springframework.web.context.request.async.WebAsyncManager
-	 */
-	protected final boolean isAsyncDispatch(HttpServletRequest request) {
-		return WebAsyncUtils.getAsyncManager(request).hasConcurrentResult();
-	}
-
-	/**
-	 * Whether this is the last thread processing the request. Note the returned
-	 * value may change from {@code true} to {@code false} if the method is
-	 * invoked before and after delegating to the next filter, since the next filter
-	 * or servlet may begin concurrent processing. Therefore this method is most
-	 * useful after delegation for final, end-of-request type processing.
-	 * @param request the current request
-	 * @return {@code true} if the response will be committed when the current
-	 * 	thread exits; {@code false} if the response will remain open.
-	 *
-	 * @see org.springframework.web.context.request.async.WebAsyncManager
-	 */
-	protected final boolean isLastRequestThread(HttpServletRequest request) {
-		return (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted());
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return true;
 	}
 
 	/**
 	 * Same contract as for <code>doFilter</code>, but guaranteed to be
-	 * just invoked once per request or once per request thread.
-	 * See {@link #shouldFilterAsyncDispatches()} for details.
+	 * just invoked once per request within a single request thread.
+	 * See {@link #shouldNotFilterAsyncDispatch()} for details.
 	 * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the
 	 * default ServletRequest and ServletResponse ones.
 	 */

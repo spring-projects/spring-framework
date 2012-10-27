@@ -32,6 +32,8 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -54,19 +56,20 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "true" so that the filter may delay the generation of
+	 * The default value is "false" so that the filter may delay the generation of
 	 * an ETag until the last asynchronously dispatched thread.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
 	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		boolean isFirstRequest = !isAsyncDispatch(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 
 		if (isFirstRequest) {
 			response = new ShallowEtagResponseWrapper(response);
@@ -74,7 +77,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		filterChain.doFilter(request, response);
 
-		if (isLastRequestThread(request)) {
+		if (!asyncManager.isConcurrentHandlingStarted()) {
 			updateResponse(request, response);
 		}
 	}

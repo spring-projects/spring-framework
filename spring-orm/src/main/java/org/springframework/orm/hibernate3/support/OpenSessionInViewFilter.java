@@ -169,13 +169,13 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * The default value is "true" so that the filter may re-bind the opened
+	 * The default value is "false" so that the filter may re-bind the opened
 	 * {@code Session} to each asynchronously dispatched thread and postpone
 	 * closing it until the very last asynchronous dispatch.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !isAsyncDispatch(request);
+		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 		String key = getAlreadyFilteredAttributeName();
 
 		if (isSingleSession()) {
@@ -210,7 +210,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 		else {
 			// deferred close mode
-			Assert.state(isLastRequestThread(request), "Deferred close mode is not supported on async dispatches");
+			Assert.state(!asyncManager.isConcurrentHandlingStarted(),
+					"Deferred close mode is not supported on async dispatches");
 			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
 				// Do not modify deferred close: just set the participate flag.
 				participate = true;
@@ -229,7 +230,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					SessionHolder sessionHolder =
 							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					if (isLastRequestThread(request)) {
+					if (!asyncManager.isConcurrentHandlingStarted()) {
 						logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
 						closeSession(sessionHolder.getSession(), sessionFactory);
 					}

@@ -71,12 +71,12 @@ public class RequestContextFilter extends OncePerRequestFilter {
 
 
 	/**
-	 * The default value is "true" in which case the filter will set up the request
+	 * The default value is "false" in which case the filter will set up the request
 	 * context in each asynchronously dispatched thread.
 	 */
 	@Override
-	protected boolean shouldFilterAsyncDispatches() {
-		return true;
+	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
 	}
 
 	@Override
