@@ -16,8 +16,8 @@
 
 package org.springframework.test.context;
 
-import static org.springframework.test.context.ContextLoaderUtils.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.context.ContextLoaderUtils.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,8 +140,8 @@ public class ContextLoaderUtilsTests {
 		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(LocationsBar.class);
 		assertNotNull(attributesList);
 		assertEquals(2, attributesList.size());
-		assertLocationsFooAttributes(attributesList.get(0));
-		assertLocationsBarAttributes(attributesList.get(1));
+		assertLocationsBarAttributes(attributesList.get(0));
+		assertLocationsFooAttributes(attributesList.get(1));
 	}
 
 	@Test
@@ -149,8 +149,8 @@ public class ContextLoaderUtilsTests {
 		List<ContextConfigurationAttributes> attributesList = resolveContextConfigurationAttributes(ClassesBar.class);
 		assertNotNull(attributesList);
 		assertEquals(2, attributesList.size());
-		assertClassesFooAttributes(attributesList.get(0));
-		assertClassesBarAttributes(attributesList.get(1));
+		assertClassesBarAttributes(attributesList.get(0));
+		assertClassesFooAttributes(attributesList.get(1));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
