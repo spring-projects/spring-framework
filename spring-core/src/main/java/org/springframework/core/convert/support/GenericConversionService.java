@@ -34,6 +34,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConversion;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
@@ -289,6 +290,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if(!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
 				return false;
 			}
+			if (this.converter instanceof ConditionalConversion) {
+				return ((ConditionalConversion) this.converter).matches(sourceType,
+						targetType);
+			}
 			return true;
 		}
 
@@ -310,7 +315,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * Adapts a {@link ConverterFactory} to a {@link GenericConverter}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final class ConverterFactoryAdapter implements GenericConverter {
+	private final class ConverterFactoryAdapter implements ConditionalGenericConverter {
 
 		private final ConvertiblePair typeInfo;
 
@@ -325,6 +330,21 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(this.typeInfo);
+		}
+
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			boolean matches = true;
+			if (this.converterFactory instanceof ConditionalConversion) {
+				matches = ((ConditionalConversion) this.converterFactory).matches(
+						sourceType, targetType);
+			}
+			if(matches) {
+				Converter<?, ?> converter = converterFactory.getConverter(targetType.getType());
+				if(converter instanceof ConditionalConversion) {
+					matches = ((ConditionalConversion) converter).matches(sourceType, targetType);
+				}
+			}
+			return matches;
 		}
 
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -393,15 +413,23 @@ public class GenericConversionService implements ConfigurableConversionService {
 			IGNORED_CLASSES = Collections.unmodifiableSet(ignored);
 		}
 
+		private final Set<GenericConverter> globalConverters =
+				new LinkedHashSet<GenericConverter>();
+
 		private final Map<ConvertiblePair, ConvertersForPair> converters =
 			new LinkedHashMap<ConvertiblePair, ConvertersForPair>(36);
 
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
-			Assert.state(converter.getConvertibleTypes() != null, "Converter does not specifiy ConvertibleTypes");
-			for (ConvertiblePair convertiblePair : convertibleTypes) {
-				ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
-				convertersForPair.add(converter);
+			if (convertibleTypes == null) {
+				Assert.state(converter instanceof ConditionalConversion,
+						"Only conditional converters may return null convertible types");
+				globalConverters.add(converter);
+			} else {
+				for (ConvertiblePair convertiblePair : convertibleTypes) {
+					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
+					convertersForPair.add(converter);
+				}
 			}
 		}
 
@@ -452,6 +480,15 @@ public class GenericConversionService implements ConfigurableConversionService {
 				: convertersForPair.getConverter(sourceType, targetType);
 			if (converter != null) {
 				return converter;
+			}
+
+			// Check ConditionalGenericConverter that match all types
+			for (GenericConverter globalConverter : this.globalConverters) {
+				if (((ConditionalConversion)globalConverter).matches(
+						sourceCandidate,
+						targetCandidate)) {
+					return globalConverter;
+				}
 			}
 
 			return null;
