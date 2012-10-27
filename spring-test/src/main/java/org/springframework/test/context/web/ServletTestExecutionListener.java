@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -27,7 +28,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestContext;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.test.context.TestExecutionListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -38,17 +39,26 @@ import org.springframework.web.context.request.ServletWebRequest;
  * @author Sam Brannen
  * @since 3.2
  */
-public class ServletTestExecutionListener extends AbstractTestExecutionListener {
+public class ServletTestExecutionListener implements TestExecutionListener {
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
 
 	/**
+	 * The default implementation is <em>empty</em>. Can be overridden by
+	 * subclasses as necessary.
+	 *
+	 * @see org.springframework.test.context.TestExecutionListener#beforeTestClass(TestContext)
+	 */
+	public void beforeTestClass(TestContext testContext) throws Exception {
+		/* no-op */
+	}
+
+	/**
 	 * TODO [SPR-9864] Document overridden prepareTestInstance().
 	 *
-	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#prepareTestInstance(org.springframework.test.context.TestContext)
+	 * @see org.springframework.test.context.TestExecutionListener#prepareTestInstance(TestContext)
 	 */
-	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
 	}
@@ -56,11 +66,32 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	/**
 	 * TODO [SPR-9864] Document overridden beforeTestMethod().
 	 *
-	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#beforeTestMethod(org.springframework.test.context.TestContext)
+	 * @see org.springframework.test.context.TestExecutionListener#beforeTestMethod(TestContext)
 	 */
-	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
+	}
+
+	/**
+	 * TODO [SPR-9864] Document overridden afterTestMethod().
+	 *
+	 * @see org.springframework.test.context.TestExecutionListener#afterTestMethod(TestContext)
+	 */
+	public void afterTestMethod(TestContext testContext) throws Exception {
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
+		}
+		RequestContextHolder.resetRequestAttributes();
+	}
+
+	/**
+	 * The default implementation is <em>empty</em>. Can be overridden by
+	 * subclasses as necessary.
+	 *
+	 * @see org.springframework.test.context.TestExecutionListener#afterTestClass(TestContext)
+	 */
+	public void afterTestClass(TestContext testContext) throws Exception {
+		/* no-op */
 	}
 
 	/**
@@ -104,19 +135,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				}
 			}
 		}
-	}
-
-	/**
-	 * TODO [SPR-9864] Document overridden afterTestMethod().
-	 *
-	 * @see org.springframework.test.context.support.AbstractTestExecutionListener#afterTestMethod(org.springframework.test.context.TestContext)
-	 */
-	@Override
-	public void afterTestMethod(TestContext testContext) throws Exception {
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Resetting RequestContextHolder for test context %s.", testContext));
-		}
-		RequestContextHolder.resetRequestAttributes();
 	}
 
 }
