@@ -734,6 +734,22 @@ public class GenericConversionServiceTests {
 		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
 	}
 
+	@Test
+	public void testEnumToStringConversion() {
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		String result = conversionService.convert(MyEnum.A, String.class);
+		assertEquals("A", result);
+	}
+
+	@Test
+	public void testEnumWithInterfaceToStringConversion() {
+		// SPR-9692
+		conversionService.addConverter(new EnumToStringConverter(conversionService));
+		conversionService.addConverter(new MyEnumInterfaceToStringConverter<MyEnum>());
+		String result = conversionService.convert(MyEnum.A, String.class);
+		assertEquals("1", result);
+	}
+
 	private static class MyConditionalConverter implements Converter<String, Color>,
 			ConditionalConversion {
 
@@ -803,4 +819,22 @@ public class GenericConversionServiceTests {
 		}
 	}
 
+	interface MyEnumInterface {
+		String getCode();
+	}
+
+	public static enum MyEnum implements MyEnumInterface {
+		A {
+			public String getCode() {
+				return "1";
+			}
+		};
+	}
+
+	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface>
+			implements Converter<T, String> {
+		public String convert(T source) {
+			return source.getCode();
+		}
+	}
 }
