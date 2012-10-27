@@ -59,6 +59,7 @@ public class DefaultConversionService extends GenericConversionService {
 	// internal helpers
 
 	private static void addScalarConverters(ConverterRegistry converterRegistry) {
+		ConversionService conversionService = (ConversionService) converterRegistry;
 		converterRegistry.addConverter(new StringToBooleanConverter());
 		converterRegistry.addConverter(Boolean.class, String.class, new ObjectToStringConverter());
 
@@ -74,7 +75,7 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverterFactory(new CharacterToNumberFactory());
 
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
-		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter());
+		converterRegistry.addConverter(Enum.class, String.class, new EnumToStringConverter(conversionService));
 
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
