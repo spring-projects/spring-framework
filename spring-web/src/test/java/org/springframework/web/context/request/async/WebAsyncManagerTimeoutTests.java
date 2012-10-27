@@ -34,6 +34,7 @@ import javax.servlet.DispatcherType;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.mock.web.MockAsyncContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -57,7 +58,7 @@ public class WebAsyncManagerTimeoutTests {
 
 	@Before
 	public void setUp() {
-		this.servletRequest = new MockHttpServletRequest();
+		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);
 		this.asyncWebRequest = new StandardServletAsyncWebRequest(servletRequest, new MockHttpServletResponse());
 
@@ -107,7 +108,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
 		assertEquals(22, this.asyncManager.getConcurrentResult());
-		assertEquals(DispatcherType.ASYNC, this.servletRequest.getDispatcherType());
+		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
 
 		verify(interceptor);
 	}
@@ -128,7 +129,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
 		assertEquals(exception, this.asyncManager.getConcurrentResult());
-		assertEquals(DispatcherType.ASYNC, this.servletRequest.getDispatcherType());
+		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
 
 		verify(interceptor);
 	}
@@ -174,7 +175,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(event);
 
 		assertEquals(23, this.asyncManager.getConcurrentResult());
-		assertEquals(DispatcherType.ASYNC, this.servletRequest.getDispatcherType());
+		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
 	}
 
 	@Test
@@ -195,7 +196,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(event);
 
 		assertEquals(23, this.asyncManager.getConcurrentResult());
-		assertEquals(DispatcherType.ASYNC, this.servletRequest.getDispatcherType());
+		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
 	}
 
 	@Test
@@ -217,7 +218,7 @@ public class WebAsyncManagerTimeoutTests {
 		this.asyncWebRequest.onTimeout(event);
 
 		assertEquals(exception, this.asyncManager.getConcurrentResult());
-		assertEquals(DispatcherType.ASYNC, this.servletRequest.getDispatcherType());
+		assertEquals("/test", ((MockAsyncContext) this.servletRequest.getAsyncContext()).getDispatchedPath());
 	}
 
 

@@ -22,11 +22,12 @@ import java.util.List;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.util.WebUtils;
@@ -39,22 +40,20 @@ import org.springframework.web.util.WebUtils;
  */
 public class MockAsyncContext implements AsyncContext {
 
-	private final ServletRequest request;
+	private final HttpServletRequest request;
 
-	private final ServletResponse response;
-
-	private final MockHttpServletRequest mockRequest;
+	private final HttpServletResponse response;
 
 	private final List<AsyncListener> listeners = new ArrayList<AsyncListener>();
 
-	private String dispatchPath;
+	private String dispatchedPath;
 
-	private long timeout = 10 * 60 * 1000L;
+	private long timeout = 10 * 1000L;	// 10 seconds is Tomcat's default
+
 
 	public MockAsyncContext(ServletRequest request, ServletResponse response) {
-		this.request = request;
-		this.response = response;
-		this.mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+		this.request = (HttpServletRequest) request;
+		this.response = (HttpServletResponse) response;
 	}
 
 	public ServletRequest getRequest() {
@@ -66,15 +65,15 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 	public boolean hasOriginalRequestAndResponse() {
-		return false;
+		return (this.request instanceof MockHttpServletRequest) && (this.response instanceof MockHttpServletResponse);
 	}
 
-	public String getDispatchPath() {
-		return this.dispatchPath;
+	public String getDispatchedPath() {
+		return this.dispatchedPath;
 	}
 
 	public void dispatch() {
-		dispatch(null);
+		dispatch(this.request.getRequestURI());
  	}
 
 	public void dispatch(String path) {
@@ -82,16 +81,13 @@ public class MockAsyncContext implements AsyncContext {
 	}
 
 	public void dispatch(ServletContext context, String path) {
-		this.dispatchPath = path;
-		if (this.mockRequest != null) {
-			this.mockRequest.setDispatcherType(DispatcherType.ASYNC);
-			this.mockRequest.setAsyncStarted(false);
-		}
+		this.dispatchedPath = path;
 	}
 
 	public void complete() {
-		if (this.mockRequest != null) {
-			this.mockRequest.setAsyncStarted(false);
+		MockHttpServletRequest mockRequest = WebUtils.getNativeRequest(request, MockHttpServletRequest.class);
+		if (mockRequest != null) {
+			mockRequest.setAsyncStarted(false);
 		}
 		for (AsyncListener listener : this.listeners) {
 			try {
@@ -103,7 +99,8 @@ public class MockAsyncContext implements AsyncContext {
 		}
 	}
 
-	public void start(Runnable run) {
+	public void start(Runnable runnable) {
+		runnable.run();
 	}
 
 	public List<AsyncListener> getListeners() {

@@ -26,6 +26,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -40,9 +42,9 @@ import org.springframework.web.util.WebUtils;
  */
 class MockAsyncContext implements AsyncContext {
 
-	private final ServletRequest request;
+	private final HttpServletRequest request;
 
-	private final ServletResponse response;
+	private final HttpServletResponse response;
 
 	private final List<AsyncListener> listeners = new ArrayList<AsyncListener>();
 
@@ -52,8 +54,8 @@ class MockAsyncContext implements AsyncContext {
 
 
 	public MockAsyncContext(ServletRequest request, ServletResponse response) {
-		this.request = request;
-		this.response = response;
+		this.request = (HttpServletRequest) request;
+		this.response = (HttpServletResponse) response;
 	}
 
 	public ServletRequest getRequest() {
@@ -73,7 +75,7 @@ class MockAsyncContext implements AsyncContext {
 	}
 
 	public void dispatch() {
-		dispatch(null);
+		dispatch(this.request.getRequestURI());
  	}
 
 	public void dispatch(String path) {
@@ -89,13 +91,12 @@ class MockAsyncContext implements AsyncContext {
 		if (mockRequest != null) {
 			mockRequest.setAsyncStarted(false);
 		}
-
 		for (AsyncListener listener : this.listeners) {
 			try {
 				listener.onComplete(new AsyncEvent(this, this.request, this.response));
 			}
 			catch (IOException e) {
-				throw new IllegalStateException("AsyncListener failed", e);
+				throw new IllegalStateException("AsyncListener failure", e);
 			}
 		}
 	}
