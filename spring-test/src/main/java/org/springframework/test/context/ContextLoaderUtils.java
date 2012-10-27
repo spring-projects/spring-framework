@@ -19,6 +19,8 @@ package org.springframework.test.context;
 import static org.springframework.beans.BeanUtils.*;
 import static org.springframework.core.annotation.AnnotationUtils.*;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,10 +29,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.context.web.WebMergedContextConfiguration;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -57,6 +59,9 @@ abstract class ContextLoaderUtils {
 	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.DelegatingSmartContextLoader";
 	private static final String DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.WebDelegatingSmartContextLoader";
 
+	private static final String WEB_APP_CONFIGURATION_CLASS_NAME = "org.springframework.test.context.web.WebAppConfiguration";
+	private static final String WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME = "org.springframework.test.context.web.WebMergedContextConfiguration";
+
 
 	private ContextLoaderUtils() {
 		/* no-op */
@@ -69,7 +74,8 @@ abstract class ContextLoaderUtils {
 	 *
 	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
 	 * {@code null} or <em>empty</em>, depending on the absence or presence
-	 * of @{@link WebAppConfiguration} either {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
+	 * of {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
+	 * either {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
 	 * or {@value #DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME} will be used as the
 	 * default context loader class name. For details on the class resolution
 	 * process, see {@link #resolveContextLoaderClass()}.
@@ -91,7 +97,9 @@ abstract class ContextLoaderUtils {
 		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
 
 		if (!StringUtils.hasText(defaultContextLoaderClassName)) {
-			defaultContextLoaderClassName = testClass.isAnnotationPresent(WebAppConfiguration.class) ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
+			Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
+			defaultContextLoaderClassName = webAppConfigClass != null
+					&& testClass.isAnnotationPresent(webAppConfigClass) ? DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME
 					: DEFAULT_CONTEXT_LOADER_CLASS_NAME;
 		}
 
@@ -385,16 +393,82 @@ abstract class ContextLoaderUtils {
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(configAttributesList);
 		String[] activeProfiles = resolveActiveProfiles(testClass);
 
-		if (testClass.isAnnotationPresent(WebAppConfiguration.class)) {
-			WebAppConfiguration webAppConfig = testClass.getAnnotation(WebAppConfiguration.class);
-			String resourceBasePath = webAppConfig.value();
-			return new WebMergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-				resourceBasePath, contextLoader);
+		MergedContextConfiguration mergedConfig = buildWebMergedContextConfiguration(testClass, locations, classes,
+			initializerClasses, activeProfiles, contextLoader);
+
+		if (mergedConfig == null) {
+			mergedConfig = new MergedContextConfiguration(testClass, locations, classes, initializerClasses,
+				activeProfiles, contextLoader);
 		}
 
-		// else
-		return new MergedContextConfiguration(testClass, locations, classes, initializerClasses, activeProfiles,
-			contextLoader);
+		return mergedConfig;
+	}
+
+	/**
+	 * Load the {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
+	 * class using reflection in order to avoid package cycles.
+	 * 
+	 * @return the {@code @WebAppConfiguration} class or <code>null</code> if it
+	 * cannot be loaded
+	 */
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Annotation> loadWebAppConfigurationClass() {
+		Class<? extends Annotation> webAppConfigClass = null;
+		try {
+			webAppConfigClass = (Class<? extends Annotation>) ClassUtils.forName(WEB_APP_CONFIGURATION_CLASS_NAME,
+				ContextLoaderUtils.class.getClassLoader());
+		}
+		catch (Throwable t) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not load @WebAppConfiguration class [" + WEB_APP_CONFIGURATION_CLASS_NAME + "].", t);
+			}
+		}
+		return webAppConfigClass;
+	}
+
+	/**
+	 * Attempt to build a {@link org.springframework.test.context.web.WebMergedContextConfiguration
+	 * WebMergedContextConfiguration} from the supplied arguments using reflection
+	 * in order to avoid package cycles.
+	 *
+	 * @return the {@code WebMergedContextConfiguration} or <code>null</code> if
+	 * it could not be built
+	 */
+	@SuppressWarnings("unchecked")
+	private static MergedContextConfiguration buildWebMergedContextConfiguration(
+			Class<?> testClass,
+			String[] locations,
+			Class<?>[] classes,
+			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
+			String[] activeProfiles, ContextLoader contextLoader) {
+
+		Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
+
+		if (webAppConfigClass != null && testClass.isAnnotationPresent(webAppConfigClass)) {
+			Annotation annotation = testClass.getAnnotation(webAppConfigClass);
+			String resourceBasePath = (String) AnnotationUtils.getValue(annotation);
+
+			try {
+				Class<? extends MergedContextConfiguration> webMergedConfigClass = (Class<? extends MergedContextConfiguration>) ClassUtils.forName(
+					WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME, ContextLoaderUtils.class.getClassLoader());
+
+				Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
+					webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
+					String.class, ContextLoader.class);
+
+				if (constructor != null) {
+					return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
+						activeProfiles, resourceBasePath, contextLoader);
+				}
+			}
+			catch (Throwable t) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Could not instantiate [" + WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME + "].", t);
+				}
+			}
+		}
+
+		return null;
 	}
 
 }

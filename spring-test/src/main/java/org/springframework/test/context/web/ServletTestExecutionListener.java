@@ -48,7 +48,7 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 *
-	 * @see org.springframework.test.context.TestExecutionListener#beforeTestClass(TestContext)
+	 * @see TestExecutionListener#beforeTestClass(TestContext)
 	 */
 	public void beforeTestClass(TestContext testContext) throws Exception {
 		/* no-op */
@@ -57,7 +57,7 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	/**
 	 * TODO [SPR-9864] Document overridden prepareTestInstance().
 	 *
-	 * @see org.springframework.test.context.TestExecutionListener#prepareTestInstance(TestContext)
+	 * @see TestExecutionListener#prepareTestInstance(TestContext)
 	 */
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
@@ -66,7 +66,7 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	/**
 	 * TODO [SPR-9864] Document overridden beforeTestMethod().
 	 *
-	 * @see org.springframework.test.context.TestExecutionListener#beforeTestMethod(TestContext)
+	 * @see TestExecutionListener#beforeTestMethod(TestContext)
 	 */
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
@@ -75,7 +75,7 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	/**
 	 * TODO [SPR-9864] Document overridden afterTestMethod().
 	 *
-	 * @see org.springframework.test.context.TestExecutionListener#afterTestMethod(TestContext)
+	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		if (logger.isDebugEnabled()) {
@@ -88,7 +88,7 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 *
-	 * @see org.springframework.test.context.TestExecutionListener#afterTestClass(TestContext)
+	 * @see TestExecutionListener#afterTestClass(TestContext)
 	 */
 	public void afterTestClass(TestContext testContext) throws Exception {
 		/* no-op */
