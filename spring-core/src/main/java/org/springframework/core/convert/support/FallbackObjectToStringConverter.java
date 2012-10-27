@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,9 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
+		if (String.class.equals(sourceClass)) {
+			return false;
+		}
 		return CharSequence.class.isAssignableFrom(sourceClass) || StringWriter.class.isAssignableFrom(sourceClass) ||
 			ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
 	}
