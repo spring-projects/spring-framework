@@ -110,31 +110,33 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	public Object getAsyncResult() {
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.mockRequest);
-		if (asyncManager.isConcurrentHandlingStarted()) {
-			if (!awaitAsyncResult()) {
+		HttpServletRequest request = this.mockRequest;
+		if (request.isAsyncStarted()) {
+
+			long timeout = request.getAsyncContext().getTimeout();
+			if (!awaitAsyncResult(timeout)) {
 				throw new IllegalStateException(
 						"Gave up waiting on async result from [" + this.handler + "] to complete");
 			}
+
+			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.mockRequest);
 			if (asyncManager.hasConcurrentResult()) {
 				return asyncManager.getConcurrentResult();
 			}
 		}
-
 		return null;
 	}
 
-	private boolean awaitAsyncResult() {
-		if (this.asyncResultLatch == null) {
-			return true;
+	private boolean awaitAsyncResult(long timeout) {
+		if (this.asyncResultLatch != null) {
+			try {
+				return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);
+			}
+			catch (InterruptedException e) {
+				return false;
+			}
 		}
-		long timeout = ((HttpServletRequest) this.mockRequest).getAsyncContext().getTimeout();
-		try {
-			return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);
-		}
-		catch (InterruptedException e) {
-			return false;
-		}
+		return true;
 	}
 
 }

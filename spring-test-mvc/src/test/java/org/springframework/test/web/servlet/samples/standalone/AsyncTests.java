@@ -72,7 +72,6 @@ public class AsyncTests {
 		public Callable<Person> getCallable() {
 			return new Callable<Person>() {
 				public Person call() throws Exception {
-					Thread.sleep(100);
 					return new Person("Joe");
 				}
 			};
