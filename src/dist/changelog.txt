@@ -18,14 +18,10 @@ Changes in version 3.2 RC1 (2012-10-29)
 * HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
 * UriComponentsBuilder is capable of handling opaque URIs as well (SPR-9798)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
-* introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
-* introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
 * improved regular expression for parsing query params (SPR-9832)
 * fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
 * fixed issue in AnnotationMethodHandlerExceptionResolver (SPR-9209)
 * MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
-* added Spring MVC Test framework (SPR-9859, SPR-7951)
-* added mock implementations of Http[Input|Output]Message
 * added support for opaque URIs in UriComponentsBuilder (SPR-9798)
 * added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
 * added Jackson2ObjectMapperBeanFactory (SPR-9739)
@@ -33,6 +29,12 @@ Changes in version 3.2 RC1 (2012-10-29)
 * added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
 * the jackson message converters now include "application/*+json" in supported media types (SPR-7905)
 * add options to configure MVC async interceptors in the MVC namespace and Java config (SPR-9914)
+* introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
+* introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
+* introduced support for setting locales in MockHttpServletRequest (SPR-9724)
+* added Spring MVC Test framework (SPR-9859, SPR-7951)
+* added mock implementations of Http[Input|Output]Message
+
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
