@@ -175,6 +175,11 @@ public final class WebAsyncManager {
 		this.callableInterceptors.put(key, interceptor);
 	}
 
+	public void registerAllCallableInterceptors(Map<Object, CallableProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		this.callableInterceptors.putAll(interceptors);
+	}
+
 	/**
 	 * Register a {@link DeferredResultProcessingInterceptor} that will be
 	 * applied when concurrent request handling with a {@link DeferredResult}
@@ -186,6 +191,11 @@ public final class WebAsyncManager {
 	public void registerDeferredResultInterceptor(Object key, DeferredResultProcessingInterceptor interceptor) {
 		Assert.notNull(interceptor, "interceptor is required");
 		this.deferredResultInterceptors.put(key, interceptor);
+	}
+
+	public void registerAllDeferredResultInterceptors(Map<Object, DeferredResultProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		this.deferredResultInterceptors.putAll(interceptors);
 	}
 
 	/**

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,6 +47,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -117,6 +122,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertNotNull(handler.getHandler());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void requestMappingHandlerAdapter() throws Exception {
 		RequestMappingHandlerAdapter adapter = webConfig.requestMappingHandlerAdapter();
@@ -128,22 +134,30 @@ public class WebMvcConfigurationSupportExtensionTests {
 		// Message converters
 		assertEquals(1, adapter.getMessageConverters().size());
 
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
+
 		// Custom argument resolvers and return value handlers
-		@SuppressWarnings("unchecked")
-		List<HandlerMethodArgumentResolver> argResolvers= (List<HandlerMethodArgumentResolver>)
-			new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		List<HandlerMethodArgumentResolver> argResolvers =
+			(List<HandlerMethodArgumentResolver>) fieldAccessor.getPropertyValue("customArgumentResolvers");
 		assertEquals(1, argResolvers.size());
 
-		@SuppressWarnings("unchecked")
-		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>)
-			new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+		List<HandlerMethodReturnValueHandler> handlers =
+			(List<HandlerMethodReturnValueHandler>) fieldAccessor.getPropertyValue("customReturnValueHandlers");
 		assertEquals(1, handlers.size());
 
 		// Async support options
-		assertEquals(ConcurrentTaskExecutor.class, new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
-		assertEquals(2500L, new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
+		assertEquals(ConcurrentTaskExecutor.class, fieldAccessor.getPropertyValue("taskExecutor").getClass());
+		assertEquals(2500L, fieldAccessor.getPropertyValue("asyncRequestTimeout"));
 
-		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
+		Map<Object, CallableProcessingInterceptor> callableInterceptors =
+				(Map<Object, CallableProcessingInterceptor>) fieldAccessor.getPropertyValue("callableInterceptors");
+		assertEquals(1, callableInterceptors.size());
+
+		Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
+				(Map<Object, DeferredResultProcessingInterceptor>) fieldAccessor.getPropertyValue("deferredResultInterceptors");
+		assertEquals(1, deferredResultInterceptors.size());
+
+		assertEquals(false, fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}
 
 	@Test
@@ -240,7 +254,9 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 		@Override
 		public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor());
+			configurer.setDefaultTimeout(2500).setTaskExecutor(new ConcurrentTaskExecutor())
+				.registerCallableInterceptors(new CallableProcessingInterceptorAdapter() { })
+				.registerDeferredResultInterceptors(new DeferredResultProcessingInterceptorAdapter() {});
 		}
 
 		@Override

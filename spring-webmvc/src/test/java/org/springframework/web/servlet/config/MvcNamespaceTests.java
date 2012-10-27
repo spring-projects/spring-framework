@@ -16,6 +16,13 @@
 
 package org.springframework.web.servlet.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
@@ -23,12 +30,13 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
@@ -57,6 +65,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.CallableProcessingInterceptorAdapter;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -75,8 +87,6 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -469,8 +479,18 @@ public class MvcNamespaceTests {
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
-		assertEquals(ConcurrentTaskExecutor.class, new DirectFieldAccessor(adapter).getPropertyValue("taskExecutor").getClass());
-		assertEquals(2500L, new DirectFieldAccessor(adapter).getPropertyValue("asyncRequestTimeout"));
+
+		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
+		assertEquals(ConcurrentTaskExecutor.class, fieldAccessor.getPropertyValue("taskExecutor").getClass());
+		assertEquals(2500L, fieldAccessor.getPropertyValue("asyncRequestTimeout"));
+
+		Map<Object, CallableProcessingInterceptor> callableInterceptors =
+				(Map<Object, CallableProcessingInterceptor>) fieldAccessor.getPropertyValue("callableInterceptors");
+		assertEquals(1, callableInterceptors.size());
+
+		Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
+				(Map<Object, DeferredResultProcessingInterceptor>) fieldAccessor.getPropertyValue("deferredResultInterceptors");
+		assertEquals(1, deferredResultInterceptors.size());
 	}
 
 
@@ -538,5 +558,9 @@ public class MvcNamespaceTests {
 			}
 		}
 	}
+
+	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter { }
+
+	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter { }
 
 }

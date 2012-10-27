@@ -174,6 +174,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<?> returnValueHandlers = getReturnValueHandlers(element, source, parserContext);
 		String asyncTimeout = getAsyncTimeout(element, source, parserContext);
 		RuntimeBeanReference asyncExecutor = getAsyncExecutor(element, source, parserContext);
+		ManagedList<?> callableInterceptors = getCallableInterceptors(element, source, parserContext);
+		ManagedList<?> deferredResultInterceptors = getDeferredResultInterceptors(element, source, parserContext);
 
 		RootBeanDefinition handlerAdapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
 		handlerAdapterDef.setSource(source);
@@ -197,6 +199,8 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		if (asyncExecutor != null) {
 			handlerAdapterDef.getPropertyValues().add("taskExecutor", asyncExecutor);
 		}
+		handlerAdapterDef.getPropertyValues().add("callableInterceptors", callableInterceptors);
+		handlerAdapterDef.getPropertyValues().add("deferredResultInterceptors", deferredResultInterceptors);
 		String handlerAdapterName = parserContext.getReaderContext().registerWithGeneratedName(handlerAdapterDef);
 
 		RootBeanDefinition csInterceptorDef = new RootBeanDefinition(ConversionServiceExposingInterceptor.class);
@@ -335,6 +339,40 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 		return null;
+	}
+
+	private ManagedList<?> getCallableInterceptors(Element element, Object source, ParserContext parserContext) {
+		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
+		if (asyncElement != null) {
+			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "callable-interceptors");
+			if (interceptorsElement != null) {
+				interceptors.setSource(source);
+				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
+					BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
+					beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
+					interceptors.add(beanDef);
+				}
+			}
+		}
+		return interceptors;
+	}
+
+	private ManagedList<?> getDeferredResultInterceptors(Element element, Object source, ParserContext parserContext) {
+		ManagedList<? super Object> interceptors = new ManagedList<Object>();
+		Element asyncElement = DomUtils.getChildElementByTagName(element, "async-support");
+		if (asyncElement != null) {
+			Element interceptorsElement = DomUtils.getChildElementByTagName(asyncElement, "deferred-result-interceptors");
+			if (interceptorsElement != null) {
+				interceptors.setSource(source);
+				for (Element converter : DomUtils.getChildElementsByTagName(interceptorsElement, "bean")) {
+					BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
+					beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
+					interceptors.add(beanDef);
+				}
+			}
+		}
+		return interceptors;
 	}
 
 	private ManagedList<?> getArgumentResolvers(Element element, Object source, ParserContext parserContext) {

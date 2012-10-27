@@ -48,6 +48,7 @@ import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -64,6 +65,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.ControllerAdviceBean;
@@ -134,6 +137,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor("MvcAsync");
 
 	private Long asyncRequestTimeout;
+
+	private final Map<Object, CallableProcessingInterceptor> callableInterceptors =
+			new LinkedHashMap<Object, CallableProcessingInterceptor>();
+
+	private final Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
+			new LinkedHashMap<Object, DeferredResultProcessingInterceptor>();
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
@@ -361,6 +370,34 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public void setAsyncRequestTimeout(long timeout) {
 		this.asyncRequestTimeout = timeout;
+	}
+
+	/**
+	 * Configure {@code CallableProcessingInterceptor}'s to register on async requests.
+	 * @param interceptors the interceptors to register
+	 */
+	public void setCallableInterceptors(List<CallableProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		for (int index = 0 ; index < interceptors.size(); index++) {
+			CallableProcessingInterceptor interceptor = interceptors.get(index);
+			this.callableInterceptors.put(getInterceptorKey(interceptor, index), interceptor);
+		}
+	}
+
+	/**
+	 * Configure {@code DeferredResultProcessingInterceptor}'s to register on async requests.
+	 * @param interceptors the interceptors to register
+	 */
+	public void setDeferredResultInterceptors(List<DeferredResultProcessingInterceptor> interceptors) {
+		Assert.notNull(interceptors);
+		for (int index = 0 ; index < interceptors.size(); index++) {
+			DeferredResultProcessingInterceptor interceptor = interceptors.get(index);
+			this.deferredResultInterceptors.put(getInterceptorKey(interceptor, index), interceptor);
+		}
+	}
+
+	private String getInterceptorKey(Object interceptor, int index) {
+		return this.hashCode() + ":" + interceptor.getClass().getName() + "#" + index;
 	}
 
 	/**
@@ -703,6 +740,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.registerAllCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerAllDeferredResultInterceptors(this.deferredResultInterceptors);
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();

@@ -15,11 +15,18 @@
  */
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.async.AsyncTask;
+import org.springframework.web.context.request.async.CallableProcessingInterceptor;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 
 /**
  * Helps with configuring a options for asynchronous request processing.
@@ -32,6 +39,13 @@ public class AsyncSupportConfigurer {
 	private AsyncTaskExecutor taskExecutor;
 
 	private Long timeout;
+
+	private final List<CallableProcessingInterceptor> callableInterceptors =
+			new ArrayList<CallableProcessingInterceptor>();
+
+	private final List<DeferredResultProcessingInterceptor> deferredResultInterceptors =
+			new ArrayList<DeferredResultProcessingInterceptor>();
+
 
 	/**
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
@@ -64,12 +78,45 @@ public class AsyncSupportConfigurer {
 		return this;
 	}
 
+	/**
+	 * Configure lifecycle intercepters with callbacks around concurrent request
+	 * execution that starts when a controller returns a
+	 * {@link java.util.concurrent.Callable}.
+	 *
+	 * @param interceptors the interceptors to register
+	 */
+	public AsyncSupportConfigurer registerCallableInterceptors(CallableProcessingInterceptor... interceptors) {
+		Assert.notNull(interceptors, "Interceptors are required");
+		this.callableInterceptors.addAll(Arrays.asList(interceptors));
+		return this;
+	}
+
+	/**
+	 * Configure lifecycle intercepters with callbacks around concurrent request
+	 * execution that starts when a controller returns a {@link DeferredResult}.
+	 *
+	 * @param interceptors the interceptors to register
+	 */
+	public AsyncSupportConfigurer registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
+		Assert.notNull(interceptors, "Interceptors are required");
+		this.deferredResultInterceptors.addAll(Arrays.asList(interceptors));
+		return this;
+	}
+
 	protected AsyncTaskExecutor getTaskExecutor() {
 		return this.taskExecutor;
 	}
 
 	protected Long getTimeout() {
 		return this.timeout;
+	}
+
+	protected List<CallableProcessingInterceptor> getCallableInterceptors() {
+		return this.callableInterceptors;
+	}
+
+	protected List<DeferredResultProcessingInterceptor> getDeferredResultInterceptors() {
+		return this.deferredResultInterceptors;
 	}
 
 }

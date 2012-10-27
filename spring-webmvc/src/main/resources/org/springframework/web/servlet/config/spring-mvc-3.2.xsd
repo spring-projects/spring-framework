@@ -97,6 +97,46 @@
 						]]></xsd:documentation>
 					</xsd:annotation>
 					<xsd:complexType>
+						<xsd:all minOccurs="0">
+							<xsd:element name="callable-interceptors" minOccurs="0">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The ordered set of interceptors that intercept the lifecycle of concurrently executed
+	requests, which start after a controller returns a java.util.concurrent.Callable.
+									]]></xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation><![CDATA[
+	Registers a CallableProcessingInterceptor.
+												]]></xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="deferred-result-interceptors" minOccurs="0">
+								<xsd:annotation>
+									<xsd:documentation><![CDATA[
+	The ordered set of interceptors that intercept the lifecycle of concurrently executed
+	requests, which start after a controller returns a DeferredResult.
+									]]></xsd:documentation>
+								</xsd:annotation>
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
+											<xsd:annotation>
+												<xsd:documentation><![CDATA[
+	Registers a DeferredResultProcessingInterceptor.
+												]]></xsd:documentation>
+											</xsd:annotation>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:all>
 						<xsd:attribute name="task-executor" type="xsd:string">
 							<xsd:annotation>
 								<xsd:documentation source="java:org.springframework.core.task.AsyncTaskExecutor"><![CDATA[

@@ -32,6 +32,7 @@ Changes in version 3.2 RC1 (2012-10-29)
 * added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
 * added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
 * the jackson message converters now include "application/*+json" in supported media types (SPR-7905)
+* add options to configure MVC async interceptors in the MVC namespace and Java config (SPR-9914)
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------

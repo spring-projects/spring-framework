@@ -378,6 +378,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		if (configurer.getTimeout() != null) {
 			adapter.setAsyncRequestTimeout(configurer.getTimeout());
 		}
+		adapter.setCallableInterceptors(configurer.getCallableInterceptors());
+		adapter.setDeferredResultInterceptors(configurer.getDeferredResultInterceptors());
 
 		return adapter;
 	}
