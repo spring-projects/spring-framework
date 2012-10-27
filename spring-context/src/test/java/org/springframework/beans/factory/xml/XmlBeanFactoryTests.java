@@ -83,10 +83,10 @@ import org.xml.sax.InputSource;
  * @author Chris Beams
  */
 public final class XmlBeanFactoryTests {
-	
+
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final ClassPathResource AUTOWIRE_CONTEXT = classPathResource("-autowire.xml");
 	private static final ClassPathResource CHILD_CONTEXT = classPathResource("-child.xml");
 	private static final ClassPathResource CLASS_NOT_FOUND_CONTEXT = classPathResource("-classNotFound.xml");
@@ -128,7 +128,7 @@ public final class XmlBeanFactoryTests {
 	private static final ClassPathResource REFTYPES_CONTEXT = classPathResource("-reftypes.xml");
 	private static final ClassPathResource DEFAULT_LAZY_CONTEXT = classPathResource("-defaultLazyInit.xml");
 	private static final ClassPathResource DEFAULT_AUTOWIRE_CONTEXT = classPathResource("-defaultAutowire.xml");
-	
+
 	private static ClassPathResource classPathResource(String suffix) {
 		return new ClassPathResource(CLASSNAME + suffix, CLASS);
 	}
