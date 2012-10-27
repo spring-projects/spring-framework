@@ -31,7 +31,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +44,9 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.converter.ConditionalConversion;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
@@ -644,4 +648,134 @@ public class GenericConversionServiceTests {
 		conversionService.removeConvertible(String.class, Color.class);
 		assertFalse(conversionService.canConvert(String.class, Color.class));
 	}
+
+	@Test
+	public void conditionalConverter() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalConverter converter = new MyConditionalConverter();
+		conversionService.addConverter(new ColorConverter());
+		conversionService.addConverter(converter);
+		assertEquals(Color.BLACK, conversionService.convert("#000000", Color.class));
+		assertTrue(converter.getMatchAttempts() > 0);
+	}
+
+	@Test
+	public void conditionalConverterFactory() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalConverterFactory converter = new MyConditionalConverterFactory();
+		conversionService.addConverter(new ColorConverter());
+		conversionService.addConverterFactory(converter);
+		assertEquals(Color.BLACK, conversionService.convert("#000000", Color.class));
+		assertTrue(converter.getMatchAttempts() > 0);
+		assertTrue(converter.getNestedMatchAttempts() > 0);
+	}
+
+	@Test
+	public void shouldNotSuportNullConvertibleTypesFromNonConditionalGenericConverter()
+			throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		GenericConverter converter = new GenericConverter() {
+
+			public Set<ConvertiblePair> getConvertibleTypes() {
+				return null;
+			}
+
+			public Object convert(Object source, TypeDescriptor sourceType,
+					TypeDescriptor targetType) {
+				return null;
+			}
+		};
+		try {
+			conversionService.addConverter(converter);
+			fail("Did not throw");
+		} catch (IllegalStateException e) {
+			assertEquals("Only conditional converters may return null convertible types", e.getMessage());
+		}
+	}
+
+	@Test
+	public void conditionalConversionForAllTypes() throws Exception {
+		GenericConversionService conversionService = new GenericConversionService();
+		MyConditionalGenericConverter converter = new MyConditionalGenericConverter();
+		conversionService.addConverter(converter);
+		assertEquals((Integer) 3, conversionService.convert(3, Integer.class));
+		Iterator<TypeDescriptor> iterator = converter.getSourceTypes().iterator();
+		assertEquals(Integer.class, iterator.next().getType());
+		assertEquals(Number.class, iterator.next().getType());
+		TypeDescriptor last = null;
+		while (iterator.hasNext()) {
+			last = iterator.next();
+		}
+		assertEquals(Object.class, last.getType());
+	}
+
+	private static class MyConditionalConverter implements Converter<String, Color>,
+			ConditionalConversion {
+
+		private int matchAttempts = 0;
+
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			matchAttempts++;
+			return false;
+		}
+
+		public Color convert(String source) {
+			throw new IllegalStateException();
+		}
+
+		public int getMatchAttempts() {
+			return matchAttempts;
+		}
+	}
+
+	private static class MyConditionalGenericConverter implements GenericConverter,
+			ConditionalConversion {
+
+		private Set<TypeDescriptor> sourceTypes = new LinkedHashSet<TypeDescriptor>();
+
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			sourceTypes.add(sourceType);
+			return false;
+		}
+
+		public Object convert(Object source, TypeDescriptor sourceType,
+				TypeDescriptor targetType) {
+			return null;
+		}
+
+		public Set<TypeDescriptor> getSourceTypes() {
+			return sourceTypes;
+		}
+	}
+
+	private static class MyConditionalConverterFactory implements
+			ConverterFactory<String, Color>, ConditionalConversion {
+
+		private MyConditionalConverter converter = new MyConditionalConverter();
+
+		private int matchAttempts = 0;
+
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			matchAttempts++;
+			return true;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T extends Color> Converter<String, T> getConverter(Class<T> targetType) {
+			return (Converter<String, T>) converter;
+		}
+
+		public int getMatchAttempts() {
+			return matchAttempts;
+		}
+
+		public int getNestedMatchAttempts() {
+			return converter.getMatchAttempts();
+		}
+	}
+
 }
