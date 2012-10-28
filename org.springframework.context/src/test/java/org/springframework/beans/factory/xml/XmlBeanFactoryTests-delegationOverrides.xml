@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-<beans>
-	
-	<!-- 
+	<!--
 		Not yet in use: illustration of possible approach
 	-->
 	<bean id="overrideOneMethod" class="org.springframework.beans.factory.xml.OverrideOneMethod">
@@ -78,6 +78,18 @@
 			<value>David</value>
 		</property>
 		<property name="age"><value>27</value></property>
+	</bean>
+
+	<bean id="overrideOneMethodByAttribute" class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type match="String"/>
+		</replaced-method>
+	</bean>
+
+	<bean id="overrideOneMethodByElement" class="org.springframework.beans.factory.xml.OverrideOneMethod">
+		<replaced-method name="replaceMe" replacer="reverseReplacer">
+			<arg-type>String</arg-type>
+		</replaced-method>
 	</bean>
 
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1487,6 +1487,24 @@ public final class XmlBeanFactoryTests {
 		catch (BeansException e) {
 			assertTrue(e.getMessage().contains("Bean name 'foo'"));
 		}
+	}
+
+	public @Test void testOverrideMethodByArgTypeAttribute() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethodByAttribute");
+		assertEquals("should not replace", "replaceMe:1", oom.replaceMe(1));
+		assertEquals("should replace", "cba", oom.replaceMe("abc"));
+	}
+
+	public @Test void testOverrideMethodByArgTypeElement() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethodByElement");
+		assertEquals("should not replace", "replaceMe:1", oom.replaceMe(1));
+		assertEquals("should replace", "cba", oom.replaceMe("abc"));
 	}
 
 	public static class DoSomethingReplacer implements MethodReplacer {
