@@ -42,6 +42,8 @@ Changes in version 3.1.3 (2012-10-12)
 * added support for recognizing wildcards in media types with a suffix (SPR-9841)
 * improved no-match handling for @RequestMapping methods (SPR-9603)
 * support SQL exception translation for ORA-06550 (SPR-9853)
+* allow 'arg-type' matches against element body as well as 'match' attribute (SPR-9812)
+
 
 Changes in version 3.1.2 (2012-07-09)
 -------------------------------------
