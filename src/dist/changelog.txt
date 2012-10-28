@@ -35,6 +35,7 @@ Changes in version 3.2 RC1 (2012-10-29)
 * added Spring MVC Test framework (SPR-9859, SPR-7951)
 * added mock implementations of Http[Input|Output]Message
 * JdbcTestUtils no longer interprets SQL comments as statements (SPR-9593)
+* allow 'arg-type' matches against element body as well as 'match' attribute (SPR-9812)
 
 
 Changes in version 3.2 M2 (2012-09-11)
