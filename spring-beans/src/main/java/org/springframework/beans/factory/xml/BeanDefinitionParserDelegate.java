@@ -827,7 +827,11 @@ public class BeanDefinitionParserDelegate {
 				// Look for arg-type match elements.
 				List<Element> argTypeEles = DomUtils.getChildElementsByTagName(replacedMethodEle, ARG_TYPE_ELEMENT);
 				for (Element argTypeEle : argTypeEles) {
-					replaceOverride.addTypeIdentifier(argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE));
+					String match = argTypeEle.getAttribute(ARG_TYPE_MATCH_ATTRIBUTE);
+					match = (StringUtils.hasText(match) ? match : DomUtils.getTextValue(argTypeEle));
+					if (StringUtils.hasText(match)) {
+						replaceOverride.addTypeIdentifier(match);
+					}
 				}
 				replaceOverride.setSource(extractSource(replacedMethodEle));
 				overrides.addOverride(replaceOverride);
