@@ -170,13 +170,13 @@ abstract class ContextLoaderUtils {
 				logger.trace(String.format("Using default ContextLoader class [%s] for test class [%s]",
 					defaultContextLoaderClassName, testClass.getName()));
 			}
-			return (Class<? extends ContextLoader>) ContextLoaderUtils.class.getClassLoader().loadClass(
-				defaultContextLoaderClassName);
+			return (Class<? extends ContextLoader>) ClassUtils.forName(defaultContextLoaderClassName,
+				ContextLoaderUtils.class.getClassLoader());
 		}
-		catch (ClassNotFoundException ex) {
+		catch (Throwable t) {
 			throw new IllegalStateException("Could not load default ContextLoader class ["
 					+ defaultContextLoaderClassName + "]. Specify @ContextConfiguration's 'loader' "
-					+ "attribute or make the default loader class available.");
+					+ "attribute or make the default loader class available.", t);
 		}
 	}
 
