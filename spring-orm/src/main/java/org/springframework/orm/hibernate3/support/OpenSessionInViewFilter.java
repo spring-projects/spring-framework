@@ -178,6 +178,15 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		return false;
 	}
 
+	/**
+	 * Returns "false" so that the filter may provide a Hibernate
+	 * {@code Session} to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
+		return false;
+	}
+
 	@Override
 	protected void doFilterInternal(
 			HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -187,7 +196,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 		String key = getAlreadyFilteredAttributeName();
 
 		if (isSingleSession()) {
@@ -197,6 +205,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 				participate = true;
 			}
 			else {
+				boolean isFirstRequest = !isAsyncDispatch(request);
 				if (isFirstRequest || !applySessionBindingInterceptor(asyncManager, key)) {
 					logger.debug("Opening single Hibernate Session in OpenSessionInViewFilter");
 					Session session = getSession(sessionFactory);
@@ -210,8 +219,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		}
 		else {
 			// deferred close mode
-			Assert.state(!asyncManager.isConcurrentHandlingStarted(),
-					"Deferred close mode is not supported on async dispatches");
+			Assert.state(!isAsyncStarted(request), "Deferred close mode is not supported on async dispatches");
 			if (SessionFactoryUtils.isDeferredCloseActive(sessionFactory)) {
 				// Do not modify deferred close: just set the participate flag.
 				participate = true;
@@ -230,7 +238,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 					// single session mode
 					SessionHolder sessionHolder =
 							(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-					if (!asyncManager.isConcurrentHandlingStarted()) {
+					if (!isAsyncStarted(request)) {
 						logger.debug("Closing single Hibernate Session in OpenSessionInViewFilter");
 						closeSession(sessionHolder.getSession(), sessionFactory);
 					}

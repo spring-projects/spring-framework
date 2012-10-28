@@ -69,13 +69,21 @@ public class RequestContextFilter extends OncePerRequestFilter {
 		this.threadContextInheritable = threadContextInheritable;
 	}
 
-
 	/**
-	 * The default value is "false" in which case the filter will set up the request
-	 * context in each asynchronously dispatched thread.
+	 * Returns "false" so that the filter may set up the request context in each
+	 * asynchronously dispatched thread.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may set up the request context in an
+	 * error dispatch.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
 		return false;
 	}
 

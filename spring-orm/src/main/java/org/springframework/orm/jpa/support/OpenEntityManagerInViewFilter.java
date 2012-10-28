@@ -126,12 +126,21 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * The default value is "false" so that the filter may re-bind the opened
+	 * Returns "false" so that the filter may re-bind the opened
 	 * {@code EntityManager} to each asynchronously dispatched thread and postpone
 	 * closing it until the very last asynchronous dispatch.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may provide an {@code EntityManager}
+	 * to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
 		return false;
 	}
 
@@ -144,7 +153,6 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 		String key = getAlreadyFilteredAttributeName();
 
 		if (TransactionSynchronizationManager.hasResource(emf)) {
@@ -152,6 +160,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
+			boolean isFirstRequest = !isAsyncDispatch(request);
 			if (isFirstRequest || !applyEntityManagerBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening JPA EntityManager in OpenEntityManagerInViewFilter");
 				try {
@@ -175,7 +184,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				EntityManagerHolder emHolder = (EntityManagerHolder)
 						TransactionSynchronizationManager.unbindResource(emf);
-				if (!asyncManager.isConcurrentHandlingStarted()) {
+				if (!isAsyncStarted(request)) {
 					logger.debug("Closing JPA EntityManager in OpenEntityManagerInViewFilter");
 					EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager());
 				}

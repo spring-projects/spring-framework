@@ -34,6 +34,7 @@ import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.request.async.WebAsyncUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * @author Rick Evans
@@ -50,6 +51,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
 		addAsyncManagerExpectations(request);
 		request.setCharacterEncoding(ENCODING);
+		expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
@@ -79,6 +81,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
+		expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
@@ -104,6 +107,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 		HttpServletRequest request = createMock(HttpServletRequest.class);
 		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(ENCODING);
+		expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
@@ -129,6 +133,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
+		expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
 		expect(request.getAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		request.removeAttribute(FILTER_NAME + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);
@@ -155,6 +160,7 @@ public class CharacterEncodingFilterTests extends TestCase {
 		addAsyncManagerExpectations(request);
 		expect(request.getCharacterEncoding()).andReturn(null);
 		request.setCharacterEncoding(ENCODING);
+		expect(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).andReturn(null);
 		expect(request.getAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX)).andReturn(null);
 		request.setAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX, Boolean.TRUE);
 		request.removeAttribute(CharacterEncodingFilter.class.getName() + OncePerRequestFilter.ALREADY_FILTERED_SUFFIX);

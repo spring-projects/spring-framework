@@ -102,12 +102,21 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	}
 
 	/**
-	 * The default value is "false" so that the filter may re-bind the opened
+	 * Returns "false" so that the filter may re-bind the opened Hibernate
 	 * {@code Session} to each asynchronously dispatched thread and postpone
 	 * closing it until the very last asynchronous dispatch.
 	 */
 	@Override
 	protected boolean shouldNotFilterAsyncDispatch() {
+		return false;
+	}
+
+	/**
+	 * Returns "false" so that the filter may provide a Hibernate
+	 * {@code Session} to each error dispatches.
+	 */
+	@Override
+	protected boolean shouldNotFilterErrorDispatch() {
 		return false;
 	}
 
@@ -120,7 +129,6 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 		boolean participate = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
 		String key = getAlreadyFilteredAttributeName();
 
 		if (TransactionSynchronizationManager.hasResource(sessionFactory)) {
@@ -128,6 +136,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			participate = true;
 		}
 		else {
+			boolean isFirstRequest = !isAsyncDispatch(request);
 			if (isFirstRequest || !applySessionBindingInterceptor(asyncManager, key)) {
 				logger.debug("Opening Hibernate Session in OpenSessionInViewFilter");
 				Session session = openSession(sessionFactory);
@@ -147,7 +156,7 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 			if (!participate) {
 				SessionHolder sessionHolder =
 						(SessionHolder) TransactionSynchronizationManager.unbindResource(sessionFactory);
-				if (!asyncManager.isConcurrentHandlingStarted()) {
+				if (!isAsyncStarted(request)) {
 					logger.debug("Closing Hibernate Session in OpenSessionInViewFilter");
 					SessionFactoryUtils.closeSession(sessionHolder.getSession());
 				}

@@ -68,16 +68,13 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		boolean isFirstRequest = !asyncManager.hasConcurrentResult();
-
-		if (isFirstRequest) {
+		if (!isAsyncDispatch(request)) {
 			response = new ShallowEtagResponseWrapper(response);
 		}
 
 		filterChain.doFilter(request, response);
 
-		if (!asyncManager.isConcurrentHandlingStarted()) {
+		if (!isAsyncStarted(request)) {
 			updateResponse(request, response);
 		}
 	}
