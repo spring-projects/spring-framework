@@ -406,10 +406,11 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Load the {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
-	 * class using reflection in order to avoid package cycles.
+	 * class, using reflection in order to avoid package cycles.
 	 * 
 	 * @return the {@code @WebAppConfiguration} class or <code>null</code> if it
 	 * cannot be loaded
+	 * @since 3.2
 	 */
 	@SuppressWarnings("unchecked")
 	private static Class<? extends Annotation> loadWebAppConfigurationClass() {
@@ -428,11 +429,12 @@ abstract class ContextLoaderUtils {
 
 	/**
 	 * Attempt to build a {@link org.springframework.test.context.web.WebMergedContextConfiguration
-	 * WebMergedContextConfiguration} from the supplied arguments using reflection
+	 * WebMergedContextConfiguration} from the supplied arguments, using reflection
 	 * in order to avoid package cycles.
 	 *
 	 * @return the {@code WebMergedContextConfiguration} or <code>null</code> if
 	 * it could not be built
+	 * @since 3.2
 	 */
 	@SuppressWarnings("unchecked")
 	private static MergedContextConfiguration buildWebMergedContextConfiguration(
