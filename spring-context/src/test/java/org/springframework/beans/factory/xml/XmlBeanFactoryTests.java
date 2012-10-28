@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,10 +83,10 @@ import org.xml.sax.InputSource;
  * @author Chris Beams
  */
 public final class XmlBeanFactoryTests {
-	
+
 	private static final Class<?> CLASS = XmlBeanFactoryTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final ClassPathResource AUTOWIRE_CONTEXT = classPathResource("-autowire.xml");
 	private static final ClassPathResource CHILD_CONTEXT = classPathResource("-child.xml");
 	private static final ClassPathResource CLASS_NOT_FOUND_CONTEXT = classPathResource("-classNotFound.xml");
@@ -128,7 +128,7 @@ public final class XmlBeanFactoryTests {
 	private static final ClassPathResource REFTYPES_CONTEXT = classPathResource("-reftypes.xml");
 	private static final ClassPathResource DEFAULT_LAZY_CONTEXT = classPathResource("-defaultLazyInit.xml");
 	private static final ClassPathResource DEFAULT_AUTOWIRE_CONTEXT = classPathResource("-defaultAutowire.xml");
-	
+
 	private static ClassPathResource classPathResource(String suffix) {
 		return new ClassPathResource(CLASSNAME + suffix, CLASS);
 	}
@@ -1487,6 +1487,24 @@ public final class XmlBeanFactoryTests {
 		catch (BeansException e) {
 			assertTrue(e.getMessage().contains("Bean name 'foo'"));
 		}
+	}
+
+	public @Test void testOverrideMethodByArgTypeAttribute() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethodByAttribute");
+		assertEquals("should not replace", "replaceMe:1", oom.replaceMe(1));
+		assertEquals("should replace", "cba", oom.replaceMe("abc"));
+	}
+
+	public @Test void testOverrideMethodByArgTypeElement() {
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(xbf);
+		reader.loadBeanDefinitions(DELEGATION_OVERRIDES_CONTEXT);
+		OverrideOneMethod oom = (OverrideOneMethod) xbf.getBean("overrideOneMethodByElement");
+		assertEquals("should not replace", "replaceMe:1", oom.replaceMe(1));
+		assertEquals("should replace", "cba", oom.replaceMe("abc"));
 	}
 
 	public static class DoSomethingReplacer implements MethodReplacer {

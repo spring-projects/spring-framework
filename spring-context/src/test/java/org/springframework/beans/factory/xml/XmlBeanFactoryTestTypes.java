@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2009 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ import org.springframework.beans.factory.support.MethodReplacer;
 
 /**
  * Types used by {@link XmlBeanFactoryTests} and its attendant XML config files.
- * 
+ *
  * @author Chris Beams
  */
 final class XmlBeanFactoryTestTypes { }
@@ -161,20 +161,20 @@ class SimpleConstructorArgBean {
  * @author Rod Johnson
  */
 abstract class ConstructorInjectedOverrides {
-	
+
 	private ITestBean tb;
-	
+
 	private String setterString;
-	
+
 	public ConstructorInjectedOverrides(ITestBean tb) {
 		this.tb = tb;
 	}
-	
+
 	public ITestBean getTestBean() {
 		return this.tb;
 	}
 
-	
+
 	protected abstract FactoryMethods createFactoryMethods();
 
 	/**
@@ -234,7 +234,7 @@ class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 
 
 /**
- * 
+ *
  * @author Rod Johnson
  */
 interface DummyBo {
@@ -245,19 +245,19 @@ interface DummyBo {
 
 
 /**
- * 
+ *
  * @author Rod Johnson
  */
 class DummyBoImpl implements DummyBo {
-	
+
 	DummyDao dao;
 
 	public DummyBoImpl(DummyDao dao) {
 		this.dao = dao;
 	}
-	
+
 	public void something() {
-		
+
 	}
 
 }
@@ -267,7 +267,7 @@ class DummyBoImpl implements DummyBo {
  * @author Rod Johnson
  */
 class DummyDao {
-	
+
 	DataSource ds;
 
 	public DummyDao(DataSource ds) {
@@ -332,7 +332,7 @@ class DummyReferencer {
  * @author Juergen Hoeller
  */
 class FactoryMethods {
-	
+
 	public static FactoryMethods nullInstance() {
 		return null;
 	}
@@ -342,21 +342,21 @@ class FactoryMethods {
 		tb.setName("defaultInstance");
 		return new FactoryMethods(tb, "default", 0);
 	}
-	
+
 	/**
 	 * Note that overloaded methods are supported.
 	 */
 	public static FactoryMethods newInstance(TestBean tb) {
 		return new FactoryMethods(tb, "default", 0);
 	}
-	
+
 	protected static FactoryMethods newInstance(TestBean tb, int num, String name) {
 		if (name == null) {
 			throw new IllegalStateException("Should never be called with null value");
 		}
 		return new FactoryMethods(tb, name, num);
 	}
-	
+
 	static FactoryMethods newInstance(TestBean tb, int num, Integer something) {
 		if (something != null) {
 			throw new IllegalStateException("Should never be called with non-null value");
@@ -384,35 +384,35 @@ class FactoryMethods {
 		this.name = name;
 		this.num = num;
 	}
-	
+
 	public void setStringValue(String stringValue) {
 		this.stringValue = stringValue;
 	}
-	
+
 	public String getStringValue() {
 		return this.stringValue;
 	}
-	
+
 	public TestBean getTestBean() {
 		return this.tb;
 	}
-	
+
 	protected TestBean protectedGetTestBean() {
 		return this.tb;
 	}
-	
+
 	private TestBean privateGetTestBean() {
 		return this.tb;
 	}
-	
+
 	public int getNum() {
 		return num;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
 	 * Set via Setter Injection once instance is created.
 	 */
@@ -540,6 +540,9 @@ abstract class OverrideOneMethod extends MethodReplaceCandidate implements Overr
 		return "replaceMe:" + someParam;
 	}
 
+	public String replaceMe(String someParam) {
+		return "replaceMe:"  + someParam;
+	}
 }
 
 
@@ -550,7 +553,7 @@ abstract class OverrideOneMethod extends MethodReplaceCandidate implements Overr
  * @author Rod Johnson
  */
 abstract class OverrideOneMethodSubclass extends OverrideOneMethod {
-	
+
 	protected void doSomething(String arg) {
 		// This implementation does nothing!
 		// It's not overloaded
