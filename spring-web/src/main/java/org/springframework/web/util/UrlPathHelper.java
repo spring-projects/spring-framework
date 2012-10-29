@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -172,9 +173,10 @@ public class UrlPathHelper {
 	public String getPathWithinServletMapping(HttpServletRequest request) {
 		String pathWithinApp = getPathWithinApplication(request);
 		String servletPath = getServletPath(request);
-		if (pathWithinApp.startsWith(servletPath)) {
+		String path = getRemainingPath(pathWithinApp, servletPath, false);
+		if (path != null) {
 			// Normal case: URI contains servlet path.
-			return pathWithinApp.substring(servletPath.length());
+			return path;
 		}
 		else {
 			// Special case: URI is different from servlet path.
@@ -195,17 +197,54 @@ public class UrlPathHelper {
 	public String getPathWithinApplication(HttpServletRequest request) {
 		String contextPath = getContextPath(request);
 		String requestUri = getRequestUri(request);
-		if (StringUtils.startsWithIgnoreCase(requestUri, contextPath)) {
+		String path = getRemainingPath(requestUri, contextPath, true);
+		if (path != null) {
 			// Normal case: URI contains context path.
-			String path = requestUri.substring(contextPath.length());
 			return (StringUtils.hasText(path) ? path : "/");
 		}
 		else {
-			// Special case: rather unusual.
 			return requestUri;
 		}
 	}
 
+	/**
+	 * Match the given "mapping" to the start of the "requestUri" and if there
+	 * is a match return the extra part. This method is needed because the
+	 * context path and the servlet path returned by the HttpServletRequest are
+	 * stripped of semicolon content unlike the requesUri.
+	 */
+	private String getRemainingPath(String requestUri, String mapping, boolean ignoreCase) {
+		int index1 = 0;
+		int index2 = 0;
+		for ( ; (index1 < requestUri.length()) && (index2 < mapping.length()); index1++, index2++) {
+			char c1 = requestUri.charAt(index1);
+			char c2 = mapping.charAt(index2);
+			if (c1 == ';') {
+				index1 = requestUri.indexOf('/', index1);
+				if (index1 == -1) {
+					return null;
+				}
+				c1 = requestUri.charAt(index1);
+			}
+			if (c1 == c2) {
+				continue;
+			}
+			if (ignoreCase && (Character.toLowerCase(c1) == Character.toLowerCase(c2))) {
+				continue;
+			}
+			return null;
+		}
+		if (index2 != mapping.length()) {
+			return null;
+		}
+		if (index1 == requestUri.length()) {
+			return "";
+		}
+		else if (requestUri.charAt(index1) == ';') {
+			index1 = requestUri.indexOf('/', index1);
+		}
+		return (index1 != -1) ? requestUri.substring(index1) : "";
+	}
 
 	/**
 	 * Return the request URI for the given request, detecting an include request
