@@ -56,6 +56,7 @@ import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
@@ -351,11 +352,6 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
-		ConfigurableWebBindingInitializer webBindingInitializer = new ConfigurableWebBindingInitializer();
-		webBindingInitializer.setConversionService(mvcConversionService());
-		webBindingInitializer.setValidator(mvcValidator());
-		webBindingInitializer.setMessageCodesResolver(getMessageCodesResolver());
-
 		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
 		addArgumentResolvers(argumentResolvers);
 
@@ -365,7 +361,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
-		adapter.setWebBindingInitializer(webBindingInitializer);
+		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
 		adapter.setCustomArgumentResolvers(argumentResolvers);
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
@@ -385,7 +381,19 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Returns a {@link FormattingConversionService} for use with annotated
+	 * Return the {@link ConfigurableWebBindingInitializer} to use for
+	 * initializing all {@link WebDataBinder} instances.
+	 */
+	protected ConfigurableWebBindingInitializer getConfigurableWebBindingInitializer() {
+		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
+		initializer.setConversionService(mvcConversionService());
+		initializer.setValidator(mvcValidator());
+		initializer.setMessageCodesResolver(getMessageCodesResolver());
+		return initializer;
+	}
+
+	/**
+	 * Return a {@link FormattingConversionService} for use with annotated
 	 * controller methods and the {@code spring:eval} JSP tag.
 	 * Also see {@link #addFormatters} as an alternative to overriding this method.
 	 */
@@ -397,7 +405,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
-	 * Returns a global {@link Validator} instance for example for validating
+	 * Return a global {@link Validator} instance for example for validating
 	 * {@code @ModelAttribute} and {@code @RequestBody} method arguments.
 	 * Delegates to {@link #getValidator()} first and if that returns {@code null}
 	 * checks the classpath for the presence of a JSR-303 implementations
