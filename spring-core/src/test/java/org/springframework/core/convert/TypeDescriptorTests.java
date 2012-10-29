@@ -16,13 +16,6 @@
 
 package org.springframework.core.convert;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -36,6 +29,8 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald

@@ -20,11 +20,11 @@ package org.springframework.core.convert.converter;
  * A converter converts a source object of type S to a target of type T.
  * Implementations of this interface are thread-safe and can be shared.
  *
- * <p>Implementations may additionally implement {@link ConditionalConversion}.
+ * <p>Implementations may additionally implement {@link ConditionalConverter}.
  *
  * @author Keith Donald
  * @since 3.0
- * @see ConditionalConversion
+ * @see ConditionalConverter
  * @param <S> The source type
  * @param <T> The target type
  */

@@ -16,15 +16,6 @@
 
 package org.springframework.core.convert.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.awt.Color;
 import java.awt.SystemColor;
 import java.util.ArrayList;
@@ -42,10 +33,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.junit.Test;
+
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalConversion;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -53,6 +45,8 @@ import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -751,7 +745,7 @@ public class GenericConversionServiceTests {
 	}
 
 	private static class MyConditionalConverter implements Converter<String, Color>,
-			ConditionalConversion {
+			ConditionalConverter {
 
 		private int matchAttempts = 0;
 
@@ -770,7 +764,7 @@ public class GenericConversionServiceTests {
 	}
 
 	private static class MyConditionalGenericConverter implements GenericConverter,
-			ConditionalConversion {
+			ConditionalConverter {
 
 		private Set<TypeDescriptor> sourceTypes = new LinkedHashSet<TypeDescriptor>();
 
@@ -794,7 +788,7 @@ public class GenericConversionServiceTests {
 	}
 
 	private static class MyConditionalConverterFactory implements
-			ConverterFactory<String, Color>, ConditionalConversion {
+			ConverterFactory<String, Color>, ConditionalConverter {
 
 		private MyConditionalConverter converter = new MyConditionalConverter();
 

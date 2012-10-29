@@ -34,7 +34,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalConversion;
+import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
@@ -81,8 +81,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	public void addConverter(Converter<?, ?> converter) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converter, Converter.class);
-		Assert.notNull(typeInfo, "Unable to the determine sourceType <S> and targetType <T> which " +
-							"your Converter<S, T> converts between; declare these generic types.");
+		Assert.notNull(typeInfo, "Unable to the determine sourceType <S> and targetType " +
+				"<T> which your Converter<S, T> converts between; declare these generic types.");
 		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
@@ -99,8 +99,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
 		if (typeInfo == null) {
-			throw new IllegalArgumentException("Unable to the determine sourceType <S> and targetRangeType R which " +
-					"your ConverterFactory<S, R> converts between; declare these generic types.");
+			throw new IllegalArgumentException("Unable to the determine sourceType <S> and " +
+					"targetRangeType R which your ConverterFactory<S, R> converts between; " +
+					"declare these generic types.");
 		}
 		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
@@ -114,7 +115,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		Assert.notNull(targetType, "The targetType to convert to cannot be null");
-		return canConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType) : null, TypeDescriptor.valueOf(targetType));
+		return canConvert(sourceType != null ?
+				TypeDescriptor.valueOf(sourceType) : null,
+				TypeDescriptor.valueOf(targetType));
 	}
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -128,8 +131,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	public boolean canBypassConvert(Class<?> sourceType, Class<?> targetType) {
 		Assert.notNull(targetType, "The targetType to convert to cannot be null");
-		return canBypassConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType)
-				: null, TypeDescriptor.valueOf(targetType));
+		return canBypassConvert(sourceType != null ?
+				TypeDescriptor.valueOf(sourceType) : null,
+				TypeDescriptor.valueOf(targetType));
 	}
 
 	public boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -166,8 +170,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	/**
-	 * Convenience operation for converting a source object to the specified targetType, where the targetType is a descriptor that provides additional conversion context.
-	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and encapsulates the construction of the sourceType descriptor using {@link TypeDescriptor#forObject(Object)}.
+	 * Convenience operation for converting a source object to the specified targetType,
+	 * where the targetType is a descriptor that provides additional conversion context.
+	 * Simply delegates to {@link #convert(Object, TypeDescriptor, TypeDescriptor)} and
+	 * encapsulates the construction of the sourceType descriptor using
+	 * {@link TypeDescriptor#forObject(Object)}.
 	 * @param source the source object
 	 * @param targetType the target type
 	 * @return the converted value
@@ -206,7 +213,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to
-	 * @return the generic converter that will perform the conversion, or {@code null} if no suitable converter was found
+	 * @return the generic converter that will perform the conversion, or {@code null} if
+	 * no suitable converter was found
 	 * @see #getDefaultConverter(TypeDescriptor, TypeDescriptor)
 	 */
 	protected GenericConverter getConverter(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -305,9 +313,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 			if(!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
 				return false;
 			}
-			if (this.converter instanceof ConditionalConversion) {
-				return ((ConditionalConversion) this.converter).matches(sourceType,
-						targetType);
+			if (this.converter instanceof ConditionalConverter) {
+				return ((ConditionalConverter) this.converter).matches(sourceType, targetType);
 			}
 			return true;
 		}
@@ -320,8 +327,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		public String toString() {
-			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
-					" : " + this.converter.toString();
+			return this.typeInfo.getSourceType().getName() + " -> " +
+					this.typeInfo.getTargetType().getName() + " : " +
+					this.converter.toString();
 		}
 	}
 
@@ -349,14 +357,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			boolean matches = true;
-			if (this.converterFactory instanceof ConditionalConversion) {
-				matches = ((ConditionalConversion) this.converterFactory).matches(
-						sourceType, targetType);
+			if (this.converterFactory instanceof ConditionalConverter) {
+				matches = ((ConditionalConverter) this.converterFactory).matches(sourceType, targetType);
 			}
 			if(matches) {
-				Converter<?, ?> converter = converterFactory.getConverter(targetType.getType());
-				if(converter instanceof ConditionalConversion) {
-					matches = ((ConditionalConversion) converter).matches(sourceType, targetType);
+				Converter<?, ?> converter = this.converterFactory.getConverter(targetType.getType());
+				if(converter instanceof ConditionalConverter) {
+					matches = ((ConditionalConverter) converter).matches(sourceType, targetType);
 				}
 			}
 			return matches;
@@ -370,8 +377,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 		public String toString() {
-			return this.typeInfo.getSourceType().getName() + " -> " + this.typeInfo.getTargetType().getName() +
-					" : " + this.converterFactory.toString();
+			return this.typeInfo.getSourceType().getName() + " -> " +
+					this.typeInfo.getTargetType().getName() + " : " +
+					this.converterFactory.toString();
 		}
 	}
 
@@ -437,7 +445,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		public void add(GenericConverter converter) {
 			Set<ConvertiblePair> convertibleTypes = converter.getConvertibleTypes();
 			if (convertibleTypes == null) {
-				Assert.state(converter instanceof ConditionalConversion,
+				Assert.state(converter instanceof ConditionalConverter,
 						"Only conditional converters may return null convertible types");
 				globalConverters.add(converter);
 			} else {
@@ -476,7 +484,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 			List<TypeDescriptor> targetCandidates = getTypeHierarchy(targetType);
 			for (TypeDescriptor sourceCandidate : sourceCandidates) {
 				for (TypeDescriptor targetCandidate : targetCandidates) {
-					GenericConverter converter = getRegisteredConverter(sourceType, targetType, sourceCandidate, targetCandidate);
+					GenericConverter converter = getRegisteredConverter(
+							sourceType, targetType, sourceCandidate, targetCandidate);
 					if(converter != null) {
 						return converter;
 					}
@@ -499,9 +508,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 			// Check ConditionalGenericConverter that match all types
 			for (GenericConverter globalConverter : this.globalConverters) {
-				if (((ConditionalConversion)globalConverter).matches(
-						sourceCandidate,
-						targetCandidate)) {
+				if (((ConditionalConverter)globalConverter).matches(
+						sourceCandidate, targetCandidate)) {
 					return globalConverter;
 				}
 			}

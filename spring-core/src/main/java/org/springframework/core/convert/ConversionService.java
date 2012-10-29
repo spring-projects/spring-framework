@@ -63,6 +63,7 @@ public interface ConversionService {
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if conversion can be bypassed
 	 * @throws IllegalArgumentException if targetType is null
+	 * @since 3.2
 	 */
 	boolean canBypassConvert(Class<?> sourceType, Class<?> targetType);
 
@@ -74,6 +75,7 @@ public interface ConversionService {
 	 * @param targetType context about the target type to convert to (required)
 	 * @return true if conversion can be bypassed
 	 * @throws IllegalArgumentException if targetType is null
+	 * @since 3.2
 	 */
 	boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 

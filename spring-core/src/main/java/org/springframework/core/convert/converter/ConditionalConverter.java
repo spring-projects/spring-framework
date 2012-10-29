@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,18 +33,18 @@ import org.springframework.core.convert.TypeDescriptor;
  * implementation might return {@code true} if the target Account class defines a
  * {@code public static findAccount(String)} method.
  *
- * @author Keith Donald
  * @author Phillip Webb
+ * @author Keith Donald
  * @since 3.2
  * @see Converter
  * @see GenericConverter
  * @see ConverterFactory
  * @see ConditionalGenericConverter
  */
-public interface ConditionalConversion {
+public interface ConditionalConverter {
 
 	/**
-	 * Should the converter from {@code sourceType} to {@code targetType} currently under
+	 * Should the conversion from {@code sourceType} to {@code targetType} currently under
 	 * consideration be selected?
 	 *
 	 * @param sourceType the type descriptor of the field we are converting from
