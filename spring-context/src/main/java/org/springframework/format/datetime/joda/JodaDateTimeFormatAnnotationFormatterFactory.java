@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda time.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -52,16 +52,16 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 	private final Set<Class<?>> fieldTypes;
 
 	private StringValueResolver embeddedValueResolver;
-	
+
 
 	public JodaDateTimeFormatAnnotationFormatterFactory() {
 		this.fieldTypes = createFieldTypes();
 	}
 
+
 	public final Set<Class<?>> getFieldTypes() {
 		return this.fieldTypes;
 	}
-
 
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -71,9 +71,8 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
-
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
-		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);		
+		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);
 		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
 			return new ReadableInstantPrinter(formatter);
 		}
@@ -82,21 +81,21 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		}
 		else if (Calendar.class.isAssignableFrom(fieldType)) {
 			// assumes Calendar->ReadableInstant converter is registered
-			return new ReadableInstantPrinter(formatter);			
+			return new ReadableInstantPrinter(formatter);
 		}
 		else {
 			// assumes Date->Long converter is registered
 			return new MillisecondInstantPrinter(formatter);
-		}		
+		}
 	}
 
 	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		return new DateTimeParser(configureDateTimeFormatterFrom(annotation));				
+		return new DateTimeParser(configureDateTimeFormatterFrom(annotation));
 	}
 
 	// internal helpers
 
-	/** 
+	/**
 	 * Create the set of field types that may be annotated with @DateTimeFormat.
 	 * Note: the 3 ReadablePartial concrete types are registered explicitly since addFormatterForFieldType rules exist for each of these types
 	 * (if we did not do this, the default byType rules for LocalDate, LocalTime, and LocalDateTime would take precedence over the annotation rule, which is not what we want)
@@ -111,9 +110,9 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		rawFieldTypes.add(Date.class);
 		rawFieldTypes.add(Calendar.class);
 		rawFieldTypes.add(Long.class);
-		return Collections.unmodifiableSet(rawFieldTypes);		
+		return Collections.unmodifiableSet(rawFieldTypes);
 	}
-	
+
 	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
 		if (StringUtils.hasLength(annotation.pattern())) {
 			return forPattern(resolveEmbeddedValue(annotation.pattern()));
@@ -143,7 +142,7 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		}
 		else {
 			return org.joda.time.format.ISODateTimeFormat.dateTime();
-		}		
+		}
 	}
 
 }
