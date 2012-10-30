@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.junit.Test;
 
 /**
  * Tests the messages and exceptions that come out for badly formed expressions
- * 
+ *
  * @author Andy Clement
  */
 public class ParserErrorMessagesTests extends ExpressionTestCase {
@@ -56,7 +56,7 @@ public class ParserErrorMessagesTests extends ExpressionTestCase {
 		// T() can only take an identifier (possibly qualified), not a literal
 		// message ought to say identifier rather than ID
 		parseAndCheckError("null instanceof T('a')", SpelMessage.NOT_EXPECTED_TOKEN, 18,
-				"identifier","literal_string");
+				"qualified ID","literal_string");
 	}
 
 }
