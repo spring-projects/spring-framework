@@ -16,7 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
@@ -29,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
+import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionInvocationTargetException;
@@ -44,6 +46,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
  * Tests invocation of methods.
  *
  * @author Andy Clement
+ * @author Phillip Webb
  */
 public class MethodInvocationTests extends ExpressionTestCase {
 
@@ -368,5 +371,31 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		Expression expression = parser.parseExpression("getName()");
 		Object value = expression.getValue(new StandardEvaluationContext(String.class));
 		assertEquals(value, "java.lang.String");
+	}
+
+	@Test
+	public void invokeMethodWithoutConversion() throws Exception {
+		final BytesService service = new BytesService();
+		byte[] bytes = new byte[100];
+		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
+		context.setBeanResolver(new BeanResolver() {
+			public Object resolve(EvaluationContext context, String beanName)
+					throws AccessException {
+				if ("service".equals(beanName)) {
+					return service;
+				}
+				return null;
+			}
+		});
+		Expression expression = parser.parseExpression("@service.handleBytes(#root)");
+		byte[] outBytes = expression.getValue(context, byte[].class);
+		assertSame(bytes, outBytes);
+	}
+
+	public static class BytesService {
+
+		public byte[] handleBytes(byte[] bytes) {
+			return bytes;
+		}
 	}
 }

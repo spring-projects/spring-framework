@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,13 @@ package org.springframework.core.convert.converter;
  * A converter converts a source object of type S to a target of type T.
  * Implementations of this interface are thread-safe and can be shared.
  *
+ * <p>Implementations may additionally implement {@link ConditionalConverter}.
+ *
  * @author Keith Donald
+ * @since 3.0
+ * @see ConditionalConverter
  * @param <S> The source type
  * @param <T> The target type
- * @since 3.0
  */
 public interface Converter<S, T> {
 
