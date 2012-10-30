@@ -55,8 +55,10 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 
 	public Object convert(Object source, TypeDescriptor sourceType,
 			TypeDescriptor targetType) {
-		if (conversionService.canBypassConvert(sourceType.getElementTypeDescriptor(),
-				targetType.getElementTypeDescriptor())) {
+		if ((conversionService instanceof GenericConversionService)
+				&& ((GenericConversionService) conversionService).canBypassConvert(
+						sourceType.getElementTypeDescriptor(),
+						targetType.getElementTypeDescriptor())) {
 			return source;
 		}
 		List<Object> sourceList = Arrays.asList(ObjectUtils.toObjectArray(source));

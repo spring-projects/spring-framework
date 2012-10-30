@@ -56,30 +56,6 @@ public interface ConversionService {
 	boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	/**
-	 * Returns true if conversion between the sourceType and targetType can be bypassed.
-	 * More precisely this method will return true if objects of sourceType can be
-	 * converted to the targetType by returning the source object unchanged.
-	 * @param sourceType context about the source type to convert from (may be null if source is null)
-	 * @param targetType context about the target type to convert to (required)
-	 * @return true if conversion can be bypassed
-	 * @throws IllegalArgumentException if targetType is null
-	 * @since 3.2
-	 */
-	boolean canBypassConvert(Class<?> sourceType, Class<?> targetType);
-
-	/**
-	 * Returns true if conversion between the sourceType and targetType can be bypassed.
-	 * More precisely this method will return true if objects of sourceType can be
-	 * converted to the targetType by returning the source object unchanged.
-	 * @param sourceType context about the source type to convert from (may be null if source is null)
-	 * @param targetType context about the target type to convert to (required)
-	 * @return true if conversion can be bypassed
-	 * @throws IllegalArgumentException if targetType is null
-	 * @since 3.2
-	 */
-	boolean canBypassConvert(TypeDescriptor sourceType, TypeDescriptor targetType);
-
-	/**
 	 * Convert the source to targetType.
 	 * @param source the source object to convert (may be null)
 	 * @param targetType the target type to convert to (required)
