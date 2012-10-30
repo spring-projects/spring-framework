@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.springframework.beans.TestBean;
+import org.springframework.validation.DefaultMessageCodesResolver.Format;
 
 /**
  * Tests for {@link DefaultMessageCodesResolver}.
@@ -119,5 +120,40 @@ public class DefaultMessageCodesResolverTests {
 				"errorCode.objectName.field",
 				"errorCode.field",
 				"errorCode" })));
-		}
+	}
+
+	@Test
+	public void shouldSupportPostfixFormat() throws Exception {
+		resolver.setMessageCodeFormatter(Format.POSTFIX_ERROR_CODE);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName");
+		assertThat(codes, is(equalTo(new String[] {
+				"objectName.errorCode",
+				"errorCode" })));
+	}
+
+	@Test
+	public void shouldSupportFieldPostfixFormat() throws Exception {
+		resolver.setMessageCodeFormatter(Format.POSTFIX_ERROR_CODE);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName", "field",
+				TestBean.class);
+		assertThat(codes, is(equalTo(new String[] {
+				"objectName.field.errorCode",
+				"field.errorCode",
+				"org.springframework.beans.TestBean.errorCode",
+				"errorCode" })));
+	}
+
+	@Test
+	public void shouldSupportCustomFormat() throws Exception {
+		resolver.setMessageCodeFormatter(new MessageCodeFormatter() {
+			public String format(String errorCode, String objectName, String field) {
+				return DefaultMessageCodesResolver.Format.toDelimitedString(
+						"CUSTOM-" + errorCode, objectName, field);
+			}
+		});
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName");
+		assertThat(codes, is(equalTo(new String[] {
+				"CUSTOM-errorCode.objectName",
+				"CUSTOM-errorCode" })));
+	}
 }
