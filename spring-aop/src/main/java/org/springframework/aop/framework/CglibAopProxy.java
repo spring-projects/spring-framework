@@ -41,6 +41,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
@@ -72,6 +73,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @author Ramnivas Laddad
  * @author Chris Beams
+ * @author Dave Syer
  * @see org.springframework.cglib.proxy.Enhancer
  * @see AdvisedSupport#setProxyTargetClass
  * @see DefaultAopProxyFactory
@@ -330,9 +332,10 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	/**
-	 * Wrap a return of this if necessary to be the proxy
+	 * Process a return value. Wraps a return of {@code this} if necessary to be the
+	 * {@code proxy} and also verifies that {@code null} is not returned as a primitive.
 	 */
-	private static Object massageReturnTypeIfNecessary(Object proxy, Object target, Method method, Object retVal) {
+	private static Object processReturnType(Object proxy, Object target, Method method, Object retVal) {
 		// Massage return value if necessary
 		if (retVal != null && retVal == target &&
 				!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
@@ -340,6 +343,10 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			// Note that we can't help if the target sets a reference
 			// to itself in another returned object.
 			retVal = proxy;
+		}
+		Class<?> returnType = method.getReturnType();
+		if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
+				throw new AopInvocationException("Null return value from advice does not match primitive return type for: " + method);
 		}
 		return retVal;
 	}
@@ -381,7 +388,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 			Object retVal = methodProxy.invoke(this.target, args);
-			return massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
+			return processReturnType(proxy, this.target, method, retVal);
 		}
 	}
 
@@ -403,7 +410,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = methodProxy.invoke(this.target, args);
-				return massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
+				return processReturnType(proxy, this.target, method, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -429,7 +436,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			Object target = this.targetSource.getTarget();
 			try {
 				Object retVal = methodProxy.invoke(target, args);
-				return massageReturnTypeIfNecessary(proxy, target, method, retVal);
+				return processReturnType(proxy, target, method, retVal);
 			}
 			finally {
 				this.targetSource.releaseTarget(target);
@@ -455,7 +462,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 			try {
 				oldProxy = AopContext.setCurrentProxy(proxy);
 				Object retVal = methodProxy.invoke(target, args);
-				return massageReturnTypeIfNecessary(proxy, target, method, retVal);
+				return processReturnType(proxy, target, method, retVal);
 			}
 			finally {
 				AopContext.setCurrentProxy(oldProxy);
@@ -573,7 +580,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 					this.targetClass, this.adviceChain, methodProxy);
 			// If we get here, we need to create a MethodInvocation.
 			Object retVal = invocation.proceed();
-			retVal = massageReturnTypeIfNecessary(proxy, this.target, method, retVal);
+			retVal = processReturnType(proxy, this.target, method, retVal);
 			return retVal;
 		}
 	}
@@ -623,7 +630,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 					// We need to create a method invocation...
 					retVal = new CglibMethodInvocation(proxy, target, method, args, targetClass, chain, methodProxy).proceed();
 				}
-				retVal = massageReturnTypeIfNecessary(proxy, target, method, retVal);
+				retVal = processReturnType(proxy, target, method, retVal);
 				return retVal;
 			}
 			finally {
