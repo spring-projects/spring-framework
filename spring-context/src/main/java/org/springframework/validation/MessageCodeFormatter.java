@@ -22,6 +22,7 @@ package org.springframework.validation;
  * @author Chris Beams
  * @since 3.2
  * @see DefaultMessageCodesResolver
+ * @see DefaultMessageCodesResolver.Format
  */
 public interface MessageCodeFormatter {
 

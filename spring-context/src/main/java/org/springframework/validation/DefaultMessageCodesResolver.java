@@ -116,6 +116,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * Specify the format for message codes built by this resolver.
 	 * <p>The default is {@link Format#PREFIX_ERROR_CODE}.
 	 * @since 3.2
+	 * @see Format
 	 */
 	public void setMessageCodeFormatter(MessageCodeFormatter formatter) {
 		this.formatter = (formatter == null ? DEFAULT_FORMATTER : formatter);
@@ -206,7 +207,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	/**
 	 * Common message code formats.
 	 *
-	 * @author Phil Webb
+	 * @author Phillip Webb
 	 * @author Chris Beams
 	 * @since 3.2
 	 * @see MessageCodeFormatter
