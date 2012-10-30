@@ -48,10 +48,17 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 	}
 
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		return !sourceType.equals(targetType) && hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
+		if (sourceType.getType().equals(targetType.getType())) {
+			// no conversion required
+			return false;
+		}
+		return hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
 	}
 
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+		if (source == null) {
+			return null;
+		}
 		Class<?> sourceClass = sourceType.getType();
 		Class<?> targetClass = targetType.getType();
 		Method method = getValueOfMethodOn(targetClass, sourceClass);

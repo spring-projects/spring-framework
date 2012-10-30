@@ -18,6 +18,8 @@ package org.springframework.core.convert.support;
 
 import java.awt.Color;
 import java.awt.SystemColor;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -742,6 +744,22 @@ public class GenericConversionServiceTests {
 		conversionService.addConverter(new MyEnumInterfaceToStringConverter<MyEnum>());
 		String result = conversionService.convert(MyEnum.A, String.class);
 		assertEquals("1", result);
+	}
+
+	@Test
+	public void convertNullAnnotatedStringToString() throws Exception {
+		DefaultConversionService.addDefaultConverters(conversionService);
+		String source = null;
+		TypeDescriptor sourceType = new TypeDescriptor(getClass().getField("annotatedString"));
+		TypeDescriptor targetType = TypeDescriptor.valueOf(String.class);
+		conversionService.convert(source, sourceType, targetType);
+	}
+
+	@ExampleAnnotation
+	public String annotatedString;
+
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface ExampleAnnotation {
 	}
 
 	private static class MyConditionalConverter implements Converter<String, Color>,
