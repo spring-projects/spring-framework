@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aop.AopInvocationException;
 import org.springframework.aop.RawTargetAccess;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
@@ -53,6 +54,8 @@ import org.springframework.util.ClassUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Dave Syer
+ * 
  * @see java.lang.reflect.Proxy
  * @see AdvisedSupport
  * @see ProxyFactory
@@ -203,12 +206,15 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 
 			// Massage return value if necessary.
-			if (retVal != null && retVal == target && method.getReturnType().isInstance(proxy) &&
+			Class<?> returnType = method.getReturnType();
+			if (retVal != null && retVal == target && returnType.isInstance(proxy) &&
 					!RawTargetAccess.class.isAssignableFrom(method.getDeclaringClass())) {
 				// Special case: it returned "this" and the return type of the method
 				// is type-compatible. Note that we can't help if the target sets
 				// a reference to itself in another returned object.
 				retVal = proxy;
+			} else if (retVal == null && returnType != Void.TYPE && returnType.isPrimitive()) {
+				throw new AopInvocationException("Null return value from advice does not match primitive return type for: " + method);
 			}
 			return retVal;
 		}
