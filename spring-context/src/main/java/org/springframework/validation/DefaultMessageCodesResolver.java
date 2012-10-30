@@ -29,7 +29,8 @@ import org.springframework.util.StringUtils;
  * Default implementation of the {@link MessageCodesResolver} interface.
  *
  * <p>Will create two message codes for an object error, in the following order (when
- * using the {@link Style#PREFIX_ERROR_CODE prefixed} {@link #setStyle(Style) style}):
+ * using the {@link Format#PREFIX_ERROR_CODE prefixed}
+ * {@link #setMessageCodeFormatter(MessageCodeFormatter) formatter}):
  * <ul>
  * <li>1.: code + "." + object name
  * <li>2.: code
@@ -73,8 +74,9 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>By default the {@code errorCode}s will be placed at the beginning of constructed
- * message strings.  The {@link #setStyle(Style) style} property can be used to specify
- * alternative {@link Style styles} of concatination.
+ * message strings. The {@link #setMessageCodeFormatter(MessageCodeFormatter)
+ * messageCodeFormatter} property can be used to specify an alternative concatenation
+ * {@link MessageCodeFormatter format}.
  *
  * <p>In order to group all codes into a specific category within your resource bundles,
  * e.g. "validation.typeMismatch.name" instead of the default "typeMismatch.name",
@@ -82,6 +84,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Chris Beams
  * @since 1.0.1
  */
 @SuppressWarnings("serial")
@@ -92,12 +95,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 */
 	public static final String CODE_SEPARATOR = ".";
 
-	private static final Style DEFAULT_STYLE = Style.PREFIX_ERROR_CODE;
+	private static final MessageCodeFormatter DEFAULT_FORMATTER = Format.PREFIX_ERROR_CODE;
 
 
 	private String prefix = "";
 
-	private Style style = DEFAULT_STYLE;
+	private MessageCodeFormatter formatter = DEFAULT_FORMATTER;
 
 
 	/**
@@ -110,11 +113,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
-	 * Specify the style of message code that will be built by this resolver.
-	 * <p>Default is {@link Style#PREFIX_ERROR_CODE}.
+	 * Specify the format for message codes built by this resolver.
+	 * <p>The default is {@link Format#PREFIX_ERROR_CODE}.
+	 * @since 3.2
 	 */
-	public void setStyle(Style style) {
-		this.style = (style == null ? DEFAULT_STYLE : style);
+	public void setMessageCodeFormatter(MessageCodeFormatter formatter) {
+		this.formatter = (formatter == null ? DEFAULT_FORMATTER : formatter);
 	}
 
 	/**
@@ -163,29 +167,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	private void addCode(Collection<String> codeList, String errorCode, String objectName, String field) {
-		String code = getCode(errorCode, objectName, field);
-		codeList.add(postProcessMessageCode(code));
-	}
-
-	private String getCode(String errorCode, String objectName, String field) {
-		switch (this.style) {
-			case PREFIX_ERROR_CODE:
-				return toDelimitedString(errorCode, objectName, field);
-			case POSTFIX_ERROR_CODE:
-				return toDelimitedString(objectName, field, errorCode);
-		}
-		throw new IllegalStateException("Unknown style " + this.style);
-	}
-
-	private String toDelimitedString(String... elements) {
-		StringBuilder rtn = new StringBuilder();
-		for (String element : elements) {
-			if(StringUtils.hasLength(element)) {
-				rtn.append(rtn.length() == 0 ? "" : CODE_SEPARATOR);
-				rtn.append(element);
-			}
-		}
-		return rtn.toString();
+		codeList.add(postProcessMessageCode(this.formatter.format(errorCode, objectName, field)));
 	}
 
 	/**
@@ -222,21 +204,51 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 
 
 	/**
-	 * The various styles that can be used to construct message codes.
+	 * Common message code formats.
+	 *
+	 * @author Phil Webb
+	 * @author Chris Beams
+	 * @since 3.2
+	 * @see MessageCodeFormatter
+	 * @see DefaultMessageCodesResolver#setMessageCodeFormatter(MessageCodeFormatter)
 	 */
-	public static enum Style {
+	public static enum Format implements MessageCodeFormatter {
 
 		/**
-		 * Prefix the error code at the beginning of the generated message code. eg:
+		 * Prefix the error code at the beginning of the generated message code. e.g.:
 		 * {@code errorCode + "." + object name + "." + field}
 		 */
-		PREFIX_ERROR_CODE,
+		PREFIX_ERROR_CODE {
+			public String format(String errorCode, String objectName, String field) {
+				return toDelimitedString(errorCode, objectName, field);
+			}
+		},
 
 		/**
-		 * Postfix the error code at the end of the generated message code. eg:
+		 * Postfix the error code at the end of the generated message code. e.g.:
 		 * {@code object name + "." + field + "." + errorCode}
 		 */
-		POSTFIX_ERROR_CODE
+		POSTFIX_ERROR_CODE {
+			public String format(String errorCode, String objectName, String field) {
+				return toDelimitedString(objectName, field, errorCode);
+			}
+		};
+
+		/**
+		 * Concatenate the given elements, delimiting each with
+		 * {@link DefaultMessageCodesResolver#CODE_SEPARATOR}, skipping zero-length or
+		 * null elements altogether.
+		 */
+		public static String toDelimitedString(String... elements) {
+			StringBuilder rtn = new StringBuilder();
+			for (String element : elements) {
+				if(StringUtils.hasLength(element)) {
+					rtn.append(rtn.length() == 0 ? "" : CODE_SEPARATOR);
+					rtn.append(element);
+				}
+			}
+			return rtn.toString();
+		}
 	}
 
 }
