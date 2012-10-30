@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -816,6 +817,28 @@ public class TypeDescriptorTests {
 		} catch(IllegalArgumentException e) {
 			assertEquals("interface java.util.Map is not assignable to interface java.util.Collection", e.getMessage());
 		}
+	}
+
+	@Test
+	public void elementTypeForCollectionSubclass() throws Exception {
+		@SuppressWarnings("serial")
+		class CustomSet extends HashSet<String> {
+		}
+
+		assertEquals(TypeDescriptor.valueOf(CustomSet.class).getElementTypeDescriptor(), TypeDescriptor.valueOf(String.class));
+		assertEquals(TypeDescriptor.forObject(new CustomSet()).getElementTypeDescriptor(), TypeDescriptor.valueOf(String.class));
+	}
+
+	@Test
+	public void elementTypeForMapSubclass() throws Exception {
+		@SuppressWarnings("serial")
+		class CustomMap extends HashMap<String, Integer> {
+		}
+
+		assertEquals(TypeDescriptor.valueOf(CustomMap.class).getMapKeyTypeDescriptor(), TypeDescriptor.valueOf(String.class));
+		assertEquals(TypeDescriptor.valueOf(CustomMap.class).getMapValueTypeDescriptor(), TypeDescriptor.valueOf(Integer.class));
+		assertEquals(TypeDescriptor.forObject(new CustomMap()).getMapKeyTypeDescriptor(), TypeDescriptor.valueOf(String.class));
+		assertEquals(TypeDescriptor.forObject(new CustomMap()).getMapValueTypeDescriptor(), TypeDescriptor.valueOf(Integer.class));
 	}
 
 }
