@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 import org.springframework.beans.TestBean;
+import org.springframework.validation.DefaultMessageCodesResolver.Style;
 
 /**
  * Tests for {@link DefaultMessageCodesResolver}.
@@ -119,5 +120,26 @@ public class DefaultMessageCodesResolverTests {
 				"errorCode.objectName.field",
 				"errorCode.field",
 				"errorCode" })));
-		}
+	}
+
+	@Test
+	public void shouldSupportPostfixStyle() throws Exception {
+		resolver.setStyle(Style.POSTFIX_ERROR_CODE);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName");
+		assertThat(codes, is(equalTo(new String[] {
+				"objectName.errorCode",
+				"errorCode" })));
+	}
+
+	@Test
+	public void shouldSupportFieldPostfixStyle() throws Exception {
+		resolver.setStyle(Style.POSTFIX_ERROR_CODE);
+		String[] codes = resolver.resolveMessageCodes("errorCode", "objectName", "field",
+				TestBean.class);
+		assertThat(codes, is(equalTo(new String[] {
+				"objectName.field.errorCode",
+				"field.errorCode",
+				"org.springframework.beans.TestBean.errorCode",
+				"errorCode" })));
+	}
 }

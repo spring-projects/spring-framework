@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,18 @@ package org.springframework.validation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
 /**
  * Default implementation of the {@link MessageCodesResolver} interface.
  *
- * <p>Will create two message codes for an object error, in the following order:
+ * <p>Will create two message codes for an object error, in the following order (when
+ * using the {@link Style#PREFIX_ERROR_CODE prefixed} {@link #setStyle(Style) style}):
  * <ul>
  * <li>1.: code + "." + object name
  * <li>2.: code
@@ -68,11 +72,16 @@ import org.springframework.util.StringUtils;
  * <li>7. try "typeMismatch"
  * </ul>
  *
+ * <p>By default the {@code errorCode}s will be placed at the beginning of constructed
+ * message strings.  The {@link #setStyle(Style) style} property can be used to specify
+ * alternative {@link Style styles} of concatination.
+ *
  * <p>In order to group all codes into a specific category within your resource bundles,
  * e.g. "validation.typeMismatch.name" instead of the default "typeMismatch.name",
  * consider specifying a {@link #setPrefix prefix} to be applied.
  *
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 1.0.1
  */
 @SuppressWarnings("serial")
@@ -83,8 +92,12 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 */
 	public static final String CODE_SEPARATOR = ".";
 
+	private static final Style DEFAULT_STYLE = Style.PREFIX_ERROR_CODE;
+
 
 	private String prefix = "";
+
+	private Style style = DEFAULT_STYLE;
 
 
 	/**
@@ -97,6 +110,14 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
+	 * Specify the style of message code that will be built by this resolver.
+	 * <p>Default is {@link Style#PREFIX_ERROR_CODE}.
+	 */
+	public void setStyle(Style style) {
+		this.style = (style == null ? DEFAULT_STYLE : style);
+	}
+
+	/**
 	 * Return the prefix to be applied to any code built by this resolver.
 	 * <p>Returns an empty String in case of no prefix.
 	 */
@@ -106,9 +127,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 
 
 	public String[] resolveMessageCodes(String errorCode, String objectName) {
-		return new String[] {
-				postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName),
-				postProcessMessageCode(errorCode)};
+		return resolveMessageCodes(errorCode, objectName, "", null);
 	}
 
 	/**
@@ -121,24 +140,52 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * @return the list of codes
 	 */
 	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
-		List<String> codeList = new ArrayList<String>();
+		Set<String> codeList = new LinkedHashSet<String>();
 		List<String> fieldList = new ArrayList<String>();
 		buildFieldList(field, fieldList);
-		for (String fieldInList : fieldList) {
-			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + objectName + CODE_SEPARATOR + fieldInList));
-		}
+		addCodes(codeList, errorCode, objectName, fieldList);
 		int dotIndex = field.lastIndexOf('.');
 		if (dotIndex != -1) {
 			buildFieldList(field.substring(dotIndex + 1), fieldList);
 		}
-		for (String fieldInList : fieldList) {
-			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldInList));
-		}
+		addCodes(codeList, errorCode, null, fieldList);
 		if (fieldType != null) {
-			codeList.add(postProcessMessageCode(errorCode + CODE_SEPARATOR + fieldType.getName()));
+			addCode(codeList, errorCode, null, fieldType.getName());
 		}
-		codeList.add(postProcessMessageCode(errorCode));
+		addCode(codeList, errorCode, null, null);
 		return StringUtils.toStringArray(codeList);
+	}
+
+	private void addCodes(Collection<String> codeList, String errorCode, String objectName, Iterable<String> fields) {
+		for (String field : fields) {
+			addCode(codeList, errorCode, objectName, field);
+		}
+	}
+
+	private void addCode(Collection<String> codeList, String errorCode, String objectName, String field) {
+		String code = getCode(errorCode, objectName, field);
+		codeList.add(postProcessMessageCode(code));
+	}
+
+	private String getCode(String errorCode, String objectName, String field) {
+		switch (this.style) {
+			case PREFIX_ERROR_CODE:
+				return toDelimitedString(errorCode, objectName, field);
+			case POSTFIX_ERROR_CODE:
+				return toDelimitedString(objectName, field, errorCode);
+		}
+		throw new IllegalStateException("Unknown style " + this.style);
+	}
+
+	private String toDelimitedString(String... elements) {
+		StringBuilder rtn = new StringBuilder();
+		for (String element : elements) {
+			if(StringUtils.hasLength(element)) {
+				rtn.append(rtn.length() == 0 ? "" : CODE_SEPARATOR);
+				rtn.append(element);
+			}
+		}
+		return rtn.toString();
 	}
 
 	/**
@@ -171,6 +218,25 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 */
 	protected String postProcessMessageCode(String code) {
 		return getPrefix() + code;
+	}
+
+
+	/**
+	 * The various styles that can be used to construct message codes.
+	 */
+	public static enum Style {
+
+		/**
+		 * Prefix the error code at the beginning of the generated message code. eg:
+		 * {@code errorCode + "." + object name + "." + field}
+		 */
+		PREFIX_ERROR_CODE,
+
+		/**
+		 * Postfix the error code at the end of the generated message code. eg:
+		 * {@code object name + "." + field + "." + errorCode}
+		 */
+		POSTFIX_ERROR_CODE
 	}
 
 }
