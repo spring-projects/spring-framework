@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.springframework.core.convert.converter;
 /**
  * A factory for "ranged" converters that can convert objects from S to subtypes of R.
  *
+ * <p>Implementations may additionally implement {@link ConditionalConversion}.
+ *
  * @author Keith Donald
  * @since 3.0
+ * @see ConditionalConversion
  * @param <S> The source type converters created by this factory can convert from
  * @param <R> The target range (or base) type converters created by this factory can convert to;
  * for example {@link Number} for a set of number subtypes.

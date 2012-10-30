@@ -16,6 +16,13 @@
 
 package org.springframework.core.convert;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,14 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-
 import org.springframework.core.MethodParameter;
-
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author Keith Donald
@@ -800,5 +800,27 @@ public class TypeDescriptorTests {
 	public Map notGenericMap;
 
 	public Map<CharSequence, Number> isAssignableMapKeyValueTypes;
+
+	@Test
+	public void testUpCast() throws Exception {
+		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
+				getClass().getMethod("setProperty", Map.class));
+		TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+		TypeDescriptor upCast = typeDescriptor.upcast(Object.class);
+		assertTrue(upCast.getAnnotation(MethodAnnotation1.class) != null);
+	}
+
+	@Test
+	public void testUpCastNotSuper() throws Exception {
+		Property property = new Property(getClass(), getClass().getMethod("getProperty"),
+				getClass().getMethod("setProperty", Map.class));
+		TypeDescriptor typeDescriptor = new TypeDescriptor(property);
+		try {
+			typeDescriptor.upcast(Collection.class);
+			fail("Did not throw");
+		} catch(IllegalArgumentException e) {
+			assertEquals("interface java.util.Map is not assignable to interface java.util.Collection", e.getMessage());
+		}
+	}
 
 }
