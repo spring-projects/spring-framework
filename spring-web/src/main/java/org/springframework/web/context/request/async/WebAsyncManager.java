@@ -181,13 +181,22 @@ public final class WebAsyncManager {
 	 * @param interceptor the interceptor to register
 	 */
 	public void registerCallableInterceptor(Object key, CallableProcessingInterceptor interceptor) {
-		Assert.notNull(interceptor, "interceptor is required");
+		Assert.notNull(key, "Key is required");
+		Assert.notNull(interceptor, "CallableProcessingInterceptor  is required");
 		this.callableInterceptors.put(key, interceptor);
 	}
 
-	public void registerAllCallableInterceptors(Map<Object, CallableProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors);
-		this.callableInterceptors.putAll(interceptors);
+	/**
+	 * Register a {@link CallableProcessingInterceptor} without a key.
+	 * The key is derived from the class name and hashcode.
+	 * @param interceptor the interceptor to register
+	 */
+	public void registerCallableInterceptor(CallableProcessingInterceptor... interceptors) {
+		Assert.notNull(interceptors, "A CallableProcessingInterceptor is required");
+		for (CallableProcessingInterceptor interceptor : interceptors) {
+			String key = interceptor.getClass().getName() + ":" + interceptor.hashCode();
+			this.callableInterceptors.put(key, interceptor);
+		}
 	}
 
 	/**
@@ -196,13 +205,23 @@ public final class WebAsyncManager {
 	 * @param interceptor the interceptor to register
 	 */
 	public void registerDeferredResultInterceptor(Object key, DeferredResultProcessingInterceptor interceptor) {
-		Assert.notNull(interceptor, "interceptor is required");
+		Assert.notNull(key, "Key is required");
+		Assert.notNull(interceptor, "DeferredResultProcessingInterceptor is required");
 		this.deferredResultInterceptors.put(key, interceptor);
 	}
 
-	public void registerAllDeferredResultInterceptors(Map<Object, DeferredResultProcessingInterceptor> interceptors) {
-		Assert.notNull(interceptors);
-		this.deferredResultInterceptors.putAll(interceptors);
+	/**
+	 * Register a {@link DeferredResultProcessingInterceptor} without a key.
+	 * The key is derived from the class name and hashcode.
+	 * @param key the key
+	 * @param interceptors the interceptor to register
+	 */
+	public void registerDeferredResultInterceptor(DeferredResultProcessingInterceptor... interceptors) {
+		Assert.notNull(interceptors, "A DeferredResultProcessingInterceptor is required");
+		for (DeferredResultProcessingInterceptor interceptor : interceptors) {
+			String key = interceptors.getClass().getName() + ":" + interceptors.hashCode();
+			this.deferredResultInterceptors.put(key, interceptor);
+		}
 	}
 
 	/**

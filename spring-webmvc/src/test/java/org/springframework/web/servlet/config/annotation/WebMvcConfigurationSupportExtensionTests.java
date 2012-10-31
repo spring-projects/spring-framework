@@ -149,13 +149,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(ConcurrentTaskExecutor.class, fieldAccessor.getPropertyValue("taskExecutor").getClass());
 		assertEquals(2500L, fieldAccessor.getPropertyValue("asyncRequestTimeout"));
 
-		Map<Object, CallableProcessingInterceptor> callableInterceptors =
-				(Map<Object, CallableProcessingInterceptor>) fieldAccessor.getPropertyValue("callableInterceptors");
-		assertEquals(1, callableInterceptors.size());
+		CallableProcessingInterceptor[] callableInterceptors =
+				(CallableProcessingInterceptor[]) fieldAccessor.getPropertyValue("callableInterceptors");
+		assertEquals(1, callableInterceptors.length);
 
-		Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
-				(Map<Object, DeferredResultProcessingInterceptor>) fieldAccessor.getPropertyValue("deferredResultInterceptors");
-		assertEquals(1, deferredResultInterceptors.size());
+		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
+				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
+		assertEquals(1, deferredResultInterceptors.length);
 
 		assertEquals(false, fieldAccessor.getPropertyValue("ignoreDefaultModelOnRedirect"));
 	}

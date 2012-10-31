@@ -138,11 +138,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 
 	private Long asyncRequestTimeout;
 
-	private final Map<Object, CallableProcessingInterceptor> callableInterceptors =
-			new LinkedHashMap<Object, CallableProcessingInterceptor>();
+	private CallableProcessingInterceptor[] callableInterceptors = new CallableProcessingInterceptor[] {};
 
-	private final Map<Object, DeferredResultProcessingInterceptor> deferredResultInterceptors =
-			new LinkedHashMap<Object, DeferredResultProcessingInterceptor>();
+	private DeferredResultProcessingInterceptor[] deferredResultInterceptors = new DeferredResultProcessingInterceptor[] {};
 
 	private boolean ignoreDefaultModelOnRedirect = false;
 
@@ -378,10 +376,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public void setCallableInterceptors(List<CallableProcessingInterceptor> interceptors) {
 		Assert.notNull(interceptors);
-		for (int index = 0 ; index < interceptors.size(); index++) {
-			CallableProcessingInterceptor interceptor = interceptors.get(index);
-			this.callableInterceptors.put(getInterceptorKey(interceptor, index), interceptor);
-		}
+		this.callableInterceptors = interceptors.toArray(new CallableProcessingInterceptor[interceptors.size()]);
 	}
 
 	/**
@@ -390,14 +385,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public void setDeferredResultInterceptors(List<DeferredResultProcessingInterceptor> interceptors) {
 		Assert.notNull(interceptors);
-		for (int index = 0 ; index < interceptors.size(); index++) {
-			DeferredResultProcessingInterceptor interceptor = interceptors.get(index);
-			this.deferredResultInterceptors.put(getInterceptorKey(interceptor, index), interceptor);
-		}
-	}
-
-	private String getInterceptorKey(Object interceptor, int index) {
-		return this.hashCode() + ":" + interceptor.getClass().getName() + "#" + index;
+		this.deferredResultInterceptors = interceptors.toArray(new DeferredResultProcessingInterceptor[interceptors.size()]);
 	}
 
 	/**
@@ -740,8 +728,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerAllCallableInterceptors(this.callableInterceptors);
-		asyncManager.registerAllDeferredResultInterceptors(this.deferredResultInterceptors);
+		asyncManager.registerCallableInterceptor(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptor(this.deferredResultInterceptors);
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();
