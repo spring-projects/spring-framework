@@ -36,9 +36,13 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class PropertySourcesPropertyResolverTests {
+
 	private Properties testProperties;
+
 	private MutablePropertySources propertySources;
+
 	private ConfigurablePropertyResolver propertyResolver;
+
 
 	@Before
 	public void setUp() {
@@ -47,6 +51,7 @@ public class PropertySourcesPropertyResolverTests {
 		testProperties = new Properties();
 		propertySources.addFirst(new PropertiesPropertySource("testProperties", testProperties));
 	}
+
 
 	@Test
 	public void containsProperty() {
@@ -103,7 +108,6 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(propertyResolver.getProperty("foo", String[].class), equalTo(new String[] { "bar", "baz" }));
 	}
 
-
 	@Test
 	public void getProperty_withNonConvertibleTargetType() {
 		testProperties.put("foo", "bar");
@@ -113,7 +117,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getProperty("foo", TestType.class);
 			fail("Expected IllegalArgumentException due to non-convertible types");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}
@@ -172,7 +177,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getRequiredProperty("bogus");
 			fail("expected IllegalStateException");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -185,7 +191,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getRequiredProperty("bogus", String[].class);
 			fail("expected IllegalStateException");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -327,7 +334,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.validateRequiredProperties();
 			fail("expected validation exception");
-		} catch (MissingRequiredPropertiesException ex) {
+		}
+		catch (MissingRequiredPropertiesException ex) {
 			assertThat(ex.getMessage(), equalTo(
 					"The following properties were declared as required " +
 					"but could not be resolved: [foo, bar]"));
@@ -338,7 +346,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.validateRequiredProperties();
 			fail("expected validation exception");
-		} catch (MissingRequiredPropertiesException ex) {
+		}
+		catch (MissingRequiredPropertiesException ex) {
 			assertThat(ex.getMessage(), equalTo(
 					"The following properties were declared as required " +
 					"but could not be resolved: [bar]"));
@@ -369,14 +378,16 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(pr.getProperty("p4"), equalTo("v1:v2"));
 		try {
 			pr.getProperty("p5");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
+					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
 		}
 		assertThat(pr.getProperty("p6"), equalTo("v1:v2:def"));
 		try {
 			pr.getProperty("pL");
-		} catch (StackOverflowError ex) {
+		}
+		catch (StackOverflowError ex) {
 			// no explicit handling for cyclic references for now
 		}
 	}
@@ -399,9 +410,10 @@ public class PropertySourcesPropertyResolverTests {
 		// exception by default
 		try {
 			pr.getProperty("p4");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
+					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
 		}
 
 		// relax the treatment of unresolvable nested placeholders
@@ -414,13 +426,18 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(pr.resolvePlaceholders("${p1}:${p2}:${bogus}"), equalTo("v1:v2:${bogus}"));
 		try {
 			pr.resolveRequiredPlaceholders("${p1}:${p2}:${bogus}");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString(
-					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
+					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
 		}
 	}
 
 
-	static interface SomeType { }
-	static class SpecificType implements SomeType { }
+	interface SomeType {
+	}
+
+	static class SpecificType implements SomeType {
+	}
+
 }
