@@ -20,14 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.convert.ConversionException;
 import org.springframework.mock.env.MockPropertySource;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -37,9 +36,13 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class PropertySourcesPropertyResolverTests {
+
 	private Properties testProperties;
+
 	private MutablePropertySources propertySources;
+
 	private ConfigurablePropertyResolver propertyResolver;
+
 
 	@Before
 	public void setUp() {
@@ -48,6 +51,7 @@ public class PropertySourcesPropertyResolverTests {
 		testProperties = new Properties();
 		propertySources.addFirst(new PropertiesPropertySource("testProperties", testProperties));
 	}
+
 
 	@Test
 	public void containsProperty() {
@@ -104,7 +108,6 @@ public class PropertySourcesPropertyResolverTests {
 		assertThat(propertyResolver.getProperty("foo", String[].class), equalTo(new String[] { "bar", "baz" }));
 	}
 
-
 	@Test
 	public void getProperty_withNonConvertibleTargetType() {
 		testProperties.put("foo", "bar");
@@ -114,7 +117,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getProperty("foo", TestType.class);
 			fail("Expected IllegalArgumentException due to non-convertible types");
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			// expected
 		}
 	}
@@ -173,7 +177,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getRequiredProperty("bogus");
 			fail("expected IllegalStateException");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -186,7 +191,8 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.getRequiredProperty("bogus", String[].class);
 			fail("expected IllegalStateException");
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			// expected
 		}
 	}
@@ -328,10 +334,11 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.validateRequiredProperties();
 			fail("expected validation exception");
-		} catch (MissingRequiredPropertiesException ex) {
+		}
+		catch (MissingRequiredPropertiesException ex) {
 			assertThat(ex.getMessage(), equalTo(
 					"The following properties were declared as required " +
-					"but could not be resolved: [foo, bar]"));
+							"but could not be resolved: [foo, bar]"));
 		}
 
 		// add foo property -> validation should fail only on missing 'bar' property
@@ -339,10 +346,11 @@ public class PropertySourcesPropertyResolverTests {
 		try {
 			propertyResolver.validateRequiredProperties();
 			fail("expected validation exception");
-		} catch (MissingRequiredPropertiesException ex) {
+		}
+		catch (MissingRequiredPropertiesException ex) {
 			assertThat(ex.getMessage(), equalTo(
 					"The following properties were declared as required " +
-					"but could not be resolved: [bar]"));
+							"but could not be resolved: [bar]"));
 		}
 
 		// add bar property -> validation should pass, even with an empty string value
@@ -354,35 +362,41 @@ public class PropertySourcesPropertyResolverTests {
 	public void resolveNestedPropertyPlaceholders() {
 		MutablePropertySources ps = new MutablePropertySources();
 		ps.addFirst(new MockPropertySource()
-			.withProperty("p1", "v1")
-			.withProperty("p2", "v2")
-			.withProperty("p3", "${p1}:${p2}")              // nested placeholders
-			.withProperty("p4", "${p3}")                    // deeply nested placeholders
-			.withProperty("p5", "${p1}:${p2}:${bogus}")     // unresolvable placeholder
-			.withProperty("p6", "${p1}:${p2}:${bogus:def}") // unresolvable w/ default
-			.withProperty("pL", "${pR}")                    // cyclic reference left
-			.withProperty("pR", "${pL}")                    // cyclic reference right
+				.withProperty("p1", "v1")
+				.withProperty("p2", "v2")
+				.withProperty("p3", "${p1}:${p2}")              // nested placeholders
+				.withProperty("p4", "${p3}")                    // deeply nested placeholders
+				.withProperty("p5", "${p1}:${p2}:${bogus}")     // unresolvable placeholder
+				.withProperty("p6", "${p1}:${p2}:${bogus:def}") // unresolvable w/ default
+				.withProperty("pL", "${pR}")                    // cyclic reference left
+				.withProperty("pR", "${pL}")                    // cyclic reference right
 		);
-		PropertySourcesPropertyResolver pr = new PropertySourcesPropertyResolver(ps);
+		ConfigurablePropertyResolver pr = new PropertySourcesPropertyResolver(ps);
 		assertThat(pr.getProperty("p1"), equalTo("v1"));
 		assertThat(pr.getProperty("p2"), equalTo("v2"));
 		assertThat(pr.getProperty("p3"), equalTo("v1:v2"));
 		assertThat(pr.getProperty("p4"), equalTo("v1:v2"));
 		try {
 			pr.getProperty("p5");
-		} catch (IllegalArgumentException ex) {
-			assertThat(ex.getMessage(), Matchers.containsString(
-					"Could not resolve placeholder 'bogus' in string value [${p1}:${p2}:${bogus}]"));
+		}
+		catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(), containsString(
+					"Could not resolve placeholder 'bogus' in string value \"${p1}:${p2}:${bogus}\""));
 		}
 		assertThat(pr.getProperty("p6"), equalTo("v1:v2:def"));
 		try {
 			pr.getProperty("pL");
-		} catch (StackOverflowError ex) {
+		}
+		catch (StackOverflowError ex) {
 			// no explicit handling for cyclic references for now
 		}
 	}
 
 
-	static interface SomeType { }
-	static class SpecificType implements SomeType { }
+	interface SomeType {
+	}
+
+	static class SpecificType implements SomeType {
+	}
+
 }
