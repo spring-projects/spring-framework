@@ -97,6 +97,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 2.5
  * @see #setAutowiredAnnotationType
  * @see Autowired

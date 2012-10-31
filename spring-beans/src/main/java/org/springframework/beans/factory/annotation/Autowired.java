@@ -59,6 +59,7 @@ import java.lang.annotation.Target;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Oliver Gierke
  * @since 2.5
  * @see AutowiredAnnotationBeanPostProcessor
  * @see Qualifier

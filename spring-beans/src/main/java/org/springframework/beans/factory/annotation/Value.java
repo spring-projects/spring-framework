@@ -43,6 +43,7 @@ import java.lang.annotation.Target;
  * class (which, by default, checks for the presence of this annotation).
  *
  * @author Juergen Hoeller
+ * @author Oliver Gierke
  * @since 3.0
  * @see AutowiredAnnotationBeanPostProcessor
  * @see Autowired
