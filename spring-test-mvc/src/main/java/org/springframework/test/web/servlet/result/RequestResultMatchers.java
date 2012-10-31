@@ -28,7 +28,7 @@ import org.hamcrest.Matchers;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.web.context.request.async.AsyncTask;
+import org.springframework.web.context.request.async.MvcAsyncTask;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /**
@@ -97,7 +97,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert the result from asynchronous processing.
 	 * This method can be used when a controller method returns {@link Callable}
-	 * or {@link AsyncTask}. The value matched is the value returned from the
+	 * or {@link MvcAsyncTask}. The value matched is the value returned from the
 	 * {@code Callable} or the exception raised.
 	 */
 	public <T> ResultMatcher asyncResult(Object expectedResult) {

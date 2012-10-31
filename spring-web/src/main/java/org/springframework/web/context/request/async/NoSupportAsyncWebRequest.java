@@ -41,7 +41,7 @@ public class NoSupportAsyncWebRequest extends ServletWebRequest implements Async
 		// ignored
 	}
 
-	public void setTimeoutHandler(Runnable runnable) {
+	public void addTimeoutHandler(Runnable runnable) {
 		// ignored
 	}
 

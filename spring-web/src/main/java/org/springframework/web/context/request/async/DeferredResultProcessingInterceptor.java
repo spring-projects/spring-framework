@@ -75,7 +75,7 @@ public interface DeferredResultProcessingInterceptor {
 	 * Invoked from a container thread when an async request times out before
 	 * the {@code DeferredResult} has been set. Implementations may invoke
 	 * {@link DeferredResult#setResult(Object) setResult} or
-	 * {@link DeferredResult#setErrorResult(Object) to resume processing.
+	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume processing.
 	 *
 	 * @param request the current request
 	 * @param deferredResult the DeferredResult for the current request; if the

@@ -39,8 +39,8 @@ class CallableInterceptorChain {
 	private int preProcessIndex = -1;
 
 
-	public CallableInterceptorChain(Collection<CallableProcessingInterceptor> interceptors) {
-		this.interceptors = new ArrayList<CallableProcessingInterceptor>(interceptors);
+	public CallableInterceptorChain(List<CallableProcessingInterceptor> interceptors) {
+		this.interceptors = interceptors;
 	}
 
 	public void applyPreProcess(NativeWebRequest request, Callable<?> task) throws Exception {

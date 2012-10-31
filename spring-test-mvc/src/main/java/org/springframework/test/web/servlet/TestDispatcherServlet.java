@@ -48,7 +48,7 @@ import org.springframework.web.servlet.ModelAndView;
 @SuppressWarnings("serial")
 final class TestDispatcherServlet extends DispatcherServlet {
 
-	private static final String KEY = TestDispatcherServlet.class.getName() + "-interceptor";
+	private static final String KEY = TestDispatcherServlet.class.getName() + ".interceptor";
 
 	/**
 	 * Create a new instance with the given web application context.

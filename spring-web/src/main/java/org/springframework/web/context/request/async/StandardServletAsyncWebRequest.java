@@ -49,7 +49,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	private AtomicBoolean asyncCompleted = new AtomicBoolean(false);
 
-	private Runnable timeoutHandler;
+	private final List<Runnable> timeoutHandlers = new ArrayList<Runnable>();
 
 	private final List<Runnable> completionHandlers = new ArrayList<Runnable>();
 
@@ -73,8 +73,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 		this.timeout = timeout;
 	}
 
-	public void setTimeoutHandler(Runnable timeoutHandler) {
-		this.timeoutHandler = timeoutHandler;
+	public void addTimeoutHandler(Runnable timeoutHandler) {
+		this.timeoutHandlers.add(timeoutHandler);
 	}
 
 	public void addCompletionHandler(Runnable runnable) {
@@ -127,8 +127,8 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 	}
 
 	public void onTimeout(AsyncEvent event) throws IOException {
-		if (this.timeoutHandler != null) {
-			this.timeoutHandler.run();
+		for (Runnable handler : this.timeoutHandlers) {
+			handler.run();
 		}
 	}
 

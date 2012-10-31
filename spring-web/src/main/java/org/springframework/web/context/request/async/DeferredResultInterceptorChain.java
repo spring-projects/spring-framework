@@ -15,8 +15,6 @@
  */
 package org.springframework.web.context.request.async;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -38,8 +36,8 @@ class DeferredResultInterceptorChain {
 	private int preProcessingIndex = -1;
 
 
-	public DeferredResultInterceptorChain(Collection<DeferredResultProcessingInterceptor> interceptors) {
-		this.interceptors = new ArrayList<DeferredResultProcessingInterceptor>(interceptors);
+	public DeferredResultInterceptorChain(List<DeferredResultProcessingInterceptor> interceptors) {
+		this.interceptors = interceptors;
 	}
 
 	public void applyPreProcess(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {

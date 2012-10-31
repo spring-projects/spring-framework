@@ -20,7 +20,6 @@ import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
@@ -49,8 +48,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.async.AsyncWebRequest;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.request.async.WebAsyncManager;
+import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
 /**
@@ -155,7 +154,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
@@ -346,7 +345,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();

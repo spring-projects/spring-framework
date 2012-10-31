@@ -208,13 +208,13 @@ public class WebAsyncManagerTests {
 		replay(executor);
 
 		this.asyncWebRequest.setTimeout(1000L);
-		this.asyncWebRequest.setTimeoutHandler(EasyMock.<Runnable>anyObject());
+		this.asyncWebRequest.addTimeoutHandler(EasyMock.<Runnable>anyObject());
 		this.asyncWebRequest.addCompletionHandler(EasyMock.<Runnable>anyObject());
 		this.asyncWebRequest.startAsync();
 		replay(this.asyncWebRequest);
 
 		@SuppressWarnings("unchecked")
-		AsyncTask<Object> asyncTask = new AsyncTask<Object>(1000L, executor, createMock(Callable.class));
+		MvcAsyncTask<Object> asyncTask = new MvcAsyncTask<Object>(1000L, executor, createMock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor, this.asyncWebRequest);
@@ -311,7 +311,7 @@ public class WebAsyncManagerTests {
 	}
 
 	private void setupDefaultAsyncScenario() {
-		this.asyncWebRequest.setTimeoutHandler((Runnable) notNull());
+		this.asyncWebRequest.addTimeoutHandler((Runnable) notNull());
 		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
 		this.asyncWebRequest.startAsync();
 		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);

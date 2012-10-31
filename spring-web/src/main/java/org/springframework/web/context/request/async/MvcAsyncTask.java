@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * Holder for a {@link Callable}, a timeout value, and a task executor.
@@ -27,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class AsyncTask<V> {
+public class MvcAsyncTask<V> {
 
 	private final Callable<V> callable;
 
@@ -37,40 +38,51 @@ public class AsyncTask<V> {
 
 	private final AsyncTaskExecutor executor;
 
+	private Callable<V> timeoutCallback;
+
+	private Runnable completionCallback;
+
 	private BeanFactory beanFactory;
 
 
 	/**
-	 * Create an AsyncTask with a timeout value and a Callable.
-	 * @param timeout timeout value in milliseconds
+	 * Create an {@code MvcAsyncTask} wrapping the given {@link Callable}.
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(long timeout, Callable<V> callable) {
-		this(timeout, null, null, callable);
-		Assert.notNull(timeout, "Timeout must not be null");
+	public MvcAsyncTask(Callable<V> callable) {
+		this(null, null, null, callable);
 	}
 
 	/**
-	 * Create an AsyncTask with a timeout value, an executor name, and a Callable.
+	 * Create an {@code MvcAsyncTask} with a timeout value and a {@link Callable}.
+	 * @param timeout timeout value in milliseconds
+	 * @param callable the callable for concurrent handling
+	 */
+	public MvcAsyncTask(long timeout, Callable<V> callable) {
+		this(timeout, null, null, callable);
+	}
+
+	/**
+	 * Create an {@code MvcAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(Long timeout, String executorName, Callable<V> callable) {
+	public MvcAsyncTask(Long timeout, String executorName, Callable<V> callable) {
 		this(timeout, null, executorName, callable);
 		Assert.notNull(executor, "Executor name must not be null");
 	}
 
 	/**
-	 * Create an AsyncTask with a timeout value, an executor instance, and a Callable.
+	 * Create an {@code MvcAsyncTask} with a timeout value, an executor instance, and a Callable.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public AsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
+	public MvcAsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
 		this(timeout, executor, null, callable);
 		Assert.notNull(executor, "Executor must not be null");
 	}
 
-	private AsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<V> callable) {
+	private MvcAsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<V> callable) {
 		Assert.notNull(callable, "Callable must not be null");
 		this.callable = callable;
 		this.timeout = timeout;
@@ -111,11 +123,50 @@ public class AsyncTask<V> {
 
 	/**
 	 * A {@link BeanFactory} to use to resolve an executor name. Applications are
-	 * not expected to have to set this property when AsyncTask is used in a
+	 * not expected to have to set this property when {@code MvcAsyncTask} is used in a
 	 * Spring MVC controller.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+
+	/**
+	 * Register code to invoke when the async request times out. This method is
+	 * called from a container thread when an async request times out before the
+	 * {@code Callable} has completed. The callback is executed in the same
+	 * thread and therefore should return without blocking. It may return an
+	 * alternative value to use, including an {@link Exception} or return
+	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
+	 */
+	public void onTimeout(Callable<V> callback) {
+		this.timeoutCallback = callback;
+	}
+
+	/**
+	 * Register code to invoke when the async request completes. This method is
+	 * called from a container thread when an async request completed for any
+	 * reason including timeout and network error.
+	 */
+	public void onCompletion(Runnable callback) {
+		this.completionCallback = callback;
+	}
+
+	CallableProcessingInterceptor getInterceptor() {
+		return new CallableProcessingInterceptorAdapter() {
+
+			@Override
+			public <T> Object afterTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+				return (timeoutCallback != null) ? timeoutCallback.call() : CallableProcessingInterceptor.RESULT_NONE;
+			}
+
+			@Override
+			public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
+				if (completionCallback != null) {
+					completionCallback.run();
+				}
+			}
+		};
 	}
 
 }

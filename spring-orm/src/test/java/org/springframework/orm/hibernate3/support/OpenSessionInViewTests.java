@@ -178,7 +178,7 @@ public class OpenSessionInViewTests {
 
 		AsyncWebRequest asyncWebRequest = createStrictMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.setTimeoutHandler((Runnable) anyObject());
+		asyncWebRequest.addTimeoutHandler((Runnable) anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		replay(asyncWebRequest);
@@ -494,7 +494,7 @@ public class OpenSessionInViewTests {
 
 		AsyncWebRequest asyncWebRequest = createMock(AsyncWebRequest.class);
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
-		asyncWebRequest.setTimeoutHandler(EasyMock.<Runnable>anyObject());
+		asyncWebRequest.addTimeoutHandler(EasyMock.<Runnable>anyObject());
 		asyncWebRequest.addCompletionHandler((Runnable) anyObject());
 		asyncWebRequest.startAsync();
 		expect(asyncWebRequest.isAsyncStarted()).andReturn(true).anyTimes();

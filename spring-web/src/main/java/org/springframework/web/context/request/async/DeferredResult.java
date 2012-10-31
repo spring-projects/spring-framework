@@ -20,6 +20,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * {@code DeferredResult} provides an alternative to using a {@link Callable}
@@ -41,6 +42,10 @@ public final class DeferredResult<T> {
 
 	private final Object timeoutResult;
 
+	private Runnable timeoutCallback;
+
+	private Runnable completionCallback;
+
 	private DeferredResultHandler resultHandler;
 
 	private Object result = RESULT_NONE;
@@ -56,7 +61,7 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Create a DeferredResult with a timeout.
+	 * Create a DeferredResult with a timeout value.
 	 * @param timeout timeout value in milliseconds
 	 */
 	public DeferredResult(long timeout) {
@@ -64,7 +69,8 @@ public final class DeferredResult<T> {
 	}
 
 	/**
-	 * Create a DeferredResult with a timeout and a default result to use on timeout.
+	 * Create a DeferredResult with a timeout value and a default result to use
+	 * in case of timeout.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param timeoutResult the result to use
 	 */
@@ -74,10 +80,45 @@ public final class DeferredResult<T> {
 	}
 
 	/**
+	 * Return {@code true} if this DeferredResult is no longer usable either
+	 * because it was previously set or because the underlying request expired.
+	 * <p>
+	 * The result may have been set with a call to {@link #setResult(Object)},
+	 * or {@link #setErrorResult(Object)}, or as a result of a timeout, if a
+	 * timeout result was provided to the constructor. The request may also
+	 * expire due to a timeout or network error.
+	 */
+	public boolean isSetOrExpired() {
+		return ((this.result != RESULT_NONE) || this.expired);
+	}
+
+	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
-	public Long getTimeoutMilliseconds() {
+	Long getTimeoutValue() {
 		return this.timeout;
+	}
+
+	/**
+	 * Register code to invoke when the async request times out. This method is
+	 * called from a container thread when an async request times out before the
+	 * {@code DeferredResult} has been set. It may invoke
+	 * {@link DeferredResult#setResult(Object) setResult} or
+	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume
+	 * processing.
+	 */
+	public void onTimeout(Runnable callback) {
+		this.timeoutCallback = callback;
+	}
+
+	/**
+	 * Register code to invoke when the async request completes. This method is
+	 * called from a container thread when an async request completed for any
+	 * reason including timeout and network error. This method is useful for
+	 * detecting that a {@code DeferredResult} instance is no longer usable.
+	 */
+	public void onCompletion(Runnable callback) {
+		this.completionCallback = callback;
 	}
 
 	/**
@@ -138,33 +179,29 @@ public final class DeferredResult<T> {
 		return setResultInternal(result);
 	}
 
-	/**
-	 * Return {@code true} if this DeferredResult is no longer usable either
-	 * because it was previously set or because the underlying request expired.
-	 * <p>
-	 * The result may have been set with a call to {@link #setResult(Object)},
-	 * or {@link #setErrorResult(Object)}, or as a result of a timeout, if a
-	 * timeout result was provided to the constructor. The request may also
-	 * expire due to a timeout or network error.
-	 */
-	public boolean isSetOrExpired() {
-		return ((this.result != RESULT_NONE) || this.expired);
-	}
+	DeferredResultProcessingInterceptor getInterceptor() {
+		return new DeferredResultProcessingInterceptorAdapter() {
 
-	/**
-	 * Mark this instance expired so it may no longer be used.
-	 * @return the previous value of the expiration flag
-	 */
-	boolean expire() {
-		synchronized (this) {
-			boolean previous = this.expired;
-			this.expired = true;
-			return previous;
-		}
-	}
+			@Override
+			public <S> void afterTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
+				if (timeoutCallback != null) {
+					timeoutCallback.run();
+				}
+				if (DeferredResult.this.timeoutResult != RESULT_NONE) {
+					setResultInternal(timeoutResult);
+				}
+			}
 
-	boolean applyTimeoutResult() {
-		return  (this.timeoutResult != RESULT_NONE) ? setResultInternal(this.timeoutResult) : false;
+			@Override
+			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
+				synchronized (this) {
+					expired = true;
+				}
+				if (completionCallback != null) {
+					completionCallback.run();
+				}
+			}
+		};
 	}
 
 

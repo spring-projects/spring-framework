@@ -128,7 +128,7 @@ public class StandardServletAsyncWebRequestTests {
 		timeoutHandler.run();
 		replay(timeoutHandler);
 
-		this.asyncRequest.setTimeoutHandler(timeoutHandler);
+		this.asyncRequest.addTimeoutHandler(timeoutHandler);
 		this.asyncRequest.onTimeout(new AsyncEvent(null));
 
 		verify(timeoutHandler);

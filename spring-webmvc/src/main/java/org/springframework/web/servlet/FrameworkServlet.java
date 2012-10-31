@@ -905,7 +905,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		initContextHolders(request, localeContext, requestAttributes);
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.registerCallableInterceptor(this.getClass().getName(), createRequestBindingInterceptor(request));
+		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), getRequestBindingInterceptor(request));
 
 		try {
 			doService(request, response);
@@ -988,7 +988,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		}
 	}
 
-	private CallableProcessingInterceptor createRequestBindingInterceptor(final HttpServletRequest request) {
+	private CallableProcessingInterceptor getRequestBindingInterceptor(final HttpServletRequest request) {
 		return new CallableProcessingInterceptorAdapter() {
 			@Override
 			public <T> void preProcess(NativeWebRequest webRequest, Callable<T> task) {

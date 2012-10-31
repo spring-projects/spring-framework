@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.util.Assert;
-import org.springframework.web.context.request.async.AsyncTask;
+import org.springframework.web.context.request.async.MvcAsyncTask;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
@@ -50,7 +50,7 @@ public class AsyncSupportConfigurer {
 	/**
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * returns a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning an {@link AsyncTask}.
+	 * a per-request basis by returning an {@link MvcAsyncTask}.
 	 *
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used and it's
 	 * highly recommended to change that default in production since the simple
