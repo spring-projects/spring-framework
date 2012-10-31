@@ -1,4 +1,4 @@
-SPRING FRAMEWORK 3.1.3 (September 2012)
+SPRING FRAMEWORK 3.1.3 (October 2012)
 ---------------------------------------
 http://www.springsource.org
 
