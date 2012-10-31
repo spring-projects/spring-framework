@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -71,6 +72,8 @@ import static org.springframework.context.annotation.MetadataUtils.*;
  * @see ConfigurationClassBeanDefinitionReader
  */
 class ConfigurationClassParser {
+
+	private static final String[] EMPTY_IMPORTS = {};
 
 	private final MetadataReaderFactory metadataReaderFactory;
 
@@ -220,10 +223,7 @@ class ConfigurationClassParser {
 		}
 
 		// process any @Import annotations
-		Set<String> imports = getImports(metadata.getClassName(), null, new HashSet<String>());
-		if (imports != null && !imports.isEmpty()) {
-			processImport(configClass, imports.toArray(new String[imports.size()]), true);
-		}
+		processImport(configClass, getImports(metadata.getClassName()), true);
 
 		// process any @ImportResource annotations
 		if (metadata.isAnnotated(ImportResource.class.getName())) {
@@ -285,23 +285,31 @@ class ConfigurationClassParser {
 	 * @return a set of all {@link Import#value() import values} or {@code null}
 	 * @throws IOException if there is any problem reading metadata from the named class
 	 */
-	private Set<String> getImports(String className, Set<String> imports,
+	private String[] getImports(String className) throws IOException {
+		LinkedList<String> imports = new LinkedList<String>();
+		collectImports(className, imports, new HashSet<String>());
+		if(imports == null || imports.isEmpty()) {
+			return EMPTY_IMPORTS;
+		}
+		LinkedHashSet<String> uniqueImports = new LinkedHashSet<String>(imports);
+		return uniqueImports.toArray(new String[uniqueImports.size()]);
+	}
+
+	private void collectImports(String className, LinkedList<String> imports,
 			Set<String> visited) throws IOException {
 		if (visited.add(className)) {
 			AnnotationMetadata metadata = metadataReaderFactory.getMetadataReader(className).getAnnotationMetadata();
+			for (String annotationType : metadata.getAnnotationTypes()) {
+				collectImports(annotationType, imports, visited);
+			}
 			Map<String, Object> attributes = metadata.getAnnotationAttributes(Import.class.getName(), true);
 			if (attributes != null) {
 				String[] value = (String[]) attributes.get("value");
 				if (value != null && value.length > 0) {
-					imports = (imports == null ? new LinkedHashSet<String>() : imports);
 					imports.addAll(Arrays.asList(value));
 				}
 			}
-			for (String annotationType : metadata.getAnnotationTypes()) {
-				getImports(annotationType, imports, visited);
-			}
 		}
-		return imports;
 	}
 
 	private void processImport(ConfigurationClass configClass, String[] classesToImport, boolean checkForCircularImports) throws IOException {
