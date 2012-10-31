@@ -215,8 +215,9 @@ public class TypeDescriptor {
 	/**
 	 * The type of the backing class, method parameter, field, or property described by this TypeDescriptor.
 	 * Returns primitive types as-is.
-	 * See {@link #getObjectType()} for a variation of this operation that resolves primitive types to their corresponding Object types if necessary.
-	 * @return the type, or <code>null</code> if this is {@link TypeDescriptor#NULL}
+	 * <p>See {@link #getObjectType()} for a variation of this operation that resolves primitive types
+	 * to their corresponding Object types if necessary.
+	 * @return the type, or <code>null</code>
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
@@ -225,7 +226,8 @@ public class TypeDescriptor {
 
 	/**
 	 * Variation of {@link #getType()} that accounts for a primitive type by returning its object wrapper type.
-	 * This is useful for conversion service implementations that wish to normalize to object-based types and not work with primitive types directly.
+	 * <p>This is useful for conversion service implementations that wish to normalize to object-based types
+	 * and not work with primitive types directly.
 	 */
 	public Class<?> getObjectType() {
 		return ClassUtils.resolvePrimitiveIfNecessary(getType());
@@ -233,12 +235,12 @@ public class TypeDescriptor {
 
 	/**
 	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the provided value.
-	 * If the value is null, no narrowing is performed and this TypeDescriptor is returned unchanged.
-	 * Designed to be called by binding frameworks when they read property, field, or method return values.
+	 * If the value is <code>null</code>, no narrowing is performed and this TypeDescriptor is returned unchanged.
+	 * <p>Designed to be called by binding frameworks when they read property, field, or method return values.
 	 * Allows such frameworks to narrow a TypeDescriptor built from a declared property, field, or method return value type.
-	 * For example, a field declared as java.lang.Object would be narrowed to java.util.HashMap if it was set to a java.util.HashMap value.
-	 * The narrowed TypeDescriptor can then be used to convert the HashMap to some other type.
-	 * Annotation and nested type context is preserved by the narrowed copy.
+	 * For example, a field declared as <code>java.lang.Object</code> would be narrowed to <code>java.util.HashMap</code>
+	 * if it was set to a <code>java.util.HashMap</code> value. The narrowed TypeDescriptor can then be used to convert
+	 * the HashMap to some other type. Annotation and nested type context is preserved by the narrowed copy.
 	 * @param value the value to use for narrowing this type descriptor
 	 * @return this TypeDescriptor narrowed (returns a copy with its type updated to the class of the provided value)
 	 */
@@ -302,13 +304,19 @@ public class TypeDescriptor {
 	/**
 	 * Obtain the annotation associated with this type descriptor of the specified type.
 	 * @param annotationType the annotation type
-	 * @return the annotation, or null if no such annotation exists on this type descriptor
+	 * @return the annotation, or <code>null</code> if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-		for (Annotation annotation : getAnnotations()) {
+		for (Annotation annotation : this.annotations) {
 			if (annotation.annotationType().equals(annotationType)) {
 				return (T) annotation;
+			}
+		}
+		for (Annotation metaAnn : this.annotations) {
+			T ann = metaAnn.annotationType().getAnnotation(annotationType);
+			if (ann != null) {
+				return ann;
 			}
 		}
 		return null;
@@ -573,24 +581,23 @@ public class TypeDescriptor {
 			return false;
 		}
 		TypeDescriptor other = (TypeDescriptor) obj;
-		if (!ObjectUtils.nullSafeEquals(getType(), other.getType())) {
+		if (!ObjectUtils.nullSafeEquals(this.type, other.type)) {
 			return false;
 		}
-		Annotation[] annotations = getAnnotations();
-		if (annotations.length != other.getAnnotations().length) {
+		if (this.annotations.length != other.annotations.length) {
 			return false;
 		}
-		for (Annotation ann : annotations) {
+		for (Annotation ann : this.annotations) {
 			if (other.getAnnotation(ann.annotationType()) == null) {
 				return false;
 			}
 		}
 		if (isCollection() || isArray()) {
-			return ObjectUtils.nullSafeEquals(getElementTypeDescriptor(), other.getElementTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(this.elementTypeDescriptor, other.elementTypeDescriptor);
 		}
 		else if (isMap()) {
-			return ObjectUtils.nullSafeEquals(getMapKeyTypeDescriptor(), other.getMapKeyTypeDescriptor()) &&
-					ObjectUtils.nullSafeEquals(getMapValueTypeDescriptor(), other.getMapValueTypeDescriptor());
+			return ObjectUtils.nullSafeEquals(this.mapKeyTypeDescriptor, other.mapKeyTypeDescriptor) &&
+					ObjectUtils.nullSafeEquals(this.mapValueTypeDescriptor, other.mapValueTypeDescriptor);
 		}
 		else {
 			return true;
@@ -603,17 +610,16 @@ public class TypeDescriptor {
 
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		Annotation[] anns = getAnnotations();
-		for (Annotation ann : anns) {
+		for (Annotation ann : this.annotations) {
 			builder.append("@").append(ann.annotationType().getName()).append(' ');
 		}
 		builder.append(ClassUtils.getQualifiedName(getType()));
 		if (isMap()) {
-			builder.append("<").append(wildcard(getMapKeyTypeDescriptor()));
-			builder.append(", ").append(wildcard(getMapValueTypeDescriptor())).append(">");
+			builder.append("<").append(wildcard(this.mapKeyTypeDescriptor));
+			builder.append(", ").append(wildcard(this.mapValueTypeDescriptor)).append(">");
 		}
 		else if (isCollection()) {
-			builder.append("<").append(wildcard(getElementTypeDescriptor())).append(">");
+			builder.append("<").append(wildcard(this.elementTypeDescriptor)).append(">");
 		}
 		return builder.toString();
 	}

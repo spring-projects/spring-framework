@@ -16,6 +16,8 @@
 
 package org.springframework.format.support;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -104,6 +106,23 @@ public class FormattingConversionServiceTests {
 		ac.refresh();
 		ValueBean valueBean = ac.getBean(ValueBean.class);
 		assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+	}
+
+	@Test
+	public void testFormatFieldForValueInjectionUsingMetaAnnotations() {
+		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
+		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(MetaValueBean.class, false));
+		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
+		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
+		ac.refresh();
+		System.setProperty("myDate", "10-31-09");
+		try {
+			MetaValueBean valueBean = ac.getBean(MetaValueBean.class);
+			assertEquals(new LocalDate(2009, 10, 31), new LocalDate(valueBean.date));
+		}
+		finally {
+			System.clearProperty("myDate");
+		}
 	}
 
 	@Test
@@ -287,6 +306,20 @@ public class FormattingConversionServiceTests {
 	}
 
 
+	public static class MetaValueBean {
+
+		@MyDateAnn
+		public Date date;
+	}
+
+
+	@Value("${myDate}")
+	@org.springframework.format.annotation.DateTimeFormat(pattern="MM-d-yy")
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyDateAnn {
+	}
+
+
 	public static class Model {
 
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
@@ -310,7 +343,7 @@ public class FormattingConversionServiceTests {
 		@org.springframework.format.annotation.DateTimeFormat(style="${dateStyle}")
 		public Date date;
 
-		@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
+		@MyDatePattern
 		public List<Date> dates;
 
 		public List<Date> getDates() {
@@ -321,7 +354,14 @@ public class FormattingConversionServiceTests {
 			this.dates = dates;
 		}
 	}
-	
+
+
+	@org.springframework.format.annotation.DateTimeFormat(pattern="${datePattern}")
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyDatePattern {
+	}
+
+
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
 		public String print(Integer object, Locale locale) {
