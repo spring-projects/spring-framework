@@ -142,7 +142,6 @@ public class PropertyPlaceholderHelper {
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
-
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
@@ -172,9 +171,8 @@ public class PropertyPlaceholderHelper {
 				}
 				else {
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in string value [" + strVal + "]");
+							placeholder + "'" + " in string value \"" + strVal + "\"");
 				}
-
 				visitedPlaceholders.remove(originalPlaceholder);
 			}
 			else {
