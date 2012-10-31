@@ -172,8 +172,10 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
 	 * DataSource instead.
 	 * <p>In JPA speak, a DataSource passed in here will be used as "nonJtaDataSource"
-	 * on the PersistenceUnitInfo passed to the PersistenceProvider, overriding
-	 * data source configuration in <code>persistence.xml</code> (if any).
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
+	 * overriding data source configuration in <code>persistence.xml</code> (if any).
+	 * Note that this variant typically works for JTA transaction management as well;
+	 * if it does not, consider using the explicit {@link #setJtaDataSource} instead.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getNonJtaDataSource()
 	 * @see #setPersistenceUnitManager
@@ -184,10 +186,27 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
+	 * to use for accessing the database. This is an alternative to keeping the
+	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
+	 * DataSource instead.
+	 * <p>In JPA speak, a DataSource passed in here will be used as "jtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
+	 * overriding data source configuration in <code>persistence.xml</code> (if any).
+	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
+	 * @see #setPersistenceUnitManager
+	 */
+	public void setJtaDataSource(DataSource jtaDataSource) {
+		this.internalPersistenceUnitManager.setDataSourceLookup(new SingleDataSourceLookup(jtaDataSource));
+		this.internalPersistenceUnitManager.setDefaultJtaDataSource(jtaDataSource);
+	}
+
+	/**
 	 * Set the PersistenceUnitPostProcessors to be applied to the
 	 * PersistenceUnitInfo used for creating this EntityManagerFactory.
 	 * <p>Such post-processors can, for example, register further entity
-	 * classes and jar files, in addition to the metadata read in from
+	 * classes and jar files, in addition to the metadata read from
 	 * <code>persistence.xml</code>.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
@@ -319,9 +338,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	@Override
 	public DataSource getDataSource() {
 		if (this.persistenceUnitInfo != null) {
-			return this.persistenceUnitInfo.getNonJtaDataSource();
+			return (this.persistenceUnitInfo.getJtaDataSource() != null ?
+					this.persistenceUnitInfo.getJtaDataSource() :
+					this.persistenceUnitInfo.getNonJtaDataSource());
 		}
-		return this.internalPersistenceUnitManager.getDefaultDataSource();
+		return (this.internalPersistenceUnitManager.getDefaultJtaDataSource() != null ?
+				this.internalPersistenceUnitManager.getDefaultJtaDataSource() :
+				this.internalPersistenceUnitManager.getDefaultDataSource());
 	}
 
 }

@@ -117,6 +117,8 @@ public class DefaultPersistenceUnitManager
 
 	private DataSource defaultDataSource;
 
+	private DataSource defaultJtaDataSource;
+
 	private PersistenceUnitPostProcessor[] persistenceUnitPostProcessors;
 
 	private LoadTimeWeaver loadTimeWeaver;
@@ -241,9 +243,9 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
-	 * to use for accessing the database if none has been specified in
-	 * <code>persistence.xml</code>.
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in <code>persistence.xml</code>.
+	 * This variant indicates no special transaction setup, i.e. typical resource-local.
 	 * <p>In JPA speak, a DataSource passed in here will be uses as "nonJtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, provided that
 	 * none has been registered before.
@@ -254,20 +256,39 @@ public class DefaultPersistenceUnitManager
 	}
 
 	/**
-	 * Return the JDBC DataSource that the JPA persistence provider is supposed
-	 * to use for accessing the database if none has been specified in
-	 * <code>persistence.xml</code>.
+	 * Return the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in <code>persistence.xml</code>.
 	 */
 	public DataSource getDefaultDataSource() {
 		return this.defaultDataSource;
 	}
 
 	/**
+	 * Specify the JDBC DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in <code>persistence.xml</code>.
+	 * This variant indicates that JTA is supposed to be used as transaction type.
+	 * <p>In JPA speak, a DataSource passed in here will be uses as "jtaDataSource"
+	 * on the PersistenceUnitInfo passed to the PersistenceProvider, provided that
+	 * none has been registered before.
+	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
+	 */
+	public void setDefaultJtaDataSource(DataSource defaultJtaDataSource) {
+		this.defaultJtaDataSource = defaultJtaDataSource;
+	}
+
+	/**
+	 * Return the JTA-aware DataSource that the JPA persistence provider is supposed to use
+	 * for accessing the database if none has been specified in <code>persistence.xml</code>.
+	 */
+	public DataSource getDefaultJtaDataSource() {
+		return this.defaultJtaDataSource;
+	}
+
+	/**
 	 * Set the PersistenceUnitPostProcessors to be applied to each
 	 * PersistenceUnitInfo that has been parsed by this manager.
-	 * <p>Such post-processors can, for example, register further entity
-	 * classes and jar files, in addition to the metadata read in from
-	 * <code>persistence.xml</code>.
+	 * <p>Such post-processors can, for example, register further entity classes and
+	 * jar files, in addition to the metadata read from <code>persistence.xml</code>.
 	 */
 	public void setPersistenceUnitPostProcessors(PersistenceUnitPostProcessor... postProcessors) {
 		this.persistenceUnitPostProcessors = postProcessors;
@@ -341,6 +362,9 @@ public class DefaultPersistenceUnitManager
 		for (SpringPersistenceUnitInfo pui : puis) {
 			if (pui.getPersistenceUnitRootUrl() == null) {
 				pui.setPersistenceUnitRootUrl(determineDefaultPersistenceUnitRootUrl());
+			}
+			if (pui.getJtaDataSource() == null) {
+				pui.setJtaDataSource(this.defaultJtaDataSource);
 			}
 			if (pui.getNonJtaDataSource() == null) {
 				pui.setNonJtaDataSource(this.defaultDataSource);
