@@ -383,7 +383,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return compareParams(otherAction);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? compareParams(other) : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 
@@ -422,7 +425,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return compareParams(otherRender);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? compareParams(other) : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+            return -1;
 		}
 	}
 
@@ -451,7 +457,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasResourceId ? -1 : 1);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+            return -1;
 		}
 	}
 
@@ -486,7 +495,10 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					return (hasEventName ? -1 : 1);
 				}
 			}
-			return (other instanceof SpecialRequestTypePredicate ? 0 : -1);
+			if (other instanceof SpecialRequestTypePredicate) {
+				return this.getClass().getName().compareTo(other.getClass().getName());
+			}
+			return -1;
 		}
 	}
 
