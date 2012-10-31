@@ -135,13 +135,13 @@ public class PropertyPlaceholderHelper {
 			int endIndex = findPlaceholderEndIndex(buf, startIndex);
 			if (endIndex != -1) {
 				String placeholder = buf.substring(startIndex + this.placeholderPrefix.length(), endIndex);
-				if (!visitedPlaceholders.add(placeholder)) {
+				String originalPlaceholder = placeholder;
+				if (!visitedPlaceholders.add(originalPlaceholder)) {
 					throw new IllegalArgumentException(
-							"Circular placeholder reference '" + placeholder + "' in property definitions");
+							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
-
 				// Now obtain the value for the fully resolved key...
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
@@ -171,10 +171,9 @@ public class PropertyPlaceholderHelper {
 				}
 				else {
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
-							placeholder + "'" + " in string value [" + strVal + "]");
+							placeholder + "'" + " in string value \"" + strVal + "\"");
 				}
-
-				visitedPlaceholders.remove(placeholder);
+				visitedPlaceholders.remove(originalPlaceholder);
 			}
 			else {
 				startIndex = -1;
