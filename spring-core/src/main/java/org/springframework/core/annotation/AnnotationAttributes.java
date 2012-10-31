@@ -18,10 +18,12 @@ package org.springframework.core.annotation;
 
 import static java.lang.String.format;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link LinkedHashMap} subclass representing annotation attribute key/value pairs
@@ -128,5 +130,29 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 				format("Attribute '%s' is of type [%s], but [%s] was expected. Cause: ",
 						attributeName, value.getClass().getSimpleName(), expectedType.getSimpleName()));
 		return (T) value;
+	}
+
+	public String toString() {
+		Iterator<Map.Entry<String, Object>> entries = entrySet().iterator();
+		StringBuilder sb = new StringBuilder("{");
+		while (entries.hasNext()) {
+			Map.Entry<String, Object> entry = entries.next();
+			sb.append(entry.getKey());
+			sb.append('=');
+			sb.append(valueToString(entry.getValue()));
+			sb.append(entries.hasNext() ? ", " : "");
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
+	private String valueToString(Object value) {
+		if (value == this) {
+			return "(this Map)";
+		}
+		if (value instanceof Object[]) {
+			return "[" + StringUtils.arrayToCommaDelimitedString((Object[]) value) + "]";
+		}
+		return String.valueOf(value);
 	}
 }
