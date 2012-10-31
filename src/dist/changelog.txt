@@ -3,39 +3,45 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 RC1 (2012-10-29)
+Changes in version 3.2 RC1 (2012-11-02)
 ---------------------------------------
 
 * added "getApplicationName()" method to ApplicationContext interface
 * introduced LiveBeansView MBean and LiveBeansViewServlet (SPR-9662)
 * ResourceBundleMessageSource supports "defaultEncoding", "fallbackToSystemLocale", "cacheSeconds" (SPR-7392)
+* BeanWrapper does not fall back to String constructor if ConversionService attempt failed before (SPR-9865)
+* @Autowired, @Value and qualifiers may be used as meta-annotations for custom injection annotations
+* @DateTimeFormat may now be used as a meta-annotation for custom formatting annotations
+* allow replaced-method 'arg-type' matches against element body as well as 'match' attribute (SPR-9812)
 * fixed potential race condition in concurrent calling of autowired methods on a prototype bean (SPR-9806)
 * cancel on a Future returned by a TaskScheduler works reliably (SPR-9821)
+* LoadTimeWeaverAware beans are consistently being created early for JPA weaving to work reliably (SPR-9857)
+* @ManagedResource supports placeholder resolution on all of its String properties (SPR-xxxx)
 * Spring-backed DataSources consistently implement JDBC 4.0's Wrapper interface (SPR-9770, SPR-9856)
 * optimized ResourceDatabasePopulator to work around JDK 1.7 substring performance regression (SPR-9781)
+* JdbcTestUtils no longer interprets SQL comments as statements (SPR-9593)
 * JPA persistence.xml files may use jar-file entries relative to the unit root (as per the JPA spec; SPR-9797)
+* added "jtaDataSource" property to JPA LocalContainerEntityManagerFactoryBean (for default units; SPR-9883)
 * Hibernate 4 LocalSessionFactoryBuilder sets thread context ClassLoader (for JBoss 7 compatibility; SPR-9846)
 * HttpComponentsHttpInvokerRequestExecutor uses HttpComponents 4.2 to explicitly release connections (SPR-9833)
 * UriComponentsBuilder is capable of handling opaque URIs as well (SPR-9798)
 * CookieGenerator supports "cookieHttpOnly" flag for Servlet 3.0 (SPR-9794)
-* improved regular expression for parsing query params (SPR-9832)
-* fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
-* fixed issue in AnnotationMethodHandlerExceptionResolver (SPR-9209)
-* MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
-* added support for opaque URIs in UriComponentsBuilder (SPR-9798)
-* added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
-* added Jackson2ObjectMapperBeanFactory (SPR-9739)
-* added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
-* added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
-* the jackson message converters now include "application/*+json" in supported media types (SPR-7905)
-* add options to configure MVC async interceptors in the MVC namespace and Java config (SPR-9914)
+* added Spring MVC Test framework (SPR-9859, SPR-7951)
 * introduced support for loading a WebApplicationContext in the TestContext framework (SPR-5243)
 * introduced support for session & request scoped beans in the TestContext framework (SPR-4588)
 * introduced support for setting locales in MockHttpServletRequest (SPR-9724)
-* added Spring MVC Test framework (SPR-9859, SPR-7951)
+* improved regular expression for parsing query params (SPR-9832)
 * added mock implementations of Http[Input|Output]Message
-* JdbcTestUtils no longer interprets SQL comments as statements (SPR-9593)
-* allow 'arg-type' matches against element body as well as 'match' attribute (SPR-9812)
+* MediaType's include method now recognizes wildcards in media types with a suffix (SPR-9841)
+* added support for wildcard media types in AbstractView and ContentNegotiationViewResolver (SPR-9807)
+* added support for opaque URIs in UriComponentsBuilder (SPR-9798)
+* added ObjectToStringHttpMessageConverter that delegates to a ConversionService (SPR-9738)
+* fixed NullPointerException in AbstractMessageConverterMethodProcessor (SPR-9868)
+* fixed issue in AnnotationMethodHandlerExceptionResolver (SPR-9209)
+* added CallableProcessingInterceptor and DeferredResultProcessingInterceptor
+* added Jackson2ObjectMapperBeanFactory (SPR-9739)
+* the Jackson message converters now include "application/*+json" in supported media types (SPR-7905)
+* DispatcherPortlet uses a forward for rendering a view as resource response (SPR-9876)
 
 
 Changes in version 3.2 M2 (2012-09-11)
@@ -104,6 +110,7 @@ Changes in version 3.2 M2 (2012-09-11)
 * optimized performance of HandlerMethod (SPR-9747, SPR-9748)
 * optimized performance of AntPathStringMatcher (SPR-9749)
 * added support for Filters/Servlet invocation in MockFilterChain (SPR-9745)
+
 
 Changes in version 3.2 M1 (2012-05-28)
 --------------------------------------
