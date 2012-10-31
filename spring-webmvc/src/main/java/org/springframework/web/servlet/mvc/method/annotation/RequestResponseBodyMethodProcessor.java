@@ -17,9 +17,13 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
@@ -27,6 +31,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -134,18 +139,45 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	}
 
 	@Override
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest,
+			MethodParameter methodParam,  Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
-		if (inputMessage.getBody() != null) {
-			return super.readWithMessageConverters(inputMessage, methodParam, paramType);
-		}
+		final HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
 
 		RequestBody annot = methodParam.getParameterAnnotation(RequestBody.class);
 		if (!annot.required()) {
-			return null;
+			InputStream inputStream = inputMessage.getBody();
+			if (inputStream == null) {
+				return null;
+			}
+			else if (inputStream.markSupported()) {
+				inputStream.mark(1);
+				if (inputStream.read() == -1) {
+					return null;
+				}
+				inputStream.reset();
+			}
+			else {
+				final PushbackInputStream pushbackInputStream = new PushbackInputStream(inputStream);
+				int b = pushbackInputStream.read();
+				if (b == -1) {
+					return null;
+				}
+				else {
+					pushbackInputStream.unread(b);
+				}
+				inputMessage = new ServletServerHttpRequest(servletRequest) {
+					@Override
+					public InputStream getBody() throws IOException {
+						// Form POST should not get here
+						return pushbackInputStream;
+					}
+				};
+			}
 		}
-		throw new HttpMessageNotReadableException("Required request body content is missing: " + methodParam.toString());
+
+		return super.readWithMessageConverters(inputMessage, methodParam, paramType);
 	}
 
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
