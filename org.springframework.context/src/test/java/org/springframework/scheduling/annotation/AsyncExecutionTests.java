@@ -16,6 +16,8 @@
 
 package org.springframework.scheduling.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Future;
 
 import org.junit.Test;
@@ -200,7 +202,7 @@ public class AsyncExecutionTests {
 			assertTrue(Thread.currentThread().getName().startsWith("e1-"));
 		}
 
-		@Async("e2")
+		@MyAsync
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			assertTrue(Thread.currentThread().getName().startsWith("e2-"));
@@ -212,6 +214,12 @@ public class AsyncExecutionTests {
 			assertTrue(Thread.currentThread().getName().startsWith("e0-"));
 			return new AsyncResult<String>(Integer.toString(i));
 		}
+	}
+
+
+	@Async("e2")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyAsync {
 	}
 
 
