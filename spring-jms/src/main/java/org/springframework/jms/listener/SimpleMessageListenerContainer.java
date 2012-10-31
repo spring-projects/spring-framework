@@ -351,13 +351,17 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 */
 	@Override
 	protected void doShutdown() throws JMSException {
-		logger.debug("Closing JMS MessageConsumers");
-		for (MessageConsumer consumer : this.consumers) {
-			JmsUtils.closeMessageConsumer(consumer);
-		}
-		logger.debug("Closing JMS Sessions");
-		for (Session session : this.sessions) {
-			JmsUtils.closeSession(session);
+		synchronized (this.consumersMonitor) {
+			if (this.consumers != null) {
+				logger.debug("Closing JMS MessageConsumers");
+				for (MessageConsumer consumer : this.consumers) {
+					JmsUtils.closeMessageConsumer(consumer);
+				}
+				logger.debug("Closing JMS Sessions");
+				for (Session session : this.sessions) {
+					JmsUtils.closeSession(session);
+				}
+			}
 		}
 	}
 
