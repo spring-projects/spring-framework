@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import javax.servlet.ServletConfig;
 import org.springframework.beans.factory.Aware;
 
 /**
- * Interface to be implemented by any object that wishes to be notified
- * of the ServletConfig (typically determined by the WebApplicationContext)
+ * Interface to be implemented by any object that wishes to be notified of the
+ * {@link ServletConfig} (typically determined by the {@link WebApplicationContext})
  * that it runs in.
  *
- * <p>Only satisfied if actually running within a Servlet-specific
- * WebApplicationContext. If this callback interface is encountered
- * elsewhere, an exception will be thrown on bean creation.
+ * <p>Note: Only satisfied if actually running within a Servlet-specific
+ * WebApplicationContext. Otherwise, no ServletConfig will be set.
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -37,7 +36,7 @@ import org.springframework.beans.factory.Aware;
 public interface ServletConfigAware extends Aware {
 
 	/**
-	 * Set the ServletConfig that this object runs in.
+	 * Set the {@link ServletConfig} that this object runs in.
 	 * <p>Invoked after population of normal bean properties but before an init
 	 * callback like InitializingBean's <code>afterPropertiesSet</code> or a
 	 * custom init-method. Invoked after ApplicationContextAware's
