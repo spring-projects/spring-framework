@@ -30,7 +30,7 @@ import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler
 
 /**
  * Configures a request handler for serving static resources by forwarding the request to the Servlet container's 
- * "default" Servlet. This is indended to be used when the Spring MVC {@link DispatcherServlet} is mapped to "/"
+ * "default" Servlet. This is intended to be used when the Spring MVC {@link DispatcherServlet} is mapped to "/"
  * thus overriding the Servlet container's default handling of static resources. Since this handler is configured 
  * at the lowest precedence, effectively it allows all other handler mappings to handle the request, and if none
  * of them do, this handler can forward it to the "default" Servlet.
