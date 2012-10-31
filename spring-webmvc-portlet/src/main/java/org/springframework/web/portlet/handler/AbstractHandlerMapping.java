@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.portlet.handler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import javax.portlet.PortletRequest;
 
 import org.springframework.beans.BeansException;
@@ -42,8 +41,7 @@ import org.springframework.web.portlet.HandlerMapping;
  * @see #setInterceptors
  * @see org.springframework.web.portlet.HandlerInterceptor
  */
-public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
-	implements HandlerMapping, Ordered {
+public abstract class AbstractHandlerMapping extends ApplicationObjectSupport implements HandlerMapping, Ordered {
 
 	private int order = Integer.MAX_VALUE;  // default: same as non-Ordered
 
@@ -244,7 +242,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport
 	 * <p>For simply adding an interceptor, consider calling <code>super.getHandlerExecutionChain</code>
 	 * and invoking {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
 	 * @param handler the resolved handler instance (never <code>null</code>)
-	 * @param request current HTTP request
+	 * @param request current portlet request
 	 * @return the HandlerExecutionChain (never <code>null</code>)
 	 * @see #getAdaptedInterceptors()
 	 */

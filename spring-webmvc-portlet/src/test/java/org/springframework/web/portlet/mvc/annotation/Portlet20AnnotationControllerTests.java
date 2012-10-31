@@ -33,7 +33,6 @@ import javax.portlet.PortletRequest;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
 import javax.portlet.WindowState;
@@ -704,6 +703,7 @@ public class Portlet20AnnotationControllerTests {
 				// the collection with [Render,Action,Render] predicates
 				wac.registerSingleton("firstController", FirstController.class);
 				wac.registerSingleton("secondController", SecondController.class);
+				wac.registerSingleton("thirdController", ThirdController.class);
 				wac.registerSingleton("handlerMapping", DefaultAnnotationHandlerMapping.class);
 				wac.registerSingleton("handlerAdapter", AnnotationMethodHandlerAdapter.class);
 				wac.setPortletContext(new MockPortletContext());
@@ -714,11 +714,44 @@ public class Portlet20AnnotationControllerTests {
 		};
 		portlet.init(new MockPortletConfig());
 
-		// Prepare render request with 'page=baz' parameters
+		// Make sure all 6 annotated methods can be called
+
 		MockRenderRequest request = new MockRenderRequest(PortletMode.VIEW);
 		MockRenderResponse response = new MockRenderResponse();
-		request.addParameter("page", "baz");
+
+		// renderFirst
 		portlet.render(request, response);
+		assertArrayEquals(new String[] { "renderFirst" }, response.getProperties("RESPONSE"));
+
+		// renderSecond
+		request.setWindowState(WindowState.MAXIMIZED);
+		request.setParameter("report", "second");
+		portlet.render(request, response);
+		assertArrayEquals(new String[] { "renderSecond" }, response.getProperties("RESPONSE"));
+
+		// renderThirds
+		request.setWindowState(WindowState.MAXIMIZED);
+		request.setParameter("report", "third");
+		portlet.render(request, response);
+		assertArrayEquals(new String[] { "renderThird" }, response.getProperties("RESPONSE"));
+
+		MockResourceRequest resourceRequest;
+		MockResourceResponse resourceResponse = new MockResourceResponse();
+
+		// resourceFirst
+		resourceRequest = new MockResourceRequest("first");
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertArrayEquals(new String[] { "resourceFirst" }, resourceResponse.getProperties("RESPONSE"));
+
+		// resourceSecond
+		resourceRequest = new MockResourceRequest("second");
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertArrayEquals(new String[] { "resourceSecond" }, resourceResponse.getProperties("RESPONSE"));
+
+		// resourceThirds
+		resourceRequest = new MockResourceRequest("third");
+		portlet.serveResource(resourceRequest, resourceResponse);
+		assertArrayEquals(new String[] { "resourceThird" }, resourceResponse.getProperties("RESPONSE"));
 	}
 
 
@@ -1201,13 +1234,15 @@ public class Portlet20AnnotationControllerTests {
 	public static class FirstController {
 
 		@RenderMapping
-		public String renderBar() {
-			throw new UnsupportedOperationException("Should not be called");
+		public String renderFirst(RenderResponse response) {
+			response.setProperty("RESPONSE", "renderFirst");
+			return "renderFirst";
 		}
 
-		@ActionMapping("xyz")
-		public void processXyz() {
-			throw new UnsupportedOperationException("Should not be called");
+		@ResourceMapping("first")
+		public String resourceFirst(ResourceResponse response) {
+			response.setProperty("RESPONSE", "resourceFirst");
+			return "resourceFirst";
 		}
 	}
 
@@ -1215,14 +1250,33 @@ public class Portlet20AnnotationControllerTests {
 	@RequestMapping(value="view")
 	public static class SecondController {
 
-		@ResourceMapping
-		public void processResource(ResourceRequest request, ResourceResponse response) {
-			throw new UnsupportedOperationException("Should not be called");
+		@ResourceMapping("second")
+		public String processResource(ResourceResponse response) {
+			response.setProperty("RESPONSE", "resourceSecond");
+			return "resourceSecond";
 		}
 
-		@RenderMapping(params="page=baz")
-		public String renderBaz() {
-			return "SUCCESS";
+		@RenderMapping(value = "MAXIMIZED", params = "report=second")
+		public String renderSecond(RenderResponse response) {
+			response.setProperty("RESPONSE", "renderSecond");
+			return "renderSecond";
+		}
+	}
+
+
+	@RequestMapping(value="view")
+	public static class ThirdController {
+
+		@ResourceMapping("third")
+		public String processResource(ResourceResponse response) {
+			response.setProperty("RESPONSE", "resourceThird");
+			return "resourceThird";
+		}
+
+		@RenderMapping(value = "MAXIMIZED", params = "report=third")
+		public String renderSecond(RenderResponse response) {
+			response.setProperty("RESPONSE", "renderThird");
+			return "renderThird";
 		}
 	}
 
