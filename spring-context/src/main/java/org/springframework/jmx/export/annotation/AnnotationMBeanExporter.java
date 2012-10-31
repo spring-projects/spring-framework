@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package org.springframework.jmx.export.annotation;
 
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Convenient subclass of Spring's standard {@link MBeanExporter},
@@ -32,7 +34,7 @@ import org.springframework.jmx.export.naming.MetadataNamingStrategy;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class AnnotationMBeanExporter extends MBeanExporter {
+public class AnnotationMBeanExporter extends MBeanExporter implements EmbeddedValueResolverAware {
 
 	private final AnnotationJmxAttributeSource annotationSource =
 			new AnnotationJmxAttributeSource();
@@ -61,6 +63,10 @@ public class AnnotationMBeanExporter extends MBeanExporter {
 	 */
 	public void setDefaultDomain(String defaultDomain) {
 		this.metadataNamingStrategy.setDefaultDomain(defaultDomain);
+	}
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.annotationSource.setEmbeddedValueResolver(resolver);
 	}
 
 }

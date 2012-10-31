@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package org.springframework.jmx.export.annotation;
 
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.annotation.AnnotationBeanUtils;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -32,6 +31,7 @@ import org.springframework.jmx.export.metadata.ManagedOperation;
 import org.springframework.jmx.export.metadata.ManagedOperationParameter;
 import org.springframework.jmx.export.metadata.ManagedResource;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Implementation of the <code>JmxAttributeSource</code> interface that
@@ -45,7 +45,15 @@ import org.springframework.util.StringUtils;
  * @see org.springframework.jmx.export.annotation.ManagedAttribute
  * @see org.springframework.jmx.export.annotation.ManagedOperation
  */
-public class AnnotationJmxAttributeSource implements JmxAttributeSource {
+public class AnnotationJmxAttributeSource implements JmxAttributeSource, EmbeddedValueResolverAware {
+
+	private StringValueResolver embeddedValueResolver;
+
+
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver = resolver;
+	}
+
 
 	public ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
 		org.springframework.jmx.export.annotation.ManagedResource ann =
@@ -54,9 +62,13 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource {
 			return null;
 		}
 		ManagedResource managedResource = new ManagedResource();
-		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource);
+		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource, this.embeddedValueResolver);
 		if (!"".equals(ann.value()) && !StringUtils.hasLength(managedResource.getObjectName())) {
-			managedResource.setObjectName(ann.value());
+			String value = ann.value();
+			if (this.embeddedValueResolver != null) {
+				value = this.embeddedValueResolver.resolveStringValue(value);
+			}
+			managedResource.setObjectName(value);
 		}
 		return managedResource;
 	}

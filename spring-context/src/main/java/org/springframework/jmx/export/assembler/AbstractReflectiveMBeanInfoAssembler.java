@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,6 +164,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected static final String FIELD_METRIC_CATEGORY = "metricCategory";
 
+
 	/**
 	 * Default value for the JMX field "currencyTimeLimit".
 	 */
@@ -223,7 +224,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Return whether strict casing for attributes is enabled.
 	 */
 	protected boolean isUseStrictCasing() {
-		return useStrictCasing;
+		return this.useStrictCasing;
 	}
 
 	/**
@@ -250,7 +251,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * Return whether to expose the JMX descriptor field "class" for managed operations.
 	 */
 	protected boolean isExposeClassDescriptor() {
-		return exposeClassDescriptor;
+		return this.exposeClassDescriptor;
 	}
 
 
@@ -446,7 +447,6 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @return whether the operation should be included in the management interface
 	 */
 	protected abstract boolean includeOperation(Method method, String beanKey);
-
 
 	/**
 	 * Get the description for a particular attribute.

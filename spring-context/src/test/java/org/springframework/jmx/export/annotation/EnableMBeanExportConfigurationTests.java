@@ -21,6 +21,7 @@ import javax.management.ObjectName;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -62,6 +63,7 @@ public class EnableMBeanExportConfigurationTests {
 
 	@Test
 	public void testLazyAssembling() throws Exception {
+		System.setProperty("domain", "bean");
 		AnnotationConfigApplicationContext ctx =
 				new AnnotationConfigApplicationContext(LazyAssemblingConfiguration.class);
 		try {
@@ -88,6 +90,7 @@ public class EnableMBeanExportConfigurationTests {
 			assertEquals("Invalid name returned", "Juergen Hoeller", name);
 		}
 		finally {
+			System.clearProperty("domain");
 			ctx.close();
 		}
 	}
@@ -129,6 +132,11 @@ public class EnableMBeanExportConfigurationTests {
 	@Configuration
 	@EnableMBeanExport(server="server", registration=RegistrationPolicy.REPLACE_EXISTING)
 	static class LazyAssemblingConfiguration {
+
+		@Bean
+		public PropertyPlaceholderConfigurer ppc() {
+			return new PropertyPlaceholderConfigurer();
+		}
 
 		@Bean
 		public MBeanServerFactoryBean server() throws Exception {
