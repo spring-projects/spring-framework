@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -34,6 +33,8 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+
+import static org.junit.Assert.*;
 
 /**
  * Integration tests for handling {@link Qualifier} annotations.
@@ -279,11 +280,31 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person1);
 		context.registerBeanDefinition(MARK, person2);
-		context.registerBeanDefinition("autowired", 
+		context.registerBeanDefinition("autowired",
 				new RootBeanDefinition(QualifiedFieldTestBean.class));
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		context.refresh();
 		QualifiedFieldTestBean bean = (QualifiedFieldTestBean) context.getBean("autowired");
+		assertEquals(JUERGEN, bean.getPerson().getName());
+	}
+
+	@Test
+	public void testAutowiredFieldResolvesMetaQualifiedCandidate() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
+		cavs1.addGenericArgumentValue(JUERGEN);
+		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
+		person1.addQualifier(new AutowireCandidateQualifier(TestQualifier.class));
+		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
+		cavs2.addGenericArgumentValue(MARK);
+		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
+		context.registerBeanDefinition(JUERGEN, person1);
+		context.registerBeanDefinition(MARK, person2);
+		context.registerBeanDefinition("autowired",
+				new RootBeanDefinition(MetaQualifiedFieldTestBean.class));
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		context.refresh();
+		MetaQualifiedFieldTestBean bean = (MetaQualifiedFieldTestBean) context.getBean("autowired");
 		assertEquals(JUERGEN, bean.getPerson().getName());
 	}
 
@@ -596,6 +617,24 @@ public class QualifierAnnotationAutowireContextTests {
 	}
 
 
+	private static class MetaQualifiedFieldTestBean {
+
+		@MyAutowired
+		private Person person;
+
+		public Person getPerson() {
+			return this.person;
+		}
+	}
+
+
+	@Autowired
+	@TestQualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public static @interface MyAutowired {
+	}
+
+
 	private static class QualifiedMethodParameterTestBean {
 
 		private Person person;
@@ -706,7 +745,6 @@ public class QualifierAnnotationAutowireContextTests {
 	}
 
 
-	@Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public static @interface TestQualifier {
