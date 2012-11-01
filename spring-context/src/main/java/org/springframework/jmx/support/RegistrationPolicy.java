@@ -51,7 +51,7 @@ public enum RegistrationPolicy {
 	 * available in {@link MBeanRegistrationSupport}.
 	 */
 	@SuppressWarnings("deprecation")
-	public static RegistrationPolicy valueOf(int registrationBehavior) {
+	static RegistrationPolicy valueOf(int registrationBehavior) {
 		switch (registrationBehavior) {
 			case MBeanRegistrationSupport.REGISTRATION_IGNORE_EXISTING:
 				return RegistrationPolicy.IGNORE_EXISTING;

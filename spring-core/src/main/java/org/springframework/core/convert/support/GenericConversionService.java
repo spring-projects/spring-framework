@@ -451,7 +451,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 				Assert.state(converter instanceof ConditionalConverter,
 						"Only conditional converters may return null convertible types");
 				globalConverters.add(converter);
-			} else {
+			}
+			else {
 				for (ConvertiblePair convertiblePair : convertibleTypes) {
 					ConvertersForPair convertersForPair = getMatchableConverters(convertiblePair);
 					convertersForPair.add(converter);
