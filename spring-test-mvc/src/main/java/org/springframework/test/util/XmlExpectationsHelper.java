@@ -16,6 +16,8 @@
 
 package org.springframework.test.util;
 
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+
 import java.io.StringReader;
 import java.util.Map;
 
@@ -27,8 +29,6 @@ import javax.xml.transform.dom.DOMSource;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
-import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -49,7 +49,7 @@ public class XmlExpectationsHelper {
 	 */
 	public void assertNode(String content, Matcher<? super Node> matcher) throws Exception {
 		Document document = parseXmlString(content);
-		MatcherAssert.assertThat("Body content", document, matcher);
+		assertThat("Body content", document, matcher);
 	}
 
 	private Document parseXmlString(String xml) throws Exception  {
@@ -67,7 +67,7 @@ public class XmlExpectationsHelper {
 	 */
 	public void assertSource(String content, Matcher<? super Source> matcher) throws Exception {
 		Document document = parseXmlString(content);
-		MatcherAssert.assertThat("Body content", new DOMSource(document), matcher);
+		assertThat("Body content", new DOMSource(document), matcher);
 	}
 
 	/**

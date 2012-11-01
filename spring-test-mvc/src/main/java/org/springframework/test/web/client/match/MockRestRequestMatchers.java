@@ -15,6 +15,8 @@
  */
 package org.springframework.test.web.client.match;
 
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -23,13 +25,11 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.RequestMatcher;
@@ -75,7 +75,7 @@ public abstract class MockRestRequestMatchers {
 		Assert.notNull(matcher, "'matcher' must not be null");
 		return new RequestMatcher() {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
-				MatcherAssert.assertThat("Request URI", request.getURI().toString(), matcher);
+				assertThat("Request URI", request.getURI().toString(), matcher);
 			}
 		};
 	}
@@ -133,7 +133,7 @@ public abstract class MockRestRequestMatchers {
 				AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + matchers.length
 						+ "> values but it has only <" + values.size() + ">", matchers.length <= values.size());
 				for (int i = 0 ; i < matchers.length; i++) {
-					MatcherAssert.assertThat("Request header", headers.get(name).get(i), matchers[i]);
+					assertThat("Request header", headers.get(name).get(i), matchers[i]);
 				}
 			}
 		};

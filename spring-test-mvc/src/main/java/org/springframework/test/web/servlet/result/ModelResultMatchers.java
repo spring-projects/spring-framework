@@ -17,10 +17,10 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -54,7 +54,7 @@ public class ModelResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
-				MatcherAssert.assertThat("Model attribute '" + name + "'", (T) mav.getModel().get(name), matcher);
+				assertThat("Model attribute '" + name + "'", (T) mav.getModel().get(name), matcher);
 			}
 		};
 	}

@@ -17,19 +17,19 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.web.context.request.async.MvcAsyncTask;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.context.request.async.MvcAsyncTask;
 
 /**
  * Factory for assertions on the request. An instance of this class is
@@ -62,7 +62,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				MatcherAssert.assertThat("Async started", request.isAsyncStarted(), equalTo(true));
+				assertThat("Async started", request.isAsyncStarted(), equalTo(true));
 			}
 		};
 	}
@@ -75,7 +75,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				MatcherAssert.assertThat("Async started", request.isAsyncStarted(), equalTo(false));
+				assertThat("Async started", request.isAsyncStarted(), equalTo(false));
 			}
 		};
 	}
@@ -88,8 +88,8 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				MatcherAssert.assertThat("Async started", request.isAsyncStarted(), equalTo(true));
-				MatcherAssert.assertThat("Async result", (T) result.getAsyncResult(), matcher);
+				assertThat("Async started", request.isAsyncStarted(), equalTo(true));
+				assertThat("Async result", (T) result.getAsyncResult(), matcher);
 			}
 		};
 	}
@@ -112,7 +112,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getAttribute(name);
-				MatcherAssert.assertThat("Request attribute: ", value, matcher);
+				assertThat("Request attribute: ", value, matcher);
 			}
 		};
 	}
@@ -132,7 +132,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getSession().getAttribute(name);
-				MatcherAssert.assertThat("Request attribute: ", value, matcher);
+				assertThat("Request attribute: ", value, matcher);
 			}
 		};
 	}

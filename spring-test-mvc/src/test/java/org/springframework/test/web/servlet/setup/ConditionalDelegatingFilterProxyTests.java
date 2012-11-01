@@ -12,9 +12,9 @@
  */
 package org.springframework.test.web.servlet.setup;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.io.IOException;
 
@@ -31,7 +31,6 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.setup.PatternMappingFilterProxy;
 
 /**
  *

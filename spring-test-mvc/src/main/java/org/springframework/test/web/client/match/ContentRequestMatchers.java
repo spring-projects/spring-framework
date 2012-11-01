@@ -16,6 +16,7 @@
 package org.springframework.test.web.client.match;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.io.IOException;
@@ -24,7 +25,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
@@ -80,7 +80,7 @@ public class ContentRequestMatchers {
 		return new RequestMatcher() {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				MatcherAssert.assertThat("Request content", mockRequest.getBodyAsString(), matcher);
+				assertThat("Request content", mockRequest.getBodyAsString(), matcher);
 			}
 		};
 	}
@@ -100,7 +100,7 @@ public class ContentRequestMatchers {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				byte[] content = mockRequest.getBodyAsBytes();
-				MatcherAssert.assertThat("Request content", content, Matchers.equalTo(expectedContent));
+				assertThat("Request content", content, Matchers.equalTo(expectedContent));
 			}
 		};
 	}

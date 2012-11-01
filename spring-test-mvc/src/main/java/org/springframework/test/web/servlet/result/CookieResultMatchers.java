@@ -17,12 +17,12 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import javax.servlet.http.Cookie;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -53,7 +53,7 @@ public class CookieResultMatchers {
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("Response cookie not found: " + name, cookie != null);
-				MatcherAssert.assertThat("Response cookie", cookie.getValue(), matcher);
+				assertThat("Response cookie", cookie.getValue(), matcher);
 			}
 		};
 	}
@@ -99,7 +99,7 @@ public class CookieResultMatchers {
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("No cookie with name: " + name, cookie != null);
-				MatcherAssert.assertThat("Response cookie maxAge", cookie.getMaxAge(), matcher);
+				assertThat("Response cookie maxAge", cookie.getMaxAge(), matcher);
 			}
 		};
 	}
@@ -118,7 +118,7 @@ public class CookieResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
-				MatcherAssert.assertThat("Response cookie path", cookie.getPath(), matcher);
+				assertThat("Response cookie path", cookie.getPath(), matcher);
 			}
 		};
 	}
@@ -134,7 +134,7 @@ public class CookieResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
-				MatcherAssert.assertThat("Response cookie domain", cookie.getDomain(), matcher);
+				assertThat("Response cookie domain", cookie.getDomain(), matcher);
 			}
 		};
 	}
@@ -153,7 +153,7 @@ public class CookieResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
-				MatcherAssert.assertThat("Response cookie comment", cookie.getComment(), matcher);
+				assertThat("Response cookie comment", cookie.getComment(), matcher);
 			}
 		};
 	}
@@ -172,7 +172,7 @@ public class CookieResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
-				MatcherAssert.assertThat("Response cookie version", cookie.getVersion(), matcher);
+				assertThat("Response cookie version", cookie.getVersion(), matcher);
 			}
 		};
 	}

@@ -16,7 +16,11 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -145,8 +149,8 @@ public class XpathAssertionTests {
 		this.mockMvc.perform(get("/music/people"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
 			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(2))
-			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(lessThan(5))) // Hamcrest..
-			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(greaterThan(0)));
+			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(equalTo(4))) // Hamcrest..
+			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(equalTo(2)));
 	}
 
 	@Controller

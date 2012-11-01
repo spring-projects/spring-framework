@@ -17,12 +17,12 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.lang.reflect.Method;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -78,7 +78,7 @@ public class HandlerResultMatchers {
 				Object handler = result.getHandler();
 				assertTrue("No handler: ", handler != null);
 				assertTrue("Not a HandlerMethod: " + handler, HandlerMethod.class.isInstance(handler));
-				MatcherAssert.assertThat("HandlerMethod", ((HandlerMethod) handler).getMethod().getName(), matcher);
+				assertThat("HandlerMethod", ((HandlerMethod) handler).getMethod().getName(), matcher);
 			}
 		};
 	}

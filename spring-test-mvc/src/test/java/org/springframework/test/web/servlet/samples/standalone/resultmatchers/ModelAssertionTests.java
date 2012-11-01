@@ -19,14 +19,14 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 import javax.validation.Valid;
@@ -78,11 +78,10 @@ public class ModelAssertionTests {
 			.andExpect(model().attribute("INTEGER", nullValue()));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testAttributeHamcrestMatchers() throws Exception {
 		mockMvc.perform(get("/"))
-			.andExpect(model().attribute("integer", allOf(greaterThan(2), lessThan(4))))
+			.andExpect(model().attribute("integer", equalTo(3)))
 			.andExpect(model().attribute("string", allOf(startsWith("a string"), endsWith("value"))))
 			.andExpect(model().attribute("person", hasProperty("name", equalTo("a name"))));
 	}

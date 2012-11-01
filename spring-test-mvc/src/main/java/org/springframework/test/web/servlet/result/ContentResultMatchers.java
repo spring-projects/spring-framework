@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.util.Map;
@@ -26,7 +27,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.XmlExpectationsHelper;
@@ -97,7 +97,7 @@ public class ContentResultMatchers {
 	public ResultMatcher string(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				MatcherAssert.assertThat("Response content", result.getResponse().getContentAsString(), matcher);
+				assertThat("Response content", result.getResponse().getContentAsString(), matcher);
 			}
 		};
 	}
@@ -116,7 +116,7 @@ public class ContentResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				byte[] content = result.getResponse().getContentAsByteArray();
-				MatcherAssert.assertThat("Response content", content, Matchers.equalTo(expectedContent));
+				assertThat("Response content", content, Matchers.equalTo(expectedContent));
 			}
 		};
 	}

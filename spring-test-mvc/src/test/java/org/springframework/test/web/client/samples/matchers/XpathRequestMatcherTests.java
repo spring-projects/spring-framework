@@ -17,8 +17,6 @@ package org.springframework.test.web.client.samples.matchers;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -192,8 +190,8 @@ public class XpathRequestMatcherTests {
 			.andExpect(content().contentType("application/xml"))
 			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(4))
 			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(2))
-			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(lessThan(5))) // Hamcrest..
-			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(greaterThan(0))) // Hamcrest..
+			.andExpect(xpath("/ns:people/composers/composer", NS).nodeCount(equalTo(4))) // Hamcrest..
+			.andExpect(xpath("/ns:people/performers/performer", NS).nodeCount(equalTo(2))) // Hamcrest..
 			.andRespond(withSuccess());
 
 		this.restTemplate.put(new URI("/composers"), this.people);

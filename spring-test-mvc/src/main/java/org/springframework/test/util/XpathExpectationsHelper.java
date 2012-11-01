@@ -17,6 +17,7 @@
 package org.springframework.test.util;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.io.StringReader;
 import java.util.Collections;
@@ -32,7 +33,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
@@ -93,7 +93,7 @@ public class XpathExpectationsHelper {
 	public void assertNode(String content, final Matcher<? super Node> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
-		MatcherAssert.assertThat("Xpath: " + XpathExpectationsHelper.this.expression, node, matcher);
+		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, node, matcher);
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class XpathExpectationsHelper {
 		Document document = parseXmlString(content);
 		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
 		String reason = "nodeCount Xpath: " + XpathExpectationsHelper.this.expression;
-		MatcherAssert.assertThat(reason, nodeList.getLength(), matcher);
+		assertThat(reason, nodeList.getLength(), matcher);
 	}
 
 	/**
@@ -169,7 +169,7 @@ public class XpathExpectationsHelper {
 	public void assertString(String content, Matcher<? super String> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		String result = evaluateXpath(document,  XPathConstants.STRING, String.class);
-		MatcherAssert.assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
+		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class XpathExpectationsHelper {
 	public void assertNumber(String content, Matcher<? super Double> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		Double result = evaluateXpath(document, XPathConstants.NUMBER, Double.class);
-		MatcherAssert.assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
+		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
 	}
 
 	/**

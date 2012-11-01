@@ -16,9 +16,9 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
@@ -48,7 +48,7 @@ public class StatusResultMatchers {
 	public ResultMatcher is(final Matcher<Integer> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				MatcherAssert.assertThat("Status: ", result.getResponse().getStatus(), matcher);
+				assertThat("Status: ", result.getResponse().getStatus(), matcher);
 			}
 		};
 	}
@@ -67,7 +67,7 @@ public class StatusResultMatchers {
 	public ResultMatcher reason(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				MatcherAssert.assertThat("Status reason: ", result.getResponse().getErrorMessage(), matcher);
+				assertThat("Status reason: ", result.getResponse().getErrorMessage(), matcher);
 			}
 		};
 	}

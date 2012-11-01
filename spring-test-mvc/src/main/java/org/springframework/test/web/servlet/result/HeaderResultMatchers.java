@@ -17,9 +17,9 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -47,7 +47,7 @@ public class HeaderResultMatchers {
 	public ResultMatcher string(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) {
-				MatcherAssert.assertThat("Response header", result.getResponse().getHeader(name), matcher);
+				assertThat("Response header", result.getResponse().getHeader(name), matcher);
 			}
 		};
 	}

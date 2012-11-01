@@ -16,10 +16,10 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -48,7 +48,7 @@ public class FlashAttributeResultMatchers {
 		return new ResultMatcher() {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
-				MatcherAssert.assertThat("Flash attribute", (T) result.getFlashMap().get(name), matcher);
+				assertThat("Flash attribute", (T) result.getFlashMap().get(name), matcher);
 			}
 		};
 	}

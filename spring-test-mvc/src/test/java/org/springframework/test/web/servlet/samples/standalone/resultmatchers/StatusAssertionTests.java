@@ -16,16 +16,12 @@
 
 package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.lessThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -63,8 +59,7 @@ public class StatusAssertionTests {
 
 	@Test
 	public void testMatcher() throws Exception {
-		Matcher<Integer> matcher = allOf(greaterThanOrEqualTo(400), lessThan(500));
-		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(matcher));
+		this.mockMvc.perform(get("/badRequest")).andExpect(status().is(equalTo(400)));
 	}
 
 	@Test

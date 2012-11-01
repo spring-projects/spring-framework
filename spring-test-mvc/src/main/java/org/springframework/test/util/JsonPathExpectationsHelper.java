@@ -16,13 +16,13 @@
 
 package org.springframework.test.util;
 
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.text.ParseException;
 import java.util.List;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 
 import com.jayway.jsonpath.InvalidPathException;
@@ -59,7 +59,7 @@ public class JsonPathExpectationsHelper {
 	@SuppressWarnings("unchecked")
 	public <T> void assertValue(String content, Matcher<T> matcher) throws ParseException {
 		T value = (T) evaluateJsonPath(content);
-		MatcherAssert.assertThat("JSON path: " + this.expression, value, matcher);
+		assertThat("JSON path: " + this.expression, value, matcher);
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException  {
