@@ -190,10 +190,9 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
-	public void resolveArgumentNotReadable() throws Exception {
+	public void resolveArgumentCannotRead() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
-		servletRequest.setContent(new byte[] {});
 
 		expect(messageConverter.canRead(String.class, contentType)).andReturn(false);
 		replay(messageConverter);
@@ -201,19 +200,25 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
-	@Test(expected = HttpMediaTypeNotSupportedException.class)
+	@Test
 	public void resolveArgumentNoContentType() throws Exception {
-		servletRequest.setContent(new byte[] {});
-		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-	}
-
-	@Test(expected = HttpMessageNotReadableException.class)
-	public void resolveArgumentRequiredNoContent() throws Exception {
-		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+		expect(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).andReturn(false);
+		replay(messageConverter);
+		try {
+			processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
+			fail("Expected exception");
+		}
+		catch (HttpMediaTypeNotSupportedException ex) {
+		}
+		verify(messageConverter);
 	}
 
 	@Test
 	public void resolveArgumentNotRequiredNoContent() throws Exception {
+		servletRequest.setContent(null);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+
+		servletRequest.setContent(new byte[0]);
 		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
 	}
 

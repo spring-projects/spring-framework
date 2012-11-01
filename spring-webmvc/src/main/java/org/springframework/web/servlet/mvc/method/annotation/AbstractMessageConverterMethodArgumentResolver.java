@@ -17,6 +17,9 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,15 +110,15 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter methodParam,
-			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
+			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 				MediaType contentType = inputMessage.getHeaders().getContentType();
 				if (contentType == null) {
 					contentType = MediaType.APPLICATION_OCTET_STREAM;
 				}
 
-				Class<T> paramClass = (paramType instanceof Class) ? (Class) paramType : null;
+				Class<T> paramClass = getParamClass(paramType);
 
 				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
 					if (messageConverter instanceof GenericHttpMessageConverter) {
@@ -141,6 +144,26 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 
 				throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 			}
+
+	private Class getParamClass(Type paramType) {
+		if (paramType instanceof Class) {
+			return (Class) paramType;
+		}
+		else if (paramType instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) paramType).getGenericComponentType();
+			if (componentType instanceof Class) {
+				// Surely, there should be a nicer way to determine the array type
+				return Array.newInstance((Class<?>) componentType, 0).getClass();
+			}
+		}
+		else if (paramType instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) paramType;
+			if (parameterizedType.getRawType() instanceof Class) {
+				return (Class) parameterizedType.getRawType();
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * Creates a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.
