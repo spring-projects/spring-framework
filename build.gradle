@@ -802,15 +802,15 @@ configure(rootProject) {
     task wrapper(type: Wrapper) {
         description = 'Generates gradlew[.bat] scripts'
         gradleVersion = '1.2'
+
+        doLast() {
+            def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
+            File wrapperFile = file('gradlew')
+            wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
+                "GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
+            File wrapperBatFile = file('gradlew.bat')
+            wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
+                "set GRADLE_OPTS=$gradleOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+        }
     }
 }
-
-def defaultWrapper = tasks["wrapper"]
-task wrapper(overwrite: true, dependsOn: defaultWrapper) << {
-    def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m -XX:MaxHeapSize=256m"
-    File wrapperFile = file('gradlew')
-    wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=", "GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-    File wrapperBatFile = file('gradlew.bat')
-    wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=", "set GRADLE_OPTS=$gradleOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-}
-
