@@ -634,6 +634,12 @@ public abstract class FrameworkServlet extends HttpServletBean {
 		wac.setNamespace(getNamespace());
 		wac.addApplicationListener(new SourceFilteringListener(wac, new ContextRefreshListener()));
 
+		// the wac environment's #initPropertySources will be called in any case when
+		// the context is refreshed; do it eagerly here to ensure servlet property sources
+		// are in place for use in any post-processing or initialization that occurs
+		// below prior to #refresh
+		wac.getEnvironment().initPropertySources(getServletContext(), getServletConfig());
+
 		postProcessWebApplicationContext(wac);
 
 		applyInitializers(wac);

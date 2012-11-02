@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,11 +188,25 @@ public abstract class PortletApplicationContextUtils {
 	}
 
 	/**
-	 * Replace {@code Servlet}- and {@code Portlet}-based stub property sources
-	 * with actual instances populated with the given context and config objects.
+	 * Replace {@code Servlet}- and {@code Portlet}-based {@link StubPropertySource stub
+	 * property sources} with actual instances populated with the given {@code servletContext},
+	 * {@code portletContext} and {@code portletConfig} objects.
+	 * <p>This method is idempotent with respect to the fact it may be called any number
+	 * of times but will perform replacement of stub property sources with their
+	 * corresponding actual property sources once and only once.
+	 * @param propertySources the {@link PropertySources} to initialize (must not be {@code null})
+	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
+	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * servlet context property source} has already been initialized)
+	 * @param portletContext the current {@link PortletContext} (ignored if {@code null}
+	 * or if the {@link StandardPortletEnvironment#PORTLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * portlet context property source} has already been initialized)
+	 * @param portletConfig the current {@link PortletConfig} (ignored if {@code null}
+	 * or if the {@link StandardPortletEnvironment#PORTLET_CONFIG_PROPERTY_SOURCE_NAME
+	 * portlet config property source} has already been initialized)
 	 * @see org.springframework.core.env.PropertySource.StubPropertySource
-	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 * @see org.springframework.web.context.support.WebApplicationContextUtils#initServletPropertySources(MutablePropertySources, ServletContext)
+	 * @see org.springframework.core.env.ConfigurableEnvironment#getPropertySources()
 	 */
 	public static void initPortletPropertySources(MutablePropertySources propertySources, ServletContext servletContext,
 			PortletContext portletContext, PortletConfig portletConfig) {
