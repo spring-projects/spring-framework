@@ -58,7 +58,7 @@ Changes in version 3.2 RC1 (2012-11-02)
 * support inferred base package for @ComponentScan (SPR-9586)
 * sort candidate @AspectJ methods deterministically (SPR-9729)
 * improve SimpleStreamingClientHttpRequest performance (SPR-9530)
-
+* added UnknownHttpStatusCodeException (SPR-9406)
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------

@@ -445,14 +445,18 @@ public enum HttpStatus {
 			return this.value;
 		}
 
-		private static Series valueOf(HttpStatus status) {
-			int seriesCode = status.value() / 100;
+		public static Series valueOf(int status) {
+			int seriesCode = status / 100;
 			for (Series series : values()) {
 				if (series.value == seriesCode) {
 					return series;
 				}
 			}
 			throw new IllegalArgumentException("No matching constant for [" + status + "]");
+		}
+
+		public static Series valueOf(HttpStatus status) {
+			return valueOf(status.value);
 		}
 
 	}
