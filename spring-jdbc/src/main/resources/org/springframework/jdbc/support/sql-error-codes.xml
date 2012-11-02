@@ -121,7 +121,7 @@
 			<value>Microsoft SQL Server</value>
 		</property>
 		<property name="badSqlGrammarCodes">
-			<value>156,170,207,208</value>
+			<value>156,170,207,208,209</value>
 		</property>
 		<property name="permissionDeniedCodes">
 			<value>229</value>
