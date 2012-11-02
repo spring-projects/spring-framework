@@ -240,7 +240,8 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 		Assert.notNull(profiles, "Profile array must not be null");
 		this.activeProfiles.clear();
 		for (String profile : profiles) {
-			addActiveProfile(profile);
+			validateProfile(profile);
+			this.activeProfiles.add(profile);
 		}
 	}
 
@@ -249,8 +250,10 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 			this.logger.debug(format("Activating profile '%s'", profile));
 		}
 		validateProfile(profile);
+		doGetActiveProfiles();
 		this.activeProfiles.add(profile);
 	}
+
 
 	public String[] getDefaultProfiles() {
 		return StringUtils.toStringArray(doGetDefaultProfiles());

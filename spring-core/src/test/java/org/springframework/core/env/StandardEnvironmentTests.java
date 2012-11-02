@@ -186,6 +186,16 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
+	public void addActiveProfile_whenActiveProfilesPropertyIsAlreadySet() {
+		ConfigurableEnvironment env = new StandardEnvironment();
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), nullValue());
+		env.getPropertySources().addFirst(new MockPropertySource().withProperty(ACTIVE_PROFILES_PROPERTY_NAME, "p1"));
+		assertThat(env.getProperty(ACTIVE_PROFILES_PROPERTY_NAME), equalTo("p1"));
+		env.addActiveProfile("p2");
+		assertThat(env.getActiveProfiles(), arrayContaining("p1", "p2"));
+	}
+
+	@Test
 	public void reservedDefaultProfile() {
 		assertThat(environment.getDefaultProfiles(), equalTo(new String[]{RESERVED_DEFAULT_PROFILE_NAME}));
 		System.setProperty(DEFAULT_PROFILES_PROPERTY_NAME, "d0");
