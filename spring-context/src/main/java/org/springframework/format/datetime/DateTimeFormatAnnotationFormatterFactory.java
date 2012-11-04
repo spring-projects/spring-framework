@@ -28,15 +28,15 @@ import org.springframework.format.Formatter;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using
+ * a {@link DateFormatter}.
  *
  * @author Phillip Webb
- * @see JodaDateTimeFormatAnnotationFormatterFactory
  * @since 3.2
+ * @see org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory
  */
 public class DateTimeFormatAnnotationFormatterFactory implements
 		AnnotationFormatterFactory<DateTimeFormat>, EmbeddedValueResolverAware {

@@ -22,13 +22,14 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} that creates a Joda {@link DateTimeFormatter}. Formatters will be
- * created using the defined {@link #setPattern(String) pattern}, {@link #setIso(ISO) ISO}
+ * created using the defined {@link #setPattern(String) pattern}, {@link #setIso(ISO) ISO},
  * or {@link #setStyle(String) style} (considered in that order).
  *
  * @author Phillip Webb
@@ -48,13 +49,13 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 
 
 	/**
-	 * Create a new {@link DateTimeFormatterFactory} instance.
+	 * Create a new {@code DateTimeFormatterFactory} instance.
 	 */
 	public DateTimeFormatterFactory() {
 	}
 
 	/**
-	 * Create a new {@link DateTimeFormatterFactory} instance.
+	 * Create a new {@code DateTimeFormatterFactory} instance.
 	 * @param pattern the pattern to use to format date values
 	 */
 	public DateTimeFormatterFactory(String pattern) {
@@ -75,8 +76,8 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	}
 
 	/**
-	 * Get a new DateTimeFormatter using this factory. If no specific
-	 * {@link #setStyle(String) style} {@link #setIso(ISO) ISO} or
+	 * Get a new {@code DateTimeFormatter} using this factory. If no specific
+	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
 	 * {@link #setPattern(String) pattern} have been defined the
 	 * {@link DateTimeFormat#mediumDateTime() medium date time format} will be used.
 	 * @return a new date time formatter
@@ -88,9 +89,9 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	}
 
 	/**
-	 * Get a new DateTimeFormatter using this factory. If no specific
-	 * {@link #setStyle(String) style} {@link #setIso(ISO) ISO} or
-	 * {@link #setPattern(String) pattern} have been defined the specific
+	 * Get a new {@code DateTimeFormatter} using this factory. If no specific
+	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
+	 * {@link #setPattern(String) pattern} have been defined the supplied
 	 * {@code fallbackFormatter} will be used.
 	 * @param fallbackFormatter the fall-back formatter to use when no specific factory
 	 *        properties have been set (can be {@code null}).
@@ -125,7 +126,7 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 
 
 	/**
-	 * Set the TimeZone to normalize the date values into, if any.
+	 * Set the {@code TimeZone} to normalize the date values into, if any.
 	 * @param timeZone the time zone
 	 */
 	public void setTimeZone(TimeZone timeZone) {
@@ -133,16 +134,16 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	}
 
 	/**
-	 * Set the two character to use to format date values. The first character used for
-	 * the date style, the second is for the time style. Supported characters are
+	 * Set the two characters to use to format date values. The first character is used for
+	 * the date style; the second is for the time style. Supported characters are:
 	 * <ul>
 	 * <li>'S' = Small</li>
 	 * <li>'M' = Medium</li>
 	 * <li>'L' = Long</li>
 	 * <li>'F' = Full</li>
 	 * <li>'-' = Omitted</li>
-	 * <ul>
-	 * This method mimics the styles supported by Joda Time.
+	 * </ul>
+	 * <p>This method mimics the styles supported by Joda Time.
 	 * @param style two characters from the set {"S", "M", "L", "F", "-"}
 	 */
 	public void setStyle(String style) {
@@ -150,8 +151,8 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	}
 
 	/**
-	 * Set the ISO format used for this date.
-	 * @param iso the iso format
+	 * Set the ISO format used to format date values.
+	 * @param iso the ISO format
 	 */
 	public void setIso(ISO iso) {
 		this.iso = iso;
@@ -164,4 +165,5 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
 	}
+
 }

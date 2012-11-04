@@ -23,19 +23,18 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar;
 import org.springframework.util.Assert;
 
 /**
  * Configures Date formatting for use with Spring.
  * <p>
  * Designed for direct instantiation but also exposes the static
- * {@link #addDateConverters(ConverterRegistry)} utility method for ad hoc use against any
- * {@code ConverterRegistry} instance.
+ * {@link #addDateConverters(ConverterRegistry)} utility method for ad hoc use
+ * against any {@code ConverterRegistry} instance.
  *
  * @author Phillip Webb
  * @since 3.2
- * @see JodaTimeFormatterRegistrar
+ * @see org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar
  * @see FormatterRegistrar#registerFormatters
  */
 public class DateFormatterRegistrar implements FormatterRegistrar {
@@ -52,7 +51,7 @@ public class DateFormatterRegistrar implements FormatterRegistrar {
 	}
 
 	/**
-	 * Set the date formatter to register. If not specified default {@link DateFormatter}
+	 * Set the date formatter to register. If not specified the default {@link DateFormatter}
 	 * will be used. This method can be used if additional formatter configuration is
 	 * required.
 	 * @param dateFormatter the date formatter

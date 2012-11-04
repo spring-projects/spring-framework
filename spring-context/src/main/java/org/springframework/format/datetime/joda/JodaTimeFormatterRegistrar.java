@@ -27,15 +27,15 @@ import org.joda.time.LocalTime;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
 import org.springframework.format.FormatterRegistrar;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.format.datetime.DateFormatterRegistrar;
 
 /**
- * Configures Joda Time's Formatting system for use with Spring.
+ * Configures Joda Time's formatting system for use with Spring.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -46,7 +46,7 @@ import org.springframework.format.datetime.DateFormatterRegistrar;
  * @see #setDateTimeStyle
  * @see #setUseIsoFormat
  * @see FormatterRegistrar#registerFormatters
- * @see DateFormatterRegistrar
+ * @see org.springframework.format.datetime.DateFormatterRegistrar
  */
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
@@ -107,8 +107,8 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 	/**
 	 * Set the formatter that will be used for objects representing date values.
-	 * This formatter will be used for the {@link LocalDate} type. When specified
-	 * {@link #setDateStyle(String) dateStyle} and
+	 * <p>This formatter will be used for the {@link LocalDate} type. When specified
+	 * the {@link #setDateStyle(String) dateStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
 	 * @see #setTimeFormatter(DateTimeFormatter)
@@ -120,9 +120,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	}
 
 	/**
-	 * Set the formatter that will be used for objects representing date values.
-	 * This formatter will be used for the {@link LocalTime} type. When specified
-	 * {@link #setTimeStyle(String) timeStyle} and
+	 * Set the formatter that will be used for objects representing time values.
+	 * <p>This formatter will be used for the {@link LocalTime} type. When specified
+	 * the {@link #setTimeStyle(String) timeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
 	 * @see #setDateFormatter(DateTimeFormatter)
@@ -135,9 +135,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 	/**
 	 * Set the formatter that will be used for objects representing date and time values.
-	 * This formatter will be used for {@link LocalDateTime}, {@link ReadableInstant},
+	 * <p>This formatter will be used for {@link LocalDateTime}, {@link ReadableInstant},
 	 * {@link Date} and {@link Calendar} types. When specified
-	 * {@link #setDateTimeStyle(String) dateTimeStyle} and
+	 * the {@link #setDateTimeStyle(String) dateTimeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
 	 * @see #setDateFormatter(DateTimeFormatter)
