@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,10 @@ import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda time.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -49,19 +47,32 @@ import org.springframework.util.StringValueResolver;
 public class JodaDateTimeFormatAnnotationFormatterFactory
 		implements AnnotationFormatterFactory<DateTimeFormat>, EmbeddedValueResolverAware {
 
-	private final Set<Class<?>> fieldTypes;
+	private static final Set<Class<?>> FIELD_TYPES;
+	static {
+		// Create the set of field types that may be annotated with @DateTimeFormat.
+		// Note: the 3 ReadablePartial concrete types are registered explicitly since
+		// addFormatterForFieldType rules exist for each of these types
+		// (if we did not do this, the default byType rules for LocalDate, LocalTime,
+		// and LocalDateTime would take precedence over the annotation rule, which
+		// is not what we want)
+		Set<Class<?>> fieldTypes = new HashSet<Class<?>>(7);
+		fieldTypes.add(ReadableInstant.class);
+		fieldTypes.add(LocalDate.class);
+		fieldTypes.add(LocalTime.class);
+		fieldTypes.add(LocalDateTime.class);
+		fieldTypes.add(Date.class);
+		fieldTypes.add(Calendar.class);
+		fieldTypes.add(Long.class);
+		FIELD_TYPES = Collections.unmodifiableSet(fieldTypes);
+	}
+
 
 	private StringValueResolver embeddedValueResolver;
-	
 
-	public JodaDateTimeFormatAnnotationFormatterFactory() {
-		this.fieldTypes = createFieldTypes();
-	}
 
 	public final Set<Class<?>> getFieldTypes() {
-		return this.fieldTypes;
+		return FIELD_TYPES;
 	}
-
 
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
@@ -71,79 +82,42 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
-
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
-		DateTimeFormatter formatter = configureDateTimeFormatterFrom(annotation);		
+		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
+
 		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
 			return new ReadableInstantPrinter(formatter);
 		}
-		else if (ReadablePartial.class.isAssignableFrom(fieldType)) {
+
+		if (ReadablePartial.class.isAssignableFrom(fieldType)) {
 			return new ReadablePartialPrinter(formatter);
 		}
-		else if (Calendar.class.isAssignableFrom(fieldType)) {
+
+		if (Calendar.class.isAssignableFrom(fieldType)) {
 			// assumes Calendar->ReadableInstant converter is registered
-			return new ReadableInstantPrinter(formatter);			
+			return new ReadableInstantPrinter(formatter);
 		}
-		else {
-			// assumes Date->Long converter is registered
-			return new MillisecondInstantPrinter(formatter);
-		}		
+
+		// assumes Date->Long converter is registered
+		return new MillisecondInstantPrinter(formatter);
 	}
 
 	public Parser<DateTime> getParser(DateTimeFormat annotation, Class<?> fieldType) {
-		return new DateTimeParser(configureDateTimeFormatterFrom(annotation));				
+		return new DateTimeParser(getFormatter(annotation, fieldType));
 	}
 
-	// internal helpers
-
-	/** 
-	 * Create the set of field types that may be annotated with @DateTimeFormat.
-	 * Note: the 3 ReadablePartial concrete types are registered explicitly since addFormatterForFieldType rules exist for each of these types
-	 * (if we did not do this, the default byType rules for LocalDate, LocalTime, and LocalDateTime would take precedence over the annotation rule, which is not what we want)
-	 * @see JodaTimeFormatterRegistrar#registerFormatters(org.springframework.format.FormatterRegistry)
+	/**
+	 * Factory method used to create a {@link DateTimeFormatter}.
+	 * @param annotation the format annotation for the field
+	 * @param fieldType the type of field
+	 * @return a {@link DateTimeFormatter} instance
+	 * @since 3.2
 	 */
-	private Set<Class<?>> createFieldTypes() {
-		Set<Class<?>> rawFieldTypes = new HashSet<Class<?>>(7);
-		rawFieldTypes.add(ReadableInstant.class);
-		rawFieldTypes.add(LocalDate.class);
-		rawFieldTypes.add(LocalTime.class);
-		rawFieldTypes.add(LocalDateTime.class);
-		rawFieldTypes.add(Date.class);
-		rawFieldTypes.add(Calendar.class);
-		rawFieldTypes.add(Long.class);
-		return Collections.unmodifiableSet(rawFieldTypes);		
+	protected DateTimeFormatter getFormatter(DateTimeFormat annotation, Class<?> fieldType) {
+		DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
+		factory.setStyle(resolveEmbeddedValue(annotation.style()));
+		factory.setIso(annotation.iso());
+		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
+		return factory.getDateTimeFormatter();
 	}
-	
-	private DateTimeFormatter configureDateTimeFormatterFrom(DateTimeFormat annotation) {
-		if (StringUtils.hasLength(annotation.pattern())) {
-			return forPattern(resolveEmbeddedValue(annotation.pattern()));
-		}
-		else if (annotation.iso() != ISO.NONE) {
-			return forIso(annotation.iso());
-		}
-		else {
-			return forStyle(resolveEmbeddedValue(annotation.style()));
-		}
-	}
-
-	private DateTimeFormatter forPattern(String pattern) {
-		return org.joda.time.format.DateTimeFormat.forPattern(pattern);
-	}
-
-	private DateTimeFormatter forStyle(String style) {
-		return org.joda.time.format.DateTimeFormat.forStyle(style);
-	}
-
-	private DateTimeFormatter forIso(ISO iso) {
-		if (iso == ISO.DATE) {
-			return org.joda.time.format.ISODateTimeFormat.date();
-		}
-		else if (iso == ISO.TIME) {
-			return org.joda.time.format.ISODateTimeFormat.time();
-		}
-		else {
-			return org.joda.time.format.ISODateTimeFormat.dateTime();
-		}		
-	}
-
 }
