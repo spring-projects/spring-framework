@@ -16,16 +16,14 @@
 
 package org.springframework.format.datetime.joda;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Locale;
 import java.util.TimeZone;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.junit.Test;
@@ -35,12 +33,14 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * Tests for {@link DateTimeFormatterFactory}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 public class DateTimeFormatterFactoryTests {
 
 	private DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
 
 	private DateTime dateTime = new DateTime(2009, 10, 21, 12, 10, 00, 00);
+
 
 	@Test
 	public void shouldDefaultToMediumFormat() throws Exception {
@@ -63,7 +63,7 @@ public class DateTimeFormatterFactoryTests {
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void shouldCreateDateTimeFormatter() throws Exception {
-		assertThat(factory.getObjectType(), is(equalTo((Class)DateTimeFormatter.class)));
+		assertThat(factory.getObjectType(), is(equalTo((Class) DateTimeFormatter.class)));
 	}
 
 	@Test
@@ -93,12 +93,34 @@ public class DateTimeFormatterFactoryTests {
 
 	@Test
 	public void shouldGetWithTimeZone() throws Exception {
+
+		TimeZone zurich = TimeZone.getTimeZone("Europe/Zurich");
+		TimeZone newYork = TimeZone.getTimeZone("America/New_York");
+
+		// Ensure that we are testing against a timezone other than the default.
+		TimeZone testTimeZone;
+		String offset;
+
+		if (zurich.equals(TimeZone.getDefault())) {
+			testTimeZone = newYork;
+			offset = "-0400"; // Daylight savings on October 21st
+		}
+		else {
+			testTimeZone = zurich;
+			offset = "+0200"; // Daylight savings on October 21st
+		}
+
 		factory.setPattern("yyyyMMddHHmmss Z");
-		factory.setTimeZone(TimeZone.getTimeZone("-0700"));
-		assertThat(factory.getDateTimeFormatter().print(dateTime), is("20091021121000 -0700"));
+		factory.setTimeZone(testTimeZone);
+
+		DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(testTimeZone);
+		DateTime dateTime = new DateTime(2009, 10, 21, 12, 10, 00, 00, dateTimeZone);
+
+		assertThat(factory.getDateTimeFormatter().print(dateTime), is("20091021121000 " + offset));
 	}
 
 	private DateTimeFormatter applyLocale(DateTimeFormatter dateTimeFormatter) {
 		return dateTimeFormatter.withLocale(Locale.US);
 	}
+
 }

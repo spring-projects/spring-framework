@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
  * or {@link #setStyle(String) style} (considered in that order).
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @see #getDateTimeFormatter()
  * @see #getDateTimeFormatter(DateTimeFormatter)
  * @since 3.2
@@ -100,7 +101,7 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	public DateTimeFormatter getDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = createDateTimeFormatter();
 		if(dateTimeFormatter != null && this.timeZone != null) {
-			dateTimeFormatter.withZone(DateTimeZone.forTimeZone(this.timeZone));
+			dateTimeFormatter = dateTimeFormatter.withZone(DateTimeZone.forTimeZone(this.timeZone));
 		}
 		return (dateTimeFormatter != null ? dateTimeFormatter : fallbackFormatter);
 	}
