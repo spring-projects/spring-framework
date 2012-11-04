@@ -59,6 +59,11 @@ Changes in version 3.2 RC1 (2012-11-02)
 * sort candidate @AspectJ methods deterministically (SPR-9729)
 * improve SimpleStreamingClientHttpRequest performance (SPR-9530)
 * added UnknownHttpStatusCodeException (SPR-9406)
+* support for custom global Joda DateTimeFormatters (SPR-7121)
+* support DateTimeFormat annotation without Joda (SPR-6508)
+* use concurrent cache to improve performance of GenericTypeResolver (SPR-8701)
+* cache and late resolve annotations on bean properties to improve performance (SPR-9166)
+
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
