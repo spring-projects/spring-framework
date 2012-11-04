@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 RC1 (2012-11-02)
+Changes in version 3.2 RC1 (2012-11-04)
 ---------------------------------------
 
 * added "getApplicationName()" method to ApplicationContext interface
@@ -63,6 +63,7 @@ Changes in version 3.2 RC1 (2012-11-02)
 * support DateTimeFormat annotation without Joda (SPR-6508)
 * use concurrent cache to improve performance of GenericTypeResolver (SPR-8701)
 * cache and late resolve annotations on bean properties to improve performance (SPR-9166)
+* allow PropertyResolver implementations to ignore unresolvable ${placeholders} (SPR-9569)
 
 
 Changes in version 3.2 M2 (2012-09-11)
