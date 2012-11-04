@@ -114,7 +114,7 @@ public class ConcurrentReferenceHashMapTests {
 	public void shouldNeedNonNegativeInitialCapacity() throws Exception {
 		new ConcurrentReferenceHashMap<Integer, String>(0, 1);
 		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("InitialCapactity must not be negative");
+		this.thrown.expectMessage("InitialCapacity must not be negative");
 		new TestWeakConcurrentCache<Integer, String>(-1, 1);
 	}
 
