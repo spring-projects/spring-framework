@@ -119,6 +119,6 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		factory.setStyle(resolveEmbeddedValue(annotation.style()));
 		factory.setIso(annotation.iso());
 		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
-		return factory.getDateTimeFormatter();
+		return factory.createDateTimeFormatter();
 	}
 }

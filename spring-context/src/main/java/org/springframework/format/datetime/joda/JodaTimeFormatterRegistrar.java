@@ -47,6 +47,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  * @see #setUseIsoFormat
  * @see FormatterRegistrar#registerFormatters
  * @see org.springframework.format.datetime.DateFormatterRegistrar
+ * @see DateTimeFormatterFactoryBean
  */
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
@@ -185,7 +186,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 			return formatter;
 		}
 		DateTimeFormatter fallbackFormatter = getFallbackFormatter(type);
-		return factories.get(type).getDateTimeFormatter(fallbackFormatter );
+		return factories.get(type).createDateTimeFormatter(fallbackFormatter );
 	}
 
 	private DateTimeFormatter getFallbackFormatter(Type type) {

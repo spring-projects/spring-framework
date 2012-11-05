@@ -37,90 +37,67 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  */
 public class DateTimeFormatterFactoryTests {
 
+	// Potential test timezone, both have daylight savings on October 21st
+	private static final TimeZone ZURICH = TimeZone.getTimeZone("Europe/Zurich");
+	private static final TimeZone NEW_YORK = TimeZone.getTimeZone("America/New_York");
+
+	// Ensure that we are testing against a timezone other than the default.
+	private static final TimeZone TEST_TIMEZONE = ZURICH.equals(TimeZone.getDefault()) ? NEW_YORK : ZURICH;
+
+
 	private DateTimeFormatterFactory factory = new DateTimeFormatterFactory();
 
 	private DateTime dateTime = new DateTime(2009, 10, 21, 12, 10, 00, 00);
 
 
 	@Test
-	public void shouldDefaultToMediumFormat() throws Exception {
-		assertThat(factory.getObject(), is(equalTo(DateTimeFormat.mediumDateTime())));
-		assertThat(factory.getDateTimeFormatter(), is(equalTo(DateTimeFormat.mediumDateTime())));
+	public void createDateTimeFormatter() throws Exception {
+		assertThat(factory.createDateTimeFormatter(), is(equalTo(DateTimeFormat.mediumDateTime())));
 	}
 
 	@Test
-	public void shouldCreateFromPattern() throws Exception {
+	public void createDateTimeFormatterWithPattern() throws Exception {
 		factory = new DateTimeFormatterFactory("yyyyMMddHHmmss");
-		DateTimeFormatter formatter = factory.getObject();
+		DateTimeFormatter formatter = factory.createDateTimeFormatter();
 		assertThat(formatter.print(dateTime), is("20091021121000"));
 	}
 
 	@Test
-	public void shouldBeSingleton() throws Exception {
-		assertThat(factory.isSingleton(), is(true));
-	}
-
-	@Test
-	@SuppressWarnings("rawtypes")
-	public void shouldCreateDateTimeFormatter() throws Exception {
-		assertThat(factory.getObjectType(), is(equalTo((Class) DateTimeFormatter.class)));
-	}
-
-	@Test
-	public void shouldGetDateTimeFormatterNullFallback() throws Exception {
-		DateTimeFormatter formatter = factory.getDateTimeFormatter(null);
+	public void createDateTimeFormatterWithNullFallback() throws Exception {
+		DateTimeFormatter formatter = factory.createDateTimeFormatter(null);
 		assertThat(formatter, is(nullValue()));
 	}
 
 	@Test
-	public void shouldGetDateTimeFormatterFallback() throws Exception {
+	public void createDateTimeFormatterWithFallback() throws Exception {
 		DateTimeFormatter fallback = DateTimeFormat.forStyle("LL");
-		DateTimeFormatter formatter = factory.getDateTimeFormatter(fallback);
+		DateTimeFormatter formatter = factory.createDateTimeFormatter(fallback);
 		assertThat(formatter, is(sameInstance(fallback)));
 	}
 
 	@Test
-	public void shouldGetDateTimeFormatter() throws Exception {
+	public void createDateTimeFormatterInOrderOfPropertyPriority() throws Exception {
 		factory.setStyle("SS");
-		assertThat(applyLocale(factory.getDateTimeFormatter()).print(dateTime), is("10/21/09 12:10 PM"));
+		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("10/21/09 12:10 PM"));
 
 		factory.setIso(ISO.DATE);
-		assertThat(applyLocale(factory.getDateTimeFormatter()).print(dateTime), is("2009-10-21"));
+		assertThat(applyLocale(factory.createDateTimeFormatter()).print(dateTime), is("2009-10-21"));
 
 		factory.setPattern("yyyyMMddHHmmss");
-		assertThat(factory.getDateTimeFormatter().print(dateTime), is("20091021121000"));
+		assertThat(factory.createDateTimeFormatter().print(dateTime), is("20091021121000"));
 	}
 
 	@Test
-	public void shouldGetWithTimeZone() throws Exception {
-
-		TimeZone zurich = TimeZone.getTimeZone("Europe/Zurich");
-		TimeZone newYork = TimeZone.getTimeZone("America/New_York");
-
-		// Ensure that we are testing against a timezone other than the default.
-		TimeZone testTimeZone;
-		String offset;
-
-		if (zurich.equals(TimeZone.getDefault())) {
-			testTimeZone = newYork;
-			offset = "-0400"; // Daylight savings on October 21st
-		}
-		else {
-			testTimeZone = zurich;
-			offset = "+0200"; // Daylight savings on October 21st
-		}
-
+	public void createDateTimeFormatterWithTimeZone() throws Exception {
 		factory.setPattern("yyyyMMddHHmmss Z");
-		factory.setTimeZone(testTimeZone);
-
-		DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(testTimeZone);
+		factory.setTimeZone(TEST_TIMEZONE);
+		DateTimeZone dateTimeZone = DateTimeZone.forTimeZone(TEST_TIMEZONE);
 		DateTime dateTime = new DateTime(2009, 10, 21, 12, 10, 00, 00, dateTimeZone);
-
-		assertThat(factory.getDateTimeFormatter().print(dateTime), is("20091021121000 " + offset));
+		String offset = (TEST_TIMEZONE.equals(NEW_YORK) ? "-0400" : "+0200");
+		assertThat(factory.createDateTimeFormatter().print(dateTime), is("20091021121000 " + offset));
 	}
 
 	private DateTimeFormatter applyLocale(DateTimeFormatter dateTimeFormatter) {
 		return dateTimeFormatter.withLocale(Locale.US);
 	}
-
 }

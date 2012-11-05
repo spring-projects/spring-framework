@@ -22,23 +22,25 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-
-import org.springframework.beans.factory.FactoryBean;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link FactoryBean} that creates a Joda {@link DateTimeFormatter}. Formatters will be
+ * Factory that creates a Joda {@link DateTimeFormatter}. Formatters will be
  * created using the defined {@link #setPattern(String) pattern}, {@link #setIso(ISO) ISO},
  * or {@link #setStyle(String) style} (considered in that order).
  *
  * @author Phillip Webb
  * @author Sam Brannen
- * @see #getDateTimeFormatter()
- * @see #getDateTimeFormatter(DateTimeFormatter)
+ * @see #createDateTimeFormatter()
+ * @see #createDateTimeFormatter(DateTimeFormatter)
+ * @see #setPattern(String)
+ * @see #setIso(org.springframework.format.annotation.DateTimeFormat.ISO)
+ * @see #setStyle(String)
+ * @see DateTimeFormatterFactoryBean
  * @since 3.2
  */
-public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> {
+public class DateTimeFormatterFactory {
 
 	private ISO iso;
 
@@ -64,33 +66,21 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	}
 
 
-	public boolean isSingleton() {
-		return true;
-	}
-
-	public Class<?> getObjectType() {
-		return DateTimeFormatter.class;
-	}
-
-	public DateTimeFormatter getObject() throws Exception {
-		return getDateTimeFormatter();
-	}
-
 	/**
-	 * Get a new {@code DateTimeFormatter} using this factory. If no specific
+	 * Create a new {@code DateTimeFormatter} using this factory. If no specific
 	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
 	 * {@link #setPattern(String) pattern} have been defined the
 	 * {@link DateTimeFormat#mediumDateTime() medium date time format} will be used.
 	 * @return a new date time formatter
 	 * @see #getObject()
-	 * @see #getDateTimeFormatter(DateTimeFormatter)
+	 * @see #createDateTimeFormatter(DateTimeFormatter)
 	 */
-	public DateTimeFormatter getDateTimeFormatter() {
-		return getDateTimeFormatter(DateTimeFormat.mediumDateTime());
+	public DateTimeFormatter createDateTimeFormatter() {
+		return createDateTimeFormatter(DateTimeFormat.mediumDateTime());
 	}
 
 	/**
-	 * Get a new {@code DateTimeFormatter} using this factory. If no specific
+	 * Create a new {@code DateTimeFormatter} using this factory. If no specific
 	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
 	 * {@link #setPattern(String) pattern} have been defined the supplied
 	 * {@code fallbackFormatter} will be used.
@@ -98,33 +88,31 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	 *        properties have been set (can be {@code null}).
 	 * @return a new date time formatter
 	 */
-	public DateTimeFormatter getDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
-		DateTimeFormatter dateTimeFormatter = createDateTimeFormatter();
-		if(dateTimeFormatter != null && this.timeZone != null) {
+	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
+		DateTimeFormatter dateTimeFormatter = null;
+		if (StringUtils.hasLength(pattern)) {
+			dateTimeFormatter = DateTimeFormat.forPattern(pattern);
+		}
+		else if (iso != null && iso != ISO.NONE) {
+			if (iso == ISO.DATE) {
+				dateTimeFormatter = ISODateTimeFormat.date();
+			}
+			else if (iso == ISO.TIME) {
+				dateTimeFormatter = ISODateTimeFormat.time();
+			}
+			else {
+				dateTimeFormatter = ISODateTimeFormat.dateTime();
+			}
+		}
+		else if (StringUtils.hasLength(style)) {
+			dateTimeFormatter = DateTimeFormat.forStyle(style);
+		}
+
+		if (dateTimeFormatter != null && this.timeZone != null) {
 			dateTimeFormatter = dateTimeFormatter.withZone(DateTimeZone.forTimeZone(this.timeZone));
 		}
 		return (dateTimeFormatter != null ? dateTimeFormatter : fallbackFormatter);
 	}
-
-	private DateTimeFormatter createDateTimeFormatter() {
-		if (StringUtils.hasLength(pattern)) {
-			return DateTimeFormat.forPattern(pattern);
-		}
-		if (iso != null && iso != ISO.NONE) {
-			if (iso == ISO.DATE) {
-				return ISODateTimeFormat.date();
-			}
-			if (iso == ISO.TIME) {
-				return ISODateTimeFormat.time();
-			}
-			return ISODateTimeFormat.dateTime();
-		}
-		if (StringUtils.hasLength(style)) {
-			return DateTimeFormat.forStyle(style);
-		}
-		return null;
-	}
-
 
 	/**
 	 * Set the {@code TimeZone} to normalize the date values into, if any.
@@ -166,5 +154,4 @@ public class DateTimeFormatterFactory implements FactoryBean<DateTimeFormatter> 
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
 	}
-
 }
