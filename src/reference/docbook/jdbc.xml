@@ -1516,14 +1516,6 @@ dataSource.setPassword("");</programlisting>
     }
 
     public int[][] batchUpdate(final Collection&lt;Actor&gt; actors) {
-        Collection&lt;Object[]&gt; batch = new ArrayList&lt;Object[]&gt;();
-        for (Actor actor : actors) {
-            Object[] values = new Object[] {
-                    actor.getFirstName(),
-                    actor.getLastName(),
-                    actor.getId()};
-            batch.add(values);
-        }
         int[][] updateCounts = jdbcTemplate.batchUpdate(
                 "update t_actor set first_name = ?, last_name = ? where id = ?",
                 actors,
