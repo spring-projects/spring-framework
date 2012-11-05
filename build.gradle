@@ -683,9 +683,10 @@ configure(rootProject) {
 
     task docsZip(type: Zip) {
         group = 'Distribution'
+        baseName = 'spring-framework'
         classifier = 'docs'
         description = "Builds -${classifier} archive containing api and reference " +
-            "for deployment at static.springframework.org/spring-framework/docs."
+            "for deployment at http://static.springframework.org/spring-framework/docs."
 
         from('src/dist') {
             include 'changelog.txt'
@@ -702,9 +703,10 @@ configure(rootProject) {
 
     task schemaZip(type: Zip) {
         group = 'Distribution'
+        baseName = 'spring-framework'
         classifier = 'schema'
         description = "Builds -${classifier} archive containing all " +
-            "XSDs for deployment at static.springframework.org/schema."
+            "XSDs for deployment at http://springframework.org/schema."
 
         subprojects.each { subproject ->
             def Properties schemas = new Properties();
@@ -729,11 +731,12 @@ configure(rootProject) {
 
     task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
         group = 'Distribution'
+        baseName = 'spring-framework'
         classifier = 'dist'
         description = "Builds -${classifier} archive, containing all jars and docs, " +
                       "suitable for community download page."
 
-        ext.baseDir = "${project.name}-${project.version}";
+        ext.baseDir = "${baseName}-${project.version}";
 
         from('src/dist') {
             include 'readme.txt'
@@ -768,6 +771,7 @@ configure(rootProject) {
     // Not published by default; only for use when building from source.
     task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
         group = 'Distribution'
+        baseName = 'spring-framework'
         classifier = 'dist-with-deps'
         description = "Builds -${classifier} archive, containing everything " +
             "in the -${distZip.classifier} archive plus all runtime dependencies."
