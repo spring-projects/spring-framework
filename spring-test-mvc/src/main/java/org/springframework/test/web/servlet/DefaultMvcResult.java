@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -49,6 +47,8 @@ class DefaultMvcResult implements MvcResult {
 	private ModelAndView modelAndView;
 
 	private Exception resolvedException;
+
+	private Object asyncResult;
 
 	private CountDownLatch asyncResultLatch;
 
@@ -105,29 +105,23 @@ class DefaultMvcResult implements MvcResult {
 		return RequestContextUtils.getOutputFlashMap(mockRequest);
 	}
 
-	public void setAsyncResultLatch(CountDownLatch asyncResultLatch) {
-		this.asyncResultLatch = asyncResultLatch;
+	public void setAsyncResult(Object asyncResult) {
+		this.asyncResult = asyncResult;
 	}
 
 	public Object getAsyncResult() {
 		HttpServletRequest request = this.mockRequest;
 		if (request.isAsyncStarted()) {
-
-			long timeout = request.getAsyncContext().getTimeout();
-			if (!awaitAsyncResult(timeout)) {
+			if (!awaitAsyncResult(request)) {
 				throw new IllegalStateException(
-						"Gave up waiting on async result from [" + this.handler + "] to complete");
-			}
-
-			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(this.mockRequest);
-			if (asyncManager.hasConcurrentResult()) {
-				return asyncManager.getConcurrentResult();
+						"Gave up waiting on async result from handler [" + this.handler + "] to complete");
 			}
 		}
-		return null;
+		return this.asyncResult;
 	}
 
-	private boolean awaitAsyncResult(long timeout) {
+	private boolean awaitAsyncResult(HttpServletRequest request) {
+		long timeout = request.getAsyncContext().getTimeout();
 		if (this.asyncResultLatch != null) {
 			try {
 				return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);
@@ -137,6 +131,10 @@ class DefaultMvcResult implements MvcResult {
 			}
 		}
 		return true;
+	}
+
+	public void setAsyncResultLatch(CountDownLatch asyncResultLatch) {
+		this.asyncResultLatch = asyncResultLatch;
 	}
 
 }

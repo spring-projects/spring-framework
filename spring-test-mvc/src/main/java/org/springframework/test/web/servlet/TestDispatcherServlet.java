@@ -66,19 +66,21 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		super.service(request, response);
 	}
 
-	private CountDownLatch registerAsyncInterceptors(HttpServletRequest request) {
+	private CountDownLatch registerAsyncInterceptors(final HttpServletRequest servletRequest) {
 
 		final CountDownLatch asyncResultLatch = new CountDownLatch(1);
 
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 
 		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
 			public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object value) throws Exception {
+				getMvcResult(servletRequest).setAsyncResult(value);
 				asyncResultLatch.countDown();
 			}
 		});
 		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
 			public <T> void postProcess(NativeWebRequest request, DeferredResult<T> result, Object value) throws Exception {
+				getMvcResult(servletRequest).setAsyncResult(value);
 				asyncResultLatch.countDown();
 			}
 		});
