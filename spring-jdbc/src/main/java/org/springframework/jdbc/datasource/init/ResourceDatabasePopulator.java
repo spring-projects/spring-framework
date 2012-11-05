@@ -118,10 +118,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
+	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
 	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
-	 * <code>IF EXISTS</code> clause in a <code>DROP</code>. The default is false so that if the
-	 * populator runs accidentally, it will fail fast when the script starts with a <code>DROP</code>.
+	 * {@code IF EXISTS} clause in a {@code DROP}. The default is false so that if the
+	 * populator runs accidentally, it will fail fast when the script starts with a {@code DROP}.
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
@@ -151,7 +151,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param connection the JDBC Connection with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
-	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a <code>DROP</code>
+	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a {@code DROP}
 	 */
 	private void executeSqlScript(Connection connection, EncodedResource resource,
 			boolean continueOnError, boolean ignoreFailedDrops) throws SQLException {
@@ -219,7 +219,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Read a script from the given resource and build a String containing the lines.
 	 * @param resource the resource to be read
-	 * @return <code>String</code> containing the script lines
+	 * @return {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
 	private String readScript(EncodedResource resource) throws IOException {
