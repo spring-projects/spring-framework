@@ -15,8 +15,15 @@
  */
 package org.springframework.test.web.servlet.request;
 
+import java.lang.reflect.Method;
+
+import javax.servlet.ServletContext;
+
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Static factory methods for {@link RequestBuilder}s.
@@ -81,6 +88,39 @@ public abstract class MockMvcRequestBuilders {
 	 */
 	public static MockMultipartHttpServletRequestBuilder fileUpload(String urlTemplate, Object... urlVariables) {
 		return new MockMultipartHttpServletRequestBuilder(urlTemplate, urlVariables);
+	}
+
+	/**
+	 * Create a {@link RequestBuilder} for an async dispatch from the
+	 * {@link MvcResult} of the request that started async processing.
+	 *
+	 * <p>Usage involves performing one request first that starts async processing:
+	 * <pre>
+	 * MvcResult mvcResult = this.mockMvc.perform(get("/1"))
+	 *	.andExpect(request().asyncStarted())
+	 *	.andReturn();
+	 *  </pre>
+	 *
+	 * <p>And then performing the async dispatch re-using the {@code MvcResult}:
+	 * <pre>
+	 * this.mockMvc.perform(asyncDispatch(mvcResult))
+	 * 	.andExpect(status().isOk())
+	 * 	.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+	 * 	.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	 * </pre>
+	 *
+	 * @param mvcResult the result from the request that started async processing
+	 */
+	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
+		return new RequestBuilder() {
+			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
+				MockHttpServletRequest request = mvcResult.getRequest();
+				Method method = ReflectionUtils.findMethod(request.getClass(), "setAsyncStarted", boolean.class);
+				method.setAccessible(true);
+				ReflectionUtils.invokeMethod(method, request, false);
+				return request;
+			}
+		};
 	}
 
 }

@@ -15,19 +15,27 @@
  */
 package org.springframework.test.web.servlet.samples.standalone;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
+import java.util.Collection;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.DeferredResult;
 
 /**
@@ -39,37 +47,52 @@ public class AsyncTests {
 
 	private MockMvc mockMvc;
 
+	private AsyncController asyncController;
+
+
 	@Before
 	public void setup() {
-		this.mockMvc = standaloneSetup(new AsyncController()).build();
-	}
-
-	@Test
-	public void testDeferredResult() throws Exception {
-		this.mockMvc.perform(get("/1").param("deferredResult", "true"))
-			.andExpect(status().isOk())
-			.andExpect(request().asyncStarted());
+		this.asyncController = new AsyncController();
+		this.mockMvc = standaloneSetup(this.asyncController).build();
 	}
 
 	@Test
 	public void testCallable() throws Exception {
-		this.mockMvc.perform(get("/1").param("callable", "true"))
-			.andExpect(status().isOk())
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
 			.andExpect(request().asyncStarted())
-			.andExpect(request().asyncResult(new Person("Joe")));
+			.andExpect(request().asyncResult(new Person("Joe")))
+			.andReturn();
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
+	@Test
+	public void testDeferredResult() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
+			.andExpect(request().asyncStarted())
+			.andReturn();
+
+		this.asyncController.onMessage("Joe");
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+		.andExpect(status().isOk())
+		.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+		.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
 
 	@Controller
 	private static class AsyncController {
 
-		@RequestMapping(value="/{id}", params="deferredResult", produces="application/json")
-		public DeferredResult<Person> getDeferredResult() {
-			return new DeferredResult<Person>();
-		}
+		private Collection<DeferredResult<Person>> deferredResults = new CopyOnWriteArrayList<DeferredResult<Person>>();
+
 
 		@RequestMapping(value="/{id}", params="callable", produces="application/json")
-		public Callable<Person> getCallable() {
+		@ResponseBody
+		public Callable<Person> getCallable(final Model model) {
 			return new Callable<Person>() {
 				public Person call() throws Exception {
 					return new Person("Joe");
@@ -77,6 +100,20 @@ public class AsyncTests {
 			};
 		}
 
+		@RequestMapping(value="/{id}", params="deferredResult", produces="application/json")
+		@ResponseBody
+		public DeferredResult<Person> getDeferredResult() {
+			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			this.deferredResults.add(deferredResult);
+			return deferredResult;
+		}
+
+		public void onMessage(String name) {
+			for (DeferredResult<Person> deferredResult : this.deferredResults) {
+				deferredResult.setResult(new Person(name));
+				this.deferredResults.remove(deferredResult);
+			}
+		}
 	}
 
 }
