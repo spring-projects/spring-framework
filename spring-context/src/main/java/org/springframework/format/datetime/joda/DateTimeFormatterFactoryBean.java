@@ -21,8 +21,8 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
- * {@link FactoryBean} that creates a Joda {@link DateTimeFormatter}. See the base class
- * {@linkplain DateTimeFormatterFactory} for configuration details.
+ * {@link FactoryBean} that creates a Joda {@link DateTimeFormatter}. See the
+ * {@linkplain DateTimeFormatterFactory base class} for configuration details.
  *
  * @author Phillip Webb
  * @author Sam Brannen

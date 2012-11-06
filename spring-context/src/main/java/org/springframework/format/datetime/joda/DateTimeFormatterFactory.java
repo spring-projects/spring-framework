@@ -94,14 +94,21 @@ public class DateTimeFormatterFactory {
 			dateTimeFormatter = DateTimeFormat.forPattern(pattern);
 		}
 		else if (iso != null && iso != ISO.NONE) {
-			if (iso == ISO.DATE) {
-				dateTimeFormatter = ISODateTimeFormat.date();
-			}
-			else if (iso == ISO.TIME) {
-				dateTimeFormatter = ISODateTimeFormat.time();
-			}
-			else {
-				dateTimeFormatter = ISODateTimeFormat.dateTime();
+			switch (iso) {
+				case DATE:
+					dateTimeFormatter = ISODateTimeFormat.date();
+					break;
+				case TIME:
+					dateTimeFormatter = ISODateTimeFormat.time();
+					break;
+				case DATE_TIME:
+					dateTimeFormatter = ISODateTimeFormat.dateTime();
+					break;
+				case NONE:
+					/* no-op */
+					break;
+				default:
+					throw new IllegalStateException("Unsupported ISO format: " + iso);
 			}
 		}
 		else if (StringUtils.hasLength(style)) {
