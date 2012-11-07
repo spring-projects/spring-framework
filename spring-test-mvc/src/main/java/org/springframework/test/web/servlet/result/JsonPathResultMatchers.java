@@ -16,11 +16,6 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-
-import java.util.List;
-
 import org.hamcrest.Matcher;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
@@ -64,8 +59,12 @@ public class JsonPathResultMatchers {
 	/**
 	 * Evaluate the JSONPath and assert the value of the content found.
 	 */
-	public ResultMatcher value(Object value) {
-		return value(equalTo(value));
+	public ResultMatcher value(final Object expectedValue) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				jsonPathHelper.assertValue(result.getResponse().getContentAsString(), expectedValue);
+			}
+		};
 	}
 
 	/**
@@ -96,6 +95,11 @@ public class JsonPathResultMatchers {
 	 * Evluate the JSON path and assert the content found is an array.
 	 */
 	public ResultMatcher isArray() {
-		return value(instanceOf(List.class));
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonPathHelper.assertValueIsArray(content);
+			}
+		};
 	}
 }

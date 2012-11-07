@@ -16,7 +16,6 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
@@ -62,7 +61,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				assertThat("Async started", request.isAsyncStarted(), equalTo(true));
+				assertEquals("Async started", true, request.isAsyncStarted());
 			}
 		};
 	}
@@ -75,7 +74,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				assertThat("Async started", request.isAsyncStarted(), equalTo(false));
+				assertEquals("Async started", false, request.isAsyncStarted());
 			}
 		};
 	}
@@ -88,7 +87,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				HttpServletRequest request = result.getRequest();
-				assertThat("Async started", request.isAsyncStarted(), equalTo(true));
+				assertEquals("Async started", true, request.isAsyncStarted());
 				assertThat("Async result", (T) result.getAsyncResult(), matcher);
 			}
 		};
@@ -100,8 +99,14 @@ public class RequestResultMatchers {
 	 * or {@link MvcAsyncTask}. The value matched is the value returned from the
 	 * {@code Callable} or the exception raised.
 	 */
-	public <T> ResultMatcher asyncResult(Object expectedResult) {
-		return asyncResult(equalTo(expectedResult));
+	public <T> ResultMatcher asyncResult(final Object expectedResult) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				HttpServletRequest request = result.getRequest();
+				assertEquals("Async started", true, request.isAsyncStarted());
+				assertEquals("Async result", expectedResult, result.getAsyncResult());
+			}
+		};
 	}
 
 	/**
