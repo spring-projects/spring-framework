@@ -108,6 +108,7 @@ import org.springframework.util.StringUtils;
  * @author Costin Leau
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Oliver Gierke
  * @since 13.02.2004
  * @see RootBeanDefinition
  * @see DefaultListableBeanFactory
@@ -1213,7 +1214,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					MethodParameter methodParam = BeanUtils.getWriteMethodParameter(pd);
 					// Do not allow eager init for type matching in case of a prioritized post-processor.
 					boolean eager = !PriorityOrdered.class.isAssignableFrom(bw.getWrappedClass());
-					DependencyDescriptor desc = new AutowireByTypeDependencyDescriptor(methodParam, eager);
+					DependencyDescriptor desc = new AutowireByTypeDependencyDescriptor(methodParam, eager, bw.getWrappedClass());
+					if (!desc.shouldBeAutowired()) {
+						continue;
+					}
 					Object autowiredArgument = resolveDependency(desc, beanName, autowiredBeanNames, converter);
 					if (autowiredArgument != null) {
 						pvs.add(propertyName, autowiredArgument);
@@ -1233,7 +1237,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}
 		}
 	}
-
 
 	/**
 	 * Return an array of non-simple bean properties that are unsatisfied.
@@ -1669,8 +1672,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	@SuppressWarnings("serial")
 	private static class AutowireByTypeDependencyDescriptor extends DependencyDescriptor {
 
-		public AutowireByTypeDependencyDescriptor(MethodParameter methodParameter, boolean eager) {
-			super(methodParameter, false, eager);
+		public AutowireByTypeDependencyDescriptor(MethodParameter methodParameter, boolean eager, Class<?> sourceBeanClass) {
+			super(methodParameter, false, eager, sourceBeanClass);
 		}
 
 		@Override

@@ -65,6 +65,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.type.ClassTypeInformation;
+import org.springframework.beans.type.TypeInformation;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.convert.ConversionService;
@@ -101,6 +103,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Costin Leau
  * @author Chris Beams
+ * @author Oliver Gierke
  * @since 15 April 2001
  * @see #getBeanDefinition
  * @see #createBean
@@ -471,8 +474,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+		return isTypeMatch(name, ClassTypeInformation.from(targetType));
+	}
+
+	/**
+	 * {@link TypeInformation} based variant of {@link #isTypeMatch(String, Class)} to allow keeping generics information
+	 * around.
+	 *
+	 * @param name the name of the bean to check the type agains
+	 * @param targetType the target type we expect the bean to match
+	 * @return
+	 * @throws NoSuchBeanDefinitionException
+	 */
+	public boolean isTypeMatch(String name, TypeInformation<?> targetType) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
+		TypeInformation<?> typeToMatch = targetType != null ? targetType : ClassTypeInformation.OBJECT;
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
@@ -480,15 +496,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (beanInstance instanceof FactoryBean) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
-					return (type != null && ClassUtils.isAssignable(typeToMatch, type));
+					return (type != null && typeToMatch.isAssignableFrom(type));
 				}
 				else {
-					return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+					return typeToMatch.isAssignableFromValue(beanInstance);
 				}
 			}
 			else {
-				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+				return !BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isAssignableFromValue(beanInstance);
 			}
 		}
 		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
@@ -501,14 +516,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// No bean definition found in this factory -> delegate to parent.
-				return parentBeanFactory.isTypeMatch(originalBeanName(name), targetType);
+				return TypeMatchUtils.isTypeMatch(beanName, typeToMatch, parentBeanFactory);
 			}
 
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-			Class[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
-					new Class[] {typeToMatch} : new Class[] {FactoryBean.class, typeToMatch});
+			Class<?> rawTypeToMatch = typeToMatch.getType();
+			Class[] typesToMatch = FactoryBean.class.equals(rawTypeToMatch) ? 
+					new Class[] { rawTypeToMatch } : new Class[] { FactoryBean.class, rawTypeToMatch };
 
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
@@ -535,7 +551,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						return false;
 					}
 				}
-			}
+				}
 			else if (BeanFactoryUtils.isFactoryDereference(name)) {
 				// Special case: A SmartInstantiationAwareBeanPostProcessor returned a non-FactoryBean
 				// type but we nevertheless are being asked to dereference a FactoryBean...
@@ -543,7 +559,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				beanType = predictBeanType(beanName, mbd, FactoryBean.class);
 				if (beanType == null || !FactoryBean.class.isAssignableFrom(beanType)) {
 					return false;
-				}
+			}
 			}
 
 			return typeToMatch.isAssignableFrom(beanType);
