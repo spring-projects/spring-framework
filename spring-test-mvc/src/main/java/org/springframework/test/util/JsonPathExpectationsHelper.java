@@ -16,14 +16,14 @@
 
 package org.springframework.test.util;
 
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.text.ParseException;
 import java.util.List;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
@@ -55,11 +55,13 @@ public class JsonPathExpectationsHelper {
 
 	/**
 	 * Evaluate the JSONPath and assert the resulting value with the given {@code Matcher}.
+	 * @param content the response content
+	 * @param matcher the matcher to assert on the resulting json path
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> void assertValue(String content, Matcher<T> matcher) throws ParseException {
 		T value = (T) evaluateJsonPath(content);
-		assertThat("JSON path: " + this.expression, value, matcher);
+		assertThat("JSON path" + this.expression, value, matcher);
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException  {
@@ -81,8 +83,19 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Apply the JSONPath and assert the resulting value.
 	 */
-	public void assertValue(Object value) throws ParseException {
-		assertValue(Matchers.equalTo(value));
+	public void assertValue(String responseContent, Object expectedValue) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertEquals("JSON path" + this.expression, expectedValue, actualValue);
+	}
+
+	/**
+	 * Apply the JSONPath and assert the resulting value is an array.
+	 */
+	public void assertValueIsArray(String responseContent) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertTrue("No value for JSON path " + this.expression, actualValue != null);
+		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
+		assertTrue(reason, actualValue instanceof List);
 	}
 
 	/**
@@ -90,7 +103,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void exists(String content) throws ParseException {
 		Object value = evaluateJsonPath(content);
-		String reason = "No value for JSON path: " + this.expression;
+		String reason = "No value for JSON path " + this.expression;
 		assertTrue(reason, value != null);
 		if (List.class.isInstance(value)) {
 			assertTrue(reason, !((List<?>) value).isEmpty());
@@ -101,7 +114,6 @@ public class JsonPathExpectationsHelper {
 	 * Evaluate the JSON path and assert it doesn't point to any content.
 	 */
 	public void doesNotExist(String content) throws ParseException {
-
 		Object value;
 		try {
 			value = evaluateJsonPath(content);
@@ -109,7 +121,6 @@ public class JsonPathExpectationsHelper {
 		catch (AssertionError ex) {
 			return;
 		}
-
 		String reason = String.format("Expected no value for JSON path: %s but found: %s", this.expression, value);
 		if (List.class.isInstance(value)) {
 			assertTrue(reason, ((List<?>) value).isEmpty());
@@ -118,5 +129,4 @@ public class JsonPathExpectationsHelper {
 			assertTrue(reason, value == null);
 		}
 	}
-
 }

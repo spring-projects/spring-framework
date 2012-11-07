@@ -19,7 +19,6 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -48,7 +47,7 @@ public class StatusResultMatchers {
 	public ResultMatcher is(final Matcher<Integer> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				assertThat("Status: ", result.getResponse().getStatus(), matcher);
+				assertThat("Response status", result.getResponse().getStatus(), matcher);
 			}
 		};
 	}
@@ -56,8 +55,12 @@ public class StatusResultMatchers {
 	/**
 	 * Assert the response status code is equal to an integer value.
 	 */
-	public ResultMatcher is(int status) {
-		return is(Matchers.equalTo(status));
+	public ResultMatcher is(final int status) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Response status", status, result.getResponse().getStatus());
+			}
+		};
 	}
 
 
@@ -67,7 +70,7 @@ public class StatusResultMatchers {
 	public ResultMatcher reason(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				assertThat("Status reason: ", result.getResponse().getErrorMessage(), matcher);
+				assertThat("Response status reason", result.getResponse().getErrorMessage(), matcher);
 			}
 		};
 	}
@@ -75,8 +78,12 @@ public class StatusResultMatchers {
 	/**
 	 * Assert the Servlet response error message.
 	 */
-	public ResultMatcher reason(String reason) {
-		return reason(Matchers.equalTo(reason));
+	public ResultMatcher reason(final String reason) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Response status reason", reason, result.getResponse().getErrorMessage());
+			}
+		};
 	}
 
     /**

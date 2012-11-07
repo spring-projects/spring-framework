@@ -23,7 +23,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 import java.lang.reflect.Method;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.ClassUtils;
@@ -75,9 +74,7 @@ public class HandlerResultMatchers {
 	public ResultMatcher methodName(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				Object handler = result.getHandler();
-				assertTrue("No handler: ", handler != null);
-				assertTrue("Not a HandlerMethod: " + handler, HandlerMethod.class.isInstance(handler));
+				Object handler = assertHandlerMethod(result);
 				assertThat("HandlerMethod", ((HandlerMethod) handler).getMethod().getName(), matcher);
 			}
 		};
@@ -90,7 +87,12 @@ public class HandlerResultMatchers {
 	 * {@link RequestMappingHandlerMapping} and {@link RequestMappingHandlerAdapter}.
 	 */
 	public ResultMatcher methodName(final String name) {
-		return methodName(Matchers.equalTo(name));
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				Object handler = assertHandlerMethod(result);
+				assertEquals("HandlerMethod", name, ((HandlerMethod) handler).getMethod().getName());
+			}
+		};
 	}
 
 	/**
@@ -102,12 +104,17 @@ public class HandlerResultMatchers {
 	public ResultMatcher method(final Method method) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				Object handler = result.getHandler();
-				assertTrue("No handler: ", handler != null);
-				assertTrue("Not a HandlerMethod: " + handler, HandlerMethod.class.isInstance(handler));
+				Object handler = assertHandlerMethod(result);
 				assertEquals("HandlerMethod", method, ((HandlerMethod) handler).getMethod());
 			}
 		};
+	}
+
+	private static Object assertHandlerMethod(MvcResult result) {
+		Object handler = result.getHandler();
+		assertTrue("No handler: ", handler != null);
+		assertTrue("Not a HandlerMethod: " + handler, HandlerMethod.class.isInstance(handler));
+		return handler;
 	}
 
 }

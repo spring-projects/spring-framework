@@ -17,11 +17,10 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.ui.ModelMap;
@@ -62,8 +61,13 @@ public class ModelResultMatchers {
 	/**
 	 * Assert a model attribute value.
 	 */
-	public ResultMatcher attribute(String name, Object value) {
-		return attribute(name, Matchers.equalTo(value));
+	public ResultMatcher attribute(final String name, final Object value) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				ModelAndView mav = getModelAndView(result);
+				assertEquals("Model attribute '" + name + "'", value, mav.getModel().get(name));
+			}
+		};
 	}
 
 	/**
@@ -72,9 +76,9 @@ public class ModelResultMatchers {
 	public ResultMatcher attributeExists(final String... names) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				assertTrue("No ModelAndView found", result.getModelAndView() != null);
+				ModelAndView mav = getModelAndView(result);
 				for (String name : names) {
-					attribute(name, Matchers.notNullValue()).match(result);
+					assertTrue("Model attribute '" + name + "' does not exist", mav.getModel().get(name) != null);
 				}
 			}
 		};

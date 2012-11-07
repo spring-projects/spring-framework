@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.util.concurrent.Callable;
@@ -24,7 +25,6 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -112,7 +112,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getAttribute(name);
-				assertThat("Request attribute: ", value, matcher);
+				assertThat("Request attribute", value, matcher);
 			}
 		};
 	}
@@ -120,8 +120,12 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a request attribute value.
 	 */
-	public <T> ResultMatcher attribute(String name, Object value) {
-		return attribute(name, Matchers.equalTo(value));
+	public <T> ResultMatcher attribute(final String name, final Object expectedValue) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				assertEquals("Request attribute", expectedValue, result.getRequest().getAttribute(name));
+			}
+		};
 	}
 
 	/**
@@ -132,7 +136,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getSession().getAttribute(name);
-				assertThat("Request attribute: ", value, matcher);
+				assertThat("Request attribute", value, matcher);
 			}
 		};
 	}
@@ -140,8 +144,12 @@ public class RequestResultMatchers {
 	/**
 	 * Assert a session attribute value..
 	 */
-	public <T> ResultMatcher sessionAttribute(String name, Object value) {
-		return sessionAttribute(name, Matchers.equalTo(value));
+	public <T> ResultMatcher sessionAttribute(final String name, final Object value) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				assertEquals("Request attribute", value, result.getRequest().getSession().getAttribute(name));
+			}
+		};
 	}
 
 }

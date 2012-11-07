@@ -25,7 +25,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -88,8 +87,13 @@ public class ContentRequestMatchers {
 	/**
 	 * Get the body of the request as a UTF-8 string and compare it to the given String.
 	 */
-	public RequestMatcher string(String expectedContent) {
-		return string(Matchers.equalTo(expectedContent));
+	public RequestMatcher string(final String expectedContent) {
+		return new RequestMatcher() {
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+				assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
+			}
+		};
 	}
 
 	/**
@@ -99,8 +103,7 @@ public class ContentRequestMatchers {
 		return new RequestMatcher() {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
-				byte[] content = mockRequest.getBodyAsBytes();
-				assertThat("Request content", content, Matchers.equalTo(expectedContent));
+				assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
 			}
 		};
 	}

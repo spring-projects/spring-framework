@@ -23,7 +23,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 import javax.servlet.http.Cookie;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -61,8 +60,14 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie value.
 	 */
-	public ResultMatcher value(String name, String value) {
-		return value(name, Matchers.equalTo(value));
+	public ResultMatcher value(final String name, final String expectedValue) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertTrue("Response cookie not found: " + name, cookie != null);
+				assertEquals("Response cookie", expectedValue, cookie.getValue());
+			}
+		};
 	}
 
 	/**
@@ -107,8 +112,14 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's maxAge value.
 	 */
-	public ResultMatcher maxAge(String name, int maxAge) {
-		return maxAge(name, Matchers.equalTo(maxAge));
+	public ResultMatcher maxAge(final String name, final int maxAge) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertTrue("No cookie with name: " + name, cookie != null);
+				assertEquals("Response cookie maxAge", maxAge, cookie.getMaxAge());
+			}
+		};
 	}
 
 	/**
@@ -123,8 +134,13 @@ public class CookieResultMatchers {
 		};
 	}
 
-	public ResultMatcher path(String name, String path) {
-		return path(name, Matchers.equalTo(path));
+	public ResultMatcher path(final String name, final String path) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertEquals("Response cookie path", path, cookie.getPath());
+			}
+		};
 	}
 
 	/**
@@ -142,8 +158,13 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's domain value.
 	 */
-	public ResultMatcher domain(String name, String domain) {
-		return domain(name, Matchers.equalTo(domain));
+	public ResultMatcher domain(final String name, final String domain) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertEquals("Response cookie domain", domain, cookie.getDomain());
+			}
+		};
 	}
 
 	/**
@@ -161,8 +182,13 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's comment value.
 	 */
-	public ResultMatcher comment(String name, String comment) {
-		return comment(name, Matchers.equalTo(comment));
+	public ResultMatcher comment(final String name, final String comment) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertEquals("Response cookie comment", comment, cookie.getComment());
+			}
+		};
 	}
 
 	/**
@@ -180,8 +206,13 @@ public class CookieResultMatchers {
 	/**
 	 * Assert a cookie's version value.
 	 */
-	public ResultMatcher version(String name, int version) {
-		return version(name, Matchers.equalTo(version));
+	public ResultMatcher version(final String name, final int version) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				Cookie cookie = result.getResponse().getCookie(name);
+				assertEquals("Response cookie version", version, cookie.getVersion());
+			}
+		};
 	}
 
 	/**

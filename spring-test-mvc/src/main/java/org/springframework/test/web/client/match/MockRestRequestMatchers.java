@@ -16,6 +16,7 @@
 package org.springframework.test.web.client.match;
 
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+import static org.springframework.test.util.AssertionErrors.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,8 +26,6 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -83,12 +82,16 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert the request URI string.
 	 *
-	 * @param uri the expected URI
+	 * @param expectedUri the expected URI
 	 * @return the request matcher
 	 */
-	public static RequestMatcher requestTo(String uri) {
-		Assert.notNull(uri, "'uri' must not be null");
-		return requestTo(Matchers.equalTo(uri));
+	public static RequestMatcher requestTo(final String expectedUri) {
+		Assert.notNull(expectedUri, "'uri' must not be null");
+		return new RequestMatcher() {
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				assertEquals("Request URI", expectedUri, request.getURI().toString());
+			}
+		};
 	}
 
 	/**
@@ -127,13 +130,9 @@ public abstract class MockRestRequestMatchers {
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
 			public void match(ClientHttpRequest request) {
-				HttpHeaders headers = request.getHeaders();
-				List<String> values = headers.get(name);
-				AssertionErrors.assertTrue("Expected header <" + name + ">", values != null);
-				AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + matchers.length
-						+ "> values but it has only <" + values.size() + ">", matchers.length <= values.size());
+				assertHeaderValueCount(name, request.getHeaders(), matchers.length);
 				for (int i = 0 ; i < matchers.length; i++) {
-					assertThat("Request header", headers.get(name).get(i), matchers[i]);
+					assertThat("Request header", request.getHeaders().get(name).get(i), matchers[i]);
 				}
 			}
 		};
@@ -142,13 +141,23 @@ public abstract class MockRestRequestMatchers {
 	/**
 	 * Assert request header values.
 	 */
-	public static RequestMatcher header(String name, String... values) {
-		@SuppressWarnings("unchecked")
-		Matcher<? super String>[] matchers = new IsEqual[values.length];
-		for (int i = 0; i < values.length; i++) {
-			matchers[i] = Matchers.equalTo(values[i]);
-		}
-		return header(name, matchers);
+	public static RequestMatcher header(final String name, final String... expectedValues) {
+		return new RequestMatcher() {
+			public void match(ClientHttpRequest request) {
+				assertHeaderValueCount(name, request.getHeaders(), expectedValues.length);
+				for (int i = 0 ; i < expectedValues.length; i++) {
+					assertEquals("Request header + [" + name + "]",
+							expectedValues[i], request.getHeaders().get(name).get(i));
+				}
+			}
+		};
+	}
+
+	private static void assertHeaderValueCount(final String name, HttpHeaders headers, int expectedCount) {
+		List<String> actualValues = headers.get(name);
+		AssertionErrors.assertTrue("Expected header <" + name + ">", actualValues != null);
+		AssertionErrors.assertTrue("Expected header <" + name + "> to have at least <" + expectedCount
+				+ "> values but found " + actualValues, expectedCount <= actualValues.size());
 	}
 
 	/**

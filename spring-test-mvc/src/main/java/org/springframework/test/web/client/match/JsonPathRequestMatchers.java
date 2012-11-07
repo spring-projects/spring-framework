@@ -15,12 +15,8 @@
  */
 package org.springframework.test.web.client.match;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
 
 import org.hamcrest.Matcher;
 import org.springframework.http.client.ClientHttpRequest;
@@ -71,8 +67,13 @@ public class JsonPathRequestMatchers {
 	/**
 	 * Apply the JSONPath and assert the resulting value.
 	 */
-	public RequestMatcher value(Object expectedValue) {
-		return value(equalTo(expectedValue));
+	public RequestMatcher value(final Object expectedValue) {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				jsonPathHelper.assertValue(request.getBodyAsString(), expectedValue);
+			}
+		};
 	}
 
 	/**
@@ -103,7 +104,12 @@ public class JsonPathRequestMatchers {
 	 * Assert the content at the given JSONPath is an array.
 	 */
 	public RequestMatcher isArray() {
-		return value(instanceOf(List.class));
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				jsonPathHelper.assertValueIsArray(request.getBodyAsString());
+			}
+		};
 	}
 
 

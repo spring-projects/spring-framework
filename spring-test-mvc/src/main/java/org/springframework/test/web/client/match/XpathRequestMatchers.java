@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XpathExpectationsHelper;
@@ -75,14 +74,24 @@ public class XpathRequestMatchers {
 	 * Assert that content exists at the given XPath.
 	 */
 	public <T> RequestMatcher exists() {
-		return node(Matchers.notNullValue());
+		return new AbstractXpathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws Exception {
+				xpathHelper.exists(request.getBodyAsString());
+			}
+		};
 	}
 
 	/**
 	 * Assert that content does not exist at the given XPath.
 	 */
 	public <T> RequestMatcher doesNotExist() {
-		return node(Matchers.nullValue());
+		return new AbstractXpathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws Exception {
+				xpathHelper.doesNotExist(request.getBodyAsString());
+			}
+		};
 	}
 
 	/**
@@ -101,8 +110,13 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the number of nodes found.
 	 */
-	public <T> RequestMatcher nodeCount(int expectedCount) {
-		return nodeCount(Matchers.equalTo(expectedCount));
+	public <T> RequestMatcher nodeCount(final int expectedCount) {
+		return new AbstractXpathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws Exception {
+				xpathHelper.assertNodeCount(request.getBodyAsString(), expectedCount);
+			}
+		};
 	}
 
 	/**
@@ -120,8 +134,13 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the String content found.
 	 */
-	public RequestMatcher string(String value) {
-		return string(Matchers.equalTo(value));
+	public RequestMatcher string(final String value) {
+		return new AbstractXpathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws Exception {
+				xpathHelper.assertString(request.getBodyAsString(), value);
+			}
+		};
 	}
 
 	/**
@@ -139,8 +158,13 @@ public class XpathRequestMatchers {
 	/**
 	 * Apply the XPath and assert the number of nodes found.
 	 */
-	public RequestMatcher number(Double value) {
-		return number(Matchers.equalTo(value));
+	public RequestMatcher number(final Double value) {
+		return new AbstractXpathRequestMatcher() {
+			@Override
+			protected void matchInternal(MockClientHttpRequest request) throws Exception {
+				xpathHelper.assertNumber(request.getBodyAsString(), value);
+			}
+		};
 	}
 
 	/**

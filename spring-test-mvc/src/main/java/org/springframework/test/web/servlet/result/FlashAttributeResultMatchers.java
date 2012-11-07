@@ -16,11 +16,10 @@
 
 package org.springframework.test.web.servlet.result;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.*;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -57,7 +56,12 @@ public class FlashAttributeResultMatchers {
 	 * Assert a flash attribute's value.
 	 */
 	public <T> ResultMatcher attribute(final String name, final Object value) {
-		return attribute(name, Matchers.equalTo(value));
+		return new ResultMatcher() {
+			@SuppressWarnings("unchecked")
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Flash attribute", value, (T) result.getFlashMap().get(name));
+			}
+		};
 	}
 
 	/**
@@ -67,7 +71,7 @@ public class FlashAttributeResultMatchers {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
 				for (String name : names) {
-					attribute(name, Matchers.notNullValue()).match(result);
+					assertTrue("Flash attribute [" + name + "] does not exist", result.getFlashMap().get(name) != null);
 				}
 			}
 		};

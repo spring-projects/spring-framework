@@ -27,7 +27,6 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.http.MediaType;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
@@ -105,8 +104,12 @@ public class ContentResultMatchers {
 	/**
 	 * Assert the response body content as a String.
 	 */
-	public ResultMatcher string(String content) {
-		return string(Matchers.equalTo(content));
+	public ResultMatcher string(final String expectedContent) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				assertEquals("Response content", expectedContent, result.getResponse().getContentAsString());
+			}
+		};
 	}
 
 	/**
@@ -115,8 +118,7 @@ public class ContentResultMatchers {
 	public ResultMatcher bytes(final byte[] expectedContent) {
 		return new ResultMatcher() {
 			public void match(MvcResult result) throws Exception {
-				byte[] content = result.getResponse().getContentAsByteArray();
-				assertThat("Response content", content, Matchers.equalTo(expectedContent));
+				assertEquals("Response content", expectedContent, result.getResponse().getContentAsByteArray());
 			}
 		};
 	}

@@ -17,10 +17,9 @@
 package org.springframework.test.web.servlet.result;
 
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.*;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.servlet.ModelAndView;
@@ -56,8 +55,13 @@ public class ViewResultMatchers {
 	/**
 	 * Assert the selected view name.
 	 */
-	public ResultMatcher name(final String name) {
-		return name(Matchers.equalTo(name));
+	public ResultMatcher name(final String expectedViewName) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				ModelAndView mav = result.getModelAndView();
+				assertTrue("No ModelAndView found", mav != null);
+				assertEquals("View name", expectedViewName, mav.getViewName());
+			}
+		};
 	}
-
 }

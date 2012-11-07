@@ -20,7 +20,6 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -56,7 +55,11 @@ public class HeaderResultMatchers {
 	 * Assert the primary value of a response header as a {@link String}.
 	 */
 	public ResultMatcher string(final String name, final String value) {
-		return string(name, Matchers.equalTo(value));
+		return new ResultMatcher() {
+			public void match(MvcResult result) {
+				assertEquals("Response header", value, result.getResponse().getHeader(name));
+			}
+		};
 	}
 
 	/**

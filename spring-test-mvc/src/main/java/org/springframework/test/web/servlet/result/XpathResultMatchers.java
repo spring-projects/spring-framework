@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.test.util.XpathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -75,14 +74,24 @@ public class XpathResultMatchers {
 	 * Evaluate the XPath and assert that content exists.
 	 */
 	public ResultMatcher exists() {
-		return node(Matchers.notNullValue());
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				xpathHelper.exists(content);
+			}
+		};
 	}
 
 	/**
 	 * Evaluate the XPath and assert that content doesn't exist.
 	 */
 	public ResultMatcher doesNotExist() {
-		return node(Matchers.nullValue());
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				xpathHelper.doesNotExist(content);
+			}
+		};
 	}
 
 	/**
@@ -101,8 +110,13 @@ public class XpathResultMatchers {
 	/**
 	 * Evaluate the XPath and assert the number of nodes found.
 	 */
-	public ResultMatcher nodeCount(int count) {
-		return nodeCount(Matchers.equalTo(count));
+	public ResultMatcher nodeCount(final int expectedCount) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				xpathHelper.assertNodeCount(content, expectedCount);
+			}
+		};
 	}
 
 	/**
@@ -121,8 +135,13 @@ public class XpathResultMatchers {
 	/**
 	 * Apply the XPath and assert the {@link String} value found.
 	 */
-	public ResultMatcher string(String value) {
-		return string(Matchers.equalTo(value));
+	public ResultMatcher string(final String expectedValue) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				xpathHelper.assertString(content, expectedValue);
+			}
+		};
 	}
 
 	/**
@@ -141,8 +160,13 @@ public class XpathResultMatchers {
 	/**
 	 * Evaluate the XPath and assert the {@link Double} value found.
 	 */
-	public ResultMatcher number(Double value) {
-		return number(Matchers.equalTo(value));
+	public ResultMatcher number(final Double expectedValue) {
+		return new ResultMatcher() {
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				xpathHelper.assertNumber(content, expectedValue);
+			}
+		};
 	}
 
 	/**

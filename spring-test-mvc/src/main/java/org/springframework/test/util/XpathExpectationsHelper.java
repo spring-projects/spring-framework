@@ -16,8 +16,8 @@
 
 package org.springframework.test.util;
 
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
+import static org.springframework.test.util.AssertionErrors.*;
+import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 import java.io.StringReader;
 import java.util.Collections;
@@ -33,7 +33,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -93,7 +92,7 @@ public class XpathExpectationsHelper {
 	public void assertNode(String content, final Matcher<? super Node> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
-		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, node, matcher);
+		assertThat("XPath " + this.expression, node, matcher);
 	}
 
 	/**
@@ -128,7 +127,9 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void exists(String content) throws Exception {
-		assertNode(content, Matchers.notNullValue());
+		Document document = parseXmlString(content);
+		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
+		assertTrue("XPath " + this.expression + " does not exist", node != null);
 	}
 
 	/**
@@ -136,7 +137,9 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void doesNotExist(String content) throws Exception {
-		assertNode(content, Matchers.nullValue());
+		Document document = parseXmlString(content);
+		Node node = evaluateXpath(document, XPathConstants.NODE, Node.class);
+		assertTrue("XPath " + this.expression + " exists", node == null);
 	}
 
 	/**
@@ -148,8 +151,7 @@ public class XpathExpectationsHelper {
 	public void assertNodeCount(String content, Matcher<Integer> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
-		String reason = "nodeCount Xpath: " + XpathExpectationsHelper.this.expression;
-		assertThat(reason, nodeList.getLength(), matcher);
+		assertThat("nodeCount for XPath " + this.expression, nodeList.getLength(), matcher);
 	}
 
 	/**
@@ -157,7 +159,9 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertNodeCount(String content, int expectedCount) throws Exception {
-		assertNodeCount(content, Matchers.equalTo(expectedCount));
+		Document document = parseXmlString(content);
+		NodeList nodeList = evaluateXpath(document, XPathConstants.NODESET, NodeList.class);
+		assertEquals("nodeCount for XPath " + this.expression, expectedCount, nodeList.getLength());
 	}
 
 	/**
@@ -169,7 +173,7 @@ public class XpathExpectationsHelper {
 	public void assertString(String content, Matcher<? super String> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		String result = evaluateXpath(document,  XPathConstants.STRING, String.class);
-		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
+		assertThat("XPath " + this.expression, result, matcher);
 	}
 
 	/**
@@ -177,7 +181,9 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertString(String content, String expectedValue) throws Exception {
-		assertString(content, Matchers.equalTo(expectedValue));
+		Document document = parseXmlString(content);
+		String actual = evaluateXpath(document,  XPathConstants.STRING, String.class);
+		assertEquals("XPath " + this.expression, expectedValue, actual);
 	}
 
 	/**
@@ -189,7 +195,7 @@ public class XpathExpectationsHelper {
 	public void assertNumber(String content, Matcher<? super Double> matcher) throws Exception {
 		Document document = parseXmlString(content);
 		Double result = evaluateXpath(document, XPathConstants.NUMBER, Double.class);
-		assertThat("Xpath: " + XpathExpectationsHelper.this.expression, result, matcher);
+		assertThat("XPath " + this.expression, result, matcher);
 	}
 
 	/**
@@ -197,7 +203,9 @@ public class XpathExpectationsHelper {
 	 * @throws Exception if content parsing or expression evaluation fails
 	 */
 	public void assertNumber(String content, Double expectedValue) throws Exception {
-		assertNumber(content, Matchers.equalTo(expectedValue));
+		Document document = parseXmlString(content);
+		Double actual = evaluateXpath(document, XPathConstants.NUMBER, Double.class);
+		assertEquals("XPath " + this.expression, expectedValue, actual);
 	}
 
 	/**
@@ -206,8 +214,8 @@ public class XpathExpectationsHelper {
 	 */
 	public void assertBoolean(String content, boolean expectedValue) throws Exception {
 		Document document = parseXmlString(content);
-		String result = evaluateXpath(document, XPathConstants.STRING, String.class);
-		assertEquals("Xpath:", expectedValue, Boolean.parseBoolean(result));
+		String actual = evaluateXpath(document, XPathConstants.STRING, String.class);
+		assertEquals("XPath " + this.expression, expectedValue, Boolean.parseBoolean(actual));
 	}
 
 }
