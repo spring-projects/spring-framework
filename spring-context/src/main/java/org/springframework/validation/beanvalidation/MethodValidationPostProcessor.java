@@ -22,23 +22,13 @@ import javax.validation.ValidatorFactory;
 
 import org.aopalliance.aop.Advice;
 
-import org.springframework.aop.Advisor;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.ProxyConfig;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -59,8 +49,8 @@ import org.springframework.validation.annotation.Validated;
  * as well. By default, JSR-303 will validate against its default group only.
  *
  * <p>As of Spring 3.1, this functionality requires Hibernate Validator 4.2 or higher.
- * In Spring 3.1.2, this class will autodetect a Bean Validation 1.1 compliant provider
- * and automatically use the standard method validation support there (once available).
+ * In a future version of Spring, this class will autodetect a Bean Validation 1.1 compliant
+ * provider and automatically use the standard method validation support when available.
  *
  * @author Juergen Hoeller
  * @since 3.1
@@ -68,7 +58,7 @@ import org.springframework.validation.annotation.Validated;
  * @see org.hibernate.validator.method.MethodValidator
  */
 @SuppressWarnings("serial")
-public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProcessor {
+public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProcessor implements InitializingBean {
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
