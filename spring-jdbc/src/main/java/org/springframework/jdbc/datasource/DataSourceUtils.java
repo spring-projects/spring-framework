@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -316,7 +316,6 @@ public abstract class DataSourceUtils {
 		if (con == null) {
 			return;
 		}
-
 		if (dataSource != null) {
 			ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);
 			if (conHolder != null && connectionEquals(conHolder, con)) {
@@ -325,11 +324,20 @@ public abstract class DataSourceUtils {
 				return;
 			}
 		}
+		logger.debug("Returning JDBC Connection to DataSource");
+		doCloseConnection(con, dataSource);
+	}
 
-		// Leave the Connection open only if the DataSource is our
-		// special SmartDataSoruce and it wants the Connection left open.
+	/**
+	 * Close the Connection, unless a {@link SmartDataSource} doesn't want us to.
+	 * @param con the Connection to close if necessary
+	 * @param dataSource the DataSource that the Connection was obtained from
+	 * @throws SQLException if thrown by JDBC methods
+	 * @see Connection#close()
+	 * @see SmartDataSource#shouldClose(Connection)
+	 */
+	public static void doCloseConnection(Connection con, DataSource dataSource) throws SQLException {
 		if (!(dataSource instanceof SmartDataSource) || ((SmartDataSource) dataSource).shouldClose(con)) {
-			logger.debug("Returning JDBC Connection to DataSource");
 			con.close();
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import javax.sql.DataSource;
 import org.hibernate.HibernateException;
 import org.hibernate.connection.ConnectionProvider;
 import org.hibernate.util.JDBCExceptionReporter;
+
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * Hibernate connection provider for local DataSource instances
@@ -87,12 +89,12 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	}
 
 	/**
-	 * This implementation simply calls <code>Connection.close</code>.
-	 * @see java.sql.Connection#close()
+	 * This implementation calls {@link DataSourceUtils#doCloseConnection},
+	 * checking against a {@link org.springframework.jdbc.datasource.SmartDataSource}.
 	 */
 	public void closeConnection(Connection con) throws SQLException {
 		try {
-			con.close();
+			DataSourceUtils.doCloseConnection(con, this.dataSourceToUse);
 		}
 		catch (SQLException ex) {
 			JDBCExceptionReporter.logExceptions(ex);
