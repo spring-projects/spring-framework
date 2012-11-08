@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.support.lob;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.PreparedStatement;
@@ -56,7 +57,7 @@ import java.sql.SQLException;
  * @see java.sql.PreparedStatement#setAsciiStream
  * @see java.sql.PreparedStatement#setCharacterStream
  */
-public interface LobCreator {
+public interface LobCreator extends Closeable {
 
 	/**
 	 * Set the given content as bytes on the given statement, using the given

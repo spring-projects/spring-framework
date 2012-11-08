@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.springframework.http.HttpInputMessage;
@@ -30,7 +31,7 @@ import org.springframework.http.HttpStatus;
  * @author Arjen Poutsma
  * @since 3.0
  */
-public interface ClientHttpResponse extends HttpInputMessage {
+public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 
 	/**
 	 * Return the HTTP status code of the response.
