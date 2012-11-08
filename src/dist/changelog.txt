@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2 RC2 (2012-11-26)
+---------------------------------------
+
+* DefaultListableBeanFactory avoids singletonObjects lock wherever possible for non-singleton performance (SPR-9819)
+* DefaultListableBeanFactory doesn't cache for autowireBean calls anymore, avoiding ClassLoader leaks (SPR-8956)
+* AsyncAnnotationBean/MethodValidation/PersistenceExceptionTranslationPostProcessor cache eligible beans (SPR-7328)
+* ConfigurableApplicationContext, LobCreator and Client/ServerHttpResponse implement Closeable for Java 7 (SPR-9962)
+* spring-jms-3.2.xsd declares former nmtoken attributes as string, allowing for placeholders (SPR-9597)
+
+
 Changes in version 3.2 RC1 (2012-11-04)
 ---------------------------------------
 
