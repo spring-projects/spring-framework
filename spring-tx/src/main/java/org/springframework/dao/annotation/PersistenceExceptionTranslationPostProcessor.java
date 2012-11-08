@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,12 @@ package org.springframework.dao.annotation;
 
 import java.lang.annotation.Annotation;
 
-import org.springframework.aop.framework.Advised;
-import org.springframework.aop.framework.AopInfrastructureBean;
-import org.springframework.aop.framework.ProxyConfig;
-import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.Ordered;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 
 /**
  * Bean post-processor that automatically applies persistence exception translation to any
@@ -67,14 +58,10 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
 @SuppressWarnings("serial")
-public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
-		implements BeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware, Ordered {
+public class PersistenceExceptionTranslationPostProcessor extends AbstractAdvisingBeanPostProcessor
+		implements BeanFactoryAware {
 
 	private Class<? extends Annotation> repositoryAnnotationType = Repository.class;
-
-	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
-
-	private PersistenceExceptionTranslationAdvisor persistenceExceptionTranslationAdvisor;
 
 
 	/**
@@ -90,53 +77,13 @@ public class PersistenceExceptionTranslationPostProcessor extends ProxyConfig
 		this.repositoryAnnotationType = repositoryAnnotationType;
 	}
 
-	public void setBeanClassLoader(ClassLoader classLoader) {
-		this.beanClassLoader = classLoader;
-	}
-
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new IllegalArgumentException(
 					"Cannot use PersistenceExceptionTranslator autodetection without ListableBeanFactory");
 		}
-		this.persistenceExceptionTranslationAdvisor = new PersistenceExceptionTranslationAdvisor(
+		this.advisor = new PersistenceExceptionTranslationAdvisor(
 				(ListableBeanFactory) beanFactory, this.repositoryAnnotationType);
-	}
-
-	public int getOrder() {
-		// This should run after all other post-processors, so that it can just add
-		// an advisor to existing proxies rather than double-proxy.
-		return LOWEST_PRECEDENCE;
-	}
-
-
-	public Object postProcessBeforeInitialization(Object bean, String beanName) {
-		return bean;
-	}
-
-	public Object postProcessAfterInitialization(Object bean, String beanName) {
-		if (bean instanceof AopInfrastructureBean) {
-			// Ignore AOP infrastructure such as scoped proxies.
-			return bean;
-		}
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
-		if (AopUtils.canApply(this.persistenceExceptionTranslationAdvisor, targetClass)) {
-			if (bean instanceof Advised) {
-				((Advised) bean).addAdvisor(this.persistenceExceptionTranslationAdvisor);
-				return bean;
-			}
-			else {
-				ProxyFactory proxyFactory = new ProxyFactory(bean);
-				// Copy our properties (proxyTargetClass etc) inherited from ProxyConfig.
-				proxyFactory.copyFrom(this);
-				proxyFactory.addAdvisor(this.persistenceExceptionTranslationAdvisor);
-				return proxyFactory.getProxy(this.beanClassLoader);
-			}
-		}
-		else {
-			// This is not a repository.
-			return bean;
-		}
 	}
 
 }
