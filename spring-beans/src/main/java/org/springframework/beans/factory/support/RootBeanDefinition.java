@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	private BeanDefinitionHolder decoratedDefinition;
 
-	boolean isFactoryMethodUnique;
+	boolean allowCaching = true;
+
+	boolean isFactoryMethodUnique = false;
 
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Object resolvedConstructorOrFactoryMethod;

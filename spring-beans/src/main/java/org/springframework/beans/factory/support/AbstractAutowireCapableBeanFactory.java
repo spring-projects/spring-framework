@@ -285,6 +285,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Use prototype bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(beanClass);
 		bd.setScope(SCOPE_PROTOTYPE);
+		bd.allowCaching = false;
 		return (T) createBean(beanClass.getName(), bd, null);
 	}
 
@@ -292,6 +293,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Use non-singleton bean definition, to avoid registering bean as dependent bean.
 		RootBeanDefinition bd = new RootBeanDefinition(ClassUtils.getUserClass(existingBean));
 		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bd.allowCaching = false;
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
 		populateBean(bd.getBeanClass().getName(), bd, bw);
@@ -310,6 +312,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (bd == null) {
 			bd = new RootBeanDefinition(mbd);
 			bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+			bd.allowCaching = false;
 		}
 		BeanWrapper bw = new BeanWrapperImpl(existingBean);
 		initBeanWrapper(bw);
@@ -1053,7 +1056,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * @param mbd the bean definition for the bean
 	 * @param bw BeanWrapper with bean instance
 	 */
-	protected void populateBean(String beanName, AbstractBeanDefinition mbd, BeanWrapper bw) {
+	protected void populateBean(String beanName, RootBeanDefinition mbd, BeanWrapper bw) {
 		PropertyValues pvs = mbd.getPropertyValues();
 
 		if (bw == null) {
@@ -1109,7 +1112,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		boolean needsDepCheck = (mbd.getDependencyCheck() != RootBeanDefinition.DEPENDENCY_CHECK_NONE);
 
 		if (hasInstAwareBpps || needsDepCheck) {
-			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw);
+			PropertyDescriptor[] filteredPds = filterPropertyDescriptorsForDependencyCheck(bw, mbd.allowCaching);
 			if (hasInstAwareBpps) {
 				for (BeanPostProcessor bp : getBeanPostProcessors()) {
 					if (bp instanceof InstantiationAwareBeanPostProcessor) {
@@ -1237,32 +1240,49 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 	/**
 	 * Extract a filtered set of PropertyDescriptors from the given BeanWrapper,
-	 * excluding ignored dependency types or properties defined on ignored
-	 * dependency interfaces.
+	 * excluding ignored dependency types or properties defined on ignored dependency interfaces.
+	 * @param bw the BeanWrapper the bean was created with
+	 * @param cache whether to cache filtered PropertyDescriptors for the given bean Class
+	 * @return the filtered PropertyDescriptors
+	 * @see #isExcludedFromDependencyCheck
+	 * @see #filterPropertyDescriptorsForDependencyCheck(org.springframework.beans.BeanWrapper)
+	 */
+	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw, boolean cache) {
+		PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
+		if (filtered == null) {
+			if (cache) {
+				synchronized (this.filteredPropertyDescriptorsCache) {
+					filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
+					if (filtered == null) {
+						filtered = filterPropertyDescriptorsForDependencyCheck(bw);
+						this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
+					}
+				}
+			}
+			else {
+				filtered = filterPropertyDescriptorsForDependencyCheck(bw);
+			}
+		}
+		return filtered;
+	}
+
+	/**
+	 * Extract a filtered set of PropertyDescriptors from the given BeanWrapper,
+	 * excluding ignored dependency types or properties defined on ignored dependency interfaces.
 	 * @param bw the BeanWrapper the bean was created with
 	 * @return the filtered PropertyDescriptors
 	 * @see #isExcludedFromDependencyCheck
 	 */
 	protected PropertyDescriptor[] filterPropertyDescriptorsForDependencyCheck(BeanWrapper bw) {
-		PropertyDescriptor[] filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
-		if (filtered == null) {
-			synchronized (this.filteredPropertyDescriptorsCache) {
-				filtered = this.filteredPropertyDescriptorsCache.get(bw.getWrappedClass());
-				if (filtered == null) {
-					List<PropertyDescriptor> pds =
-							new LinkedList<PropertyDescriptor>(Arrays.asList(bw.getPropertyDescriptors()));
-					for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
-						PropertyDescriptor pd = it.next();
-						if (isExcludedFromDependencyCheck(pd)) {
-							it.remove();
-						}
-					}
-					filtered = pds.toArray(new PropertyDescriptor[pds.size()]);
-					this.filteredPropertyDescriptorsCache.put(bw.getWrappedClass(), filtered);
-				}
+		List<PropertyDescriptor> pds =
+				new LinkedList<PropertyDescriptor>(Arrays.asList(bw.getPropertyDescriptors()));
+		for (Iterator<PropertyDescriptor> it = pds.iterator(); it.hasNext();) {
+			PropertyDescriptor pd = it.next();
+			if (isExcludedFromDependencyCheck(pd)) {
+				it.remove();
 			}
 		}
-		return filtered;
+		return pds.toArray(new PropertyDescriptor[pds.size()]);
 	}
 
 	/**
