@@ -897,6 +897,22 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return isFactoryBean(beanName, getMergedLocalBeanDefinition(beanName));
 	}
 
+	@Override
+	public boolean isActuallyInCreation(String beanName) {
+		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
+	}
+
+	/**
+	 * Return whether the specified prototype bean is currently in creation
+	 * (within the current thread).
+	 * @param beanName the name of the bean
+	 */
+	protected boolean isPrototypeCurrentlyInCreation(String beanName) {
+		Object curVal = this.prototypesCurrentlyInCreation.get();
+		return (curVal != null &&
+				(curVal.equals(beanName) || (curVal instanceof Set && ((Set<?>) curVal).contains(beanName))));
+	}
+
 	/**
 	 * Callback before prototype creation.
 	 * <p>The default implementation register the prototype as currently in creation.
@@ -940,22 +956,6 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				this.prototypesCurrentlyInCreation.remove();
 			}
 		}
-	}
-
-	/**
-	 * Return whether the specified prototype bean is currently in creation
-	 * (within the current thread).
-	 * @param beanName the name of the bean
-	 */
-	protected final boolean isPrototypeCurrentlyInCreation(String beanName) {
-		Object curVal = this.prototypesCurrentlyInCreation.get();
-		return (curVal != null &&
-				(curVal.equals(beanName) || (curVal instanceof Set && ((Set<?>) curVal).contains(beanName))));
-	}
-
-	public boolean isCurrentlyInCreation(String beanName) {
-		Assert.notNull(beanName, "Bean name must not be null");
-		return isSingletonCurrentlyInCreation(beanName) || isPrototypeCurrentlyInCreation(beanName);
 	}
 
 	public void destroyBean(String beanName, Object beanInstance) {

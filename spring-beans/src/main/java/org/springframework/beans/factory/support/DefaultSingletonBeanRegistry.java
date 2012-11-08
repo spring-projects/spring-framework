@@ -16,9 +16,7 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -94,11 +92,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	/** Set of registered singletons, containing the bean names in registration order */
 	private final Set<String> registeredSingletons = new LinkedHashSet<String>(16);
 
-	/** Names of beans that are currently in creation */
-	private final Set<String> singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet<String>());
+	/** Names of beans that are currently in creation (using a ConcurrentHashMap as a Set) */
+	private final Map<String, Boolean> singletonsCurrentlyInCreation = new ConcurrentHashMap<String, Boolean>();
 
-	/** Names of beans currently excluded from in creation checks */
-	private final Set<String> inCreationCheckExclusions = new HashSet<String>();
+	/** Names of beans currently excluded from in creation checks (using a ConcurrentHashMap as a Set) */
+	private final Map<String, Boolean> inCreationCheckExclusions = new ConcurrentHashMap<String, Boolean>();
 
 	/** List of suppressed Exceptions, available for associating related causes */
 	private Set<Exception> suppressedExceptions;
@@ -166,7 +164,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 	public Object getSingleton(String beanName) {
-		return getSingleton(beanName, isSingletonCurrentlyInCreation(beanName));
+		return getSingleton(beanName, true);
 	}
 
 	/**
@@ -179,10 +177,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		Object singletonObject = this.singletonObjects.get(beanName);
-		if (singletonObject == null && allowEarlyReference) {
+		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);
-				if (singletonObject == null) {
+				if (singletonObject == null && allowEarlyReference) {
 					ObjectFactory singletonFactory = this.singletonFactories.get(beanName);
 					if (singletonFactory != null) {
 						singletonObject = singletonFactory.getObject();
@@ -289,6 +287,34 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	}
 
 
+	public void setCurrentlyInCreation(String beanName, boolean inCreation) {
+		Assert.notNull(beanName, "Bean name must not be null");
+		if (!inCreation) {
+			this.inCreationCheckExclusions.put(beanName, Boolean.TRUE);
+		}
+		else {
+			this.inCreationCheckExclusions.remove(beanName);
+		}
+	}
+
+	public boolean isCurrentlyInCreation(String beanName) {
+		Assert.notNull(beanName, "Bean name must not be null");
+		return (!this.inCreationCheckExclusions.containsKey(beanName) && isActuallyInCreation(beanName));
+	}
+
+	protected boolean isActuallyInCreation(String beanName) {
+		return isSingletonCurrentlyInCreation(beanName);
+	}
+
+	/**
+	 * Return whether the specified singleton bean is currently in creation
+	 * (within the entire factory).
+	 * @param beanName the name of the bean
+	 */
+	public boolean isSingletonCurrentlyInCreation(String beanName) {
+		return this.singletonsCurrentlyInCreation.containsKey(beanName);
+	}
+
 	/**
 	 * Callback before singleton creation.
 	 * <p>Default implementation register the singleton as currently in creation.
@@ -296,7 +322,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void beforeSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
+		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
+				this.singletonsCurrentlyInCreation.put(beanName, Boolean.TRUE) != null) {
 			throw new BeanCurrentlyInCreationException(beanName);
 		}
 	}
@@ -308,27 +335,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @see #isSingletonCurrentlyInCreation
 	 */
 	protected void afterSingletonCreation(String beanName) {
-		if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
+		if (!this.inCreationCheckExclusions.containsKey(beanName) &&
+				!this.singletonsCurrentlyInCreation.remove(beanName)) {
 			throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
 		}
-	}
-
-	public final void setCurrentlyInCreation(String beanName, boolean inCreation) {
-		if (!inCreation) {
-			this.inCreationCheckExclusions.add(beanName);
-		}
-		else {
-			this.inCreationCheckExclusions.remove(beanName);
-		}
-	}
-
-	/**
-	 * Return whether the specified singleton bean is currently in creation
-	 * (within the entire factory).
-	 * @param beanName the name of the bean
-	 */
-	public final boolean isSingletonCurrentlyInCreation(String beanName) {
-		return this.singletonsCurrentlyInCreation.contains(beanName);
 	}
 
 
