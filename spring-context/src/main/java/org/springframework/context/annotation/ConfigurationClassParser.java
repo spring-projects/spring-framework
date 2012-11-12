@@ -31,13 +31,18 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
@@ -318,6 +323,7 @@ class ConfigurationClassParser {
 					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
 					try {
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(Class.forName(candidate), ImportBeanDefinitionRegistrar.class);
+						invokeAwareMethods(registrar);
 						registrar.registerBeanDefinitions(importingClassMetadata, registry);
 					}
 					catch (ClassNotFoundException ex) {
@@ -356,6 +362,28 @@ class ConfigurationClassParser {
 		return this.importStack;
 	}
 
+	/**
+	 * Invokes {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and {@link BeanFactoryAware} interfaces in case
+	 * the given {@link ImportBeanDefinitionRegistrar} implements the interface.
+	 * 
+	 * @param registrar
+	 */
+	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
+
+		if (registrar instanceof ResourceLoaderAware) {
+			((ResourceLoaderAware) registrar).setResourceLoader(resourceLoader);
+		}
+
+		if (registrar instanceof BeanClassLoaderAware) {
+			ClassLoader classLoader = registry instanceof ConfigurableListableBeanFactory ? ((ConfigurableListableBeanFactory) registry)
+					.getBeanClassLoader() : resourceLoader.getClassLoader();
+			((BeanClassLoaderAware) registrar).setBeanClassLoader(classLoader);
+		}
+
+		if (registrar instanceof BeanFactoryAware && registry instanceof BeanFactory) {
+			((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) registry);
+		}
+	}
 
 	interface ImportRegistry {
 
