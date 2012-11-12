@@ -18,6 +18,7 @@ package org.springframework.http.client;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.Closeable;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
