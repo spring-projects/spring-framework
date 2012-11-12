@@ -16,8 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import static org.springframework.context.annotation.MetadataUtils.attributesFor;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,13 +29,19 @@ import java.util.Set;
 import java.util.Stack;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.parsing.Location;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.beans.factory.parsing.ProblemReporter;
 import org.springframework.beans.factory.support.BeanDefinitionReader;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
@@ -51,6 +55,8 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.context.annotation.MetadataUtils.*;
 
 /**
  * Parses a {@link Configuration} class definition, populating a collection of
@@ -318,6 +324,7 @@ class ConfigurationClassParser {
 					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
 					try {
 						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(Class.forName(candidate), ImportBeanDefinitionRegistrar.class);
+						invokeAwareMethods(registrar);
 						registrar.registerBeanDefinitions(importingClassMetadata, registry);
 					}
 					catch (ClassNotFoundException ex) {
@@ -333,6 +340,29 @@ class ConfigurationClassParser {
 			this.importStack.pop();
 		}
 	}
+
+	/**
+	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
+	 * {@link BeanFactoryAware} contracts if implemented by the given {@code registrar}.
+	 */
+	private void invokeAwareMethods(ImportBeanDefinitionRegistrar registrar) {
+		if (registrar instanceof Aware) {
+			if (registrar instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) registrar).setResourceLoader(resourceLoader);
+			}
+			if (registrar instanceof BeanClassLoaderAware) {
+				ClassLoader classLoader =
+						registry instanceof ConfigurableBeanFactory ?
+						((ConfigurableBeanFactory) registry).getBeanClassLoader() :
+						resourceLoader.getClassLoader();
+				((BeanClassLoaderAware) registrar).setBeanClassLoader(classLoader);
+			}
+			if (registrar instanceof BeanFactoryAware && registry instanceof BeanFactory) {
+				((BeanFactoryAware) registrar).setBeanFactory((BeanFactory) registry);
+			}
+		}
+	}
+
 
 	/**
 	 * Validate each {@link ConfigurationClass} object.
@@ -355,7 +385,6 @@ class ConfigurationClassParser {
 	public ImportRegistry getImportRegistry() {
 		return this.importStack;
 	}
-
 
 	interface ImportRegistry {
 

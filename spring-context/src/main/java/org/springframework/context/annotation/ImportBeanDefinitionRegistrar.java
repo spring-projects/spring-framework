@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,15 @@ import org.springframework.core.type.AnnotationMetadata;
  * <p>Along with {@code @Configuration} and {@link ImportSelector}, classes of this type
  * may be provided to the @{@link Import} annotation (or may also be returned from an
  * {@code ImportSelector}).
+ *
+ * <p>An {@link ImportBeanDefinitionRegistrar} may implement any of the following
+ * {@link org.springframework.beans.factory.Aware Aware} interfaces, and their respective
+ * methods will be called prior to {@link #registerBeanDefinitions}:
+ * <ul>
+ * <li>{@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware}
+ * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware}
+ * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}
+ * </ul>
  *
  * <p>See implementations and associated unit tests for usage examples.
  *
