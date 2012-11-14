@@ -397,10 +397,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		ManagedList<? super Object> messageConverters = new ManagedList<Object>();
 		if (convertersElement != null) {
 			messageConverters.setSource(source);
-			for (Element converter : DomUtils.getChildElementsByTagName(convertersElement, "bean")) {
-				BeanDefinitionHolder beanDef = parserContext.getDelegate().parseBeanDefinitionElement(converter);
-				beanDef = parserContext.getDelegate().decorateBeanDefinitionIfRequired(converter, beanDef);
-				messageConverters.add(beanDef);
+			for (Element beanElement : DomUtils.getChildElementsByTagName(convertersElement, new String[] { "bean", "ref" })) {
+				Object object = parserContext.getDelegate().parsePropertySubElement(beanElement, null);
+				messageConverters.add(object);
 			}
 		}
 

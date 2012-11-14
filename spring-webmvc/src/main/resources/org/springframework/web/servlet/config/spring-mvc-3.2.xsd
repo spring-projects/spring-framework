@@ -33,13 +33,22 @@
 					</xsd:annotation>
 					<xsd:complexType>
 						<xsd:sequence>
-							<xsd:element ref="beans:bean" minOccurs="1" maxOccurs="unbounded">
-								<xsd:annotation>
-									<xsd:documentation><![CDATA[
-	The HttpMessageConverter bean definition.
-									]]></xsd:documentation>
-								</xsd:annotation>
-							</xsd:element>
+							<xsd:choice maxOccurs="unbounded">
+								<xsd:element ref="beans:bean">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+		An HttpMessageConverter bean definition.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+								<xsd:element ref="beans:ref">
+									<xsd:annotation>
+										<xsd:documentation><![CDATA[
+		A reference to an HttpMessageConverter bean.
+										]]></xsd:documentation>
+									</xsd:annotation>
+								</xsd:element>
+							</xsd:choice>
 						</xsd:sequence>
 						<xsd:attribute name="register-defaults" type="xsd:boolean" default="true">
 							<xsd:annotation>
