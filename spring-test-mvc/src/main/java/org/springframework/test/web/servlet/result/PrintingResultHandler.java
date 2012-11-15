@@ -20,6 +20,7 @@ import java.util.Enumeration;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -129,7 +130,8 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
-		this.printer.printValue("Was async started", result.getRequest().isAsyncStarted());
+		HttpServletRequest request = result.getRequest();
+		this.printer.printValue("Was async started", request.isAsyncStarted());
 		this.printer.printValue("Async result", result.getAsyncResult(0));
 	}
 
