@@ -73,6 +73,8 @@ import org.springframework.web.util.UriUtils;
 */
 public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable {
 
+	static final boolean servlet3Present = ClassUtils.hasMethod(ServletRequest.class, "startAsync");
+
 	private final UriComponents uriComponents;
 
 	private final HttpMethod method;
@@ -647,8 +649,7 @@ public class MockHttpServletRequestBuilder implements RequestBuilder, Mergeable 
 	 * {@link ServletContext}. Can be overridden in sub-classes.
 	 */
 	protected MockHttpServletRequest createServletRequest(ServletContext servletContext) {
-		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
-				createServlet3Request(servletContext) : new MockHttpServletRequest(servletContext);
+		return servlet3Present ? createServlet3Request(servletContext) : new MockHttpServletRequest(servletContext);
 	}
 
 	private MockHttpServletRequest createServlet3Request(ServletContext servletContext) {

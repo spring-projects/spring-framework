@@ -34,6 +34,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 import org.springframework.test.web.servlet.result.PrintingResultHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.method.HandlerMethod;
@@ -60,7 +62,11 @@ public class PrintingResultHandlerTests {
 	@Before
 	public void setup() {
 		this.handler = new TestPrintingResultHandler();
-		this.request = new MockHttpServletRequest("GET", "/");
+		this.request = new MockHttpServletRequest("GET", "/") {
+			public boolean isAsyncStarted() {
+				return false;
+			}
+		};
 		this.response = new MockHttpServletResponse();
 		this.mvcResult = new StubMvcResult(this.request, null, null, null, null, null, this.response);
 	}
@@ -75,9 +81,12 @@ public class PrintingResultHandlerTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("header", "headerValue");
 
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("param", "paramValue");
+
 		assertValue("MockHttpServletRequest", "HTTP Method", this.request.getMethod());
 		assertValue("MockHttpServletRequest", "Request URI", this.request.getRequestURI());
-		assertValue("MockHttpServletRequest", "Parameters", this.request.getParameterMap());
+		assertValue("MockHttpServletRequest", "Parameters", params);
 		assertValue("MockHttpServletRequest", "Headers", headers);
 	}
 

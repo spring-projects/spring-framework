@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpMethod;
@@ -99,9 +98,8 @@ public class MockMultipartHttpServletRequestBuilder extends MockHttpServletReque
 
 	@Override
 	protected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {
-		MockMultipartHttpServletRequest request = ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
+		MockMultipartHttpServletRequest request = servlet3Present ?
 				createServlet3Request() : new MockMultipartHttpServletRequest();
-
 		for (MockMultipartFile file : this.files) {
 			request.addFile(file);
 		}

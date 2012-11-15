@@ -48,6 +48,8 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class PrintingResultHandler implements ResultHandler {
 
+	private static final boolean servlet3Present = ClassUtils.hasMethod(ServletRequest.class, "startAsync");
+
 	private final ResultValuePrinter printer;
 
 
@@ -77,7 +79,7 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printHeading("Handler");
 		printHandler(result.getHandler(), result.getInterceptors());
 
-		if (ClassUtils.hasMethod(ServletRequest.class, "startAsync")) {
+		if (servlet3Present) {
 			this.printer.printHeading("Async");
 			printAsyncResult(result);
 		}
@@ -130,9 +132,11 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
-		HttpServletRequest request = result.getRequest();
-		this.printer.printValue("Was async started", request.isAsyncStarted());
-		this.printer.printValue("Async result", result.getAsyncResult(0));
+		if (servlet3Present) {
+			HttpServletRequest request = result.getRequest();
+			this.printer.printValue("Was async started", request.isAsyncStarted());
+			this.printer.printValue("Async result", result.getAsyncResult(0));
+		}
 	}
 
 	/** Print the handler */
