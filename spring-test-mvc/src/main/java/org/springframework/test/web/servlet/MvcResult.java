@@ -85,4 +85,15 @@ public interface MvcResult {
 	 */
 	Object getAsyncResult();
 
+	/**
+	 * Get the result of asynchronous execution or {@code null} if concurrent
+	 * handling did not start. This method will wait for up to the given timeout
+	 * for the completion of concurrent handling.
+	 *
+	 * @param timeout how long to wait for the async result to be set in
+	 * milliseconds; if -1, the wait will be as long as the async timeout set
+	 * on the Servlet request
+	 */
+	Object getAsyncResult(long timeout);
+
 }

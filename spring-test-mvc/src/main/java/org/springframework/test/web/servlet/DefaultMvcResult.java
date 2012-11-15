@@ -110,9 +110,13 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	public Object getAsyncResult() {
+		return getAsyncResult(-1);
+	}
+
+	public Object getAsyncResult(long timeout) {
 		HttpServletRequest request = this.mockRequest;
-		if (request.isAsyncStarted()) {
-			if (!awaitAsyncResult(request)) {
+		if ((timeout != 0) && request.isAsyncStarted()) {
+			if (!awaitAsyncResult(request, timeout)) {
 				throw new IllegalStateException(
 						"Gave up waiting on async result from handler [" + this.handler + "] to complete");
 			}
@@ -120,8 +124,10 @@ class DefaultMvcResult implements MvcResult {
 		return this.asyncResult;
 	}
 
-	private boolean awaitAsyncResult(HttpServletRequest request) {
-		long timeout = request.getAsyncContext().getTimeout();
+	private boolean awaitAsyncResult(HttpServletRequest request, long timeout) {
+		if (timeout != -1) {
+			timeout = request.getAsyncContext().getTimeout();
+		}
 		if (this.asyncResultLatch != null) {
 			try {
 				return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);

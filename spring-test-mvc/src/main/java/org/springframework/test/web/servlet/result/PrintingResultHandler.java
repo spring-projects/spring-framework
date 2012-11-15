@@ -17,12 +17,18 @@
 package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
+import java.util.Map;
+
+import javax.servlet.ServletRequest;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.method.HandlerMethod;
@@ -70,6 +76,11 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printHeading("Handler");
 		printHandler(result.getHandler(), result.getInterceptors());
 
+		if (ClassUtils.hasMethod(ServletRequest.class, "startAsync")) {
+			this.printer.printHeading("Async");
+			printAsyncResult(result);
+		}
+
 		this.printer.printHeading("Resolved Exception");
 		printResolvedException(result.getResolvedException());
 
@@ -87,11 +98,11 @@ public class PrintingResultHandler implements ResultHandler {
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
-		this.printer.printValue("Parameters", request.getParameterMap());
+		this.printer.printValue("Parameters", getParamsMultiValueMap(request));
 		this.printer.printValue("Headers", getRequestHeaders(request));
 	}
 
-	protected static HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
+	protected final HttpHeaders getRequestHeaders(MockHttpServletRequest request) {
 		HttpHeaders headers = new HttpHeaders();
 		Enumeration<?> names = request.getHeaderNames();
 		while (names.hasMoreElements()) {
@@ -102,6 +113,24 @@ public class PrintingResultHandler implements ResultHandler {
 			}
 		}
 		return headers;
+	}
+
+	protected final MultiValueMap<String, String> getParamsMultiValueMap(MockHttpServletRequest request) {
+		Map<String, String[]> params = request.getParameterMap();
+		MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<String, String>();
+		for (String name : params.keySet()) {
+			if (params.get(name) != null) {
+				for (String value : params.get(name)) {
+					multiValueMap.add(name, value);
+				}
+			}
+		}
+		return multiValueMap;
+	}
+
+	protected void printAsyncResult(MvcResult result) throws Exception {
+		this.printer.printValue("Was async started", result.getRequest().isAsyncStarted());
+		this.printer.printValue("Async result", result.getAsyncResult(0));
 	}
 
 	/** Print the handler */
@@ -178,7 +207,7 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Cookies", response.getCookies());
 	}
 
-	protected static HttpHeaders getResponseHeaders(MockHttpServletResponse response) {
+	protected final HttpHeaders getResponseHeaders(MockHttpServletResponse response) {
 		HttpHeaders headers = new HttpHeaders();
 		for (String name : response.getHeaderNames()) {
 			headers.put(name, response.getHeaders(name));

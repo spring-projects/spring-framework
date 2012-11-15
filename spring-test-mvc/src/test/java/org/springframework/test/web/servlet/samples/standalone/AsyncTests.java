@@ -17,6 +17,7 @@ package org.springframework.test.web.servlet.samples.standalone;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,11 +60,13 @@ public class AsyncTests {
 	@Test
 	public void testCallable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
+			.andDo(print())
 			.andExpect(request().asyncStarted())
 			.andExpect(request().asyncResult(new Person("Joe")))
 			.andReturn();
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
+			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));

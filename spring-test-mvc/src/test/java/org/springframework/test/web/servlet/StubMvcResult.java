@@ -124,4 +124,8 @@ public class StubMvcResult implements MvcResult {
 		return null;
 	}
 
+	public Object getAsyncResult(long timeout) {
+		return null;
+	}
+
 }
