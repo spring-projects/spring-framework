@@ -320,7 +320,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		// Try "get*" method...
 		String getterName = "get" + propertyWriteMethodSuffix;
 		for (Method method : ms) {
-			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
@@ -328,7 +328,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		// Try "is*" method...
 		getterName = "is" + propertyWriteMethodSuffix;
 		for (Method method : ms) {
-			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					boolean.class.equals(method.getReturnType()) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
@@ -344,7 +344,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Method[] methods = clazz.getMethods();
 		String setterName = "set" + StringUtils.capitalize(propertyName);
 		for (Method method : methods) {
-			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
+			if (!method.isBridge() && method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}

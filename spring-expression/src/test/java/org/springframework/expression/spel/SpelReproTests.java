@@ -50,6 +50,10 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.*;
 
 /**
@@ -1630,6 +1634,25 @@ public class SpelReproTests extends ExpressionTestCase {
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail("Test failed - SPR_9486_floatPowerDoubleTest");
+		}
+	}
+
+	@Test
+	public void testBridgeMethods_SPR_9994() throws Exception {
+		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Object target = new GenericImplementation();
+		TypedValue value = accessor.read(context, target , "property");
+		assertEquals(Integer.class, value.getTypeDescriptor().getType());
+	}
+
+	private static interface GenericInterface<T extends Number> {
+		public T getProperty();
+	}
+
+	private static class GenericImplementation implements GenericInterface<Integer> {
+		public Integer getProperty() {
+			return null;
 		}
 	}
 
