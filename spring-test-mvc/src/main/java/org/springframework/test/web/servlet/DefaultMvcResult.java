@@ -114,9 +114,13 @@ class DefaultMvcResult implements MvcResult {
 	}
 
 	public Object getAsyncResult(long timeout) {
+		// MockHttpServletRequest type doesn't have async methods
 		HttpServletRequest request = this.mockRequest;
 		if ((timeout != 0) && request.isAsyncStarted()) {
-			if (!awaitAsyncResult(request, timeout)) {
+			if (timeout == -1) {
+				timeout = request.getAsyncContext().getTimeout();
+			}
+			if (!awaitAsyncResult(timeout)) {
 				throw new IllegalStateException(
 						"Gave up waiting on async result from handler [" + this.handler + "] to complete");
 			}
@@ -124,10 +128,7 @@ class DefaultMvcResult implements MvcResult {
 		return this.asyncResult;
 	}
 
-	private boolean awaitAsyncResult(HttpServletRequest request, long timeout) {
-		if (timeout != -1) {
-			timeout = request.getAsyncContext().getTimeout();
-		}
+	private boolean awaitAsyncResult(long timeout) {
 		if (this.asyncResultLatch != null) {
 			try {
 				return this.asyncResultLatch.await(timeout, TimeUnit.MILLISECONDS);

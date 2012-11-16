@@ -579,6 +579,7 @@ project('spring-test-mvc') {
         testCompile "cglib:cglib-nodep:2.2"
         testCompile "rome:rome:1.0"
         testCompile "javax.xml.bind:jaxb-api:2.2.6"
+        testCompile "org.easymock:easymockclassextension:2.3"
         testCompile("org.springframework.security:spring-security-core:3.1.2.RELEASE") {
             exclude group: 'org.springframework'
         }
