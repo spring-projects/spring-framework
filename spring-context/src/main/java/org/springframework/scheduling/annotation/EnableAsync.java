@@ -96,7 +96,13 @@ import org.springframework.core.Ordered;
  * the examples are equivalent save the setting of the <em>thread name prefix</em> of the
  * Executor; this is because the the {@code task:} namespace {@code executor} element does
  * not expose such an attribute. This demonstrates how the code-based approach allows for
- * maximum configurability through direct access to actual componentry.<p>
+ * maximum configurability through direct access to actual componentry.
+ *
+ * <p>Note: In the above example the {@code ThreadPoolTaskExecutor} is not a fully managed
+ * Spring Bean. Add the {@code @Bean} annotation to the {@code getAsyncExecutor()} method
+ * if you want a fully managed bean. In such circumstances it is no longer necessary to
+ * manually call the {@code executor.initialize()} method as this will be invoked
+ * automatically when the bean is initialized.
  *
  * @author Chris Beams
  * @since 3.1
