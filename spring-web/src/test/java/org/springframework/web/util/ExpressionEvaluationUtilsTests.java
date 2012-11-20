@@ -27,9 +27,9 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import org.junit.Test;
 
-import org.springframework.mock.web.MockExpressionEvaluator;
-import org.springframework.mock.web.MockPageContext;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockExpressionEvaluator;
+import org.springframework.mock.web.test.MockPageContext;
+import org.springframework.mock.web.test.MockServletContext;
 
 import static org.junit.Assert.*;
 

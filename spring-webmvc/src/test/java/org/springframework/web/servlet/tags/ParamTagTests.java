@@ -21,8 +21,8 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.springframework.mock.web.MockBodyContent;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockBodyContent;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 
 /**
  * Unit tests for ParamTag

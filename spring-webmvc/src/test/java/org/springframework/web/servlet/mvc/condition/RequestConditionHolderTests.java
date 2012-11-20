@@ -23,7 +23,7 @@ import static org.junit.Assert.assertSame;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 /**

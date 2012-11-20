@@ -30,7 +30,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import static org.hamcrest.CoreMatchers.*;

@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 
 /**
  * @author Juergen Hoeller

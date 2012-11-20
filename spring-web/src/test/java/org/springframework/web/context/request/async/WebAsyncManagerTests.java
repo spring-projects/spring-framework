@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
  * Test fixture with an {@link WebAsyncManager} with a mock AsyncWebRequest.

@@ -35,9 +35,9 @@ import javax.servlet.DispatcherType;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.mock.web.MockAsyncContext;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockAsyncContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
