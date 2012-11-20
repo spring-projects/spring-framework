@@ -88,7 +88,7 @@ import org.springframework.core.Ordered;
  * <pre class="code">
  * {@code
  * <beans>
- *     <task:annotation-config executor="myExecutor"/>
+ *     <task:annotation-driven executor="myExecutor"/>
  *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
  *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
  * </beans>
