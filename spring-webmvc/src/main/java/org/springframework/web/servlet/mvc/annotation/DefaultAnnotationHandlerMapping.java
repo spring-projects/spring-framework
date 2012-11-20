@@ -79,6 +79,9 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @since 2.5
  * @see RequestMapping
  * @see AnnotationMethodHandlerAdapter
+ *
+ * @deprecated in Spring 3.2 in favor of
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping RequestMappingHandlerMapping}
  */
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 

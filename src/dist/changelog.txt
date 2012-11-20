@@ -74,7 +74,8 @@ Changes in version 3.2 RC1 (2012-11-04)
 * use concurrent cache to improve performance of GenericTypeResolver (SPR-8701)
 * cache and late resolve annotations on bean properties to improve performance (SPR-9166)
 * allow PropertyResolver implementations to ignore unresolvable ${placeholders} (SPR-9569)
-* add integration with Tiles 3
+* add integration with Tiles 3 (SPR-8825)
+* deprecated DefaultAnnotationHandlerMapping, AnnotationMethodHandlerAdapter, and AnnotationMethodHandlerExceptionResolver (SPR-10005)
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
