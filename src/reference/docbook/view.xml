@@ -839,7 +839,9 @@ public String deletePet(@PathVariable int ownerId, @PathVariable int petId) {
 
     <para><emphasis>NOTE:</emphasis> This section focuses on Spring's support
     for Tiles 2 (the standalone version of Tiles, requiring Java 5+) in the
-    <literal>org.springframework.web.servlet.view.tiles2</literal> package.
+    <literal>org.springframework.web.servlet.view.tiles2</literal> package as
+    as well as Tiles 3 in the
+    <literal>org.springframework.web.servlet.view.tiles3</literal> package.
     Spring also continues to support Tiles 1.x (a.k.a. "Struts Tiles", as
     shipped with Struts 1.1+; compatible with Java 1.4) in the original
     <literal>org.springframework.web.servlet.view.tiles</literal>
