@@ -28,8 +28,8 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.util.ReflectionUtils;
 
 /**

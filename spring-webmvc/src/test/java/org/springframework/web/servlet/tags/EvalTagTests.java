@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
 /**

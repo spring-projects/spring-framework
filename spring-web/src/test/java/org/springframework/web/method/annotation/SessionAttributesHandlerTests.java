@@ -28,7 +28,7 @@ import java.util.HashSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.DefaultSessionAttributeStore;

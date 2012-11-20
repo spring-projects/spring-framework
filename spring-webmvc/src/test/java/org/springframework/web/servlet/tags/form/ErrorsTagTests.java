@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.beans.TestBean;
-import org.springframework.mock.web.MockBodyContent;
-import org.springframework.mock.web.MockPageContext;
+import org.springframework.mock.web.test.MockBodyContent;
+import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;

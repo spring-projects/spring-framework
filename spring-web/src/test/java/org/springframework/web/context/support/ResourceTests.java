@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 import org.springframework.core.io.Resource;
-import org.springframework.mock.web.MockServletContext;
+import org.springframework.mock.web.test.MockServletContext;
 
 /**
  * @author Chris Beams
