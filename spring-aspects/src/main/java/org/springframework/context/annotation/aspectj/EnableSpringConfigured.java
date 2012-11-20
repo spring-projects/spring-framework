@@ -27,14 +27,13 @@ import org.springframework.context.annotation.Import;
 /**
  * Signals the current application context to apply dependency injection to
  * non-managed classes that are instantiated outside of the Spring bean factory
- * (typically classes annotated with the @
- * {@link org.springframework.beans.factory.annotation.Configurable
- * Configurable} annotation).
+ * (typically classes annotated with the
+ * {@link org.springframework.beans.factory.annotation.Configurable @Configurable}
+ * annotation).
  *
  * <p>Similar to functionality found in Spring's
- * {@code <context:spring-configured>} XML element. Often used in conjunction
- * with {@link org.springframework.context.annotation.EnableLoadTimeWeaving
- * @EnableLoadTimeWeaving}.
+ * {@code <context:spring-configured>} XML element. Often used in conjunction with
+ * {@link org.springframework.context.annotation.EnableLoadTimeWeaving @EnableLoadTimeWeaving}.
  *
  * @author Chris Beams
  * @since 3.1
