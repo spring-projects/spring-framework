@@ -689,7 +689,7 @@ would be rolled back, not necessarily following the EJB rules-->
 
       <para>It is not sufficient to tell you simply to annotate your classes
       with the <interfacename>@Transactional</interfacename> annotation, add
-      the line (<literal>&lt;tx:annotation-driven/&gt;</literal>) to your
+      <interfacename>@EnableTransactionManagement</interfacename> to your
       configuration, and then expect you to understand how it all works. This
       section explains the inner workings of the Spring Framework's
       declarative transaction infrastructure in the event of
@@ -1396,6 +1396,14 @@ public class DefaultFooService implements FooService {
         explicitly, as in the preceding example.</para>
       </tip>
 
+      <note>
+        <para>The <interfacename>@EnableTransactionManagement</interfacename>
+        annotation provides equivalent support if you are using Java based
+        configuration. Simply add the annotation to a
+        <interfacename>@Configuration</interfacename> class. See Javadoc
+        for full details.</para>
+      </note>
+
       <sidebar>
         <title>Method visibility and
         <interfacename>@Transactional</interfacename></title>
@@ -1460,13 +1468,14 @@ public class DefaultFooService implements FooService {
       behavior on any kind of method.</para>
 
       <para><table id="tx-annotation-driven-settings">
-          <title><literal>&lt;tx:annotation-driven/&gt;</literal>
-          settings</title>
+          <title>Annotation driven transaction settings</title>
 
-          <tgroup cols="3">
+          <tgroup cols="4">
             <thead>
               <row>
-                <entry>Attribute</entry>
+                <entry>XML Attribute</entry>
+
+                <entry>Annotation Attribute</entry>
 
                 <entry>Default</entry>
 
@@ -1478,6 +1487,10 @@ public class DefaultFooService implements FooService {
               <row>
                 <entry><literal>transaction-manager</literal></entry>
 
+                <entry>N/A (See
+                <interfacename>TransactionManagementConfigurer</interfacename>
+                Javadoc)</entry>
+
                 <entry>transactionManager</entry>
 
                 <entry><para>Name of transaction manager to use. Only required
@@ -1487,6 +1500,8 @@ public class DefaultFooService implements FooService {
               </row>
 
               <row>
+                <entry><literal>mode</literal></entry>
+
                 <entry><literal>mode</literal></entry>
 
                 <entry>proxy</entry>
@@ -1507,6 +1522,8 @@ public class DefaultFooService implements FooService {
               <row>
                 <entry><literal>proxy-target-class</literal></entry>
 
+                <entry><literal>proxyTargetClass</literal></entry>
+
                 <entry>false</entry>
 
                 <entry><para>Applies to proxy mode only. Controls what type of
@@ -1524,6 +1541,8 @@ public class DefaultFooService implements FooService {
               <row>
                 <entry><literal>order</literal></entry>
 
+                <entry><literal>order</literal></entry>
+
                 <entry>Ordered.LOWEST_PRECEDENCE</entry>
 
                 <entry><para>Defines the order of the transaction advice that
@@ -1539,11 +1558,10 @@ public class DefaultFooService implements FooService {
         </table></para>
 
       <note>
-        <para>The <literal>proxy-target-class</literal> attribute on the
-        <literal>&lt;tx:annotation-driven/&gt;</literal> element controls what
+        <para>The <literal>proxy-target-class</literal> attribute controls what
         type of transactional proxies are created for classes annotated with
         the <interfacename>@Transactional</interfacename> annotation. If
-        <literal>proxy-target-class</literal> attribute is set to
+        <literal>proxy-target-class</literal> is set to
         <literal>true</literal>, class-based proxies are created. If
         <literal>proxy-target-class</literal> is <literal>false</literal> or
         if the attribute is omitted, standard JDK interface-based proxies are
@@ -1552,20 +1570,20 @@ public class DefaultFooService implements FooService {
       </note>
 
       <note>
-        <para><literal>&lt;tx:annotation-driven/&gt;</literal> only looks for
+        <para><interfacename>@EnableTransactionManagement</interfacename> and
+        <literal>&lt;tx:annotation-driven/&gt;</literal> only looks for
         <interfacename>@Transactional</interfacename> on beans in the same
-        application context it is defined in. This means that, if you put
-        <literal>&lt;tx:annotation-driven/&gt;</literal> in a
+        application context they are defined in. This means that, if you put
+        annotation driven configuration in a
         <interfacename>WebApplicationContext</interfacename> for a
         <classname>DispatcherServlet</classname>, it only checks for
         <interfacename>@Transactional</interfacename> beans in your
-        controllers, and not your services. <!--I don't understand the logic of preceding explanation. Also identify *it* in first sentence of Note. 
-TR: OK AS IS. "it" refers to <tx:annotation-driven/>-->See <xref
+        controllers, and not your services. See <xref
         linkend="mvc-servlet" /> for more information.</para>
       </note>
 
       <para>The most derived location takes precedence when evaluating the
-      transactional settings for a method. <!--Do you need to clarify what *most derived* location means? Lowest level? TR: OK AS IS. following sentence explains it-->In
+      transactional settings for a method. In
       the case of the following example, the
       <classname>DefaultFooService</classname> class is annotated at the class
       level with the settings for a read-only transaction, but the

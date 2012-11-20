@@ -1474,7 +1474,7 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
 		
 		
 		<para>As described in the aforementioned section, you can configure a context-wide <interfacename>LoadTimeWeaver</interfacename>
-		using the  <literal>context:load-time-weaver</literal> configuration element. (This has been available since Spring 2.5.)
+		using the <interfacename>@EnableLoadTimeWeaving</interfacename> annotation of <literal>context:load-time-weaver</literal> XML element.
 		Such a global weaver is picked up by all JPA <classname>LocalContainerEntityManagerFactoryBeans</classname>
         automatically. This is the preferred way of setting up a load-time weaver, delivering autodetection of the platform 
         (WebLogic, OC4J, GlassFish, Tomcat, Resin, JBoss or VM agent) and automatic propagation of the weaver to all weaver-aware beans:</para>

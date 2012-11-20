@@ -273,8 +273,17 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 		<title>Enable caching annotations</title>
 
 		<para>It is important to note that even though declaring the cache annotations does not automatically triggers their actions - like many things in Spring, the feature has to be declaratively
-		enabled (which means if you ever suspect caching is to blame, you can disable it by removing only one configuration line rather then all the annotations in your code). In practice, this
-		translates to one line that informs Spring that it should process the cache annotations, namely:</para>
+		enabled (which means if you ever suspect caching is to blame, you can disable it by removing only one configuration line rather then all the annotations in your code).</para>
+
+		<para>To enable caching annotations add the annotation <interfacename>@EnableCaching</interfacename> to one of your <interfacename>@Configuration</interfacename> classes:</para>
+
+		<programlisting language="java">@Configuration
+@EnableCaching
+public class AppConfig {
+
+}</programlisting>
+
+		<para>Alternatively for XML configuration use the <literal>cache:annotation-driven</literal> element:</para>
 
 		<programlisting language="xml"><![CDATA[<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"]]>
 	<emphasis role="bold">xmlns:cache="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
@@ -283,18 +292,20 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 	<emphasis role="bold"><![CDATA[<cache:annotation-driven />]]></emphasis>
 <![CDATA[</beans>]]></programlisting>
 
-		<para>The namespace allows various options to be specified that influence the way the caching behaviour is added to the application through AOP. The configuration is similar (on purpose)
-		with that of <literal><ulink url="tx-annotation-driven-settings">tx:annotation-driven</ulink></literal>:
+		<para>Both the <literal>cache:annotation-driven</literal> element and <interfacename>@EnableCaching</interfacename> annotation allow various options to be specified that influence the way the
+		caching behaviour is added to the application through AOP. The configuration is intentionally similar
+		with that of <link linkend="tx-annotation-driven-settings"><interfacename>@Transactional</interfacename></link>:
 		</para>
 
 		<para><table id="cache-annotation-driven-settings">
-			<title><literal>&lt;cache:annotation-driven/&gt;</literal>
-			settings</title>
+			<title>Cache annotation settings</title>
 
-			<tgroup cols="3">
+			<tgroup cols="4">
 			<thead>
 				<row>
-				<entry>Attribute</entry>
+				<entry>XML Attribute</entry>
+
+				<entry>Annotation Attribute</entry>
 
 				<entry>Default</entry>
 
@@ -305,6 +316,7 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 			<tbody>
 				<row>
 				<entry><literal>cache-manager</literal></entry>
+				<entry>N/A (See <literal>CachingConfigurer</literal> Javadoc)</entry>
 
 				<entry>cacheManager</entry>
 
@@ -315,6 +327,7 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 				</row>
 
 				<row>
+				<entry><literal>mode</literal></entry>
 				<entry><literal>mode</literal></entry>
 
 				<entry>proxy</entry>
@@ -334,6 +347,7 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 
 				<row>
 				<entry><literal>proxy-target-class</literal></entry>
+				<entry><literal>proxyTargetClass</literal></entry>
 
 				<entry>false</entry>
 
@@ -350,6 +364,7 @@ public Book importBooks(String deposit, Date date)]]></programlisting>
 				</row>
 
 				<row>
+				<entry><literal>order</literal></entry>
 				<entry><literal>order</literal></entry>
 
 				<entry>Ordered.LOWEST_PRECEDENCE</entry>

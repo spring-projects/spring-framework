@@ -433,7 +433,6 @@ public class JmxTestBean implements IJmxTestBean {
       <emphasis>must</emphasis> be configured with an implementation instance
       of the <classname>JmxAttributeSource</classname> interface for it to
       function correctly (there is <emphasis>no</emphasis> default).</para>
-
       <para>To mark a bean for export to JMX, you should annotate the bean
       class with the <classname>ManagedResource</classname> annotation. Each
       method you wish to expose as an operation must be marked with the
@@ -1076,21 +1075,31 @@ public class AnnotationTestBean implements IJmxTestBean {
     </section>
 
     <section id="jmx-context-mbeanexport">
-      <title>The <literal>&lt;context:mbean-export/&gt;</literal> element</title>
-      <para>If you are using at least Java 5, then a convenience subclass of
+      <title>Configuring annotation based MBean export</title>
+      <para>If you prefer using <link linkend="jmx-interface-metadata">the annotation based
+      approach</link> to define your management interfaces, then a convenience subclass of
       <classname>MBeanExporter</classname> is available:
       <classname>AnnotationMBeanExporter</classname>.
       When defining an instance of this subclass, the <literal>namingStrategy</literal>,
       <literal>assembler</literal>, and <literal>attributeSource</literal>
       configuration is no longer needed, since it will always use standard Java
       annotation-based metadata (autodetection is always enabled as well). In fact,
-      an even simpler syntax is supported by Spring's
-      '<literal>context</literal>' namespace.. Rather than defining an
-      <classname>MBeanExporter</classname> bean, just provide this single element:</para>
+      rather than defining an <classname>MBeanExporter</classname> bean, an even
+      simpler syntax is supported by the <interfacename>@EnableMBeanExport</interfacename>
+      <interfacename>@Configuration</interfacename> annotation.</para>
+
+      <programlisting language="java">@Configuration
+@EnableMBeanExport
+public class AppConfig {
+
+}</programlisting>
+
+      <para>If you prefer XML based configuration the '<literal>context:mbean-export'</literal>
+      element serves the same purpose.</para>
 
       <programlisting language="xml"><![CDATA[<context:mbean-export/>]]></programlisting>
 
-      <para>You can provide a reference to a particular MBean server if
+      <para>You can provide a reference to a particular MBean <literal>server</literal> if
       necessary, and the <literal>defaultDomain</literal> attribute
       (a property of <classname>AnnotationMBeanExporter</classname>)
       accepts an alternate value for the generated MBean
@@ -1100,7 +1109,13 @@ public class AnnotationTestBean implements IJmxTestBean {
       <link linkend="jmx-naming-metadata"><classname>MetadataNamingStrategy</classname></link>.
       </para>
 
-      <programlisting language="xml"><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>.
+      <programlisting language="java">@EnableMBeanExport(server="myMBeanServer", defaultDomain="myDomain")
+@Configuration
+ContextConfiguration {
+
+}</programlisting>
+
+      <programlisting language="xml"><![CDATA[<context:mbean-export server="myMBeanServer" default-domain="myDomain"/>]]></programlisting>
 
       <note>
         <para>Do not use interface-based AOP proxies in combination with autodetection of

@@ -4560,8 +4560,8 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
 		<interfacename>@EnableWebMvc</interfacename> to one of your 
 		<interfacename>@Configuration</interfacename> classes:</para>
 
-		<programlisting language="java">@EnableWebMvc
-@Configuration
+		<programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig {
 
 }</programlisting>
@@ -4702,8 +4702,8 @@ public class WebConfig {
 		methods to override. See <interfacename>WebMvcConifgurer</interfacename> for 
 		a list of all methods and the Javadoc for further details:</para>
 		
-		<programlisting language="java">@EnableWebMvc
-@Configuration
+		<programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
 
   @Override
@@ -4753,8 +4753,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
       <para>An example of registering interceptors in Java:</para>
 
-      <programlisting language="java">@EnableWebMvc
-@Configuration
+      <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
@@ -4799,8 +4799,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
       <para>An example of customizing content negotiation in Java:</para>
 
-      <programlisting language="java">@EnableWebMvc
-@Configuration
+      <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
 
   @Override
@@ -4839,8 +4839,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <para>An example of forwarding a request for <literal>"/"</literal>
       to a view called <literal>"home"</literal> in Java:</para>
 
-      <programlisting language="java">@EnableWebMvc
-@Configuration
+      <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
@@ -4875,8 +4875,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <code>/resources/**</code> from a <code>public-resources</code>
       directory within the web application root you would use:</para>
 
-	  <programlisting language="java">@EnableWebMvc
-@Configuration
+	  <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
@@ -4894,8 +4894,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       maximum use of the browser cache and a reduction in HTTP requests made
       by the browser:</para>
 
-	  <programlisting language="java">@EnableWebMvc
-@Configuration
+	  <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
@@ -4972,8 +4972,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       annotation and then inject the <classname>Environment</classname> 
       abstraction for access to all defined properties:</para>
       
-      	  <programlisting language="java">@EnableWebMvc
-@Configuration
+      <programlisting language="java">@Configuration
+@EnableWebMvc
 @PropertySource("/WEB-INF/spring/application.properties")
 public class WebConfig extends WebMvcConfigurerAdapter {
 
@@ -5020,8 +5020,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
       <para>To enable the feature using the default setup use:</para>
 
-	  <programlisting language="java">@EnableWebMvc
-@Configuration
+	  <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override
@@ -5047,8 +5047,8 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       the default Servlet name is unknown, then the default Servlet's name
       must be explicitly provided as in the following example:</para>
 
-	  <programlisting language="java">@EnableWebMvc
-@Configuration
+	  <programlisting language="java">@Configuration
+@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter {
       
   @Override

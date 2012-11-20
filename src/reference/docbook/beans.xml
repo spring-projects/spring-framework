@@ -953,18 +953,25 @@ List userList = service.getUsernameList();
   <section id="context-load-time-weaver">
     <title>Registering a <interfacename>LoadTimeWeaver</interfacename></title>
 
-    <para>The <literal>context</literal> namespace introduced in Spring 2.5
-      provides a <literal>load-time-weaver</literal>
-      element.<!--Need to explain purpose of LoadTimeWeaver? Is this section ok here? --></para>
+    <para>The <interfacename>LoadTimeWeaver</interfacename> is used by Spring to dynamically
+    transform classes as they are loaded into the Java virtual machine (JVM).</para>
+
+    <para>To enable load-time weaving add the <interfacename>@EnableLoadTimeWeaving</interfacename>
+    to one of your <interfacename>@Configuration</interfacename> classes:</para>
+
+    <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig {
+
+}</programlisting>
+
+    <para>Alternatively for XML configuration use the  <literal>context:load-time-weaver</literal> element:</para>
 
     <programlisting language="xml">&lt;beans&gt;
-
      &lt;context:load-time-weaver/&gt;
-
 &lt;/beans&gt;</programlisting>
 
-    <para>Adding this element to an XML-based Spring configuration file
-      activates a Spring <interfacename>LoadTimeWeaver</interfacename> for the
+    <para>Once configured for the
       <interfacename>ApplicationContext</interfacename>. Any bean within that
       <interfacename>ApplicationContext</interfacename> may implement
       <interfacename>LoadTimeWeaverAware</interfacename>, thereby receiving a

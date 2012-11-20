@@ -327,27 +327,46 @@
       automatically generate a proxy for that bean to intercept method
       invocations and ensure that advice is executed as needed.</para>
 
-      <para>The @AspectJ support is enabled by including the following element
-      inside your spring configuration:</para>
+      <para>The @AspectJ support can be enabled with XML or Java style
+      configuration.  In either case you will also need to ensure that
+      AspectJ's <filename class="libraryfile">aspectjrt.jar</filename>
+      library is on the classpath of your application (version 1.6.8 or later).
+      This library is available in the <filename class="directory">'lib'</filename>
+      directory of an AspectJ distribution or via the Maven Central repository.</para>
 
-      <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;</programlisting>
+      <section id="aop-enable-aspectj-java">
+        <title>Enabling @AspectJ Support with Java configuration</title>
 
-      <para>This assumes that you are using schema support as described in
-      <xref linkend="xsd-config" />. See <xref
-      linkend="xsd-config-body-schemas-aop" /> for how to import the tags in
-      the aop namespace.</para>
+        <para>To enable @AspectJ support with Java
+        <interfacename>@Configuration</interfacename> add the
+        <interfacename>@EnableAspectJAutoProxy</interfacename> annotation:</para>
 
-      <para>If you are using the DTD, it is still possible to enable @AspectJ
-      support by adding the following definition to your application
-      context:</para>
+        <programlisting language="java">@Configuration
+@EnableAspectJAutoProxy
+public class AppConfig {
 
-      <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
+}</programlisting>
+      </section>
 
-      <para>You will also need AspectJ's
-      <filename class="libraryfile">aspectjrt.jar</filename> library on the
-      classpath of your application, version 1.6.8 or later. This library is
-      available in the <filename class="directory">'lib'</filename> directory
-      of an AspectJ distribution or via the Maven Central repository.</para>
+      <section id="aop-enable-aspectj-xml">
+        <title>Enabling @AspectJ Support with XML configuration</title>
+
+        <para>To enable @AspectJ support with XML based configuration use the
+        <literal>aop:aspectj-autoproxy</literal> element:</para>
+
+        <programlisting language="xml">&lt;aop:aspectj-autoproxy/&gt;</programlisting>
+
+        <para>This assumes that you are using schema support as described in
+        <xref linkend="xsd-config" />. See <xref
+        linkend="xsd-config-body-schemas-aop" /> for how to import the tags in
+        the aop namespace.</para>
+
+        <para>If you are using the DTD, it is still possible to enable @AspectJ
+        support by adding the following definition to your application
+        context:</para>
+
+        <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
+      </section>
     </section>
 
     <section id="aop-at-aspectj">
@@ -2929,10 +2948,21 @@ public class Account {
       linkend="aop-aj-ltw"/>). The
       <classname>AnnotationBeanConfigurerAspect</classname> itself needs
       configuring by Spring (in order to obtain a reference to the bean
-      factory that is to be used to configure new objects). The Spring <link
+      factory that is to be used to configure new objects). If you are
+      using Java based configuration simply add
+      <interfacename>@EnableSpringConfigured</interfacename> to any
+      <interfacename>@Configuration</interfacename> class.</para>
+
+      <programlisting language="java">@Configuration
+@EnableSpringConfigured
+public class AppConfig {
+
+}</programlisting>
+
+      <para>If you prefer XML based configuration, the Spring <link
       linkend="xsd-config-body-schemas-context"><literal>context</literal>
-      namespace</link> defines a convenient tag for doing this: just include
-      the following in your application context configuration:</para>
+      namespace</link> defines a convenient
+      <literal>context:spring-configured</literal> element:</para>
 
       <programlisting language="xml">&lt;context:spring-configured/&gt;</programlisting>
 
@@ -3000,7 +3030,7 @@ public class Account {
         there is one aspect instance per classloader that defines the type.
         This means that if you define multiple application contexts within the
         same classloader hierarchy you need to consider where to define the
-        <literal>&lt;context:spring-configured/&gt;</literal> bean and where to
+        <interfacename>@EnableSpringConfigured</interfacename> bean and where to
         place <filename class="libraryfile">spring-aspects.jar</filename> on
         the classpath.</para>
 
@@ -3011,7 +3041,7 @@ public class Account {
         these contexts will co-exist within the same classloader hierarchy,
         and so the <literal>AnnotationBeanConfigurerAspect</literal> can only
         hold a reference to one of them. In this case we recommend defining
-        the <literal>&lt;context:spring-configured/&gt;</literal> bean in the
+        the <interfacename>@EnableSpringConfigured</interfacename> bean in the
         shared (parent) application context: this defines the services that
         you are likely to want to inject into domain objects. A consequence is
         that you cannot configure domain objects with references to beans
@@ -3198,6 +3228,16 @@ public class Account {
         quickly get some performance metrics, so that we can then apply a
         finer-grained profiling tool to that specific area immediately
         afterwards.</para>
+
+        <note>
+          <para>The example presented here uses XML style configuration, it is
+          also possible to configure and use @AspectJ with
+          <link linkend="beans-java">Java Configuration</link>.
+          Specifically the <interfacename>@EnableLoadTimeWeaving</interfacename>
+          annotation can be used as an alternative to
+          <literal>&lt;context:load-time-weaver/&gt;</literal>
+          (see <link linkend="aop-aj-ltw-spring">below</link> for details).</para>
+        </note>
 
         <para>Here is the profiling aspect. Nothing too fancy, just a
         quick-and-dirty time-based profiler, using the @AspectJ-style of
@@ -3477,7 +3517,7 @@ public final class Main {
         </tip>
 
         <para>Configuring a <interfacename>LoadTimeWeaver</interfacename>
-        using XML for a particular
+        for a particular
         <interfacename>ApplicationContext</interfacename> can be as easy as
         adding one line. (Please note that you almost certainly will need to
         be using an <interfacename>ApplicationContext</interfacename> as your
@@ -3489,9 +3529,17 @@ public final class Main {
         <para>To enable the Spring Framework's LTW support, you need to
         configure a <interfacename>LoadTimeWeaver</interfacename>, which
         typically is done using the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
-        below a valid <literal>&lt;context:load-time-weaver/&gt;</literal>
-        definition that uses default settings.</para>
+        <interfacename>@EnableLoadTimeWeaving</interfacename> annotation.</para>
+
+        <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig {
+
+}</programlisting>
+
+        <para>Alternatively, if you prefer XML based configuration, use the
+        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Note
+        that the element is defined in the '<literal>context</literal>' namespace.</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
@@ -3507,19 +3555,11 @@ http://www.springframework.org/schema/context
 
 &lt;/beans&gt;</programlisting>
 
-        <para>The above <literal>&lt;context:load-time-weaver/&gt;</literal>
-        bean definition will define and register a number of LTW-specific
-        infrastructure beans for you automatically, such as a
-        <interfacename>LoadTimeWeaver</interfacename> and an
-        <classname>AspectJWeavingEnabler</classname>. Notice how the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> is defined in the
-        '<literal>context</literal>' namespace; note also that the referenced
-        XML Schema file is only available in versions of Spring 2.5 and
-        later.</para>
-
-        <para>What the above configuration does is define and register a
-        default <interfacename>LoadTimeWeaver</interfacename> bean for you.
-        The default <interfacename>LoadTimeWeaver</interfacename> is the
+        <para>The above configuration will define and register a number of
+        LTW-specific infrastructure beans for you automatically, such
+        as a <interfacename>LoadTimeWeaver</interfacename> and an
+        <classname>AspectJWeavingEnabler</classname>.  The default
+        <interfacename>LoadTimeWeaver</interfacename> is the
         <classname>DefaultContextLoadTimeWeaver</classname> class, which
         attempts to decorate an automatically detected
         <interfacename>LoadTimeWeaver</interfacename>: the exact type of
@@ -3595,12 +3635,26 @@ http://www.springframework.org/schema/context
         when using the <classname>DefaultContextLoadTimeWeaver</classname>: it
         is of course possible to specify exactly which
         <interfacename>LoadTimeWeaver</interfacename> implementation that you
-        wish to use by specifying the fully-qualified classname as the value
-        of the '<literal>weaver-class</literal>' attribute of the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element. Find
-        below an example of doing just that:</para>
+        wish to use.</para>
 
-        <!-- removed <emphasis> below to solve NPE problem -->
+        <para>To specify a specific <interfacename>LoadTimeWeaver</interfacename>
+        with Java configuration implement the
+        <interfacename>LoadTimeWeavingConfigurer</interfacename> interface and override
+        the <literal>getLoadTimeWeaver()</literal> method:</para>
+
+        <programlisting language="java">@Configuration
+@EnableLoadTimeWeaving
+public class AppConfig implements LoadTimeWeavingConfigurer {
+    @Override
+    public LoadTimeWeaver getLoadTimeWeaver() {
+        return new ReflectiveLoadTimeWeaver();
+    }
+}</programlisting>
+
+        <para>If you are using XML based configuration you can specify the fully-qualified
+        classname as the value of the '<literal>weaver-class</literal>' attribute on the
+        <literal>&lt;context:load-time-weaver/&gt;</literal> element:</para>
+
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3617,8 +3671,7 @@ http://www.springframework.org/schema/context
 &lt;/beans&gt;</programlisting>
 
         <para>The <interfacename>LoadTimeWeaver</interfacename> that is
-        defined and registered by the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> element can be
+        defined and registered by the configuration can be
         later retrieved from the Spring container using the well-known name
         '<literal>loadTimeWeaver</literal>'. Remember that the
         <interfacename>LoadTimeWeaver</interfacename> exists just as a
@@ -3632,41 +3685,45 @@ http://www.springframework.org/schema/context
         details, because the specifics of how the weaving is actually effected
         is beyond the scope of this section.</para>
 
-        <para>There is one final attribute of the
-        <literal>&lt;context:load-time-weaver/&gt;</literal> left to discuss:
-        the '<literal>aspectj-weaving</literal>' attribute. This is a simple
+        <para>There is one final attribute of the configuration left to discuss:
+        the '<literal>aspectjWeaving</literal>' attribute
+        (or '<literal>aspectj-weaving</literal>' if you are using XML). This is a simple
         attribute that controls whether LTW is enabled or not, it is as simple
         as that. It accepts one of three possible values, summarised below,
-        with the default value if the attribute is not present being '
-        <literal>autodetect</literal>'</para>
+        with the default value if the attribute is not present being
+        '<literal>autodetect</literal>'</para>
 
         <table id="aop-aj-ltw-ltw-tag-attrs" pgwide="1">
-          <title>'<literal>aspectj-weaving</literal>' attribute values</title>
+          <title>AspectJ weaving attribute values</title>
 
-          <tgroup cols="2">
+          <tgroup cols="3">
             <colspec align="left" />
 
             <thead>
               <row>
-                <entry>Attribute Value</entry>
+                <entry>Annotation Value</entry>
+                <entry>XML Value</entry>
                 <entry>Explanation</entry>
               </row>
             </thead>
 
             <tbody>
               <row>
+                <entry><para><literal>ENABLED</literal></para></entry>
                 <entry><para><literal>on</literal></para></entry>
                 <entry><para>AspectJ weaving is on, and aspects will be woven
                 at load-time as appropriate.</para></entry>
               </row>
 
               <row>
+                <entry><para><literal>DISABLED</literal></para></entry>
                 <entry><para><literal>off</literal></para></entry>
                 <entry><para>LTW is off... no aspect will be woven at
                 load-time.</para></entry>
               </row>
 
               <row>
+                <entry><para><literal>AUTODETECT</literal></para></entry>
                 <entry><para><literal>autodetect</literal></para></entry>
                 <entry><para>If the Spring LTW infrastructure can find at
                 least one '<filename>META-INF/aop.xml</filename>' file, then
@@ -3809,7 +3866,7 @@ TR: REVISED, PLS REVIEW. Chnaged the last one to *inside*--> is recommended
           Oracle Containers for Java EE (OC4J 10.1.3.1 and above), Resin (3.1 and above) and JBoss (5.x or above)
           provide a ClassLoader that is capable of local instrumentation.
           Spring's native LTW leverages such ClassLoaders to enable AspectJ weaving.
-          You can enable LTW by simply activating <literal>context:load-time-weaver</literal>
+          You can enable LTW by simply activating load-time weaving
           as described earlier. Specifically, you do <emphasis>not</emphasis>
           need to modify the launch script to add
           <literal>-javaagent:path/to/spring-instrument.jar</literal>.</para>
