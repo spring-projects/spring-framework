@@ -41,6 +41,7 @@ public class DeferredResultMethodReturnValueHandler implements HandlerMethodRetu
 			NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
+			mavContainer.setRequestHandled(true);
 			return;
 		}
 

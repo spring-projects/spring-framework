@@ -49,6 +49,7 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 			NativeWebRequest webRequest) throws Exception {
 
 		if (returnValue == null) {
+			mavContainer.setRequestHandled(true);
 			return;
 		}
 
