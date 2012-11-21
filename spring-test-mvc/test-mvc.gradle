@@ -1,2 +1,0 @@
-ext.mergeIntoProject = project(':spring-test')
-apply from: "${rootProject.projectDir}/merge-dist.gradle"

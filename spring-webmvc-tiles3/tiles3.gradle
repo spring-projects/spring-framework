@@ -1,2 +1,0 @@
-ext.mergeIntoProject = project(':spring-webmvc')
-apply from: "${rootProject.projectDir}/merge-dist.gradle"

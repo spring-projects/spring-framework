@@ -21,6 +21,7 @@ configure(allprojects) {
     ext.hsqldbVersion='1.8.0.10'
     ext.junitVersion = '4.11.20120805.1225' // temporary use of snapshot; spring-test
                                             // still builds against on 4.10
+    ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
     [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
@@ -55,7 +56,7 @@ configure(subprojects - project(":spring-test")) {
 }
 
 configure(subprojects) { subproject ->
-    apply from: "${rootProject.projectDir}/publish-maven.gradle"
+    apply from: "${gradleScriptDir}/publish-maven.gradle"
 
     jar {
         manifest.attributes['Created-By'] =
@@ -505,7 +506,8 @@ project('spring-webmvc') {
 
 project('spring-webmvc-tiles3') {
     description = 'Spring Framework Tiles3 Integration'
-    apply from: 'tiles3.gradle'
+    ext.mergeIntoProject = project(':spring-webmvc')
+    apply from: "${gradleScriptDir}/merge-artifacts.gradle"
     dependencies {
         compile project(":spring-context")
         compile project(":spring-webmvc").sourceSets.main.output
@@ -572,7 +574,8 @@ project('spring-test') {
 
 project('spring-test-mvc') {
     description = 'Spring Test MVC Framework'
-    apply from: 'test-mvc.gradle'
+    ext.mergeIntoProject = project(':spring-test')
+    apply from: "${gradleScriptDir}/merge-artifacts.gradle"
     dependencies {
         compile project(":spring-context")
         compile project(":spring-webmvc")

@@ -1,22 +1,22 @@
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
 
 /**
- * Will merge the distributions of the current project into mergeIntoProject. For
- * example, to bundle spring-test-mvc in spring-test's jars. This script will perform the
- * following steps:
- * <ul>
- *   <li>Ensure that jar tasks of the project being merged from will execute the tasks of
- *     the project being merged into</li>
- *   <li>Add the project being merged into to the classpath of the project being merged
- *     from</li>
- *   <li>Update the pom.xml of the project being merged into to contain the entries from
- *     the project being merged from</li>
- * </ul>
+ * Will merge the artifacts of the current project into mergeIntoProject. For example, to
+ * bundle spring-test-mvc in spring-test's jars. This script will perform the following
+ * steps:
+ *
+ * - Ensure that jar tasks of the project being merged from will execute the tasks of the
+ *   project being merged into
+ *
+ * - Add the project being merged into to the classpath of the project being merged from
+ *
+ * - Update the pom.xml of the project being merged into to contain the entries from the
+ *   project being merged from
  *
  * Example Usage:
  *
- * ext.mergeIntoProject = project(':spring-test')
- * apply from: "${rootProject.projectDir}/merge-dist.gradle"
+ *   ext.mergeIntoProject = project(':spring-test')
+ *   apply from: "${rootProject.projectDir}/gradle/merge-artifacts.gradle"
  */
 
 def mergeFromProject = project
