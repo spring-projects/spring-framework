@@ -250,7 +250,7 @@
 
 	The latter two are similar to PicoContainer and make bean factories simple to
 	configure for small namespaces, but doesn't work as well as standard Spring
-	behaviour for bigger applications.
+	behavior for bigger applications.
 
 	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
 	always override autowiring. Autowire behavior can be combined with dependency

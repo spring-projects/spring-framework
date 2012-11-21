@@ -33,7 +33,7 @@
 
 	<para>At its core, the abstraction applies caching to Java methods, reducing thus the number of executions based on the
 	information available in the cache. That is, each time a <emphasis>targeted</emphasis> method is invoked, the abstraction
-	will apply a caching behaviour checking whether the method has been already executed for the given arguments. If it has,
+	will apply a caching behavior checking whether the method has been already executed for the given arguments. If it has,
 	then the cached result is returned without having to execute the actual method; if it has not, then method is executed, the
 	result cached and returned to the user so that, the next time the method is invoked, the cached result is returned.
 	This way, expensive methods (whether CPU or IO bound) can be executed only once for a given set of parameters and the result
@@ -227,8 +227,8 @@ public Book findBook(String name)]]></programlisting>
 		be executed and its result placed into the cache (according to the <literal>@CachePut</literal> options). It supports the same options as <literal>@Cacheable</literal> and should be used
 		for cache population rather then method flow optimization.</para>
 
-		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generally discouraged because they have different behaviours. While the latter
-		causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behaviour and with the exception of specific
+		<para>Note that using <literal>@CachePut</literal> and <literal>@Cacheable</literal> annotations on the same method is generally discouraged because they have different behaviors. While the latter
+		causes the method execution to be skipped by using the cache, the former forces the execution in order to execute a cache update. This leads to unexpected behavior and with the exception of specific
 		corner-cases (such as annotations having conditions that exclude them from each other), such declarations should be avoided.</para>
 	</section>
 
@@ -293,7 +293,7 @@ public class AppConfig {
 <![CDATA[</beans>]]></programlisting>
 
 		<para>Both the <literal>cache:annotation-driven</literal> element and <interfacename>@EnableCaching</interfacename> annotation allow various options to be specified that influence the way the
-		caching behaviour is added to the application through AOP. The configuration is intentionally similar
+		caching behavior is added to the application through AOP. The configuration is intentionally similar
 		with that of <link linkend="tx-annotation-driven-settings"><interfacename>@Transactional</interfacename></link>:
 		</para>
 
@@ -462,7 +462,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]></programlisting>
 
 		<para>Even though <literal>@SlowService</literal> is not a Spring annotation, the container automatically picks up its declaration at runtime and understands its meaning. Note that as
-		mentioned <link linkend="cache-annotation-enable">above</link>, the annotation-driven behaviour needs to be enabled.</para>
+		mentioned <link linkend="cache-annotation-enable">above</link>, the annotation-driven behavior needs to be enabled.</para>
 	</section>
 	</section>
 
@@ -484,7 +484,7 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 	</cache:caching>
 </cache:advice>
 
-<!-- apply the cacheable behaviour to all BookService interfaces -->
+<!-- apply the cacheable behavior to all BookService interfaces -->
 <aop:config>
 	<aop:advisor advice-ref="cacheAdvice" pointcut="execution(* x.y.BookService.*(..))"/>
 </aop:config>

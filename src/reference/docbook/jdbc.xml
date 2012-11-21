@@ -2950,7 +2950,7 @@ public class DataAccessUnitTestTemplate {
       used the scripts are executed in lexical order of their URL or
       filename.</para>
 
-      <para>The default behaviour of the database initializer is to
+      <para>The default behavior of the database initializer is to
       unconditionally execute the scripts provided. This will not always be
       what you want, for instance if running against an existing database that
       already has test data in it. The likelihood of accidentally deleting
@@ -3049,7 +3049,7 @@ public class DataAccessUnitTestTemplate {
         <para>The second option can also be easy. Some suggestions on how to
         implement this are<itemizedlist>
             <listitem>
-              <para>Rely on Spring BeanFactory default behaviour, which is
+              <para>Rely on Spring BeanFactory default behavior, which is
               that beans are initialized in registration order. You can easily
               arrange that by adopting the common practice of a set of
               &lt;import/&gt; elements that order your application modules,

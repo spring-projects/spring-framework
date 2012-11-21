@@ -3565,7 +3565,7 @@ http://www.springframework.org/schema/context
         <interfacename>LoadTimeWeaver</interfacename>: the exact type of
         <interfacename>LoadTimeWeaver</interfacename> that will be
         'automatically detected' is dependent upon your runtime environment
-        (summarised in the following table).</para>
+        (summarized in the following table).</para>
 
         <table id="aop-aj-ltw-spring-env-impls" pgwide="1">
           <title><classname>DefaultContextLoadTimeWeaver</classname>
@@ -3689,7 +3689,7 @@ http://www.springframework.org/schema/context
         the '<literal>aspectjWeaving</literal>' attribute
         (or '<literal>aspectj-weaving</literal>' if you are using XML). This is a simple
         attribute that controls whether LTW is enabled or not, it is as simple
-        as that. It accepts one of three possible values, summarised below,
+        as that. It accepts one of three possible values, summarized below,
         with the default value if the attribute is not present being
         '<literal>autodetect</literal>'</para>
 
