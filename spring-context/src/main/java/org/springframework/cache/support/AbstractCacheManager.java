@@ -42,10 +42,11 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>();
 
 	private Set<String> cacheNames = new LinkedHashSet<String>();
-
+	
+	private boolean gracefullyHandleExceptions;
 
 	public void afterPropertiesSet() {
-		Collection<? extends Cache> caches = loadCaches();
+		Collection<? extends Cache> caches = loadPreparedCaches();
 		Assert.notEmpty(caches, "loadCaches must not return an empty Collection");
 		this.cacheMap.clear();
 
@@ -68,12 +69,31 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	public Collection<String> getCacheNames() {
 		return Collections.unmodifiableSet(this.cacheNames);
 	}
-
-
+	
+	private Collection<? extends Cache> loadPreparedCaches() {
+		Collection<? extends Cache> caches = loadCaches();
+		
+		if(this.gracefullyHandleExceptions) {
+			Collection<Cache> failSafeCaches = new LinkedHashSet<Cache>(caches.size());
+			for(Cache cache : caches) {
+				failSafeCaches.add(new FailSafeCache(cache));
+			}
+			caches = failSafeCaches;
+		}
+		return caches;
+	}
+	
 	/**
 	 * Load the caches for this cache manager. Occurs at startup.
 	 * The returned collection must not be null.
 	 */
 	protected abstract Collection<? extends Cache> loadCaches();
 
+	public boolean isGracefullyHandleExceptions() {
+		return this.gracefullyHandleExceptions;
+	}
+
+	public void setGracefullyHandleExceptions(boolean gracefullyHandleExceptions) {
+		this.gracefullyHandleExceptions = gracefullyHandleExceptions;
+	}
 }
