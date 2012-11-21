@@ -1,0 +1,19 @@
+apply plugin: 'eclipse'
+
+task cleanEclipseJdtUi(type: Delete) {
+	delete project.file('.settings/org.eclipse.jdt.ui.prefs');
+}
+
+task eclipseJdtUi(type: Copy) {
+    from rootProject.file('src/eclipse/org.eclipse.jdt.ui.prefs')
+	into project.file('.settings/')
+}
+
+task eclipseJdtPrepare(type: Copy) {
+    from rootProject.file('src/eclipse/org.eclipse.jdt.core.prefs')
+	into project.file('.settings/')
+}
+
+tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
+tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
+tasks["eclipse"].dependsOn(eclipseJdtUi)

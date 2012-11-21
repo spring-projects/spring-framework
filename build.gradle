@@ -55,6 +55,7 @@ configure(subprojects - project(":spring-test")) {
 }
 
 configure(subprojects) { subproject ->
+    apply from: "${rootProject.projectDir}/eclipse.gradle"
     apply from: "${rootProject.projectDir}/publish-maven.gradle"
 
     jar {
