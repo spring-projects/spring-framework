@@ -59,7 +59,7 @@
 
 <beans>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <para>The equivalent file in the XML Schema-style would be...</para>
@@ -70,7 +70,7 @@
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <note>
@@ -109,7 +109,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <section id="xsd-config-body-schemas-util-constant">
@@ -480,7 +480,7 @@ public class Client {
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <section id="xsd-config-body-schemas-jee-jndi-lookup">
@@ -639,7 +639,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
         </section>
@@ -664,7 +664,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
         </section>
@@ -698,7 +698,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 ]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd</emphasis><![CDATA[
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <note>
@@ -727,7 +727,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
         </section>
@@ -747,7 +747,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 ]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"</emphasis><![CDATA[>
 
-]]><lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation><![CDATA[
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
 </beans>]]></programlisting>
             <note>
