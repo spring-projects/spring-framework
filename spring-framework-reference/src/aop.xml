@@ -344,7 +344,7 @@
       <programlisting language="xml">&lt;bean class="org.springframework.aop.aspectj.annotation.AnnotationAwareAspectJAutoProxyCreator" /&gt;</programlisting>
 
       <para>You will also need AspectJ's
-      <filename class="libraryfile">aspectjrt.jar</filename> library on the
+      <filename class="libraryfile">aspectjweaver.jar</filename> library on the
       classpath of your application, version 1.6.8 or later. This library is
       available in the <filename class="directory">'lib'</filename> directory
       of an AspectJ distribution or via the Maven Central repository.</para>
