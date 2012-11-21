@@ -371,8 +371,13 @@ public abstract class GenericTypeResolver {
 	 * @return the type if it resolves to a Class, or <code>Object.class</code> otherwise
 	 */
 	public static Class<?> resolveType(Type genericType, Map<TypeVariable, Type> typeVariableMap) {
-		Type rawType = getRawType(genericType, typeVariableMap);
-		return (rawType instanceof Class ? (Class) rawType : Object.class);
+		Type resolvedType = getRawType(genericType, typeVariableMap);
+		if (resolvedType instanceof GenericArrayType) {
+			Type componentType = ((GenericArrayType) resolvedType).getGenericComponentType();
+			Class<?> componentClass = resolveType(componentType, typeVariableMap);
+			resolvedType = Array.newInstance(componentClass, 0).getClass();
+		}
+		return (resolvedType instanceof Class ? (Class) resolvedType : Object.class);
 	}
 
 	/**

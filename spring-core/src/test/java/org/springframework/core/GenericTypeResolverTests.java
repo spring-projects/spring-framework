@@ -17,6 +17,8 @@
 package org.springframework.core;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -128,6 +130,27 @@ public class GenericTypeResolverTests {
 		assertEquals(Object.class, resolveReturnTypeForGenericMethod(extractMagicValue, new Object[] { map }));
 	}
 
+    /**
+     * @since 3.2
+     */
+    @Test
+    public void testResolveType() {
+            Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
+            MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
+            assertEquals(MyInterfaceType.class,
+                            resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+
+            Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage", MyInterfaceType[].class);
+            MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
+            assertEquals(MyInterfaceType[].class,
+                            resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+
+            Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage", Object[].class);
+            MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
+            Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
+            assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
+    }
+
 
 	public interface MyInterfaceType<T> {
 	}
@@ -147,7 +170,7 @@ public class GenericTypeResolverTests {
 	public class MyCollectionSuperclassType extends MySuperclassType<Collection<String>> {
 	}
 
-	public static class MyTypeWithMethods {
+	public static class MyTypeWithMethods<T> {
 		public MyInterfaceType<Integer> integer() { return null; }
 		public MySimpleInterfaceType string() { return null; }
 		public Object object() { return null; }
@@ -166,7 +189,7 @@ public class GenericTypeResolverTests {
 
 		/**
 		 * Similar to {@link #createProxy(Object)} but adds an additional argument
-		 * before the argument of type {@code T}. Note that they may potentially 
+		 * before the argument of type {@code T}. Note that they may potentially
 		 * be of the same time when invoked!
 		 */
 		public static <T> T createNamedProxy(String name, T object) {
@@ -181,7 +204,7 @@ public class GenericTypeResolverTests {
 		}
 
 		/**
-		 * Similar to {@link #createMock(Class)} but adds an additional method 
+		 * Similar to {@link #createMock(Class)} but adds an additional method
 		 * argument before the parameterized argument.
 		 */
 		public static <T> T createNamedMock(String name, Class<T> toMock) {
@@ -211,6 +234,17 @@ public class GenericTypeResolverTests {
 			return null;
 		}
 
+        public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
+        }
+
+        public void readIntegerArrayInputMessage(MyInterfaceType<Integer>[] message) {
+        }
+
+        public void readGenericArrayInputMessage(T[] message) {
+        }
+	}
+
+	public static class MySimpleTypeWithMethods extends MyTypeWithMethods<Integer> {
 	}
 
 	static class GenericClass<T> {
