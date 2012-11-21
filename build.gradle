@@ -659,6 +659,7 @@ configure(rootProject) {
     description = 'Spring Framework'
 
     apply plugin: 'docbook-reference'
+    apply from: "${gradleScriptDir}/jdiff.gradle"
 
     reference {
         sourceDir = file('src/reference/docbook')
