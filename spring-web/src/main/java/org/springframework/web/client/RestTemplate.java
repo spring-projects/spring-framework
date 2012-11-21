@@ -553,20 +553,17 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				}
 
 				List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
-				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
+				for (HttpMessageConverter<?> converter : getMessageConverters()) {
 					if (responseClass != null) {
-						if (messageConverter.canRead(responseClass, null)) {
-							allSupportedMediaTypes
-									.addAll(getSupportedMediaTypes(messageConverter));
+						if (converter.canRead(responseClass, null)) {
+							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
 					}
-					else if (messageConverter instanceof GenericHttpMessageConverter) {
+					else if (converter instanceof GenericHttpMessageConverter) {
 
-						GenericHttpMessageConverter genericMessageConverter =
-								(GenericHttpMessageConverter) messageConverter;
-						if (genericMessageConverter.canRead(responseType, null)) {
-							allSupportedMediaTypes
-									.addAll(getSupportedMediaTypes(messageConverter));
+						GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+						if (genericConverter.canRead(responseType, null, null)) {
+							allSupportedMediaTypes.addAll(getSupportedMediaTypes(converter));
 						}
 					}
 

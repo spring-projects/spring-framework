@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -35,6 +37,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -58,6 +61,8 @@ public class HttpEntityMethodProcessorTests {
 
 	private MockHttpServletRequest servletRequest;
 
+	private WebDataBinderFactory binderFactory;
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -70,6 +75,8 @@ public class HttpEntityMethodProcessorTests {
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+
+		binderFactory = new ValidatingBinderFactory();
 	}
 
 	@Test
@@ -84,7 +91,7 @@ public class HttpEntityMethodProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>) processor.resolveArgument(
-				paramSimpleBean, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramSimpleBean, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getBody().getName());
@@ -102,27 +109,68 @@ public class HttpEntityMethodProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		HttpEntity<List<SimpleBean>> result = (HttpEntity<List<SimpleBean>>) processor.resolveArgument(
-				paramList, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramList, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getBody().get(0).getName());
 		assertEquals("Robert", result.getBody().get(1).getName());
 	}
 
+	@Test
+	public void resolveArgumentTypeVariable() throws Exception {
+
+		Method method = MySimpleParameterizedController.class.getMethod("handleDto", HttpEntity.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+
+		String content = "{\"name\" : \"Jad\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+
+		@SuppressWarnings("unchecked")
+		HttpEntity<SimpleBean> result = (HttpEntity<SimpleBean>) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+
+		assertNotNull(result);
+		assertEquals("Jad", result.getBody().getName());
+	}
 
 	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
 	}
 
+	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+		@SuppressWarnings("unused")
+		public void handleDto(HttpEntity<DTO> dto) {}
+	}
 
-	private static class SimpleBean {
+	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> { }
 
+	private interface Identifiable extends Serializable {
+		public Long getId();
+		public void setId(Long id);
+	}
+
+	@SuppressWarnings({ "serial" })
+	private static class SimpleBean implements Identifiable {
+
+		private Long id;
 		private String name;
+
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
 
 		public String getName() {
 			return name;
 		}
 
-		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}

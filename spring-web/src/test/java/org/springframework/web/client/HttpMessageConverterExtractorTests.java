@@ -176,8 +176,8 @@ public class HttpMessageConverterExtractorTests {
 
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		expect(response.getHeaders()).andReturn(responseHeaders).times(2);
-		expect(converter.canRead(type, contentType)).andReturn(true);
-		expect(converter.read(type, response)).andReturn(expected);
+		expect(converter.canRead(type, null, contentType)).andReturn(true);
+		expect(converter.read(type, null, response)).andReturn(expected);
 
 		replay(response, converter);
 		Object result = extractor.extractData(response);

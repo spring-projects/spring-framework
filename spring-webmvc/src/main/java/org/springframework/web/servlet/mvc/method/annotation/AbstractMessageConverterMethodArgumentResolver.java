@@ -21,16 +21,19 @@ import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
@@ -104,66 +107,50 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	 * @param <T> the expected type of the argument value to be created
 	 * @param inputMessage the HTTP input message representing the current request
 	 * @param methodParam the method argument
-	 * @param paramType the type of the argument value to be created
+	 * @param targetType the type of object to create, not necessarily the same as
+	 * the method parameter type (e.g. for {@code HttpEntity<String>} method
+	 * parameter the target type is String)
 	 * @return the created method argument value
 	 * @throws IOException if the reading from the request fails
 	 * @throws HttpMediaTypeNotSupportedException if no suitable message converter is found
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage,
-			MethodParameter methodParam, Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			MethodParameter methodParam, Type targetType) throws IOException, HttpMediaTypeNotSupportedException {
 
 				MediaType contentType = inputMessage.getHeaders().getContentType();
 				if (contentType == null) {
 					contentType = MediaType.APPLICATION_OCTET_STREAM;
 				}
 
-				Class<T> paramClass = getParamClass(paramType);
+				Class<?> contextClass = methodParam.getDeclaringClass();
+				Map<TypeVariable, Type> map = GenericTypeResolver.getTypeVariableMap(contextClass);
+				Class<T> targetClass = (Class<T>) GenericTypeResolver.resolveType(targetType, map);
 
-				for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-					if (messageConverter instanceof GenericHttpMessageConverter) {
-						GenericHttpMessageConverter genericMessageConverter = (GenericHttpMessageConverter) messageConverter;
-						if (genericMessageConverter.canRead(paramType, contentType)) {
+				for (HttpMessageConverter<?> converter : this.messageConverters) {
+					if (converter instanceof GenericHttpMessageConverter) {
+						GenericHttpMessageConverter genericConverter = (GenericHttpMessageConverter) converter;
+						if (genericConverter.canRead(targetType, contextClass, contentType)) {
 							if (logger.isDebugEnabled()) {
-								logger.debug("Reading [" + paramType + "] as \"" +
-										contentType + "\" using [" + messageConverter + "]");
+								logger.debug("Reading [" + targetType + "] as \"" +
+										contentType + "\" using [" + converter + "]");
 							}
-							return (T) genericMessageConverter.read(paramType, inputMessage);
+							return (T) genericConverter.read(targetType, contextClass, inputMessage);
 						}
 					}
-					if (paramClass != null) {
-						if (messageConverter.canRead(paramClass, contentType)) {
+					if (targetClass != null) {
+						if (converter.canRead(targetClass, contentType)) {
 							if (logger.isDebugEnabled()) {
-								logger.debug("Reading [" + paramClass.getName() + "] as \"" + contentType + "\" using [" +
-										messageConverter + "]");
+								logger.debug("Reading [" + targetClass.getName() + "] as \"" +
+										contentType + "\" using [" + converter + "]");
 							}
-							return ((HttpMessageConverter<T>) messageConverter).read(paramClass, inputMessage);
+							return ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
 						}
 					}
 				}
 
 				throw new HttpMediaTypeNotSupportedException(contentType, allSupportedMediaTypes);
 			}
-
-	private Class getParamClass(Type paramType) {
-		if (paramType instanceof Class) {
-			return (Class) paramType;
-		}
-		else if (paramType instanceof GenericArrayType) {
-			Type componentType = ((GenericArrayType) paramType).getGenericComponentType();
-			if (componentType instanceof Class) {
-				// Surely, there should be a nicer way to determine the array type
-				return Array.newInstance((Class<?>) componentType, 0).getClass();
-			}
-		}
-		else if (paramType instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) paramType;
-			if (parameterizedType.getRawType() instanceof Class) {
-				return (Class) parameterizedType.getRawType();
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Creates a new {@link HttpInputMessage} from the given {@link NativeWebRequest}.

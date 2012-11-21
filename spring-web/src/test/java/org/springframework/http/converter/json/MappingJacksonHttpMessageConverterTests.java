@@ -49,12 +49,12 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 	public void readGenerics() throws IOException {
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter() {
 			@Override
-			protected JavaType getJavaType(Type type) {
+			protected JavaType getJavaType(Type type, Class<?> contextClass) {
 				if (type instanceof Class && List.class.isAssignableFrom((Class<?>)type)) {
 					return TypeFactory.collectionType(ArrayList.class, MyBean.class);
 				}
 				else {
-					return super.getJavaType(type);
+					return super.getJavaType(type, contextClass);
 				}
 			}
 		};
@@ -85,7 +85,7 @@ public class MappingJacksonHttpMessageConverterTests extends AbstractMappingJack
 		inputMessage.getHeaders().setContentType(new MediaType("application", "json"));
 
 		MappingJacksonHttpMessageConverter converter = new MappingJacksonHttpMessageConverter();
-		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), inputMessage);
+		List<MyBean> results = (List<MyBean>) converter.read(beansList.getType(), null, inputMessage);
 		assertEquals(1, results.size());
 		MyBean result = results.get(0);
 		assertEquals("Foo", result.getString());

@@ -86,7 +86,7 @@ public class RestTemplateTests {
 
 		verifyMocks();
 	}
-	
+
 	@Test
 	public void varArgsNullTemplateVariable() throws Exception {
 		expect(requestFactory.createRequest(new URI("http://example.com/-foo"), HttpMethod.GET))
@@ -481,7 +481,7 @@ public class RestTemplateTests {
 
 		verifyMocks();
 	}
-	
+
 	@Test
 	public void postForEntityNull() throws Exception {
 		MediaType textPlain = new MediaType("text", "plain");
@@ -644,7 +644,7 @@ public class RestTemplateTests {
 		template.setMessageConverters(Collections.<HttpMessageConverter<?>>singletonList(converter));
 
 		ParameterizedTypeReference<List<Integer>> intList = new ParameterizedTypeReference<List<Integer>>() {};
-		expect(converter.canRead(intList.getType(), null)).andReturn(true);
+		expect(converter.canRead(intList.getType(), null, null)).andReturn(true);
 		expect(converter.getSupportedMediaTypes()).andReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		expect(requestFactory.createRequest(new URI("http://example.com"), HttpMethod.POST)).andReturn(this.request);
 		HttpHeaders requestHeaders = new HttpHeaders();
@@ -660,8 +660,8 @@ public class RestTemplateTests {
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		expect(response.getHeaders()).andReturn(responseHeaders).times(3);
 		List<Integer> expected = Collections.singletonList(42);
-		expect(converter.canRead(intList.getType(), MediaType.TEXT_PLAIN)).andReturn(true);
-		expect(converter.read(intList.getType(), response)).andReturn(expected);
+		expect(converter.canRead(intList.getType(), null, MediaType.TEXT_PLAIN)).andReturn(true);
+		expect(converter.read(intList.getType(), null, response)).andReturn(expected);
 		expect(response.getStatusCode()).andReturn(HttpStatus.OK);
 		response.close();
 

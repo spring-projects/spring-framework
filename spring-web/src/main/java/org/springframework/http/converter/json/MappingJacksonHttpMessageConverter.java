@@ -128,11 +128,11 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead((Type) clazz, mediaType);
+		return canRead((Type) clazz, null, mediaType);
 	}
 
-	public boolean canRead(Type type, MediaType mediaType) {
-		JavaType javaType = getJavaType(type);
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
+		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 	}
 
@@ -151,14 +151,14 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	protected Object readInternal(Class<?> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		JavaType javaType = getJavaType(clazz);
+		JavaType javaType = getJavaType(clazz, null);
 		return readJavaType(javaType, inputMessage);
 	}
 
-	public Object read(Type type, HttpInputMessage inputMessage)
+	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		JavaType javaType = getJavaType(type);
+		JavaType javaType = getJavaType(type, contextClass);
 		return readJavaType(javaType, inputMessage);
 	}
 
@@ -196,10 +196,10 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		}
 	}
 
-
 	/**
-	 * Return the Jackson {@link JavaType} for the specified type.
-	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)},
+	 * Return the Jackson {@link JavaType} for the specified type and context class.
+	 * <p>The default implementation returns {@link TypeFactory#type(java.lang.reflect.Type)}
+	 * or {@code TypeFactory.type(type, TypeFactory.type(contextClass))},
 	 * but this can be overridden in subclasses, to allow for custom generic collection handling.
 	 * For instance:
 	 * <pre class="code">
@@ -212,10 +212,14 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	 * }
 	 * </pre>
 	 * @param type the type to return the java type for
+	 * @param contextClass a context class for the target type, for example a class
+	 * in which the target type appears in a method signature, can be {@code null}
 	 * @return the java type
 	 */
-	protected JavaType getJavaType(Type type) {
-		return TypeFactory.type(type);
+	protected JavaType getJavaType(Type type, Class<?> contextClass) {
+		return (contextClass != null) ?
+			TypeFactory.type(type, TypeFactory.type(contextClass)) :
+			TypeFactory.type(type);
 	}
 
 	/**

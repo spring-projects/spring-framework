@@ -19,9 +19,9 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.Before;
@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -68,6 +69,9 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	private MockHttpServletResponse servletResponse;
 
+	private ValidatingBinderFactory binderFactory;
+
+
 	@Before
 	public void setUp() throws Exception {
 
@@ -85,8 +89,9 @@ public class RequestResponseBodyMethodProcessorTests {
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-	}
 
+		this.binderFactory = new ValidatingBinderFactory();
+	}
 
 	@Test
 	public void resolveArgumentParameterizedType() throws Exception {
@@ -100,7 +105,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		List<SimpleBean> result = (List<SimpleBean>) processor.resolveArgument(
-				paramGenericList, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramGenericList, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.get(0).getName());
@@ -119,7 +124,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		@SuppressWarnings("unchecked")
 		MultiValueMap<String, String> result = (MultiValueMap<String, String>) processor.resolveArgument(
-				paramMultiValueMap, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramMultiValueMap, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("apple", result.getFirst("fruit"));
@@ -137,7 +142,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		SimpleBean result = (SimpleBean) processor.resolveArgument(
-				paramSimpleBean, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramSimpleBean, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("Jad", result.getName());
@@ -154,10 +159,33 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		String result = (String) processor.resolveArgument(
-				paramString, mavContainer, webRequest, new ValidatingBinderFactory());
+				paramString, mavContainer, webRequest, binderFactory);
 
 		assertNotNull(result);
 		assertEquals("foobarbaz", result);
+	}
+
+	// SPR-9964
+
+	@Test
+	public void resolveArgumentTypeVariable() throws Exception {
+
+		Method method = MySimpleParameterizedController.class.getMethod("handleDto", Identifiable.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new MySimpleParameterizedController(), method);
+		MethodParameter methodParam = handlerMethod.getMethodParameters()[0];
+
+		String content = "{\"name\" : \"Jad\"}";
+		this.servletRequest.setContent(content.getBytes("UTF-8"));
+		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		SimpleBean result = (SimpleBean) processor.resolveArgument(methodParam, mavContainer, webRequest, binderFactory);
+
+		assertNotNull(result);
+		assertEquals("Jad", result.getName());
 	}
 
 	// SPR-9160
@@ -213,15 +241,36 @@ public class RequestResponseBodyMethodProcessorTests {
 		return null;
 	}
 
-	private static class SimpleBean {
+	private static abstract class MyParameterizedController<DTO extends Identifiable> {
+		@SuppressWarnings("unused")
+		public void handleDto(@RequestBody DTO dto) {}
+	}
 
+	private static class MySimpleParameterizedController extends MyParameterizedController<SimpleBean> { }
+
+	private interface Identifiable extends Serializable {
+		public Long getId();
+		public void setId(Long id);
+	}
+
+	@SuppressWarnings({ "serial" })
+	private static class SimpleBean implements Identifiable {
+
+		private Long id;
 		private String name;
+
+		public Long getId() {
+			return id;
+		}
+
+		public void setId(Long id) {
+			this.id = id;
+		}
 
 		public String getName() {
 			return name;
 		}
 
-		@SuppressWarnings("unused")
 		public void setName(String name) {
 			this.name = name;
 		}

@@ -74,7 +74,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * {@link Collection} where the generic type is a JAXB type annotated with
 	 * {@link XmlRootElement} or {@link XmlType}.
 	 */
-	public boolean canRead(Type type, MediaType mediaType) {
+	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		if (!(type instanceof ParameterizedType)) {
 			return false;
 		}
@@ -119,7 +119,9 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 		throw new UnsupportedOperationException();
 	}
 
-	public T read(Type type, HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
+	public T read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
 		ParameterizedType parameterizedType = (ParameterizedType) type;
 		T result = createCollection((Class<?>) parameterizedType.getRawType());
 		Class<?> elementClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
