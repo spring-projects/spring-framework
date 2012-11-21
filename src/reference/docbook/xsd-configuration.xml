@@ -812,6 +812,56 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
             <literal>'src/org/springframework/beans/factory/xml'</literal> directory of the
             Spring source distribution.</para>
         </section>
+
+        <section id="xsd-config-body-schemas-jdbc">
+            <title>The <literal>jdbc</literal> schema</title>
+            <para>The <literal>jdbc</literal> tags allow you to quickly configure an
+            embedded database or initialize an existing data source. These tags are
+            documented in <xref linkend="jdbc-embedded-database-support"/> and
+            <xref linkend="jdbc-intializing-datasource"/> respectively.</para>
+            <para>To use the tags in the <literal>jdbc</literal>
+            schema, you need to have the following preamble at the top of your Spring XML
+            configuration file; the text in the following snippet references the
+            correct schema so that the tags in the <literal>jdbc</literal> namespace are
+            available to you.</para>
+<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/jdbc"</emphasis><![CDATA[
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+        </section>
+
+        <section id="xsd-config-body-schemas-cache">
+            <title>The <literal>cache</literal> schema</title>
+            <para>The <literal>cache</literal> tags can be used to enable support for Spring's
+            <interfacename>@CacheEvict</interfacename>, <interfacename>@CachePut</interfacename>
+            and <interfacename>@Caching</interfacename> annotations. It it also supports declarative
+            XML-based caching. See  <xref linkend="cache-annotation-enable"/> and
+            <xref linkend="cache-declarative-xml"/> for details.</para>
+            <para>To use the tags in the <literal>cache</literal>
+            schema, you need to have the following preamble at the top of your Spring XML
+            configuration file; the text in the following snippet references the
+            correct schema so that the tags in the <literal>cache</literal> namespace are
+            available to you.</para>
+<programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache-3.1.xsd"</emphasis><![CDATA[>
+
+]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
+
+</beans>]]></programlisting>
+        </section>
+
         <section id="xsd-config-body-schemas-beans">
             <title>The <literal>beans</literal> schema</title>
             <para>Last but not least we have the tags in the <literal>beans</literal> schema.
