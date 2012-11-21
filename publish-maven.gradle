@@ -16,10 +16,10 @@ def customizePom(pom, gradleProject) {
     pom.whenConfigured { generatedPom ->
         // respect 'optional' and 'provided' dependencies
         gradleProject.optionalDeps.each { dep ->
-            generatedPom.dependencies.find { it.artifactId == dep.name }?.optional = true
+            generatedPom.dependencies.findAll { it.artifactId == dep.name }*.optional = true
         }
         gradleProject.providedDeps.each { dep ->
-            generatedPom.dependencies.find { it.artifactId == dep.name }?.scope = 'provided'
+            generatedPom.dependencies.findAll { it.artifactId == dep.name }*.scope = 'provided'
         }
 
         // eliminate test-scoped dependencies (no need in maven central poms)
