@@ -329,7 +329,7 @@
 
       <para>The @AspectJ support can be enabled with XML or Java style
       configuration.  In either case you will also need to ensure that
-      AspectJ's <filename class="libraryfile">aspectjrt.jar</filename>
+      AspectJ's <filename class="libraryfile">aspectjweaver.jar</filename>
       library is on the classpath of your application (version 1.6.8 or later).
       This library is available in the <filename class="directory">'lib'</filename>
       directory of an AspectJ distribution or via the Maven Central repository.</para>
