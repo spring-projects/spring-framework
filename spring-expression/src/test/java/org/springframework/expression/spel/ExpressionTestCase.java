@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public abstract class ExpressionTestCase {
 	protected final static boolean SHOULD_BE_WRITABLE = true;
 	protected final static boolean SHOULD_NOT_BE_WRITABLE = false;
 
-	protected final static ExpressionParser parser = new SpelExpressionParser();
-	protected final static StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
+	protected final ExpressionParser parser = new SpelExpressionParser();
+	protected final StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	/**
 	 * Evaluate an expression and check that the actual result matches the expectedValue and the class of the result

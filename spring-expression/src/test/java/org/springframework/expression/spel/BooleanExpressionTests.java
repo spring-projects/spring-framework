@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,15 @@
 package org.springframework.expression.spel;
 
 import org.junit.Test;
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.expression.spel.support.StandardTypeConverter;
 
 /**
  * Tests the evaluation of real boolean expressions, these use AND, OR, NOT, TRUE, FALSE
- * 
+ *
  * @author Andy Clement
+ * @author Oliver Becker
  */
 public class BooleanExpressionTests extends ExpressionTestCase {
 
@@ -82,5 +86,28 @@ public class BooleanExpressionTests extends ExpressionTestCase {
 		evaluateAndCheckError(" 'hello' and 'goodbye'", SpelMessage.TYPE_CONVERSION_ERROR, 1);
 		evaluateAndCheckError("!35.2", SpelMessage.TYPE_CONVERSION_ERROR, 1);
 		evaluateAndCheckError("! 'foob'", SpelMessage.TYPE_CONVERSION_ERROR, 2);
+	}
+
+	@Test
+	public void testConvertAndHandleNull() { // SPR-9445
+		// without null conversion
+		evaluateAndCheckError("null or true", SpelMessage.TYPE_CONVERSION_ERROR, 0, "null", "boolean");
+		evaluateAndCheckError("null and true", SpelMessage.TYPE_CONVERSION_ERROR, 0, "null", "boolean");
+		evaluateAndCheckError("!null", SpelMessage.TYPE_CONVERSION_ERROR, 1, "null", "boolean");
+		evaluateAndCheckError("null ? 'foo' : 'bar'", SpelMessage.TYPE_CONVERSION_ERROR, 0, "null", "boolean");
+
+		// with null conversion (null -> false)
+		GenericConversionService conversionService = new GenericConversionService() {
+			@Override
+			protected Object convertNullSource(TypeDescriptor sourceType, TypeDescriptor targetType) {
+				return targetType.getType() == Boolean.class ? false : null;
+			}
+		};
+		eContext.setTypeConverter(new StandardTypeConverter(conversionService));
+
+		evaluate("null or true", Boolean.TRUE, Boolean.class, false);
+		evaluate("null and true", Boolean.FALSE, Boolean.class, false);
+		evaluate("!null", Boolean.TRUE, Boolean.class, false);
+		evaluate("null ? 'foo' : 'bar'", "bar", String.class, false);
 	}
 }
