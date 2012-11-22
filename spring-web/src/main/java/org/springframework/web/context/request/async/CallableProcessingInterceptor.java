@@ -35,7 +35,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * the Exception instance as the concurrent result. Such exceptions will then
  * be processed through the {@code HandlerExceptionResolver} mechanism.
  *
- * <p>The {@link #afterTimeout(NativeWebRequest, Callable) afterTimeout} method
+ * <p>The {@link #handleTimeout(NativeWebRequest, Callable) afterTimeout} method
  * can select a value to be used to resume processing.
  *
  * @author Rossen Stoyanchev
@@ -43,7 +43,10 @@ import org.springframework.web.context.request.NativeWebRequest;
  */
 public interface CallableProcessingInterceptor {
 
-	public static final Object RESULT_NONE = new Object();
+	static final Object RESULT_NONE = new Object();
+
+	static final Object RESPONSE_HANDLED = new Object();
+
 
 	/**
 	 * Invoked <em>after</em> the start of concurrent handling in the async
@@ -79,11 +82,11 @@ public interface CallableProcessingInterceptor {
 	 * @param request the current request
 	 * @param task the task for the current async request
 	 * @return a concurrent result value; if the value is anything other than
-	 * {@link #RESULT_NONE}, concurrent processing is resumed and subsequent
-	 * interceptors are not invoked
+	 * {@link #RESULT_NONE} or {@link #RESPONSE_HANDLED}, concurrent processing
+	 * is resumed and subsequent interceptors are not invoked
 	 * @throws Exception in case of errors
 	 */
-	<T> Object afterTimeout(NativeWebRequest request, Callable<T> task) throws Exception;
+	<T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception;
 
 	/**
 	 * Invoked from a container thread when async processing completes for any

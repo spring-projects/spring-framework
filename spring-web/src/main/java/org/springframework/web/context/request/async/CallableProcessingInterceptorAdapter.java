@@ -44,7 +44,7 @@ public abstract class CallableProcessingInterceptorAdapter implements CallablePr
 	 * This implementation always returns
 	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
 	 */
-	public <T> Object afterTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 		return RESULT_NONE;
 	}
 

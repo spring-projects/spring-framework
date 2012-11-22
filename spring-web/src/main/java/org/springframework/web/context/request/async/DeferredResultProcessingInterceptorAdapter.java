@@ -40,9 +40,10 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	}
 
 	/**
-	 * This implementation is empty.
+	 * This implementation returns {@code true} by default.
 	 */
-	public <T> void afterTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
+		return true;
 	}
 
 	/**

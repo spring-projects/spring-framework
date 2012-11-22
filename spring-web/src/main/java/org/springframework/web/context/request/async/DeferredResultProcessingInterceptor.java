@@ -32,7 +32,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * the Exception instance as the concurrent result. Such exceptions will then
  * be processed through the {@code HandlerExceptionResolver} mechanism.
  *
- * <p>The {@link #afterTimeout(NativeWebRequest, DeferredResult) afterTimeout}
+ * <p>The {@link #handleTimeout(NativeWebRequest, DeferredResult) afterTimeout}
  * method can set the {@code DeferredResult} in order to resume processing.
  *
  * @author Rossen Stoyanchev
@@ -81,9 +81,11 @@ public interface DeferredResultProcessingInterceptor {
 	 * @param deferredResult the DeferredResult for the current request; if the
 	 * {@code DeferredResult} is set, then concurrent processing is resumed and
 	 * subsequent interceptors are not invoked
+	 * @return {@code true} if processing should continue, or {@code false} if
+	 * other interceptors should not be invoked
 	 * @throws Exception in case of errors
 	 */
-	<T> void afterTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
+	<T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
 
 	/**
 	 * Invoked from a container thread when an async request completed for any

@@ -60,11 +60,13 @@ class DeferredResultInterceptorChain {
 	}
 
 	public void triggerAfterTimeout(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
-		for (int i = this.preProcessingIndex; i >= 0; i--) {
+		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
 			if (deferredResult.isSetOrExpired()) {
 				return;
 			}
-			this.interceptors.get(i).afterTimeout(request, deferredResult);
+			if (!interceptor.handleTimeout(request, deferredResult)){
+				break;
+			}
 		}
 	}
 

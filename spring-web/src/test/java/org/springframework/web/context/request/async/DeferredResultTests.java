@@ -113,7 +113,7 @@ public class DeferredResultTests {
 			}
 		});
 
-		result.getInterceptor().afterTimeout(null, null);
+		result.getInterceptor().handleTimeout(null, null);
 
 		assertEquals("timeout event", sb.toString());
 		assertFalse("Should not be able to set result a second time", result.setResult("hello"));

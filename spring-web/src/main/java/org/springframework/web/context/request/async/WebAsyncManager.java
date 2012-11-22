@@ -63,6 +63,12 @@ public final class WebAsyncManager {
 
 	private static final UrlPathHelper urlPathHelper = new UrlPathHelper();
 
+	private static final CallableProcessingInterceptor timeoutCallableInterceptor =
+			new TimeoutCallableProcessingInterceptor();
+
+	private static final DeferredResultProcessingInterceptor timeoutDeferredResultInterceptor =
+			new TimeoutDeferredResultProcessingInterceptor();
+
 
 	private AsyncWebRequest asyncWebRequest;
 
@@ -266,8 +272,6 @@ public final class WebAsyncManager {
 		Assert.notNull(mvcAsyncTask, "MvcAsyncTask must not be null");
 		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 
-		final Callable<?> callable = mvcAsyncTask.getCallable();
-
 		Long timeout = mvcAsyncTask.getTimeout();
 		if (timeout != null) {
 			this.asyncWebRequest.setTimeout(timeout);
@@ -281,7 +285,9 @@ public final class WebAsyncManager {
 		List<CallableProcessingInterceptor> interceptors = new ArrayList<CallableProcessingInterceptor>();
 		interceptors.add(mvcAsyncTask.getInterceptor());
 		interceptors.addAll(this.callableInterceptors.values());
+		interceptors.add(timeoutCallableInterceptor);
 
+		final Callable<?> callable = mvcAsyncTask.getCallable();
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(new Runnable() {
@@ -368,6 +374,7 @@ public final class WebAsyncManager {
 		List<DeferredResultProcessingInterceptor> interceptors = new ArrayList<DeferredResultProcessingInterceptor>();
 		interceptors.add(deferredResult.getInterceptor());
 		interceptors.addAll(this.deferredResultInterceptors.values());
+		interceptors.add(timeoutDeferredResultInterceptor);
 
 		final DeferredResultInterceptorChain interceptorChain = new DeferredResultInterceptorChain(interceptors);
 

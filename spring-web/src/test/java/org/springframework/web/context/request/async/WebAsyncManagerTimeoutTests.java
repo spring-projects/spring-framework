@@ -56,12 +56,14 @@ public class WebAsyncManagerTimeoutTests {
 
 	private MockHttpServletRequest servletRequest;
 
+	private MockHttpServletResponse servletResponse;
 
 	@Before
 	public void setUp() {
 		this.servletRequest = new MockHttpServletRequest("GET", "/test");
 		this.servletRequest.setAsyncSupported(true);
-		this.asyncWebRequest = new StandardServletAsyncWebRequest(servletRequest, new MockHttpServletResponse());
+		this.servletResponse = new MockHttpServletResponse();
+		this.asyncWebRequest = new StandardServletAsyncWebRequest(servletRequest, servletResponse);
 
 		AsyncTaskExecutor executor = createMock(AsyncTaskExecutor.class);
 		expect(executor.submit((Runnable) notNull())).andReturn(null);
@@ -78,7 +80,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
-		expect(interceptor.afterTimeout(this.asyncWebRequest, callable)).andReturn(RESULT_NONE);
+		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andReturn(RESULT_NONE);
 		interceptor.afterCompletion(this.asyncWebRequest, callable);
 		replay(interceptor);
 
@@ -90,6 +92,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 		assertEquals(DispatcherType.REQUEST, this.servletRequest.getDispatcherType());
+		assertEquals(503, this.servletResponse.getStatus());
 
 		verify(interceptor);
 	}
@@ -120,7 +123,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
-		expect(interceptor.afterTimeout(this.asyncWebRequest, callable)).andReturn(22);
+		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andReturn(22);
 		replay(interceptor);
 
 		this.asyncManager.registerCallableInterceptor("timeoutInterceptor", interceptor);
@@ -142,7 +145,7 @@ public class WebAsyncManagerTimeoutTests {
 		Exception exception = new Exception();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
-		expect(interceptor.afterTimeout(this.asyncWebRequest, callable)).andThrow(exception);
+		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andThrow(exception);
 		replay(interceptor);
 
 		this.asyncManager.registerCallableInterceptor("timeoutInterceptor", interceptor);
@@ -164,7 +167,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		DeferredResultProcessingInterceptor interceptor = createStrictMock(DeferredResultProcessingInterceptor.class);
 		interceptor.preProcess(this.asyncWebRequest, deferredResult);
-		interceptor.afterTimeout(this.asyncWebRequest, deferredResult);
+		expect(interceptor.handleTimeout(this.asyncWebRequest, deferredResult)).andReturn(true);
 		interceptor.afterCompletion(this.asyncWebRequest, deferredResult);
 		replay(interceptor);
 
@@ -176,6 +179,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		assertFalse(this.asyncManager.hasConcurrentResult());
 		assertEquals(DispatcherType.REQUEST, this.servletRequest.getDispatcherType());
+		assertEquals(503, this.servletResponse.getStatus());
 
 		verify(interceptor);
 	}
@@ -220,8 +224,9 @@ public class WebAsyncManagerTimeoutTests {
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
-			public <T> void afterTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
+			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				result.setErrorResult(23);
+				return true;
 			}
 		};
 
@@ -243,7 +248,7 @@ public class WebAsyncManagerTimeoutTests {
 		final Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
-			public <T> void afterTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
+			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				throw exception;
 			}
 		};

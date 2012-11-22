@@ -15,8 +15,6 @@
  */
 package org.springframework.web.context.request.async;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -63,10 +61,13 @@ class CallableInterceptorChain {
 	}
 
 	public Object triggerAfterTimeout(NativeWebRequest request, Callable<?> task) {
-		for (int i = this.interceptors.size()-1; i >= 0; i--) {
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
 			try {
-				Object result = this.interceptors.get(i).afterTimeout(request, task);
-				if (result != CallableProcessingInterceptor.RESULT_NONE) {
+				Object result = interceptor.handleTimeout(request, task);
+				if (result == CallableProcessingInterceptor.RESPONSE_HANDLED) {
+					break;
+				}
+				else if (result != CallableProcessingInterceptor.RESULT_NONE) {
 					return result;
 				}
 			}

@@ -183,18 +183,19 @@ public final class DeferredResult<T> {
 		return new DeferredResultProcessingInterceptorAdapter() {
 
 			@Override
-			public <S> void afterTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
+			public <S> boolean handleTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
 				if (timeoutCallback != null) {
 					timeoutCallback.run();
 				}
 				if (DeferredResult.this.timeoutResult != RESULT_NONE) {
 					setResultInternal(timeoutResult);
 				}
+				return true;
 			}
 
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
-				synchronized (this) {
+				synchronized (DeferredResult.this) {
 					expired = true;
 				}
 				if (completionCallback != null) {

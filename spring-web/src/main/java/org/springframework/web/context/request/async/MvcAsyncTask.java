@@ -156,7 +156,7 @@ public class MvcAsyncTask<V> {
 		return new CallableProcessingInterceptorAdapter() {
 
 			@Override
-			public <T> Object afterTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
+			public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 				return (timeoutCallback != null) ? timeoutCallback.call() : CallableProcessingInterceptor.RESULT_NONE;
 			}
 
