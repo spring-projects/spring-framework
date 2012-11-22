@@ -130,18 +130,8 @@ public abstract class SpelNodeImpl implements SpelNode {
 		return (obj instanceof Class ? ((Class<?>) obj) : obj.getClass());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected final <T> T getValue(ExpressionState state, Class<T> desiredReturnType) throws EvaluationException {
-		Object result = getValueInternal(state).getValue();
-		if (result != null && desiredReturnType != null) {
-			Class<?> resultType = result.getClass();
-			if (desiredReturnType.isAssignableFrom(resultType)) {
-				return (T) result;
-			}
-			// Attempt conversion to the requested type, may throw an exception
-			return ExpressionUtils.convert(state.getEvaluationContext(), result, desiredReturnType);
-		}
-		return (T) result;
+		return ExpressionUtils.convertTypedValue(state.getEvaluationContext(), getValueInternal(state), desiredReturnType);
 	}
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;

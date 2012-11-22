@@ -60,7 +60,10 @@ public abstract class ExpressionUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
 		Object value = typedValue.getValue();
-		if (targetType == null || ClassUtils.isAssignableValue(targetType, value)) {
+		if (targetType == null) {
+			return (T) value;
+		}
+		if (value != null && ClassUtils.isAssignableValue(targetType, value)) {
 			return (T) value;
 		}
 		if (context != null) {

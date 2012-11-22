@@ -16,9 +16,7 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
-import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelMessage;
@@ -39,37 +37,35 @@ public class OpOr extends Operator {
 
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		boolean leftValue;
-		boolean rightValue;
+		Boolean leftValue;
+		Boolean rightValue;
 		try {
-			TypedValue typedValue = getLeftOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			leftValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
+			leftValue = getLeftOperand().getValue(state, Boolean.class);
+			this.assertValueNotNull(leftValue);
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getLeftOperand().getStartPosition());
 			throw see;
 		}
 
-		if (leftValue == true) {
+		if (leftValue) {
 			return BooleanTypedValue.TRUE; // no need to evaluate right operand
 		}
 
 		try {
-			TypedValue typedValue = getRightOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			rightValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
+			rightValue = getRightOperand().getValue(state, Boolean.class);
+			this.assertValueNotNull(rightValue);
 		}
 		catch (SpelEvaluationException see) {
 			see.setPosition(getRightOperand().getStartPosition()); // TODO end positions here and in similar situations
 			throw see;
 		}
 
-		return BooleanTypedValue.forValue(leftValue || rightValue);
+		return BooleanTypedValue.forValue(/* leftValue || */ rightValue);
 	}
 
-	private void assertTypedValueNotNull(TypedValue typedValue) {
-		if (TypedValue.NULL.equals(typedValue)) {
+	private void assertValueNotNull(Boolean value) {
+		if (value == null) {
 			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
 	}
