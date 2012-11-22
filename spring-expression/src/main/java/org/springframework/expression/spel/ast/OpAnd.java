@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.expression.spel.ast;
 
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationException;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.ExpressionState;
@@ -29,6 +28,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  *
  * @author Andy Clement
  * @author Mark Fisher
+ * @author Oliver Becker
  * @since 3.0
  */
 public class OpAnd extends Operator {
@@ -39,38 +39,27 @@ public class OpAnd extends Operator {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		boolean leftValue;
-		boolean rightValue;
-
-		try {
-			TypedValue typedValue = getLeftOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			leftValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
+		if (getBooleanValue(state, getLeftOperand()) == false) {
+			// no need to evaluate right operand
+			return BooleanTypedValue.FALSE;
 		}
-		catch (SpelEvaluationException ee) {
-			ee.setPosition(getLeftOperand().getStartPosition());
-			throw ee;
-		}
-
-		if (leftValue == false) {
-			return BooleanTypedValue.forValue(false); // no need to evaluate right operand
-		}
-
-		try {
-			TypedValue typedValue = getRightOperand().getValueInternal(state);
-			this.assertTypedValueNotNull(typedValue);
-			rightValue = (Boolean)state.convertValue(typedValue, TypeDescriptor.valueOf(Boolean.class));
-		}
-		catch (SpelEvaluationException ee) {
-			ee.setPosition(getRightOperand().getStartPosition());
-			throw ee;
-		}
-
-		return /* leftValue && */BooleanTypedValue.forValue(rightValue);
+		return BooleanTypedValue.forValue(getBooleanValue(state, getRightOperand()));
 	}
 
-	private void assertTypedValueNotNull(TypedValue typedValue) {
-		if (TypedValue.NULL.equals(typedValue)) {
+	private boolean getBooleanValue(ExpressionState state, SpelNodeImpl operand) {
+		try {
+			Boolean value = operand.getValue(state, Boolean.class);
+			assertValueNotNull(value);
+			return value;
+		}
+		catch (SpelEvaluationException ee) {
+			ee.setPosition(operand.getStartPosition());
+			throw ee;
+		}
+	}
+
+	private void assertValueNotNull(Boolean value) {
+		if (value == null) {
 			throw new SpelEvaluationException(SpelMessage.TYPE_CONVERSION_ERROR, "null", "boolean");
 		}
 	}

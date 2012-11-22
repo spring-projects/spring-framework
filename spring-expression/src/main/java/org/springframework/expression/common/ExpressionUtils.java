@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class ExpressionUtils {
 	@SuppressWarnings("unchecked")
 	public static <T> T convertTypedValue(EvaluationContext context, TypedValue typedValue, Class<T> targetType) {
 		Object value = typedValue.getValue();
-		if (targetType == null || ClassUtils.isAssignableValue(targetType, value)) {
+		if ((targetType == null) || (value != null && ClassUtils.isAssignableValue(targetType, value))) {
 			return (T) value;
 		}
 		if (context != null) {
