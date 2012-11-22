@@ -35,11 +35,11 @@ import org.springframework.util.Assert;
 public abstract class SpelNodeImpl implements SpelNode {
 
 	private static SpelNodeImpl[] NO_CHILDREN = new SpelNodeImpl[0];
-	
+
 	protected int pos; // start = top 16bits, end = bottom 16bits
 	protected SpelNodeImpl[] children = SpelNodeImpl.NO_CHILDREN;
 	private SpelNodeImpl parent;
-	
+
 	public SpelNodeImpl(int pos, SpelNodeImpl... operands) {
 		this.pos = pos;
 		// pos combines start and end so can never be zero because tokens cannot be zero length
@@ -51,7 +51,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 			}
 		}
 	}
-	
+
 	protected SpelNodeImpl getPreviousChild() {
 		SpelNodeImpl result = null;
 		if (parent != null) {
@@ -62,7 +62,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 		}
 		return result;
 	}
-	
+
 	/**
      * @return true if the next child is one of the specified classes
      */
@@ -96,7 +96,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 			return getValue(new ExpressionState(new StandardEvaluationContext()));
 		}
 	}
-	
+
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState);
@@ -118,7 +118,7 @@ public abstract class SpelNodeImpl implements SpelNode {
 	public SpelNode getChild(int index) {
 		return children[index];
 	}
-	
+
 	public int getChildCount() {
 		return children.length;
 	}

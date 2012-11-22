@@ -36,7 +36,7 @@ public class OperatorNot extends SpelNodeImpl { // Not is a unary operator so do
 	public OperatorNot(int pos, SpelNodeImpl operand) {
 		super(pos, operand);
 	}
-	
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		try {
