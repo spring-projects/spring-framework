@@ -1101,7 +1101,7 @@ public interface ConversionService {
 </bean>]]></programlisting>
 
       <para>It is also common to use a ConversionService within a Spring MVC
-        application. See <xref linkend="format-configuring-FormattingConversionService"/>
+        application. See <xref linkend="format-configuring-formatting-mvc"/>
         for details on use with
         <literal>&lt;mvc:annotation-driven/&gt;</literal>.</para>
 
@@ -1415,7 +1415,7 @@ public interface FormatterRegistrar {
 	    </para>
 	</section>
       
-    <section id="format-configuring-FormattingConversionService">
+    <section id="format-configuring-formatting-mvc">
       <title>Configuring Formatting in Spring MVC</title>
 
       <para> In a Spring MVC application, you may configure a custom
@@ -1496,6 +1496,97 @@ public interface FormatterRegistrar {
       </note>
 
     </section>
+  </section>
+
+  <section id="format-configuring-formatting-globaldatetimeformat">
+    <title>Configuring a global date &amp; time format</title>
+
+    <para>By default, date and time fields that are not annotated with
+    <interfacename>@DateTimeFormat</interfacename> are converted from strings
+    using the the <literal>DateFormat.SHORT</literal> style. If you prefer,
+    you can change this by defining your own global format.</para>
+
+    <para>You will need to ensure that Spring does not register default
+    formatters and instead you should register all formatters manually. Use the
+    <classname>org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar</classname>
+    or <classname>org.springframework.format.datetime.DateFormatterRegistrar</classname>
+    class depending on your use of the Joda Time library.</para>
+
+    <para>For example, the following Java configuration will register a global
+    '<literal>yyyyMMdd</literal>' format. This example does not depend on the
+    Joda Time:</para>
+    <programlisting language="java">@Configurable
+public class AppConfig {
+
+  @Bean
+  public FormattingConversionService conversionService() {
+
+    // Use the DefaultFormattingConversionService but do not register defaults
+    DefaultFormattingConversionService conversionService = new DefaultFormattingConversionService(false);
+
+    // Ensure @NumberFormat is still supported
+    conversionService.addFormatterForFieldAnnotation(new NumberFormatAnnotationFormatterFactory());
+
+    // Register date conversion with a specific global format
+    DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+    registrar.setFormatter(new DateFormatter("yyyyMMdd"));
+    registrar.registerFormatters(conversionService);
+
+    return conversionService;
+  }
+}</programlisting>
+
+    <para>If you prefer XML based configuration you can use a
+    <classname>FormattingConversionServiceFactoryBean</classname>. Here is the same
+    example, this time using Joda Time:</para>
+    <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="registerDefaultFormatters" value="false" />
+        <property name="formatters">
+        <set>
+            <bean class="org.springframework.format.number.NumberFormatAnnotationFormatterFactory" />
+        </set>
+        </property>
+        <property name="formatterRegistrars">
+        <set>
+          <bean class="org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar">
+              <property name="dateFormatter">
+                  <bean class="org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean">
+                      <property name="pattern" value="yyyyMMdd"/>
+                  </bean>
+              </property>
+          </bean>
+      </set>
+      </property>
+    </bean>
+  </beans>
+]]></programlisting>
+
+    <note>
+      <para>Joda Time provides separate distinct types to represent
+      <literal>date</literal>, <literal>time</literal> and
+      <literal>date-time</literal> values. The <literal>dateFormatter</literal>
+      , <literal>timeFormatter</literal> and <literal>dateTimeFormatter</literal>
+      properties of the <classname>JodaTimeFormatterRegistrar</classname> should
+      be used to configure the different formats for each type. The
+      <classname>DateTimeFormatterFactoryBean</classname> provides a
+      convenient way to create formatters.</para>
+    </note>
+
+    <para>If you are using Spring MVC remember to explicitly configure the
+    conversion service that is used. For Java based
+    <interfacename>@Configuration</interfacename> this means extending the
+    <classname>WebMvcConfigurationSupport</classname> class and overriding
+    the <literal>mvcConversionService()</literal> method. For XML you should
+    use the <literal>'conversion-service'</literal> attribute of the
+    <literal>mvc:annotation-driven</literal> element. See
+    <xref linkend="format-configuring-formatting-mvc"/> for details.</para>
   </section>
 
   <section id="validation-beanvalidation">
