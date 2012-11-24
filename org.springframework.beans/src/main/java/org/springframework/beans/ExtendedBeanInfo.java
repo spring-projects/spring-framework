@@ -16,9 +16,8 @@
 
 package org.springframework.beans;
 
-import static java.lang.String.format;
-
 import java.awt.Image;
+
 import java.beans.BeanDescriptor;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
@@ -27,310 +26,190 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
+
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.SortedSet;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.core.BridgeMethodResolver;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
+import static org.springframework.beans.PropertyDescriptorUtils.*;
 
 /**
- * Decorates a standard {@link BeanInfo} object (likely created created by
- * {@link Introspector#getBeanInfo(Class)}) by including non-void returning setter
- * methods in the collection of {@link #getPropertyDescriptors() property descriptors}.
- * Both regular and
+ * Decorator for a standard {@link BeanInfo} object, e.g. as created by
+ * {@link Introspector#getBeanInfo(Class)}, designed to discover and register non-void
+ * returning setter methods. For example:
+ * <pre>{@code
+ * public class Bean {
+ *     private Foo foo;
+ *
+ *     public Foo getFoo() {
+ *         return this.foo;
+ *     }
+ *
+ *     public Bean setFoo(Foo foo) {
+ *         this.foo = foo;
+ *         return this;
+ *     }
+ * }</pre>
+ * The standard JavaBeans {@code Introspector} will discover the {@code getFoo} read
+ * method, but will bypass the {@code #setFoo(Foo)} write method, because its non-void
+ * returning signature does not comply with the JavaBeans specification.
+ * {@code ExtendedBeanInfo}, on the other hand, will recognize and include it. This is
+ * designed to allow APIs with "builder" or method-chaining style setter signatures to be
+ * used within Spring {@code <beans>} XML. {@link #getPropertyDescriptors()} returns all
+ * existing property descriptors from the wrapped {@code BeanInfo} as well any added for
+ * non-void returning setters. Both standard ("non-indexed") and
  * <a href="http://docs.oracle.com/javase/tutorial/javabeans/writing/properties.html">
  * indexed properties</a> are fully supported.
  *
- * <p>The wrapped {@code BeanInfo} object is not modified in any way.
- *
  * @author Chris Beams
  * @since 3.1
+ * @see #ExtendedBeanInfo(BeanInfo)
  * @see CachedIntrospectionResults
  */
 class ExtendedBeanInfo implements BeanInfo {
 
-	private final Log logger = LogFactory.getLog(getClass());
-
 	private final BeanInfo delegate;
 
-	private final SortedSet<PropertyDescriptor> propertyDescriptors =
-		new TreeSet<PropertyDescriptor>(new PropertyDescriptorComparator());
+	private final Set<PropertyDescriptor> propertyDescriptors =
+			new TreeSet<PropertyDescriptor>(new PropertyDescriptorComparator());
 
 
 	/**
-	 * Wrap the given delegate {@link BeanInfo} instance and find any non-void returning
-	 * setter methods, creating and adding a {@link PropertyDescriptor} for each.
-	 *
-	 * <p>Note that the wrapped {@code BeanInfo} is modified by this process.
-	 *
+	 * Wrap the given {@link BeanInfo} instance; copy all its existing property descriptors
+	 * locally, wrapping each in a custom {@link SimpleIndexedPropertyDescriptor indexed} or
+	 * {@link SimpleNonIndexedPropertyDescriptor non-indexed} {@code PropertyDescriptor}
+	 * variant that bypasses default JDK weak/soft reference management; then search
+	 * through its method descriptors to find any non-void returning write methods and
+	 * update or create the corresponding {@link PropertyDescriptor} for each one found.
+	 * @param delegate the wrapped {@code BeanInfo}, which is never modified
+	 * @throws IntrospectionException if any problems occur creating and adding new
+	 * property descriptors
 	 * @see #getPropertyDescriptors()
-	 * @throws IntrospectionException if any problems occur creating and adding new {@code PropertyDescriptors}
 	 */
 	public ExtendedBeanInfo(BeanInfo delegate) throws IntrospectionException {
 		this.delegate = delegate;
 
-		ALL_METHODS:
-		for (MethodDescriptor md : delegate.getMethodDescriptors()) {
-			Method method = resolveMethod(md.getMethod());
+		for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
+			this.propertyDescriptors.add(pd instanceof IndexedPropertyDescriptor ?
+					new SimpleIndexedPropertyDescriptor((IndexedPropertyDescriptor) pd) :
+					new SimpleNonIndexedPropertyDescriptor(pd));
+		}
 
-			// bypass non-getter java.lang.Class methods for efficiency
-			if (ReflectionUtils.isObjectMethod(method) && !method.getName().startsWith("get")) {
-				continue ALL_METHODS;
-			}
-
-			// is the method a NON-INDEXED setter? ignore return type in order to capture non-void signatures
-			if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
-				String propertyName = propertyNameFor(method);
-				if(propertyName.length() == 0) {
-					continue ALL_METHODS;
-				}
-				for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-					Method readMethod = readMethodFor(pd);
-					Method writeMethod = writeMethodFor(pd);
-					// has the setter already been found by the wrapped BeanInfo?
-					if (writeMethod != null
-							&& writeMethod.getName().equals(method.getName())) {
-						// yes -> copy it, including corresponding getter method (if any -- may be null)
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod);
-						continue ALL_METHODS;
-					}
-					// has a getter corresponding to this setter already been found by the wrapped BeanInfo?
-					if (readMethod != null
-							&& readMethod.getName().equals(getterMethodNameFor(propertyName))
-							&& readMethod.getReturnType().equals(method.getParameterTypes()[0])) {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, method);
-						continue ALL_METHODS;
-					}
-				}
-				// the setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor for it
-				// no corresponding getter was detected, so the 'read method' parameter is null.
-				this.addOrUpdatePropertyDescriptor(null, propertyName, null, method);
-				continue ALL_METHODS;
-			}
-
-			// is the method an INDEXED setter? ignore return type in order to capture non-void signatures
-			if (method.getName().startsWith("set") && method.getParameterTypes().length == 2 && method.getParameterTypes()[0].equals(int.class)) {
-				String propertyName = propertyNameFor(method);
-				if(propertyName.length() == 0) {
-					continue ALL_METHODS;
-				}
-				DELEGATE_PD:
-				for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-					if (!(pd instanceof IndexedPropertyDescriptor)) {
-						continue DELEGATE_PD;
-					}
-					IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
-					Method readMethod = readMethodFor(ipd);
-					Method writeMethod = writeMethodFor(ipd);
-					Method indexedReadMethod = indexedReadMethodFor(ipd);
-					Method indexedWriteMethod = indexedWriteMethodFor(ipd);
-					// has the setter already been found by the wrapped BeanInfo?
-					if (!(indexedWriteMethod != null
-							&& indexedWriteMethod.getName().equals(method.getName()))) {
-						indexedWriteMethod = method;
-					}
-					// yes -> copy it, including corresponding getter method (if any -- may be null)
-					this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
-					continue ALL_METHODS;
-				}
-				// the INDEXED setter method was not found by the wrapped BeanInfo -> add a new PropertyDescriptor
-				// for it. no corresponding INDEXED getter was detected, so the 'indexed read method' parameter is null.
-				this.addOrUpdatePropertyDescriptor(null, propertyName, null, null, null, method);
-				continue ALL_METHODS;
-			}
-
-			// the method is not a setter, but is it a getter?
-			for (PropertyDescriptor pd : delegate.getPropertyDescriptors()) {
-				// have we already copied this read method to a property descriptor locally?
-				String propertyName = pd.getName();
-				Method readMethod = readMethodFor(pd);
-				Method mostSpecificReadMethod = ClassUtils.getMostSpecificMethod(readMethod, method.getDeclaringClass());
-				for (PropertyDescriptor existingPD : this.propertyDescriptors) {
-					if (method.equals(mostSpecificReadMethod)
-							&& existingPD.getName().equals(propertyName)) {
-						if (readMethodFor(existingPD) == null) {
-							// no -> add it now
-							this.addOrUpdatePropertyDescriptor(pd, propertyName, method, writeMethodFor(pd));
-						}
-						// yes -> do not add a duplicate
-						continue ALL_METHODS;
-					}
-				}
-				if (method.equals(mostSpecificReadMethod)
-						|| (pd instanceof IndexedPropertyDescriptor && method.equals(indexedReadMethodFor((IndexedPropertyDescriptor) pd)))) {
-					// yes -> copy it, including corresponding setter method (if any -- may be null)
-					if (pd instanceof IndexedPropertyDescriptor) {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethodFor(pd), indexedReadMethodFor((IndexedPropertyDescriptor)pd), indexedWriteMethodFor((IndexedPropertyDescriptor)pd));
-					} else {
-						this.addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethodFor(pd));
-					}
-					continue ALL_METHODS;
-				}
-			}
+		for (Method method : findNonVoidWriteMethods(delegate.getMethodDescriptors())) {
+			handleNonVoidWriteMethod(method);
 		}
 	}
 
 
-	private static Method resolveMethod(Method method) {
-		return BridgeMethodResolver.findBridgedMethod(method);
-	}
-
-	private static Method readMethodFor(PropertyDescriptor pd) {
-		return resolveMethod(pd.getReadMethod());
-	}
-
-	private static Method writeMethodFor(PropertyDescriptor pd) {
-		return resolveMethod(pd.getWriteMethod());
-	}
-
-	private static Method indexedReadMethodFor(IndexedPropertyDescriptor ipd) {
-		return resolveMethod(ipd.getIndexedReadMethod());
-	}
-
-	private static Method indexedWriteMethodFor(IndexedPropertyDescriptor ipd) {
-		return resolveMethod(ipd.getIndexedWriteMethod());
-	}
-
-	private void addOrUpdatePropertyDescriptor(PropertyDescriptor pd, String propertyName, Method readMethod, Method writeMethod) throws IntrospectionException {
-		addOrUpdatePropertyDescriptor(pd, propertyName, readMethod, writeMethod, null, null);
-	}
-
-	private void addOrUpdatePropertyDescriptor(PropertyDescriptor pd, String propertyName, Method readMethod, Method writeMethod, Method indexedReadMethod, Method indexedWriteMethod) throws IntrospectionException {
-		Assert.notNull(propertyName, "propertyName may not be null");
-		propertyName = pd == null ? propertyName : pd.getName();
-		for (PropertyDescriptor existingPD : this.propertyDescriptors) {
-			if (existingPD.getName().equals(propertyName)) {
-				// is there already a descriptor that captures this read method or its corresponding write method?
-				if (readMethodFor(existingPD) != null) {
-					if (readMethod != null && readMethodFor(existingPD).getReturnType() != readMethod.getReturnType()
-							|| writeMethod != null && readMethodFor(existingPD).getReturnType() != writeMethod.getParameterTypes()[0]) {
-						// no -> add a new descriptor for it below
-						break;
-					}
-				}
-				// update the existing descriptor's read method
-				if (readMethod != null) {
-					try {
-						existingPD.setReadMethod(readMethod);
-					} catch (IntrospectionException ex) {
-						// there is a conflicting setter method present -> null it out and try again
-						existingPD.setWriteMethod(null);
-						existingPD.setReadMethod(readMethod);
-					}
-				}
-
-				// is there already a descriptor that captures this write method or its corresponding read method?
-				if (writeMethodFor(existingPD) != null) {
-					if (readMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != readMethod.getReturnType()
-							|| writeMethod != null && writeMethodFor(existingPD).getParameterTypes()[0] != writeMethod.getParameterTypes()[0]) {
-						// no -> add a new descriptor for it below
-						break;
-					}
-				}
-				// update the existing descriptor's write method
-				if (writeMethod != null
-						&& !(existingPD instanceof IndexedPropertyDescriptor &&
-								!writeMethod.getParameterTypes()[0].isArray())) {
-					existingPD.setWriteMethod(writeMethod);
-				}
-
-				// is this descriptor indexed?
-				if (existingPD instanceof IndexedPropertyDescriptor) {
-					IndexedPropertyDescriptor existingIPD = (IndexedPropertyDescriptor) existingPD;
-
-					// is there already a descriptor that captures this indexed read method or its corresponding indexed write method?
-					if (indexedReadMethodFor(existingIPD) != null) {
-						if (indexedReadMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedReadMethod.getReturnType()
-								|| indexedWriteMethod != null && indexedReadMethodFor(existingIPD).getReturnType() != indexedWriteMethod.getParameterTypes()[1]) {
-							// no -> add a new descriptor for it below
-							break;
-						}
-					}
-					// update the existing descriptor's indexed read method
-					try {
-						if (indexedReadMethod != null) {
-							existingIPD.setIndexedReadMethod(indexedReadMethod);
-						}
-					} catch (IntrospectionException ex) {
-						// there is a conflicting indexed setter method present -> null it out and try again
-						existingIPD.setIndexedWriteMethod(null);
-						existingIPD.setIndexedReadMethod(indexedReadMethod);
-					}
-
-					// is there already a descriptor that captures this indexed write method or its corresponding indexed read method?
-					if (indexedWriteMethodFor(existingIPD) != null) {
-						if (indexedReadMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedReadMethod.getReturnType()
-								|| indexedWriteMethod != null && indexedWriteMethodFor(existingIPD).getParameterTypes()[1] != indexedWriteMethod.getParameterTypes()[1]) {
-							// no -> add a new descriptor for it below
-							break;
-						}
-					}
-					// update the existing descriptor's indexed write method
-					if (indexedWriteMethod != null) {
-						existingIPD.setIndexedWriteMethod(indexedWriteMethod);
-					}
-				}
-
-				// the descriptor has been updated -> return immediately
-				return;
+	private List<Method> findNonVoidWriteMethods(MethodDescriptor[] methodDescriptors) {
+		List<Method> matches = new ArrayList<Method>();
+		for (MethodDescriptor methodDescriptor : methodDescriptors) {
+			Method method = methodDescriptor.getMethod();
+			if (isNonVoidWriteMethod(method)) {
+				matches.add(method);
 			}
 		}
+		return matches;
+	}
 
-		// we haven't yet seen read or write methods for this property -> add a new descriptor
-		if (pd == null) {
-			try {
-				if (indexedReadMethod == null && indexedWriteMethod == null) {
-					pd = new PropertyDescriptor(propertyName, readMethod, writeMethod);
-				}
-				else {
-					pd = new IndexedPropertyDescriptor(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
-				}
-				this.propertyDescriptors.add(pd);
-			} catch (IntrospectionException ex) {
-				logger.debug(format("Could not create new PropertyDescriptor for readMethod [%s] writeMethod [%s] " +
-						"indexedReadMethod [%s] indexedWriteMethod [%s] for property [%s]. Reason: %s",
-						readMethod, writeMethod, indexedReadMethod, indexedWriteMethod, propertyName, ex.getMessage()));
-				// suppress exception and attempt to continue
+	public static boolean isNonVoidWriteMethod(Method method) {
+		String methodName = method.getName();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		int nParams = parameterTypes.length;
+		if (methodName.length() > 3 && methodName.startsWith("set") &&
+				Modifier.isPublic(method.getModifiers()) &&
+				!void.class.isAssignableFrom(method.getReturnType()) &&
+				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class)))) {
+			return true;
+		}
+		return false;
+	}
+
+	private void handleNonVoidWriteMethod(Method method) throws IntrospectionException {
+		int nParams = method.getParameterTypes().length;
+		String propertyName = propertyNameFor(method);
+		Class<?> propertyType = method.getParameterTypes()[nParams-1];
+		PropertyDescriptor existingPD = findExistingPropertyDescriptor(propertyName, propertyType);
+		if (nParams == 1) {
+			if (existingPD == null) {
+				this.propertyDescriptors.add(
+						new SimpleNonIndexedPropertyDescriptor(propertyName, null, method));
+			}
+			else {
+				existingPD.setWriteMethod(method);
+			}
+		}
+		else if (nParams == 2) {
+			if (existingPD == null) {
+				this.propertyDescriptors.add(
+						new SimpleIndexedPropertyDescriptor(
+								propertyName, null, null, null, method));
+			}
+			else if (existingPD instanceof IndexedPropertyDescriptor) {
+				((IndexedPropertyDescriptor)existingPD).setIndexedWriteMethod(method);
+			}
+			else {
+				this.propertyDescriptors.remove(existingPD);
+				this.propertyDescriptors.add(
+						new SimpleIndexedPropertyDescriptor(
+								propertyName, existingPD.getReadMethod(),
+								existingPD.getWriteMethod(), null, method));
 			}
 		}
 		else {
-			pd.setWriteMethod(null);
-			pd.setReadMethod(readMethod);
-			try {
-				pd.setWriteMethod(writeMethod);
-			} catch (IntrospectionException ex) {
-				logger.debug(format("Could not add write method [%s] for property [%s]. Reason: %s",
-						writeMethod, propertyName, ex.getMessage()));
-				// fall through -> add property descriptor as best we can
-			}
-			if (pd instanceof IndexedPropertyDescriptor) {
-				((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(null);
-				((IndexedPropertyDescriptor)pd).setIndexedReadMethod(indexedReadMethod);
-				try {
-					((IndexedPropertyDescriptor)pd).setIndexedWriteMethod(indexedWriteMethod);
-				} catch (IntrospectionException ex) {
-					logger.debug(format("Could not add indexed write method [%s] for property [%s]. Reason: %s",
-							indexedWriteMethod, propertyName, ex.getMessage()));
-					// fall through -> add property descriptor as best we can
-				}
-			}
-			this.propertyDescriptors.add(pd);
+			throw new IllegalArgumentException(
+					"write method must have exactly 1 or 2 parameters: " + method);
 		}
 	}
 
-	private String propertyNameFor(Method method) {
-		return Introspector.decapitalize(method.getName().substring(3,method.getName().length()));
+	private PropertyDescriptor findExistingPropertyDescriptor(
+			String propertyName, Class<?> propertyType) {
+
+		for (PropertyDescriptor pd : this.propertyDescriptors) {
+			final Class<?> candidateType;
+			final String candidateName = pd.getName();
+			if (pd instanceof IndexedPropertyDescriptor) {
+				IndexedPropertyDescriptor ipd = (IndexedPropertyDescriptor) pd;
+				candidateType = ipd.getIndexedPropertyType();
+				if (candidateName.equals(propertyName) &&
+						(candidateType.equals(propertyType) ||
+								candidateType.equals(propertyType.getComponentType()))) {
+					return pd;
+				}
+			}
+			else {
+				candidateType = pd.getPropertyType();
+				if (candidateName.equals(propertyName) &&
+						(candidateType.equals(propertyType) ||
+								propertyType.equals(candidateType.getComponentType()))) {
+					return pd;
+				}
+			}
+		}
+		return null;
 	}
 
-	private Object getterMethodNameFor(String name) {
-		return "get" + StringUtils.capitalize(name);
+	private String propertyNameFor(Method method) {
+		return Introspector.decapitalize(
+				method.getName().substring(3, method.getName().length()));
+	}
+
+
+	/**
+	 * Return the set of {@link PropertyDescriptor}s from the wrapped {@link BeanInfo}
+	 * object as well as {@code PropertyDescriptor}s for each non-void returning setter
+	 * method found during construction.
+	 * @see #ExtendedBeanInfo(BeanInfo)
+	 */
+	public PropertyDescriptor[] getPropertyDescriptors() {
+		return this.propertyDescriptors.toArray(
+				new PropertyDescriptor[this.propertyDescriptors.size()]);
 	}
 
 	public BeanInfo[] getAdditionalBeanInfo() {
@@ -353,45 +232,431 @@ class ExtendedBeanInfo implements BeanInfo {
 		return delegate.getEventSetDescriptors();
 	}
 
-	public Image getIcon(int arg0) {
-		return delegate.getIcon(arg0);
+	public Image getIcon(int iconKind) {
+		return delegate.getIcon(iconKind);
 	}
 
 	public MethodDescriptor[] getMethodDescriptors() {
 		return delegate.getMethodDescriptors();
 	}
+}
 
-	/**
-	 * Return the set of {@link PropertyDescriptor}s from the wrapped {@link BeanInfo}
-	 * object as well as {@code PropertyDescriptor}s for each non-void returning setter
-	 * method found during construction.
-	 * @see #ExtendedBeanInfo(BeanInfo)
-	 */
-	public PropertyDescriptor[] getPropertyDescriptors() {
-		return this.propertyDescriptors.toArray(new PropertyDescriptor[this.propertyDescriptors.size()]);
+
+class SimpleNonIndexedPropertyDescriptor extends PropertyDescriptor {
+
+	private Method readMethod;
+	private Method writeMethod;
+	private Class<?> propertyType;
+	private Class<?> propertyEditorClass;
+
+
+	public SimpleNonIndexedPropertyDescriptor(PropertyDescriptor original)
+			throws IntrospectionException {
+
+		this(original.getName(), original.getReadMethod(), original.getWriteMethod());
+		copyNonMethodProperties(original, this);
+	}
+
+	public SimpleNonIndexedPropertyDescriptor(String propertyName,
+			Method readMethod, Method writeMethod) throws IntrospectionException {
+
+		super(propertyName, readMethod, writeMethod);
+		this.setReadMethod(readMethod);
+		this.setWriteMethod(writeMethod);
+		this.propertyType = findPropertyType(readMethod, writeMethod);
 	}
 
 
-	/**
-	 * Sorts PropertyDescriptor instances alpha-numerically to emulate the behavior of
-	 * {@link java.beans.BeanInfo#getPropertyDescriptors()}.
-	 *
-	 * @see ExtendedBeanInfo#propertyDescriptors
-	 */
-	static class PropertyDescriptorComparator implements Comparator<PropertyDescriptor> {
-		public int compare(PropertyDescriptor desc1, PropertyDescriptor desc2) {
-			String left = desc1.getName();
-			String right = desc2.getName();
-			for (int i = 0; i < left.length(); i++) {
-				if (right.length() == i) {
-					return 1;
-				}
-				int result = left.getBytes()[i] - right.getBytes()[i];
-				if (result != 0) {
-					return result;
-				}
+	@Override
+	public Method getReadMethod() {
+		return this.readMethod;
+	}
+
+	@Override
+	public void setReadMethod(Method readMethod) {
+		this.readMethod = readMethod;
+	}
+
+	@Override
+	public Method getWriteMethod() {
+		return this.writeMethod;
+	}
+
+	@Override
+	public void setWriteMethod(Method writeMethod) {
+		this.writeMethod = writeMethod;
+	}
+
+	@Override
+	public Class<?> getPropertyType() {
+		if (this.propertyType == null) {
+			try {
+				this.propertyType = findPropertyType(this.readMethod, this.writeMethod);
+			} catch (IntrospectionException ex) {
+				// ignore, as does PropertyDescriptor#getPropertyType
 			}
-			return left.length() - right.length();
 		}
+		return this.propertyType;
+	}
+
+	@Override
+	public Class<?> getPropertyEditorClass() {
+		return this.propertyEditorClass;
+	}
+
+	@Override
+	public void setPropertyEditorClass(Class<?> propertyEditorClass) {
+		this.propertyEditorClass = propertyEditorClass;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		return PropertyDescriptorUtils.equals(this, obj);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s[name=%s, propertyType=%s, readMethod=%s, writeMethod=%s]",
+				this.getClass().getSimpleName(), this.getName(), this.getPropertyType(),
+				this.readMethod, this.writeMethod);
+	}
+}
+
+
+class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
+
+	private Method readMethod;
+	private Method writeMethod;
+	private Class<?> propertyType;
+	private Class<?> propertyEditorClass;
+
+	private Method indexedReadMethod;
+	private Method indexedWriteMethod;
+	private Class<?> indexedPropertyType;
+
+
+	public SimpleIndexedPropertyDescriptor(IndexedPropertyDescriptor original)
+			throws IntrospectionException {
+
+		this(original.getName(), original.getReadMethod(), original.getWriteMethod(),
+				original.getIndexedReadMethod(), original.getIndexedWriteMethod());
+		copyNonMethodProperties(original, this);
+	}
+
+	public SimpleIndexedPropertyDescriptor(String propertyName,
+				Method readMethod, Method writeMethod,
+				Method indexedReadMethod, Method indexedWriteMethod)
+			throws IntrospectionException {
+
+		super(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+		this.setReadMethod(readMethod);
+		this.setWriteMethod(writeMethod);
+		this.propertyType = findPropertyType(readMethod, writeMethod);
+
+		this.setIndexedReadMethod(indexedReadMethod);
+		this.setIndexedWriteMethod(indexedWriteMethod);
+		this.indexedPropertyType = findIndexedPropertyType(
+				this.getName(), this.propertyType, indexedReadMethod, indexedWriteMethod);
+	}
+
+
+	@Override
+	public Method getReadMethod() {
+		return this.readMethod;
+	}
+
+	@Override
+	public void setReadMethod(Method readMethod) {
+		this.readMethod = readMethod;
+	}
+
+	@Override
+	public Method getWriteMethod() {
+		return this.writeMethod;
+	}
+
+	@Override
+	public void setWriteMethod(Method writeMethod) {
+		this.writeMethod = writeMethod;
+	}
+
+	@Override
+	public Class<?> getPropertyType() {
+		if (this.propertyType == null) {
+			try {
+				this.propertyType = findPropertyType(this.readMethod, this.writeMethod);
+			} catch (IntrospectionException ex) {
+				// ignore, as does IndexedPropertyDescriptor#getPropertyType
+			}
+		}
+		return this.propertyType;
+	}
+
+	@Override
+	public Method getIndexedReadMethod() {
+		return this.indexedReadMethod;
+	}
+
+	@Override
+	public void setIndexedReadMethod(Method indexedReadMethod) throws IntrospectionException {
+		this.indexedReadMethod = indexedReadMethod;
+	}
+
+	@Override
+	public Method getIndexedWriteMethod() {
+		return this.indexedWriteMethod;
+	}
+
+	@Override
+	public void setIndexedWriteMethod(Method indexedWriteMethod) throws IntrospectionException {
+		this.indexedWriteMethod = indexedWriteMethod;
+	}
+
+	@Override
+	public Class<?> getIndexedPropertyType() {
+		if (this.indexedPropertyType == null) {
+			try {
+				this.indexedPropertyType = findIndexedPropertyType(
+						this.getName(), this.getPropertyType(),
+						this.indexedReadMethod, this.indexedWriteMethod);
+			} catch (IntrospectionException ex) {
+				// ignore, as does IndexedPropertyDescriptor#getIndexedPropertyType
+			}
+		}
+		return this.indexedPropertyType;
+	}
+
+	@Override
+	public Class<?> getPropertyEditorClass() {
+		return this.propertyEditorClass;
+	}
+
+	@Override
+	public void setPropertyEditorClass(Class<?> propertyEditorClass) {
+		this.propertyEditorClass = propertyEditorClass;
+	}
+
+
+	/*
+	 * @see java.beans.IndexedPropertyDescriptor#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (obj != null && obj instanceof IndexedPropertyDescriptor) {
+			IndexedPropertyDescriptor other = (IndexedPropertyDescriptor) obj;
+			if (!compareMethods(getIndexedReadMethod(), other.getIndexedReadMethod())) {
+				return false;
+			}
+
+			if (!compareMethods(getIndexedWriteMethod(), other.getIndexedWriteMethod())) {
+				return false;
+			}
+
+			if (getIndexedPropertyType() != other.getIndexedPropertyType()) {
+				return false;
+			}
+			return PropertyDescriptorUtils.equals(this, obj);
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s[name=%s, propertyType=%s, indexedPropertyType=%s, " +
+				"readMethod=%s, writeMethod=%s, indexedReadMethod=%s, indexedWriteMethod=%s]",
+				this.getClass().getSimpleName(), this.getName(), this.getPropertyType(),
+				this.getIndexedPropertyType(), this.readMethod, this.writeMethod,
+				this.indexedReadMethod, this.indexedWriteMethod);
+	}
+}
+
+
+class PropertyDescriptorUtils {
+
+	/*
+	 * see java.beans.FeatureDescriptor#FeatureDescriptor(FeatureDescriptor)
+	 */
+	public static void copyNonMethodProperties(PropertyDescriptor source, PropertyDescriptor target)
+			throws IntrospectionException {
+
+		target.setExpert(source.isExpert());
+		target.setHidden(source.isHidden());
+		target.setPreferred(source.isPreferred());
+		target.setName(source.getName());
+		target.setShortDescription(source.getShortDescription());
+		target.setDisplayName(source.getDisplayName());
+
+		// copy all attributes (emulating behavior of private FeatureDescriptor#addTable)
+		Enumeration<String> keys = source.attributeNames();
+		while (keys.hasMoreElements()) {
+			String key = (String)keys.nextElement();
+			target.setValue(key, source.getValue(key));
+		}
+
+		// see java.beans.PropertyDescriptor#PropertyDescriptor(PropertyDescriptor)
+		target.setPropertyEditorClass(source.getPropertyEditorClass());
+		target.setBound(source.isBound());
+		target.setConstrained(source.isConstrained());
+	}
+
+	/*
+	 * See PropertyDescriptor#findPropertyType
+	 */
+	public static Class<?> findPropertyType(Method readMethod, Method writeMethod)
+			throws IntrospectionException {
+
+		Class<?> propertyType = null;
+
+		if (readMethod != null) {
+			Class<?>[] params = readMethod.getParameterTypes();
+			if (params.length != 0) {
+				throw new IntrospectionException("bad read method arg count: " + readMethod);
+			}
+			propertyType = readMethod.getReturnType();
+			if (propertyType == Void.TYPE) {
+				throw new IntrospectionException("read method "
+						+ readMethod.getName() + " returns void");
+			}
+		}
+		if (writeMethod != null) {
+			Class<?> params[] = writeMethod.getParameterTypes();
+			if (params.length != 1) {
+				throw new IntrospectionException("bad write method arg count: " + writeMethod);
+			}
+			if (propertyType != null
+					&& !params[0].isAssignableFrom(propertyType)) {
+				throw new IntrospectionException("type mismatch between read and write methods");
+			}
+			propertyType = params[0];
+		}
+		return propertyType;
+	}
+
+	/*
+	 * See IndexedPropertyDescriptor#findIndexedPropertyType
+	 */
+	public static Class<?> findIndexedPropertyType(String name, Class<?> propertyType,
+				Method indexedReadMethod, Method indexedWriteMethod)
+			throws IntrospectionException {
+
+		Class<?> indexedPropertyType = null;
+
+		if (indexedReadMethod != null) {
+			Class<?> params[] = indexedReadMethod.getParameterTypes();
+			if (params.length != 1) {
+				throw new IntrospectionException(
+						"bad indexed read method arg count");
+			}
+			if (params[0] != Integer.TYPE) {
+				throw new IntrospectionException(
+						"non int index to indexed read method");
+			}
+			indexedPropertyType = indexedReadMethod.getReturnType();
+			if (indexedPropertyType == Void.TYPE) {
+				throw new IntrospectionException(
+						"indexed read method returns void");
+			}
+		}
+		if (indexedWriteMethod != null) {
+			Class<?> params[] = indexedWriteMethod.getParameterTypes();
+			if (params.length != 2) {
+				throw new IntrospectionException(
+						"bad indexed write method arg count");
+			}
+			if (params[0] != Integer.TYPE) {
+				throw new IntrospectionException(
+						"non int index to indexed write method");
+			}
+			if (indexedPropertyType != null && indexedPropertyType != params[1]) {
+				throw new IntrospectionException(
+						"type mismatch between indexed read and indexed write methods: " + name);
+			}
+			indexedPropertyType = params[1];
+		}
+		if (propertyType != null
+				&& (!propertyType.isArray() ||
+						propertyType.getComponentType() != indexedPropertyType)) {
+			throw new IntrospectionException(
+					"type mismatch between indexed and non-indexed methods: " + name);
+		}
+		return indexedPropertyType;
+	}
+
+	/**
+	 * Compare the given {@link PropertyDescriptor} against the given {@link Object} and
+	 * return {@code true} if they are objects are equivalent, i.e. both are {@code
+	 * PropertyDescriptor}s whose read method, write method, property types, property
+	 * editor and flags are equivalent.
+	 *
+	 * @see PropertyDescriptor#equals(Object)
+	 */
+	public static boolean equals(PropertyDescriptor pd1, Object obj) {
+		if (pd1 == obj) {
+			return true;
+		}
+		if (obj != null && obj instanceof PropertyDescriptor) {
+			PropertyDescriptor pd2 = (PropertyDescriptor) obj;
+			if (!compareMethods(pd1.getReadMethod(), pd2.getReadMethod())) {
+				return false;
+			}
+
+			if (!compareMethods(pd1.getWriteMethod(), pd2.getWriteMethod())) {
+				return false;
+			}
+
+			if (pd1.getPropertyType() == pd2.getPropertyType()
+					&& pd1.getPropertyEditorClass() == pd2.getPropertyEditorClass()
+					&& pd1.isBound() == pd2.isBound()
+					&& pd1.isConstrained() == pd2.isConstrained()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * see PropertyDescriptor#compareMethods
+	 */
+	public static boolean compareMethods(Method a, Method b) {
+		if ((a == null) != (b == null)) {
+			return false;
+		}
+
+		if (a != null && b != null) {
+			if (!a.equals(b)) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+
+/**
+ * Sorts PropertyDescriptor instances alpha-numerically to emulate the behavior of
+ * {@link java.beans.BeanInfo#getPropertyDescriptors()}.
+ *
+ * @see ExtendedBeanInfo#propertyDescriptors
+ */
+class PropertyDescriptorComparator implements Comparator<PropertyDescriptor> {
+
+	public int compare(PropertyDescriptor desc1, PropertyDescriptor desc2) {
+		String left = desc1.getName();
+		String right = desc2.getName();
+		for (int i = 0; i < left.length(); i++) {
+			if (right.length() == i) {
+				return 1;
+			}
+			int result = left.getBytes()[i] - right.getBytes()[i];
+			if (result != 0) {
+				return result;
+			}
+		}
+		return left.length() - right.length();
 	}
 }
