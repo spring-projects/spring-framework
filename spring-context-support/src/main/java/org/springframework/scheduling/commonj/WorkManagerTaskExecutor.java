@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,26 +64,6 @@ import org.springframework.util.Assert;
  * {@link org.springframework.jca.work.jboss.JBossWorkManagerTaskExecutor}
  * {@link org.springframework.jca.work.glassfish.GlassFishWorkManagerTaskExecutor}
  * classes which are the direct equivalent of this CommonJ adapter class.
- *
- * <p>A similar facility is available on WebSphere 5.1, under the name
- * "Asynch Beans". Its central interface is called WorkManager too and is
- * also obtained from JNDI, just like a standard CommonJ WorkManager.
- * However, this WorkManager variant is notably different: The central
- * execution method is called "startWork" instead of "schedule",
- * and takes a slightly different Work interface as parameter.
- *
- * <p>Support for this WebSphere 5.1 variant can be built with this class
- * and its helper DelegatingWork as template: Call the WorkManager's
- * <code>startWork(Work)</code> instead of <code>schedule(Work)</code>
- * in the <code>execute(Runnable)</code> implementation. Furthermore,
- * for simplicity's sake, drop the entire "Implementation of the CommonJ
- * WorkManager interface" section (and the corresponding
- * <code>implements WorkManager</code> clause at the class level).
- * Of course, you also need to change all <code>commonj.work</code> imports in
- * your WorkManagerTaskExecutor and DelegatingWork variants to the corresponding
- * WebSphere API imports (<code>com.ibm.websphere.asynchbeans.WorkManager</code>
- * and <code>com.ibm.websphere.asynchbeans.Work</code>, respectively).
- * This should be sufficient to get a TaskExecutor adapter for WebSphere 5.
  *
  * @author Juergen Hoeller
  * @since 2.0
