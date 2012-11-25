@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import java.lang.annotation.Documented;
  * created by the container before this bean. Used infrequently in cases where a bean
  * does not explicitly depend on another through properties or constructor arguments,
  * but rather depends on the side effects of another bean's initialization.
- * <p>Note: This attribute will not be inherited by child bean definitions,
- * hence it needs to be specified per concrete bean definition.
  *
  * <p>May be used on any class directly or indirectly annotated with
  * {@link org.springframework.stereotype.Component} or on methods annotated
@@ -45,7 +43,6 @@ import java.lang.annotation.Documented;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Inherited
 @Documented
 public @interface DependsOn {
 
