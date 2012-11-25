@@ -54,7 +54,9 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
  * @see edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor
  * @see edu.emory.mathcs.backport.java.util.concurrent.Executors
  * @see ThreadPoolTaskExecutor
+ * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
+@Deprecated
 public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor {
 
 	private Executor concurrentExecutor;

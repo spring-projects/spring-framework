@@ -32,7 +32,9 @@ import org.springframework.util.CustomizableThreadCreator;
  * @since 2.0.3
  * @see #setThreadNamePrefix
  * @see #setThreadPriority
+ * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
+@Deprecated
 public class CustomizableThreadFactory extends CustomizableThreadCreator implements ThreadFactory {
 
 	/**

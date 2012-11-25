@@ -72,7 +72,9 @@ import org.springframework.util.Assert;
  * @see edu.emory.mathcs.backport.java.util.concurrent.ScheduledThreadPoolExecutor
  * @see edu.emory.mathcs.backport.java.util.concurrent.Executors
  * @see ConcurrentTaskExecutor
+ * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
+@Deprecated
 public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		implements SchedulingTaskExecutor, Executor, BeanNameAware, InitializingBean, DisposableBean {
 
