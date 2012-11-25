@@ -1081,8 +1081,7 @@ public interface ConversionService {
       <para> To register a default ConversionService with Spring, add the
         following bean definition with id <code>conversionService</code>: </para>
       <programlisting language="xml"><![CDATA[<bean id="conversionService"
-      class="org.springframework.context.support.ConversionServiceFactoryBean"/>]]>
-      </programlisting>
+      class="org.springframework.context.support.ConversionServiceFactoryBean"/>]]></programlisting>
 
       <para> A default ConversionService can convert between strings, numbers,
         enums, collections, maps, and other common types. To supplement or
@@ -1447,7 +1446,7 @@ public interface FormatterRegistrar {
         and Date types will be installed, including support for the
         @NumberFormat and @DateTimeFormat annotations. Full support for the Joda
         Time formatting library is also installed if Joda Time is present on the
-        classpath. </para>
+        classpath.</para>
 
       <para> To inject a ConversionService instance with custom formatters and
         converters registered, set the conversion-service attribute and then 
@@ -1485,8 +1484,7 @@ public interface FormatterRegistrar {
         </property>
     </bean>
 
-</beans>
-]]></programlisting>
+</beans>]]></programlisting>
 
       <note>
 	      <para> See <xref linkend="format-FormatterRegistrar-SPI"/> and  
@@ -1507,15 +1505,15 @@ public interface FormatterRegistrar {
     you can change this by defining your own global format.</para>
 
     <para>You will need to ensure that Spring does not register default
-    formatters and instead you should register all formatters manually. Use the
+    formatters, and instead you should register all formatters manually. Use the
     <classname>org.springframework.format.datetime.joda.JodaTimeFormatterRegistrar</classname>
     or <classname>org.springframework.format.datetime.DateFormatterRegistrar</classname>
-    class depending on your use of the Joda Time library.</para>
+    class depending on whether you use the Joda Time library.</para>
 
     <para>For example, the following Java configuration will register a global
     '<literal>yyyyMMdd</literal>' format. This example does not depend on the
-    Joda Time:</para>
-    <programlisting language="java">@Configurable
+    Joda Time library:</para>
+    <programlisting language="java">@Configuration
 public class AppConfig {
 
   @Bean
@@ -1565,14 +1563,13 @@ public class AppConfig {
       </set>
       </property>
     </bean>
-  </beans>
-]]></programlisting>
+  </beans>]]></programlisting>
 
     <note>
       <para>Joda Time provides separate distinct types to represent
       <literal>date</literal>, <literal>time</literal> and
-      <literal>date-time</literal> values. The <literal>dateFormatter</literal>
-      , <literal>timeFormatter</literal> and <literal>dateTimeFormatter</literal>
+      <literal>date-time</literal> values. The <literal>dateFormatter</literal>,
+      <literal>timeFormatter</literal> and <literal>dateTimeFormatter</literal>
       properties of the <classname>JodaTimeFormatterRegistrar</classname> should
       be used to configure the different formats for each type. The
       <classname>DateTimeFormatterFactoryBean</classname> provides a
@@ -1796,8 +1793,7 @@ BindingResult results = binder.getBindingResult();</programlisting>
 public class MyController {
 
     @RequestMapping("/foo", method=RequestMethod.POST)
-    public void processFoo(<emphasis role="bold">@Valid</emphasis> Foo foo) { <lineannotation>/* ... */</lineannotation> }
-</programlisting>
+    public void processFoo(<emphasis role="bold">@Valid</emphasis> Foo foo) { <lineannotation>/* ... */</lineannotation> }</programlisting>
 
         <para> Spring MVC will validate a @Valid object after binding so-long as
           an appropriate Validator has been configured. </para>
@@ -1846,8 +1842,7 @@ public class MyController {
 
     <mvc:annotation-driven validator="globalValidator"/>
 
-</beans>
-]]></programlisting>
+</beans>]]></programlisting>
       </section>
 
       <section id="validation-mvc-jsr303">
@@ -1876,8 +1871,7 @@ public class MyController {
     <!-- JSR-303 support will be detected on classpath and enabled automatically -->
     <mvc:annotation-driven/>
 
-</beans>
-]]></programlisting>
+</beans>]]></programlisting>
 
         <para> With this minimal configuration, anytime a @Valid @Controller
           input is encountered, it will be validated by the JSR-303 provider.
