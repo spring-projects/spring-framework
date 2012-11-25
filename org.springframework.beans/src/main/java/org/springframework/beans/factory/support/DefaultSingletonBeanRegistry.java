@@ -98,7 +98,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	private final Set<String> singletonsCurrentlyInCreation = Collections.synchronizedSet(new HashSet<String>());
 
 	/** Names of beans currently excluded from in creation checks */
-	private final Set<String> inCreationCheckExclusions = new HashSet<String>();
+	private final Set<String> inCreationCheckExclusions = Collections.synchronizedSet(new HashSet<String>());
 
 	/** List of suppressed Exceptions, available for associating related causes */
 	private Set<Exception> suppressedExceptions;
@@ -437,11 +437,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			this.singletonsCurrentlyInDestruction = true;
 		}
 
+		String[] disposableBeanNames;
 		synchronized (this.disposableBeans) {
-			String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-			for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
-				destroySingleton(disposableBeanNames[i]);
-			}
+			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
+		}
+		for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
+			destroySingleton(disposableBeanNames[i]);
 		}
 
 		this.containedBeanMap.clear();
