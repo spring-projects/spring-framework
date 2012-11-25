@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,10 @@ import org.springframework.util.ClassUtils;
  * @see oracle.j2ee.transaction.OC4JTransactionManager#begin(String)
  * @see oracle.j2ee.transaction.OC4JTransaction#setTransactionIsolation
  * @see oracle.j2ee.transaction.TransactionUtility
+ * @deprecated as of Spring 3.2, in favor of {@link WebLogicJtaTransactionManager}
+ * since Oracle end-of-lifed OC4J in favor of WebLogic
  */
+@Deprecated
 public class OC4JJtaTransactionManager extends JtaTransactionManager {
 
 	private static final String TRANSACTION_UTILITY_CLASS_NAME =
