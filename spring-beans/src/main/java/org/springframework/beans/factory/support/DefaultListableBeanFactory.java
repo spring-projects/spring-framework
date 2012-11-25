@@ -576,34 +576,35 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Pre-instantiating singletons in " + this);
 		}
+		List<String> beanNames;
 		synchronized (this.beanDefinitionMap) {
 			// Iterate over a copy to allow for init methods which in turn register new bean definitions.
 			// While this may not be part of the regular factory bootstrap, it does otherwise work fine.
-			List<String> beanNames = new ArrayList<String>(this.beanDefinitionNames);
-			for (String beanName : beanNames) {
-				RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
-				if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
-					if (isFactoryBean(beanName)) {
-						final FactoryBean<?> factory = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
-						boolean isEagerInit;
-						if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
-							isEagerInit = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
-								public Boolean run() {
-									return ((SmartFactoryBean<?>) factory).isEagerInit();
-								}
-							}, getAccessControlContext());
-						}
-						else {
-							isEagerInit = (factory instanceof SmartFactoryBean &&
-									((SmartFactoryBean<?>) factory).isEagerInit());
-						}
-						if (isEagerInit) {
-							getBean(beanName);
-						}
+			beanNames = new ArrayList<String>(this.beanDefinitionNames);
+		}
+		for (String beanName : beanNames) {
+			RootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);
+			if (!bd.isAbstract() && bd.isSingleton() && !bd.isLazyInit()) {
+				if (isFactoryBean(beanName)) {
+					final FactoryBean<?> factory = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
+					boolean isEagerInit;
+					if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
+						isEagerInit = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+							public Boolean run() {
+								return ((SmartFactoryBean<?>) factory).isEagerInit();
+							}
+						}, getAccessControlContext());
 					}
 					else {
+						isEagerInit = (factory instanceof SmartFactoryBean &&
+								((SmartFactoryBean<?>) factory).isEagerInit());
+					}
+					if (isEagerInit) {
 						getBean(beanName);
 					}
+				}
+				else {
+					getBean(beanName);
 				}
 			}
 		}
@@ -650,9 +651,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				this.frozenBeanDefinitionNames = null;
 			}
 			this.beanDefinitionMap.put(beanName, beanDefinition);
-
-			resetBeanDefinition(beanName);
 		}
+
+		resetBeanDefinition(beanName);
 	}
 
 	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
@@ -668,9 +669,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			this.beanDefinitionNames.remove(beanName);
 			this.frozenBeanDefinitionNames = null;
-
-			resetBeanDefinition(beanName);
 		}
+
+		resetBeanDefinition(beanName);
 	}
 
 	/**
@@ -685,9 +686,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		// Remove corresponding bean from singleton cache, if any. Shouldn't usually
 		// be necessary, rather just meant for overriding a context's default beans
 		// (e.g. the default StaticMessageSource in a StaticApplicationContext).
-		synchronized (getSingletonMutex()) {
-			destroySingleton(beanName);
-		}
+		destroySingleton(beanName);
 
 		// Remove any assumptions about by-type mappings
 		this.singletonBeanNamesByType.clear();

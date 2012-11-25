@@ -447,11 +447,12 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			this.singletonsCurrentlyInDestruction = true;
 		}
 
+		String[] disposableBeanNames;
 		synchronized (this.disposableBeans) {
-			String[] disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
-			for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
-				destroySingleton(disposableBeanNames[i]);
-			}
+			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
+		}
+		for (int i = disposableBeanNames.length - 1; i >= 0; i--) {
+			destroySingleton(disposableBeanNames[i]);
 		}
 
 		this.containedBeanMap.clear();
