@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,10 @@ import org.springframework.util.Assert;
  * @author Alef Arendsen
  * @since 11.07.2003
  * @see javax.servlet.jsp.el.ExpressionEvaluator#evaluate
+ * @deprecated as of Spring 3.2, in favor of the JSP 2.0+ native support
+ * for embedded expressions in JSP pages (also applying to tag attributes)
  */
+@Deprecated
 public abstract class ExpressionEvaluationUtils {
 
 	/**
@@ -64,13 +67,9 @@ public abstract class ExpressionEvaluationUtils {
 	 * containers with web applications declaring Servlet 2.4 or higher in their
 	 * <code>web.xml</code>. For backwards compatibility, Spring's expression support
 	 * will remain active for applications declaring Servlet 2.3 or earlier. However,
-	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared,
-	 * so we'll also fall back to keeping expression support active in such a case.
-	 * <p><b>Recommendations:</b> Explicitly set "springJspExpressionSupport" to "false"
-	 * in order to prevent double evaluation for Servlet 2.4+ based applications.
-	 * On Servlet 3.0 containers, this will be done for you by default by the framework.
-	 * If for some reason you nevertheless want Spring's JSP expression support to be
-	 * active, explicitly set the "springJspExpressionSupport" context-param to "true".
+	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared;
+	 * as of Spring 3.2, we won't activate Spring's expression support at all then since
+	 * it got deprecated and will be removed in the next iteration of the framework.
 	 * @param pageContext current JSP PageContext
 	 * @return <code>true</code> if active (ExpressionEvaluationUtils will actually evaluate expressions);
 	 * <code>false</code> if not active (ExpressionEvaluationUtils will return given values as-is,
@@ -84,13 +83,13 @@ public abstract class ExpressionEvaluationUtils {
 		}
 		if (sc.getMajorVersion() >= 3) {
 			// We're on a Servlet 3.0+ container: Let's check what the application declares...
-			if (sc.getEffectiveMajorVersion() > 2 || sc.getEffectiveMinorVersion() > 3) {
-				// Application declares Servlet 2.4+ in its web.xml: JSP 2.0 expressions active.
-				// Skip our own expression support in order to prevent double evaluation.
-				return false;
+			if (sc.getEffectiveMajorVersion() == 2 && sc.getEffectiveMinorVersion() < 4) {
+				// Application declares Servlet 2.3- in its web.xml: JSP 2.0 expressions not active.
+				// Activate our own expression support.
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
