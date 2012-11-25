@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,9 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Thanks to Oracle for donating the original version of this extended OC4J
  * integration code to the Spring project!
+ *
+ * <p><b>NOTE:</b> This class will be deprecated as of Spring 3.2, in favor of
+ * {@link WebLogicJtaTransactionManager} since Oracle end-of-lifed OC4J in favor of WebLogic.
  *
  * @author Paul Parkinson
  * @author Juergen Hoeller

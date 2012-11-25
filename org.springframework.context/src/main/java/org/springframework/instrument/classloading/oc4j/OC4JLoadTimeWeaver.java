@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link LoadTimeWeaver} implementation for OC4J's instrumentable ClassLoader.
- *
- * <p><b>NOTE:</b> Requires Oracle OC4J version 10.1.3.1 or higher.
+ * Requires Oracle OC4J version 10.1.3.1 or higher.
  *
  * <p>Many thanks to <a href="mailto:mike.keith@oracle.com">Mike Keith</a>
  * for his assistance.
+ *
+ * <p><b>NOTE:</b> This class will be deprecated as of Spring 3.2, in favor of
+ * {@link org.springframework.instrument.classloading.weblogic.WebLogicLoadTimeWeaver}
+ * since Oracle end-of-lifed OC4J in favor of WebLogic.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -38,10 +41,11 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 
 	private final OC4JClassLoaderAdapter classLoader;
 
+
 	/**
 	 * Creates a new instance of thie {@link OC4JLoadTimeWeaver} class
 	 * using the default {@link ClassLoader class loader}.
-	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader() 
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	public OC4JLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
@@ -57,18 +61,20 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader = new OC4JClassLoaderAdapter(classLoader);
 	}
 
+
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
 		// we rely on the ClassLoaderUtilities API instead.
-		classLoader.addTransformer(transformer);
+		this.classLoader.addTransformer(transformer);
 	}
 
 	public ClassLoader getInstrumentableClassLoader() {
-		return classLoader.getClassLoader();
+		return this.classLoader.getClassLoader();
 	}
 
 	public ClassLoader getThrowawayClassLoader() {
-		return classLoader.getThrowawayClassLoader();
+		return this.classLoader.getThrowawayClassLoader();
 	}
+
 }
