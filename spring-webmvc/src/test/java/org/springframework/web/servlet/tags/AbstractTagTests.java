@@ -41,6 +41,7 @@ public abstract class AbstractTagTests extends TestCase {
 
 	protected MockPageContext createPageContext() {
 		MockServletContext sc = new MockServletContext();
+		sc.addInitParameter("springJspExpressionSupport", "true");
 		SimpleWebApplicationContext wac = new SimpleWebApplicationContext();
 		wac.setServletContext(sc);
 		wac.setNamespace("test");
