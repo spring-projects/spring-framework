@@ -18,11 +18,11 @@ package org.springframework.cache.jcache;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-
+import javax.cache.CacheManager;
 import javax.cache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.AbstractCacheManager;
+import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 import org.springframework.util.Assert;
 
 /**
@@ -32,11 +32,27 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.2
  */
-public class JCacheCacheManager extends AbstractCacheManager {
+public class JCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
 	private javax.cache.CacheManager cacheManager;
 
 	private boolean allowNullValues = true;
+
+
+	/**
+	 * Create a new JCacheCacheManager, setting the target JCache CacheManager
+	 * through the {@link #setCacheManager} bean property.
+	 */
+	public JCacheCacheManager() {
+	}
+
+	/**
+	 * Create a new JCacheCacheManager for the given backing JCache.
+	 * @param cacheManager the backing JCache {@link javax.cache.CacheManager}
+	 */
+	public JCacheCacheManager(CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
 
 	/**

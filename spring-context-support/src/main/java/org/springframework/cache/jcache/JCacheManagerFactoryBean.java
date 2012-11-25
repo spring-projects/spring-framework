@@ -20,6 +20,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -33,7 +34,8 @@ import org.springframework.beans.factory.InitializingBean;
  * @see javax.cache.Caching#getCacheManager()
  * @see javax.cache.Caching#getCacheManager(String)
  */
-public class JCacheManagerFactoryBean implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean {
+public class JCacheManagerFactoryBean
+		implements FactoryBean<CacheManager>, BeanClassLoaderAware, InitializingBean, DisposableBean {
 
 	private String cacheManagerName = Caching.DEFAULT_CACHE_MANAGER_NAME;
 
@@ -72,6 +74,11 @@ public class JCacheManagerFactoryBean implements FactoryBean<CacheManager>, Bean
 
 	public boolean isSingleton() {
 		return true;
+	}
+
+
+	public void destroy() {
+		this.cacheManager.shutdown();
 	}
 
 }

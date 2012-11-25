@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2010-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,43 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.vendor;
+package org.springframework.cache.ehcache;
+
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Ehcache;
+import net.sf.ehcache.Element;
+import net.sf.ehcache.config.CacheConfiguration;
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.cache.Cache;
 
 import static org.junit.Assert.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.cache.Cache;
-
 /**
- * Test for native cache implementations.
- * 
  * @author Costin Leau
  */
-public abstract class AbstractNativeCacheTests<T> {
+public class EhCacheCacheTests {
 
-	protected T nativeCache;
-	protected Cache cache;
 	protected final static String CACHE_NAME = "testCache";
+
+	protected Ehcache nativeCache;
+
+	protected Cache cache;
+
 
 	@Before
 	public void setUp() throws Exception {
-		nativeCache = createNativeCache();
-		cache = createCache(nativeCache);
+		if (CacheManager.getInstance().cacheExists(CACHE_NAME)) {
+			nativeCache = CacheManager.getInstance().getEhcache(CACHE_NAME);
+		}
+		else {
+			nativeCache = new net.sf.ehcache.Cache(new CacheConfiguration(CACHE_NAME, 100));
+			CacheManager.getInstance().addCache(nativeCache);
+		}
+		cache = new EhCacheCache(nativeCache);
 		cache.clear();
 	}
-
-
-	protected abstract T createNativeCache() throws Exception;
-
-	protected abstract Cache createCache(T nativeCache);
 
 
 	@Test
@@ -85,4 +92,20 @@ public abstract class AbstractNativeCacheTests<T> {
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
 	}
+
+	@Test
+	public void testExpiredElements() throws Exception {
+		String key = "brancusi";
+		String value = "constantin";
+		Element brancusi = new Element(key, value);
+		// ttl = 10s
+		brancusi.setTimeToLive(3);
+		nativeCache.put(brancusi);
+
+		assertEquals(value, cache.get(key).get());
+		// wait for the entry to expire
+		Thread.sleep(5 * 1000);
+		assertNull(cache.get(key));
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,15 +51,26 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 		// preserve the initial order of the cache names
 		for (Cache cache : caches) {
-			this.cacheMap.put(cache.getName(), cache);
+			this.cacheMap.put(cache.getName(), decorateCache(cache));
 			this.cacheNames.add(cache.getName());
 		}
 	}
 
 	protected final void addCache(Cache cache) {
-		this.cacheMap.put(cache.getName(), cache);
+		this.cacheMap.put(cache.getName(), decorateCache(cache));
 		this.cacheNames.add(cache.getName());
 	}
+
+	/**
+	 * Decorate the given Cache object if necessary.
+	 * @param cache the Cache object to be added to this CacheManager
+	 * @return the decorated Cache object to be used instead,
+	 * or simply the passed-in Cache object by default
+	 */
+	protected Cache decorateCache(Cache cache) {
+		return cache;
+	}
+
 
 	public Cache getCache(String name) {
 		return this.cacheMap.get(name);

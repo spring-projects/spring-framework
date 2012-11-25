@@ -23,7 +23,7 @@ import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Status;
 
 import org.springframework.cache.Cache;
-import org.springframework.cache.support.AbstractCacheManager;
+import org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager;
 import org.springframework.util.Assert;
 
 /**
@@ -33,9 +33,25 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public class EhCacheCacheManager extends AbstractCacheManager {
+public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManager {
 
 	private net.sf.ehcache.CacheManager cacheManager;
+
+
+	/**
+	 * Create a new EhCacheCacheManager, setting the target EhCache CacheManager
+	 * through the {@link #setCacheManager} bean property.
+	 */
+	public EhCacheCacheManager() {
+	}
+
+	/**
+	 * Create a new EhCacheCacheManager for the given backing EhCache.
+	 * @param cacheManager the backing EhCache {@link net.sf.ehcache.CacheManager}
+	 */
+	public EhCacheCacheManager(net.sf.ehcache.CacheManager cacheManager) {
+		this.cacheManager = cacheManager;
+	}
 
 
 	/**

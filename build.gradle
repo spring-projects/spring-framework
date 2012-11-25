@@ -269,8 +269,6 @@ project('spring-context') {
         }
         compile("joda-time:joda-time:1.6", optional)
         compile("org.jruby:jruby:1.4.0", optional)
-        compile("javax.cache:cache-api:0.5", optional)
-        compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
         compile("org.slf4j:slf4j-api:1.6.1", optional)
         compile("org.codehaus.jsr166-mirror:jsr166:1.7.0", provided)
         compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
@@ -361,6 +359,8 @@ project('spring-context-support') {
         compile(project(":spring-jdbc"), optional) // for Quartz support
         compile(project(":spring-tx"), optional) // for Quartz support
         compile("org.codehaus.fabric3.api:commonj:1.1.0", optional)
+        compile("javax.cache:cache-api:0.5", optional)
+        compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
         compile("opensymphony:quartz:1.6.2", optional)
         compile("javax.mail:mail:1.4", optional)
         compile("velocity:velocity:1.5", optional)

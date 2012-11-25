@@ -17,7 +17,6 @@
 package org.springframework.cache.ehcache;
 
 import junit.framework.TestCase;
-
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
@@ -152,7 +151,7 @@ public class EhCacheSupportTests extends TestCase {
 			assertTrue("overridden diskExpiryThreadIntervalSeconds is correct", config.getDiskExpiryThreadIntervalSeconds() == 10);
 		}
 		finally {
-			if (useCacheManagerFb) {
+			if (useCacheManagerFb && cacheManagerFb != null) {
 				cacheManagerFb.destroy();
 			}
 			else {
