@@ -16,11 +16,10 @@
 
 package org.springframework.jmx.export.annotation;
 
-import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler;
 import org.springframework.jmx.export.naming.MetadataNamingStrategy;
-import org.springframework.util.StringValueResolver;
 
 /**
  * Convenient subclass of Spring's standard {@link MBeanExporter},
@@ -34,7 +33,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @since 2.5
  */
-public class AnnotationMBeanExporter extends MBeanExporter implements EmbeddedValueResolverAware {
+public class AnnotationMBeanExporter extends MBeanExporter {
 
 	private final AnnotationJmxAttributeSource annotationSource =
 			new AnnotationJmxAttributeSource();
@@ -65,8 +64,10 @@ public class AnnotationMBeanExporter extends MBeanExporter implements EmbeddedVa
 		this.metadataNamingStrategy.setDefaultDomain(defaultDomain);
 	}
 
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.annotationSource.setEmbeddedValueResolver(resolver);
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+		this.annotationSource.setBeanFactory(beanFactory);
 	}
 
 }

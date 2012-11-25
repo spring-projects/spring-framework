@@ -20,7 +20,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.beans.annotation.AnnotationBeanUtils;
-import org.springframework.context.EmbeddedValueResolverAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -45,13 +47,21 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.jmx.export.annotation.ManagedAttribute
  * @see org.springframework.jmx.export.annotation.ManagedOperation
  */
-public class AnnotationJmxAttributeSource implements JmxAttributeSource, EmbeddedValueResolverAware {
+public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFactoryAware {
 
 	private StringValueResolver embeddedValueResolver;
 
 
-	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver = resolver;
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			// Not using EmbeddedValueResolverAware in order to avoid a spring-context dependency:
+			// ConfigurableBeanFactory and its resolveEmbeddedValue live in the spring-beans module.
+			this.embeddedValueResolver = new StringValueResolver() {
+				public String resolveStringValue(String strVal) {
+					return ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(strVal);
+				}
+			};
+		}
 	}
 
 
