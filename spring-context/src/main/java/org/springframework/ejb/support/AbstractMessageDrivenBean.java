@@ -40,7 +40,9 @@ import org.apache.commons.logging.LogFactory;
  * <code>ejbCreate()</code> methods.
  *
  * @author Rod Johnson
+ * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
+@Deprecated
 public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
 	implements MessageDrivenBean {
 

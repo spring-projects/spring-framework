@@ -51,7 +51,9 @@ import org.springframework.util.WeakReferenceMonitor;
  * @author Juergen Hoeller
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
+ * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
+@Deprecated
 public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";

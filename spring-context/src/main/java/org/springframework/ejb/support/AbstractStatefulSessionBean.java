@@ -41,7 +41,9 @@ import org.springframework.beans.FatalBeanException;
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @see org.springframework.context.access.ContextJndiBeanFactoryLocator
+ * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
+@Deprecated
 public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 
 	/**
