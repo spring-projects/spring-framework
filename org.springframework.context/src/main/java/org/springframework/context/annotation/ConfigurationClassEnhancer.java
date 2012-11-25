@@ -56,7 +56,6 @@ class ConfigurationClassEnhancer {
 		DisposableBeanMethodInterceptor.class, NoOp.class };
 
 	private static final CallbackFilter CALLBACK_FILTER = new CallbackFilter() {
-
 		public int accept(Method candidateMethod) {
 			// Set up the callback filter to return the index of the BeanMethodInterceptor when
 			// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
@@ -71,7 +70,6 @@ class ConfigurationClassEnhancer {
 	};
 
 	private static final Callback DISPOSABLE_BEAN_METHOD_INTERCEPTOR = new DisposableBeanMethodInterceptor();
-
 
 	private final Callback[] callbackInstances;
 
@@ -162,6 +160,7 @@ class ConfigurationClassEnhancer {
 	private static class GetObjectMethodInterceptor implements MethodInterceptor {
 
 		private final ConfigurableBeanFactory beanFactory;
+
 		private final String beanName;
 
 		public GetObjectMethodInterceptor(ConfigurableBeanFactory beanFactory, String beanName) {
@@ -296,7 +295,8 @@ class ConfigurationClassEnhancer {
 						this.beanFactory.setCurrentlyInCreation(beanName, false);
 					}
 					return this.beanFactory.getBean(beanName);
-				} finally {
+				}
+				finally {
 					if (alreadyInCreation) {
 						this.beanFactory.setCurrentlyInCreation(beanName, true);
 					}
@@ -347,6 +347,6 @@ class ConfigurationClassEnhancer {
 			Enhancer.registerCallbacks(fbSubclass, callbackInstances);
 			return fbSubclass.newInstance();
 		}
-
 	}
+
 }
