@@ -16,7 +16,6 @@
 
 package org.springframework.orm.hibernate4;
 
-import java.lang.reflect.Method;
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -53,8 +52,6 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Helper class featuring methods for Hibernate Session handling.
@@ -79,13 +76,6 @@ public abstract class SessionFactoryUtils {
 	public static final int SESSION_SYNCHRONIZATION_ORDER =
 			DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 
-	/**
-	 * A Method handle for the <code>SessionFactory.openSession()</code> method.
-	 * The return value differs between Hibernate 3.x and 4.x; for cross-compilation purposes,
-	 * we have to use reflection here as long as we keep compiling against Hibernate 3.x jars.
-	 */
-	private static final Method openSessionMethod = ClassUtils.getMethod(SessionFactory.class, "openSession");
-
 	static final Log logger = LogFactory.getLog(SessionFactoryUtils.class);
 
 
@@ -101,17 +91,6 @@ public abstract class SessionFactoryUtils {
 			return cp.unwrap(DataSource.class);
 		}
 		return null;
-	}
-
-	/**
-	 * Obtain a new Session from the given SessionFactory.
-	 * <p>Bridges between Hibernate signature differences.
-	 * @param sessionFactory the SessionFactory to use
-	 * @return the new Session
-	 * @see org.hibernate.SessionFactory#openSession()
-	 */
-	public static Session openSession(SessionFactory sessionFactory) {
-		return (Session) ReflectionUtils.invokeMethod(openSessionMethod, sessionFactory);
 	}
 
 	/**

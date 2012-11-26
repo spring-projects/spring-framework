@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,28 @@
 
 package org.springframework.orm.hibernate4;
 
-import java.sql.SQLException;
-
-import org.hibernate.JDBCException;
+import org.hibernate.HibernateException;
 
 import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
  * Hibernate-specific subclass of UncategorizedDataAccessException,
- * for JDBC exceptions that Hibernate wrapped.
+ * for Hibernate system errors that do not match any concrete
+ * <code>org.springframework.dao</code> exceptions.
  *
  * @author Juergen Hoeller
  * @since 3.1
  * @see SessionFactoryUtils#convertHibernateAccessException
  */
-public class HibernateJdbcException extends UncategorizedDataAccessException {
-
-	public HibernateJdbcException(JDBCException ex) {
-		super("JDBC exception on Hibernate data access: SQLException for SQL [" + ex.getSQL() + "]; SQL state [" +
-				ex.getSQLState() + "]; error code [" + ex.getErrorCode() + "]; " + ex.getMessage(), ex);
-	}
+public class HibernateSystemException extends UncategorizedDataAccessException {
 
 	/**
-	 * Return the underlying SQLException.
+	 * Create a new HibernateSystemException,
+	 * wrapping an arbitrary HibernateException.
+	 * @param cause the HibernateException thrown
 	 */
-	public SQLException getSQLException() {
-		return ((JDBCException) getCause()).getSQLException();
-	}
-
-	/**
-	 * Return the SQL that led to the problem.
-	 */
-	public String getSql() {
-		return ((JDBCException) getCause()).getSQL();
+	public HibernateSystemException(HibernateException cause) {
+		super(cause != null ? cause.getMessage() : null, cause);
 	}
 
 }

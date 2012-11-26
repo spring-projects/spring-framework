@@ -184,7 +184,7 @@ public class OpenSessionInViewInterceptor implements AsyncWebRequestInterceptor 
 	 */
 	protected Session openSession() throws DataAccessResourceFailureException {
 		try {
-			Session session = SessionFactoryUtils.openSession(getSessionFactory());
+			Session session = getSessionFactory().openSession();
 			session.setFlushMode(FlushMode.MANUAL);
 			return session;
 		}
