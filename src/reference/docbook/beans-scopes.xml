@@ -121,13 +121,8 @@
       bean return the cached object.</para>
 
     <para><mediaobject>
-      <imageobject role="fo">
-        <imagedata align="center" fileref="images/singleton.png" format="PNG"
-            width="400"/>
-      </imageobject>
-
-      <imageobject role="html">
-        <imagedata align="center" fileref="images/singleton.png" format="PNG"/>
+      <imageobject>
+        <imagedata align="center" fileref="images/singleton.png" format="PNG" width="400" />
       </imageobject>
       </mediaobject></para>
 
@@ -167,13 +162,8 @@
       diagram.</emphasis><!--First it says diagram illustrates scope, but then says it's not typical of a prototype scope. Why not use realistic one? --></para>
 
     <para><mediaobject>
-      <imageobject role="fo">
-        <imagedata align="center" fileref="images/prototype.png" format="PNG"
-            width="400" />
-      </imageobject>
-
-      <imageobject role="html">
-        <imagedata align="center" fileref="images/prototype.png" format="PNG"/>
+      <imageobject>
+        <imagedata align="center" fileref="images/prototype.png" format="PNG" width="400"/>
       </imageobject>
       </mediaobject></para>
 

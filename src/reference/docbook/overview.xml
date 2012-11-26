@@ -99,14 +99,8 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
     Instrumentation, and Test, as shown in the following diagram.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
-          <imagedata align="left" fileref="images/spring-overview.png"
-                     format="PNG" width="400" />
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/spring-overview.png"
-                     format="PNG" />
+        <imageobject>
+          <imagedata align="center" fileref="images/spring-overview.png" format="PNG" width="400" />
         </imageobject>
 
         <caption><para>Overview of the Spring Framework</para></caption>
@@ -261,14 +255,8 @@ TR: OK. Added to diagram.--></para>
     web framework integration.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
-          <imagedata align="center" fileref="images/overview-full.png"
-                     format="PNG" width="400" />
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-full.png"
-                     format="PNG" />
+        <imageobject>
+          <imagedata align="center" fileref="images/overview-full.png" format="PNG" width="400" />
         </imageobject>
 
         <caption><para>Typical full-fledged Spring web
@@ -291,15 +279,10 @@ TR: OK. Added to diagram.--></para>
     that transform HTTP parameters to values for your domain model.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
+        <imageobject>
           <imagedata align="center"
                      fileref="images/overview-thirdparty-web.png" format="PNG"
                      width="400"/>
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center"
-                     fileref="images/overview-thirdparty-web.png" format="PNG" />
         </imageobject>
 
         <caption><para>Spring middle-tier using a third-party web
@@ -318,16 +301,10 @@ TR: OK. Added to diagram.--></para>
     layer.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
+        <imageobject>
           <imagedata align="center" fileref="images/overview-remoting.png"
                      format="PNG" width="400" />
         </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-remoting.png"
-                     format="PNG" />
-        </imageobject>
-
         <caption><para>Remoting usage scenario</para></caption>
       </mediaobject></para>
 
@@ -338,16 +315,10 @@ TR: OK. Added to diagram.--></para>
     difficult.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
+        <imageobject>
           <imagedata align="center" fileref="images/overview-ejb.png"
                      format="PNG" width="400" />
         </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/overview-ejb.png"
-                     format="PNG" />
-        </imageobject>
-
         <caption><para>EJBs - Wrapping existing POJOs</para></caption>
       </mediaobject></para>
 

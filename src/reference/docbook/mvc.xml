@@ -235,13 +235,8 @@
     Spring Web MVC shares with many other leading web frameworks).</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
-          <imagedata align="center" fileref="images/mvc.png" format="PNG"
-              width="400" />
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/mvc.png" format="PNG" />
+        <imageobject>
+          <imagedata align="center" fileref="images/mvc.png" format="PNG" width="400"/>
         </imageobject>
 
         <caption><para>The request processing workflow in Spring Web MVC (high
@@ -319,14 +314,8 @@
     new scope-specific beans local to a given Servlet instance.</para>
 
     <para><mediaobject>
-        <imageobject role="fo">
-          <imagedata align="center" fileref="images/mvc-contexts.gif"
-                     format="GIF" width="400" />
-        </imageobject>
-
-        <imageobject role="html">
-          <imagedata align="center" fileref="images/mvc-contexts.gif"
-                     format="GIF" />
+        <imageobject>
+          <imagedata align="center" fileref="images/mvc-contexts.gif" format="GIF" width="400" />
         </imageobject>
 
         <caption>Context hierarchy in Spring Web MVC</caption>

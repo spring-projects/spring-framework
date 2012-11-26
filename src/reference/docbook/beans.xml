@@ -112,8 +112,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 
     <para><mediaobject>
       <imageobject>
-        <imagedata align="center" fileref="images/container-magic.png"
-          format="PNG" width="400" />
+        <imagedata align="center" fileref="images/container-magic.png" format="PNG" width="250" />
       </imageobject>
 
       <caption><para>The Spring IoC container</para></caption>

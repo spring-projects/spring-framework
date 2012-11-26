@@ -189,26 +189,11 @@ public interface Unmarshaller {
             <para>
                 The O/X Mapping exception hierarchy is shown in the following figure:
                 <mediaobject>
-                    <imageobject role="fo">
+                    <imageobject>
                       <imagedata align="center" fileref="images/oxm-exceptions.png"
                           format="PNG" width="400"/>
                     </imageobject>
-                    <caption>
-                        <para>
-                            O/X Mapping exception hierarchy
-                        </para>
-                    </caption>
-                </mediaobject>
-                <mediaobject>
-                    <imageobject role="html">
-                      <imagedata align="center" fileref="images/oxm-exceptions.png"
-                          format="PNG" width="400"/>
-                    </imageobject>
-                    <caption>
-                        <para>
-                            O/X Mapping exception hierarchy
-                        </para>
-                    </caption>
+                    <caption>O/X Mapping exception hierarchy</caption>
                 </mediaobject>
             </para>
         </section>

@@ -2657,16 +2657,10 @@ public @interface Idempotent {
       be seen below.</para>
 
       <para><mediaobject>
-          <imageobject role="fo">
+          <imageobject>
             <imagedata align="center"
                        fileref="images/aop-proxy-plain-pojo-call.png"
-                       format="PNG" />
-          </imageobject>
-
-          <imageobject role="html">
-            <imagedata align="center"
-                       fileref="images/aop-proxy-plain-pojo-call.png"
-                       format="PNG" />
+                       format="PNG" width="400"/>
           </imageobject>
         </mediaobject></para>
 
@@ -2685,14 +2679,9 @@ public @interface Idempotent {
       a proxy. Consider the following diagram and code snippet.</para>
 
       <para><mediaobject>
-          <imageobject role="fo">
+          <imageobject>
             <imagedata align="center" fileref="images/aop-proxy-call.png"
-                       format="PNG" />
-          </imageobject>
-
-          <imageobject role="html">
-            <imagedata align="center" fileref="images/aop-proxy-call.png"
-                       format="PNG" />
+                       format="PNG" width="400" />
           </imageobject>
         </mediaobject></para>
 

@@ -721,13 +721,9 @@ would be rolled back, not necessarily following the EJB rules-->
 TR: OK AS IS. images don't show up in the editor, but they do show up in the generated docs-->
 
       <para><mediaobject>
-          <imageobject role="fo">
+          <imageobject>
             <imagedata align="center" fileref="images/tx.png" format="PNG"
                 width="400"/>
-          </imageobject>
-
-          <imageobject role="html">
-            <imagedata align="center" fileref="images/tx.png" format="PNG" />
           </imageobject>
         </mediaobject></para>
     </section>
@@ -1869,17 +1865,11 @@ TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section d
         <title>Required</title>
 
         <para><mediaobject>
-            <imageobject role="fo">
+            <imageobject>
               <imagedata align="center" fileref="images/tx_prop_required.png"
                   format="PNG" width="400"/>
             </imageobject>
-
-            <imageobject role="html">
-              <imagedata align="center" fileref="images/tx_prop_required.png"
-                  format="PNG" width="400"/>
-            </imageobject>
-
-              <caption><para>PROPAGATION_REQUIRED</para></caption>
+            <caption>PROPAGATION_REQUIRED</caption>
             </mediaobject></para>
 
         <para>When the propagation setting is
@@ -1916,7 +1906,7 @@ TR: REVISED, PLS REVIEW - changed it back; it's not just settings, the section d
             <imageobject>
               <imagedata align="center"
                          fileref="images/tx_prop_requires_new.png"
-                         format="PNG" />
+                         format="PNG" width="400" />
             </imageobject>
 
             <caption><para>PROPAGATION_REQUIRES_NEW</para></caption>
