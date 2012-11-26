@@ -16,8 +16,10 @@
 
 package org.springframework.jmx.support;
 
-import java.util.List;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.Field;
+import java.util.List;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
@@ -26,8 +28,33 @@ import junit.framework.TestCase;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class MBeanServerFactoryBeanTests extends TestCase {
+
+	@Override
+	protected void setUp() throws Exception {
+		resetPlatformManager();
+	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		resetPlatformManager();
+	}
+
+	/**
+	 * Resets MBeanServerFactory and ManagementFactory to a known consistent state.
+	 * This involves releasing all currently registered MBeanServers and resetting
+	 * the platformMBeanServer to null.
+	 */
+	private void resetPlatformManager() throws Exception {
+		for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
+			MBeanServerFactory.releaseMBeanServer(server);
+		}
+		Field field = ManagementFactory.class.getDeclaredField("platformMBeanServer");
+		field.setAccessible(true);
+		field.set(null, null);
+	}
 
 	public void testGetObject() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
