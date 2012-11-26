@@ -17,7 +17,7 @@
 
     <mediaobject>
       <imageobject role="fo">
-        <imagedata align="center" fileref="images/logo-pdf.png" format="PNG"
+        <imagedata align="center" fileref="images/logo.png" format="PNG"
                    width="240" />
       </imageobject>
     </mediaobject>
