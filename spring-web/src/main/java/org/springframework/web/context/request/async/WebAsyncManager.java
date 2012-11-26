@@ -197,7 +197,7 @@ public final class WebAsyncManager {
 	 * The key is derived from the class name and hashcode.
 	 * @param interceptor the interceptor to register
 	 */
-	public void registerCallableInterceptor(CallableProcessingInterceptor... interceptors) {
+	public void registerCallableInterceptors(CallableProcessingInterceptor... interceptors) {
 		Assert.notNull(interceptors, "A CallableProcessingInterceptor is required");
 		for (CallableProcessingInterceptor interceptor : interceptors) {
 			String key = interceptor.getClass().getName() + ":" + interceptor.hashCode();
@@ -222,7 +222,7 @@ public final class WebAsyncManager {
 	 * @param key the key
 	 * @param interceptors the interceptor to register
 	 */
-	public void registerDeferredResultInterceptor(DeferredResultProcessingInterceptor... interceptors) {
+	public void registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
 		Assert.notNull(interceptors, "A DeferredResultProcessingInterceptor is required");
 		for (DeferredResultProcessingInterceptor interceptor : interceptors) {
 			String key = interceptors.getClass().getName() + ":" + interceptors.hashCode();

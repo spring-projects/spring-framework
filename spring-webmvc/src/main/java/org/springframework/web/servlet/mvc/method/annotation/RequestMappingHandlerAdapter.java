@@ -728,8 +728,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerCallableInterceptor(this.callableInterceptors);
-		asyncManager.registerDeferredResultInterceptor(this.deferredResultInterceptors);
+		asyncManager.registerCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
 		if (asyncManager.hasConcurrentResult()) {
 			Object result = asyncManager.getConcurrentResult();

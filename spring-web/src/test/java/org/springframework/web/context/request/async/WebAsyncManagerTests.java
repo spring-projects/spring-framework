@@ -201,6 +201,36 @@ public class WebAsyncManagerTests {
 	}
 
 	@Test
+	public void startCallableProcessingPostProcessContinueAfterException() throws Exception {
+
+		Callable<Object> task = new StubCallable(21);
+		Exception exception = new Exception();
+
+		CallableProcessingInterceptor interceptor1 = createMock(CallableProcessingInterceptor.class);
+		interceptor1.preProcess(this.asyncWebRequest, task);
+		interceptor1.postProcess(this.asyncWebRequest, task, 21);
+		replay(interceptor1);
+
+		CallableProcessingInterceptor interceptor2 = createMock(CallableProcessingInterceptor.class);
+		interceptor2.preProcess(this.asyncWebRequest, task);
+		interceptor2.postProcess(this.asyncWebRequest, task, 21);
+		expectLastCall().andThrow(exception);
+		replay(interceptor2);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerCallableInterceptors(interceptor1, interceptor2);
+		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+
+		verify(interceptor1);
+		verify(interceptor2);
+		verify(this.asyncWebRequest);
+	}
+
+	@Test
 	public void startCallableProcessingWithAsyncTask() {
 
 		AsyncTaskExecutor executor = createMock(AsyncTaskExecutor.class);
