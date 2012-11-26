@@ -17,7 +17,6 @@
 package org.springframework.orm.hibernate4;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
@@ -46,7 +45,6 @@ import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * A Spring-provided extension of the standard Hibernate {@link Configuration} class,
@@ -74,13 +72,6 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			new AnnotationTypeFilter(Entity.class, false),
 			new AnnotationTypeFilter(Embeddable.class, false),
 			new AnnotationTypeFilter(MappedSuperclass.class, false)};
-
-	private static final Method addAnnotatedClassMethod =
-			ClassUtils.getMethod(Configuration.class, "addAnnotatedClass", Class.class);
-
-	private static final Method addPackageMethod =
-			ClassUtils.getMethod(Configuration.class, "addPackage", String.class);
-
 
 	private final ResourcePatternResolver resourcePatternResolver;
 
@@ -169,7 +160,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	public LocalSessionFactoryBuilder addAnnotatedClasses(Class<?>... annotatedClasses) {
 		for (Class<?> annotatedClass : annotatedClasses) {
-			ReflectionUtils.invokeMethod(addAnnotatedClassMethod, this, annotatedClass);
+			addAnnotatedClass(annotatedClass);
 		}
 		return this;
 	}
@@ -181,7 +172,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 */
 	public LocalSessionFactoryBuilder addPackages(String... annotatedPackages) {
 		for (String annotatedPackage :annotatedPackages) {
-			ReflectionUtils.invokeMethod(addPackageMethod, this, annotatedPackage);
+			addPackage(annotatedPackage);
 		}
 		return this;
 	}

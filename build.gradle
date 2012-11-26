@@ -431,10 +431,9 @@ project('spring-orm') {
         // our respective orm.hibernate3 and orm.hibernate4 packages
         compile("aopalliance:aopalliance:1.0")
         compile("org.hibernate:com.springsource.org.hibernate:3.3.1.GA", optional)
-        compile("org.hibernate:hibernate-core:4.1.0.Final", optional)
         compile("org.hibernate:hibernate-cglib-repack:2.1_3", optional)
         compile("org.hibernate:hibernate-annotations:3.4.0.GA", optional)
-        compile("org.hibernate:hibernate-entitymanager:4.1.0.Final", optional)
+        compile("org.hibernate:hibernate-entitymanager:3.4.0.GA", optional)
         compile("org.apache.openjpa:openjpa:1.1.0", optional)
         compile("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1", optional)
         compile("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1", optional)
@@ -456,6 +455,24 @@ project('spring-orm') {
             optional dep
             exclude group: 'javax.persistence', module: 'persistence-api'
         }
+    }
+}
+
+project('spring-orm-hibernate4') {
+    description = 'Spring Object/Relational Mapping - Hibernate 4 support'
+    ext.mergeIntoProject = project(':spring-orm')
+    apply from: "${gradleScriptDir}/merge-artifacts.gradle"
+    dependencies {
+        compile project(":spring-orm").sourceSets.main.output
+        compile project(":spring-tx")
+        compile project(":spring-jdbc")
+        compile("org.hibernate:hibernate-core:4.1.0.Final", optional)
+        compile("org.hibernate:hibernate-entitymanager:4.1.0.Final", optional)
+        compile(project(":spring-web")) { dep ->
+            optional dep
+            exclude group: 'javax.persistence', module: 'persistence-api'
+        }
+        compile("javax.servlet:servlet-api:2.5", optional)
     }
 }
 
