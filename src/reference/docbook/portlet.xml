@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="portlet"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="portlet">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Portlet MVC Framework</title>
 
-  <section id="portlet-introduction">
+  <section xml:id="portlet-introduction">
     <title>Introduction</title>
 
     <sidebar>
       <title>JSR-168 The Java Portlet Specification</title>
       <para>For more general information about portlet development, please
       review a whitepaper from Sun entitled
-      <ulink url="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction to JSR 168"</ulink>,
+      <link xl:href="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction to JSR 168"</link>,
       and of course the
-      <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 Specification</ulink> itself.</para>
+      <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 Specification</link> itself.</para>
     </sidebar>
 
     <para>In addition to supporting conventional (servlet-based) Web development,
@@ -78,7 +82,7 @@
     <classname>DispatcherPortlet</classname> exposes the current locale in
     the same way as <classname>DispatcherServlet</classname>.</para>
 
-    <section id="portlet-introduction-controller">
+    <section xml:id="portlet-introduction-controller">
       <title>Controllers - The C in MVC</title>
       <para>The default handler is still a very simple
       <interfacename>Controller</interfacename> interface, offering just two
@@ -98,7 +102,7 @@
       same as in the servlet framework.</para>
     </section>
 
-    <section id="portlet-introduction-view">
+    <section xml:id="portlet-introduction-view">
       <title>Views - The V in MVC</title>
       <para>All the view rendering capabilities of the servlet framework are
       used directly via a special bridge servlet named
@@ -109,7 +113,7 @@
       within the portlet.</para>
     </section>
 
-    <section id="portlet-introduction-scope">
+    <section xml:id="portlet-introduction-scope">
       <title>Web-scoped beans</title>
       <para>Spring Portlet MVC supports beans whose lifecycle is scoped to the
       current HTTP request or HTTP <interfacename>Session</interfacename> (both
@@ -118,7 +122,7 @@
       container(s) that Spring Portlet MVC uses. These bean scopes are described
       in detail in <xref linkend="beans-factory-scopes-other"/></para>
     </section>
-    
+
     <!--
         As of Spring 3.0.0.RC1, the PetPortal sample application is not
         included in the Spring distribution. Thus the following note is
@@ -135,7 +139,7 @@
     -->
   </section>
 
-  <section id="portlet-dispatcher">
+  <section xml:id="portlet-dispatcher">
     <title>The <classname>DispatcherPortlet</classname></title>
 
     <para>Portlet MVC is a request-driven web MVC framework, designed around
@@ -196,7 +200,7 @@
     defaults are provided so you don't have to worry about configuring
     them.</para>
 
-    <table id="portlet-webappctx-special-beans-tbl">
+    <table xml:id="portlet-webappctx-special-beans-tbl">
       <title>Special beans in the <interfacename>WebApplicationContext</interfacename></title>
       <tgroup cols="2">
         <colspec colname="c1" colwidth="1*" align="left" />
@@ -291,7 +295,7 @@
     by adding context parameters in the <literal>portlet.xml</literal> file or
     portlet init-parameters. The possibilities are listed below.</para>
 
-    <table frame="all" id="portlet-dpp-init-params">
+    <table frame="all" xml:id="portlet-dpp-init-params">
       <title><classname>DispatcherPortlet</classname> initialization parameters</title>
       <tgroup cols="2">
         <colspec colname="c1" colwidth="1*" align="left" />
@@ -340,7 +344,7 @@
     </table>
   </section>
 
-  <section id="portlet-viewservlet">
+  <section xml:id="portlet-viewservlet">
     <title>The <classname>ViewRendererServlet</classname></title>
 
     <para>The rendering process in Portlet MVC is a bit more complex than in
@@ -405,7 +409,7 @@
 
   </section>
 
-  <section id="portlet-controller">
+  <section xml:id="portlet-controller">
     <title>Controllers</title>
 
     <para>The controllers in Portlet MVC are very similar to the Web MVC
@@ -447,7 +451,7 @@
     action request, handling a render request, and returning a model and a
     view.</para>
 
-    <section id="portlet-controller-abstractcontroller">
+    <section xml:id="portlet-controller-abstractcontroller">
       <title><classname>AbstractController</classname> and <classname>PortletContentGenerator</classname></title>
 
       <para>Of course, just a <interfacename>Controller</interfacename>
@@ -458,7 +462,7 @@
       <interfacename>ApplicationContext</interfacename> and control over
       caching.</para>
 
-      <table frame="all" id="portlet-ac-features">
+      <table frame="all" xml:id="portlet-ac-features">
         <title>Features offered by the <classname>AbstractController</classname></title>
         <tgroup cols="2">
           <colspec colname="c1" colwidth="1*" align="left" />
@@ -566,7 +570,7 @@ public class SampleController extends AbstractController {
       controller working.</para>
     </section>
 
-    <section id="portlet-controller-simple">
+    <section xml:id="portlet-controller-simple">
       <title>Other simple controllers</title>
 
       <para>Although you can extend <classname>AbstractController</classname>,
@@ -584,7 +588,7 @@ public class SampleController extends AbstractController {
       then it uses "view" as the view name.</para>
     </section>
 
-    <section id="portlet-controller-command">
+    <section xml:id="portlet-controller-command">
       <title>Command Controllers</title>
 
       <para>Spring Portlet MVC has the exact same hierarchy of
@@ -646,7 +650,7 @@ public class SampleController extends AbstractController {
       start using them.</para>
     </section>
 
-    <section id="portlet-controller-wrapping">
+    <section xml:id="portlet-controller-wrapping">
       <title><classname>PortletWrappingController</classname></title>
 
       <para>Instead of developing new controllers, it is possible to use
@@ -673,7 +677,7 @@ public class SampleController extends AbstractController {
     </section>
   </section>
 
-  <section id="portlet-handlermapping">
+  <section xml:id="portlet-handlermapping">
     <title>Handler mappings</title>
 
     <para>Using a handler mapping you can map incoming portlet requests to
@@ -747,7 +751,7 @@ public class SampleController extends AbstractController {
       Handlers.</para></listitem>
     </itemizedlist>
 
-    <section id="portlet-handlermapping-portletmode">
+    <section xml:id="portlet-handlermapping-portletmode">
       <title><classname>PortletModeHandlerMapping</classname></title>
 
       <para>This is a simple handler mapping that maps incoming requests
@@ -765,7 +769,7 @@ public class SampleController extends AbstractController {
 </bean>]]></programlisting>
     </section>
 
-    <section id="portlet-handlermapping-parameter">
+    <section xml:id="portlet-handlermapping-parameter">
       <title><classname>ParameterHandlerMapping</classname></title>
 
       <para>If we need to navigate around to multiple controllers without
@@ -791,7 +795,7 @@ public class SampleController extends AbstractController {
 </bean>]]></programlisting>
     </section>
 
-    <section id="portlet-handlermapping-portletmodeparameter">
+    <section xml:id="portlet-handlermapping-portletmodeparameter">
       <title><classname>PortletModeParameterHandlerMapping</classname></title>
 
       <para>The most powerful built-in handler mapping,
@@ -838,7 +842,7 @@ public class SampleController extends AbstractController {
       defaults for each mode and an overall default as well.</para>
     </section>
 
-    <section id="portlet-handlermapping-interceptor">
+    <section xml:id="portlet-handlermapping-interceptor">
       <title>Adding <interfacename>HandlerInterceptor</interfacename>s</title>
 
       <para>Spring's handler mapping mechanism has a notion of handler
@@ -879,7 +883,7 @@ public class SampleController extends AbstractController {
       to check what kind of request it is before processing it.</para>
     </section>
 
-    <section id="portlet-handlermapping-interceptoradapter">
+    <section xml:id="portlet-handlermapping-interceptoradapter">
       <title><classname>HandlerInterceptorAdapter</classname></title>
 
       <para>As with the servlet package, the portlet package has a
@@ -892,7 +896,7 @@ public class SampleController extends AbstractController {
 
     </section>
 
-    <section id="portlet-handlermapping-parameterinterceptor">
+    <section xml:id="portlet-handlermapping-parameterinterceptor">
       <title><classname>ParameterMappingInterceptor</classname></title>
 
       <para>The portlet package also has a concrete interceptor named
@@ -920,7 +924,7 @@ public class SampleController extends AbstractController {
     </section>
   </section>
 
-  <section id="portlet-viewresolver">
+  <section xml:id="portlet-viewresolver">
     <title>Views and resolving them</title>
 
     <para>As mentioned previously, Spring Portlet MVC directly reuses all
@@ -960,7 +964,7 @@ public class SampleController extends AbstractController {
     that they work in servlet views.</para>
   </section>
 
-  <section id="portlet-multipart">
+  <section xml:id="portlet-multipart">
     <title>Multipart (file upload) support</title>
 
     <para>Spring Portlet MVC has built-in multipart support to handle file
@@ -970,7 +974,7 @@ public class SampleController extends AbstractController {
     in the <literal>org.springframework.web.portlet.multipart</literal>
     package. Spring provides a <interfacename>PortletMultipartResolver</interfacename>
     for use with
-    <ulink url="http://jakarta.apache.org/commons/fileupload">Commons FileUpload</ulink>.
+    <link xl:href="http://jakarta.apache.org/commons/fileupload">Commons FileUpload</link>.
     How uploading files is supported will be described in the rest of this section.</para>
 
     <para>By default, no multipart handling will be done by Spring Portlet
@@ -995,7 +999,7 @@ public class SampleController extends AbstractController {
       consequently no multipart support will be in effect.</para>
     </note>
 
-    <section id="portlet-multipart-resolver">
+    <section xml:id="portlet-multipart-resolver">
       <title>Using the <interfacename>PortletMultipartResolver</interfacename></title>
 
       <para>The following example shows how to use the
@@ -1033,7 +1037,7 @@ public class SampleController extends AbstractController {
       <interfacename>RenderRequest</interfacename>.</para>
     </section>
 
-    <section id="portlet-multipart-forms">
+    <section xml:id="portlet-multipart-forms">
       <title>Handling a file upload in a form</title>
 
       <para>After the
@@ -1230,7 +1234,7 @@ public class FileUploadBean {
     </section>
   </section>
 
-  <section id="portlet-exceptionresolver">
+  <section xml:id="portlet-exceptionresolver">
     <title>Handling exceptions</title>
 
     <para>Just like Servlet MVC, Portlet MVC provides
@@ -1243,7 +1247,7 @@ public class FileUploadBean {
     to a view name.</para>
   </section>
 
-  <section id="portlet-annotation">
+  <section xml:id="portlet-annotation">
     <title>Annotation-based controller configuration</title>
 
     <para>Spring 2.5 introduced an annotation-based programming model for MVC
@@ -1257,12 +1261,12 @@ public class FileUploadBean {
     direct dependencies on Servlet or Portlet API's, although they can easily
     get access to Servlet or Portlet facilities if desired.</para>
 
-	<!--
-		PetPortal is no longer included with the Spring distribution as of
-		Spring 3.0.0.RC1. Thus, the following is commented out until further
-		notice.
-	-->
-	<!--
+    <!--
+        PetPortal is no longer included with the Spring distribution as of
+        Spring 3.0.0.RC1. Thus, the following is commented out until further
+        notice.
+    -->
+    <!--
     <tip>
       <para>The Spring distribution ships with the
       <emphasis>PetPortal</emphasis> sample, which is a portal application that takes
@@ -1270,12 +1274,12 @@ public class FileUploadBean {
       of simple form processing. You can find the <emphasis>PetPortal</emphasis>
       application in the <literal>'samples/petportal'</literal> directory.</para>
     </tip>
-	-->
+    -->
 
     <para>The following sections document these annotations and how they are
     most commonly used in a Portlet environment.</para>
 
-    <section id="portlet-ann-setup">
+    <section xml:id="portlet-ann-setup">
       <title>Setting up the dispatcher for annotation support</title>
 
       <para><emphasis><interfacename>@RequestMapping</interfacename> will only be processed
@@ -1311,7 +1315,7 @@ public class FileUploadBean {
       specifying a custom <interfacename>WebBindingInitializer</interfacename> (see below).</para>
     </section>
 
-    <section id="portlet-ann-controller">
+    <section xml:id="portlet-ann-controller">
       <title>Defining a controller with
       <interfacename>@Controller</interfacename></title>
 
@@ -1358,7 +1362,7 @@ public class FileUploadBean {
 </programlisting>
     </section>
 
-    <section id="portlet-ann-requestmapping">
+    <section xml:id="portlet-ann-requestmapping">
       <title>Mapping requests with
       <interfacename>@RequestMapping</interfacename></title>
 
@@ -1439,7 +1443,7 @@ public class PetSitesEditController {
 }</programlisting>
     </section>
 
-    <section id="portlet-ann-requestmapping-arguments">
+    <section xml:id="portlet-ann-requestmapping-arguments">
       <title>Supported handler method arguments</title>
 
       <para>Handler methods which are annotated with
@@ -1587,7 +1591,7 @@ public class PetSitesEditController {
       </itemizedlist></para>
     </section>
 
-    <section id="portlet-ann-requestparam">
+    <section xml:id="portlet-ann-requestparam">
       <title>Binding request parameters to method parameters with
       <classname>@RequestParam</classname></title>
 
@@ -1620,7 +1624,7 @@ public class PetSitesEditController {
       <literal>@RequestParam(value="id", required=false)</literal>).</para>
     </section>
 
-    <section id="portlet-ann-modelattrib">
+    <section xml:id="portlet-ann-modelattrib">
       <title>Providing a link to data from the model with
       <classname>@ModelAttribute</classname></title>
 
@@ -1680,7 +1684,7 @@ public class PetSitesEditController {
 }</programlisting>
     </section>
 
-    <section id="portlet-ann-sessionattrib">
+    <section xml:id="portlet-ann-sessionattrib">
       <title>Specifying attributes to store in a Session with
       <classname>@SessionAttributes</classname></title>
 
@@ -1703,7 +1707,7 @@ public class PetSitesEditController {
 </programlisting>
     </section>
 
-    <section id="portlet-ann-webdatabinder">
+    <section xml:id="portlet-ann-webdatabinder">
       <title>Customizing <classname>WebDataBinder</classname>
       initialization</title>
 
@@ -1713,7 +1717,7 @@ public class PetSitesEditController {
       controller or externalize your configuration by providing a custom
       <interfacename>WebBindingInitializer</interfacename>.</para>
 
-      <section id="portlet-ann-initbinder">
+      <section xml:id="portlet-ann-initbinder">
         <title>Customizing data binding with
         <interfacename>@InitBinder</interfacename></title>
 
@@ -1754,7 +1758,7 @@ public class MyFormController {
 }</programlisting>
       </section>
 
-      <section id="portlet-ann-webbindinginitializer">
+      <section xml:id="portlet-ann-webbindinginitializer">
         <title>Configuring a custom
         <interfacename>WebBindingInitializer</interfacename></title>
 
@@ -1768,7 +1772,7 @@ public class MyFormController {
     </section>
   </section>
 
-  <section id="portlet-deployment">
+  <section xml:id="portlet-deployment">
     <title>Portlet application deployment</title>
 
     <para>The process of deploying a Spring Portlet MVC application is no

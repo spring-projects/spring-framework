@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="resources"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="resources">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Resources</title>
 
-  <section id="resources-introduction">
+  <section xml:id="resources-introduction">
     <title>Introduction</title>
 
     <para>Java's standard <classname>java.net.URL</classname> class and
     standard handlers for various URL prefixes unfortunately are not quite
     adequate enough for all access to low-level resources. For example,
-	there is no standardized <classname>URL</classname> implementation
-	that may be used to access a resource that needs to be obtained from
-	the classpath, or relative to a
-	<interfacename>ServletContext</interfacename>. While it is possible
+    there is no standardized <classname>URL</classname> implementation
+    that may be used to access a resource that needs to be obtained from
+    the classpath, or relative to a
+    <interfacename>ServletContext</interfacename>. While it is possible
     to register new handlers for specialized <classname>URL</classname>
-	prefixes (similar to existing handlers for prefixes such as
-	<literal>http:</literal>), this is generally quite complicated, and the
-	<classname>URL</classname> interface still lacks some desirable
+    prefixes (similar to existing handlers for prefixes such as
+    <literal>http:</literal>), this is generally quite complicated, and the
+    <classname>URL</classname> interface still lacks some desirable
     functionality, such as a method to check for the existence of the
-	resource being pointed to.</para>
+    resource being pointed to.</para>
   </section>
 
-  <section id="resources-resource">
+  <section xml:id="resources-resource">
     <title>The <interfacename>Resource</interfacename> interface</title>
 
     <para>Spring's <interfacename>Resource</interfacename> interface is meant
@@ -122,14 +126,14 @@
     <classname>URL</classname> to do its work.</para>
   </section>
 
-  <section id="resources-implementations">
+  <section xml:id="resources-implementations">
     <title>Built-in <interfacename>Resource</interfacename> implementations</title>
 
     <para>There are a number of <interfacename>Resource</interfacename>
     implementations that come supplied straight out of the box in
     Spring:</para>
 
-    <section id="resources-implementations-urlresource">
+    <section xml:id="resources-implementations-urlresource">
       <title><classname>UrlResource</classname></title>
 
       <para>The <classname>UrlResource</classname> wraps a
@@ -156,7 +160,7 @@
       URL string, and will create a <classname>UrlResource</classname>.</para>
     </section>
 
-    <section id="resources-implementations-classpathresource">
+    <section xml:id="resources-implementations-classpathresource">
       <title><classname>ClassPathResource</classname></title>
 
       <para>This class represents a resource which should be obtained from the
@@ -182,7 +186,7 @@
       <classname>ClassPathResource</classname> in that case.</para>
     </section>
 
-    <section id="resources-implementations-filesystemresource">
+    <section xml:id="resources-implementations-filesystemresource">
       <title><classname>FileSystemResource</classname></title>
 
       <para>This is a <interfacename>Resource</interfacename> implementation
@@ -191,7 +195,7 @@
       <classname>URL</classname>.</para>
     </section>
 
-    <section id="resources-implementations-servletcontextresource">
+    <section xml:id="resources-implementations-servletcontextresource">
       <title><classname>ServletContextResource</classname></title>
 
       <para>This is a <interfacename>Resource</interfacename> implementation
@@ -207,7 +211,7 @@
       conceivable) is actually dependent on the Servlet container.</para>
     </section>
 
-    <section id="resources-implementations-inputstreamresource">
+    <section xml:id="resources-implementations-inputstreamresource">
       <title><classname>InputStreamResource</classname></title>
 
       <para>A <interfacename>Resource</interfacename> implementation for a
@@ -226,7 +230,7 @@
       need to read a stream multiple times.</para>
     </section>
 
-    <section id="resources-implementations-bytearrayresource">
+    <section xml:id="resources-implementations-bytearrayresource">
       <title><classname>ByteArrayResource</classname></title>
 
       <para>This is a <interfacename>Resource</interfacename> implementation
@@ -240,7 +244,7 @@
     </section>
   </section>
 
-  <section id="resources-resourceloader">
+  <section xml:id="resources-resourceloader">
     <title>The <interfacename>ResourceLoader</interfacename></title>
 
     <para>The <interfacename>ResourceLoader</interfacename> interface is meant
@@ -295,7 +299,7 @@
     <classname>String</classname>s to
     <interfacename>Resource</interfacename>s:</para>
 
-    <table pgwide="1" id="resources-resource-strings">
+    <table pgwide="1" xml:id="resources-resource-strings">
       <title>Resource strings</title>
 
       <tgroup cols="3">
@@ -357,7 +361,7 @@
     </table>
   </section>
 
-  <section id="resources-resourceloaderaware">
+  <section xml:id="resources-resourceloaderaware">
     <title>The <interfacename>ResourceLoaderAware</interfacename> interface</title>
 
     <para>The <interfacename>ResourceLoaderAware</interfacename> interface is
@@ -408,7 +412,7 @@
     see <xref linkend="beans-autowired-annotation"/>.</para>
   </section>
 
-  <section id="resources-as-dependencies">
+  <section xml:id="resources-as-dependencies">
     <title><literal>Resources</literal> as dependencies</title>
 
     <para>If the bean itself is going to determine and supply the resource
@@ -429,8 +433,8 @@
     <literal>myBean</literal> has a template property of type
     <interfacename>Resource</interfacename>, it can be configured with a
     simple string for that resource, as follows:</para>
-	  
-	<programlisting language="xml"><![CDATA[<bean id="myBean" class="...">
+
+    <programlisting language="xml"><![CDATA[<bean id="myBean" class="...">
   <property name="template" value="some/resource/path/myTemplate.txt"/>
 </bean>]]></programlisting>
 
@@ -454,10 +458,10 @@
     <programlisting language="xml"><![CDATA[<property name="template" value="file:/some/resource/path/myTemplate.txt"/>]]></programlisting>
   </section>
 
-  <section id="resources-app-ctx">
+  <section xml:id="resources-app-ctx">
     <title>Application contexts and <interfacename>Resource</interfacename> paths</title>
 
-    <section id="resources-app-ctx-construction">
+    <section xml:id="resources-app-ctx-construction">
       <title>Constructing application contexts</title>
 
       <para>An application context constructor (for a specific application
@@ -498,7 +502,7 @@
       subsequently used as a <interfacename>ResourceLoader</interfacename>,
       any unprefixed paths will still be treated as filesystem paths.</para>
 
-      <section id="resources-app-ctx-classpathxml">
+      <section xml:id="resources-app-ctx-classpathxml">
         <title>Constructing <classname>ClassPathXmlApplicationContext</classname> instances - shortcuts</title>
 
         <para>The <classname>ClassPathXmlApplicationContext</classname>
@@ -533,7 +537,7 @@
       </section>
     </section>
 
-    <section id="resources-app-ctx-wildcards-in-resource-paths">
+    <section xml:id="resources-app-ctx-wildcards-in-resource-paths">
       <title>Wildcards in application context constructor resource paths</title>
 
       <para>The resource paths in application context constructor values may
@@ -559,7 +563,7 @@
       <interfacename>Resource</interfacename>, as a resource points to just
       one resource at a time.</para>
 
-      <section id="resources-app-ctx-ant-patterns-in-paths">
+      <section xml:id="resources-app-ctx-ant-patterns-in-paths">
         <title>Ant-style Patterns</title>
 
         <para>When the path location contains an Ant-style pattern, for example:</para>
@@ -581,12 +585,12 @@
         parses the jar URL and then traverses the contents of the jar file
         to resolve the wildcards.</para>
 
-        <section id="resources-app-ctx-portability">
+        <section xml:id="resources-app-ctx-portability">
           <title>Implications on portability</title>
 
           <para>If the specified path is already a file URL (either
           explicitly, or implicitly because the base
-		  <interfacename>ResourceLoader</interfacename> is a
+          <interfacename>ResourceLoader</interfacename> is a
           filesystem one, then wildcarding is guaranteed to work in a
           completely portable fashion.</para>
 
@@ -613,7 +617,7 @@
         </section>
       </section>
 
-      <section id="resources-classpath-wildcards">
+      <section xml:id="resources-classpath-wildcards">
         <title>The <literal>classpath*:</literal> prefix</title>
 
         <para>When constructing an XML-based application context, a location
@@ -655,7 +659,7 @@
         strategy described above is used for the wildcard subpath.</para>
       </section>
 
-      <section id="resources-wildcards-in-path-other-stuff">
+      <section xml:id="resources-wildcards-in-path-other-stuff">
         <title>Other notes relating to wildcards</title>
 
         <para>Please note that "<literal>classpath*:</literal>" when
@@ -669,17 +673,17 @@
         returns file system locations for a passed-in empty string (indicating
         potential roots to search).</para>
 
-		<para>Ant-style patterns with "<literal>classpath:</literal>"
-		resources are not guaranteed to find matching resources if the root
-		package to search is available in multiple class path locations. This
-		is because a resource such as</para>
+        <para>Ant-style patterns with "<literal>classpath:</literal>"
+        resources are not guaranteed to find matching resources if the root
+        package to search is available in multiple class path locations. This
+        is because a resource such as</para>
 
         <programlisting><![CDATA[    com/mycompany/package1/service-context.xml]]></programlisting>
 
         <para>may be in only one location, but when a path such as</para>
 
         <programlisting><![CDATA[    classpath:com/mycompany/**/service-context.xml]]></programlisting>
-        
+
         <para>is used to try to resolve it, the resolver will work off the (first) URL
         returned by <methodname>getResource("com/mycompany")</methodname>;. If
         this base package node exists in multiple classloader locations, the
@@ -690,7 +694,7 @@
       </section>
     </section>
 
-    <section id="resources-filesystemresource-caveats">
+    <section xml:id="resources-filesystemresource-caveats">
       <title><classname>FileSystemResource</classname> caveats</title>
 
       <para>A <classname>FileSystemResource</classname> that is not attached
@@ -731,10 +735,10 @@ ctx.getResource("/some/resource/path/myTemplate.txt");]]></programlisting>
       the use of a <classname>UrlResource</classname>, by using the
       <literal>file:</literal> URL prefix.</para>
 
-      <programlisting language="java"><lineannotation>// actual context type doesn't matter, the <interfacename>Resource</interfacename> will always be <classname>UrlResource</classname></lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// actual context type doesn't matter, the Resource will always be UrlResource</lineannotation><![CDATA[
 ctx.getResource("file:/some/resource/path/myTemplate.txt");]]></programlisting>
 
-      <programlisting language="java"><lineannotation>// force this FileSystemXmlApplicationContext to load its definition via a <classname>UrlResource</classname></lineannotation><![CDATA[
+      <programlisting language="java"><lineannotation>// force this FileSystemXmlApplicationContext to load its definition via a UrlResource</lineannotation><![CDATA[
 ApplicationContext ctx =
     new FileSystemXmlApplicationContext("file:/conf/context.xml");]]></programlisting>
     </section>

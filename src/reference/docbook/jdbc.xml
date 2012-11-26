@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="jdbc"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="jdbc">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Data access with JDBC</title>
 
-  <section id="jdbc-introduction">
+  <section xml:id="jdbc-introduction">
     <title>Introduction to Spring Framework JDBC</title>
 
     <para>The value-add provided by the Spring Framework JDBC abstraction is
@@ -122,7 +126,7 @@
     <para>The Spring Framework takes care of all the low-level details that
     can make JDBC such a tedious API to develop with.</para>
 
-    <section id="jdbc-choose-style">
+    <section xml:id="jdbc-choose-style">
       <title>Choosing an approach for JDBC database access</title>
 
       <para>You can choose among several approaches to form the basis for your
@@ -166,7 +170,7 @@
           SimpleJdbcCall</emphasis> optimize database metadata to limit the
           amount of necessary configuration. This approach simplifies coding
           so that you only need to provide the name of the table or procedure
-          and provide a map of parameters matching the column names. <!--Revise preceding to clarify: You *must* use this approach w/ SimpleJdbcTemplate, it is *recommended*, or you *can*? 
+          and provide a map of parameters matching the column names. <!--Revise preceding to clarify: You *must* use this approach w/ SimpleJdbcTemplate, it is *recommended*, or you *can*?
 TR: OK. I removed the sentence since it isn;t entirely accurate. The implementation uses a plain JdbcTemplate internally.-->
           This only works if the database provides adequate metadata. If the
           database doesn't provide this metadata, you will have to provide
@@ -185,7 +189,7 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
       </itemizedlist>
     </section>
 
-    <section id="jdbc-packages">
+    <section xml:id="jdbc-packages">
       <title>Package hierarchy<!--I have provided links to main sections that deal with most packages. TR: OK--></title>
 
       <para>The Spring Framework's JDBC abstraction framework consists of four
@@ -240,11 +244,11 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
     </section>
   </section>
 
-  <section id="jdbc-core">
+  <section xml:id="jdbc-core">
     <title>Using the JDBC core classes to control basic JDBC processing and
     error handling<!--Note: I moved the *DataSource* subsection out of this section because it seems to belong more under *Controlling database connections.*--><!--This section here is about core classes, but datasource is a separate package from core. See *Package hierarchy* section above. TR: OK--></title>
 
-    <section id="jdbc-JdbcTemplate">
+    <section xml:id="jdbc-JdbcTemplate">
       <title><classname>JdbcTemplate</classname></title>
 
       <para>The <classname>JdbcTemplate</classname> class is the central class
@@ -293,7 +297,7 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
       using a custom subclass of the <classname>JdbcTemplate</classname>
       class).</para>
 
-      <section id="jdbc-JdbcTemplate-examples">
+      <section xml:id="jdbc-JdbcTemplate-examples">
         <title>Examples of JdbcTemplate class usage</title>
 
         <para>This section provides some examples of
@@ -302,7 +306,7 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
         <classname>JdbcTemplate</classname>; see the attendant Javadocs for
         that.</para>
 
-        <section id="jdbc-JdbcTemplate-examples-query">
+        <section xml:id="jdbc-JdbcTemplate-examples-query">
           <title>Querying (SELECT)</title>
 
           <para>Here is a simple query for getting the number of rows in a
@@ -318,7 +322,7 @@ TR: OK. I removed the sentence since it isn;t entirely accurate. The implementat
           <para>Querying for a <classname>String</classname>:</para>
 
           <programlisting language="java">String lastName = this.jdbcTemplate.queryForObject(
-        "select last_name from t_actor where id = ?", 
+        "select last_name from t_actor where id = ?",
         new Object[]{1212L}, String.class);</programlisting>
 
           <para>Querying and populating a <emphasis>single</emphasis> domain
@@ -370,11 +374,11 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         actor.setFirstName(rs.getString("first_name"));
         actor.setLastName(rs.getString("last_name"));
         return actor;
-    }        
+    }
 }</programlisting>
         </section>
 
-        <section id="jdbc-JdbcTemplate-examples-update">
+        <section xml:id="jdbc-JdbcTemplate-examples-update">
           <title>Updating (INSERT/UPDATE/DELETE) with jdbcTemplate<!--Provide introductory text as with other examples. TR: OK.--></title>
 
           <para>You use the <methodname>update(..)</methodname> method to
@@ -383,11 +387,11 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
           array.</para>
 
           <programlisting language="java">this.jdbcTemplate.update(
-        "insert into t_actor (first_name, last_name) values (?, ?)", 
+        "insert into t_actor (first_name, last_name) values (?, ?)",
         "Leonor", "Watling");</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
-        "update t_actor set = ? where id = ?", 
+        "update t_actor set = ? where id = ?",
         "Banjo", 5276L);</programlisting>
 
           <programlisting language="java">this.jdbcTemplate.update(
@@ -395,7 +399,7 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         Long.valueOf(actorId));</programlisting>
         </section>
 
-        <section id="jdbc-JdbcTemplate-examples-other">
+        <section xml:id="jdbc-JdbcTemplate-examples-other">
           <title>Other jdbcTemplate operations</title>
 
           <para>You can use the <methodname>execute(..)</methodname> method to
@@ -410,12 +414,12 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
           linkend="jdbc-StoredProcedure">covered later</link>.</para>
 
           <programlisting language="java">this.jdbcTemplate.update(
-        "call SUPPORT.REFRESH_ACTORS_SUMMARY(?)", 
+        "call SUPPORT.REFRESH_ACTORS_SUMMARY(?)",
         Long.valueOf(unionId));</programlisting>
         </section>
       </section>
 
-      <section id="jdbc-JdbcTemplate-idioms">
+      <section xml:id="jdbc-JdbcTemplate-idioms">
         <title><classname>JdbcTemplate</classname> best practices</title>
 
         <para>Instances of the <classname>JdbcTemplate</classname> class are
@@ -448,7 +452,7 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         <emphasis role="bold">this.jdbcTemplate = new JdbcTemplate(dataSource);</emphasis>
     }
 
-    <lineannotation>// JDBC-backed implementations of the methods on the <interfacename>CorporateEventDao</interfacename> follow...</lineannotation>
+    <lineannotation>// JDBC-backed implementations of the methods on the CorporateEventDao follow...</lineannotation>
 }</programlisting>
 
         <para>The corresponding configuration might look like this.</para>
@@ -462,11 +466,11 @@ private static final class ActorMapper implements RowMapper&lt;Actor&gt; {
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
-    
+
     &lt;bean id="corporateEventDao" class="com.example.JdbcCorporateEventDao"&gt;
         &lt;property name="dataSource" ref="dataSource"/&gt;
     &lt;/bean&gt;
-    
+
     &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
         &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
         &lt;property name="url" value="${jdbc.url}"/&gt;
@@ -496,7 +500,7 @@ public class JdbcCorporateEventDao implements CorporateEventDao {
         <emphasis role="bold">this.jdbcTemplate = new JdbcTemplate(dataSource);</emphasis>
     }
 
-    <lineannotation>// JDBC-backed implementations of the methods on the <interfacename>CorporateEventDao</interfacename> follow...</lineannotation>
+    <lineannotation>// JDBC-backed implementations of the methods on the CorporateEventDao follow...</lineannotation>
 }</programlisting></para>
 
         <para>The corresponding XML configuration file <!--*corresponding* to what? TR: to the prvious code-snippet-->would
@@ -511,10 +515,10 @@ public class JdbcCorporateEventDao implements CorporateEventDao {
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context-3.0.xsd"&gt;
-    
+
     &lt;!-- Scans within the base package of the application for @Components to configure as beans --&gt;
     &lt;context:component-scan base-package="org.springframework.docs.test" /&gt;
-    
+
     &lt;bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
         &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
         &lt;property name="url" value="${jdbc.url}"/&gt;
@@ -545,7 +549,7 @@ public class JdbcCorporateEventDao implements CorporateEventDao {
       </section>
     </section>
 
-    <section id="jdbc-NamedParameterJdbcTemplate">
+    <section xml:id="jdbc-NamedParameterJdbcTemplate">
       <title><classname>NamedParameterJdbcTemplate</classname></title>
 
       <para>The <classname>NamedParameterJdbcTemplate</classname> class adds
@@ -614,8 +618,9 @@ public int countOfActorsByFirstName(String firstName) {
       same Java package) is the <classname>SqlParameterSource</classname>
       interface. You have already seen an example of an implementation of this
       interface in one of the previous code snippet (the
-      <classname>MapSqlParameterSource</classname> class). <!--Revision ok?Why say *another feature*? So far this is the only feature discussed for NamedParameterJDBC template. It's mentioned above.--><!--In next paragraph you do describe another implementation. --><!--TR: Revised, please review.--><interfacename>An
-      <classname>SqlParameterSource</classname></interfacename> is a source of
+      <classname>MapSqlParameterSource</classname> class).
+      <!--Revision ok?Why say *another feature*? So far this is the only feature discussed for NamedParameterJDBC template. It's mentioned above.--><!--In next paragraph you do describe another implementation. --><!--TR: Revised, please review.-->
+      An <classname>SqlParameterSource</classname> is a source of
       named parameter values to a
       <classname>NamedParameterJdbcTemplate</classname>. The
       <classname>MapSqlParameterSource</classname> class is a very simple
@@ -627,9 +632,9 @@ public int countOfActorsByFirstName(String firstName) {
       implementation is the
       <classname>BeanPropertySqlParameterSource</classname> class. This class
       wraps an arbitrary JavaBean (that is, an instance of a class that
-      adheres to <ulink
-      url="http://java.sun.com/products/javabeans/docs/spec.html">the JavaBean
-      conventions</ulink>), and uses the properties of the wrapped JavaBean as
+      adheres to <link
+      xl:href="http://java.sun.com/products/javabeans/docs/spec.html">the JavaBean
+      conventions</link>), and uses the properties of the wrapped JavaBean as
       the source of named parameter values.</para>
 
       <programlisting language="java">public class Actor {
@@ -637,19 +642,19 @@ public int countOfActorsByFirstName(String firstName) {
     private Long id;
     private String firstName;
     private String lastName;
-    
+
     public String getFirstName() {
         return this.firstName;
     }
-    
+
     public String getLastName() {
         return this.lastName;
     }
-    
+
     public Long getId() {
         return this.id;
     }
-    
+
     <lineannotation>// setters omitted...</lineannotation>
 
 }</programlisting>
@@ -663,8 +668,8 @@ public void setDataSource(DataSource dataSource) {
 
 public int countOfActors(Actor exampleActor) {
 
-    <lineannotation>// notice how the named parameters match the properties of the above '<classname>Actor</classname>' class</lineannotation>
-    String sql = 
+    <lineannotation>// notice how the named parameters match the properties of the above 'Actor' class</lineannotation>
+    String sql =
         "select count(*) from T_ACTOR where first_name = :firstName and last_name = :lastName";
 
     SqlParameterSource namedParameters = new BeanPropertySqlParameterSource(exampleActor);
@@ -688,7 +693,7 @@ public int countOfActors(Actor exampleActor) {
       of an application.</para>
     </section>
 
-    <section id="jdbc-SimpleJdbcTemplate">
+    <section xml:id="jdbc-SimpleJdbcTemplate">
       <title><classname>SimpleJdbcTemplate</classname></title>
 
       <para>The <classname>SimpleJdbcTemplate</classname> class wraps the
@@ -713,7 +718,7 @@ public int countOfActors(Actor exampleActor) {
       code snippet that does the same job with the
       <classname>SimpleJdbcTemplate</classname>.</para>
 
-      <programlisting language="java"><lineannotation>// classic <classname>JdbcTemplate</classname>-style...</lineannotation>
+      <programlisting language="java"><lineannotation>// classic JdbcTemplate-style...</lineannotation>
 private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -722,9 +727,9 @@ public void setDataSource(DataSource dataSource) {
 <!--How is the code shown below different from the code shown in the next example? It seems like they're the same.-->
 public Actor findActor(String specialty, int age) {
 
-    String sql = "select id, first_name, last_name from T_ACTOR" + 
+    String sql = "select id, first_name, last_name from T_ACTOR" +
             " where specialty = ? and age = ?";
-    
+
     RowMapper&lt;Actor&gt; mapper = new RowMapper&lt;Actor&gt;() {
         public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
@@ -735,16 +740,16 @@ public Actor findActor(String specialty, int age) {
         }
     };
 
-    
+
     <lineannotation>// notice the wrapping up of the arguments in an array</lineannotation>
     return (Actor) jdbcTemplate.queryForObject(sql, new Object[] {specialty, age}, mapper);
 }</programlisting>
 
       <para>Here is the same method, with the
-      <classname>SimpleJdbcTemplate</classname>.<!--The code shown above is the same as the code shown below. What is the difference? 
+      <classname>SimpleJdbcTemplate</classname>.<!--The code shown above is the same as the code shown below. What is the difference?
 TR: difference is in the way the parameters are passed in on the last line; no need to use an Objcet[].--></para>
 
-      <programlisting language="java"><lineannotation>// <classname>SimpleJdbcTemplate</classname>-style...</lineannotation>
+      <programlisting language="java"><lineannotation>// SimpleJdbcTemplate-style...</lineannotation>
 private SimpleJdbcTemplate simpleJdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
@@ -753,9 +758,9 @@ public void setDataSource(DataSource dataSource) {
 
 public Actor findActor(String specialty, int age) {
 
-    String sql = "select id, first_name, last_name from T_ACTOR" + 
+    String sql = "select id, first_name, last_name from T_ACTOR" +
             " where specialty = ? and age = ?";
-    RowMapper&lt;Actor&gt; mapper = new RowMapper&lt;Actor&gt;() {  
+    RowMapper&lt;Actor&gt; mapper = new RowMapper&lt;Actor&gt;() {
         public Actor mapRow(ResultSet rs, int rowNum) throws SQLException {
             Actor actor = new Actor();
             actor.setId(rs.getLong("id"));
@@ -765,7 +770,7 @@ public Actor findActor(String specialty, int age) {
         }
     };
 
-    <lineannotation>// notice the use of varargs since the parameter values now come 
+    <lineannotation>// notice the use of varargs since the parameter values now come
     // after the RowMapper parameter</lineannotation>
     return this.simpleJdbcTemplate.queryForObject(sql, mapper, specialty, age);
 }</programlisting>
@@ -789,7 +794,7 @@ public Actor findActor(String specialty, int age) {
       </note>
     </section>
 
-    <section id="jdbc-SQLExceptionTranslator">
+    <section xml:id="jdbc-SQLExceptionTranslator">
       <title><interfacename>SQLExceptionTranslator</interfacename></title>
 
       <para><interfacename>SQLExceptionTranslator</interfacename> is an
@@ -891,29 +896,29 @@ public Actor findActor(String specialty, int age) {
       <programlisting language="java"><lineannotation>private JdbcTemplate jdbcTemplate;
 
 public void setDataSource(DataSource dataSource) {
-    // create a <classname>JdbcTemplate</classname> and set data source</lineannotation> 
-    this.jdbcTemplate = new JdbcTemplate(); 
-    this.jdbcTemplate.setDataSource(dataSource); 
-<lineannotation>    // create a custom translator and set the <interfacename>DataSource</interfacename> for the default translation lookup</lineannotation> 
-    CustomSQLErrorCodesTranslator tr = new CustomSQLErrorCodesTranslator(); 
-    tr.setDataSource(dataSource); 
-    this.jdbcTemplate.setExceptionTranslator(tr); 
+    // create a JdbcTemplate and set data source</lineannotation>
+    this.jdbcTemplate = new JdbcTemplate();
+    this.jdbcTemplate.setDataSource(dataSource);
+<lineannotation>    // create a custom translator and set the DataSource for the default translation lookup</lineannotation>
+    CustomSQLErrorCodesTranslator tr = new CustomSQLErrorCodesTranslator();
+    tr.setDataSource(dataSource);
+    this.jdbcTemplate.setExceptionTranslator(tr);
 }
 
 <lineannotation>public void updateShippingCharge(long orderId, long pct) {
-    // use the <classname>prepared JdbcTemplate</classname> for this <classname>update</classname></lineannotation>
+    // use the prepared JdbcTemplate for this update</lineannotation>
     this.jdbcTemplate.update(
-        "update orders" + 
-            " set shipping_charge = shipping_charge * ? / 100" + 
+        "update orders" +
+            " set shipping_charge = shipping_charge * ? / 100" +
             " where id = ?"
-        pct, orderId); 
+        pct, orderId);
 }</programlisting>
 
       <para>The custom translator is passed a data source in order to look up
       the error codes in <literal>sql-error-codes.xml</literal>.</para>
     </section>
 
-    <section id="jdbc-statements-executing">
+    <section xml:id="jdbc-statements-executing">
       <title>Executing statements</title>
 
       <para>Executing an SQL statement requires very little code. You need a
@@ -941,7 +946,7 @@ public class ExecuteAStatement {
 }</programlisting>
     </section>
 
-    <section id="jdbc-statements-querying">
+    <section xml:id="jdbc-statements-querying">
       <title>Running queries</title>
 
       <para>Some query methods return a single value. To retrieve a count or a
@@ -966,7 +971,7 @@ public class RunAQuery {
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
-  
+
     public int getCount() {
         return this.jdbcTemplate.queryForInt("select count(*) from mytable");
     }
@@ -1005,7 +1010,7 @@ public List&lt;Map&lt;String, Object&gt;&gt; getList() {
       <programlisting>[{name=Bob, id=1}, {name=Mary, id=2}]</programlisting>
     </section>
 
-    <section id="jdbc-updates">
+    <section xml:id="jdbc-updates">
       <title>Updating the database</title>
 
       <para>The following example shows a column updated for a certain primary
@@ -1028,17 +1033,17 @@ public class ExecuteAnUpdate {
 
     public void setName(int id, String name) {
         this.jdbcTemplate.update(
-                "update mytable set name = ? where id = ?", 
+                "update mytable set name = ? where id = ?",
                 name, id);
     }
 }</programlisting>
     </section>
 
-    <section id="jdbc-auto-genereted-keys">
+    <section xml:id="jdbc-auto-genereted-keys">
       <title>Retrieving auto-generated keys</title>
 
       <para>An <methodname>update()</methodname> convenience method
-      supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*. 
+      supports<!--Give name of this method. Also indicate *what* is acquiring the primary keys. TR: Changed to *retrieval*.
 The name of the method is *update*.--> the retrieval of primary keys generated
       by the database. This support is part of the JDBC 3.0 standard; see
       Chapter 13.6 of the specification for details. The method takes a
@@ -1070,10 +1075,10 @@ jdbcTemplate.update(
     </section>
   </section>
 
-  <section id="jdbc-connections">
+  <section xml:id="jdbc-connections">
     <title>Controlling database connections</title>
 
-    <section id="jdbc-datasource">
+    <section xml:id="jdbc-datasource">
       <title><interfacename>DataSource</interfacename><!--I don't understand why *DataSource* was a subsection of *Using the JDBC classes to control basic JDBC processing and error handling*.--><!--According to *The package hierarchy*section, there is a datasource package, separate from the core package.So I moved it to this section. TR: OK.--></title>
 
       <para>Spring obtains a connection to the database through a
@@ -1137,7 +1142,7 @@ dataSource.setPassword("");</programlisting>
 
       <para>DBCP configuration:</para>
 
-      <programlisting language="java">&lt;bean id="dataSource" 
+      <programlisting language="java">&lt;bean id="dataSource"
         class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"&gt;
     &lt;property name="driverClassName" value="${jdbc.driverClassName}"/&gt;
     &lt;property name="url" value="${jdbc.url}"/&gt;
@@ -1160,7 +1165,7 @@ dataSource.setPassword("");</programlisting>
 &lt;context:property-placeholder location="jdbc.properties"/&gt;</programlisting>
     </section>
 
-    <section id="jdbc-DataSourceUtils">
+    <section xml:id="jdbc-DataSourceUtils">
       <title><classname>DataSourceUtils</classname></title>
 
       <para>The <classname>DataSourceUtils</classname> class is a convenient
@@ -1170,7 +1175,7 @@ dataSource.setPassword("");</programlisting>
       <classname>DataSourceTransactionManager</classname>.</para>
     </section>
 
-    <section id="jdbc-SmartDataSource">
+    <section xml:id="jdbc-SmartDataSource">
       <title><interfacename>SmartDataSource</interfacename></title>
 
       <para>The <interfacename>SmartDataSource</interfacename> interface
@@ -1182,11 +1187,11 @@ dataSource.setPassword("");</programlisting>
       connection.</para>
     </section>
 
-    <section id="jdbc-AbstractDataSource">
+    <section xml:id="jdbc-AbstractDataSource">
       <title><classname>AbstractDataSource</classname></title>
 
       <para><code><classname>AbstractDataSource</classname></code> is an
-      <literal><classname>abstract</classname></literal> base class for
+      <literal>abstract</literal> base class for
       Spring's <interfacename>DataSource</interfacename> implementations that
       implements code that is common to all <classname>DataSource</classname>
       implementations.<!--Please revise *takes care of uninteresting glue* to specify what exactly it does. Avoid slang and idomatic language, --><!--especially important with non-native English readers. TR: Revised, please review.-->
@@ -1195,7 +1200,7 @@ dataSource.setPassword("");</programlisting>
       implementation.<!--Preceding revision ok? If not, revise to specify *which* class you extend if you are writing your own DataSource imp. TR: OK.--></para>
     </section>
 
-    <section id="jdbc-SingleConnectionDataSource">
+    <section xml:id="jdbc-SingleConnectionDataSource">
       <title><classname>SingleConnectionDataSource</classname></title>
 
       <para>The <classname>SingleConnectionDataSource</classname> class is an
@@ -1222,7 +1227,7 @@ dataSource.setPassword("");</programlisting>
       connections.</para>
     </section>
 
-    <section id="jdbc-DriverManagerDataSource">
+    <section xml:id="jdbc-DriverManagerDataSource">
       <title><classname>DriverManagerDataSource</classname></title>
 
       <para>The <classname>DriverManagerDataSource</classname> class is an
@@ -1244,7 +1249,7 @@ dataSource.setPassword("");</programlisting>
       <classname>DriverManagerDataSource</classname>.</para>
     </section>
 
-    <section id="jdbc-TransactionAwareDataSourceProxy">
+    <section xml:id="jdbc-TransactionAwareDataSourceProxy">
       <title><classname>TransactionAwareDataSourceProxy</classname></title>
 
       <para><classname>TransactionAwareDataSourceProxy</classname> is a proxy
@@ -1272,7 +1277,7 @@ dataSource.setPassword("");</programlisting>
       details.)</emphasis></para>
     </section>
 
-    <section id="jdbc-DataSourceTransactionManager">
+    <section xml:id="jdbc-DataSourceTransactionManager">
       <title><classname>DataSourceTransactionManager</classname></title>
 
       <para>The <classname>DataSourceTransactionManager</classname> class is a
@@ -1307,7 +1312,7 @@ dataSource.setPassword("");</programlisting>
       isolation levels!</para>
     </section>
 
-    <section id="jdbc-NativeJdbcExtractor">
+    <section xml:id="jdbc-NativeJdbcExtractor">
       <title>NativeJdbcExtractor</title>
 
       <para>Sometimes you need to access vendor specific JDBC methods that
@@ -1360,7 +1365,7 @@ dataSource.setPassword("");</programlisting>
     </section>
   </section>
 
-  <section id="jdbc-advanced-jdbc">
+  <section xml:id="jdbc-advanced-jdbc">
     <title>JDBC batch operations</title>
 
     <para>Most JDBC drivers provide improved performance if you batch multiple
@@ -1369,7 +1374,7 @@ dataSource.setPassword("");</programlisting>
     processing using both the <classname>JdbcTemplate</classname> and the
     <classname>SimpleJdbcTemplate</classname>.</para>
 
-    <section id="jdbc-batch-classic">
+    <section xml:id="jdbc-batch-classic">
       <title>Basic batch operations with the JdbcTemplate</title>
 
       <para>You accomplish <classname>JdbcTemplate</classname> batch
@@ -1419,7 +1424,7 @@ dataSource.setPassword("");</programlisting>
       you to signal the end of the batch.</para>
     </section>
 
-    <section id="jdbc-batch-list">
+    <section xml:id="jdbc-batch-list">
       <title>Batch operations with a List of objects</title>
 
       <para>Both the <classname>JdbcTemplate</classname> and the
@@ -1490,7 +1495,7 @@ dataSource.setPassword("");</programlisting>
       driver returns a -2 value.</para>
     </section>
 
-    <section id="jdbc-batch-multi">
+    <section xml:id="jdbc-batch-multi">
       <title>Batch operations with multiple batches</title>
 
       <para>The last example of a batch update deals with batches that are so
@@ -1525,7 +1530,7 @@ dataSource.setPassword("");</programlisting>
                         ps.setString(1, argument.getFirstName());
                         ps.setString(2, argument.getLastName());
                         ps.setLong(3, argument.getId().longValue());
- 
+
                      }
                  } );
         return updateCounts;
@@ -1545,7 +1550,7 @@ dataSource.setPassword("");</programlisting>
     </section>
   </section>
 
-  <section id="jdbc-simple-jdbc">
+  <section xml:id="jdbc-simple-jdbc">
     <title>Simplifying JDBC operations with the SimpleJdbc classes</title>
 
     <para>The <classname>SimpleJdbcInsert</classname> and
@@ -1555,14 +1560,14 @@ dataSource.setPassword("");</programlisting>
     up front, although you can override or turn off the metadata processing if
     you prefer to provide all the details in your code.</para>
 
-    <section id="jdbc-simple-jdbc-insert-1">
+    <section xml:id="jdbc-simple-jdbc-insert-1">
       <title>Inserting data using SimpleJdbcInsert</title>
 
       <para>Let's start by looking at the
       <classname>SimpleJdbcInsert</classname> class with the minimal amount of
       configuration options. You should instantiate the
       <classname>SimpleJdbcInsert</classname> in the data access layer's
-      initialization method. <!--What do you mean *should be*? Are you saying a human should do it. If so, say *You should instantiate the SimpleJdbcInsert...* Also, is--><!--it correct to say *in* the data access layer's init method? Should it be *with*. Below, what do you mean by *fluid style*? 
+      initialization method. <!--What do you mean *should be*? Are you saying a human should do it. If so, say *You should instantiate the SimpleJdbcInsert...* Also, is--><!--it correct to say *in* the data access layer's init method? Should it be *with*. Below, what do you mean by *fluid style*?
 TR: Revised, please review.-->For this example, the initializing method is the
       <classname>setDataSource</classname> method. You do not need to subclass
       the <classname>SimpleJdbcInsert</classname> class; simply create a new
@@ -1579,7 +1584,7 @@ TR: Revised, please review.-->For this example, the initializing method is the
 
     public void setDataSource(DataSource dataSource) {
         this.simpleJdbcTemplate = new SimpleJdbcTemplate(dataSource);
-        this.insertActor = 
+        this.insertActor =
                 new SimpleJdbcInsert(dataSource).withTableName("t_actor");
     }
 
@@ -1602,7 +1607,7 @@ TR: Revised, please review.-->For this example, the initializing method is the
       statement.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-insert-2">
+    <section xml:id="jdbc-simple-jdbc-insert-2">
       <title>Retrieving auto-generated keys using SimpleJdbcInsert</title>
 
       <para>This example uses the same insert as the preceding, but instead of
@@ -1646,7 +1651,7 @@ TR: Revised, please review.-->For this example, the initializing method is the
       method.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-insert-3">
+    <section xml:id="jdbc-simple-jdbc-insert-3">
       <title>Specifying columns for a SimpleJdbcInsert</title>
 
       <para>You can limit the columns for an insert by specifying a list of
@@ -1678,7 +1683,7 @@ TR: Revised, please review.-->For this example, the initializing method is the
       on the metadata to determine which columns to use.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-parameters">
+    <section xml:id="jdbc-simple-jdbc-parameters">
       <title>Using SqlParameterSource to provide parameter values</title>
 
       <para>Using a <classname>Map</classname> to provide parameter values
@@ -1741,7 +1746,7 @@ TR: Revised, please review.-->For this example, the initializing method is the
       classes.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-1">
+    <section xml:id="jdbc-simple-jdbc-call-1">
       <title>Calling a stored procedure with SimpleJdbcCall</title>
 
       <para>The <classname>SimpleJdbcCall</classname> class leverages metadata
@@ -1756,14 +1761,14 @@ TR: Revised, please review.-->For this example, the initializing method is the
       <code>last_name</code>, and <code>birth_date</code> columns in the form
       of <code>out</code> parameters.</para>
 
-      <para><programlisting>CREATE PROCEDURE read_actor ( 
-  IN in_id INTEGER, 
-  OUT out_first_name VARCHAR(100), 
-  OUT out_last_name VARCHAR(100), 
-  OUT out_birth_date DATE) 
-BEGIN 
-  SELECT first_name, last_name, birth_date 
-  INTO out_first_name, out_last_name, out_birth_date 
+      <para><programlisting>CREATE PROCEDURE read_actor (
+  IN in_id INTEGER,
+  OUT out_first_name VARCHAR(100),
+  OUT out_last_name VARCHAR(100),
+  OUT out_birth_date DATE)
+BEGIN
+  SELECT first_name, last_name, birth_date
+  INTO out_first_name, out_last_name, out_birth_date
   FROM t_actor where id = in_id;
 END;</programlisting>The <code>in_id</code> parameter contains the
       <code>id</code> of the actor you are looking up. The <code>out</code>
@@ -1793,7 +1798,7 @@ END;</programlisting>The <code>in_id</code> parameter contains the
 
     public Actor readActor(Long id) {
         SqlParameterSource in = new MapSqlParameterSource()
-                .addValue("in_id", id); 
+                .addValue("in_id", id);
         Map out = procReadActor.execute(in);
         Actor actor = new Actor();
         actor.setId(id);
@@ -1806,7 +1811,7 @@ END;</programlisting>The <code>in_id</code> parameter contains the
     //  ... additional methods
 }</programlisting>The code you write for the execution of the call involves
       creating an <classname>SqlParameterSource</classname> containing the IN
-      parameter. <!--sentence before this one said *all you need to specify* is name of procedure, but preceding sentence says it involves creating an--><!--SQLParameterSource. Isn't this *in addition* to specifying procedure name? Revise to clarify what a human does in this example. --><!--Reword preceding to clarify whether a human creates the SqlParameterSource. 
+      parameter. <!--sentence before this one said *all you need to specify* is name of procedure, but preceding sentence says it involves creating an--><!--SQLParameterSource. Isn't this *in addition* to specifying procedure name? Revise to clarify what a human does in this example. --><!--Reword preceding to clarify whether a human creates the SqlParameterSource.
 TR: Revised, please review. Execution is separate from declaration, so we still only need to declare the name of the proc.-->It's
       important to match the name provided for the input value with that of
       the parameter name <!--match *what* to the name of parameter in stored procedure?? And if this is something you're telling a human to do,--><!--reword to say *You must match <what> to the name of the parameter etc* TR: Revised.-->declared
@@ -1858,7 +1863,7 @@ TR: Revised, please review. Execution is separate from declaration, so we still 
       for the names of your returned <code>out</code> parameters.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-2">
+    <section xml:id="jdbc-simple-jdbc-call-2">
       <title>Explicitly declaring parameters to use for a
       SimpleJdbcCall</title>
 
@@ -1919,7 +1924,7 @@ TR: Revised, please review. Execution is separate from declaration, so we still 
       metadata.</para>
     </section>
 
-    <section id="jdbc-params">
+    <section xml:id="jdbc-params">
       <title>How to define SqlParameters</title>
 
       <para>To define a parameter for the SimpleJdbc classes and also for the
@@ -1965,7 +1970,7 @@ TR: Revised, please review. Execution is separate from declaration, so we still 
       define customized handling of the return values.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-3">
+    <section xml:id="jdbc-simple-jdbc-call-3">
       <title>Calling a stored function using SimpleJdbcCall</title>
 
       <para>You call a stored function in almost the same way as you call a
@@ -1985,7 +1990,7 @@ TR: Revised, please review. Execution is separate from declaration, so we still 
       Here is the MySQL source for this function:</para>
 
       <para><programlisting>CREATE FUNCTION get_actor_name (in_id INTEGER)
-RETURNS VARCHAR(200) READS SQL DATA 
+RETURNS VARCHAR(200) READS SQL DATA
 BEGIN
   DECLARE out_name VARCHAR(200);
   SELECT concat(first_name, ' ', last_name)
@@ -2013,7 +2018,7 @@ END;</programlisting></para>
 
     public String getActorName(Long id) {
         SqlParameterSource in = new MapSqlParameterSource()
-                .addValue("in_id", id); 
+                .addValue("in_id", id);
         String name = funcGetActorName.executeFunction(String.class, in);
         return name;
     }
@@ -2024,7 +2029,7 @@ END;</programlisting></para>
       the function call.</para>
     </section>
 
-    <section id="jdbc-simple-jdbc-call-4">
+    <section xml:id="jdbc-simple-jdbc-call-4">
       <title>Returning ResultSet/REF Cursor from a SimpleJdbcCall</title>
 
       <para>Calling a stored procedure or function that returns a result set
@@ -2083,7 +2088,7 @@ END;</programlisting>To call this procedure you declare the
     </section>
   </section>
 
-  <section id="jdbc-object">
+  <section xml:id="jdbc-object">
     <title>Modeling JDBC operations as Java objects</title>
 
     <para>The <literal>org.springframework.jdbc.object</literal> package
@@ -2108,7 +2113,7 @@ END;</programlisting>To call this procedure you declare the
       operation classes, continue using these classes.</para>
     </note>
 
-    <section id="jdbc-SqlQuery">
+    <section xml:id="jdbc-SqlQuery">
       <title><classname>SqlQuery</classname></title>
 
       <para><classname>SqlQuery</classname> is a reusable, threadsafe class
@@ -2126,7 +2131,7 @@ END;</programlisting>To call this procedure you declare the
       <classname>UpdatableSqlQuery</classname>.</para>
     </section>
 
-    <section id="jdbc-MappingSqlQuery">
+    <section xml:id="jdbc-MappingSqlQuery">
       <title><classname>MappingSqlQuery</classname></title>
 
       <para><classname>MappingSqlQuery</classname> is a reusable query in
@@ -2202,7 +2207,7 @@ public Customer getCustomer(Long id) {
 }</programlisting>
     </section>
 
-    <section id="jdbc-SqlUpdate">
+    <section xml:id="jdbc-SqlUpdate">
       <title><classname>SqlUpdate</classname></title>
 
       <para>The <classname>SqlUpdate</classname> class encapsulates an SQL
@@ -2247,7 +2252,7 @@ public class UpdateCreditRating extends SqlUpdate {
 }</programlisting>
     </section>
 
-    <section id="jdbc-StoredProcedure">
+    <section xml:id="jdbc-StoredProcedure">
       <title><classname>StoredProcedure</classname></title>
 
       <para>The <classname>StoredProcedure</classname> class is a superclass
@@ -2322,18 +2327,18 @@ import org.springframework.jdbc.object.StoredProcedure;
 public class StoredProcedureDao {
 
     private GetSysdateProcedure getSysdate;
-    
+
     @Autowired
     public void init(DataSource dataSource) {
         this.getSysdate = new GetSysdateProcedure(dataSource);
     }
-    
+
     public Date getSysdate() {
         return getSysdate.execute();
     }
 
     private class GetSysdateProcedure extends StoredProcedure {
-        
+
         private static final String SQL = "sysdate";
 
         public GetSysdateProcedure(DataSource dataSource) {
@@ -2348,7 +2353,7 @@ public class StoredProcedureDao {
             // the 'sysdate' sproc has no input parameters, so an empty Map is supplied...
             Map&lt;String, Object&gt; results = execute(new HashMap&lt;String, Object&gt;());
             Date sysdate = (Date) results.get("date");
-            return sysdate;    
+            return sysdate;
         }
     }
 
@@ -2404,7 +2409,7 @@ import java.sql.SQLException;
 import com.foo.domain.Title;
 
 public final class TitleMapper implements RowMapper&lt;Title&gt; {
-    
+
     public Title mapRow(ResultSet rs, int rowNum) throws SQLException {
         Title title = new Title();
         title.setId(rs.getLong("id"));
@@ -2426,7 +2431,7 @@ import java.sql.SQLException;
 import com.foo.domain.Genre;
 
 public final class GenreMapper implements RowMapper&lt;Genre&gt; {
-    
+
     public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Genre(rs.getString("name"));
     }
@@ -2472,13 +2477,13 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
     </section>
   </section>
 
-  <section id="jdbc-parameter-handling">
+  <section xml:id="jdbc-parameter-handling">
     <title>Common problems with parameter and data value handling</title>
 
     <para>Common problems with parameters and data values exist in the
     different approaches provided by the Spring Framework JDBC.</para>
 
-    <section id="jdbc-type-information">
+    <section xml:id="jdbc-type-information">
       <title>Providing SQL type information for parameters</title>
 
       <para>Usually Spring determines the SQL type of the parameters based on
@@ -2522,7 +2527,7 @@ public class TitlesAfterDateStoredProcedure extends StoredProcedure {
       </itemizedlist>
     </section>
 
-    <section id="jdbc-lob">
+    <section xml:id="jdbc-lob">
       <title>Handling BLOB and CLOB objects</title>
 
       <para>You can store images, other binary objects, and large chunks of
@@ -2599,12 +2604,12 @@ final InputStream clobIs = new FileInputStream(clobIn);
 final InputStreamReader clobReader = new InputStreamReader(clobIs);
 jdbcTemplate.execute(
   "INSERT INTO lob_table (id, a_clob, a_blob) VALUES (?, ?, ?)",
-  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {]]><co id="lobHandler"/><![CDATA[
-      protected void setValues(PreparedStatement ps, LobCreator lobCreator) 
+  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {]]><co xml:id="lobHandler"/><![CDATA[
+      protected void setValues(PreparedStatement ps, LobCreator lobCreator)
           throws SQLException {
         ps.setLong(1, 1L);
-        lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());]]><co id="setClobAsCharacterStream"/><![CDATA[
-        lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());]]><co id="setBlobAsBinaryStream"/><![CDATA[
+        lobCreator.setClobAsCharacterStream(ps, 2, clobReader, (int)clobIn.length());]]><co xml:id="setClobAsCharacterStream"/><![CDATA[
+        lobCreator.setBlobAsBinaryStream(ps, 3, blobIs, (int)blobIn.length());]]><co xml:id="setBlobAsBinaryStream"/><![CDATA[
       }
   }
 );
@@ -2640,9 +2645,9 @@ clobReader.close();]]></programlisting>
         new RowMapper<Map<String, Object>>() {
           public Map<String, Object> mapRow(ResultSet rs, int i) throws SQLException {
             Map<String, Object> results = new HashMap<String, Object>();
-            String clobText = lobHandler.getClobAsString(rs, "a_clob");]]><co id="getClobAsString"/><![CDATA[
+            String clobText = lobHandler.getClobAsString(rs, "a_clob");]]><co xml:id="getClobAsString"/><![CDATA[
             results.put("CLOB", clobText);
-            byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");]]><co id="getBlobAsBytes"/><![CDATA[
+            byte[] blobBytes = lobHandler.getBlobAsBytes(rs, "a_blob");]]><co xml:id="getBlobAsBytes"/><![CDATA[
             results.put("BLOB", blobBytes);
             return results;
           }
@@ -2662,7 +2667,7 @@ clobReader.close();]]></programlisting>
       </para>
     </section>
 
-    <section id="jdbc-in-clause">
+    <section xml:id="jdbc-in-clause">
       <title>Passing in lists of values for IN clause</title>
 
       <para>The SQL standard allows for selecting rows based on an expression
@@ -2696,7 +2701,7 @@ clobReader.close();]]></programlisting>
       database supports this syntax.</para>
     </section>
 
-    <section id="jdbc-complex-types">
+    <section xml:id="jdbc-complex-types">
       <title>Handling complex types for stored procedure calls</title>
 
       <para>When you call stored procedures you can sometimes use complex
@@ -2713,12 +2718,12 @@ clobReader.close();]]></programlisting>
       that must be implemented. This interface is used as part of the
       declaration of an <classname>SqlOutParameter</classname>.</para>
 
-      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item", 
+      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item",
         new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
 
 declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
     new SqlReturnType() {
-      public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName) 
+      public Object getTypeValue(CallableStatement cs, int colIndx, int sqlType, String typeName)
           throws SQLException {
         STRUCT struct = (STRUCT)cs.getObject(colIndx);
         Object[] attr = struct.getAttributes();
@@ -2738,7 +2743,7 @@ declareParameter(new SqlOutParameter("item", OracleTypes.STRUCT, "ITEM_TYPE",
       <classname>StructDescriptor</classname>s, as shown in the following
       example, or <classname>ArrayDescriptor</classname>s.<!--Rewording of preceding ok? The example is showing human participation, I assume. ;-) TR: Yes :), OK.--></para>
 
-      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item", 
+      <para><programlisting language="java">final TestItem - new TestItem(123L, "A test item",
         new SimpleDateFormat("yyyy-M-d").parse("2010-12-31"););
 
 SqlTypeValue value = new AbstractSqlTypeValue() {
@@ -2775,18 +2780,18 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
     </section>
   </section>
 
-  <section id="jdbc-embedded-database-support">
+  <section xml:id="jdbc-embedded-database-support">
     <title>Embedded database support</title>
 
     <para>The <literal>org.springframework.jdbc.datasource.embedded</literal>
     package provides support for embedded Java database engines. Support for
-    <ulink url="http://www.hsqldb.org">HSQL</ulink>, <ulink
-    url="http://www.h2database.com">H2</ulink>, and <ulink
-    url="http://db.apache.org/derby">Derby</ulink> is provided natively. You
+    <link xl:href="http://www.hsqldb.org">HSQL</link>, <link
+    xl:href="http://www.h2database.com">H2</link>, and <link
+    xl:href="http://db.apache.org/derby">Derby</link> is provided natively. You
     can also use an extensible API to plug in new embedded database types and
     <classname>DataSource</classname> implementations.</para>
 
-    <section id="jdbc-why-embedded-database">
+    <section xml:id="jdbc-why-embedded-database">
       <title>Why use an embedded database?</title>
 
       <para>An embedded database is useful during the development phase of a
@@ -2795,7 +2800,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       rapidly evolve SQL during development.</para>
     </section>
 
-    <section id="jdbc-embedded-database-xml">
+    <section xml:id="jdbc-embedded-database-xml">
       <title>Creating an embedded database instance using Spring XML</title>
 
       <para>If you want to expose an embedded database instance as a bean in a
@@ -2814,7 +2819,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       needed.</para>
     </section>
 
-    <section id="jdbc-embedded-database-java">
+    <section xml:id="jdbc-embedded-database-java">
       <title>Creating an embedded database instance programmatically</title>
 
       <para>The <classname>EmbeddedDatabaseBuilder</classname> class provides
@@ -2828,7 +2833,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
 </programlisting></para>
     </section>
 
-    <section id="jdbc-embedded-database-extension">
+    <section xml:id="jdbc-embedded-database-extension">
       <title>Extending the embedded database support</title>
 
       <para>Spring JDBC embedded database support can be extended in two ways:
@@ -2847,11 +2852,11 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
         </orderedlist></para>
 
       <para>You are encouraged to contribute back extensions to the Spring
-      community at <ulink
-      url="jira.springframework.org">jira.springframework.org</ulink>.</para>
+      community at <link
+      xl:href="jira.springframework.org">jira.springframework.org</link>.</para>
     </section>
 
-    <section id="jdbc-embedded-database-using-HSQL">
+    <section xml:id="jdbc-embedded-database-using-HSQL">
       <title>Using HSQL</title>
 
       <para>Spring supports HSQL 1.8.0 and above. HSQL is the default embedded
@@ -2863,7 +2868,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <literal>EmbeddedDatabaseType.HSQL</literal>.</para>
     </section>
 
-    <section id="jdbc-embedded-database-using-H2">
+    <section xml:id="jdbc-embedded-database-using-H2">
       <title>Using H2</title>
 
       <para>Spring supports the H2 database as well. To enable H2, set the
@@ -2874,7 +2879,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <literal>EmbeddedDatabaseType.H2</literal>.</para>
     </section>
 
-    <section id="jdbc-embedded-database-using-Derby">
+    <section xml:id="jdbc-embedded-database-using-Derby">
       <title>Using Derby</title>
 
       <para>Spring also supports Apache Derby 10.5 and above. To enable Derby,
@@ -2885,7 +2890,7 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
       <literal>EmbeddedDatabaseType.Derby</literal>.</para>
     </section>
 
-    <section id="jdbc-embedded-database-dao-testing">
+    <section xml:id="jdbc-embedded-database-dao-testing">
       <title>Testing data access logic with an embedded database</title>
 
       <para>Embedded databases provide a lightweight way to test data access
@@ -2896,12 +2901,12 @@ SqlTypeValue value = new AbstractSqlTypeValue() {
 public class DataAccessUnitTestTemplate {
 
     private EmbeddedDatabase db;
-    
+
     @Before
     public void setUp() {
         // creates an HSQL in-memory database populated from default scripts
         // classpath:schema.sql and classpath:data.sql
-        db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();		
+        db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
     }
 
     @Test
@@ -2919,7 +2924,7 @@ public class DataAccessUnitTestTemplate {
     </section>
   </section>
 
-  <section id="jdbc-intializing-datasource">
+  <section xml:id="jdbc-intializing-datasource">
     <title>Initializing a DataSource</title>
 
     <para>The <literal>org.springframework.jdbc.datasource.init</literal>
@@ -2929,7 +2934,7 @@ public class DataAccessUnitTestTemplate {
     <classname>DataSource</classname> for an application, but sometimes you
     need to initialize an instance running on a server somewhere.</para>
 
-    <section id="jdbc-initializing-datasource-xml">
+    <section xml:id="jdbc-initializing-datasource-xml">
       <title>Initializing a database instance using Spring XML</title>
 
       <para>If you want to initialize a database and you can provide a
@@ -2993,7 +2998,7 @@ public class DataAccessUnitTestTemplate {
       can simply use the <classname>DataSourceInitializer</classname>
       directly, and define it as a component in your application.</para>
 
-      <section id="jdbc-client-component-initialization">
+      <section xml:id="jdbc-client-component-initialization">
         <title>Initialization of Other Components that Depend on the
         Database</title>
 

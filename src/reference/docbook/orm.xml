@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="orm"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="orm">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Object Relational Mapping (ORM) Data Access</title>
 
-  <section id="orm-introduction">
+  <section xml:id="orm-introduction">
     <title>Introduction to ORM with Spring</title>
 
     <para>The Spring Framework supports integration
@@ -42,7 +46,7 @@
         it easy to swap the implementations and configuration locations of
         Hibernate <interfacename>SessionFactory</interfacename> instances,
         JDBC <interfacename>DataSource</interfacename> instances, transaction
-        managers, and mapped object implementations (if needed). <!--I changed *mappes* to *mapped*; is that what you mean? Also, clarify whether *if needed* refers only to that or to the rest as well 
+        managers, and mapped object implementations (if needed). <!--I changed *mappes* to *mapped*; is that what you mean? Also, clarify whether *if needed* refers only to that or to the rest as well
 TR: OK. Refers only to mapped object implementations-->This in turn makes it
         much easier to test each piece of persistence-related code in
         isolation.<!--deleted redundancy; sentence already refers to isolating each piece of code. TR: OK. moved isolation to the end--></para>
@@ -75,7 +79,7 @@ TR: OK. Refers only to mapped object implementations-->This in turn makes it
         <interfacename>Session</interfacename> to ensure efficiency and proper
         transaction handling. Spring makes it easy to create and bind a
         <interfacename>Session</interfacename> to the current thread
-        transparently, <!--This bullet and next refer to template wrapper class. Is this referring to using Spring DAO templates, whichis no longer recommend--><!--ed? If so, it's confusing to discuss it as an option. Sends a mixed message. If not, explain what you mean by *template* wrapper class. 
+        transparently, <!--This bullet and next refer to template wrapper class. Is this referring to using Spring DAO templates, whichis no longer recommend--><!--ed? If so, it's confusing to discuss it as an option. Sends a mixed message. If not, explain what you mean by *template* wrapper class.
 TR: REVISED, PLS REVIEW. Good point, removed coverage of template wrapper.-->by
         exposing a current <interfacename>Session</interfacename> through the
         Hibernate <interfacename>SessionFactory</interfacename>. Thus Spring
@@ -105,15 +109,15 @@ TR: REVISED, PLS REVIEW. Good point, removed coverage of template wrapper.-->by
       </listitem>
     </itemizedlist>
 
-    <para><!--The PetClinic sample in the Spring distribution offers alternative DAO implementations and application context configurations for JDBC, 
-Hibernate, and JPA. PetClinic is a working sample application that illustrates the use of Hibernate and JPA in a Spring web application. 
+    <para><!--The PetClinic sample in the Spring distribution offers alternative DAO implementations and application context configurations for JDBC,
+Hibernate, and JPA. PetClinic is a working sample application that illustrates the use of Hibernate and JPA in a Spring web application.
 It also leverages declarative transaction demarcation with different transaction strategies.
 
 Beyond the samples shipped with Spring, vendors provide a variety of Spring-based ORM samples.  --><!--Name vendors, link to them? TR: WILL ADDRESS LATER. We need to point to the current samples which aren't completed yet. --><emphasis>TODO:
     provide links to current samples</emphasis></para>
   </section>
 
-  <section id="orm-general">
+  <section xml:id="orm-general">
     <title>General ORM integration considerations</title>
 
     <para>This section highlights considerations that apply to all ORM
@@ -137,14 +141,14 @@ Beyond the samples shipped with Spring, vendors provide a variety of Spring-base
     objects and transaction managers, web view resolvers, web controllers that
     use the business services,and so on.</para>
 
-    <section id="orm-resource-mngmnt">
+    <section xml:id="orm-resource-mngmnt">
       <title>Resource and transaction management</title>
 
       <para>Typical business applications are cluttered with repetitive
       resource management code. Many projects try to invent their own
       solutions, sometimes sacrificing proper handling of failures for
       programming convenience. Spring advocates simple solutions for proper
-      resource handling, namely IoC through templating<!--same question as before re templates. Does preceding refer to Spring templates that in beginning you say you no longer recommend? 
+      resource handling, namely IoC through templating<!--same question as before re templates. Does preceding refer to Spring templates that in beginning you say you no longer recommend?
 TR: OK AS IS. The template for JDBC is still recommended--> in the case of
       JDBC and applying AOP interceptors for the ORM technologies.</para>
 
@@ -170,7 +174,7 @@ TR: OK AS IS. The template for JDBC is still recommended--> in the case of
       chapter.</para>
     </section>
 
-    <section id="orm-exception-translation">
+    <section xml:id="orm-exception-translation">
       <title>Exception translation</title>
 
       <para>When you use Hibernate, JPA, or JDO in a DAO, you must decide how
@@ -200,7 +204,7 @@ public class ProductDaoImpl implements ProductDao {
 
       <programlisting language="xml">&lt;beans&gt;
 
-  <lineannotation>&lt;!-- <classname>Exception</classname> translation bean post processor --&gt;</lineannotation>
+  <lineannotation>&lt;!-- Exception translation bean post processor --&gt;</lineannotation>
   &lt;bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/&gt;
 
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"/&gt;
@@ -223,11 +227,11 @@ public class ProductDaoImpl implements ProductDao {
     </section>
   </section>
 
-  <section id="orm-hibernate">
+  <section xml:id="orm-hibernate">
     <title>Hibernate</title>
 
-    <para>We will start with a coverage of <ulink
-    url="http://www.hibernate.org/">Hibernate 3</ulink> in a Spring
+    <para>We will start with a coverage of <link
+    xl:href="http://www.hibernate.org/">Hibernate 3</link> in a Spring
     environment, using it to demonstrate the approach that Spring takes
     towards integrating O/R mappers. This section will cover many issues in
     detail and show different variations of DAO implementations and
@@ -238,7 +242,7 @@ public class ProductDaoImpl implements ProductDao {
 
     <para><note><para>As of Spring 3.0, Spring requires Hibernate 3.2 or later.</para></note></para>
 
-    <section id="orm-session-factory-setup">
+    <section xml:id="orm-session-factory-setup">
       <title><interfacename>SessionFactory</interfacename> setup in a Spring
       container</title>
 
@@ -298,7 +302,7 @@ public class ProductDaoImpl implements ProductDao {
       However, that is typically not common outside of an EJB context.</para>
     </section>
 
-    <section id="orm-hibernate-straight">
+    <section xml:id="orm-hibernate-straight">
       <title>Implementing DAOs based on plain Hibernate 3 API</title>
 
       <para>Hibernate 3 has a feature called contextual sessions, wherein
@@ -382,14 +386,14 @@ public class ProductDaoImpl implements ProductDao {
       transactions.</para>
     </section>
 
-    <section id="orm-hibernate-tx-declarative">
+    <section xml:id="orm-hibernate-tx-declarative">
       <title>Declarative transaction demarcation</title>
 
       <para>We recommend that you use Spring's declarative transaction
       support, which enables you to replace explicit transaction demarcation
       API calls in your Java code with an AOP transaction interceptor. This
       transaction interceptor can be configured in a Spring container using
-      either Java annotations or XML.<!--Reword last part of preceding sentence to clarify *what* is *using Java annotations or XML*. Are you using Java annotations or XML to replace--><!--explicit transaction demarcation API calls, etc. OR are you saying the Spring container is using these? 
+      either Java annotations or XML.<!--Reword last part of preceding sentence to clarify *what* is *using Java annotations or XML*. Are you using Java annotations or XML to replace--><!--explicit transaction demarcation API calls, etc. OR are you saying the Spring container is using these?
 TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
       to keep business services free of repetitive transaction demarcation
       code and to focus on adding business logic, which is the real value of
@@ -414,22 +418,22 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop
        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
-  <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
+  <lineannotation>&lt;!-- SessionFactory, DataSource, etc. omitted --&gt;</lineannotation>
 
-  &lt;bean id="transactionManager" 
+  &lt;bean id="transactionManager"
             class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
-  
+
   &lt;aop:config&gt;
-    &lt;aop:pointcut id="productServiceMethods" 
+    &lt;aop:pointcut id="productServiceMethods"
             expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
   &lt;/aop:config&gt;
@@ -507,20 +511,20 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop
        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
-  <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
+  <lineannotation>&lt;!-- SessionFactory, DataSource, etc. omitted --&gt;</lineannotation>
 
   &lt;bean id="transactionManager"
             class="org.springframework.orm.hibernate3.HibernateTransactionManager"&gt;
     &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
   &lt;/bean&gt;
-  
+
   &lt;tx:annotation-driven/&gt;
 
   &lt;bean id="myProductService" class="product.SimpleProductService"&gt;
@@ -530,7 +534,7 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
 &lt;/beans&gt;</programlisting>
     </section>
 
-    <section id="orm-hibernate-tx-programmatic">
+    <section xml:id="orm-hibernate-tx-programmatic">
       <title>Programmatic transaction demarcation</title>
 
       <para>You can demarcate transactions in a higher level of the
@@ -596,7 +600,7 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
       default but allows configurable rollback policies per method.</para>
     </section>
 
-    <section id="orm-hibernate-tx-strategies">
+    <section xml:id="orm-hibernate-tx-strategies">
       <title>Transaction management strategies</title>
 
       <para>Both <classname>TransactionTemplate</classname> and
@@ -722,12 +726,12 @@ TR: OK. Reads OK to me, it applies to both. --></para>
       <classname>HibernateTransactionManager</classname> class.</para>
     </section>
 
-    <section id="orm-hibernate-resources">
-      <title>Comparing container-managed and locally defined resources<!--I've revised to better communicate the point of the section, which I think has to do with --><!--comparing spring's local support for transactions as opposed to container support. Revise as necessary. 
+    <section xml:id="orm-hibernate-resources">
+      <title>Comparing container-managed and locally defined resources<!--I've revised to better communicate the point of the section, which I think has to do with --><!--comparing spring's local support for transactions as opposed to container support. Revise as necessary.
 TR: REVISED, PLS REVIEW. Changed to heading *resources* since it technically could be more than transactions i.e. caching--></title>
 
       <para>You can switch between a container-managed JNDI
-      <interfacename>SessionFactory</interfacename><!--Clarify whether JNDI SessionFactory refers to container resources; I'm not sure what's being compared. 
+      <interfacename>SessionFactory</interfacename><!--Clarify whether JNDI SessionFactory refers to container resources; I'm not sure what's being compared.
 TR: REVISED, PLS REVIEW. Clarified by addin container-managed.--> and a
       locally defined one, without having to change a single line of
       application code. Whether to keep resource definitions in the container
@@ -744,13 +748,13 @@ TR: REVISED, PLS REVIEW. Clarified by addin container-managed.--> and a
       Configured with any strategy other than JTA, transaction support also
       works in a stand-alone or test environment. Especially in the typical
       case of single-database transactions, Spring's single-resource local
-      transaction support <!--I wrote *stand-alone transaction support*; if not correct, specify what you mean by *this*. 
+      transaction support <!--I wrote *stand-alone transaction support*; if not correct, specify what you mean by *this*.
 TR: REVISED, PLS REVIEW. Changed to single-resource local transaction support.-->is
       a lightweight and powerful alternative to JTA. When you use local EJB
       stateless session beans to drive transactions, you depend both on an EJB
       container and JTA, even if you access only a single database, and only
       use stateless session beans to provide declarative transactions through
-      container-managed transactions. <!--Does the next sentence refer to Spring or non-Spring? Clarify. I'm not sure whether the point of this paragraph and preceding is clear. 
+      container-managed transactions. <!--Does the next sentence refer to Spring or non-Spring? Clarify. I'm not sure whether the point of this paragraph and preceding is clear.
 TR: REVISED, PLS REVIEW. It's not very clear. I've revised it. It refers to non-Spring programmatic use of JTA.-->Also,
       direct use of JTA programmatically requires a Java EE environment as
       well. JTA does not involve only container dependencies in terms of JTA
@@ -787,7 +791,7 @@ TR: REVISED, PLS REVIEW. It's not very clear. I've revised it. It refers to non-
       only adds value when used in conjunction with EJBs.</para>
     </section>
 
-    <section id="orm-hibernate-invalid-jdbc-access-error">
+    <section xml:id="orm-hibernate-invalid-jdbc-access-error">
       <title>Spurious application server warnings with Hibernate</title>
 
       <para>In some JTA environments with very strict
@@ -815,7 +819,7 @@ TR: REVISED, PLS REVIEW. It's not very clear. I've revised it. It refers to non-
           obtaining the JTA
           <interfacename>PlatformTransactionManager</interfacename> object
           (presumably from JNDI through
-          <literal>JndiObjectFactoryBean/<literal>&lt;jee:jndi-lookup&gt;</literal></literal>)
+          <literal>JndiObjectFactoryBean</literal> or <literal>&lt;jee:jndi-lookup&gt;</literal>)
           and feeding it, for example, to Spring's
           <classname>JtaTransactionManager</classname>, then the easiest way
           is to specify a reference to the bean defining this JTA
@@ -830,7 +834,7 @@ TR: REVISED, PLS REVIEW. It's not very clear. I've revised it. It refers to non-
           <para>More likely you do not already have the JTA
           <interfacename>PlatformTransactionManager</interfacename> instance,
           because Spring's <classname>JtaTransactionManager</classname> can
-          find it itself. <!--Re preceding sentence, if this is the case, then why would you need to do what first bullet describes? 
+          find it itself. <!--Re preceding sentence, if this is the case, then why would you need to do what first bullet describes?
 TR: OK AS IS. This is very container dependent, and either case is possible.-->Thus
           you need to configure Hibernate to look up JTA
           <interfacename>PlatformTransactionManager</interfacename> directly.
@@ -863,7 +867,7 @@ TR: OK AS IS. This is very container dependent, and either case is possible.-->T
         <listitem>
           <para>Among other activities, this synchronization<!--Identify *this*. TR: REVISED, PLS REVIEW. Added "synchronization"--> can
           trigger a callback by Spring to Hibernate, through Hibernate's
-          <literal>afterTransactionCompletion</literal> callback <!--Preceding line, is *afterTransactionCompletion* callback the same as *afterCompletion* callback in step 2? If so, revise so --><!--there is no redundancy, or at least refer to the two callbacks in the same way. 
+          <literal>afterTransactionCompletion</literal> callback <!--Preceding line, is *afterTransactionCompletion* callback the same as *afterCompletion* callback in step 2? If so, revise so --><!--there is no redundancy, or at least refer to the two callbacks in the same way.
 TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletion*) and the other is Hibernate's (*afterTransactionCompletion*)-->(used
           to clear the Hibernate cache), followed by an explicit
           <literal>close()</literal> call on the Hibernate Session, which
@@ -918,7 +922,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
     </section>
   </section>
 
-  <section id="orm-jdo">
+  <section xml:id="orm-jdo">
     <title>JDO</title>
 
     <para>Spring supports the standard JDO 2.0 and 2.1 APIs as data access
@@ -926,7 +930,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
     corresponding integration classes reside in the
     <literal>org.springframework.orm.jdo</literal> package.</para>
 
-    <section id="orm-jdo-setup">
+    <section xml:id="orm-jdo-setup">
       <title><interfacename>PersistenceManagerFactory</interfacename>
       setup</title>
 
@@ -955,8 +959,8 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       usually supports a Spring-defined JDBC
       <interfacename>DataSource</interfacename>, passed into the
       <classname>connectionFactory</classname> property. For example, for the
-      open source JDO implementation DataNucleus (formerly JPOX) (<ulink
-      url="http://www.datanucleus.org/">http://www.datanucleus.org/</ulink>),
+      open source JDO implementation DataNucleus (formerly JPOX) (<link
+      xl:href="http://www.datanucleus.org/">http://www.datanucleus.org/</link>),
       this is the XML configuration of the
       <interfacename>PersistenceManagerFactory</interfacename>
       implementation:<!--complete the intro sentence; what does this example show? What is its purpose? TR: REVISED, PLS REVIEW.--></para>
@@ -981,8 +985,8 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       <interfacename>PersistenceManagerFactory</interfacename> in the JNDI
       environment of a Java EE application server, usually through the JCA
       connector provided by the particular JDO implementation. Spring's
-      standard <literal>JndiObjectFactoryBean /
-      <literal>&lt;jee:jndi-lookup&gt;</literal></literal> can be used to
+      standard <literal>JndiObjectFactoryBean</literal> or
+      <literal>&lt;jee:jndi-lookup&gt;</literal> can be used to
       retrieve and expose such a
       <interfacename>PersistenceManagerFactory</interfacename>. However,
       outside an EJB context, no real benefit exists in holding the
@@ -992,7 +996,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       there apply to JDO as well.</para>
     </section>
 
-    <section id="orm-jdo-daos-straight">
+    <section xml:id="orm-jdo-daos-straight">
       <title>Implementing DAOs based on the plain JDO API</title>
 
       <para>DAOs can also be written directly against plain JDO API, without
@@ -1012,7 +1016,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
         PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
         try {
             Query query = pm.newQuery(Product.class, "category = pCategory");
-            query.declareParameters("String pCategory"); 
+            query.declareParameters("String pCategory");
             return query.execute(category);
         }
         finally {
@@ -1083,7 +1087,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
     public Collection loadProductsByCategory(String category) {
         PersistenceManager pm = this.persistenceManagerFactory.getPersistenceManager();
         Query query = pm.newQuery(Product.class, "category = pCategory");
-        query.declareParameters("String pCategory"); 
+        query.declareParameters("String pCategory");
         return query.execute(category);
     }
 }</programlisting>
@@ -1130,7 +1134,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       <exceptionname>DataAccessException</exceptionname> (if desired).</para>
     </section>
 
-    <section id="orm-jdo-tx">
+    <section xml:id="orm-jdo-tx">
       <title>Transaction management</title>
 
       <note>
@@ -1150,11 +1154,11 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
         xmlns:aop="http://www.springframework.org/schema/aop"
         xmlns:tx="http://www.springframework.org/schema/tx"
         xsi:schemaLocation="
-   http://www.springframework.org/schema/beans 
+   http://www.springframework.org/schema/beans
    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-   http://www.springframework.org/schema/tx 
+   http://www.springframework.org/schema/tx
    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-   http://www.springframework.org/schema/aop 
+   http://www.springframework.org/schema/aop
    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
@@ -1200,7 +1204,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
       case for JDBC-based JDO 2.0 implementations by default.</para>
     </section>
 
-    <section id="orm-jdo-dialect">
+    <section xml:id="orm-jdo-dialect">
       <title><interfacename>JdoDialect</interfacename></title>
 
       <para>As an advanced feature, both <classname>JdoTemplate</classname>
@@ -1250,25 +1254,25 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
     </section>
   </section>
 
-  <section id="orm-jpa">
+  <section xml:id="orm-jpa">
     <title>JPA</title>
 
     <para>The Spring JPA, available under the
     <literal>org.springframework.orm.jpa</literal> package, offers
-    comprehensive support for the <ulink
-    url="http://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html">Java
-    Persistence API</ulink> in a similar manner to the integration with
+    comprehensive support for the <link
+    xl:href="http://java.sun.com/developer/technicalArticles/J2EE/jpa/index.html">Java
+    Persistence API</link> in a similar manner to the integration with
     Hibernate or JDO, while being aware of the underlying implementation in
     order to provide additional features.</para>
 
-    <section id="orm-jpa-setup">
+    <section xml:id="orm-jpa-setup">
       <title>Three options for JPA setup in a Spring environment</title>
 
       <para>The Spring JPA support offers three ways of setting up the JPA
       <interfacename>EntityManagerFactory</interfacename> that will be used by
       the application to obtain an entity manager.<!--Define and give purpose of JPA EntityManagerFactory. TR: REVISED, PLS REVIEW.--></para>
 
-      <section id="orm-jpa-setup-lemfb">
+      <section xml:id="orm-jpa-setup-lemfb">
         <title><classname>LocalEntityManagerFactoryBean</classname></title>
 
         <note>
@@ -1279,7 +1283,7 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
         <para>The <classname>LocalEntityManagerFactoryBean</classname> creates
         an <interfacename>EntityManagerFactory</interfacename> suitable for
         simple deployment environments where the application uses only JPA for
-        data access. <!--Note says use option only for stand-alone apps and testing; does that conflict with preceding line re data access? 
+        data access. <!--Note says use option only for stand-alone apps and testing; does that conflict with preceding line re data access?
 TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         <interfacename>PersistenceProvider</interfacename> autodetection
         mechanism (according to JPA's Java SE bootstrapping) and, in most
@@ -1304,7 +1308,7 @@ TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         designed.</para>
       </section>
 
-      <section id="orm-jpa-setup-jndi">
+      <section xml:id="orm-jpa-setup-jndi">
         <title>Obtaining an <classname>EntityManagerFactory</classname> from
         JNDI</title>
 
@@ -1352,7 +1356,7 @@ TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         <literal>@PersistenceContext</literal> annotations.</para>
       </section>
 
-      <section id="orm-jpa-setup-lcemfb">
+      <section xml:id="orm-jpa-setup-lcemfb">
         <title><classname>LocalContainerEntityManagerFactoryBean</classname></title>
 
         <note>
@@ -1377,14 +1381,14 @@ TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         <interfacename>LocalContainerEntityManagerFactoryBean</interfacename>:<!--The following examples shows what? What's its purpose? TR: REVISED, PLS REVIEW.--></para>
 
         <programlisting language="xml">&lt;beans&gt;
-        
+
  &lt;bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="dataSource" ref="someDataSource"/&gt;
   &lt;property name="loadTimeWeaver"&gt;
     &lt;bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/&gt;
   &lt;/property&gt;
  &lt;/bean&gt;
- 
+
 &lt;/beans&gt;</programlisting>
 
         <para>The following example shows a typical
@@ -1419,7 +1423,7 @@ TR: REVISED, PLS REVIEW.-->The factory bean uses the JPA
         configuration within the application. It supports links to an existing
         JDBC <interfacename>DataSource</interfacename>, supports both local
         and global transactions, and so on. However, it also imposes
-        requirements on the runtime environment, such as the availability <!--Clarify: first says it imposes *requirements* but says such as *the availability* of a weaving-capable Classloader. Revise to say--><!--whether you are *required* to use this when persistence provider demands byte-code transformation. i.e. what is the *requirement* here? 
+        requirements on the runtime environment, such as the availability <!--Clarify: first says it imposes *requirements* but says such as *the availability* of a weaving-capable Classloader. Revise to say--><!--whether you are *required* to use this when persistence provider demands byte-code transformation. i.e. what is the *requirement* here?
 TR: OK AS IS. The requirement is to provide the classloader for the runtime environment, if necessary - this is configured outside of Spring.-->of
         a weaving-capable class loader if the persistence provider demands
         byte-code transformation.</para>
@@ -1454,8 +1458,8 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
         <interfacename>ClassTransformer</interfacename> instances to be
         plugged in a specific manner, depending whether the environment is a
         web container or application server. <!--Preceding: is this what you mean? Avoid slashes (web container/application server); slashes mean different things depending on context.--><!--Revise if necessary. TR: OK.-->
-        Hooking <literal>ClassTransformers</literal> through a Java 5 <ulink
-        url="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</ulink>
+        Hooking <literal>ClassTransformers</literal> through a Java 5 <link
+        xl:href="http://java.sun.com/j2se/1.5.0/docs/api/java/lang/instrument/package-summary.html">agent</link>
         typically is not efficient. The agents work against the
         <emphasis>entire virtual machine</emphasis> and inspect
         <emphasis>every</emphasis> class that is loaded, which is usually
@@ -1468,23 +1472,23 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
         applied only <emphasis>per class loader</emphasis> and not per
         VM.</para>
 
-        <para>Refer to <xref linkend="aop-aj-ltw-spring" /> in the AOP chapter for more insight regarding the 
-        <interfacename>LoadTimeWeaver</interfacename> implementations and their setup, either generic or customized to 
+        <para>Refer to <xref linkend="aop-aj-ltw-spring" /> in the AOP chapter for more insight regarding the
+        <interfacename>LoadTimeWeaver</interfacename> implementations and their setup, either generic or customized to
         various platforms (such as Tomcat, WebLogic, OC4J, GlassFish, Resin and JBoss).</para>
-		
-		
-		<para>As described in the aforementioned section, you can configure a context-wide <interfacename>LoadTimeWeaver</interfacename>
-		using the <interfacename>@EnableLoadTimeWeaving</interfacename> annotation of <literal>context:load-time-weaver</literal> XML element.
-		Such a global weaver is picked up by all JPA <classname>LocalContainerEntityManagerFactoryBeans</classname>
-        automatically. This is the preferred way of setting up a load-time weaver, delivering autodetection of the platform 
+
+
+        <para>As described in the aforementioned section, you can configure a context-wide <interfacename>LoadTimeWeaver</interfacename>
+        using the <interfacename>@EnableLoadTimeWeaving</interfacename> annotation of <literal>context:load-time-weaver</literal> XML element.
+        Such a global weaver is picked up by all JPA <classname>LocalContainerEntityManagerFactoryBeans</classname>
+        automatically. This is the preferred way of setting up a load-time weaver, delivering autodetection of the platform
         (WebLogic, OC4J, GlassFish, Tomcat, Resin, JBoss or VM agent) and automatic propagation of the weaver to all weaver-aware beans:</para>
-		
-		<programlisting language="xml">&lt;context:load-time-weaver/&gt;
+
+        <programlisting language="xml">&lt;context:load-time-weaver/&gt;
 &lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
     ...
 &lt;/bean&gt;</programlisting>
-		
-		<para> However, if needed, one can manually specify a dedicated weaver through the <literal>loadTimeWeaver</literal> property:</para> 
+
+        <para> However, if needed, one can manually specify a dedicated weaver through the <literal>loadTimeWeaver</literal> property:</para>
 
         <programlisting language="xml">&lt;bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"&gt;
   &lt;property name="loadTimeWeaver"&gt;
@@ -1493,23 +1497,23 @@ TR: OK AS IS. The requirement is to provide the classloader for the runtime envi
 &lt;/bean&gt;</programlisting>
 
           <para>No matter how the LTW is configured, using this technique, JPA applications relying on
-          instrumentation can run in the target platform (ex: Tomcat) without needing an agent. 
-          This is important especially when the hosting applications rely on different JPA implementations 
+          instrumentation can run in the target platform (ex: Tomcat) without needing an agent.
+          This is important especially when the hosting applications rely on different JPA implementations
           because the JPA transformers are applied only at class loader level and thus are
           isolated from each other.</para>
 
-		<!-- 
-		  <note>
+        <!--
+          <note>
             <para>If you use TopLink Essentials as a JPA provider under
             Tomcat, place the toplink-essentials JAR under
             <emphasis>$CATALINA_HOME</emphasis>/shared/lib folder instead of
-            inside your war.--><!--Revise: *instead of placing the JAR under your WAR*, OR *instead of placing WAR under $CATALINA_HOME/etc*? 
+            inside your war.--><!--Revise: *instead of placing the JAR under your WAR*, OR *instead of placing WAR under $CATALINA_HOME/etc*?
 TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
           </note>
-		 -->
+         -->
       </section>
 
-      <section id="orm-jpa-multiple-pu">
+      <section xml:id="orm-jpa-multiple-pu">
         <title>Dealing with multiple persistence units</title>
 
         <para>For applications that rely on multiple persistence units
@@ -1560,7 +1564,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
       </section>
     </section>
 
-    <section id="orm-jpa-straight">
+    <section xml:id="orm-jpa-straight">
       <title>Implementing DAOs based on plain JPA</title>
 
       <note>
@@ -1661,7 +1665,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
     public Collection loadProductsByCategory(String category) {
        Query query = em.createQuery("from Product as p where p.category = :category");
        query.setParameter("category", category);
-       return query.getResultList(); 
+       return query.getResultList();
     }
 }</programlisting>
 
@@ -1712,7 +1716,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
       developers.</para>
     </section>
 
-    <section id="orm-jpa-tx">
+    <section xml:id="orm-jpa-tx">
       <title>Transaction Management</title>
 
       <note>
@@ -1731,11 +1735,11 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
        xmlns:aop="http://www.springframework.org/schema/aop"
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-       http://www.springframework.org/schema/beans 
+       http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-       http://www.springframework.org/schema/tx 
+       http://www.springframework.org/schema/tx
        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
-       http://www.springframework.org/schema/aop 
+       http://www.springframework.org/schema/aop
        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
@@ -1745,7 +1749,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
   &lt;bean id="myProductService" class="product.ProductServiceImpl"&gt;
     &lt;property name="productDao" ref="myProductDao"/&gt;
   &lt;/bean&gt;
-  
+
   &lt;aop:config&gt;
     &lt;aop:pointcut id="productServiceMethods" expression="execution(* product.ProductService.*(..))"/&gt;
     &lt;aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods"/&gt;
@@ -1772,7 +1776,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
       <interfacename>JpaDialect</interfacename> mechanism.</para>
     </section>
 
-    <section id="orm-jpa-dialect">
+    <section xml:id="orm-jpa-dialect">
       <title><interfacename>JpaDialect</interfacename></title>
 
       <para>As an advanced feature <classname>JpaTemplate</classname>,
@@ -1820,7 +1824,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
     </section>
   </section>
 
-  <section id="orm-ibatis">
+  <section xml:id="orm-ibatis">
     <title>iBATIS SQL Maps</title>
 
     <para>The iBATIS support in the Spring Framework much resembles the JDBC
@@ -1842,7 +1846,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
       longer provided.<!--directed where? TR: REVISED, PLS REVIEW.--></para>
     </note>
 
-    <section id="orm-ibatis-setup">
+    <section xml:id="orm-ibatis-setup">
       <title>Setting up the <classname>SqlMapClient</classname></title>
 
       <para>Using iBATIS SQL Maps involves creating SqlMap configuration files
@@ -1854,12 +1858,12 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
       <programlisting language="xml">public class Account {
 
     private String name;
-    private String email; 
+    private String email;
 
     public String getName() {
         return this.name;
     }
- 
+
     public void setName(String name) {
         this.name = name;
     }
@@ -1873,7 +1877,7 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
     }
 }</programlisting>
 
-      <para>To map this <classname>Account</classname> class<!--*previous account class*:Identify the account class and the section you're talking about 
+      <para>To map this <classname>Account</classname> class<!--*previous account class*:Identify the account class and the section you're talking about
 TR: REVISED, PLS REVIEW. The Account class was part of the iBATIS 1.0 examples that were dropped a long time ago. No one has complained.
 Makes you wonder if anyone actually reads thes docs :)--> with iBATIS 2.x we
       need to create the following SQL map
@@ -1934,7 +1938,7 @@ Makes you wonder if anyone actually reads thes docs :)--> with iBATIS 2.x we
 &lt;/beans&gt;</programlisting>
     </section>
 
-    <section id="orm-ibatis-template">
+    <section xml:id="orm-ibatis-template">
       <title>Using <classname>SqlMapClientTemplate</classname> and
       <classname>SqlMapClientDaoSupport</classname></title>
 
@@ -1999,7 +2003,7 @@ Makes you wonder if anyone actually reads thes docs :)--> with iBATIS 2.x we
       hierarchy.</para>
     </section>
 
-    <section id="orm-ibatis-straight">
+    <section xml:id="orm-ibatis-straight">
       <title>Implementing DAOs based on plain iBATIS API</title>
 
       <para>DAOs can also be written against plain iBATIS API, without any
@@ -2008,9 +2012,9 @@ Makes you wonder if anyone actually reads thes docs :)--> with iBATIS 2.x we
       corresponding DAO implementation:</para>
 
       <programlisting language="java">public class SqlMapAccountDao implements AccountDao {
-        
+
     private SqlMapClient sqlMapClient;
-    
+
     public void setSqlMapClient(SqlMapClient sqlMapClient) {
         this.sqlMapClient = sqlMapClient;
     }

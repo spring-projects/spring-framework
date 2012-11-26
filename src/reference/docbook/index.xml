@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<book xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xml:id="spring-framework-reference"
+<book xml:id="spring-framework-reference"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xlink="http://www.w3.org/1999/xlink">
-  <bookinfo>
-    <title>Spring Framework Reference Manual</title>
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+
+  <info>
+    <title>Spring Framework Reference Documentation</title>
 
     <productname>Spring Framework</productname>
 
@@ -19,171 +24,199 @@
 
     <authorgroup>
       <author>
-        <firstname>Rod</firstname>
-
-        <surname>Johnson</surname>
+        <personname>
+          <firstname>Rod</firstname>
+          <surname>Johnson</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Juergen</firstname>
-
-        <surname>Hoeller</surname>
+        <personname>
+          <firstname>Juergen</firstname>
+          <surname>Hoeller</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Keith</firstname>
-
-        <surname>Donald</surname>
+        <personname>
+          <firstname>Keith</firstname>
+          <surname>Donald</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Colin</firstname>
-
-        <surname>Sampaleanu</surname>
+        <personname>
+          <firstname>Colin</firstname>
+          <surname>Sampaleanu</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Rob</firstname>
-
-        <surname>Harrop</surname>
+        <personname>
+          <firstname>Rob</firstname>
+          <surname>Harrop</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Thomas</firstname>
-
-        <surname>Risberg</surname>
+        <personname>
+          <firstname>Thomas</firstname>
+          <surname>Risberg</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Alef</firstname>
-
-        <surname>Arendsen</surname>
+        <personname>
+          <firstname>Alef</firstname>
+          <surname>Arendsen</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Darren</firstname>
-
-        <surname>Davison</surname>
+        <personname>
+          <firstname>Darren</firstname>
+          <surname>Davison</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Dmitriy</firstname>
-
-        <surname>Kopylenko</surname>
+        <personname>
+          <firstname>Dmitriy</firstname>
+          <surname>Kopylenko</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Mark</firstname>
-
-        <surname>Pollack</surname>
+        <personname>
+          <firstname>Mark</firstname>
+          <surname>Pollack</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Thierry</firstname>
-
-        <surname>Templier</surname>
+        <personname>
+          <firstname>Thierry</firstname>
+          <surname>Templier</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Erwin</firstname>
-
-        <surname>Vervaet</surname>
+        <personname>
+          <firstname>Erwin</firstname>
+          <surname>Vervaet</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Portia</firstname>
-
-        <surname>Tung</surname>
+        <personname>
+          <firstname>Portia</firstname>
+          <surname>Tung</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Ben</firstname>
-
-        <surname>Hale</surname>
+        <personname>
+          <firstname>Ben</firstname>
+          <surname>Hale</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Adrian</firstname>
-
-        <surname>Colyer</surname>
+        <personname>
+          <firstname>Adrian</firstname>
+          <surname>Colyer</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>John</firstname>
-
-        <surname>Lewis</surname>
+        <personname>
+          <firstname>John</firstname>
+          <surname>Lewis</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Costin</firstname>
-
-        <surname>Leau</surname>
+        <personname>
+          <firstname>Costin</firstname>
+          <surname>Leau</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Mark</firstname>
-
-        <surname>Fisher</surname>
+        <personname>
+          <firstname>Mark</firstname>
+          <surname>Fisher</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Sam</firstname>
-
-        <surname>Brannen</surname>
+        <personname>
+          <firstname>Sam</firstname>
+          <surname>Brannen</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Ramnivas</firstname>
-
-        <surname>Laddad</surname>
+        <personname>
+          <firstname>Ramnivas</firstname>
+          <surname>Laddad</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Arjen</firstname>
-
-        <surname>Poutsma</surname>
+        <personname>
+          <firstname>Arjen</firstname>
+          <surname>Poutsma</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Chris</firstname>
-
-        <surname>Beams</surname>
+        <personname>
+          <firstname>Chris</firstname>
+          <surname>Beams</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Tareq</firstname>
-
-        <surname>Abedrabbo</surname>
+        <personname>
+          <firstname>Tareq</firstname>
+          <surname>Abedrabbo</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Andy</firstname>
-
-        <surname>Clement</surname>
+        <personname>
+          <firstname>Andy</firstname>
+          <surname>Clement</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Dave</firstname>
-
-        <surname>Syer</surname>
-      </author>
-      
-      <author>
-        <firstname>Oliver</firstname>
-
-        <surname>Gierke</surname>
+        <personname>
+          <firstname>Dave</firstname>
+          <surname>Syer</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Rossen</firstname>
-
-        <surname>Stoyanchev</surname>
+        <personname>
+          <firstname>Oliver</firstname>
+          <surname>Gierke</surname>
+        </personname>
       </author>
 
       <author>
-        <firstname>Phillip</firstname>
+        <personname>
+          <firstname>Rossen</firstname>
+          <surname>Stoyanchev</surname>
+        </personname>
+      </author>
 
-        <surname>Webb</surname>
+      <author>
+        <personname>
+          <firstname>Phillip</firstname>
+          <surname>Webb</surname>
+        </personname>
       </author>
 
     </authorgroup>
@@ -206,16 +239,16 @@
       copies and further provided that each copy contains this Copyright
       Notice, whether distributed in print or electronically.</para>
     </legalnotice>
-  </bookinfo>
+  </info>
 
   <!-- front matter -->
 
   <toc></toc>
 
-  <part id="spring-introduction">
+  <part xml:id="spring-introduction">
     <title>Overview of Spring Framework</title>
 
-    <partintro id="spring-core-intro">
+    <partintro>
       <para>The Spring Framework is a lightweight solution and a potential
       one-stop-shop for building your enterprise-ready applications. However,
       Spring is modular, allowing you to use only those parts that you need,
@@ -240,13 +273,13 @@
       <para>This document is a reference guide to Spring Framework features.
       If you have any requests, comments, or questions on this document,
       please post them on the user mailing list or on the support forums at
-      <ulink url="http://forum.springsource.org/"></ulink>.<!-- Missing link above. PDF shows it as http://forum.springsource.org/ --></para>
+      <link xl:href="http://forum.springsource.org/"></link>.<!-- Missing link above. PDF shows it as http://forum.springsource.org/ --></para>
     </partintro>
 
     <xi:include href="overview.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-whats-new">
+  <part xml:id="spring-whats-new">
     <title>What's New in Spring 3</title>
 
     <xi:include href="new-in-3.0.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
@@ -254,10 +287,10 @@
     <xi:include href="new-in-3.2.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-core">
+  <part xml:id="spring-core">
     <title>Core Technologies</title>
 
-    <partintro id="spring-core-intro">
+    <partintro>
       <para>This part of the reference documentation covers all of those
       technologies that are absolutely integral to the Spring
       Framework.</para>
@@ -334,10 +367,10 @@
     <xi:include href="testing.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-data-tier">
+  <part xml:id="spring-data-tier">
     <title>Data Access</title>
 
-    <partintro id="spring-data-tier-intro">
+    <partintro xml:id="spring-data-tier-intro">
       <para>This part of the reference documentation is concerned with data
       access and the interaction between the data access layer and the
       business or service layer.</para>
@@ -382,10 +415,10 @@
     <xi:include href="oxm.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-web">
+  <part xml:id="spring-web">
     <title>The Web</title>
 
-    <partintro id="spring-web-intro">
+    <partintro>
       <para>This part of the reference documentation covers the Spring
       Framework's support for the presentation tier (and specifically
       web-based presentation tiers).</para>
@@ -430,10 +463,10 @@
     <xi:include href="portlet.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-integration">
+  <part xml:id="spring-integration">
     <title>Integration</title>
 
-    <partintro id="spring-integration-intro">
+    <partintro>
       <para>This part of the reference documentation covers the Spring
       Framework's integration with a number of Java EE (and related)
       technologies.</para>
@@ -494,12 +527,12 @@
 
     <xi:include href="dynamic-languages.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
-                
+
     <xi:include href="cache.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
   </part>
 
-  <part id="spring-appendices">
+  <part xml:id="spring-appendices">
     <title>Appendices</title>
 
     <xi:include href="classic-spring.xml"

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="overview"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="overview">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Introduction to Spring Framework</title>
 
   <para>Spring Framework is a Java platform that provides comprehensive
@@ -39,10 +43,10 @@
     </listitem>
   </itemizedlist>
 
-  <section id="overview-dependency-injection">
+  <section xml:id="overview-dependency-injection">
     <title>Dependency Injection and Inversion of Control</title>
 
-    <sidebar id="background-ioc">
+    <sidebar xml:id="background-ioc">
       <title>Background</title>
 
       <para><quote><emphasis>The question is, what aspect of control are
@@ -51,8 +55,8 @@
       renaming the principle to make it more self-explanatory and came up with
       <firstterm>Dependency Injection</firstterm>.</para>
 
-      <para>For insight into IoC and DI, refer to Fowler's article at <ulink
-      url="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</ulink>.</para>
+      <para>For insight into IoC and DI, refer to Fowler's article at <link
+      xl:href="http://martinfowler.com/articles/injection.html">http://martinfowler.com/articles/injection.html</link>.</para>
     </sidebar>
 
     <para>Java applications -- a loose term that runs the gamut from
@@ -86,7 +90,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
     engineer robust, <emphasis>maintainable</emphasis> applications.</para>
   </section>
 
-  <section id="overview-modules">
+  <section xml:id="overview-modules">
     <title>Modules</title>
 
     <para>The Spring Framework consists of features organized into about 20
@@ -108,7 +112,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
         <caption><para>Overview of the Spring Framework</para></caption>
       </mediaobject></para>
 
-    <section id="overview-core-container">
+    <section xml:id="overview-core-container">
       <title>Core Container</title>
 
       <para>The <link linkend="beans-introduction"><emphasis>Core
@@ -150,7 +154,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       aggregations.</para>
     </section>
 
-    <section id="overview-data-access">
+    <section xml:id="overview-data-access">
       <title>Data Access/Integration</title>
 
       <para>The <emphasis>Data Access/Integration</emphasis> layer consists of
@@ -184,7 +188,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       Java objects)</emphasis>.</para>
     </section>
 
-    <section id="overview-web">
+    <section xml:id="overview-web">
       <title>Web</title>
 
       <para>The <emphasis>Web</emphasis> layer consists of the Web,
@@ -201,7 +205,7 @@ TR: This section doesn't read well and I think we should try to rewrite it.-->Nu
       linkend="mvc-introduction"><emphasis>MVC</emphasis></link>)
       implementation for web applications. Spring's MVC framework provides a
       clean separation between domain model code and web forms, and integrates
-      with all the other features of the Spring Framework.<!--MVC allows you to use *all other features*? (Or just all other features in Web layer?) How do you mean? Does this need elaboration? 
+      with all the other features of the Spring Framework.<!--MVC allows you to use *all other features*? (Or just all other features in Web layer?) How do you mean? Does this need elaboration?
 It sounds important.--><!--TR: REVISED, PLS REVIEW.--></para>
 
       <para>The <emphasis>Web-Struts</emphasis> module contains the support
@@ -215,7 +219,7 @@ It sounds important.--><!--TR: REVISED, PLS REVIEW.--></para>
       functionality of Web-Servlet module.<!--mirrors it in what way?--><!--TR: REVISED, PLS REVIEW. The functionality is mirrored - one for Servlets and the other for Portlets--></para>
     </section>
 
-    <section id="overview-aop-instrumentation">
+    <section xml:id="overview-aop-instrumentation">
       <title>AOP and Instrumentation</title>
 
       <para>Spring's <link
@@ -237,7 +241,7 @@ TR: OK. Added to diagram.--></para>
       certain application servers.</para>
     </section>
 
-    <section id="overview-testing">
+    <section xml:id="overview-testing">
       <title>Test</title>
 
       <para>The <emphasis>Test</emphasis> module supports the testing of
@@ -248,7 +252,7 @@ TR: OK. Added to diagram.--></para>
     </section>
   </section>
 
-  <section id="overview-usagescenarios">
+  <section xml:id="overview-usagescenarios">
     <title>Usage scenarios</title>
 
     <para>The building blocks described previously make Spring a logical
@@ -353,7 +357,7 @@ TR: OK. Added to diagram.--></para>
     scalable, fail-safe web applications that might need declarative
     security.</para>
 
-    <section id="dependency-management">
+    <section xml:id="dependency-management">
       <title>Dependency Management and Naming Conventions</title>
 
       <para>Dependency management and dependency injection are different
@@ -386,8 +390,8 @@ TR: OK. Added to diagram.--></para>
       <para>In general, Spring publishes its artifacts to four different
       places:<itemizedlist>
           <listitem>
-            <para>On the community download site <ulink
-            url="http://www.springsource.org/downloads/community">http://www.springsource.org/downloads/community</ulink>.
+            <para>On the community download site <link
+            xl:href="http://www.springsource.org/downloads/community">http://www.springsource.org/downloads/community</link>.
             Here you find all the Spring jars bundled together into a zip file
             for easy download. The names of the jars here since version 3.0
             are in the form
@@ -417,8 +421,8 @@ TR: OK. Added to diagram.--></para>
             (<code>org.springframework.*-&lt;version&gt;.jar</code>), and the
             dependencies are also in this "long" form, with external libraries
             (not from SpringSource) having the prefix
-            <code>com.springsource</code>. See the <ulink security=""
-            url="http://www.springsource.com/repository/app/faq">FAQ</ulink>
+            <code>com.springsource</code>. See the <link
+            xl:href="http://www.springsource.com/repository/app/faq">FAQ</link>
             for more information.</para>
           </listitem>
 
@@ -553,8 +557,8 @@ TR: OK. Added to diagram.--></para>
 
                 <entry>Various</entry>
 
-                <entry><ulink
-                url="http://www.springsource.com/repository">http://www.springsource.com/repository</ulink></entry>
+                <entry><link
+                xl:href="http://www.springsource.com/repository">http://www.springsource.com/repository</link></entry>
               </row>
 
               <row>
@@ -570,7 +574,7 @@ TR: OK. Added to diagram.--></para>
           </tgroup>
         </table></para>
 
-      <section id="overview-spring-dependencies">
+      <section xml:id="overview-spring-dependencies">
         <title>Spring Dependencies and Depending on Spring</title>
 
         <para>Although Spring provides integration and support for a huge
@@ -590,7 +594,7 @@ TR: OK. Added to diagram.--></para>
         our samples mostly use Maven.</para>
       </section>
 
-      <section id="overview-maven-dependency-management">
+      <section xml:id="overview-maven-dependency-management">
         <title>Maven Dependency Management</title>
 
         <para>If you are using Maven for dependency management you don't even
@@ -671,18 +675,18 @@ TR: OK. Added to diagram.--></para>
 
         <para>If you are managing your dependencies by hand, the URL in the
         repository declaration above is not browsable, but there is a user
-        interface at <ulink
-        url="http://www.springsource.com/repository">http://www.springsource.com/repository</ulink>
+        interface at <link
+        xl:href="http://www.springsource.com/repository">http://www.springsource.com/repository</link>
         that can be used to search for and download dependencies. It also has
         handy snippets of Maven and Ivy configuration that you can copy and
         paste if you are using those tools.</para>
       </section>
 
-      <section id="overview-ivy-dependency-management">
+      <section xml:id="overview-ivy-dependency-management">
         <title>Ivy Dependency Management</title>
 
-        <para>If you prefer to use <ulink
-        url="http://ant.apache.org/ivy">Ivy</ulink> to manage dependencies
+        <para>If you prefer to use <link
+        xl:href="http://ant.apache.org/ivy">Ivy</link> to manage dependencies
         then there are similar names and configuration options. </para>
 
         <para>To configure Ivy to point to the SpringSource EBR add the
@@ -690,7 +694,7 @@ TR: OK. Added to diagram.--></para>
         <filename>ivysettings.xml</filename>:</para>
 
         <programlisting>&lt;resolvers&gt;
-  
+
   &lt;url name="com.springsource.repository.bundles.release"&gt;
 
     &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/release/
@@ -705,7 +709,7 @@ TR: OK. Added to diagram.--></para>
     &lt;ivy pattern="http://repository.springsource.com/ivy/bundles/external/
        [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
     &lt;artifact pattern="http://repository.springsource.com/ivy/bundles/external/
-       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt; 
+       [organisation]/[module]/[revision]/[artifact]-[revision].[ext]" /&gt;
 
   &lt;/url&gt;
 
@@ -721,12 +725,12 @@ TR: OK. Added to diagram.--></para>
         include in your dependencies section. For example (in
         <filename>ivy.xml</filename>): </para>
 
-        <programlisting>&lt;dependency org="org.springframework" 
+        <programlisting>&lt;dependency org="org.springframework"
       name="org.springframework.core" rev="3.0.0.RELEASE" conf="compile-&gt;runtime"/&gt;</programlisting>
       </section>
     </section>
 
-    <section id="overview-logging">
+    <section xml:id="overview-logging">
       <title>Logging</title>
 
       <para>Logging is a very important dependency for Spring because a) it is
@@ -763,15 +767,15 @@ TR: OK. Added to diagram.--></para>
       application works and logs happily to the console out of the box in most
       situations, and that's important.</para>
 
-      <section id="overview-not-using-commons-logging">
+      <section xml:id="overview-not-using-commons-logging">
         <title>Not Using Commons Logging</title>
 
         <para>Unfortunately, the runtime discovery algorithm in
         <code>commons-logging</code>, while convenient for the end-user, is
         problematic. If we could turn back the clock and start Spring now
         as a new project it would use a different logging dependency. The
-        first choice would probably be the Simple Logging Facade for Java (<ulink
-        url="http://www.slf4j.org">SLF4J</ulink>), which is also used by a lot
+        first choice would probably be the Simple Logging Facade for Java (<link
+        xl:href="http://www.slf4j.org">SLF4J</link>), which is also used by a lot
         of other tools that people use with Spring inside their
         applications.</para>
 
@@ -801,94 +805,94 @@ TR: OK. Added to diagram.--></para>
         alternative implementation of JCL using SLF4J as an example.</para>
       </section>
 
-      <section id="overview-logging-slf4j">
+      <section xml:id="overview-logging-slf4j">
         <title>Using SLF4J</title>
+
+          <para>SLF4J is a cleaner dependency and more efficient at runtime than
+          <code>commons-logging</code> because it uses compile-time bindings
+          instead of runtime discovery of the other logging frameworks it
+          integrates. This also means that you have to be more explicit about what
+          you want to happen at runtime, and declare it or configure it
+          accordingly. SLF4J provides bindings to many common logging frameworks,
+          so you can usually choose one that you already use, and bind to that for
+          configuration and management.</para>
+
+          <para>SLF4J provides bindings to many common logging frameworks,
+          including JCL, and it also does the reverse: bridges between other
+          logging frameworks and itself. So to use SLF4J with Spring you need to
+          replace the <code>commons-logging</code> dependency with the SLF4J-JCL
+          bridge. Once you have done that then logging calls from within Spring
+          will be translated into logging calls to the SLF4J API, so if other
+          libraries in your application use that API, then you have a single place
+          to configure and manage logging.</para>
+
+          <para>A common choice might be to bridge Spring to SLF4J, and then
+          provide explicit binding from SLF4J to Log4J. You need to supply 4
+          dependencies (and exclude the existing <code>commons-logging</code>):
+          the bridge, the SLF4J API, the binding to Log4J, and the Log4J
+          implementation itself. In Maven you would do that like this</para>
+
+          <programlisting>&lt;dependencies&gt;
+       &lt;dependency&gt;
+          &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+          &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
+          &lt;version&gt;3.0.0.RELEASE&lt;/version&gt;
+          &lt;scope&gt;runtime&lt;/scope&gt;
+          &lt;exclusions&gt;
+             &lt;exclusion&gt;
+                &lt;groupId&gt;commons-logging&lt;/groupId&gt;
+                &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
+             &lt;/exclusion&gt;
+          &lt;/exclusions&gt;
+       &lt;/dependency&gt;
+       &lt;dependency&gt;
+          &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+          &lt;artifactId&gt;jcl-over-slf4j&lt;/artifactId&gt;
+          &lt;version&gt;1.5.8&lt;/version&gt;
+          &lt;scope&gt;runtime&lt;/scope&gt;
+       &lt;/dependency&gt;
+       &lt;dependency&gt;
+          &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+          &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
+          &lt;version&gt;1.5.8&lt;/version&gt;
+          &lt;scope&gt;runtime&lt;/scope&gt;
+       &lt;/dependency&gt;
+       &lt;dependency&gt;
+          &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+          &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+          &lt;version&gt;1.5.8&lt;/version&gt;
+          &lt;scope&gt;runtime&lt;/scope&gt;
+       &lt;/dependency&gt;
+       &lt;dependency&gt;
+          &lt;groupId&gt;log4j&lt;/groupId&gt;
+          &lt;artifactId&gt;log4j&lt;/artifactId&gt;
+          &lt;version&gt;1.2.14&lt;/version&gt;
+          &lt;scope&gt;runtime&lt;/scope&gt;
+       &lt;/dependency&gt;
+    &lt;/dependencies&gt; </programlisting>
+
+          <para>That might seem like a lot of dependencies just to get some
+          logging. Well it is, but it <emphasis>is</emphasis> optional, and it
+          should behave better than the vanilla <code>commons-logging</code> with
+          respect to classloader issues, notably if you are in a strict container
+          like an OSGi platform. Allegedly there is also a performance benefit
+          because the bindings are at compile-time not runtime.</para>
+
+          <para>A more common choice amongst SLF4J users, which uses fewer steps
+          and generates fewer dependencies, is to bind directly to <link
+          xl:href="http://logback.qos.ch">Logback</link>. This removes the extra
+          binding step because Logback implements SLF4J directly, so you only need
+          to depend on two libraries not four (<code>jcl-over-slf4j</code> and
+          <code>logback</code>). If you do that you might also need to exclude the
+          slf4j-api dependency from other external dependencies (not Spring),
+          because you only want one version of that API on the classpath.</para>
       </section>
 
-      <para>SLF4J is a cleaner dependency and more efficient at runtime than
-      <code>commons-logging</code> because it uses compile-time bindings
-      instead of runtime discovery of the other logging frameworks it
-      integrates. This also means that you have to be more explicit about what
-      you want to happen at runtime, and declare it or configure it
-      accordingly. SLF4J provides bindings to many common logging frameworks,
-      so you can usually choose one that you already use, and bind to that for
-      configuration and management.</para>
-
-      <para>SLF4J provides bindings to many common logging frameworks,
-      including JCL, and it also does the reverse: bridges between other
-      logging frameworks and itself. So to use SLF4J with Spring you need to
-      replace the <code>commons-logging</code> dependency with the SLF4J-JCL
-      bridge. Once you have done that then logging calls from within Spring
-      will be translated into logging calls to the SLF4J API, so if other
-      libraries in your application use that API, then you have a single place
-      to configure and manage logging.</para>
-
-      <para>A common choice might be to bridge Spring to SLF4J, and then
-      provide explicit binding from SLF4J to Log4J. You need to supply 4
-      dependencies (and exclude the existing <code>commons-logging</code>):
-      the bridge, the SLF4J API, the binding to Log4J, and the Log4J
-      implementation itself. In Maven you would do that like this</para>
-
-      <programlisting>&lt;dependencies&gt;
-   &lt;dependency&gt;
-      &lt;groupId&gt;org.springframework&lt;/groupId&gt;
-      &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
-      &lt;version&gt;3.0.0.RELEASE&lt;/version&gt;
-      &lt;scope&gt;runtime&lt;/scope&gt;
-      &lt;exclusions&gt;
-         &lt;exclusion&gt;
-            &lt;groupId&gt;commons-logging&lt;/groupId&gt;
-            &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
-         &lt;/exclusion&gt;
-      &lt;/exclusions&gt;
-   &lt;/dependency&gt;
-   &lt;dependency&gt;
-      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-      &lt;artifactId&gt;jcl-over-slf4j&lt;/artifactId&gt;
-      &lt;version&gt;1.5.8&lt;/version&gt;
-      &lt;scope&gt;runtime&lt;/scope&gt;
-   &lt;/dependency&gt;
-   &lt;dependency&gt;
-      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-      &lt;artifactId&gt;slf4j-api&lt;/artifactId&gt;
-      &lt;version&gt;1.5.8&lt;/version&gt;
-      &lt;scope&gt;runtime&lt;/scope&gt;
-   &lt;/dependency&gt;
-   &lt;dependency&gt;
-      &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
-      &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
-      &lt;version&gt;1.5.8&lt;/version&gt;
-      &lt;scope&gt;runtime&lt;/scope&gt;
-   &lt;/dependency&gt;
-   &lt;dependency&gt;
-      &lt;groupId&gt;log4j&lt;/groupId&gt;
-      &lt;artifactId&gt;log4j&lt;/artifactId&gt;
-      &lt;version&gt;1.2.14&lt;/version&gt;
-      &lt;scope&gt;runtime&lt;/scope&gt;
-   &lt;/dependency&gt;
-&lt;/dependencies&gt; </programlisting>
-
-      <para>That might seem like a lot of dependencies just to get some
-      logging. Well it is, but it <emphasis>is</emphasis> optional, and it
-      should behave better than the vanilla <code>commons-logging</code> with
-      respect to classloader issues, notably if you are in a strict container
-      like an OSGi platform. Allegedly there is also a performance benefit
-      because the bindings are at compile-time not runtime.</para>
-
-      <para>A more common choice amongst SLF4J users, which uses fewer steps
-      and generates fewer dependencies, is to bind directly to <ulink type=""
-      url="http://logback.qos.ch">Logback</ulink>. This removes the extra
-      binding step because Logback implements SLF4J directly, so you only need
-      to depend on two libraries not four (<code>jcl-over-slf4j</code> and
-      <code>logback</code>). If you do that you might also need to exclude the
-      slf4j-api dependency from other external dependencies (not Spring),
-      because you only want one version of that API on the classpath.</para>
-
-      <section id="overview-logging-log4j">
+      <section xml:id="overview-logging-log4j">
         <title>Using Log4J</title>
 
-        <para>Many people use <ulink
-        url="http://logging.apache.org/log4j">Log4j</ulink> as a logging
+        <para>Many people use <link
+        xl:href="http://logging.apache.org/log4j">Log4j</link> as a logging
         framework for configuration and management purposes. It's efficient
         and well-established, and in fact it's what we use at runtime when we
         build and test Spring. Spring also provides some utilities for
@@ -928,7 +932,7 @@ log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %t %c{2}:%L - %m
 
 log4j.category.org.springframework.beans.factory=DEBUG</programlisting>
 
-        <section id="overview-native-jcl">
+        <section xml:id="overview-native-jcl">
           <title>Runtime Containers with Native JCL</title>
 
           <para>Many people run their Spring applications in a container that

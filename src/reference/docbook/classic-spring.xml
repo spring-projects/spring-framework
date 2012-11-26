@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<appendix xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<appendix xml:id="classic-spring"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="classic-spring">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Classic Spring Usage</title>
 
   <para>This appendix discusses some classic Spring usage patterns as a
@@ -11,20 +15,20 @@
   the current recommended usage is covered in the respective sections of the
   reference manual.</para>
 
-  <section id="classic-spring-orm">
+  <section xml:id="classic-spring-orm">
     <title>Classic ORM usage</title>
 
     <para>This section documents the classic usage patterns that you might
     encounter in a legacy Spring application. For the currently recommended
     usage patterns, please refer to the <xref linkend="orm" /> chapter.</para>
 
-    <section id="classic-spring-hibernate">
+    <section xml:id="classic-spring-hibernate">
       <title>Hibernate</title>
 
       <para>For the currently recommended usage patterns for Hibernate see
       <xref linkend="orm-hibernate" /></para>
 
-      <section id="orm-hibernate-template">
+      <section xml:id="orm-hibernate-template">
         <title>The <classname>HibernateTemplate</classname></title>
 
         <para>The basic programming model for templating looks as follows, for
@@ -57,7 +61,7 @@
     }
 
     public Collection loadProductsByCategory(String category) throws DataAccessException {
-    	return this.hibernateTemplate.find("from test.Product product where product.category=?", category);
+        return this.hibernateTemplate.find("from test.Product product where product.category=?", category);
     }
 }</programlisting>
 
@@ -117,7 +121,7 @@
 }</programlisting>
       </section>
 
-      <section id="orm-hibernate-daos">
+      <section xml:id="orm-hibernate-daos">
         <title>Implementing Spring-based DAOs without callbacks</title>
 
         <para>As alternative to using Spring's
@@ -170,13 +174,13 @@
       </section>
     </section>
 
-    <section id="classic-spring-jdo">
+    <section xml:id="classic-spring-jdo">
       <title>JDO</title>
 
       <para>For the currently recommended usage patterns for JDO see <xref
       linkend="orm-jdo" /></para>
 
-      <section id="orm-jdo-template">
+      <section xml:id="orm-jdo-template">
         <title><classname>JdoTemplate</classname> and
         <classname>JdoDaoSupport</classname></title>
 
@@ -189,15 +193,15 @@
         <classname>JdoTemplate</classname>:</para>
 
         <programlisting language="xml">&lt;beans&gt;
-  
+
   &lt;bean id="myProductDao" class="product.ProductDaoImpl"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
   &lt;/bean&gt;
-  
+
 &lt;/beans&gt;</programlisting>
 
         <programlisting language="java">public class ProductDaoImpl implements ProductDao {
-  
+
     private JdoTemplate jdoTemplate;
 
     public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
@@ -208,7 +212,7 @@
         return (Collection) this.jdoTemplate.execute(new JdoCallback() {
             public Object doInJdo(PersistenceManager pm) throws JDOException {
                 Query query = pm.newQuery(Product.class, "category = pCategory");
-                query.declareParameters("String pCategory"); 
+                query.declareParameters("String pCategory");
                 List result = query.execute(category);
                 <lineannotation>// do some further stuff with the result list</lineannotation>
                 return result;
@@ -237,7 +241,7 @@
         typical requirements:</para>
 
         <programlisting language="java">public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
-  
+
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         return getJdoTemplate().find(
             Product.class, "category = pCategory", "String category", new Object[] {category});
@@ -257,13 +261,13 @@
       </section>
     </section>
 
-    <section id="classic-spring-jpa">
+    <section xml:id="classic-spring-jpa">
       <title>JPA</title>
 
       <para>For the currently recommended usage patterns for JPA see <xref
       linkend="orm-jpa" /></para>
 
-      <section id="orm-jpa-template">
+      <section xml:id="orm-jpa-template">
         <title><classname>JpaTemplate</classname> and
         <classname>JpaDaoSupport</classname></title>
 
@@ -282,7 +286,7 @@
 &lt;/beans&gt;</programlisting>
 
         <programlisting language="java">public class JpaProductDao implements ProductDao {
-  
+
     private JpaTemplate jpaTemplate;
 
     public void setEntityManagerFactory(EntityManagerFactory emf) {
@@ -294,7 +298,7 @@
             public Object doInJpa(EntityManager em) throws PersistenceException {
                 Query query = em.createQuery("from Product as p where p.category = :category");
                 query.setParameter("category", category);
-                List result = query.getResultList(); 
+                List result = query.getResultList();
                 <lineannotation>// do some further processing with the result list</lineannotation>
                 return result;
             }
@@ -322,7 +326,7 @@
         subclasses:</para>
 
         <programlisting language="java">public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
-  
+
     public Collection loadProductsByCategory(String category) throws DataAccessException {
         Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
         params.put("category", category);
@@ -348,13 +352,13 @@
     </section>
   </section>
 
-  <section id="clasic-spring-mvc">
+  <section xml:id="clasic-spring-mvc">
     <title>Classic Spring MVC</title>
 
     <para>...</para>
   </section>
 
-  <section id="classic-spring-jms">
+  <section xml:id="classic-spring-jms">
     <title>JMS Usage</title>
 
     <para>One of the benefits of Spring's JMS support is to shield the user
@@ -392,7 +396,7 @@
       </note>
     </sidebar>
 
-    <section id="classic-spring-jms-template">
+    <section xml:id="classic-spring-jms-template">
       <title>JmsTemplate</title>
 
       <para>Located in the package
@@ -407,7 +411,7 @@
       that the point-to-point domain, Queues, will be used.</para>
     </section>
 
-    <section id="classic-spring-aysnc-messages">
+    <section xml:id="classic-spring-aysnc-messages">
       <title>Asynchronous Message Reception </title>
 
       <para><link
@@ -423,7 +427,7 @@
       rely only on the JMS 1.0.2 API. </para>
     </section>
 
-    <section id="classic-spring-jms-connections">
+    <section xml:id="classic-spring-jms-connections">
       <title>Connections</title>
 
       <para>The <classname>ConnectionFactory</classname> interface is part of
@@ -441,7 +445,7 @@
       <classname>javax.jmsTopicConnection</classname>.</para>
     </section>
 
-    <section id="classic-spring-jms-tx-management">
+    <section xml:id="classic-spring-jms-tx-management">
       <title>Transaction Management</title>
 
       <para>In a JMS 1.0.2 environment the class

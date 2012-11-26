@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="scheduling"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="scheduling">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Task Execution and Scheduling</title>
 
-  <section id="scheduling-introduction">
+  <section xml:id="scheduling-introduction">
     <title>Introduction</title>
 
     <para>The Spring Framework provides abstractions for asynchronous
@@ -20,8 +24,8 @@
 
     <para>Spring also features integration classes for supporting scheduling
     with the <classname>Timer</classname>, part of the JDK since 1.3, and the
-    Quartz Scheduler (<ulink
-    url="http://quartz-scheduler.org"></ulink>). Both of those
+    Quartz Scheduler (<link
+    xl:href="http://quartz-scheduler.org"></link>). Both of those
     schedulers are set up using a <interfacename>FactoryBean</interfacename>
     with optional references to <classname>Timer</classname> or
     <classname>Trigger</classname> instances, respectively. Furthermore, a
@@ -31,7 +35,7 @@
     <classname>MethodInvokingFactoryBean</classname> operation).</para>
   </section>
 
-  <section id="scheduling-task-executor">
+  <section xml:id="scheduling-task-executor">
     <title>The Spring <interfacename>TaskExecutor</interfacename>
     abstraction</title>
 
@@ -61,7 +65,7 @@
     behavior, it is possible to use this abstraction for your own
     needs.</para>
 
-    <section id="scheduling-task-executor-types">
+    <section xml:id="scheduling-task-executor-types">
       <title><interfacename>TaskExecutor</interfacename> types</title>
 
       <para>There are a number of pre-built implementations of
@@ -80,7 +84,7 @@
           pooling, keep scrolling further down the page.</para>
         </listitem>
 
-        <listitem id="syncTaskExecutor">
+        <listitem xml:id="syncTaskExecutor">
           <para><classname>SyncTaskExecutor</classname></para>
 
           <para>This implementation doesn't execute invocations
@@ -89,7 +93,7 @@
           isn't necessary such as simple test cases.</para>
         </listitem>
 
-        <listitem id="concurrentTaskExecutor">
+        <listitem xml:id="concurrentTaskExecutor">
           <para><classname>ConcurrentTaskExecutor</classname></para>
 
           <para>This implementation is a wrapper for a Java 5
@@ -104,7 +108,7 @@
           alternative.</para>
         </listitem>
 
-        <listitem id="simpleThreadPoolTaskExecutor">
+        <listitem xml:id="simpleThreadPoolTaskExecutor">
           <para><classname>SimpleThreadPoolTaskExecutor</classname></para>
 
           <para>This implementation is actually a subclass of Quartz's
@@ -114,7 +118,7 @@
           components.</para>
         </listitem>
 
-        <listitem id="threadPoolTaskExecutor">
+        <listitem xml:id="threadPoolTaskExecutor">
           <para><classname>ThreadPoolTaskExecutor</classname></para>
 
           <sidebar>
@@ -169,7 +173,7 @@
       </itemizedlist>
     </section>
 
-    <section id="scheduling-task-executor-usage">
+    <section xml:id="scheduling-task-executor-usage">
       <title>Using a <interfacename>TaskExecutor</interfacename></title>
 
       <para>Spring's <interfacename>TaskExecutor</interfacename>
@@ -230,7 +234,7 @@ public class TaskExecutorExample {
     </section>
   </section>
 
-  <section id="scheduling-task-scheduler">
+  <section xml:id="scheduling-task-scheduler">
     <title>The Spring <interfacename>TaskScheduler</interfacename>
     abstraction</title>
 
@@ -262,7 +266,7 @@ public class TaskExecutorExample {
     The fixed-rate and fixed-delay methods are for simple, periodic execution,
     but the method that accepts a Trigger is much more flexible.</para>
 
-    <section id="scheduling-trigger-interface">
+    <section xml:id="scheduling-trigger-interface">
       <title>The <interfacename>Trigger</interfacename> interface</title>
 
       <para>The <interfacename>Trigger</interfacename> interface is
@@ -301,7 +305,7 @@ public class TaskExecutorExample {
 }</programlisting>
     </section>
 
-    <section id="scheduling-trigger-implementations">
+    <section xml:id="scheduling-trigger-implementations">
       <title><interfacename>Trigger</interfacename> implementations</title>
 
       <para>Spring provides two implementations of the
@@ -330,7 +334,7 @@ public class TaskExecutorExample {
       externally.</para>
     </section>
 
-    <section id="scheduling-task-scheduler-implementations">
+    <section xml:id="scheduling-task-scheduler-implementations">
       <title><interfacename>TaskScheduler</interfacename>
       implementations</title>
 
@@ -357,14 +361,14 @@ public class TaskExecutorExample {
     </section>
   </section>
 
-  <section id="scheduling-annotation-support">
+  <section xml:id="scheduling-annotation-support">
     <title>Annotation Support for Scheduling and Asynchronous
     Execution</title>
 
     <para>Spring provides annotation support for both task scheduling and
     asynchronous method execution.</para>
 
-    <section id="secheduling-enable-annotation-support">
+    <section xml:id="secheduling-enable-annotation-support">
 
       <title>Enable scheduling annotations</title>
 
@@ -403,7 +407,7 @@ public class AppConfig {
       with <interfacename>@Scheduled</interfacename>.</para>
     </section>
 
-    <section id="scheduling-annotation-support-scheduled">
+    <section xml:id="scheduling-annotation-support-scheduled">
       <title>The @Scheduled Annotation</title>
 
       <para>The @Scheduled annotation can be added to a method along with
@@ -462,7 +466,7 @@ public void doSomething() {
       </note>
     </section>
 
-    <section id="scheduling-annotation-support-async">
+    <section xml:id="scheduling-annotation-support-async">
       <title>The @Async Annotation</title>
 
       <para>The <interfacename>@Async</interfacename> annotation can be
@@ -533,7 +537,7 @@ public class SampleBeanInititalizer {
 }</programlisting>
     </section>
 
-    <section id="scheduling-annotation-support-qualification">
+    <section xml:id="scheduling-annotation-support-qualification">
       <title>Executor qualification with @Async</title>
 
       <para>By default when specifying <interfacename>@Async</interfacename> on
@@ -557,7 +561,7 @@ void doSomething(String s) {
     </section>
   </section>
 
-  <section id="scheduling-task-namespace">
+  <section xml:id="scheduling-task-namespace">
     <title>The Task Namespace</title>
 
     <para>Beginning with Spring 3.0, there is an XML namespace for configuring
@@ -565,7 +569,7 @@ void doSomething(String s) {
     <interfacename>TaskScheduler</interfacename> instances. It also provides a
     convenient way to configure tasks to be scheduled with a trigger.</para>
 
-    <section id="scheduling-task-namespace-scheduler">
+    <section xml:id="scheduling-task-namespace-scheduler">
       <title>The 'scheduler' element</title>
 
       <para>The following element will create a
@@ -581,7 +585,7 @@ void doSomething(String s) {
       are no other configuration options for the scheduler.</para>
     </section>
 
-    <section id="scheduling-task-namespace-executor">
+    <section xml:id="scheduling-task-namespace-executor">
       <title>The 'executor' element</title>
 
       <para>The following will create a
@@ -607,8 +611,8 @@ void doSomething(String s) {
       has also been provided. The configuration of the thread pool should also
       be considered in light of the executor's queue capacity. For the full
       description of the relationship between pool size and queue capacity,
-      consult the documentation for <ulink
-      url="http://java.sun.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</ulink>.
+      consult the documentation for <link
+      xl:href="http://java.sun.com/javase/6/docs/api/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</link>.
       The main idea is that when a task is submitted, the executor will first
       try to use a free thread if the number of active threads is currently
       less than the core size. If the core size has been reached, then the
@@ -659,7 +663,7 @@ void doSomething(String s) {
                rejection-policy="CALLER_RUNS"/&gt;</programlisting>
     </section>
 
-    <section id="scheduling-task-namespace-scheduled-tasks">
+    <section xml:id="scheduling-task-namespace-scheduled-tasks">
       <title>The 'scheduled-tasks' element</title>
 
       <para>The most powerful feature of Spring's task namespace is the
@@ -699,18 +703,18 @@ void doSomething(String s) {
     </section>
   </section>
 
-  <section id="scheduling-quartz">
+  <section xml:id="scheduling-quartz">
     <title>Using the Quartz Scheduler</title>
 
     <para>Quartz uses <classname>Trigger</classname>,
     <classname>Job</classname> and <classname>JobDetail</classname> objects to
     realize scheduling of all kinds of jobs. For the basic concepts behind
-    Quartz, have a look at <ulink
-    url="http://quartz-scheduler.org"></ulink>. For convenience
+    Quartz, have a look at <link
+    xl:href="http://quartz-scheduler.org"></link>. For convenience
     purposes, Spring offers a couple of classes that simplify the usage of
     Quartz within Spring-based applications.</para>
 
-    <section id="scheduling-quartz-jobdetail">
+    <section xml:id="scheduling-quartz-jobdetail">
       <title>Using the JobDetailBean</title>
 
       <para><classname>JobDetail</classname> objects contain all information
@@ -744,15 +748,15 @@ void doSomething(String s) {
 public class ExampleJob extends QuartzJobBean {
 
   private int timeout;
-  
+
   /**
    * Setter called after the ExampleJob is instantiated
    * with the value from the JobDetailBean (5)
-   */ 
+   */
   public void setTimeout(int timeout) {
     this.timeout = timeout;
   }
-  
+
   protected void executeInternal(JobExecutionContext ctx) throws JobExecutionException {
       <lineannotation>// do the actual work</lineannotation>
   }
@@ -768,7 +772,7 @@ public class ExampleJob extends QuartzJobBean {
       <literal>exampleJob</literal>).</emphasis></para>
     </section>
 
-    <section id="scheduling-quartz-method-invoking-job">
+    <section xml:id="scheduling-quartz-method-invoking-job">
       <title>Using the
       <classname>MethodInvokingJobDetailFactoryBean</classname></title>
 
@@ -786,9 +790,9 @@ public class ExampleJob extends QuartzJobBean {
       method (see below):</para>
 
       <programlisting language="java">public class ExampleBusinessObject {
-  
+
   <lineannotation>// properties and collaborators</lineannotation>
-  
+
   public void doIt() {
     <lineannotation>// do the actual work</lineannotation>
   }
@@ -827,7 +831,7 @@ public class ExampleJob extends QuartzJobBean {
       </note>
     </section>
 
-    <section id="scheduling-quartz-cron">
+    <section xml:id="scheduling-quartz-cron">
       <title>Wiring up jobs using triggers and the
       <classname>SchedulerFactoryBean</classname></title>
 
@@ -879,13 +883,13 @@ public class ExampleJob extends QuartzJobBean {
       <para>More properties are available for the
       <classname>SchedulerFactoryBean</classname> for you to set, such as the
       calendars used by the job details, properties to customize Quartz with,
-      etc. Have a look at the <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
-      Javadoc</ulink> for more information.</para>
+      etc. Have a look at the <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
+      Javadoc</link> for more information.</para>
     </section>
   </section>
 
-  <section id="scheduling-jdk-timer">
+  <section xml:id="scheduling-jdk-timer">
     <title>Using JDK Timer support</title>
 
     <para>The other way to schedule jobs in Spring is to use JDK
@@ -893,7 +897,7 @@ public class ExampleJob extends QuartzJobBean {
     the timer that invokes methods. Wiring timers is done using the
     <classname>TimerFactoryBean</classname>.</para>
 
-    <section id="scheduling-jdk-timer-creating">
+    <section xml:id="scheduling-jdk-timer-creating">
       <title>Creating custom timers</title>
 
       <para>Using the <classname>TimerTask</classname> you can create customer
@@ -902,11 +906,11 @@ public class ExampleJob extends QuartzJobBean {
       <programlisting language="java">public class CheckEmailAddresses extends TimerTask {
 
   private List emailAddresses;
-  
+
   public void setEmailAddresses(List emailAddresses) {
     this.emailAddresses = emailAddresses;
   }
-  
+
   public void run() {
     <lineannotation>// iterate over all email addresses and archive them</lineannotation>
   }
@@ -937,7 +941,7 @@ public class ExampleJob extends QuartzJobBean {
       value). </emphasis></para>
     </section>
 
-    <section id="scheduling-jdk-timer-method-invoking-task">
+    <section xml:id="scheduling-jdk-timer-method-invoking-task">
       <title>Using the
       <classname>MethodInvokingTimerTaskFactoryBean</classname></title>
 
@@ -955,9 +959,9 @@ public class ExampleJob extends QuartzJobBean {
       below):</para>
 
       <programlisting language="java">public class BusinessObject {
-  
+
   <lineannotation>// properties and collaborators</lineannotation>
-  
+
   public void doIt() {
     <lineannotation>// do the actual work</lineannotation>
   }
@@ -969,7 +973,7 @@ public class ExampleJob extends QuartzJobBean {
       method being executed on a fixed schedule.</para>
     </section>
 
-    <section id="scheduling-jdk-timer-factory-bean">
+    <section xml:id="scheduling-jdk-timer-factory-bean">
       <title>Wrapping up: setting up the tasks using the
       <classname>TimerFactoryBean</classname></title>
 

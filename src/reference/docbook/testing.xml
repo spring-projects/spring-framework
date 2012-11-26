@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xml:id="testing" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:ns5="http://www.w3.org/1999/xhtml"
-         xmlns:ns4="http://www.w3.org/2000/svg"
-         xmlns:ns3="http://www.w3.org/1998/Math/MathML"
-         xmlns:ns="http://docbook.org/ns/docbook">
+<chapter
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+
   <title>Testing</title>
 
   <section xml:id="testing-introduction">
@@ -83,9 +85,9 @@
         usage with Spring's Web MVC framework, which are useful for testing
         web contexts and controllers. These mock objects are generally more
         convenient to use than dynamic mock objects such as <link
-        xlink:href="http://www.easymock.org">EasyMock</link> or existing
+        xl:href="http://www.easymock.org">EasyMock</link> or existing
         Servlet API mock objects such as <link
-        xlink:href="http://www.mockobjects.com">MockObjects</link>.</para>
+        xl:href="http://www.mockobjects.com">MockObjects</link>.</para>
       </section>
 
       <section xml:id="mock-objects-portlet">
@@ -1358,10 +1360,10 @@ public class MyTest {
 // static inner Config class</lineannotation>
 <emphasis role="bold">@ContextConfiguration</emphasis>
 public class OrderServiceTest {
- 
+
     @Configuration
     static class Config {
- 
+
         <lineannotation>// this bean will be injected into the OrderServiceTest class</lineannotation>
         @Bean
         public OrderService orderService() {
@@ -1370,10 +1372,10 @@ public class OrderServiceTest {
             return orderService;
         }
     }
- 
+
     @Autowired
     private OrderService orderService;
- 
+
     @Test
     public void testOrderService() {
         <lineannotation>// test the orderService</lineannotation>
@@ -1862,7 +1864,7 @@ public class TransferServiceTest {
             Gradle it is important to make sure that the build framework does
             not <emphasis>fork</emphasis> between tests. For example, if the
             <link
-            xlink:href="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
+            xl:href="http://maven.apache.org/plugins/maven-surefire-plugin/test-mojo.html#forkMode">forkMode</link>
             for the Maven Surefire plug-in is set to <literal>always</literal>
             or <literal>pertest</literal>, the TestContext framework will not
             be able to cache application contexts between test classes and the
@@ -1964,7 +1966,7 @@ public class TransferServiceTest {
 public class HibernateTitleRepositoryTests {
 
     <lineannotation>// this instance will be dependency injected by type</lineannotation>
-    <emphasis role="bold">@Autowired</emphasis>    
+    <emphasis role="bold">@Autowired</emphasis>
     private HibernateTitleRepository titleRepository;
 
     @Test
@@ -2004,9 +2006,9 @@ public class HibernateTitleRepositoryTests {
         looks like this:</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;beans xmlns="http://www.springframework.org/schema/beans" 
+&lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean will be injected into the HibernateTitleRepositoryTests class --&gt;</lineannotation>
@@ -2014,7 +2016,7 @@ public class HibernateTitleRepositoryTests {
             role="bold">com.foo.repository.hibernate.HibernateTitleRepository</emphasis>"&gt;
         &lt;property name="sessionFactory" ref="sessionFactory"/&gt;
     &lt;/bean&gt;
-    
+
     &lt;bean id="sessionFactory"
             class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
         <lineannotation>&lt;!-- configuration elided for brevity --&gt;</lineannotation>
@@ -2543,32 +2545,32 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
     <itemizedlist>
       <listitem>
-        <para><link xlink:href="http://www.junit.org/">JUnit</link>: <quote>
+        <para><link xl:href="http://www.junit.org/">JUnit</link>: <quote>
         <emphasis>A programmer-oriented testing framework for Java</emphasis>
         </quote>. Used by the Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://testng.org/">TestNG</link>: A testing
+        <para><link xl:href="http://testng.org/">TestNG</link>: A testing
         framework inspired by JUnit with added support for Java 5 annotations,
         test groups, data-driven testing, distributed testing, etc.</para>
       </listitem>
 
       <listitem>
         <para><link
-        xlink:href="http://www.mockobjects.com/">MockObjects.com</link>: Web
+        xl:href="http://www.mockobjects.com/">MockObjects.com</link>: Web
         site dedicated to mock objects, a technique for improving the design
         of code within test-driven development.</para>
       </listitem>
 
       <listitem>
         <para><link
-        xlink:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
+        xl:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
         Objects"</link>: Article in Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://www.easymock.org/">EasyMock</link>:
+        <para><link xl:href="http://www.easymock.org/">EasyMock</link>:
         Java library <quote> <emphasis>that provides Mock Objects for
         interfaces (and objects through the class extension) by generating
         them on the fly using Java's proxy mechanism.</emphasis> </quote> Used
@@ -2576,27 +2578,27 @@ public class HibernateClinicTests extends AbstractClinicTests { }
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://www.jmock.org/">JMock</link>: Library
+        <para><link xl:href="http://www.jmock.org/">JMock</link>: Library
         that supports test-driven development of Java code with mock
         objects.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://mockito.org/">Mockito</link>: Java mock
+        <para><link xl:href="http://mockito.org/">Mockito</link>: Java mock
         library based on the <link
-        xlink:href="http://xunitpatterns.com/Test%20Spy.html">test spy</link>
+        xl:href="http://xunitpatterns.com/Test%20Spy.html">test spy</link>
         pattern.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://dbunit.sourceforge.net/">DbUnit</link>:
+        <para><link xl:href="http://dbunit.sourceforge.net/">DbUnit</link>:
         JUnit extension (also usable with Ant and Maven) targeted for
         database-driven projects that, among other things, puts your database
         into a known state between test runs.</para>
       </listitem>
 
       <listitem>
-        <para><link xlink:href="http://grinder.sourceforge.net/">The
+        <para><link xl:href="http://grinder.sourceforge.net/">The
         Grinder</link>: Java load testing framework.</para>
       </listitem>
     </itemizedlist>

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="validation"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="validation">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Validation, Data Binding, and Type Conversion</title>
 
-  <section id="validation-introduction">
+  <section xml:id="validation-introduction">
     <title>Introduction</title>
 
     <para>There are pros and cons for considering validation as business logic,
@@ -45,7 +49,7 @@
       chapter.</para>
   </section>
 
-  <section id="validator">
+  <section xml:id="validator">
     <title>Validation using Spring's <interfacename>Validator</interfacename>
       interface</title>
 
@@ -92,7 +96,7 @@
     <programlisting language="java"><![CDATA[public class PersonValidator implements Validator {
 
     ]]><lineannotation>/**
-    * This <interfacename>Validator</interfacename> validates <emphasis role="bold">just</emphasis> <classname>Person</classname> instances
+    * This Validator validates *just* Person instances
     */</lineannotation><![CDATA[
     public boolean supports(Class clazz) {
         return Person.class.equals(clazz);
@@ -152,7 +156,7 @@
     }
 
     ]]><lineannotation>/**
-    * This <interfacename>Validator</interfacename> validates <classname>Customer</classname> instances, and any subclasses of <classname>Customer</classname> too
+    * This Validator validates Customer instances, and any subclasses of Customer too
     */</lineannotation><![CDATA[
     public boolean supports(Class clazz) {
         return Customer.class.isAssignableFrom(clazz);
@@ -179,7 +183,7 @@
       be found from the Javadoc.</para>
   </section>
 
-  <section id="validation-conversion">
+  <section xml:id="validation-conversion">
     <title>Resolving codes to error messages</title>
 
     <para>We've talked about databinding and validation. Outputting messages
@@ -210,14 +214,14 @@
 
     <para>More information on the
       <interfacename>MessageCodesResolver</interfacename> and the default
-      strategy can be found online with the Javadocs for <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/MessageCodesResolver.html"
-      >MessageCodesResolver</ulink> and <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/DefaultMessageCodesResolver.html"
-      >DefaultMessageCodesResolver</ulink> respectively.</para>
+      strategy can be found online with the Javadocs for <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/MessageCodesResolver.html"
+      >MessageCodesResolver</link> and <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/DefaultMessageCodesResolver.html"
+      >DefaultMessageCodesResolver</link> respectively.</para>
   </section>
 
-  <section id="beans-beans">
+  <section xml:id="beans-beans">
     <title>Bean manipulation and the
       <interfacename>BeanWrapper</interfacename></title>
 
@@ -228,8 +232,8 @@
       would have a setter method <methodname>setBingoMadness(..)</methodname>
       and a getter method <methodname>getBingoMadness()</methodname>. For more
       information about JavaBeans and the specification, please refer to Sun's
-      website ( <ulink url="http://java.sun.com/products/javabeans/"
-      >java.sun.com/products/javabeans</ulink>).</para>
+      website ( <link xl:href="http://java.sun.com/products/javabeans/"
+      >java.sun.com/products/javabeans</link>).</para>
 
     <para>One quite important class in the beans package is the
       <interfacename>BeanWrapper</interfacename> interface and its corresponding
@@ -255,7 +259,7 @@
       indicated by its name: <emphasis>it wraps a bean</emphasis> to perform
       actions on that bean, like setting and retrieving properties.</para>
 
-    <section id="beans-beans-conventions">
+    <section xml:id="beans-beans-conventions">
       <title>Setting and getting basic and nested properties</title>
 
       <para>Setting and getting properties is done using the
@@ -266,7 +270,7 @@
         are a couple of conventions for indicating properties of an object. A
         couple of examples:</para>
 
-      <table id="beans-beans-conventions-properties-tbl">
+      <table xml:id="beans-beans-conventions-properties-tbl">
         <title>Examples of properties</title>
 
         <tgroup cols="2">
@@ -389,8 +393,8 @@ company.setPropertyValue("managingDirector", jim.getWrappedInstance());
 Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></programlisting>
     </section>
 
-    <section id="beans-beans-conversion">
-      <title>Built-in <interface>PropertyEditor</interface>
+    <section xml:id="beans-beans-conversion">
+      <title>Built-in <interfacename>PropertyEditor</interfacename>
         implementations</title>
 
       <para>Spring uses the concept of <literal>PropertyEditors</literal> to
@@ -442,7 +446,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
         configurable in some fashion, you can of course still register your own
         variant to override the default one:</para>
 
-      <table id="beans-beans-property-editors-tbl">
+      <table xml:id="beans-beans-property-editors-tbl">
         <title>Built-in <literal>PropertyEditors</literal></title>
 
         <tgroup cols="2">
@@ -598,13 +602,13 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
   chank
     pop
       Foo
-      FooEditor   ]]><lineannotation>// the <interfacename>PropertyEditor</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+      FooEditor   ]]><lineannotation>// the PropertyEditor for the Foo class</lineannotation></programlisting>
 
       <para>Note that you can also use the standard
         <interfacename>BeanInfo</interfacename> JavaBeans mechanism here as well
-        (described <ulink
-        url="http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html"
-        >in not-amazing-detail here</ulink>). Find below an example of using the
+        (described <link
+        xl:href="http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html"
+        >in not-amazing-detail here</link>). Find below an example of using the
         <interfacename>BeanInfo</interfacename> mechanism for explicitly
         registering one or more <interfacename>PropertyEditor</interfacename>
         instances with the properties of an associated class.</para>
@@ -612,7 +616,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
   chank
     pop
       Foo
-      FooBeanInfo   ]]><lineannotation>// the <interfacename>BeanInfo</interfacename> for the <classname>Foo</classname> class</lineannotation></programlisting>
+      FooBeanInfo   ]]><lineannotation>// the BeanInfo for the Foo class</lineannotation></programlisting>
 
       <para> Here is the Java source code for the referenced
         <classname>FooBeanInfo</classname> class. This would associate a
@@ -637,7 +641,7 @@ Float salary = (Float) company.getPropertyValue("managingDirector.salary");]]></
     }
 }]]></programlisting>
 
-      <section id="beans-beans-conversion-customeditor-registration">
+      <section xml:id="beans-beans-conversion-customeditor-registration">
         <title>Registering additional custom
           <interfacename>PropertyEditors</interfacename></title>
 
@@ -725,7 +729,7 @@ public class DependsOnExoticType {
 
         <para>The <interfacename>PropertyEditor</interfacename> implementation
           could look similar to this:</para>
-        <programlisting language="java"><lineannotation>// converts string representation to <classname>ExoticType</classname> object</lineannotation><![CDATA[
+        <programlisting language="java"><lineannotation>// converts string representation to ExoticType object</lineannotation><![CDATA[
 package example;
 
 public class ExoticTypeEditor extends PropertyEditorSupport {
@@ -748,7 +752,7 @@ public class ExoticTypeEditor extends PropertyEditorSupport {
   </property>
 </bean>]]></programlisting>
 
-        <section id="beans-beans-conversion-customeditor-registration-per">
+        <section xml:id="beans-beans-conversion-customeditor-registration-per">
           <title>Using
             <interfacename>PropertyEditorRegistrars</interfacename></title>
 
@@ -791,7 +795,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
 
     public void registerCustomEditors(PropertyEditorRegistry registry) {
 
-        ]]><lineannotation>// it is expected that new <interfacename>PropertyEditor</interfacename> instances are created</lineannotation><![CDATA[
+        ]]><lineannotation>// it is expected that new PropertyEditor instances are created</lineannotation><![CDATA[
         registry.registerCustomEditor(ExoticType.class, new ExoticTypeEditor());
 
         ]]><lineannotation>// you could register as many custom property editors as are required here...</lineannotation><![CDATA[
@@ -846,7 +850,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
         ]]><emphasis role="bold">this.customPropertyEditorRegistrar.registerCustomEditors(binder);</emphasis><![CDATA[
     }
 
-    ]]><lineannotation>// other methods to do with registering a <classname>User</classname></lineannotation><![CDATA[
+    ]]><lineannotation>// other methods to do with registering a User</lineannotation><![CDATA[
 }]]></programlisting>
 
           <para>This style of <interfacename>PropertyEditor</interfacename>
@@ -861,7 +865,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
     </section>
   </section>
 
-  <section id="core-convert">
+  <section xml:id="core-convert">
     <title>Spring 3 Type Conversion</title>
 
     <para> Spring 3 introduces a <filename>core.convert</filename> package that
@@ -872,7 +876,7 @@ public final class CustomPropertyEditorRegistrar implements PropertyEditorRegist
       value strings to required property types. The public API may also be used
       anywhere in your application where type conversion is needed. </para>
 
-    <section id="core-convert-Converter-API">
+    <section xml:id="core-convert-Converter-API">
       <title>Converter SPI</title>
 
       <para> The SPI to implement type conversion logic is simple and strongly
@@ -911,7 +915,7 @@ final class StringToInteger implements Converter<String, Integer> {
 }]]></programlisting>
     </section>
 
-    <section id="core-convert-ConverterFactory-SPI">
+    <section xml:id="core-convert-ConverterFactory-SPI">
       <title>ConverterFactory</title>
 
       <para> When you need to centralize the conversion logic for an entire
@@ -958,7 +962,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 }]]></programlisting>
     </section>
 
-    <section id="core-convert-GenericConverter-SPI">
+    <section xml:id="core-convert-GenericConverter-SPI">
       <title>GenericConverter</title>
 
       <para> When you require a sophisticated Converter implementation, consider
@@ -1001,7 +1005,7 @@ public interface GenericConverter {
           type conversion needs. </para>
       </note>
 
-      <section id="core-convert-ConditionalGenericConverter-SPI">
+      <section xml:id="core-convert-ConditionalGenericConverter-SPI">
         <title>ConditionalGenericConverter</title>
 
         <para> Sometimes you only want a Converter to execute if a specific
@@ -1027,7 +1031,7 @@ public interface GenericConverter {
       </section>
     </section>
 
-    <section id="core-convert-ConversionService-API">
+    <section xml:id="core-convert-ConversionService-API">
       <title>ConversionService API</title>
 
       <para> The ConversionService defines a unified API for executing type
@@ -1049,7 +1053,7 @@ public interface ConversionService {
 }]]></programlisting>
 
       <para> Most ConversionService implementations also implement
-        <interface>ConverterRegistry</interface>, which provides an SPI for
+        <interfacename>ConverterRegistry</interfacename>, which provides an SPI for
         registering converters. Internally, a ConversionService implementation
         delegates to its registered converters to carry out type conversion
         logic. </para>
@@ -1062,7 +1066,7 @@ public interface ConversionService {
         factory for creating common ConversionService configurations. </para>
     </section>
 
-    <section id="core-convert-Spring-config">
+    <section xml:id="core-convert-Spring-config">
       <title>Configuring a ConversionService</title>
 
       <para> A ConversionService is a stateless object designed to be
@@ -1110,7 +1114,7 @@ public interface ConversionService {
         <classname>FormattingConversionServiceFactoryBean</classname>.</para>
     </section>
 
-    <section id="core-convert-programmatic-usage">
+    <section xml:id="core-convert-programmatic-usage">
       <title>Using a ConversionService programmatically</title>
 
       <para> To work with a ConversionService instance programmatically, simply
@@ -1131,7 +1135,7 @@ public class MyService {
     </section>
   </section>
 
-  <section id="format">
+  <section xml:id="format">
     <title>Spring 3 Field Formatting</title>
 
     <para> As discussed in the previous section, <link linkend="core-convert"
@@ -1164,7 +1168,7 @@ public class MyService {
       parse and print localized field values. The ConversionService provides a
       unified type conversion API for both SPIs. </para>
 
-    <section id="format-Formatter-SPI">
+    <section xml:id="format-Formatter-SPI">
       <title>Formatter SPI</title>
 
       <para> The Formatter SPI to implement field formatting logic is simple and
@@ -1207,8 +1211,8 @@ public interface Parser<T> {
         <filename>datetime</filename> package provides a DateFormatter to format
         java.util.Date objects with a java.text.DateFormat. The
         <filename>datetime.joda</filename> package provides comprehensive
-        datetime formatting support based on the <ulink
-        url="http://joda-time.sourceforge.net">Joda Time library</ulink>. </para>
+        datetime formatting support based on the <link
+        xl:href="http://joda-time.sourceforge.net">Joda Time library</link>. </para>
 
       <para> Consider <classname>DateFormatter</classname> as an example
         <interfacename>Formatter</interfacename> implementation: </para>
@@ -1246,11 +1250,11 @@ public final class DateFormatter implements Formatter<Date> {
 }]]></programlisting>
 
       <para> The Spring team welcomes community-driven Formatter contributions;
-        see <ulink url="http://jira.springframework.org"
-        >http://jira.springframework.org</ulink> to contribute. </para>
+        see <link xl:href="http://jira.springframework.org"
+        >http://jira.springframework.org</link> to contribute. </para>
     </section>
 
-    <section id="format-CustomFormatAnnotations">
+    <section xml:id="format-CustomFormatAnnotations">
       <title>Annotation-driven Formatting</title>
 
       <para> As you will see, field formatting can be configured by field type
@@ -1325,7 +1329,7 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 
 }]]></programlisting>
 
-      <section id="format-annotations-api">
+      <section xml:id="format-annotations-api">
         <title>Format Annotation API</title>
 
         <para> A portable format annotation API exists in the
@@ -1346,18 +1350,18 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
       </section>
     </section>
 
-    <section id="format-FormatterRegistry-SPI">
+    <section xml:id="format-FormatterRegistry-SPI">
       <title>FormatterRegistry SPI</title>
 
-      <para> The FormatterRegistry is an SPI for registering formatters and 
-      	converters. <classname>FormattingConversionService</classname> is 
-      	an implementation of FormatterRegistry suitable for most environments. 
-      	This implementation may be configured programmatically or declaratively 
-      	as a Spring bean using 
-      	<classname>FormattingConversionServiceFactoryBean</classname>.
-      	Because this implementation also implements
-        <classname>ConversionService</classname>, it can be directly 
-        configured for use with Spring's DataBinder and the Spring Expression 
+      <para> The FormatterRegistry is an SPI for registering formatters and
+          converters. <classname>FormattingConversionService</classname> is
+          an implementation of FormatterRegistry suitable for most environments.
+          This implementation may be configured programmatically or declaratively
+          as a Spring bean using
+          <classname>FormattingConversionServiceFactoryBean</classname>.
+          Because this implementation also implements
+        <classname>ConversionService</classname>, it can be directly
+        configured for use with Spring's DataBinder and the Spring Expression
         Language (SpEL).
       </para>
 
@@ -1378,24 +1382,24 @@ public interface FormatterRegistry extends ConverterRegistry {
 }]]></programlisting>
 
       <para> As shown above, Formatters can be registered by fieldType or
-        annotation. 
+        annotation.
       </para>
       <para> The FormatterRegistry SPI allows you to configure Formatting rules
         centrally, instead of duplicating such configuration across your
         Controllers. For example, you might want to enforce that all Date fields
         are formatted a certain way, or fields with a specific annotation are
         formatted in a certain way. With a shared FormatterRegistry, you define
-        these rules once and they are applied whenever formatting is needed. 
-      </para>      
+        these rules once and they are applied whenever formatting is needed.
+      </para>
     </section>
 
-    <section id="format-FormatterRegistrar-SPI">
+    <section xml:id="format-FormatterRegistrar-SPI">
       <title>FormatterRegistrar SPI</title>
-	
-	  <para> The FormatterRegistrar is an SPI for registering formatters and 
-	  	converters through the FormatterRegistry: 
-	  </para>
-	  
+
+      <para> The FormatterRegistrar is an SPI for registering formatters and
+          converters through the FormatterRegistry:
+      </para>
+
       <programlisting language="java"><![CDATA[package org.springframework.format;
 
 public interface FormatterRegistrar {
@@ -1404,17 +1408,17 @@ public interface FormatterRegistrar {
 
 }]]></programlisting>
 
-	    <para> A FormatterRegistrar is useful when registering multiple related 
-	        converters and formatters for a given formatting category, such as Date 
-	        formatting. It can also be useful where declarative registration is
-	        insufficient. For example when a formatter needs to be indexed under a 
-	        specific field type different from its own &lt;T&gt; or when registering
-	        a Printer/Parser pair. The next section provides more information on 
-	        converter and formatter registration.
-	    </para>
-	</section>
-      
-    <section id="format-configuring-formatting-mvc">
+        <para> A FormatterRegistrar is useful when registering multiple related
+            converters and formatters for a given formatting category, such as Date
+            formatting. It can also be useful where declarative registration is
+            insufficient. For example when a formatter needs to be indexed under a
+            specific field type different from its own &lt;T&gt; or when registering
+            a Printer/Parser pair. The next section provides more information on
+            converter and formatter registration.
+        </para>
+    </section>
+
+    <section xml:id="format-configuring-formatting-mvc">
       <title>Configuring Formatting in Spring MVC</title>
 
       <para> In a Spring MVC application, you may configure a custom
@@ -1449,7 +1453,7 @@ public interface FormatterRegistrar {
         classpath.</para>
 
       <para> To inject a ConversionService instance with custom formatters and
-        converters registered, set the conversion-service attribute and then 
+        converters registered, set the conversion-service attribute and then
         specify custom converters, formatters, or FormatterRegistrars as properties
         of the FormattingConversionServiceFactoryBean: </para>
       <programlisting language="xml"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
@@ -1487,16 +1491,16 @@ public interface FormatterRegistrar {
 </beans>]]></programlisting>
 
       <note>
-	      <para> See <xref linkend="format-FormatterRegistrar-SPI"/> and  
-	        the <classname>FormattingConversionServiceFactoryBean</classname> 
-	        for more information on when to use FormatterRegistrars.
-	      </para>
+          <para> See <xref linkend="format-FormatterRegistrar-SPI"/> and
+            the <classname>FormattingConversionServiceFactoryBean</classname>
+            for more information on when to use FormatterRegistrars.
+          </para>
       </note>
 
     </section>
   </section>
 
-  <section id="format-configuring-formatting-globaldatetimeformat">
+  <section xml:id="format-configuring-formatting-globaldatetimeformat">
     <title>Configuring a global date &amp; time format</title>
 
     <para>By default, date and time fields that are not annotated with
@@ -1586,7 +1590,7 @@ public class AppConfig {
     <xref linkend="format-configuring-formatting-mvc"/> for details.</para>
   </section>
 
-  <section id="validation-beanvalidation">
+  <section xml:id="validation-beanvalidation">
     <title>Spring 3 Validation</title>
 
     <para> Spring 3 introduces several enhancements to its validation support.
@@ -1595,7 +1599,7 @@ public class AppConfig {
       well as bind to them. Third, Spring MVC now has support for declaratively
       validating @Controller inputs. </para>
 
-    <section id="validation-beanvalidation-overview">
+    <section xml:id="validation-beanvalidation-overview">
       <title>Overview of the JSR-303 Bean Validation API</title>
 
       <para> JSR-303 standardizes validation constraint declaration and metadata
@@ -1629,16 +1633,16 @@ public class AppConfig {
       <para> When an instance of this class is validated by a JSR-303 Validator,
         these constraints will be enforced. </para>
 
-      <para> For general information on JSR-303, see the <ulink
-        url="http://jcp.org/en/jsr/detail?id=303">Bean Validation
-        Specification</ulink>. For information on the specific capabilities of
-        the default reference implementation, see the <ulink
-        url="https://www.hibernate.org/412.html">Hibernate Validator</ulink>
+      <para> For general information on JSR-303, see the <link
+        xl:href="http://jcp.org/en/jsr/detail?id=303">Bean Validation
+        Specification</link>. For information on the specific capabilities of
+        the default reference implementation, see the <link
+        xl:href="https://www.hibernate.org/412.html">Hibernate Validator</link>
         documentation. To learn how to setup a JSR-303 implementation as a
         Spring bean, keep reading. </para>
     </section>
 
-    <section id="validation-beanvalidation-spring">
+    <section xml:id="validation-beanvalidation-spring">
       <title>Configuring a Bean Validation Implementation</title>
 
       <para> Spring provides full support for the JSR-303 Bean Validation API.
@@ -1659,7 +1663,7 @@ public class AppConfig {
         Hibernate Validator, is expected to be present in the classpath and will
         be detected automatically. </para>
 
-      <section id="validation-beanvalidation-spring-inject">
+      <section xml:id="validation-beanvalidation-spring-inject">
         <title>Injecting a Validator</title>
 
         <para> <classname>LocalValidatorFactoryBean</classname> implements both
@@ -1695,7 +1699,7 @@ public class MyService {
 }]]></programlisting>
       </section>
 
-      <section id="validation-beanvalidation-spring-constraints">
+      <section xml:id="validation-beanvalidation-spring-constraints">
         <title>Configuring Custom Constraints</title>
 
         <para> Each JSR-303 validation constraint consists of two parts. First,
@@ -1739,7 +1743,7 @@ public class MyConstraintValidator implements ConstraintValidator {
           dependencies @Autowired like any other Spring bean. </para>
       </section>
 
-      <section id="validation-beanvalidation-spring-other">
+      <section xml:id="validation-beanvalidation-spring-other">
         <title>Additional Configuration Options</title>
 
         <para> The default <classname>LocalValidatorFactoryBean</classname>
@@ -1751,7 +1755,7 @@ public class MyConstraintValidator implements ConstraintValidator {
       </section>
     </section>
 
-    <section id="validation-binder">
+    <section xml:id="validation-binder">
       <title>Configuring a DataBinder</title>
 
       <para> Since Spring 3, a DataBinder instance can be configured with a
@@ -1776,14 +1780,14 @@ binder.validate();
 BindingResult results = binder.getBindingResult();</programlisting>
     </section>
 
-    <section id="validation-mvc">
+    <section xml:id="validation-mvc">
       <title>Spring MVC 3 Validation</title>
 
       <para> Beginning with Spring 3, Spring MVC has the ability to
         automatically validate @Controller inputs. In previous versions it was
         up to the developer to manually invoke validation logic. </para>
 
-      <section id="validation-mvc-triggering">
+      <section xml:id="validation-mvc-triggering">
         <title>Triggering @Controller Input Validation</title>
 
         <para> To trigger validation of a @Controller input, simply annotate the
@@ -1803,7 +1807,7 @@ public class MyController {
         </note>
       </section>
 
-      <section id="validation-mvc-configuring">
+      <section xml:id="validation-mvc-configuring">
         <title>Configuring a Validator for use by Spring MVC</title>
 
         <para> The Validator instance invoked when a @Valid method argument is
@@ -1845,7 +1849,7 @@ public class MyController {
 </beans>]]></programlisting>
       </section>
 
-      <section id="validation-mvc-jsr303">
+      <section xml:id="validation-mvc-jsr303">
         <title>Configuring a JSR-303 Validator for use by Spring MVC</title>
 
         <para> With JSR-303, a single <code>javax.validation.Validator</code>

@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="dao"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="dao">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>DAO support</title>
 
-  <section id="dao-introduction">
+  <section xml:id="dao-introduction">
     <title>Introduction</title>
 
     <para>The Data Access Object (DAO) support in Spring is aimed at making it
@@ -16,7 +20,7 @@
     to each technology.</para>
   </section>
 
-  <section id="dao-exceptions">
+  <section xml:id="dao-exceptions">
     <title>Consistent exception hierarchy</title>
 
     <para>Spring provides a convenient translation from technology-specific
@@ -71,7 +75,7 @@
     </mediaobject>
   </section>
 
-  <section id="dao-annotations">
+  <section xml:id="dao-annotations">
     <title>Annotations used for configuring DAO or Repository classes</title>
 
     <para>The best way to guarantee that your Data Access Objects (DAOs) or
@@ -104,7 +108,7 @@ public class JpaMovieFinder implements MovieFinder {
 
     @PersistenceContext
     private EntityManager entityManager;
-    
+
     // ...
 
 }</programlisting>
@@ -116,12 +120,12 @@ public class JpaMovieFinder implements MovieFinder {
 public class HibernateMovieFinder implements MovieFinder {
 
     private SessionFactory sessionFactory;
-    
+
     @Autowired
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-    
+
     // ...
 
 }</programlisting>
@@ -137,12 +141,12 @@ public class HibernateMovieFinder implements MovieFinder {
 public class JdbcMovieFinder implements MovieFinder {
 
     private JdbcTemplate jdbcTemplate;
-    
+
     @Autowired
     public void init(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
-    
+
     // ...
 
 }</programlisting>

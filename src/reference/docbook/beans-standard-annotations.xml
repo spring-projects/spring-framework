@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-standard-annotations"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-standard-annotations">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Using JSR 330 Standard Annotations</title>
-  
+
   <para>Starting with Spring 3.0, Spring offers support for JSR-330 standard annotations (Dependency Injection).
   Those annotations are scanned in the same way as the Spring annotations. You just need to have the relevant jars in your classpath.
   </para>
 
   <note>
-  	<para>
+      <para>
       If you are using Maven, the <interfacename>javax.inject</interfacename> artifact is available
       in the standard Maven repository
-      (<ulink url="http://repo1.maven.org/maven2/javax/inject/javax.inject/1/">http://repo1.maven.org/maven2/javax/inject/javax.inject/1/</ulink>).
+      (<link xl:href="http://repo1.maven.org/maven2/javax/inject/javax.inject/1/">http://repo1.maven.org/maven2/javax/inject/javax.inject/1/</link>).
       You can add the following dependency to your file pom.xml:
-  	</para>
+      </para>
     <programlisting language="xml">
 &lt;dependency&gt;
     &lt;groupId&gt;javax.inject&lt;/groupId&gt;
@@ -23,8 +27,8 @@
     &lt;version&gt;1&lt;/version&gt;
 &lt;/dependency&gt;</programlisting>
   </note>
-  
-  <section id="beans-inject-named">
+
+  <section xml:id="beans-inject-named">
     <title>Dependency Injection with <interfacename>@Inject</interfacename> and <interfacename>@Named</interfacename></title>
 
     <para>Instead of <interfacename>@Autowired</interfacename>,
@@ -45,10 +49,10 @@ public class SimpleMovieLister {
     </para>
 
     <para>As with <interfacename>@Autowired</interfacename>, it is possible to use <interfacename>@Inject</interfacename>
-	at the class-level, field-level, method-level and constructor-argument level.
+    at the class-level, field-level, method-level and constructor-argument level.
 
-	If you would like to use a qualified name for the dependency that should be injected,
-	you should use the <interfacename>@Named</interfacename> annotation as follows:
+    If you would like to use a qualified name for the dependency that should be injected,
+    you should use the <interfacename>@Named</interfacename> annotation as follows:
 
     <programlisting language="java">import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,18 +66,18 @@ public class SimpleMovieLister {
       this.movieFinder = movieFinder;
   }
   <lineannotation>// ...</lineannotation>
-}</programlisting>	
-	
+}</programlisting>
+
     </para>
   </section>
 
-<section id="beans-named">
+<section xml:id="beans-named">
     <title><interfacename>@Named</interfacename>: a standard equivalent to the <interfacename>@Component</interfacename> annotation</title>
     <para>
     Instead of <interfacename>@Component</interfacename>, <interfacename>@javax.inject.Named</interfacename> may be used as follows:
         <programlisting language="java">import javax.inject.Inject;
 import javax.inject.Named;
-  
+
 @Named("movieListener")
 public class SimpleMovieLister {
 
@@ -84,7 +88,7 @@ public class SimpleMovieLister {
       this.movieFinder = movieFinder;
   }
   <lineannotation>// ...</lineannotation>
-}</programlisting>	
+}</programlisting>
 </para>
 
 <para>
@@ -94,7 +98,7 @@ can be used in a similar fashion:
 
     <programlisting language="java">import javax.inject.Inject;
 import javax.inject.Named;
-  
+
 @Named
 public class SimpleMovieLister {
 
@@ -114,17 +118,17 @@ component-scanning in the exact same way as when using Spring annotations:
 
     <programlisting language="xml">&lt;beans&gt;
     &lt;context:component-scan base-package="org.example"/&gt;
-&lt;/beans&gt;</programlisting>	
+&lt;/beans&gt;</programlisting>
 </para>
 </section>
 
-<section id="beans-standard-annotations-limitations">
+<section xml:id="beans-standard-annotations-limitations">
     <title>Limitations of the standard approach</title>
 
-	<para>When working with standard annotations, it is important to know that
-	some significant features are not available as shown in the table below:</para>
-	
-	 <para><table id="annotations-comparison">
+    <para>When working with standard annotations, it is important to know that
+    some significant features are not available as shown in the table below:</para>
+
+     <para><table xml:id="annotations-comparison">
           <title>Spring annotations vs. standard annotations</title>
 
           <tgroup cols="3">
@@ -156,46 +160,46 @@ component-scanning in the exact same way as when using Spring annotations:
                 <entry>@Scope("singleton")</entry>
                 <entry>@Singleton</entry>
                 <entry>
-                	<para>
-                		The JSR-330 default scope is like Spring's <interfacename>prototype</interfacename>.
-                		However, in order to keep it consistent with Spring's general defaults,
-                		a JSR-330 bean declared in the Spring container is a
-                		<interfacename>singleton</interfacename> by default. In order to use a
-                		scope other than <interfacename>singleton</interfacename>, you should use Spring's
-                		<interfacename>@Scope</interfacename> annotation.
-                	</para>
-                	<para>
-                		<interfacename>javax.inject</interfacename> also provides a
-                		<ulink url="http://download.oracle.com/javaee/6/api/javax/inject/Scope.html">@Scope</ulink> annotation.
-                		Nevertheless, this one is only intended to be used for creating your own annotations.
-                	</para>
+                    <para>
+                        The JSR-330 default scope is like Spring's <interfacename>prototype</interfacename>.
+                        However, in order to keep it consistent with Spring's general defaults,
+                        a JSR-330 bean declared in the Spring container is a
+                        <interfacename>singleton</interfacename> by default. In order to use a
+                        scope other than <interfacename>singleton</interfacename>, you should use Spring's
+                        <interfacename>@Scope</interfacename> annotation.
+                    </para>
+                    <para>
+                        <interfacename>javax.inject</interfacename> also provides a
+                        <link xl:href="http://download.oracle.com/javaee/6/api/javax/inject/Scope.html">@Scope</link> annotation.
+                        Nevertheless, this one is only intended to be used for creating your own annotations.
+                    </para>
                 </entry>
-              </row>              
+              </row>
               <row>
                 <entry>@Qualifier</entry>
                 <entry>@Named</entry>
                 <entry>&#151;</entry>
-              </row>  
+              </row>
                <row>
                 <entry>@Value</entry>
                 <entry>&#151;</entry>
                 <entry>no equivalent</entry>
-              </row> 
+              </row>
                <row>
                 <entry>@Required</entry>
                 <entry>&#151;</entry>
                 <entry>no equivalent</entry>
-              </row> 
+              </row>
                <row>
                 <entry>@Lazy</entry>
                 <entry>&#151;</entry>
                 <entry>no equivalent</entry>
-              </row> 
-            </tbody>     
+              </row>
+            </tbody>
           </tgroup>
          </table>
         </para>
-	
-	</section>
+
+    </section>
 
 </section>

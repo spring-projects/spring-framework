@@ -1,62 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<appendix xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<appendix xml:id="springbeansdtd"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="springbeansdtd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title><literal>spring-beans-2.0.dtd</literal></title>
 
   <para><programlisting language="xml">&lt;!--
-	Spring XML Beans DTD, version 2.0
-	Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
+    Spring XML Beans DTD, version 2.0
+    Authors: Rod Johnson, Juergen Hoeller, Alef Arendsen, Colin Sampaleanu, Rob Harrop
 
-	This defines a simple and consistent way of creating a namespace
-	of JavaBeans objects, managed by a Spring BeanFactory, read by
-	XmlBeanDefinitionReader (with DefaultBeanDefinitionDocumentReader).
+    This defines a simple and consistent way of creating a namespace
+    of JavaBeans objects, managed by a Spring BeanFactory, read by
+    XmlBeanDefinitionReader (with DefaultBeanDefinitionDocumentReader).
 
-	This document type is used by most Spring functionality, including
-	web application contexts, which are based on bean factories.
+    This document type is used by most Spring functionality, including
+    web application contexts, which are based on bean factories.
 
-	Each "bean" element in this document defines a JavaBean.
-	Typically the bean class is specified, along with JavaBean properties
-	and/or constructor arguments.
+    Each "bean" element in this document defines a JavaBean.
+    Typically the bean class is specified, along with JavaBean properties
+    and/or constructor arguments.
 
-	A bean instance can be a "singleton" (shared instance) or a "prototype"
-	(independent instance). Further scopes can be provided by extended
-	bean factories, for example in a web environment.
+    A bean instance can be a "singleton" (shared instance) or a "prototype"
+    (independent instance). Further scopes can be provided by extended
+    bean factories, for example in a web environment.
 
-	References among beans are supported, that is, setting a JavaBean property
-	or a constructor argument to refer to another bean in the same factory
-	(or an ancestor factory).
+    References among beans are supported, that is, setting a JavaBean property
+    or a constructor argument to refer to another bean in the same factory
+    (or an ancestor factory).
 
-	As alternative to bean references, "inner bean definitions" can be used.
-	Singleton flags of such inner bean definitions are effectively ignored:
-	Inner beans are typically anonymous prototypes.
+    As alternative to bean references, "inner bean definitions" can be used.
+    Singleton flags of such inner bean definitions are effectively ignored:
+    Inner beans are typically anonymous prototypes.
 
-	There is also support for lists, sets, maps, and java.util.Properties
-	as bean property types or constructor argument types.
+    There is also support for lists, sets, maps, and java.util.Properties
+    as bean property types or constructor argument types.
 
-	For simple purposes, this DTD is sufficient. As of Spring 2.0,
-	XSD-based bean definitions are supported as more powerful alternative.
+    For simple purposes, this DTD is sufficient. As of Spring 2.0,
+    XSD-based bean definitions are supported as more powerful alternative.
 
-	XML documents that conform to this DTD should declare the following doctype:
+    XML documents that conform to this DTD should declare the following doctype:
 
-	&lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
-		"http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+    &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN"
+        "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 -->
 
 
 &lt;!--
-	The document root. A document can contain bean definitions only,
-	imports only, or a mixture of both (typically with imports first).
+    The document root. A document can contain bean definitions only,
+    imports only, or a mixture of both (typically with imports first).
 -->
 &lt;!ELEMENT beans (
-	description?,
-	(import | alias | bean)*
+    description?,
+    (import | alias | bean)*
 )>
 
 &lt;!--
-	Default values for all bean definitions. Can be overridden at
-	the "bean" level. See those attribute definitions for details.
+    Default values for all bean definitions. Can be overridden at
+    the "bean" level. See those attribute definitions for details.
 -->
 &lt;!ATTLIST beans default-lazy-init (true | false) "false">
 &lt;!ATTLIST beans default-autowire (no | byName | byType | constructor | autodetect) "no">
@@ -66,37 +70,37 @@
 &lt;!ATTLIST beans default-merge (true | false) "false">
 
 &lt;!--
-	Element containing informative text describing the purpose of the enclosing
-	element. Always optional.
-	Used primarily for user documentation of XML bean definition documents.
+    Element containing informative text describing the purpose of the enclosing
+    element. Always optional.
+    Used primarily for user documentation of XML bean definition documents.
 -->
 &lt;!ELEMENT description (#PCDATA)>
 
 
 &lt;!--
-	Specifies an XML bean definition resource to import.
+    Specifies an XML bean definition resource to import.
 -->
 &lt;!ELEMENT import EMPTY>
 
 &lt;!--
-	The relative resource location of the XML bean definition file to import,
-	for example "myImport.xml" or "includes/myImport.xml" or "../myImport.xml".
+    The relative resource location of the XML bean definition file to import,
+    for example "myImport.xml" or "includes/myImport.xml" or "../myImport.xml".
 -->
 &lt;!ATTLIST import resource CDATA #REQUIRED>
 
 
 &lt;!--
-	Defines an alias for a bean, which can reside in a different definition file.
+    Defines an alias for a bean, which can reside in a different definition file.
 -->
 &lt;!ELEMENT alias EMPTY>
 
 &lt;!--
-	The name of the bean to define an alias for.
+    The name of the bean to define an alias for.
 -->
 &lt;!ATTLIST alias name CDATA #REQUIRED>
 
 &lt;!--
-	The alias name to define for the bean.
+    The alias name to define for the bean.
 -->
 &lt;!ATTLIST alias alias CDATA #REQUIRED>
 
@@ -116,97 +120,97 @@
 &lt;!ATTLIST meta value CDATA #REQUIRED>
 
 &lt;!--
-	Defines a single (usually named) bean.
+    Defines a single (usually named) bean.
 
-	A bean definition may contain nested tags for constructor arguments,
-	property values, lookup methods, and replaced methods. Mixing constructor
-	injection and setter injection on the same bean is explicitly supported.
+    A bean definition may contain nested tags for constructor arguments,
+    property values, lookup methods, and replaced methods. Mixing constructor
+    injection and setter injection on the same bean is explicitly supported.
 -->
 &lt;!ELEMENT bean (
-	description?,
-	(meta | constructor-arg | property | lookup-method | replaced-method)*
+    description?,
+    (meta | constructor-arg | property | lookup-method | replaced-method)*
 )>
 
 &lt;!--
-	Beans can be identified by an id, to enable reference checking.
+    Beans can be identified by an id, to enable reference checking.
 
-	There are constraints on a valid XML id: if you want to reference your bean
-	in Java code using a name that's illegal as an XML id, use the optional
-	"name" attribute. If neither is given, the bean class name is used as id
-	(with an appended counter like "#2" if there is already a bean with that name).
+    There are constraints on a valid XML id: if you want to reference your bean
+    in Java code using a name that's illegal as an XML id, use the optional
+    "name" attribute. If neither is given, the bean class name is used as id
+    (with an appended counter like "#2" if there is already a bean with that name).
 -->
 &lt;!ATTLIST bean id ID #IMPLIED>
 
 &lt;!--
-	Optional. Can be used to create one or more aliases illegal in an id.
-	Multiple aliases can be separated by any number of spaces, commas, or
-	semi-colons (or indeed any mixture of the three).
+    Optional. Can be used to create one or more aliases illegal in an id.
+    Multiple aliases can be separated by any number of spaces, commas, or
+    semi-colons (or indeed any mixture of the three).
 -->
 &lt;!ATTLIST bean name CDATA #IMPLIED>
 
 &lt;!--
-	Each bean definition must specify the fully qualified name of the class,
-	except if it pure serves as parent for child bean definitions.
+    Each bean definition must specify the fully qualified name of the class,
+    except if it pure serves as parent for child bean definitions.
 -->
 &lt;!ATTLIST bean class CDATA #IMPLIED>
 
 &lt;!--
-	Optionally specify a parent bean definition.
+    Optionally specify a parent bean definition.
 
-	Will use the bean class of the parent if none specified, but can
-	also override it. In the latter case, the child bean class must be
-	compatible with the parent, i.e. accept the parent's property values
-	and constructor argument values, if any.
+    Will use the bean class of the parent if none specified, but can
+    also override it. In the latter case, the child bean class must be
+    compatible with the parent, i.e. accept the parent's property values
+    and constructor argument values, if any.
 
-	A child bean definition will inherit constructor argument values,
-	property values and method overrides from the parent, with the option
-	to add new values. If init method, destroy method, factory bean and/or factory
-	method are specified, they will override the corresponding parent settings.
+    A child bean definition will inherit constructor argument values,
+    property values and method overrides from the parent, with the option
+    to add new values. If init method, destroy method, factory bean and/or factory
+    method are specified, they will override the corresponding parent settings.
 
-	The remaining settings will always be taken from the child definition:
-	depends on, autowire mode, dependency check, scope, lazy init.
+    The remaining settings will always be taken from the child definition:
+    depends on, autowire mode, dependency check, scope, lazy init.
 -->
 &lt;!ATTLIST bean parent CDATA #IMPLIED>
 
 &lt;!--
-	The scope of this bean: typically "singleton" (one shared instance,
-	which will be returned by all calls to getBean() with the id),
-	or "prototype" (independent instance resulting from each call to
-	getBean(). Default is "singleton".
+    The scope of this bean: typically "singleton" (one shared instance,
+    which will be returned by all calls to getBean() with the id),
+    or "prototype" (independent instance resulting from each call to
+    getBean(). Default is "singleton".
 
-	Singletons are most commonly used, and are ideal for multi-threaded
-	service objects. Further scopes, such as "request" or "session",
-	might be supported by extended bean factories (for example, in a
-	web environment).
+    Singletons are most commonly used, and are ideal for multi-threaded
+    service objects. Further scopes, such as "request" or "session",
+    might be supported by extended bean factories (for example, in a
+    web environment).
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per concrete bean definition.
 
-	Inner bean definitions inherit the singleton status of their containing
-	bean definition, unless explicitly specified: The inner bean will be a
-	singleton if the containing bean is a singleton, and a prototype if
-	the containing bean has any other scope.
+    Inner bean definitions inherit the singleton status of their containing
+    bean definition, unless explicitly specified: The inner bean will be a
+    singleton if the containing bean is a singleton, and a prototype if
+    the containing bean has any other scope.
 -->
 &lt;!ATTLIST bean scope CDATA #IMPLIED>
 
 &lt;!--
-	Is this bean "abstract", i.e. not meant to be instantiated itself but
-	rather just serving as parent for concrete child bean definitions.
-	Default is "false". Specify "true" to tell the bean factory to not try to
-	instantiate that particular bean in any case.
+    Is this bean "abstract", i.e. not meant to be instantiated itself but
+    rather just serving as parent for concrete child bean definitions.
+    Default is "false". Specify "true" to tell the bean factory to not try to
+    instantiate that particular bean in any case.
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per abstract bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per abstract bean definition.
 -->
 &lt;!ATTLIST bean abstract (true | false) #IMPLIED>
 
 &lt;!--
-	If this bean should be lazily initialized.
-	If false, it will get instantiated on startup by bean factories
-	that perform eager initialization of singletons.
+    If this bean should be lazily initialized.
+    If false, it will get instantiated on startup by bean factories
+    that perform eager initialization of singletons.
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean lazy-init (true | false | default) "default">
 
@@ -217,163 +221,163 @@
 &lt;!ATTLIST bean autowire-candidate (true | false) #IMPLIED>
 
 &lt;!--
-	Optional attribute controlling whether to "autowire" bean properties.
-	This is an automagical process in which bean references don't need to be coded
-	explicitly in the XML bean definition file, but Spring works out dependencies.
+    Optional attribute controlling whether to "autowire" bean properties.
+    This is an automagical process in which bean references don't need to be coded
+    explicitly in the XML bean definition file, but Spring works out dependencies.
 
-	There are 5 modes:
+    There are 5 modes:
 
-	1. "no"
-	The traditional Spring default. No automagical wiring. Bean references
-	must be defined in the XML file via the &lt;ref> element. We recommend this
-	in most cases as it makes documentation more explicit.
+    1. "no"
+    The traditional Spring default. No automagical wiring. Bean references
+    must be defined in the XML file via the &lt;ref> element. We recommend this
+    in most cases as it makes documentation more explicit.
 
-	2. "byName"
-	Autowiring by property name. If a bean of class Cat exposes a dog property,
-	Spring will try to set this to the value of the bean "dog" in the current factory.
-	If there is no matching bean by name, nothing special happens;
-	use dependency-check="objects" to raise an error in that case.
+    2. "byName"
+    Autowiring by property name. If a bean of class Cat exposes a dog property,
+    Spring will try to set this to the value of the bean "dog" in the current factory.
+    If there is no matching bean by name, nothing special happens;
+    use dependency-check="objects" to raise an error in that case.
 
-	3. "byType"
-	Autowiring if there is exactly one bean of the property type in the bean factory.
-	If there is more than one, a fatal error is raised, and you can't use byType
-	autowiring for that bean. If there is none, nothing special happens;
-	use dependency-check="objects" to raise an error in that case.
+    3. "byType"
+    Autowiring if there is exactly one bean of the property type in the bean factory.
+    If there is more than one, a fatal error is raised, and you can't use byType
+    autowiring for that bean. If there is none, nothing special happens;
+    use dependency-check="objects" to raise an error in that case.
 
-	4. "constructor"
-	Analogous to "byType" for constructor arguments. If there isn't exactly one bean
-	of the constructor argument type in the bean factory, a fatal error is raised.
+    4. "constructor"
+    Analogous to "byType" for constructor arguments. If there isn't exactly one bean
+    of the constructor argument type in the bean factory, a fatal error is raised.
 
-	5. "autodetect"
-	Chooses "constructor" or "byType" through introspection of the bean class.
-	If a default no-arg constructor is found, "byType" gets applied.
+    5. "autodetect"
+    Chooses "constructor" or "byType" through introspection of the bean class.
+    If a default no-arg constructor is found, "byType" gets applied.
 
-	The latter two are similar to PicoContainer and make bean factories simple to
-	configure for small namespaces, but doesn't work as well as standard Spring
-	behavior for bigger applications.
+    The latter two are similar to PicoContainer and make bean factories simple to
+    configure for small namespaces, but doesn't work as well as standard Spring
+    behavior for bigger applications.
 
-	Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
-	always override autowiring. Autowire behavior can be combined with dependency
-	checking, which will be performed after all autowiring has been completed.
+    Note that explicit dependencies, i.e. "property" and "constructor-arg" elements,
+    always override autowiring. Autowire behavior can be combined with dependency
+    checking, which will be performed after all autowiring has been completed.
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean autowire (no | byName | byType | constructor | autodetect | default) "default">
 
 &lt;!--
-	Optional attribute controlling whether to check whether all this
-	beans dependencies, expressed in its properties, are satisfied.
-	Default is no dependency checking.
+    Optional attribute controlling whether to check whether all this
+    beans dependencies, expressed in its properties, are satisfied.
+    Default is no dependency checking.
 
-	"simple" type dependency checking includes primitives and String;
-	"objects" includes collaborators (other beans in the factory);
-	"all" includes both types of dependency checking.
+    "simple" type dependency checking includes primitives and String;
+    "objects" includes collaborators (other beans in the factory);
+    "all" includes both types of dependency checking.
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean dependency-check (none | objects | simple | all | default) "default">
 
 &lt;!--
-	The names of the beans that this bean depends on being initialized.
-	The bean factory will guarantee that these beans get initialized before.
+    The names of the beans that this bean depends on being initialized.
+    The bean factory will guarantee that these beans get initialized before.
 
-	Note that dependencies are normally expressed through bean properties or
-	constructor arguments. This property should just be necessary for other kinds
-	of dependencies like statics (*ugh*) or database preparation on startup.
+    Note that dependencies are normally expressed through bean properties or
+    constructor arguments. This property should just be necessary for other kinds
+    of dependencies like statics (*ugh*) or database preparation on startup.
 
-	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+    Note: This attribute will not be inherited by child bean definitions.
+    Hence, it needs to be specified per concrete bean definition.
 -->
 &lt;!ATTLIST bean depends-on CDATA #IMPLIED>
 
 &lt;!--
-	Optional attribute for the name of the custom initialization method
-	to invoke after setting bean properties. The method must have no arguments,
-	but may throw any exception.
+    Optional attribute for the name of the custom initialization method
+    to invoke after setting bean properties. The method must have no arguments,
+    but may throw any exception.
 -->
 &lt;!ATTLIST bean init-method CDATA #IMPLIED>
 
 &lt;!--
-	Optional attribute for the name of the custom destroy method to invoke
-	on bean factory shutdown. The method must have no arguments,
-	but may throw any exception.
+    Optional attribute for the name of the custom destroy method to invoke
+    on bean factory shutdown. The method must have no arguments,
+    but may throw any exception.
 
-	Note: Only invoked on beans whose lifecycle is under full control
-	of the factory - which is always the case for singletons, but not
-	guaranteed for any other scope.
+    Note: Only invoked on beans whose lifecycle is under full control
+    of the factory - which is always the case for singletons, but not
+    guaranteed for any other scope.
 -->
 &lt;!ATTLIST bean destroy-method CDATA #IMPLIED>
 
 &lt;!--
-	Optional attribute specifying the name of a factory method to use to
-	create this object. Use constructor-arg elements to specify arguments
-	to the factory method, if it takes arguments. Autowiring does not apply
-	to factory methods.
+    Optional attribute specifying the name of a factory method to use to
+    create this object. Use constructor-arg elements to specify arguments
+    to the factory method, if it takes arguments. Autowiring does not apply
+    to factory methods.
 
-	If the "class" attribute is present, the factory method will be a static
-	method on the class specified by the "class" attribute on this bean
-	definition. Often this will be the same class as that of the constructed
-	object - for example, when the factory method is used as an alternative
-	to a constructor. However, it may be on a different class. In that case,
-	the created object will *not* be of the class specified in the "class"
-	attribute. This is analogous to FactoryBean behavior.
+    If the "class" attribute is present, the factory method will be a static
+    method on the class specified by the "class" attribute on this bean
+    definition. Often this will be the same class as that of the constructed
+    object - for example, when the factory method is used as an alternative
+    to a constructor. However, it may be on a different class. In that case,
+    the created object will *not* be of the class specified in the "class"
+    attribute. This is analogous to FactoryBean behavior.
 
-	If the "factory-bean" attribute is present, the "class" attribute is not
-	used, and the factory method will be an instance method on the object
-	returned from a getBean call with the specified bean name. The factory
-	bean may be defined as a singleton or a prototype.
+    If the "factory-bean" attribute is present, the "class" attribute is not
+    used, and the factory method will be an instance method on the object
+    returned from a getBean call with the specified bean name. The factory
+    bean may be defined as a singleton or a prototype.
 
-	The factory method can have any number of arguments. Autowiring is not
-	supported. Use indexed constructor-arg elements in conjunction with the
-	factory-method attribute.
+    The factory method can have any number of arguments. Autowiring is not
+    supported. Use indexed constructor-arg elements in conjunction with the
+    factory-method attribute.
 
-	Setter Injection can be used in conjunction with a factory method.
-	Method Injection cannot, as the factory method returns an instance,
-	which will be used when the container creates the bean.
+    Setter Injection can be used in conjunction with a factory method.
+    Method Injection cannot, as the factory method returns an instance,
+    which will be used when the container creates the bean.
 -->
 &lt;!ATTLIST bean factory-method CDATA #IMPLIED>
 
 &lt;!--
-	Alternative to class attribute for factory-method usage.
-	If this is specified, no class attribute should be used.
-	This should be set to the name of a bean in the current or
-	ancestor factories that contains the relevant factory method.
-	This allows the factory itself to be configured using Dependency
-	Injection, and an instance (rather than static) method to be used.
+    Alternative to class attribute for factory-method usage.
+    If this is specified, no class attribute should be used.
+    This should be set to the name of a bean in the current or
+    ancestor factories that contains the relevant factory method.
+    This allows the factory itself to be configured using Dependency
+    Injection, and an instance (rather than static) method to be used.
 -->
 &lt;!ATTLIST bean factory-bean CDATA #IMPLIED>
 
 &lt;!--
-	Bean definitions can specify zero or more constructor arguments.
-	This is an alternative to "autowire constructor".
-	Arguments correspond to either a specific index of the constructor argument
-	list or are supposed to be matched generically by type.
+    Bean definitions can specify zero or more constructor arguments.
+    This is an alternative to "autowire constructor".
+    Arguments correspond to either a specific index of the constructor argument
+    list or are supposed to be matched generically by type.
 
-	Note: A single generic argument value will just be used once, rather than
-	potentially matched multiple times (as of Spring 1.1).
+    Note: A single generic argument value will just be used once, rather than
+    potentially matched multiple times (as of Spring 1.1).
 
-	constructor-arg elements are also used in conjunction with the factory-method
-	element to construct beans using static or instance factory methods.
+    constructor-arg elements are also used in conjunction with the factory-method
+    element to construct beans using static or instance factory methods.
 -->
 &lt;!ELEMENT constructor-arg (
-	description?,
-	(bean | ref | idref | value | null | list | set | map | props)?
+    description?,
+    (bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 &lt;!--
-	The constructor-arg tag can have an optional index attribute,
-	to specify the exact index in the constructor argument list. Only needed
-	to avoid ambiguities, e.g. in case of 2 arguments of the same type.
+    The constructor-arg tag can have an optional index attribute,
+    to specify the exact index in the constructor argument list. Only needed
+    to avoid ambiguities, e.g. in case of 2 arguments of the same type.
 -->
 &lt;!ATTLIST constructor-arg index CDATA #IMPLIED>
 
 &lt;!--
-	The constructor-arg tag can have an optional type attribute,
-	to specify the exact type of the constructor argument. Only needed
-	to avoid ambiguities, e.g. in case of 2 single argument constructors
-	that can both be converted from a String.
+    The constructor-arg tag can have an optional type attribute,
+    to specify the exact type of the constructor argument. Only needed
+    to avoid ambiguities, e.g. in case of 2 single argument constructors
+    that can both be converted from a String.
 -->
 &lt;!ATTLIST constructor-arg type CDATA #IMPLIED>
 
@@ -389,20 +393,20 @@
 
 
 &lt;!--
-	Bean definitions can have zero or more properties.
-	Property elements correspond to JavaBean setter methods exposed
-	by the bean classes. Spring supports primitives, references to other
-	beans in the same or related factories, lists, maps and properties.
+    Bean definitions can have zero or more properties.
+    Property elements correspond to JavaBean setter methods exposed
+    by the bean classes. Spring supports primitives, references to other
+    beans in the same or related factories, lists, maps and properties.
 -->
 &lt;!ELEMENT property (
-	description?, meta*,
-	(bean | ref | idref | value | null | list | set | map | props)?
+    description?, meta*,
+    (bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 &lt;!--
-	The property name attribute is the name of the JavaBean property.
-	This follows JavaBean conventions: a name of "age" would correspond
-	to setAge()/optional getAge() methods.
+    The property name attribute is the name of the JavaBean property.
+    This follows JavaBean conventions: a name of "age" would correspond
+    to setAge()/optional getAge() methods.
 -->
 &lt;!ATTLIST property name CDATA #REQUIRED>
 
@@ -418,86 +422,86 @@
 
 
 &lt;!--
-	A lookup method causes the IoC container to override the given method and return
-	the bean with the name given in the bean attribute. This is a form of Method Injection.
-	It's particularly useful as an alternative to implementing the BeanFactoryAware
-	interface, in order to be able to make getBean() calls for non-singleton instances
-	at runtime. In this case, Method Injection is a less invasive alternative.
+    A lookup method causes the IoC container to override the given method and return
+    the bean with the name given in the bean attribute. This is a form of Method Injection.
+    It's particularly useful as an alternative to implementing the BeanFactoryAware
+    interface, in order to be able to make getBean() calls for non-singleton instances
+    at runtime. In this case, Method Injection is a less invasive alternative.
 -->
 &lt;!ELEMENT lookup-method EMPTY>
 
 &lt;!--
-	Name of a lookup method. This method should take no arguments.
+    Name of a lookup method. This method should take no arguments.
 -->
 &lt;!ATTLIST lookup-method name CDATA #IMPLIED>
 
 &lt;!--
-	Name of the bean in the current or ancestor factories that the lookup method
-	should resolve to. Often this bean will be a prototype, in which case the
-	lookup method will return a distinct instance on every invocation. This
-	is useful for single-threaded objects.
+    Name of the bean in the current or ancestor factories that the lookup method
+    should resolve to. Often this bean will be a prototype, in which case the
+    lookup method will return a distinct instance on every invocation. This
+    is useful for single-threaded objects.
 -->
 &lt;!ATTLIST lookup-method bean CDATA #IMPLIED>
 
 
 &lt;!--
-	Similar to the lookup method mechanism, the replaced-method element is used to control
-	IoC container method overriding: Method Injection. This mechanism allows the overriding
-	of a method with arbitrary code.
+    Similar to the lookup method mechanism, the replaced-method element is used to control
+    IoC container method overriding: Method Injection. This mechanism allows the overriding
+    of a method with arbitrary code.
 -->
 &lt;!ELEMENT replaced-method (
-	(arg-type)*
+    (arg-type)*
 )>
 
 &lt;!--
-	Name of the method whose implementation should be replaced by the IoC container.
-	If this method is not overloaded, there's no need to use arg-type subelements.
-	If this method is overloaded, arg-type subelements must be used for all
-	override definitions for the method.
+    Name of the method whose implementation should be replaced by the IoC container.
+    If this method is not overloaded, there's no need to use arg-type subelements.
+    If this method is overloaded, arg-type subelements must be used for all
+    override definitions for the method.
 -->
 &lt;!ATTLIST replaced-method name CDATA #IMPLIED>
 
 &lt;!--
-	Bean name of an implementation of the MethodReplacer interface in the current
-	or ancestor factories. This may be a singleton or prototype bean. If it's
-	a prototype, a new instance will be used for each method replacement.
-	Singleton usage is the norm.
+    Bean name of an implementation of the MethodReplacer interface in the current
+    or ancestor factories. This may be a singleton or prototype bean. If it's
+    a prototype, a new instance will be used for each method replacement.
+    Singleton usage is the norm.
 -->
 &lt;!ATTLIST replaced-method replacer CDATA #IMPLIED>
 
 &lt;!--
-	Subelement of replaced-method identifying an argument for a replaced method
-	in the event of method overloading.
+    Subelement of replaced-method identifying an argument for a replaced method
+    in the event of method overloading.
 -->
 &lt;!ELEMENT arg-type (#PCDATA)>
 
 &lt;!--
-	Specification of the type of an overloaded method argument as a String.
-	For convenience, this may be a substring of the FQN. E.g. all the
-	following would match "java.lang.String":
-	- java.lang.String
-	- String
-	- Str
+    Specification of the type of an overloaded method argument as a String.
+    For convenience, this may be a substring of the FQN. E.g. all the
+    following would match "java.lang.String":
+    - java.lang.String
+    - String
+    - Str
 
-	As the number of arguments will be checked also, this convenience can often
-	be used to save typing.
+    As the number of arguments will be checked also, this convenience can often
+    be used to save typing.
 -->
 &lt;!ATTLIST arg-type match CDATA #IMPLIED>
 
 
 &lt;!--
-	Defines a reference to another bean in this factory or an external
-	factory (parent or included factory).
+    Defines a reference to another bean in this factory or an external
+    factory (parent or included factory).
 -->
 &lt;!ELEMENT ref EMPTY>
 
 &lt;!--
-	References must specify a name of the target bean.
-	The "bean" attribute can reference any name from any bean in the context,
-	to be checked at runtime.
-	Local references, using the "local" attribute, have to use bean ids;
-	they can be checked by this DTD, thus should be preferred for references
-	within the same bean factory XML file.
+    References must specify a name of the target bean.
+    The "bean" attribute can reference any name from any bean in the context,
+    to be checked at runtime.
+    Local references, using the "local" attribute, have to use bean ids;
+    they can be checked by this DTD, thus should be preferred for references
+    within the same bean factory XML file.
 -->
 &lt;!ATTLIST ref bean CDATA #IMPLIED>
 &lt;!ATTLIST ref local IDREF #IMPLIED>
@@ -505,132 +509,132 @@
 
 
 &lt;!--
-	Defines a string property value, which must also be the id of another
-	bean in this factory or an external factory (parent or included factory).
-	While a regular 'value' element could instead be used for the same effect,
-	using idref in this case allows validation of local bean ids by the XML
-	parser, and name completion by supporting tools.
+    Defines a string property value, which must also be the id of another
+    bean in this factory or an external factory (parent or included factory).
+    While a regular 'value' element could instead be used for the same effect,
+    using idref in this case allows validation of local bean ids by the XML
+    parser, and name completion by supporting tools.
 -->
 &lt;!ELEMENT idref EMPTY>
 
 &lt;!--
-	ID refs must specify a name of the target bean.
-	The "bean" attribute can reference any name from any bean in the context,
-	potentially to be checked at runtime by bean factory implementations.
-	Local references, using the "local" attribute, have to use bean ids;
-	they can be checked by this DTD, thus should be preferred for references
-	within the same bean factory XML file.
+    ID refs must specify a name of the target bean.
+    The "bean" attribute can reference any name from any bean in the context,
+    potentially to be checked at runtime by bean factory implementations.
+    Local references, using the "local" attribute, have to use bean ids;
+    they can be checked by this DTD, thus should be preferred for references
+    within the same bean factory XML file.
 -->
 &lt;!ATTLIST idref bean CDATA #IMPLIED>
 &lt;!ATTLIST idref local IDREF #IMPLIED>
 
 
 &lt;!--
-	Contains a string representation of a property value.
-	The property may be a string, or may be converted to the required
-	type using the JavaBeans PropertyEditor machinery. This makes it
-	possible for application developers to write custom PropertyEditor
-	implementations that can convert strings to arbitrary target objects.
+    Contains a string representation of a property value.
+    The property may be a string, or may be converted to the required
+    type using the JavaBeans PropertyEditor machinery. This makes it
+    possible for application developers to write custom PropertyEditor
+    implementations that can convert strings to arbitrary target objects.
 
-	Note that this is recommended for simple objects only.
-	Configure more complex objects by populating JavaBean
-	properties with references to other beans.
+    Note that this is recommended for simple objects only.
+    Configure more complex objects by populating JavaBean
+    properties with references to other beans.
 -->
 &lt;!ELEMENT value (#PCDATA)>
 
 &lt;!--
-	The value tag can have an optional type attribute, to specify the
-	exact type that the value should be converted to. Only needed
-	if the type of the target property or constructor argument is
-	too generic: for example, in case of a collection element.
+    The value tag can have an optional type attribute, to specify the
+    exact type that the value should be converted to. Only needed
+    if the type of the target property or constructor argument is
+    too generic: for example, in case of a collection element.
 -->
 &lt;!ATTLIST value type CDATA #IMPLIED>
 
 &lt;!--
-	Denotes a Java null value. Necessary because an empty "value" tag
-	will resolve to an empty String, which will not be resolved to a
-	null value unless a special PropertyEditor does so.
+    Denotes a Java null value. Necessary because an empty "value" tag
+    will resolve to an empty String, which will not be resolved to a
+    null value unless a special PropertyEditor does so.
 -->
 &lt;!ELEMENT null (#PCDATA)>
 
 
 &lt;!--
-	A list can contain multiple inner bean, ref, collection, or value elements.
-	Java lists are untyped, pending generics support in Java 1.5,
-	although references will be strongly typed.
-	A list can also map to an array type. The necessary conversion
-	is automatically performed by the BeanFactory.
+    A list can contain multiple inner bean, ref, collection, or value elements.
+    Java lists are untyped, pending generics support in Java 1.5,
+    although references will be strongly typed.
+    A list can also map to an array type. The necessary conversion
+    is automatically performed by the BeanFactory.
 -->
 &lt;!ELEMENT list (
-	(bean | ref | idref | value | null | list | set | map | props)*
+    (bean | ref | idref | value | null | list | set | map | props)*
 )>
 
 &lt;!--
-	Enable/disable merging for collections when using parent/child beans.
+    Enable/disable merging for collections when using parent/child beans.
 -->
 &lt;!ATTLIST list merge (true | false | default) "default">
 
 &lt;!--
-	Specify the default Java type for nested values.
+    Specify the default Java type for nested values.
 -->
 &lt;!ATTLIST list value-type CDATA #IMPLIED>
 
 
 &lt;!--
-	A set can contain multiple inner bean, ref, collection, or value elements.
-	Java sets are untyped, pending generics support in Java 1.5,
-	although references will be strongly typed.
+    A set can contain multiple inner bean, ref, collection, or value elements.
+    Java sets are untyped, pending generics support in Java 1.5,
+    although references will be strongly typed.
 -->
 &lt;!ELEMENT set (
-	(bean | ref | idref | value | null | list | set | map | props)*
+    (bean | ref | idref | value | null | list | set | map | props)*
 )>
 
 &lt;!--
-	Enable/disable merging for collections when using parent/child beans.
+    Enable/disable merging for collections when using parent/child beans.
 -->
 &lt;!ATTLIST set merge (true | false | default) "default">
 
 &lt;!--
-	Specify the default Java type for nested values.
+    Specify the default Java type for nested values.
 -->
 &lt;!ATTLIST set value-type CDATA #IMPLIED>
 
 
 &lt;!--
-	A Spring map is a mapping from a string key to object.
-	Maps may be empty.
+    A Spring map is a mapping from a string key to object.
+    Maps may be empty.
 -->
 &lt;!ELEMENT map (
-	(entry)*
+    (entry)*
 )>
 
 &lt;!--
-	Enable/disable merging for collections when using parent/child beans.
+    Enable/disable merging for collections when using parent/child beans.
 -->
 &lt;!ATTLIST map merge (true | false | default) "default">
 
 &lt;!--
-	Specify the default Java type for nested entry keys.
+    Specify the default Java type for nested entry keys.
 -->
 &lt;!ATTLIST map key-type CDATA #IMPLIED>
 
 &lt;!--
-	Specify the default Java type for nested entry values.
+    Specify the default Java type for nested entry values.
 -->
 &lt;!ATTLIST map value-type CDATA #IMPLIED>
 
 &lt;!--
-	A map entry can be an inner bean, ref, value, or collection.
-	The key of the entry is given by the "key" attribute or child element.
+    A map entry can be an inner bean, ref, value, or collection.
+    The key of the entry is given by the "key" attribute or child element.
 -->
 &lt;!ELEMENT entry (
   key?,
-	(bean | ref | idref | value | null | list | set | map | props)?
+    (bean | ref | idref | value | null | list | set | map | props)?
 )>
 
 &lt;!--
-	Each map element must specify its key as attribute or as child element.
-	A key attribute is always a String value.
+    Each map element must specify its key as attribute or as child element.
+    A key attribute is always a String value.
 -->
 &lt;!ATTLIST entry key CDATA #IMPLIED>
 
@@ -650,35 +654,35 @@
 &lt;!ATTLIST entry value-ref CDATA #IMPLIED>
 
 &lt;!--
-	A key element can contain an inner bean, ref, value, or collection.
+    A key element can contain an inner bean, ref, value, or collection.
 -->
 &lt;!ELEMENT key (
-	(bean | ref | idref | value | null | list | set | map | props)
+    (bean | ref | idref | value | null | list | set | map | props)
 )>
 
 
 &lt;!--
-	Props elements differ from map elements in that values must be strings.
-	Props may be empty.
+    Props elements differ from map elements in that values must be strings.
+    Props may be empty.
 -->
 &lt;!ELEMENT props (
-	(prop)*
+    (prop)*
 )>
 
 &lt;!--
-	Enable/disable merging for collections when using parent/child beans.
+    Enable/disable merging for collections when using parent/child beans.
 -->
 &lt;!ATTLIST props merge (true | false | default) "default">
 
 &lt;!--
-	Element content is the string value of the property.
-	Note that whitespace is trimmed off to avoid unwanted whitespace
-	caused by typical XML formatting.
+    Element content is the string value of the property.
+    Note that whitespace is trimmed off to avoid unwanted whitespace
+    caused by typical XML formatting.
 -->
 &lt;!ELEMENT prop (#PCDATA)>
 
 &lt;!--
-	Each property element must specify its key.
+    Each property element must specify its key.
 -->
 &lt;!ATTLIST prop key CDATA #REQUIRED></programlisting></para>
 </appendix>

@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="web-integration"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="web-integration">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Integrating with other web frameworks</title>
 
-  <section id="intro">
+  <section xml:id="intro">
     <title>Introduction</title>
 
     <para>This chapter details Spring's integration with third party web
-    frameworks such as <ulink
-    url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>, <ulink
-    url="http://struts.apache.org/">Struts</ulink>, <ulink
-    url="http://www.opensymphony.com/webwork/">WebWork</ulink>, and <ulink
-    url="http://tapestry.apache.org/">Tapestry</ulink>.</para>
+    frameworks such as <link
+    xl:href="http://java.sun.com/javaee/javaserverfaces/">JSF</link>, <link
+    xl:href="http://struts.apache.org/">Struts</link>, <link
+    xl:href="http://www.opensymphony.com/webwork/">WebWork</link>, and <link
+    xl:href="http://tapestry.apache.org/">Tapestry</link>.</para>
 
     <!-- insert some content about Spring Web Flow here -->
 
@@ -46,7 +50,7 @@
     popular web frameworks in Java, starting with the Spring configuration
     that is common to all of the supported web frameworks, and then detailing
     the specific integration options for each supported web framework.</para>
-    
+
     <note>
         <para>Please note that this chapter does not attempt to explain
         how to use any of the supported web frameworks. For example, if you want
@@ -60,7 +64,7 @@
 
   </section>
 
-  <section id="web-integration-common">
+  <section xml:id="web-integration-common">
     <title>Common configuration</title>
 
     <para>Before diving into the integration specifics of each supported web
@@ -83,8 +87,8 @@
     a Spring container (a <classname>WebApplicationContext</classname>) that
     contains all of the 'business beans' in one's application.</para>
 
-    <para>On to specifics: all that one need do is to declare a <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></ulink>
+    <para>On to specifics: all that one need do is to declare a <link
+    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></link>
     in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
     &lt;context-param/&gt; section (in the same file) that defines which set
@@ -106,29 +110,29 @@
     <para>If you don't specify the <literal>contextConfigLocation</literal>
     context parameter, the <classname>ContextLoaderListener</classname> will
     look for a file called <literal>/WEB-INF/applicationContext.xml</literal>
-    to load. Once the context files are loaded, Spring creates a <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></ulink>
+    to load. Once the context files are loaded, Spring creates a <link
+    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></link>
     object based on the bean definitions and stores it in the
-    <interface>ServletContext</interface> of the web application.</para>
+    <interfacename>ServletContext</interfacename> of the web application.</para>
 
     <para>All Java web frameworks are built on top of the Servlet API, and so
     one can use the following code snippet to get access to this 'business
-    context' <interface>ApplicationContext</interface> created by the
+    context' <interfacename>ApplicationContext</interfacename> created by the
     <classname>ContextLoaderListener</classname>.</para>
 
     <programlisting language="java">WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);</programlisting>
 
-    <para>The <ulink
-    url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></ulink>
+    <para>The <link
+    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></link>
     class is for convenience, so you don't have to remember the name of the
-    <interface>ServletContext</interface> attribute. Its
+    <interfacename>ServletContext</interfacename> attribute. Its
     <emphasis>getWebApplicationContext()</emphasis> method will return
     <literal>null</literal> if an object doesn't exist under the
     <literal>WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE</literal>
     key. Rather than risk getting <classname>NullPointerExceptions</classname>
     in your application, it's better to use the
     <literal>getRequiredWebApplicationContext()</literal> method. This method
-    throws an exception when the <interface>ApplicationContext</interface> is
+    throws an exception when the <interfacename>ApplicationContext</interfacename> is
     missing.</para>
 
     <para>Once you have a reference to the
@@ -143,7 +147,7 @@
     specific integration strategies.</para>
   </section>
 
-  <section id="jsf">
+  <section xml:id="jsf">
     <title>JavaServer Faces 1.1 and 1.2</title>
 
     <para>JavaServer Faces (JSF) is the JCP's standard component-based,
@@ -151,10 +155,10 @@
     official part of the Java EE umbrella.</para>
 
     <para>For a popular JSF runtime as well as for popular JSF component
-    libraries, check out the <ulink url="http://myfaces.apache.org/">Apache
-    MyFaces project</ulink>. The MyFaces project also provides common JSF
-    extensions such as <ulink
-    url="http://myfaces.apache.org/orchestra/">MyFaces Orchestra</ulink>: a
+    libraries, check out the <link xl:href="http://myfaces.apache.org/">Apache
+    MyFaces project</link>. The MyFaces project also provides common JSF
+    extensions such as <link
+    xl:href="http://myfaces.apache.org/orchestra/">MyFaces Orchestra</link>: a
     Spring-based JSF extension that provides rich conversation scope
     support.</para>
 
@@ -162,9 +166,9 @@
       <para>Spring Web Flow 2.0 provides rich JSF support through its newly
       established Spring Faces module, both for JSF-centric usage (as
       described in this section) and for Spring-centric usage (using JSF views
-      within a Spring MVC dispatcher). Check out the <ulink
-      url="http://www.springframework.org/webflow">Spring Web Flow
-      website</ulink> for details!</para>
+      within a Spring MVC dispatcher). Check out the <link
+      xl:href="http://www.springframework.org/webflow">Spring Web Flow
+      website</link> for details!</para>
     </note>
 
     <para>The key element in Spring's JSF integration is the JSF 1.1
@@ -172,13 +176,13 @@
     supports the <classname>ELResolver</classname> mechanism as a
     next-generation version of JSF EL integration.</para>
 
-    <section id="jsf-delegatingvariableresolver">
+    <section xml:id="jsf-delegatingvariableresolver">
       <title>DelegatingVariableResolver (JSF 1.1/1.2)</title>
 
       <para>The easiest way to integrate one's Spring middle-tier with one's
-      JSF web layer is to use the <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
-      <classname>DelegatingVariableResolver</classname></ulink> class. To
+      JSF web layer is to use the <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+      <classname>DelegatingVariableResolver</classname></link> class. To
       configure this variable resolver in one's application, one will need to
       edit one's <emphasis>faces-context.xml</emphasis> file. After the
       opening <literal>&lt;faces-config/&gt;</literal> element, add an
@@ -221,7 +225,7 @@
 &lt;/managed-bean&gt;</programlisting>
     </section>
 
-    <section id="jsf-springbeanvariableresolver">
+    <section xml:id="jsf-springbeanvariableresolver">
       <title>SpringBeanVariableResolver (JSF 1.1/1.2)</title>
 
       <para><classname>SpringBeanVariableResolver</classname> is a variant of
@@ -245,7 +249,7 @@
 &lt;/faces-config&gt;</programlisting>
     </section>
 
-    <section id="jsf-springbeanfaceselresolver">
+    <section xml:id="jsf-springbeanfaceselresolver">
       <title>SpringBeanFacesELResolver (JSF 1.2+)</title>
 
       <para><classname>SpringBeanFacesELResolver</classname> is a JSF 1.2
@@ -268,31 +272,31 @@
 &lt;/faces-config&gt;</programlisting>
     </section>
 
-    <section id="jsf-facescontextutils">
+    <section xml:id="jsf-facescontextutils">
       <title>FacesContextUtils</title>
 
       <para>A custom <interfacename>VariableResolver</interfacename> works
       well when mapping one's properties to beans in
       <emphasis>faces-config.xml</emphasis>, but at times one may need to grab
-      a bean explicitly. The <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/FacesContextUtils.html">
-      <classname>FacesContextUtils</classname></ulink> class makes this easy.
+      a bean explicitly. The <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/FacesContextUtils.html">
+      <classname>FacesContextUtils</classname></link> class makes this easy.
       It is similar to <classname>WebApplicationContextUtils</classname>,
       except that it takes a <classname>FacesContext</classname> parameter
-      rather than a <interface>ServletContext</interface> parameter.</para>
+      rather than a <interfacename>ServletContext</interfacename> parameter.</para>
 
       <programlisting language="java">ApplicationContext ctx = FacesContextUtils.getWebApplicationContext(FacesContext.getCurrentInstance());</programlisting>
     </section>
   </section>
 
-  <section id="struts">
+  <section xml:id="struts">
     <title>Apache Struts 1.x and 2.x</title>
 
-    <para><ulink url="http://struts.apache.org">Struts</ulink> used to be the
+    <para><link xl:href="http://struts.apache.org">Struts</link> used to be the
     <emphasis>de facto</emphasis> web framework for Java applications, mainly
-    because it was one of the first to be released (June 2001). It has now been renamed to <emphasis>Struts 1</emphasis> 
-	(as opposed to Struts 2). Many applications still use it. 
-	Invented by Craig McClanahan, Struts is an open source project hosted by the Apache
+    because it was one of the first to be released (June 2001). It has now been renamed to <emphasis>Struts 1</emphasis>
+    (as opposed to Struts 2). Many applications still use it.
+    Invented by Craig McClanahan, Struts is an open source project hosted by the Apache
     Software Foundation. At the time, it greatly simplified the JSP/Servlet
     programming paradigm and won over many developers who were using
     proprietary frameworks. It simplified the programming model, it was open
@@ -306,9 +310,9 @@
 
       <para>Struts 2 is effectively a different product - a successor of
       WebWork 2.2 (as discussed in <xref linkend="webwork" />), carrying the
-      Struts brand now. Check out the Struts 2 <ulink
-      url="http://struts.apache.org/2.x/docs/spring-plugin.html">Spring
-      Plugin</ulink> for the built-in Spring integration shipped with Struts
+      Struts brand now. Check out the Struts 2 <link
+      xl:href="http://struts.apache.org/2.x/docs/spring-plugin.html">Spring
+      Plugin</link> for the built-in Spring integration shipped with Struts
       2. In general, Struts 2 is closer to WebWork 2.2 than to Struts 1 in
       terms of its Spring integration implications.</para>
     </note>
@@ -330,11 +334,11 @@
       </listitem>
     </itemizedlist>
 
-    <section id="struts-contextloaderplugin">
+    <section xml:id="struts-contextloaderplugin">
       <title>ContextLoaderPlugin</title>
 
-      <para>The <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></ulink>
+      <para>The <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></link>
       is a Struts 1.1+ plug-in that loads a Spring context file for the Struts
       <classname>ActionServlet</classname>. This context refers to the root
       <classname>WebApplicationContext</classname> (loaded by the
@@ -363,9 +367,9 @@
       which can be useful when using testing tools like StrutsTestCase.
       StrutsTestCase's <classname>MockStrutsTestCase</classname> won't
       initialize Listeners on startup so putting all your context files in the
-      plugin is a workaround. (A <ulink
-      url="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
-      bug has been filed</ulink> for this issue, but has been closed as 'Wont
+      plugin is a workaround. (A <link
+      xl:href="http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1088866&amp;group_id=39190&amp;atid=424562">
+      bug has been filed</link> for this issue, but has been closed as 'Wont
       Fix').</para>
 
       <para>After configuring this plug-in in
@@ -401,12 +405,12 @@
 
       <programlisting language="xml">&lt;bean name="/users" .../&gt;</programlisting>
 
-      <section id="struts-delegatingrequestprocessor">
+      <section xml:id="struts-delegatingrequestprocessor">
         <title>DelegatingRequestProcessor</title>
 
-        <para>To configure the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingRequestProcessor.html">
-        <literal>DelegatingRequestProcessor</literal></ulink> in your
+        <para>To configure the <link
+        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingRequestProcessor.html">
+        <literal>DelegatingRequestProcessor</literal></link> in your
         <emphasis>struts-config.xml</emphasis> file, override the
         "processorClass" property in the &lt;controller&gt; element. These
         lines follow the &lt;action-mapping&gt; element.</para>
@@ -432,21 +436,21 @@
 
         <note>
           <para>If you are using Tiles in your Struts application, you must
-          configure your &lt;controller&gt; with the <ulink
-          url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></ulink>
+          configure your &lt;controller&gt; with the <link
+          xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></link>
           instead.</para>
         </note>
       </section>
 
-      <section id="struts-delegatingactionproxy">
+      <section xml:id="struts-delegatingactionproxy">
         <title>DelegatingActionProxy</title>
 
         <para>If you have a custom <classname>RequestProcessor</classname> and
         can't use the <classname>DelegatingRequestProcessor</classname> or
         <classname>DelegatingTilesRequestProcessor</classname> approaches, you
-        can use the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingActionProxy.html">
-        <classname>DelegatingActionProxy</classname></ulink> as the type in
+        can use the <link
+        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingActionProxy.html">
+        <classname>DelegatingActionProxy</classname></link> as the type in
         your action-mapping.</para>
 
         <programlisting language="xml">&lt;action path="/user" type="org.springframework.web.struts.DelegatingActionProxy"
@@ -473,18 +477,18 @@
       </section>
     </section>
 
-    <section id="struts-actionsupport">
+    <section xml:id="struts-actionsupport">
       <title>ActionSupport Classes</title>
 
       <para>As previously mentioned, you can retrieve the
       <classname>WebApplicationContext</classname> from the
-      <interface>ServletContext</interface> using the
+      <interfacename>ServletContext</interfacename> using the
       <classname>WebApplicationContextUtils</classname> class. An easier way
       is to extend Spring's <classname>Action</classname> classes for Struts.
       For example, instead of subclassing Struts'
-      <classname>Action</classname> class, you can subclass Spring's <ulink
-      url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html">
-      <classname>ActionSupport</classname></ulink> class.</para>
+      <classname>Action</classname> class, you can subclass Spring's <link
+      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html">
+      <classname>ActionSupport</classname></link> class.</para>
 
       <para>The <classname>ActionSupport</classname> class provides additional
       convenience methods, like
@@ -511,24 +515,24 @@
       - the Spring versions merely have <emphasis>Support</emphasis> appended
       to the name: <itemizedlist spacing="compact">
           <listitem>
-            <para><ulink
-            url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></ulink>,</para>
+            <para><link
+            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></link>,</para>
           </listitem>
 
           <listitem>
-            <para><ulink
-            url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></ulink>,</para>
+            <para><link
+            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></link>,</para>
           </listitem>
 
           <listitem>
-            <para><ulink
-            url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></ulink>
+            <para><link
+            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></link>
             and</para>
           </listitem>
 
           <listitem>
-            <para><ulink
-            url="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></ulink>.</para>
+            <para><link
+            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></link>.</para>
           </listitem>
         </itemizedlist></para>
 
@@ -541,12 +545,12 @@
     </section>
   </section>
 
-  <section id="webwork">
+  <section xml:id="webwork">
     <title>WebWork 2.x</title>
 
-    <para>From the <ulink url="http://www.opensymphony.com/webwork/">WebWork
-    homepage</ulink>:</para>
-    
+    <para>From the <link xl:href="http://www.opensymphony.com/webwork/">WebWork
+    homepage</link>:</para>
+
     <para>
         <quote>
           <emphasis>WebWork is a Java web-application development framework. It is
@@ -562,9 +566,9 @@
     understand, and the framework also has an extensive tag library as well as
     nicely decoupled validation.</para>
 
-    <para>One of the key enablers in WebWork's technology stack is <ulink
-    url="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an
-    IoC container</ulink> to manage Webwork Actions, handle the "wiring" of
+    <para>One of the key enablers in WebWork's technology stack is <link
+    xl:href="http://www.opensymphony.com/webwork/wikidocs/IoC%20Overview.html">an
+    IoC container</link> to manage Webwork Actions, handle the "wiring" of
     business objects, etc. Prior to WebWork version 2.2, WebWork used its own
     proprietary IoC container (and provided integration points so that one
     could integrate an IoC container such as Spring's into the mix). However,
@@ -577,10 +581,10 @@
     <para>Now in the interests of adhering to the DRY (Don't Repeat Yourself)
     principle, it would be foolish to document the Spring-WebWork integration
     in light of the fact that the WebWork team have already written such a
-    writeup. Please consult the <ulink
-    url="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork
-    integration page</ulink> on the <ulink
-    url="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</ulink>
+    writeup. Please consult the <link
+    xl:href="http://www.opensymphony.com/webwork/wikidocs/Spring.html">Spring-WebWork
+    integration page</link> on the <link
+    xl:href="http://wiki.opensymphony.com/display/WW/WebWork">WebWork wiki</link>
     for the full lowdown.</para>
 
     <para>Note that the Spring-WebWork integration code was developed (and
@@ -588,16 +592,16 @@
     themselves. So please refer first to the WebWork site and forums if you are
     having issues with the integration. But feel free to
     post comments and queries regarding the Spring-WebWork integration on the
-    <ulink url="http://forum.springframework.org/forumdisplay.php?f=25">Spring
-    support forums</ulink>, too.</para>
+    <link xl:href="http://forum.springframework.org/forumdisplay.php?f=25">Spring
+    support forums</link>, too.</para>
   </section>
 
-  <section id="tapestry">
+  <section xml:id="tapestry">
     <title>Tapestry 3.x and 4.x</title>
 
-    <para>From the <ulink url="http://tapestry.apache.org/">Tapestry
-    homepage</ulink>:</para>
-    
+    <para>From the <link xl:href="http://tapestry.apache.org/">Tapestry
+    homepage</link>:</para>
+
     <para>
         <quote>
           <emphasis>Tapestry is an open-source framework for creating dynamic,
@@ -621,7 +625,7 @@
     contains the following snippet of best practice advice. (Text that the
     author of this Spring section has added is contained within
     <literal>[]</literal> brackets.)</para>
-    
+
     <para>
         <quote>
           <emphasis>A very successful design pattern in Tapestry is to keep pages
@@ -643,11 +647,11 @@
     Tapestry itself makes doing this dependency injection of Spring-managed
     beans a cinch. (Another nice thing is that this Spring-Tapestry
     integration code was written - and continues to be maintained - by the
-    Tapestry creator <ulink url="http://howardlewisship.com/blog/">Howard M.
-    Lewis Ship</ulink>, so hats off to him for what is really some silky
+    Tapestry creator <link xl:href="http://howardlewisship.com/blog/">Howard M.
+    Lewis Ship</link>, so hats off to him for what is really some silky
     smooth integration).</para>
 
-    <section id="tapestry-di">
+    <section xml:id="tapestry-di">
       <title>Injecting Spring-managed beans</title>
 
       <para>Assume we have the following simple Spring container definition
@@ -660,26 +664,26 @@
        xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 <emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"</emphasis>&gt;
- 
+
 &lt;beans&gt;
     &lt;!-- the DataSource --&gt;
     &lt;jee:jndi-lookup id="dataSource" jndi-name="java:DefaultDS"/&gt;
 
-    &lt;bean id="hibSessionFactory" 
+    &lt;bean id="hibSessionFactory"
           class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"&gt;
         &lt;property name="dataSource" ref="dataSource"/&gt;
     &lt;/bean&gt;
 
-    &lt;bean id="transactionManager" 
+    &lt;bean id="transactionManager"
           class="org.springframework.transaction.jta.JtaTransactionManager"/&gt;
 
-    &lt;bean id="mapper" 
+    &lt;bean id="mapper"
           class="com.whatever.dataaccess.mapper.hibernate.MapperImpl"&gt;
         &lt;property name="sessionFactory" ref="hibSessionFactory"/&gt;
     &lt;/bean&gt;
 
     &lt;!-- (transactional) AuthenticationService --&gt;
-    &lt;bean id="authenticationService" 
+    &lt;bean id="authenticationService"
           class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
         &lt;property name="transactionManager" ref="transactionManager"/&gt;
         &lt;property name="target"&gt;
@@ -693,10 +697,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 *=PROPAGATION_REQUIRED
             &lt;/value&gt;
         &lt;/property&gt;
-    &lt;/bean&gt;  
- 
+    &lt;/bean&gt;
+
     &lt;!-- (transactional) UserService --&gt;
-    &lt;bean id="userService" 
+    &lt;bean id="userService"
           class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"&gt;
         &lt;property name="transactionManager" ref="transactionManager"/&gt;
         &lt;property name="target"&gt;
@@ -710,8 +714,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
                 *=PROPAGATION_REQUIRED
             &lt;/value&gt;
         &lt;/property&gt;
-    &lt;/bean&gt;  
- 
+    &lt;/bean&gt;
+
  &lt;/beans&gt;</programlisting>
 
       <para>Inside the Tapestry application, the above bean definitions need
@@ -727,7 +731,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       application by calling Spring's static utility function
       <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>,
       where servletContext is the standard
-      <interface>ServletContext</interface> from the Java EE Servlet
+      <interfacename>ServletContext</interfacename> from the Java EE Servlet
       specification. As such, one simple mechanism for a page to get an
       instance of the <interfacename>UserService</interfacename>, for example,
       would be with code such as:</para>
@@ -757,16 +761,16 @@ UserService userService = (UserService) appContext.getBean("userService");
         linkend="tapestry-4-style-di" />.</para>
       </note>
 
-      <section id="tapestry-pre4-style-di">
+      <section xml:id="tapestry-pre4-style-di">
         <title>Dependency Injecting Spring Beans into Tapestry pages</title>
 
         <para>First we need to make the
-        <interface>ApplicationContext</interface> available to the Tapestry
+        <interfacename>ApplicationContext</interfacename> available to the Tapestry
         page or Component without having to have the
-        <interface>ServletContext</interface>; this is because at the stage in
+        <interfacename>ServletContext</interfacename>; this is because at the stage in
         the page's/component's lifecycle when we need to access the
-        <interface>ApplicationContext</interface>, the
-        <interface>ServletContext</interface> won't be easily available to the
+        <interfacename>ApplicationContext</interfacename>, the
+        <interfacename>ServletContext</interfacename> won't be easily available to the
         page, so we can't use
         <literal>WebApplicationContextUtils.getApplicationContext(servletContext)</literal>
         directly. One way is by defining a custom version of the Tapestry
@@ -778,15 +782,15 @@ UserService userService = (UserService) appContext.getBean("userService");
 // import ...
 
 public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
- 
+
     public static final String APPLICATION_CONTEXT_KEY = "appContext";
- 
+
     /**
      * @see org.apache.tapestry.engine.AbstractEngine#setupForRequest(org.apache.tapestry.request.RequestContext)
      */
     protected void setupForRequest(RequestContext context) {
         super.setupForRequest(context);
-     
+
         // insert ApplicationContext in global, if not there
         Map global = (Map) getGlobal();
         ApplicationContext ac = (ApplicationContext) global.get(APPLICATION_CONTEXT_KEY);
@@ -807,8 +811,8 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
 
         <programlisting language="xml"><lineannotation>file: xportal.application:</lineannotation>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE application PUBLIC 
-    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+&lt;!DOCTYPE application PUBLIC
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN"
     "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
 &lt;application
     name="Whatever xPortal"
@@ -816,7 +820,7 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
 &lt;/application&gt;</programlisting>
       </section>
 
-      <section id="tapestry-componentdefs">
+      <section xml:id="tapestry-componentdefs">
         <title>Component definition files</title>
 
         <para>Now in our page or component definition file (*.page or *.jwc),
@@ -838,12 +842,12 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
         context. The entire page definition might look like this:</para>
 
         <programlisting language="xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;!DOCTYPE page-specification PUBLIC 
-    "-//Apache Software Foundation//Tapestry Specification 3.0//EN" 
+&lt;!DOCTYPE page-specification PUBLIC
+    "-//Apache Software Foundation//Tapestry Specification 3.0//EN"
     "http://jakarta.apache.org/tapestry/dtd/Tapestry_3_0.dtd"&gt;
-     
+
 &lt;page-specification class="com.whatever.web.xportal.pages.Login"&gt;
- 
+
     &lt;property-specification name="username" type="java.lang.String"/&gt;
     &lt;property-specification name="password" type="java.lang.String"/&gt;
     &lt;property-specification name="error" type="java.lang.String"/&gt;
@@ -856,31 +860,31 @@ public class MyEngine extends org.apache.tapestry.engine.BaseEngine {
                             type="com.whatever.services.service.user.AuthenticationService"&gt;
         global.appContext.getBean("authenticationService")
     &lt;/property-specification&gt;
-   
+
     &lt;bean name="delegate" class="com.whatever.web.xportal.PortalValidationDelegate"/&gt;
- 
+
     &lt;bean name="validator" class="org.apache.tapestry.valid.StringValidator" lifecycle="page"&gt;
         &lt;set-property name="required" expression="true"/&gt;
         &lt;set-property name="clientScriptingEnabled" expression="true"/&gt;
     &lt;/bean&gt;
- 
+
     &lt;component id="inputUsername" type="ValidField"&gt;
         &lt;static-binding name="displayName" value="Username"/&gt;
         &lt;binding name="value" expression="username"/&gt;
         &lt;binding name="validator" expression="beans.validator"/&gt;
     &lt;/component&gt;
-   
+
     &lt;component id="inputPassword" type="ValidField"&gt;
         &lt;binding name="value" expression="password"/&gt;
        &lt;binding name="validator" expression="beans.validator"/&gt;
        &lt;static-binding name="displayName" value="Password"/&gt;
        &lt;binding name="hidden" expression="true"/&gt;
     &lt;/component&gt;
- 
+
 &lt;/page-specification&gt;</programlisting>
       </section>
 
-      <section id="tapestry-getters">
+      <section xml:id="tapestry-getters">
         <title>Adding abstract accessors</title>
 
         <para>Now in the Java class definition for the page or component
@@ -897,7 +901,7 @@ public abstract AuthenticationService getAuthenticationService();</programlistin
         page in this example, might look like this:</para>
 
         <programlisting language="java">package com.whatever.web.xportal.pages;
- 
+
 /**
  *  Allows the user to login, by providing username and password.
  *  After successfully logging in, a cookie is placed on the client browser
@@ -905,54 +909,54 @@ public abstract AuthenticationService getAuthenticationService();</programlistin
  *  persists for a week).
  */
 public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
- 
+
     /** the key under which the authenticated user object is stored in the visit as */
     public static final String USER_KEY = "user";
-   
+
     /** The name of the cookie that identifies a user **/
-    private static final String COOKIE_NAME = Login.class.getName() + ".username";  
+    private static final String COOKIE_NAME = Login.class.getName() + ".username";
     private final static int ONE_WEEK = 7 * 24 * 60 * 60;
- 
+
     public abstract String getUsername();
     public abstract void setUsername(String username);
- 
+
     public abstract String getPassword();
     public abstract void setPassword(String password);
- 
+
     public abstract ICallback getCallback();
     public abstract void setCallback(ICallback value);
-    
+
     public abstract UserService getUserService();
     public abstract AuthenticationService getAuthenticationService();
- 
+
     protected IValidationDelegate getValidationDelegate() {
         return (IValidationDelegate) getBeans().getBean("delegate");
     }
- 
+
     protected void setErrorField(String componentId, String message) {
         IFormComponent field = (IFormComponent) getComponent(componentId);
         IValidationDelegate delegate = getValidationDelegate();
         delegate.setFormComponent(field);
         delegate.record(new ValidatorException(message));
     }
- 
+
     /**
-     *  Attempts to login. 
+     *  Attempts to login.
      * &lt;p&gt;
      *  If the user name is not known, or the password is invalid, then an error
      *  message is displayed.
      **/
     public void attemptLogin(IRequestCycle cycle) {
-     
+
         String password = getPassword();
- 
+
         // Do a little extra work to clear out the password.
         setPassword(null);
         IValidationDelegate delegate = getValidationDelegate();
- 
+
         delegate.setFormComponent((IFormComponent) getComponent("inputPassword"));
         delegate.recordFieldInputValue(null);
- 
+
         // An error, from a validation field, may already have occurred.
         if (delegate.getHasErrors()) {
             return;
@@ -967,7 +971,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
             return;
         }
     }
- 
+
     /**
      *  Sets up the {@link User} as the logged in user, creates
      *  a cookie for their username (for subsequent logins),
@@ -975,17 +979,17 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
      *  a specified page).
      **/
     public void loginUser(User user, IRequestCycle cycle) {
-     
+
         String username = user.getUsername();
- 
+
         // Get the visit object; this will likely force the
         // creation of the visit object and an HttpSession
         Map visit = (Map) getVisit();
         visit.put(USER_KEY, user);
- 
+
         // After logging in, go to the MyLibrary page, unless otherwise specified
         ICallback callback = getCallback();
- 
+
         if (callback == null) {
             cycle.activate("Home");
         }
@@ -997,12 +1001,12 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         Cookie cookie = new Cookie(COOKIE_NAME, username);
         cookie.setPath(engine.getServletPath());
         cookie.setMaxAge(ONE_WEEK);
- 
+
         // Record the user's username in a cookie
         cycle.getRequestContext().addCookie(cookie);
         engine.forgetPage(getPageName());
     }
-   
+
     public void pageBeginRender(PageEvent event) {
         if (getUsername() == null) {
             setUsername(getRequestCycle().getRequestContext().getCookieValue(COOKIE_NAME));
@@ -1011,15 +1015,15 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 }</programlisting>
       </section>
 
-      <section id="tapestry-4-style-di">
+      <section xml:id="tapestry-4-style-di">
         <title>Dependency Injecting Spring Beans into Tapestry pages -
         Tapestry 4.x style</title>
 
         <para>Effecting the dependency injection of Spring-managed beans into
         Tapestry pages in Tapestry version 4.x is <emphasis>so</emphasis> much
-        simpler. All that is needed is a single <ulink
-        url="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on
-        library</ulink>, and some (small) amount of (essentially boilerplate)
+        simpler. All that is needed is a single <link
+        xl:href="http://howardlewisship.com/tapestry-javaforge/tapestry-spring/">add-on
+        library</link>, and some (small) amount of (essentially boilerplate)
         configuration. Simply package and deploy this library with the (any of
         the) other libraries required by your web application (typically in
         <literal>WEB-INF/lib</literal>).</para>
@@ -1037,10 +1041,10 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
         <programlisting language="java">package com.whatever.web.xportal.pages;
 
 public abstract class Login extends BasePage implements ErrorProperty, PageRenderListener {
-    
+
     @InjectObject("spring:userService")
     public abstract UserService getUserService();
-    
+
     @InjectObject("spring:authenticationService")
     public abstract AuthenticationService getAuthenticationService();
 
@@ -1099,7 +1103,7 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 
   </section>
 
-  <section id="web-integration-resources">
+  <section xml:id="web-integration-resources">
     <title>Further Resources</title>
 
     <para>Find below links to further resources about the various web
@@ -1107,24 +1111,24 @@ public abstract class Login extends BasePage implements ErrorProperty, PageRende
 
     <itemizedlist>
       <listitem>
-        <para>The <ulink
-        url="http://java.sun.com/javaee/javaserverfaces/">JSF</ulink>
+        <para>The <link
+        xl:href="http://java.sun.com/javaee/javaserverfaces/">JSF</link>
         homepage</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://struts.apache.org/">Struts</ulink>
+        <para>The <link xl:href="http://struts.apache.org/">Struts</link>
         homepage</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink
-        url="http://www.opensymphony.com/webwork/">WebWork</ulink>
+        <para>The <link
+        xl:href="http://www.opensymphony.com/webwork/">WebWork</link>
         homepage</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://tapestry.apache.org/">Tapestry</ulink>
+        <para>The <link xl:href="http://tapestry.apache.org/">Tapestry</link>
         homepage</para>
       </listitem>
     </itemizedlist>

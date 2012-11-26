@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-factory-extension"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-factory-extension">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Container Extension Points</title>
 
   <para>Typically, an application developer does not need to subclass
@@ -11,7 +15,7 @@
     implementations of special integration interfaces. The next few sections
     describe these integration interfaces.</para>
 
-  <section id="beans-factory-extension-bpp">
+  <section xml:id="beans-factory-extension-bpp">
     <title>Customizing beans using a
       <interfacename>BeanPostProcessor</interfacename></title>
 
@@ -85,7 +89,7 @@
       Bean post-processors can be deployed in the container just like any other
       beans.</para>
 
-    <anchor id="beans-factory-programmatically-registering-beanpostprocessors"/>
+    <anchor xml:id="beans-factory-programmatically-registering-beanpostprocessors"/>
     <note>
       <title>Programmatically registering <interfacename>BeanPostProcessors
         </interfacename></title>
@@ -137,7 +141,7 @@
       <literal>BeanPostProcessors</literal> in an
       <interfacename>ApplicationContext</interfacename>.</para>
 
-    <section id="beans-factory-extension-bpp-examples-hw">
+    <section xml:id="beans-factory-extension-bpp-examples-hw">
       <title>Example: Hello World,
         <interfacename>BeanPostProcessor</interfacename>-style</title>
 
@@ -187,7 +191,7 @@ public class InstantiationTracingBeanPostProcessor implements BeanPostProcessor 
 
   <lineannotation>&lt;!--
       when the above bean (messenger) is instantiated, this custom
-      <interfacename>BeanPostProcessor</interfacename> implementation will output the fact to the system console
+      BeanPostProcessor implementation will output the fact to the system console
    --&gt;</lineannotation>
   &lt;bean class="scripting.InstantiationTracingBeanPostProcessor"/&gt;
 
@@ -224,7 +228,7 @@ public final class Boot {
 org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
     </section>
 
-    <section id="beans-factory-extension-bpp-examples-rabpp">
+    <section xml:id="beans-factory-extension-bpp-examples-rabpp">
       <title>Example: The
         <classname>RequiredAnnotationBeanPostProcessor</classname></title>
 
@@ -239,7 +243,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
     </section>
   </section>
 
-  <section id="beans-factory-extension-factory-postprocessors">
+  <section xml:id="beans-factory-extension-factory-postprocessors">
     <title>Customizing configuration metadata with a
       <interfacename>BeanFactoryPostProcessor</interfacename></title>
 
@@ -299,7 +303,7 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
       <interfacename>BeanFactoryPostProcessor</interfacename> can also be used,
       for example, to register custom property editors.</para>
 
-    <anchor id="beans-factory-autodetect-beanfactorypostprocessors"/>
+    <anchor xml:id="beans-factory-autodetect-beanfactorypostprocessors"/>
 
     <para>An <interfacename>ApplicationContext</interfacename> automatically
       detects any beans that are deployed into it that implement the
@@ -314,14 +318,14 @@ org.springframework.scripting.groovy.GroovyMessenger@272961</programlisting>
         for lazy initialization. If no other bean references a
         <interfacename>Bean(Factory)PostProcessor</interfacename>,
         that post-processor will not get instantiated at all. Thus, marking it for
-        lazy initialization will be ignored, and the 
+        lazy initialization will be ignored, and the
         <interfacename>Bean(Factory)PostProcessor</interfacename> will be
         instantiated eagerly even if you set the <literal>default-lazy-init</literal>
         attribute to <literal>true</literal> on the declaration of your
         <code>&lt;beans /&gt;</code> element.</para>
     </note>
 
-    <section id="beans-factory-placeholderconfigurer">
+    <section xml:id="beans-factory-placeholderconfigurer">
       <title>Example: the
         <interfacename>PropertyPlaceholderConfigurer</interfacename></title>
 
@@ -392,15 +396,15 @@ jdbc.password=root</programlisting>
         </para>
 
         <itemizedlist>
-        	<listitem>
-	        	<para><emphasis>never</emphasis> (0): Never check system properties</para>
-        	</listitem>
-        	<listitem>
-	        	<para><emphasis>fallback</emphasis> (1): Check system properties if not resolvable in the specified properties files. This is the default.</para>
-        	</listitem>
-        	<listitem>
-	        	<para><emphasis>override</emphasis> (2): Check system properties first, before trying the specified properties files. This allows system properties to override any other property source.</para>
-        	</listitem>
+            <listitem>
+                <para><emphasis>never</emphasis> (0): Never check system properties</para>
+            </listitem>
+            <listitem>
+                <para><emphasis>fallback</emphasis> (1): Check system properties if not resolvable in the specified properties files. This is the default.</para>
+            </listitem>
+            <listitem>
+                <para><emphasis>override</emphasis> (2): Check system properties first, before trying the specified properties files. This allows system properties to override any other property source.</para>
+            </listitem>
         </itemizedlist>
 
       <para>
@@ -434,7 +438,7 @@ jdbc.password=root</programlisting>
       </tip>
     </section>
 
-    <section id="beans-factory-overrideconfigurer">
+    <section xml:id="beans-factory-overrideconfigurer">
       <title>Example: the
         <classname>PropertyOverrideConfigurer</classname></title>
 
@@ -495,7 +499,7 @@ dataSource.url=jdbc:mysql:mydb</programlisting>
     </section>
   </section>
 
-  <section id="beans-factory-extension-factorybean">
+  <section xml:id="beans-factory-extension-factorybean">
     <title>Customizing instantiation logic with a
       <interfacename>FactoryBean</interfacename></title>
 

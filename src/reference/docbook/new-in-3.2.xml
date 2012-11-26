@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="new-in-3.2"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="new-in-3.2">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>New Features and Enhancements in Spring 3.2</title>
 
-  <section id="new-in-3.2-features-overview">
+  <section xml:id="new-in-3.2-features-overview">
     <title>Overview of new features</title>
 
-    <section id="new-in-3.2-webmvc-async">
+    <section xml:id="new-in-3.2-webmvc-async">
       <title>Support for Servlet 3 based asynchronous request processing</title>
 
       <para>The Spring MVC programming model now provides explicit Servlet 3 async support.
       <interfacename>@RequestMapping</interfacename> methods can return one of:</para>
-      
+
       <itemizedlist>
         <listitem>
           <para><interfacename>java.util.concurrent.Callable</interfacename> to
@@ -31,14 +35,14 @@
           customize the timeout value or the task executor to use.</para>
         </listitem>
       </itemizedlist>
-            
-      <para>See <ulink
-          url="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">
-          Introducing Servlet 3 Async Support</ulink> (SpringSource team blog).</para>
-    
+
+      <para>See <link
+          xl:href="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">
+          Introducing Servlet 3 Async Support</link> (SpringSource team blog).</para>
+
     </section>
 
-    <section id="new-in-3.2-spring-mvc-test">
+    <section xml:id="new-in-3.2-spring-mvc-test">
       <title>Spring MVC Test framework</title>
 
       <para>First-class support for testing Spring MVC applications with a
@@ -47,13 +51,13 @@
       REST tests rely on the <classname>RestTemplate</classname>.
       See the following presentation for more information before
       documentation is added:
-      <ulink url="https://github.com/rstoyanchev/spring-32-test-webapps">
-        "Testing Web Applications with Spring 3.2"</ulink>.
+      <link xl:href="https://github.com/rstoyanchev/spring-32-test-webapps">
+        "Testing Web Applications with Spring 3.2"</link>.
       </para>
 
     </section>
 
-    <section id="new-in-3.2-webmvc-content-negotiation">
+    <section xml:id="new-in-3.2-webmvc-content-negotiation">
       <title>Content negotiation improvements</title>
 
       <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
@@ -75,14 +79,14 @@
 
       <para>The introduction of <classname>ContentNegotiationManger</classname>
       also enables smart suffix pattern matching for incoming requests.
-      See <ulink url="https://github.com/SpringSource/spring-framework/commit/4fd7645">
-      commit message</ulink></para>
+      See <link xl:href="https://github.com/SpringSource/spring-framework/commit/4fd7645">
+      commit message</link></para>
 
     </section>
 
-    <section id="new-in-3.2-webmvc-controller-advice">
+    <section xml:id="new-in-3.2-webmvc-controller-advice">
       <title><interfacename>@ControllerAdvice</interfacename> annotation</title>
-      
+
       <para>Classes annotated with <interfacename>@ControllerAdvice</interfacename>
       can contain <interfacename>@ExceptionHandler</interfacename>,
       <interfacename>@InitBinder</interfacename>, and
@@ -92,10 +96,10 @@
       <interfacename>@ControllerAdvice</interfacename> is
       a component annotation allowing implementation classes to be auto-detected
       through classpath scanning.</para>
-       
+
     </section>
 
-    <section id="new-in-3.2-matrix-variables">
+    <section xml:id="new-in-3.2-matrix-variables">
       <title>Matrix variables</title>
 
       <para>A new <interfacename>@MatrixVariable</interfacename> annotation
@@ -103,7 +107,7 @@
       For more details see <xref linkend="mvc-ann-matrix-variables"/>.</para>
     </section>
 
-    <section id="new-in-3.2-dispatcher-servlet-initializer">
+    <section xml:id="new-in-3.2-dispatcher-servlet-initializer">
       <title>Abstract base class for code-based Servlet 3+ container initialization</title>
 
       <para>An abstract base class implementation of the
@@ -116,7 +120,7 @@
       For more details see <xref linkend="mvc-container-config"/>.</para>
     </section>
 
-    <section id="new-in-3.2-webmvc-exception-handler-support">
+    <section xml:id="new-in-3.2-webmvc-exception-handler-support">
       <title><classname>ResponseEntityExceptionHandler</classname> class</title>
 
       <para>A convenient base class with an
@@ -132,7 +136,7 @@
 
     </section>
 
-    <section id="new-in-3.2-webmvc-generic-types-rest-template">
+    <section xml:id="new-in-3.2-webmvc-generic-types-rest-template">
       <title>Support for generic types in the <classname>RestTemplate</classname> and in
         <interfacename>@RequestBody</interfacename> arguments</title>
 
@@ -152,10 +156,10 @@
       generic type is a JAXB type annotated with
       <interfacename>@XmlRootElement</interfacename> or
       <interfacename>@XmlType</interfacename>.</para>
-      
+
     </section>
 
-    <section id="new-in-3.2-webmvc-jackson-json">
+    <section xml:id="new-in-3.2-webmvc-jackson-json">
       <title>Jackson JSON 2 and related improvements</title>
 
       <para>The Jackson Json 2 library is now supported. Due to packaging changes in
@@ -170,7 +174,7 @@
 
     </section>
 
-    <section id="new-in-3.2-webmvc-request-body-arg-with-binding-result">
+    <section xml:id="new-in-3.2-webmvc-request-body-arg-with-binding-result">
       <title><interfacename>@RequestBody</interfacename> improvements</title>
 
       <para>An <interfacename>@RequestBody</interfacename> or an
@@ -183,7 +187,7 @@
 
     </section>
 
-    <section id="new-in-3.2-webmvc-http-patch">
+    <section xml:id="new-in-3.2-webmvc-http-patch">
       <title>HTTP PATCH method</title>
 
       <para>The HTTP request method <code>PATCH</code> may now be used in
@@ -195,7 +199,7 @@
 
     </section>
 
-    <section id="new-in-3.2-webmvc-mapped-interceptor-exclude-patterns">
+    <section xml:id="new-in-3.2-webmvc-mapped-interceptor-exclude-patterns">
       <title>Excluded patterns in mapped interceptors</title>
 
       <para>Mapped interceptors now support URL patterns to be excluded.

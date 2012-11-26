@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-factory-scopes"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-factory-scopes">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Bean scopes</title>
 
   <para>When you create a bean definition, you create a
@@ -25,7 +29,7 @@
   <para>The following scopes are supported out of the box. You can also create
     <link linkend="beans-factory-scopes-custom">a custom scope.</link></para>
 
-  <table id="beans-factory-scopes-tbl">
+  <table xml:id="beans-factory-scopes-tbl">
     <title>Bean scopes</title>
 
     <tgroup cols="2">
@@ -94,14 +98,14 @@
 
     <para>As of Spring 3.0, a <emphasis>thread scope</emphasis> is available,
       but is not registered by default. For more information, see the
-      documentation for <ulink
-      url="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
-      >SimpleThreadScope</ulink>. For instructions on how to register this or
+      documentation for <link
+      xl:href="http://static.springsource.org/spring/docs/current/api/org/springframework/context/support/SimpleThreadScope.html"
+      >SimpleThreadScope</link>. For instructions on how to register this or
       any other custom scope, see <xref
       linkend="beans-factory-scopes-custom-using"/>.</para>
   </note>
 
-  <section id="beans-factory-scopes-singleton">
+  <section xml:id="beans-factory-scopes-singleton">
     <title>The singleton scope</title>
 
     <para>Only one <emphasis>shared</emphasis> instance of a singleton bean is
@@ -146,7 +150,7 @@
 &lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="singleton"/&gt;</programlisting>
   </section>
 
-  <section id="beans-factory-scopes-prototype">
+  <section xml:id="beans-factory-scopes-prototype">
     <title>The prototype scope</title>
 
     <para>The non-singleton, prototype scope of bean deployment results in the
@@ -175,7 +179,7 @@
 
     <para>The following example defines a bean as a prototype in XML:</para>
 
-    <programlisting language="xml"><lineannotation>&lt;!-- using <literal>spring-beans-2.0.dtd</literal> --&gt;</lineannotation>
+    <programlisting language="xml"><lineannotation>&lt;!-- using spring-beans-2.0.dtd --&gt;</lineannotation>
 &lt;bean id="accountService" class="com.foo.DefaultAccountService" scope="prototype"/&gt;</programlisting>
 
     <para>In contrast to the other scopes, Spring does not manage the complete
@@ -199,7 +203,7 @@
       see <xref linkend="beans-factory-lifecycle"/>.)</para>
   </section>
 
-  <section id="beans-factory-scopes-sing-prot-interaction">
+  <section xml:id="beans-factory-scopes-sing-prot-interaction">
     <title>Singleton beans with prototype-bean dependencies</title>
 
     <para>When you use singleton-scoped beans with dependencies on prototype
@@ -220,7 +224,7 @@
       linkend="beans-factory-method-injection"/></para>
   </section>
 
-  <section id="beans-factory-scopes-other">
+  <section xml:id="beans-factory-scopes-other">
     <title>Request, session, and global session scopes</title>
 
     <para>The <literal>request</literal>, <literal>session</literal>, and
@@ -233,7 +237,7 @@
       <classname>IllegalStateException</classname> complaining about an unknown
       bean scope.</para>
 
-    <section id="beans-factory-scopes-other-web-configuration">
+    <section xml:id="beans-factory-scopes-other-web-configuration">
       <title>Initial web configuration</title>
 
       <para>To support the scoping of beans at the <literal>request</literal>,
@@ -301,7 +305,7 @@
         call chain.</para>
     </section>
 
-    <section id="beans-factory-scopes-request">
+    <section xml:id="beans-factory-scopes-request">
       <title>Request scope</title>
 
       <para>Consider the following bean definition:</para>
@@ -320,7 +324,7 @@
         is scoped to the request is discarded.</para>
     </section>
 
-    <section id="beans-factory-scopes-session">
+    <section xml:id="beans-factory-scopes-session">
       <title>Session scope</title>
 
       <para>Consider the following bean definition:</para>
@@ -345,7 +349,7 @@
         <interfacename>Session</interfacename> is also discarded.</para>
     </section>
 
-    <section id="beans-factory-scopes-global-session">
+    <section xml:id="beans-factory-scopes-global-session">
       <title>Global session scope</title>
 
       <para>Consider the following bean definition:</para>
@@ -369,7 +373,7 @@
         no error is raised.</para>
     </section>
 
-    <section id="beans-factory-scopes-other-injection">
+    <section xml:id="beans-factory-scopes-other-injection">
       <title>Scoped beans as dependencies</title>
 
       <para>The Spring IoC container manages not only the instantiation of your
@@ -403,7 +407,7 @@
          http://www.springframework.org/schema/aop
          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
 
-  <lineannotation>&lt;!-- an HTTP <interfacename>Session</interfacename>-scoped bean exposed as a proxy --&gt;</lineannotation>
+  <lineannotation>&lt;!-- an HTTP Session-scoped bean exposed as a proxy --&gt;</lineannotation>
   &lt;bean id="userPreferences" class="com.foo.UserPreferences" scope="session"&gt;
 
         <lineannotation>&lt;!-- instructs the container to proxy the surrounding bean --&gt;</lineannotation>
@@ -413,7 +417,7 @@
   <lineannotation>&lt;!-- a singleton-scoped bean injected with a proxy to the above bean --&gt;</lineannotation>
   &lt;bean id="userService" class="com.foo.SimpleUserService"&gt;
 
-      <lineannotation>&lt;!-- a reference to the proxied <literal>userPreferences</literal> bean --&gt;</lineannotation>
+      <lineannotation>&lt;!-- a reference to the proxied userPreferences bean --&gt;</lineannotation>
       &lt;property name="userPreferences" ref="userPreferences"/&gt;
 
   &lt;/bean&gt;
@@ -493,7 +497,7 @@
   &lt;property name="userPreferences" ref="userPreferences"/&gt;
 &lt;/bean&gt;</programlisting>
 
-      <section id="beans-factory-scopes-other-injection-proxies">
+      <section xml:id="beans-factory-scopes-other-injection-proxies">
         <title>Choosing the type of proxy to create</title>
 
         <para>By default, when the Spring container creates a proxy for a bean
@@ -517,7 +521,7 @@
           collaborators into which the scoped bean is injected must reference
           the bean through one of its interfaces.</para>
 
-        <programlisting language="xml"><lineannotation>&lt;!-- <classname>DefaultUserPreferences</classname> implements the <interfacename>UserPreferences</interfacename> interface --&gt;</lineannotation>
+        <programlisting language="xml"><lineannotation>&lt;!-- DefaultUserPreferences implements the UserPreferences interface --&gt;</lineannotation>
 &lt;bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session"&gt;
   &lt;aop:scoped-proxy proxy-target-class="false"<literal/>/&gt;
 &lt;/bean&gt;
@@ -532,7 +536,7 @@
     </section>
   </section>
 
-  <section id="beans-factory-scopes-custom">
+  <section xml:id="beans-factory-scopes-custom">
     <title>Custom scopes</title>
 
     <para>As of Spring 2.0, the bean scoping mechanism is extensible. You can
@@ -541,7 +545,7 @@
       override the built-in <literal>singleton</literal> and
       <literal>prototype</literal> scopes.</para>
 
-    <section id="beans-factory-scopes-custom-creating">
+    <section xml:id="beans-factory-scopes-custom-creating">
       <title>Creating a custom scope</title>
 
       <para>To integrate your custom scope(s) into the Spring container, you
@@ -550,9 +554,9 @@
         interface, which is described in this section. For an idea of how to
         implement your own scopes, see the <interfacename>Scope</interfacename>
         implementations that are supplied with the Spring Framework itself and
-        the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/Scope.html"
-        >Scope Javadoc</ulink>, which explains the methods you need to implement
+        the <link
+        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/Scope.html"
+        >Scope Javadoc</link>, which explains the methods you need to implement
         in more detail.</para>
 
       <para>The <literal>Scope</literal> interface has four methods to get
@@ -590,7 +594,7 @@
       <programlisting language="java">String getConversationId()</programlisting>
     </section>
 
-    <section id="beans-factory-scopes-custom-using">
+    <section xml:id="beans-factory-scopes-custom-using">
       <title>Using a custom scope</title>
 
       <para>After you write and test one or more custom

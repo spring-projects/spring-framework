@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="new-in-3.1"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="new-in-3.1">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>New Features and Enhancements in Spring 3.1</title>
 
   <para>Building on the support introduced in Spring 3.0, Spring 3.1 is
   currently under development, and at the time of this writing Spring 3.1 RC1
   is being prepared for release.</para>
 
-  <section id="new-in-3.1-features-overview">
+  <section xml:id="new-in-3.1-features-overview">
     <title>Overview of new features</title>
 
     <para>This is a list of new features for Spring 3.1. Most features do not
     yet have dedicated reference documentation but do have Javadoc. In such
     cases, fully-qualified class names are given.</para>
 
-    <section id="new-in-3.1-cache-abstraction">
+    <section xml:id="new-in-3.1-cache-abstraction">
       <title>Cache Abstraction</title>
 
       <itemizedlist>
@@ -25,27 +29,27 @@
         </listitem>
 
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/">
-          Cache Abstraction</ulink> (SpringSource team blog)</para>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/02/23/spring-3-1-m1-caching/">
+          Cache Abstraction</link> (SpringSource team blog)</para>
         </listitem>
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-bean-definition-profiles">
+    <section xml:id="new-in-3.1-bean-definition-profiles">
       <title>Bean Definition Profiles</title>
 
       <itemizedlist>
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
-          XML profiles</ulink> (SpringSource Team Blog)</para>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
+          XML profiles</link> (SpringSource Team Blog)</para>
         </listitem>
 
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/">
-          Introducing @Profile</ulink> (SpringSource Team Blog)</para>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/02/14/spring-3-1-m1-introducing-profile/">
+          Introducing @Profile</link> (SpringSource Team Blog)</para>
         </listitem>
 
         <listitem>
@@ -60,14 +64,14 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-environment-abstraction">
+    <section xml:id="new-in-3.1-environment-abstraction">
       <title>Environment Abstraction</title>
 
       <itemizedlist>
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
-          Environment Abstraction</ulink> (SpringSource Team Blog)</para>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/02/11/spring-framework-3-1-m1-released/">
+          Environment Abstraction</link> (SpringSource Team Blog)</para>
         </listitem>
 
         <listitem>
@@ -76,14 +80,14 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-property-source-abstraction">
+    <section xml:id="new-in-3.1-property-source-abstraction">
       <title>PropertySource Abstraction</title>
 
       <itemizedlist>
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/02/15/spring-3-1-m1-unified-property-management/">
-          Unified Property Management</ulink> (SpringSource Team Blog)</para>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/02/15/spring-3-1-m1-unified-property-management/">
+          Unified Property Management</link> (SpringSource Team Blog)</para>
         </listitem>
 
         <listitem>
@@ -101,7 +105,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-code-equivalent-xml-namespaces">
+    <section xml:id="new-in-3.1-code-equivalent-xml-namespaces">
       <title>Code equivalents for Spring's XML namespaces</title>
 
       <para>Code-based equivalents to popular Spring XML namespace elements
@@ -169,7 +173,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-hibernate-4-support">
+    <section xml:id="new-in-3.1-hibernate-4-support">
       <title>Support for Hibernate 4.x</title>
 
       <itemizedlist>
@@ -180,7 +184,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-test-context-profiles">
+    <section xml:id="new-in-3.1-test-context-profiles">
       <title>TestContext framework support for @Configuration classes and bean
       definition profiles</title>
 
@@ -195,9 +199,9 @@
 
       <itemizedlist>
         <listitem>
-          <para><ulink
-          url="http://blog.springsource.com/2011/06/21/spring-3-1-m2-testing-with-configuration-classes-and-profiles/">Spring
-          3.1 M2: Testing with @Configuration Classes and Profiles</ulink>
+          <para><link
+          xl:href="http://blog.springsource.com/2011/06/21/spring-3-1-m2-testing-with-configuration-classes-and-profiles/">Spring
+          3.1 M2: Testing with @Configuration Classes and Profiles</link>
           (SpringSource Team Blog)</para>
         </listitem>
 
@@ -238,7 +242,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-c-namespace">
+    <section xml:id="new-in-3.1-c-namespace">
       <title>c: namespace for more concise constructor injection</title>
 
       <itemizedlist>
@@ -248,7 +252,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-injection-non-javabeans-setters">
+    <section xml:id="new-in-3.1-injection-non-javabeans-setters">
       <title>Support for injection against non-standard JavaBeans
       setters</title>
 
@@ -260,7 +264,7 @@
       setter methods return a reference to 'this'.</para>
     </section>
 
-    <section id="new-in-3.1-servlet-3-code-config">
+    <section xml:id="new-in-3.1-servlet-3-code-config">
       <title>Support for Servlet 3 code-based configuration of Servlet
       Container</title>
 
@@ -276,15 +280,15 @@
         </listitem>
 
         <listitem>
-          <para><ulink url="http://bit.ly/lrDHja">Diff from Spring's
-          Greenhouse reference application</ulink> demonstrating migration
+          <para><link xl:href="http://bit.ly/lrDHja">Diff from Spring's
+          Greenhouse reference application</link> demonstrating migration
           from web.xml to
           <interfacename>WebApplicationInitializer</interfacename></para>
         </listitem>
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-servlet-3-multipart-resolver">
+    <section xml:id="new-in-3.1-servlet-3-multipart-resolver">
       <title>Support for Servlet 3 MultipartResolver</title>
 
       <itemizedlist>
@@ -296,7 +300,7 @@
       </itemizedlist>
     </section>
 
-    <section id="new-in-3.1-jpa-without-xml">
+    <section xml:id="new-in-3.1-jpa-without-xml">
       <title>JPA EntityManagerFactory bootstrapping without
       persistence.xml</title>
 
@@ -320,7 +324,7 @@
       initializer.</para>
     </section>
 
-    <section id="new-in-3.1-handler-method-controller-processing">
+    <section xml:id="new-in-3.1-handler-method-controller-processing">
       <title>New HandlerMethod-based Support Classes For Annotated Controller
       Processing</title>
 
@@ -380,7 +384,7 @@
 
       <para>A second notable difference is the introduction of a
       <classname>HandlerMethod</classname> abstraction to represent an
-      <interface>@RequestMapping</interface> method. This abstraction is used
+      <interfacename>@RequestMapping</interfacename> method. This abstraction is used
       throughout by the new support classes as the <literal>handler</literal>
       instance. For example a <classname>HandlerInterceptor</classname> can
       cast the <literal>handler</literal> from <classname>Object</classname>
@@ -388,7 +392,7 @@
       controller method, its annotations, etc.</para>
 
       <para>The new classes are enabled by default by the MVC namespace and by
-      Java-based configuration via <interface>@EnableWebMvc</interface>. The
+      Java-based configuration via <interfacename>@EnableWebMvc</interfacename>. The
       existing classes will continue to be available but use of the new
       classes is recommended going forward.</para>
 
@@ -397,9 +401,9 @@
 
     </section>
 
-    <section id="new-in-3.1-request-mapping-consumes-produces">
+    <section xml:id="new-in-3.1-request-mapping-consumes-produces">
       <title>"consumes" and "produces" conditions in
-      <interface>@RequestMapping</interface></title>
+      <interfacename>@RequestMapping</interfacename></title>
 
       <para>Improved support for specifying media types consumed by a method
       through the <literal>'Content-Type'</literal> header as well as for
@@ -408,7 +412,7 @@
       linkend="mvc-ann-requestmapping-produces" /></para>
     </section>
 
-    <section id="new-in-3.1-flash-redirect-attributes">
+    <section xml:id="new-in-3.1-flash-redirect-attributes">
       <title>Flash Attributes and
       <interfacename>RedirectAttributes</interfacename></title>
 
@@ -426,7 +430,7 @@
       for more details.</para>
     </section>
 
-    <section id="new-in-3.1-uri-template-var-enhancements">
+    <section xml:id="new-in-3.1-uri-template-var-enhancements">
       <title>URI Template Variable Enhancements</title>
 
       <para>URI template variables from the current request are used in more
@@ -461,20 +465,20 @@
         </itemizedlist></para>
     </section>
 
-    <section id="new-in-3.1-mvc-valid-requestbody">
+    <section xml:id="new-in-3.1-mvc-valid-requestbody">
       <title><interfacename>@Valid</interfacename> On
-      <interface>@RequestBody</interface> Controller Method Arguments</title>
+      <interfacename>@RequestBody</interfacename> Controller Method Arguments</title>
 
-      <para>An <interface>@RequestBody</interface> method argument can be
-      annotated with <interface>@Valid</interface> to invoke automatic
+      <para>An <interfacename>@RequestBody</interfacename> method argument can be
+      annotated with <interfacename>@Valid</interfacename> to invoke automatic
       validation similar to the support for
-      <interface>@ModelAttribute</interface> method arguments. A resulting
+      <interfacename>@ModelAttribute</interfacename> method arguments. A resulting
       <classname>MethodArgumentNotValidException</classname> is handled in the
       <classname>DefaultHandlerExceptionResolver</classname> and results in a
       <literal>400</literal> response code.</para>
     </section>
 
-    <section id="new-in-3.1-mvc-requestpart">
+    <section xml:id="new-in-3.1-mvc-requestpart">
       <title><interfacename>@RequestPart</interfacename> Annotation On
       Controller Method Arguments</title>
 
@@ -484,7 +488,7 @@
       linkend="mvc-multipart" />.</para>
     </section>
 
-    <section id="new-in-3.1-mvc-uricomponentsbuilder">
+    <section xml:id="new-in-3.1-mvc-uricomponentsbuilder">
       <title><classname>UriComponentsBuilder</classname> and <classname>UriComponents</classname></title>
 
       <para>A new <classname>UriComponents</classname> class has been added,

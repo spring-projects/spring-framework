@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="jms"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="jms">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>JMS (Java Message Service)</title>
 
-  <section id="jms-introduction">
+  <section xml:id="jms-introduction">
     <title>Introduction</title>
 
     <para>Spring provides a JMS integration framework that simplifies the use
@@ -60,10 +64,10 @@
     Spring's transaction management mechanisms.</para>
   </section>
 
-  <section id="jms-using">
+  <section xml:id="jms-using">
     <title>Using Spring JMS</title>
 
-    <section id="jms-jmstemplate">
+    <section xml:id="jms-jmstemplate">
       <title><classname>JmsTemplate</classname></title>
 
       <para>The <classname>JmsTemplate</classname> class is the central class
@@ -118,7 +122,7 @@
       </note>
     </section>
 
-    <section id="jms-connections">
+    <section xml:id="jms-connections">
       <title>Connections</title>
 
       <para>The <classname>JmsTemplate</classname> requires a reference to a
@@ -140,7 +144,7 @@
       should ensure that it references the managed implementation of the
       <classname>ConnectionFactory</classname>.</para>
 
-      <section id="jms-caching-resources">
+      <section xml:id="jms-caching-resources">
         <title>Caching Messaging Resources</title>
 
         <para>The standard API involves creating many intermediate objects. To
@@ -154,7 +158,7 @@
         IConnectionFactory are provided.</para>
       </section>
 
-      <section id="jms-connection-factory">
+      <section xml:id="jms-connection-factory">
         <title>SingleConnectionFactory</title>
 
         <para>Spring provides an implementation of the
@@ -171,7 +175,7 @@
         from JNDI.</para>
       </section>
 
-      <section id="jdbc-connection-factory-caching">
+      <section xml:id="jdbc-connection-factory-caching">
         <title>CachingConnectionFactory</title>
 
         <para>The <classname>CachingConnectionFactory</classname> extends the
@@ -193,7 +197,7 @@
       </section>
     </section>
 
-    <section id="jms-destinations">
+    <section xml:id="jms-destinations">
       <title>Destination Management</title>
 
       <para>Destinations, like ConnectionFactories, are JMS administered
@@ -255,7 +259,7 @@
       destination.</para>
     </section>
 
-    <section id="jms-mdp">
+    <section xml:id="jms-mdp">
       <title>Message Listener Containers</title>
 
       <para>One of the most common uses of JMS messages in the EJB world is to
@@ -279,7 +283,7 @@
       <para>There are two standard JMS message listener containers packaged
       with Spring, each with its specialised feature set.</para>
 
-      <section id="jms-mdp-simple">
+      <section xml:id="jms-mdp-simple">
         <title>SimpleMessageListenerContainer</title>
 
         <para>This message listener container is the simpler of the two
@@ -293,7 +297,7 @@
         - but is generally not compatible with Java EE's JMS restrictions.</para>
       </section>
 
-      <section id="jms-mdp-default">
+      <section xml:id="jms-mdp-default">
         <title>DefaultMessageListenerContainer</title>
 
         <para>This message listener container is the one used in most cases.
@@ -309,7 +313,7 @@
       </section>
     </section>
 
-    <section id="jms-tx">
+    <section xml:id="jms-tx">
       <title>Transaction management</title>
 
       <para>Spring provides a <classname>JmsTransactionManager</classname>
@@ -358,7 +362,7 @@
     </section>
   </section>
 
-  <section id="jms-sending">
+  <section xml:id="jms-sending">
     <title>Sending a <interfacename>Message</interfacename></title>
 
     <para>The <classname>JmsTemplate</classname> contains many convenience
@@ -420,7 +424,7 @@ public class JmsQueueSender {
     a default destination, the <methodname>send(MessageCreator c)</methodname>
     sends a message to that destination.</para>
 
-    <section id="jms-msg-conversion">
+    <section xml:id="jms-msg-conversion">
       <title>Using Message Converters</title>
 
       <para>In order to facilitate the sending of domain model objects, the
@@ -485,11 +489,11 @@ public class JmsQueueSender {
     Fields={
         Name={String:Mark}
         Age={Integer:47}
-    } 
+    }
 }</programlisting>
     </section>
 
-    <section id="jms-callbacks">
+    <section xml:id="jms-callbacks">
       <title><interfacename>SessionCallback</interfacename> and
       <interfacename>ProducerCallback</interfacename></title>
 
@@ -508,10 +512,10 @@ public class JmsQueueSender {
     </section>
   </section>
 
-  <section id="jms-receiving">
+  <section xml:id="jms-receiving">
     <title>Receiving a message</title>
 
-    <section id="jms-receiving-sync">
+    <section xml:id="jms-receiving-sync">
       <title>Synchronous Reception</title>
 
       <para>While JMS is typically associated with asynchronous processing, it
@@ -524,7 +528,7 @@ public class JmsQueueSender {
       should wait before giving up waiting for a message.</para>
     </section>
 
-    <section id="jms-asynchronousMessageReception">
+    <section xml:id="jms-asynchronousMessageReception">
       <title>Asynchronous Reception - Message-Driven POJOs</title>
 
       <para>In a fashion similar to a Message-Driven Bean (MDB) in the EJB
@@ -584,7 +588,7 @@ public class ExampleListener implements MessageListener {
       implementation.</para>
     </section>
 
-    <section id="jms-receiving-async-session-aware-message-listener">
+    <section xml:id="jms-receiving-async-session-aware-message-listener">
       <title>The <interfacename>SessionAwareMessageListener</interfacename>
       interface</title>
 
@@ -627,7 +631,7 @@ public interface SessionAwareMessageListener {
       exceptions thrown.</para>
     </section>
 
-    <section id="jms-receiving-async-message-listener-adapter">
+    <section xml:id="jms-receiving-async-message-listener-adapter">
       <title>The <classname>MessageListenerAdapter</classname></title>
 
       <para>The <classname>MessageListenerAdapter</classname> class is the
@@ -709,7 +713,7 @@ public interface SessionAwareMessageListener {
         &lt;bean class="jmsexample.DefaultTextMessageDelegate"/&gt;
     &lt;/constructor-arg&gt;
     &lt;property name="defaultListenerMethod" value="receive"/&gt;
-    <lineannotation>&lt;!-- we <emphasis role="bold">don't</emphasis> want automatic message context extraction --&gt;</lineannotation>
+    <lineannotation>&lt;!-- we don't want automatic message context extraction --&gt;</lineannotation>
     &lt;property name="messageConverter"&gt;
         &lt;null/&gt;
     &lt;/property&gt;
@@ -727,7 +731,7 @@ public interface SessionAwareMessageListener {
 
       <programlisting language="java">public interface ResponsiveTextMessageDelegate {
 
-    <lineannotation><emphasis role="bold">// notice the return type...</emphasis></lineannotation>
+    <lineannotation>// notice the return type...</lineannotation>
     String receive(TextMessage message);
 }</programlisting>
 
@@ -755,7 +759,7 @@ public interface SessionAwareMessageListener {
       the call stack).</para>
     </section>
 
-    <section id="jms-tx-participation">
+    <section xml:id="jms-tx-participation">
       <title>Processing messages within transactions</title>
 
       <para>Invoking a message listener within a transaction only requires
@@ -811,7 +815,7 @@ public interface SessionAwareMessageListener {
     </section>
   </section>
 
-  <section id="jms-jca-message-endpoint-manager">
+  <section xml:id="jms-jca-message-endpoint-manager">
     <title>Support for JCA Message Endpoints</title>
 
     <para>Beginning with version 2.5, Spring also provides support for a
@@ -906,7 +910,7 @@ public interface SessionAwareMessageListener {
     </note>
   </section>
 
-  <section id="jms-namespace">
+  <section xml:id="jms-namespace">
     <title>JMS Namespace Support</title>
 
     <para>Spring 2.5 introduces an XML namespace for simplifying JMS
@@ -921,7 +925,7 @@ public interface SessionAwareMessageListener {
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 <emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd"</emphasis>&gt;
 
-<lineannotation>&lt;!-- <literal>&lt;bean/&gt;</literal> definitions here --&gt;</lineannotation>
+<lineannotation>&lt;!-- &lt;bean/&gt; definitions here --&gt;</lineannotation>
 
 &lt;/beans&gt;</programlisting>
 
@@ -947,7 +951,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     may contain several optional ones. The following table describes all available
     attributes:</para>
 
-    <table id="jms-namespace-listener-tbl">
+    <table xml:id="jms-namespace-listener-tbl">
       <title>Attributes of the JMS <literal>&lt;listener&gt;</literal>
       element</title>
 
@@ -1054,7 +1058,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     provides a discussion of transaction choices and message redelivery
     scenarios.</para>
 
-    <table id="jms-namespace-listener-container-tbl">
+    <table xml:id="jms-namespace-listener-container-tbl">
       <title>Attributes of the JMS
       <literal>&lt;listener-container&gt;</literal> element</title>
 
@@ -1210,7 +1214,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <para>The available configuration options for the JCA variant are
     described in the following table:</para>
 
-    <table id="jms-namespace-jca-listener-container-tbl">
+    <table xml:id="jms-namespace-jca-listener-container-tbl">
       <title>Attributes of the JMS
       <literal>&lt;jca-listener-container/&gt;</literal> element</title>
 

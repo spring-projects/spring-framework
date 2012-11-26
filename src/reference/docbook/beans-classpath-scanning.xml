@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<section xml:id="beans-classpath-scanning"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="beans-classpath-scanning">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>Classpath scanning and managed components</title>
 
   <para>Most examples in this chapter use XML to specify the configuration
@@ -22,9 +26,9 @@
     definitions registered with the container.</para>
 
   <note>
-    <para>Starting with Spring 3.0, many features provided by the <ulink
-      url="http://www.springsource.org/javaconfig">Spring JavaConfig
-      project</ulink> are part of the core Spring Framework. This allows you to
+    <para>Starting with Spring 3.0, many features provided by the <link
+      xl:href="http://www.springsource.org/javaconfig">Spring JavaConfig
+      project</link> are part of the core Spring Framework. This allows you to
       define beans using Java rather than using the traditional XML files. Take
       a look at the <interfacename>@Configuration</interfacename>,
       <interfacename>@Bean</interfacename>,
@@ -33,7 +37,7 @@
       to use these new features.</para>
   </note>
 
-  <section id="beans-stereotype-annotations">
+  <section xml:id="beans-stereotype-annotations">
     <title><interfacename>@Component</interfacename> and further stereotype
       annotations</title>
 
@@ -73,7 +77,7 @@
       persistence layer.</para>
   </section>
 
-  <section id="beans-scanning-autodetection">
+  <section xml:id="beans-scanning-autodetection">
     <title>Automatically detecting classes and registering bean
       definitions</title>
 
@@ -155,7 +159,7 @@ public class JpaMovieFinder implements MovieFinder {
      -->
   </section>
 
-  <section id="beans-scanning-filters">
+  <section xml:id="beans-scanning-filters">
     <title>Using filters to customize scanning</title>
 
     <para>By default, classes annotated with
@@ -172,7 +176,7 @@ public class JpaMovieFinder implements MovieFinder {
       <literal>expression</literal> attributes. The following table describes
       the filtering options.</para>
 
-    <table id="beans-scanning-filters-tbl">
+    <table xml:id="beans-scanning-filters-tbl">
       <title>Filter Types</title>
 
       <tgroup cols="3">
@@ -268,7 +272,7 @@ public class JpaMovieFinder implements MovieFinder {
     </note>
   </section>
 
-  <section id="beans-factorybeans-annotations">
+  <section xml:id="beans-factorybeans-annotations">
     <title>Defining bean metadata within components</title>
 
     <para>Spring components can also contribute bean definition metadata to the
@@ -358,7 +362,7 @@ public class FactoryMethodComponent {
       semantics.</para>
   </section>
 
-  <section id="beans-scanning-name-generator">
+  <section xml:id="beans-scanning-name-generator">
     <title>Naming autodetected components</title>
 
     <para>When a component is autodetected as part of the scanning process, its
@@ -390,9 +394,9 @@ public class MovieFinderImpl implements MovieFinder {
 
     <note>
       <para>If you do not want to rely on the default bean-naming strategy, you
-        can provide a custom bean-naming strategy. First, implement the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/support/BeanNameGenerator.html"
-        ><interfacename>BeanNameGenerator</interfacename></ulink> interface, and
+        can provide a custom bean-naming strategy. First, implement the <link
+        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/support/BeanNameGenerator.html"
+        ><interfacename>BeanNameGenerator</interfacename></link> interface, and
         be sure to include a default no-arg constructor. Then, provide the
         fully-qualified class name when configuring the scanner:</para>
     </note>
@@ -410,7 +414,7 @@ public class MovieFinderImpl implements MovieFinder {
       is responsible for wiring.</para>
   </section>
 
-  <section id="beans-scanning-scope-resolver">
+  <section xml:id="beans-scanning-scope-resolver">
     <title>Providing a scope for autodetected components</title>
 
     <para>As with Spring-managed components in general, the default and most
@@ -427,9 +431,9 @@ public class MovieFinderImpl implements MovieFinder {
 
     <note>
       <para>To provide a custom strategy for scope resolution rather than
-        relying on the annotation-based approach, implement the <ulink
-        url="http://static.springframework.org/spring/docs/current/api/org/springframework/context/annotation/ScopeMetadataResolver.html"
-        ><interfacename>ScopeMetadataResolver</interfacename></ulink> interface,
+        relying on the annotation-based approach, implement the <link
+        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/context/annotation/ScopeMetadataResolver.html"
+        ><interfacename>ScopeMetadataResolver</interfacename></link> interface,
         and be sure to include a default no-arg constructor. Then, provide the
         fully-qualified class name when configuring the scanner:</para>
     </note>
@@ -457,7 +461,7 @@ public class MovieFinderImpl implements MovieFinder {
 &lt;/beans&gt;</programlisting>
   </section>
 
-  <section id="beans-scanning-qualifiers">
+  <section xml:id="beans-scanning-qualifiers">
     <title>Providing qualifier metadata with annotations</title>
 
     <para>The <interfacename>@Qualifier</interfacename> annotation is discussed

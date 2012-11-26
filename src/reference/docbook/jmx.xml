@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
+<chapter xml:id="jmx"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"
-    xml:id="jmx">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
   <title>JMX</title>
 
-  <section id="jmx-introduction">
+  <section xml:id="jmx-introduction">
     <title>Introduction</title>
 
     <para>The JMX support in Spring provides you with the features to easily
@@ -53,7 +57,7 @@
     features.</para>
   </section>
 
-  <section id="jmx-exporting">
+  <section xml:id="jmx-exporting">
     <title>Exporting your beans to JMX</title>
 
     <para>The core class in Spring's JMX framework is the
@@ -77,7 +81,7 @@ public class JmxTestBean implements IJmxTestBean {
     public void setAge(int age) {
         this.age = age;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -102,7 +106,7 @@ public class JmxTestBean implements IJmxTestBean {
 
     <programlisting language="xml"><![CDATA[<beans>
 
-  ]]><lineannotation>&lt;!-- this bean must <emphasis role="bold">not</emphasis> be lazily initialized if the exporting is to happen --&gt;</lineannotation><![CDATA[
+  ]]><lineannotation>&lt;!-- this bean must not be lazily initialized if the exporting is to happen --&gt;</lineannotation><![CDATA[
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"]]> <emphasis
         role="bold">lazy-init="false"</emphasis><![CDATA[>
     <property name="beans">
@@ -137,7 +141,7 @@ public class JmxTestBean implements IJmxTestBean {
     inherited from the <classname>Object</classname> class) are exposed as
     operations.</para>
 
-    <section id="jmx-exporting-mbeanserver">
+    <section xml:id="jmx-exporting-mbeanserver">
       <title>Creating an <interfacename>MBeanServer</interfacename></title>
 
       <para>The above configuration assumes that the application is running in
@@ -167,7 +171,7 @@ public class JmxTestBean implements IJmxTestBean {
 
   ]]><lineannotation>&lt;!--
     this bean needs to be eagerly pre-instantiated in order for the exporting to occur;
-    this means that it must <emphasis role="bold">not</emphasis> be marked as lazily initialized
+    this means that it must not be marked as lazily initialized
   --&gt;</lineannotation><![CDATA[
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -195,7 +199,7 @@ public class JmxTestBean implements IJmxTestBean {
       you must (of course) have a JMX implementation on your classpath.</para>
     </section>
 
-    <section id="jmx-mbean-server">
+    <section xml:id="jmx-mbean-server">
       <title>Reusing an existing <interfacename>MBeanServer</interfacename></title>
 
       <para>If no server is specified, the <classname>MBeanExporter</classname>
@@ -210,10 +214,10 @@ public class JmxTestBean implements IJmxTestBean {
    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
      ]]><lineannotation>&lt;!-- indicate to first look for a server --&gt;</lineannotation><![CDATA[
      <property name="locateExistingServerIfPossible" value="true"/>
-     ]]><lineannotation>&lt;!-- search for the <interfacename>MBeanServer</interfacename> instance with the given agentId --&gt;</lineannotation><![CDATA[
+     ]]><lineannotation>&lt;!-- search for the MBeanServer instance with the given agentId --&gt;</lineannotation><![CDATA[
      <property name="agentId" value="]]><emphasis><![CDATA[<MBeanServer instance agentId>]]></emphasis><![CDATA["/>
    </bean>
-   
+
    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
      <property name="server" ref="mbeanServer"/>
    ...
@@ -227,17 +231,17 @@ public class JmxTestBean implements IJmxTestBean {
       <programlisting language="xml"><![CDATA[<beans>
    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
      <property name="server">
-       ]]><lineannotation>&lt;!-- Custom <literal>MBeanServerLocator</literal> --&gt;</lineannotation><![CDATA[
+       ]]><lineannotation>&lt;!-- Custom MBeanServerLocator --&gt;</lineannotation><![CDATA[
        <bean class="platform.package.MBeanServerLocator" factory-method="locateMBeanServer"/>
      </property>
-     
+
      ]]><lineannotation>&lt;!-- other beans here --&gt;</lineannotation><![CDATA[
-     
+
    </bean>
 </beans>]]></programlisting>
     </section>
 
-    <section id="jmx-exporting-lazy">
+    <section xml:id="jmx-exporting-lazy">
       <title>Lazy-initialized MBeans</title>
 
       <para>If you configure a bean with the
@@ -249,7 +253,7 @@ public class JmxTestBean implements IJmxTestBean {
       from the container until the first invocation on the proxy occurs.</para>
     </section>
 
-    <section id="jmx-exporting-auto">
+    <section xml:id="jmx-exporting-auto">
       <title>Automatic registration of MBeans</title>
 
       <para>Any beans that are exported through the
@@ -272,7 +276,7 @@ public class JmxTestBean implements IJmxTestBean {
       behavior can be overridden as detailed in <xref linkend="jmx-naming" />.</para>
     </section>
 
-    <section id="jmx-exporting-registration-behavior">
+    <section xml:id="jmx-exporting-registration-behavior">
       <title>Controlling the registration behavior</title>
 
       <para>Consider the scenario where a Spring
@@ -294,7 +298,7 @@ public class JmxTestBean implements IJmxTestBean {
       <classname>ObjectName</classname>; these registration behaviors are
       summarized on the following table:</para>
 
-      <table id="jmx-registration-behaviors">
+      <table xml:id="jmx-registration-behaviors">
           <title>Registration Behaviors</title>
 
           <tgroup cols="2">
@@ -390,7 +394,7 @@ public class JmxTestBean implements IJmxTestBean {
     </section>
   </section>
 
-  <section id="jmx-interface">
+  <section xml:id="jmx-interface">
     <title>Controlling the management interface of your beans</title>
 
     <para>In the previous example, you had little control over the management
@@ -402,7 +406,7 @@ public class JmxTestBean implements IJmxTestBean {
     Spring JMX provides a comprehensive and extensible mechanism for
     controlling the management interfaces of your beans.</para>
 
-    <section id="jmx-interface-assembler">
+    <section xml:id="jmx-interface-assembler">
       <title>The <interfacename>MBeanInfoAssembler</interfacename>
       Interface</title>
 
@@ -420,7 +424,7 @@ public class JmxTestBean implements IJmxTestBean {
       source-level metadata or any arbitrary interface.</para>
     </section>
 
-    <section id="jmx-interface-metadata">
+    <section xml:id="jmx-interface-metadata">
       <title>Using Source-Level Metadata (JDK 5.0 annotations)</title>
 
       <para>Using the <classname>MetadataMBeanInfoAssembler</classname> you
@@ -443,7 +447,7 @@ public class JmxTestBean implements IJmxTestBean {
       setter to create a write-only or read-only attribute
       respectively.</para>
 
-      <para>The example below shows the annotated version of the 
+      <para>The example below shows the annotated version of the
         <classname>JmxTestBean</classname> class that you saw earlier:</para>
       <programlisting language="java"><![CDATA[package org.springframework.jmx;
 
@@ -537,7 +541,7 @@ public class AnnotationTestBean implements IJmxTestBean {
         <property name="attributeSource" ref="jmxAttributeSource"/>
     </bean>
 
-    ]]><lineannotation>&lt;!-- will pick up the <classname>ObjectName</classname> from the annotation --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- will pick up the ObjectName from the annotation --&gt;</lineannotation><![CDATA[
     <bean id="namingStrategy"
           class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
         <property name="attributeSource" ref="jmxAttributeSource"/>
@@ -548,7 +552,7 @@ public class AnnotationTestBean implements IJmxTestBean {
         <property name="age" value="100"/>
     </bean>
 </beans>]]></programlisting>
-      
+
 
       <para>Here you can see that an
       <classname>MetadataMBeanInfoAssembler</classname> bean has been
@@ -559,13 +563,13 @@ public class AnnotationTestBean implements IJmxTestBean {
       management interfaces for your Spring-exposed MBeans.</para>
     </section>
 
-    <section id="jmx-interface-metadata-types">
+    <section xml:id="jmx-interface-metadata-types">
       <title>Source-Level Metadata Types</title>
 
       <para>The following source level metadata types are available for use in
       Spring JMX:</para>
 
-      <para><table id="jmx-metadata-types">
+      <para><table xml:id="jmx-metadata-types">
           <title>Source-Level Metadata Types</title>
 
           <tgroup cols="3">
@@ -627,7 +631,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <para>The following configuration parameters are available for use on
       these source-level metadata types:</para>
 
-      <para><table id="jmx-metadata-parameters">
+      <para><table xml:id="jmx-metadata-parameters">
           <title>Source-Level Metadata Parameters</title>
 
           <tgroup cols="3">
@@ -763,7 +767,7 @@ public class AnnotationTestBean implements IJmxTestBean {
         </table></para>
     </section>
 
-    <section id="jmx-interface-autodetect">
+    <section xml:id="jmx-interface-autodetect">
       <title>The <classname>AutodetectCapableMBeanInfoAssembler</classname>
       interface</title>
 
@@ -787,7 +791,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
-    ]]><lineannotation>&lt;!-- notice how no <literal>'beans'</literal> are explicitly configured here --&gt;</lineannotation><![CDATA[
+    ]]><lineannotation>&lt;!-- notice how no 'beans' are explicitly configured here --&gt;</lineannotation><![CDATA[
     <property name="autodetect" value="true"/>
     <property name="assembler" ref="assembler"/>
   </bean>
@@ -817,7 +821,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <xref linkend="jmx-naming" />.</para>
     </section>
 
-    <section id="jmx-interface-java">
+    <section xml:id="jmx-interface-java">
       <title>Defining management interfaces using Java interfaces</title>
 
       <para>In addition to the
@@ -908,7 +912,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       create the management interface.</para>
     </section>
 
-    <section id="jmx-interface-methodnames">
+    <section xml:id="jmx-interface-methodnames">
       <title>Using
       <classname>MethodNameBasedMBeanInfoAssembler</classname></title>
 
@@ -944,7 +948,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     </section>
   </section>
 
-  <section id="jmx-naming">
+  <section xml:id="jmx-naming">
     <title>Controlling the <classname>ObjectName</classname>s for your beans</title>
 
     <para>Behind the scenes, the <classname>MBeanExporter</classname>
@@ -966,7 +970,7 @@ public class AnnotationTestBean implements IJmxTestBean {
     and the <classname>MetadataNamingStrategy</classname> that uses source
     level metadata to obtain the <classname>ObjectName</classname>.</para>
 
-    <section id="jmx-naming-properties">
+    <section xml:id="jmx-naming-properties">
       <title>Reading <classname>ObjectName</classname>s from <classname>Properties</classname></title>
 
       <para>You can configure your own
@@ -1026,7 +1030,7 @@ public class AnnotationTestBean implements IJmxTestBean {
       <classname>ObjectName</classname>.</para>
     </section>
 
-    <section id="jmx-naming-metadata">
+    <section xml:id="jmx-naming-metadata">
       <title>Using the <classname>MetadataNamingStrategy</classname></title>
 
       <para>The <classname>MetadataNamingStrategy</classname> uses
@@ -1074,7 +1078,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 
     </section>
 
-    <section id="jmx-context-mbeanexport">
+    <section xml:id="jmx-context-mbeanexport">
       <title>Configuring annotation based MBean export</title>
       <para>If you prefer using <link linkend="jmx-interface-metadata">the annotation based
       approach</link> to define your management interfaces, then a convenience subclass of
@@ -1129,7 +1133,7 @@ ContextConfiguration {
     </section>
   </section>
 
-  <section id="jmx-jsr160">
+  <section xml:id="jmx-jsr160">
     <title>JSR-160 Connectors</title>
 
     <para>For remote access, Spring JMX module offers two
@@ -1137,7 +1141,7 @@ ContextConfiguration {
     <literal>org.springframework.jmx.support</literal> package for creating
     both server- and client-side connectors.</para>
 
-    <section id="jmx-jsr160-server">
+    <section xml:id="jmx-jsr160-server">
       <title>Server-side Connectors</title>
 
       <para>To have Spring JMX create, start and expose a JSR-160
@@ -1164,7 +1168,7 @@ ContextConfiguration {
       <programlisting language="xml"><![CDATA[<bean id="serverConnector"
       class="org.springframework.jmx.support.ConnectorServerFactoryBean">
   <property name="objectName" value="connector:name=rmi"/>
-  <property name="serviceUrl" 
+  <property name="serviceUrl"
             value="service:jmx:rmi://localhost/jndi/rmi://localhost:1099/myconnector"/>
 </bean>]]></programlisting>
 
@@ -1179,7 +1183,7 @@ ContextConfiguration {
       <programlisting language="xml"><![CDATA[<bean id="serverConnector"
       class="org.springframework.jmx.support.ConnectorServerFactoryBean">
   <property name="objectName" value="connector:name=iiop"/>
-  <property name="serviceUrl" 
+  <property name="serviceUrl"
                value="service:jmx:iiop://localhost/jndi/iiop://localhost:900/myconnector"/>
   <property name="threaded" value="true"/>
   <property name="daemon" value="true"/>
@@ -1202,7 +1206,7 @@ ContextConfiguration {
 </bean>]]></programlisting>
     </section>
 
-    <section id="jmx-jsr160-client">
+    <section xml:id="jmx-jsr160-client">
       <title>Client-side Connectors</title>
 
       <para>To create an <classname>MBeanServerConnection</classname> to a
@@ -1215,15 +1219,15 @@ ContextConfiguration {
 </bean>]]></programlisting>
     </section>
 
-    <section id="jmx-jsr160-protocols">
+    <section xml:id="jmx-jsr160-protocols">
       <title>JMX over Burlap/Hessian/SOAP</title>
 
       <para>JSR-160 permits extensions to the way in which communication is
       done between the client and the server. The examples above are using the
       mandatory RMI-based implementation required by the JSR-160 specification
       (IIOP and JRMP) and the (optional) JMXMP. By using other providers or
-      JMX implementations (such as <ulink
-      url="http://mx4j.sourceforge.net">MX4J</ulink>) you can take advantage
+      JMX implementations (such as <link
+      xl:href="http://mx4j.sourceforge.net">MX4J</link>) you can take advantage
       of protocols like SOAP, Hessian, Burlap over simple HTTP or SSL and
       others:</para>
 
@@ -1237,7 +1241,7 @@ ContextConfiguration {
     </section>
   </section>
 
-  <section id="jmx-proxy">
+  <section xml:id="jmx-proxy">
     <title>Accessing MBeans via Proxies</title>
 
     <para>Spring JMX allows you to create proxies that re-route calls to
@@ -1290,13 +1294,13 @@ ContextConfiguration {
     <classname>MBeanServerConnection</classname>.</para>
   </section>
 
-  <section id="jmx-notifications">
+  <section xml:id="jmx-notifications">
     <title>Notifications</title>
 
     <para>Spring's JMX offering includes comprehensive support for JMX
     notifications.</para>
 
-    <section id="jmx-notifications-listeners">
+    <section xml:id="jmx-notifications-listeners">
       <title>Registering Listeners for Notifications</title>
 
       <para>Spring's JMX support makes it very easy to register any number of
@@ -1304,8 +1308,8 @@ ContextConfiguration {
       (this includes MBeans exported by Spring's
       <classname>MBeanExporter</classname> and MBeans registered via some
       other mechanism). By way of an example, consider the scenario where one
-	  would like to be informed (via a <classname>Notification</classname>)
-	  each and every time an attribute of a target MBean changes.</para>
+      would like to be informed (via a <classname>Notification</classname>)
+      each and every time an attribute of a target MBean changes.</para>
 
       <programlisting language="java"><![CDATA[package com.example;
 
@@ -1351,20 +1355,20 @@ public class ConsoleLoggingNotificationListener
 
 </beans>]]></programlisting>
 
-		<para>With the above configuration in place, every time a JMX
-		<classname>Notification</classname> is broadcast from the target MBean
-		(<literal>bean:name=testBean1</literal>), the
-		<classname>ConsoleLoggingNotificationListener</classname> bean that was
-		registered as a listener via the
-		<literal>notificationListenerMappings</literal> property will be
-		notified. The <classname>ConsoleLoggingNotificationListener</classname>
-		bean can then take whatever action it deems appropriate in response to
-		the <classname>Notification</classname>.</para>
+        <para>With the above configuration in place, every time a JMX
+        <classname>Notification</classname> is broadcast from the target MBean
+        (<literal>bean:name=testBean1</literal>), the
+        <classname>ConsoleLoggingNotificationListener</classname> bean that was
+        registered as a listener via the
+        <literal>notificationListenerMappings</literal> property will be
+        notified. The <classname>ConsoleLoggingNotificationListener</classname>
+        bean can then take whatever action it deems appropriate in response to
+        the <classname>Notification</classname>.</para>
 
-		<para>You can also use straight bean names as the link between exported beans
-		and listeners:</para>
+        <para>You can also use straight bean names as the link between exported beans
+        and listeners:</para>
 
-		<programlisting language="xml"><![CDATA[<beans>
+        <programlisting language="xml"><![CDATA[<beans>
 
   <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     <property name="beans">
@@ -1388,13 +1392,13 @@ public class ConsoleLoggingNotificationListener
 
 </beans>]]></programlisting>
 
-		<para>If one wants to register a single <classname>NotificationListener</classname>
-		instance for all of the beans that the enclosing <classname>MBeanExporter</classname>
-		is exporting, one can use the special wildcard <literal>'*'</literal> (sans quotes)
-		as the key for an entry in the <literal>notificationListenerMappings</literal>
-		property map; for example:</para>
+        <para>If one wants to register a single <classname>NotificationListener</classname>
+        instance for all of the beans that the enclosing <classname>MBeanExporter</classname>
+        is exporting, one can use the special wildcard <literal>'*'</literal> (sans quotes)
+        as the key for an entry in the <literal>notificationListenerMappings</literal>
+        property map; for example:</para>
 
-		<programlisting language="xml"><![CDATA[<property name="notificationListenerMappings">
+        <programlisting language="xml"><![CDATA[<property name="notificationListenerMappings">
   <map>
     <entry key="*">
       <bean class="com.example.ConsoleLoggingNotificationListener"/>
@@ -1494,7 +1498,7 @@ public class ConsoleLoggingNotificationListener
         </list>
     </property>
   </bean>
-  
+
   ]]><lineannotation>&lt;!-- implements both the <interfacename>NotificationListener</interfacename> and <interfacename>NotificationFilter</interfacename> interfaces --&gt;</lineannotation><![CDATA[
   <bean id="customerNotificationListener" class="com.example.ConsoleLoggingNotificationListener"/>
 
@@ -1511,7 +1515,7 @@ public class ConsoleLoggingNotificationListener
 </beans>]]></programlisting>
     </section>
 
-    <section id="jmx-notifications-publishing">
+    <section xml:id="jmx-notifications-publishing">
       <title>Publishing Notifications</title>
 
       <para>Spring provides support not just for registering to receive
@@ -1568,7 +1572,7 @@ public class ConsoleLoggingNotificationListener
       <literal>add(int, int)</literal> operation is invoked.</para>
 
       <programlisting language="java"><![CDATA[package org.springframework.jmx;
-			
+
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.jmx.export.notification.NotificationPublisher;
 import javax.management.Notification;
@@ -1591,7 +1595,7 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
     public void dontExposeMe() {
         throw new RuntimeException();
     }
-    
+
     public void setNotificationPublisher(NotificationPublisher notificationPublisher) {
         this.publisher = notificationPublisher;
     }
@@ -1599,39 +1603,39 @@ public class JmxTestBean implements IJmxTestBean, NotificationPublisherAware {
 
       <para>The <classname>NotificationPublisher</classname> interface and the
       machinery to get it all working is one of the nicer features of Spring's JMX support.
-	  It does however come with the price tag of coupling your classes to both Spring and JMX; as
-	  always, the advice here is to be pragmatic... if you need the functionality offered by the
+      It does however come with the price tag of coupling your classes to both Spring and JMX; as
+      always, the advice here is to be pragmatic... if you need the functionality offered by the
       <classname>NotificationPublisher</classname> and you can accept the coupling to both Spring
-	  and JMX, then do so.</para>
+      and JMX, then do so.</para>
     </section>
   </section>
 
-  <section id="jmx-resources">
+  <section xml:id="jmx-resources">
     <title>Further Resources</title>
 
     <para>This section contains links to further resources about JMX.</para>
 
     <itemizedlist>
       <listitem>
-        <para>The <ulink url="http://java.sun.com/products/JavaManagement/">JMX homepage</ulink> at Sun</para>
+        <para>The <link xl:href="http://java.sun.com/products/JavaManagement/">JMX homepage</link> at Sun</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</ulink> (JSR-000003)</para>
+        <para>The <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr003/index3.html">JMX specification</link> (JSR-000003)</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</ulink> (JSR-000160)</para>
+        <para>The <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr160/index.html">JMX Remote API specification</link> (JSR-000160)</para>
       </listitem>
 
       <listitem>
-        <para>The <ulink url="http://mx4j.sourceforge.net/">MX4J
-        homepage</ulink> (an Open Source implementation of various JMX
+        <para>The <link xl:href="http://mx4j.sourceforge.net/">MX4J
+        homepage</link> (an Open Source implementation of various JMX
         specs)</para>
       </listitem>
 
       <listitem>
-        <para><ulink url="http://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</ulink> - an introductory article from Sun.</para>
+        <para><link xl:href="http://java.sun.com/developer/technicalArticles/J2SE/jmx.html">Getting Started with JMX</link> - an introductory article from Sun.</para>
       </listitem>
     </itemizedlist>
   </section>
