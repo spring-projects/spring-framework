@@ -207,5 +207,22 @@
 
     </section>
 
+    <section xml:id="new-in-3.2-date-time-format-without-joda">
+        <title>Support for <interfacename>@DateTimeFormat</interfacename> without Joda Time</title>
+        <para>The <interfacename>@DateTimeFormat</interfacename> annotation can now be
+        used without needing a dependency on the Joda Time library. If Joda Time is not
+        present the JDK <classname>SimpleDateFormat</classname> will be used to parse and
+        print date patterns. When Joda time is present it will continue to be used in
+        preference to <classname>SimpleDateFormat</classname>.
+        </para>
+    </section>
+
+    <section xml:id="new-in-3.2-global-date-time-format">
+        <title>Global date &amp; time formatting</title>
+        <para>It is now possible to define global formats that will be used when parsing
+        and printing date and time types.  See
+        <xref linkend="format-configuring-formatting-globaldatetimeformat"/> for details.
+        </para>
+    </section>
   </section>
 </chapter>
