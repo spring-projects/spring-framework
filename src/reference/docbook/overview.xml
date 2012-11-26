@@ -574,7 +574,7 @@ TR: OK. Added to diagram.--></para>
         configure an application, your Maven dependencies will look like
         this:</para>
 
-        <para><programlisting>&lt;dependencies&gt;
+        <para><programlisting language="xml">&lt;dependencies&gt;
    &lt;dependency&gt;
       &lt;groupId&gt;org.springframework&lt;/groupId&gt;
       &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
@@ -593,7 +593,7 @@ TR: OK. Added to diagram.--></para>
         developer snapshots), you need to specify the repository location in
         your Maven configuration. For full releases:</para>
 
-        <programlisting>&lt;repositories&gt;
+        <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.release&lt;/id&gt;
       &lt;url&gt;http://repo.springsource.org/release/&lt;/url&gt;
@@ -603,7 +603,7 @@ TR: OK. Added to diagram.--></para>
 
         <para>For milestones:</para>
 
-        <programlisting>&lt;repositories&gt;
+        <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.milestone&lt;/id&gt;
       &lt;url&gt;http://repo.springsource.org/milestone/&lt;/url&gt;
@@ -613,7 +613,7 @@ TR: OK. Added to diagram.--></para>
 
         <para>And for snapshots:</para>
 
-        <programlisting>&lt;repositories&gt;
+        <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.maven.snapshot&lt;/id&gt;
       &lt;url&gt;http://repo.springsource.org/snapshot/&lt;/url&gt;
@@ -625,7 +625,7 @@ TR: OK. Added to diagram.--></para>
         naming convention for the dependencies. The names are usually easy to
         guess, e.g. in this case it is:</para>
 
-        <programlisting>&lt;dependencies&gt;
+        <programlisting language="xml">&lt;dependencies&gt;
    &lt;dependency&gt;
       &lt;groupId&gt;org.springframework&lt;/groupId&gt;
       &lt;artifactId&gt;org.springframework.context&lt;/artifactId&gt;
@@ -637,7 +637,7 @@ TR: OK. Added to diagram.--></para>
         <para>You also need to declare the location of the repository
         explicitly (only the URL is important):</para>
 
-        <programlisting>&lt;repositories&gt;
+        <programlisting language="xml">&lt;repositories&gt;
    &lt;repository&gt;
       &lt;id&gt;com.springsource.repository.bundles.release&lt;/id&gt;
       &lt;url&gt;http://repository.springsource.com/maven/bundles/release/&lt;/url&gt;
@@ -664,7 +664,7 @@ TR: OK. Added to diagram.--></para>
         following resolvers to your
         <filename>ivysettings.xml</filename>:</para>
 
-        <programlisting>&lt;resolvers&gt;
+        <programlisting language="xml">&lt;resolvers&gt;
 
   &lt;url name="com.springsource.repository.bundles.release"&gt;
 
@@ -696,7 +696,7 @@ TR: OK. Added to diagram.--></para>
         include in your dependencies section. For example (in
         <filename>ivy.xml</filename>): </para>
 
-        <programlisting>&lt;dependency org="org.springframework"
+        <programlisting language="xml">&lt;dependency org="org.springframework"
       name="org.springframework.core" rev="3.0.0.RELEASE" conf="compile-&gt;runtime"/&gt;</programlisting>
       </section>
     </section>
@@ -755,7 +755,7 @@ TR: OK. Added to diagram.--></para>
         the dependency, and because of the way that the Spring dependencies
         are declared, you only have to do that once.</para>
 
-        <programlisting>&lt;dependencies&gt;
+        <programlisting language="xml">&lt;dependencies&gt;
    &lt;dependency&gt;
       &lt;groupId&gt;org.springframework&lt;/groupId&gt;
       &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
@@ -803,7 +803,7 @@ TR: OK. Added to diagram.--></para>
           the bridge, the SLF4J API, the binding to Log4J, and the Log4J
           implementation itself. In Maven you would do that like this</para>
 
-          <programlisting>&lt;dependencies&gt;
+          <programlisting language="xml">&lt;dependencies&gt;
        &lt;dependency&gt;
           &lt;groupId&gt;org.springframework&lt;/groupId&gt;
           &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
@@ -877,7 +877,7 @@ TR: OK. Added to diagram.--></para>
         of the classpath). So for Maven users this is your dependency
         declaration:</para>
 
-        <programlisting>&lt;dependencies&gt;
+        <programlisting language="xml">&lt;dependencies&gt;
    &lt;dependency&gt;
       &lt;groupId&gt;org.springframework&lt;/groupId&gt;
       &lt;artifactId&gt;spring-context&lt;/artifactId&gt;
