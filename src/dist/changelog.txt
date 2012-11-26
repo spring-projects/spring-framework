@@ -11,6 +11,8 @@ Changes in version 3.2 RC2 (2012-11-26)
 * DefaultListableBeanFactory avoids wide/interleaved metadata locks to avoid deadlock potential (SPR-10020)
 * DefaultListableBeanFactory avoids singletonObjects lock wherever possible for non-singleton performance (SPR-9819)
 * DefaultListableBeanFactory doesn't cache for autowireBean calls anymore, avoiding ClassLoader leaks (SPR-8956)
+* Java 5 Closeable and Java 7 AutoCloseable automatically detected as destroy methods (SPR-10034)
+* @Bean destroy method inference not applying for DisposableBean implementers (avoiding double destruction)
 * @Lazy and @DependsOn not marked as @Inherited anymore - only supported on actual bean types (SPR-9589, SPR-9476)
 * AsyncAnnotationBean/MethodValidation/PersistenceExceptionTranslationPostProcessor cache eligible beans (SPR-7328)
 * ConfigurableApplicationContext, LobCreator and Client/ServerHttpResponse implement Closeable for Java 7 (SPR-9962)
@@ -19,10 +21,11 @@ Changes in version 3.2 RC2 (2012-11-26)
 * added "transactionAware" bean property to EhCacheCacheManager and JCacheCacheManager (SPR-9966)
 * moved "cache.ehcache" and "cache.jcache" packages from spring-context to spring-context-support module
 * deprecated "scheduling.backportconcurrent" package in favor of native JDK 6 "scheduling.concurrent" support
-* deprecated Oracle OC4J support (OC4JJtransactionManager, OC4JLoadTimeWeaver) in favor of Oracle WebLogic
+* deprecated Oracle OC4J support (OC4JJtaTransactionManager, OC4JLoadTimeWeaver) in favor of Oracle WebLogic
 * deprecated ExpressionEvaluationUtils, turning off Spring's own JSP expression support in favor of JSP 2.0
 * deprecated EJB 2.x implementation class hierarchy in "ejb.support" package
 * deprecated DefaultAnnotationHandlerMapping and AnnotationMethodHandlerAdapter/ExceptionResolver (SPR-10005)
+* Hibernate 4 support independently compiled against Hibernate 4.1, avoiding the use of reflection (SPR-10039)
 * added integration with Tiles 3 (SPR-8825)
 
 
