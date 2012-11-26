@@ -56,7 +56,7 @@ class RequestMatcherClientHttpRequest extends MockClientHttpRequest implements R
 		this.responseCreator = responseCreator;
 	}
 
-	public ClientHttpResponse execute() throws IOException {
+	public ClientHttpResponse executeInternal() throws IOException {
 
 		if (this.requestMatchers.isEmpty()) {
 			throw new AssertionError("No request expectations to execute");

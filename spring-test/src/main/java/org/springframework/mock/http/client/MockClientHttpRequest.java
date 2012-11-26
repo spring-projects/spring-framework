@@ -75,18 +75,18 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	}
 
 	/**
-	 * Whether the execute method was invoked.
-	 */
-	public boolean isExecuted() {
-		return this.executed;
-	}
-
-	/**
 	 * Sets the {@link #isExecuted() executed} flag to true and returns the
 	 * configured {@link #setResponse(ClientHttpResponse) response}.
 	 */
-	public ClientHttpResponse execute() throws IOException {
+	public final ClientHttpResponse execute() throws IOException {
 		this.executed = true;
+		return executeInternal();
+	}
+
+	/**
+	 * Override this method to execute the request and provdie a response.
+	 */
+	protected ClientHttpResponse executeInternal() throws IOException {
 		return this.clientHttpResponse;
 	}
 

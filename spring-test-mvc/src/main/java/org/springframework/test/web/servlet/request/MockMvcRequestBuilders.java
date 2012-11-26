@@ -81,6 +81,17 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
+	 *
+	 * @param httpMethod the HTTP method
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param urlVariables zero or more URL variables
+	 */
+	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, String urlTemplate, Object... urlVars) {
+		return new MockHttpServletRequestBuilder(httpMethod, urlTemplate, urlVars);
+	}
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
 	 *
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
