@@ -547,8 +547,6 @@
     <xi:include href="xml-custom.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include href="dtd.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
     <xi:include href="spring.tld.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
 
