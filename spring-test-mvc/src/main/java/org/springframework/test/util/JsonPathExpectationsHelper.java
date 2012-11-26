@@ -17,7 +17,7 @@
 package org.springframework.test.util;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.AssertionErrors.*;
 import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.text.ParseException;
@@ -85,6 +85,17 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValue(String responseContent, Object expectedValue) throws ParseException {
 		Object actualValue = evaluateJsonPath(responseContent);
+		if ((actualValue instanceof List) && !(expectedValue instanceof List)) {
+			@SuppressWarnings("rawtypes")
+			List actualValueList = (List) actualValue;
+			if (actualValueList.size() == 0) {
+				fail("No matching value for JSON path \"" + this.expression + "\"");
+			}
+			if (actualValueList.size() != 1) {
+				fail("Got a list of values " + actualValue + " instead of the value " + expectedValue);
+			}
+			actualValue = actualValueList.get(0);
+		}
 		assertEquals("JSON path" + this.expression, expectedValue, actualValue);
 	}
 
@@ -93,7 +104,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsArray(String responseContent) throws ParseException {
 		Object actualValue = evaluateJsonPath(responseContent);
-		assertTrue("No value for JSON path " + this.expression, actualValue != null);
+		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
 		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
 		assertTrue(reason, actualValue instanceof List);
 	}

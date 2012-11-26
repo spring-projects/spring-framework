@@ -595,7 +595,6 @@ project('spring-test-mvc') {
             exclude group: 'com.sun.jmx', module: 'jmxri'
         }
         testCompile "javax.servlet:jstl:1.2"
-        testCompile "org.apache.tiles:tiles-jsp:2.2.2"
         testCompile "org.hibernate:hibernate-validator:4.2.0.Final"
         testCompile "org.codehaus.jackson:jackson-mapper-asl:1.4.2"
         testCompile project(":spring-oxm")
@@ -613,6 +612,7 @@ project('spring-test-mvc') {
         testCompile("org.springframework.security:spring-security-config:3.1.2.RELEASE") {
             exclude group: 'org.springframework'
         }
+        testCompile("org.springframework.hateoas:spring-hateoas:0.3.0.RELEASE")
     }
 }
 
