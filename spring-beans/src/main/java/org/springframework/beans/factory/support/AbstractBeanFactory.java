@@ -52,7 +52,6 @@ import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
@@ -1466,8 +1465,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected boolean requiresDestruction(Object bean, RootBeanDefinition mbd) {
 		return (bean != null &&
-				(bean instanceof DisposableBean || mbd.getDestroyMethodName() != null ||
-						hasDestructionAwareBeanPostProcessors()));
+				(DisposableBeanAdapter.hasDestroyMethod(bean, mbd) || hasDestructionAwareBeanPostProcessors()));
 	}
 
 	/**

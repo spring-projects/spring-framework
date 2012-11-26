@@ -16,6 +16,7 @@
 
 package org.springframework.beans.factory;
 
+import java.io.Closeable;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.security.AccessControlContext;
@@ -1909,7 +1910,6 @@ public class DefaultListableBeanFactoryTests {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
-
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1918,6 +1918,25 @@ public class DefaultListableBeanFactoryTests {
 		lbf.preInstantiateSingletons();
 		lbf.destroySingletons();
 		assertTrue("Destroy method invoked", BeanWithDisposableBean.closed);
+	}
+
+	@Test
+	public void testBeanPostProcessorWithWrappedObjectAndCloseable() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithCloseable.class);
+		lbf.registerBeanDefinition("test", bd);
+		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			public Object postProcessBeforeInitialization(Object bean, String beanName) {
+				return new TestBean();
+			}
+			public Object postProcessAfterInitialization(Object bean, String beanName) {
+				return bean;
+			}
+		});
+		BeanWithDisposableBean.closed = false;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertTrue("Destroy method invoked", BeanWithCloseable.closed);
 	}
 
 	@Test
@@ -1930,7 +1949,6 @@ public class DefaultListableBeanFactoryTests {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
-
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -2245,6 +2263,16 @@ public class DefaultListableBeanFactoryTests {
 		private static boolean closed;
 
 		public void destroy() {
+			closed = true;
+		}
+	}
+
+
+	public static class BeanWithCloseable implements Closeable {
+
+		private static boolean closed;
+
+		public void close() {
 			closed = true;
 		}
 	}

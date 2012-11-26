@@ -435,15 +435,21 @@
 	The name of the custom initialization method to invoke after setting
 	bean properties. The method must have no arguments, but may throw any
 	exception.
+
+	This is an alternative to implementing Spring's InitializingBean
+	interface or marking a method with the PostConstruct annotation.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 		<xsd:attribute name="destroy-method" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	The name of the custom destroy method to invoke on bean factory
-	shutdown. The method must have no arguments, but may throw any
-	exception.
+	The name of the custom destroy method to invoke on bean factory shutdown.
+	The method must have no arguments, but may throw any exception.
+
+	This is an alternative to implementing Spring's DisposableBean
+	interface or the standard Java Closeable/AutoCloseable interface,
+	or marking a method with the PreDestroy annotation.
 
 	Note: Only invoked on beans whose lifecycle is under the full
 	control of the factory - which is always the case for singletons,
