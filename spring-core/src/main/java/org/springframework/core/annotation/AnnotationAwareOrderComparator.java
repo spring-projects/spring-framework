@@ -34,7 +34,11 @@ import org.springframework.core.Ordered;
  */
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
+	/**
+	 * Shared default instance of AnnotationAwareOrderComparator.
+	 */
 	public static AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
+
 
 	@Override
 	protected int getOrder(Object obj) {
