@@ -270,7 +270,7 @@ public class SimpleDateFormatBeanDefinitionParser extends AbstractSingleBeanDefi
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:myns="http://www.mycompany.com/schema/myns"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.xsd">
 
    ]]><lineannotation>&lt;!-- as a top-level bean --&gt;</lineannotation><![CDATA[
@@ -297,7 +297,7 @@ http://www.mycompany.com/schema/myns http://www.mycompany.com/schema/myns/myns.x
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:foo="http://www.foo.com/schema/component"
       xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.foo.com/schema/component http://www.foo.com/schema/component/component.xsd">
 
    ]]><lineannotation><![CDATA[<foo:component id="bionic-family" name="Bionic-1">

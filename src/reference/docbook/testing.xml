@@ -2009,7 +2009,7 @@ public class HibernateTitleRepositoryTests {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     <lineannotation>&lt;!-- this bean will be injected into the HibernateTitleRepositoryTests class --&gt;</lineannotation>
     &lt;bean id="<emphasis role="bold">titleRepository</emphasis>" class="<emphasis

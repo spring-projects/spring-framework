@@ -922,8 +922,8 @@ public interface SessionAwareMessageListener {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis>
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-<emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd"</emphasis>&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+<emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis>&gt;
 
 <lineannotation>&lt;!-- &lt;bean/&gt; definitions here --&gt;</lineannotation>
 

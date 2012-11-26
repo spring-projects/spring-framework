@@ -72,7 +72,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -110,8 +110,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:util="http://www.springframework.org/schema/util"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -481,8 +481,8 @@ public class Client {
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -640,8 +640,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:lang="http://www.springframework.org/schema/lang"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -665,8 +665,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jms="http://www.springframework.org/schema/jms"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -698,9 +698,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:aop="http://www.springframework.org/schema/aop"
        ]]><emphasis role="bold">xmlns:tx="http://www.springframework.org/schema/tx"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd</emphasis><![CDATA[
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd</emphasis><![CDATA[
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -728,8 +728,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:aop="http://www.springframework.org/schema/aop"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -748,8 +748,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:context="http://www.springframework.org/schema/context"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -833,8 +833,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/jdbc"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -858,8 +858,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        ]]><emphasis role="bold">xmlns:jdbc="http://www.springframework.org/schema/cache"</emphasis><![CDATA[
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
-]]><emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache-3.1.xsd"</emphasis><![CDATA[>
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+]]><emphasis role="bold">http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd"</emphasis><![CDATA[>
 
 ]]><lineannotation>&lt;!-- bean definitions here --&gt;</lineannotation><![CDATA[
 
@@ -886,7 +886,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="foo" class="x.y.Foo">
         ]]><emphasis role="bold"><![CDATA[<meta key="cacheName" value="foo"/>]]></emphasis><![CDATA[

@@ -319,9 +319,9 @@ public class Application {
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     ]]><emphasis role="bold"><![CDATA[xmlns:oxm="http://www.springframework.org/schema/oxm"]]></emphasis>
     <![CDATA[xsi:schemaLocation="http://www.springframework.org/schema/beans
-    ]]><![CDATA[http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    ]]><![CDATA[http://www.springframework.org/schema/beans/spring-beans.xsd
     ]]><emphasis role="bold"><![CDATA[http://www.springframework.org/schema/oxm
-    ]]><![CDATA[http://www.springframework.org/schema/oxm/spring-oxm-3.0.xsd"]]></emphasis><![CDATA[>
+    ]]><![CDATA[http://www.springframework.org/schema/oxm/spring-oxm.xsd"]]></emphasis><![CDATA[>
 ]]></programlisting>
         <para>
             Currently, the following tags are available:

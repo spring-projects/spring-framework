@@ -1042,7 +1042,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"&gt;
         &lt;property name="brokerURL" value="tcp://ep-t43:61616"/&gt;
@@ -1064,7 +1064,7 @@ public class SimpleCheckingAccountService implements CheckingAccountService {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+         http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="checkingAccountService"
           class="org.springframework.jms.remoting.JmsInvokerServiceExporter"&gt;
@@ -1109,7 +1109,7 @@ public class Server {
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+        http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
     &lt;bean id="checkingAccountService"
           class="org.springframework.jms.remoting.JmsInvokerProxyFactoryBean"&gt;

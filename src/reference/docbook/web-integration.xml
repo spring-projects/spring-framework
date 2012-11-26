@@ -662,8 +662,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        <emphasis role="bold">xmlns:jee="http://www.springframework.org/schema/jee"</emphasis>
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-<emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd"</emphasis>&gt;
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+<emphasis role="bold">http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd"</emphasis>&gt;
 
 &lt;beans&gt;
     &lt;!-- the DataSource --&gt;
