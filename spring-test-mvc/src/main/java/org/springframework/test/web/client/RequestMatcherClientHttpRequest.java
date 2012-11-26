@@ -73,7 +73,7 @@ class RequestMatcherClientHttpRequest extends MockClientHttpRequest implements R
 
 		setResponse(this.responseCreator.createResponse(this));
 
-		return super.execute();
+		return super.executeInternal();
 	}
 
 }
