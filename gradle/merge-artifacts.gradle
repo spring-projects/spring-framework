@@ -1,5 +1,3 @@
-import org.gradle.plugins.ide.eclipse.model.ProjectDependency
-
 /**
  * Will merge the artifacts of the current project into mergeIntoProject. For example, to
  * bundle spring-test-mvc in spring-test's jars. This script will perform the following
@@ -41,14 +39,6 @@ mergeIntoProject."jar" {
 mergeIntoProject."javadoc" {
     source += mergeFromProject.javadoc.source
     classpath += mergeFromProject.javadoc.classpath
-}
-
-// GRADLE-1116
-mergeFromProject.eclipse.classpath.file.whenMerged { classpath ->
-    classpath.entries.removeAll { entry -> entry.path.contains("/${mergeIntoProject.name}/build/") }
-    def dependency = new ProjectDependency("/${mergeIntoProject.name}", mergeIntoProject.path)
-    dependency.exported = true
-    classpath.entries.add(dependency)
 }
 
 // Update mergeIntoProject to contain additional configurations that contains all the dependencies from mergeFromProject
