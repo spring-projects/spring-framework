@@ -532,14 +532,17 @@ project('spring-webmvc-tiles3') {
         compile("javax.servlet:jstl:1.1.2", provided)
         compile("javax.servlet.jsp:jsp-api:2.1", provided)
         compile("org.apache.tiles:tiles-request-api:1.0.1", optional)
-        compile("org.apache.tiles:tiles-request-servlet-wildcard:1.0.1", optional)
+        compile("org.apache.tiles:tiles-request-servlet-wildcard:1.0.1") { dep->
+            optional dep
+            exclude group: 'org.springframework', module: 'spring-web'
+        }
         compile("org.apache.tiles:tiles-api:3.0.1", optional)
         compile("org.apache.tiles:tiles-core:3.0.1", optional)
         compile("org.apache.tiles:tiles-servlet:3.0.1", optional)
         compile("org.apache.tiles:tiles-jsp:3.0.1", optional)
         compile("org.apache.tiles:tiles-el:3.0.1", optional)
         compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided) // servlet-api 3.0
-        testCompile project(":spring-web").sourceSets*.output // mock request & response
+        compile project(":spring-web").sourceSets*.output // mock request & response
     }
 }
 
@@ -593,6 +596,7 @@ project('spring-test-mvc') {
     description = 'Spring Test MVC Framework'
     ext.mergeIntoProject = project(':spring-test')
     apply from: "${gradleScriptDir}/merge-artifacts.gradle"
+    apply from: "ide.gradle"
     dependencies {
         compile project(":spring-context")
         compile project(":spring-webmvc")
