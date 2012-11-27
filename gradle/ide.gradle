@@ -1,0 +1,26 @@
+import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+
+eclipse.classpath.file.whenMerged { classpath ->
+    // servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
+    // exported to dependent projects in Eclipse to avoid false compilation errors due
+    // to changing APIs across these versions
+    classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
+
+    // GRADLE-1116
+    def regexp = /.*?\/([^\/]+)\/build\/[^\/]+\/(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
+    def projectOutputDependencies = classpath.entries.findAll { entry -> entry.path =~ regexp }
+    projectOutputDependencies.each { entry ->
+        def matcher = (entry.path =~ regexp)
+        if(matcher) {
+            def projectName = matcher[0][1]
+            def path = "/${projectName}"
+            if(!classpath.entries.find { e -> e instanceof ProjectDependency && e.path == path }) {
+                def dependency = new ProjectDependency(path, project(":${projectName}").path)
+                dependency.exported = true
+                classpath.entries.add(dependency)
+            }
+            classpath.entries.remove(entry)
+        }
+    }
+    classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
+}
