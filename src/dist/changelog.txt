@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 RC2 (2012-11-26)
+Changes in version 3.2 RC2 (2012-11-27)
 ---------------------------------------
 
 * overhauled non-void JavaBean write method support (SPR-10029)
