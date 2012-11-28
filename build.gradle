@@ -848,7 +848,7 @@ configure(rootProject) {
 
     task wrapper(type: Wrapper) {
         description = 'Generates gradlew[.bat] scripts'
-        gradleVersion = '1.2'
+        gradleVersion = '1.3'
 
         doLast() {
             def gradleOpts = "-XX:MaxPermSize=1024m -Xmx1024m"
