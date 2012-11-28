@@ -101,14 +101,14 @@ public class WebAsyncManagerTimeoutTests {
 	public void startCallableProcessingTimeoutAndResumeThroughCallback() throws Exception {
 
 		StubCallable callable = new StubCallable();
-		MvcAsyncTask<Object> mvcAsyncTask = new MvcAsyncTask<Object>(callable);
-		mvcAsyncTask.onTimeout(new Callable<Object>() {
+		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<Object>(callable);
+		webAsyncTask.onTimeout(new Callable<Object>() {
 			public Object call() throws Exception {
 				return 7;
 			}
 		});
 
-		this.asyncManager.startCallableProcessing(mvcAsyncTask);
+		this.asyncManager.startCallableProcessing(webAsyncTask);
 
 		this.asyncWebRequest.onTimeout(ASYNC_EVENT);
 
