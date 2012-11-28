@@ -19,13 +19,13 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.async.MvcAsyncTask;
+import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Handles return values of type {@link MvcAsyncTask}.
+ * Handles return values of type {@link WebAsyncTask}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -41,7 +41,7 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
-		return MvcAsyncTask.class.isAssignableFrom(paramType);
+		return WebAsyncTask.class.isAssignableFrom(paramType);
 	}
 
 	public void handleReturnValue(Object returnValue,
@@ -53,9 +53,9 @@ public class AsyncTaskMethodReturnValueHandler implements HandlerMethodReturnVal
 			return;
 		}
 
-		MvcAsyncTask<?> mvcAsyncTask = (MvcAsyncTask<?>) returnValue;
-		mvcAsyncTask.setBeanFactory(this.beanFactory);
-		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(mvcAsyncTask, mavContainer);
+		WebAsyncTask<?> webAsyncTask = (WebAsyncTask<?>) returnValue;
+		webAsyncTask.setBeanFactory(this.beanFactory);
+		WebAsyncUtils.getAsyncManager(webRequest).startCallableProcessing(webAsyncTask, mavContainer);
 	}
 
 }

@@ -28,7 +28,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class MvcAsyncTask<V> {
+public class WebAsyncTask<V> {
 
 	private final Callable<V> callable;
 
@@ -46,43 +46,43 @@ public class MvcAsyncTask<V> {
 
 
 	/**
-	 * Create an {@code MvcAsyncTask} wrapping the given {@link Callable}.
+	 * Create an {@code WebAsyncTask} wrapping the given {@link Callable}.
 	 * @param callable the callable for concurrent handling
 	 */
-	public MvcAsyncTask(Callable<V> callable) {
+	public WebAsyncTask(Callable<V> callable) {
 		this(null, null, null, callable);
 	}
 
 	/**
-	 * Create an {@code MvcAsyncTask} with a timeout value and a {@link Callable}.
+	 * Create an {@code WebAsyncTask} with a timeout value and a {@link Callable}.
 	 * @param timeout timeout value in milliseconds
 	 * @param callable the callable for concurrent handling
 	 */
-	public MvcAsyncTask(long timeout, Callable<V> callable) {
+	public WebAsyncTask(long timeout, Callable<V> callable) {
 		this(timeout, null, null, callable);
 	}
 
 	/**
-	 * Create an {@code MvcAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
+	 * Create an {@code WebAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public MvcAsyncTask(Long timeout, String executorName, Callable<V> callable) {
+	public WebAsyncTask(Long timeout, String executorName, Callable<V> callable) {
 		this(timeout, null, executorName, callable);
 		Assert.notNull(executor, "Executor name must not be null");
 	}
 
 	/**
-	 * Create an {@code MvcAsyncTask} with a timeout value, an executor instance, and a Callable.
+	 * Create an {@code WebAsyncTask} with a timeout value, an executor instance, and a Callable.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
-	public MvcAsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
+	public WebAsyncTask(Long timeout, AsyncTaskExecutor executor, Callable<V> callable) {
 		this(timeout, executor, null, callable);
 		Assert.notNull(executor, "Executor must not be null");
 	}
 
-	private MvcAsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<V> callable) {
+	private WebAsyncTask(Long timeout, AsyncTaskExecutor executor, String executorName, Callable<V> callable) {
 		Assert.notNull(callable, "Callable must not be null");
 		this.callable = callable;
 		this.timeout = timeout;
@@ -123,7 +123,7 @@ public class MvcAsyncTask<V> {
 
 	/**
 	 * A {@link BeanFactory} to use to resolve an executor name. Applications are
-	 * not expected to have to set this property when {@code MvcAsyncTask} is used in a
+	 * not expected to have to set this property when {@code WebAsyncTask} is used in a
 	 * Spring MVC controller.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {

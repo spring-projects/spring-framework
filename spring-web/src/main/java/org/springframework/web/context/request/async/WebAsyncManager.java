@@ -256,38 +256,38 @@ public final class WebAsyncManager {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void startCallableProcessing(final Callable<?> callable, Object... processingContext) {
 		Assert.notNull(callable, "Callable must not be null");
-		startCallableProcessing(new MvcAsyncTask(callable), processingContext);
+		startCallableProcessing(new WebAsyncTask(callable), processingContext);
 	}
 
 	/**
-	 * Use the given {@link MvcAsyncTask} to configure the task executor as well as
+	 * Use the given {@link WebAsyncTask} to configure the task executor as well as
 	 * the timeout value of the {@code AsyncWebRequest} before delegating to
 	 * {@link #startCallableProcessing(Callable, Object...)}.
 	 *
-	 * @param mvcAsyncTask an MvcAsyncTask containing the target {@code Callable}
+	 * @param webAsyncTask an WebAsyncTask containing the target {@code Callable}
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
 	 */
-	public void startCallableProcessing(final MvcAsyncTask<?> mvcAsyncTask, Object... processingContext) {
-		Assert.notNull(mvcAsyncTask, "MvcAsyncTask must not be null");
+	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext) {
+		Assert.notNull(webAsyncTask, "WebAsyncTask must not be null");
 		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 
-		Long timeout = mvcAsyncTask.getTimeout();
+		Long timeout = webAsyncTask.getTimeout();
 		if (timeout != null) {
 			this.asyncWebRequest.setTimeout(timeout);
 		}
 
-		AsyncTaskExecutor executor = mvcAsyncTask.getExecutor();
+		AsyncTaskExecutor executor = webAsyncTask.getExecutor();
 		if (executor != null) {
 			this.taskExecutor = executor;
 		}
 
 		List<CallableProcessingInterceptor> interceptors = new ArrayList<CallableProcessingInterceptor>();
-		interceptors.add(mvcAsyncTask.getInterceptor());
+		interceptors.add(webAsyncTask.getInterceptor());
 		interceptors.addAll(this.callableInterceptors.values());
 		interceptors.add(timeoutCallableInterceptor);
 
-		final Callable<?> callable = mvcAsyncTask.getCallable();
+		final Callable<?> callable = webAsyncTask.getCallable();
 		final CallableInterceptorChain interceptorChain = new CallableInterceptorChain(interceptors);
 
 		this.asyncWebRequest.addTimeoutHandler(new Runnable() {
