@@ -244,7 +244,7 @@ public class WebAsyncManagerTests {
 		replay(this.asyncWebRequest);
 
 		@SuppressWarnings("unchecked")
-		MvcAsyncTask<Object> asyncTask = new MvcAsyncTask<Object>(1000L, executor, createMock(Callable.class));
+		WebAsyncTask<Object> asyncTask = new WebAsyncTask<Object>(1000L, executor, createMock(Callable.class));
 		this.asyncManager.startCallableProcessing(asyncTask);
 
 		verify(executor, this.asyncWebRequest);

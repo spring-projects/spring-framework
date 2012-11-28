@@ -63,7 +63,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.context.request.async.MvcAsyncTask;
+import org.springframework.web.context.request.async.WebAsyncTask;
 import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
@@ -348,7 +348,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	/**
 	 * Set the default {@link AsyncTaskExecutor} to use when a controller method
 	 * return a {@link Callable}. Controller methods can override this default on
-	 * a per-request basis by returning an {@link MvcAsyncTask}.
+	 * a per-request basis by returning an {@link WebAsyncTask}.
 	 * <p>By default a {@link SimpleAsyncTaskExecutor} instance is used.
 	 * It's recommended to change that default in production as the simple executor
 	 * does not re-use threads.

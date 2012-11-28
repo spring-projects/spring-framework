@@ -28,7 +28,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.context.request.async.MvcAsyncTask;
+import org.springframework.web.context.request.async.WebAsyncTask;
 
 /**
  * Factory for assertions on the request. An instance of this class is
@@ -96,7 +96,7 @@ public class RequestResultMatchers {
 	/**
 	 * Assert the result from asynchronous processing.
 	 * This method can be used when a controller method returns {@link Callable}
-	 * or {@link MvcAsyncTask}. The value matched is the value returned from the
+	 * or {@link WebAsyncTask}. The value matched is the value returned from the
 	 * {@code Callable} or the exception raised.
 	 */
 	public <T> ResultMatcher asyncResult(final Object expectedResult) {
