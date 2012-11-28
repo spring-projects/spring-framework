@@ -39,6 +39,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * can select a value to be used to resume processing.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 3.2
  */
 public interface CallableProcessingInterceptor {
@@ -47,6 +48,24 @@ public interface CallableProcessingInterceptor {
 
 	static final Object RESPONSE_HANDLED = new Object();
 
+	/**
+	 * Invoked <em>before</em> the start of concurrent handling in the original
+	 * thread in which the {@code Callable} is submitted for concurrent handling.
+	 *
+	 * <p>
+	 * This is useful for capturing the state of the current thread just prior to
+	 * invoking the {@link Callable}. Once the state is captured, it can then be
+	 * transfered to the new {@link Thread} in
+	 * {@link #preProcess(NativeWebRequest, Callable)}. Capturing the state of
+	 * Spring Security's SecurityContextHolder and migrating it to the new Thread
+	 * is a concrete example of where this is useful.
+	 * </p>
+	 *
+	 * @param request the current request
+	 * @param task the task for the current async request
+	 * @throws Exception in case of errors
+	 */
+	<T> void  beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception;
 
 	/**
 	 * Invoked <em>after</em> the start of concurrent handling in the async
