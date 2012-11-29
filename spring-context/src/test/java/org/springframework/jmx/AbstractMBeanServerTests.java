@@ -25,17 +25,18 @@ import junit.framework.TestCase;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.MBeanTestUtils;
 
 /**
  * <strong>Note:</strong> the JMX test suite requires the presence of the
  * <code>jmxremote_optional.jar</code> in your classpath. Thus, if you
  * run into the <em>"Unsupported protocol: jmxmp"</em> error, you will
  * need to download the
- * <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX Remote API 1.0.1_04 Reference Implementation</a> 
+ * <a href="http://www.oracle.com/technetwork/java/javase/tech/download-jsp-141676.html">JMX Remote API 1.0.1_04 Reference Implementation</a>
  * from Oracle and extract <code>jmxremote_optional.jar</code> into your
  * classpath, for example in the <code>lib/ext</code> folder of your JVM.
  * See also <a href="https://issuetracker.springsource.com/browse/EBR-349">EBR-349</a>.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -67,8 +68,9 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 		onTearDown();
 	}
 
-	private void releaseServer() {
+	private void releaseServer() throws Exception {
 		MBeanServerFactory.releaseMBeanServer(getServer());
+		MBeanTestUtils.resetMBeanServers();
 	}
 
 	protected void onTearDown() throws Exception {
