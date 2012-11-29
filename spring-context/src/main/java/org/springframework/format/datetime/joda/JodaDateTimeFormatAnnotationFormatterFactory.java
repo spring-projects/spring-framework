@@ -38,7 +38,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda time.
+ * Formats fields annotated with the {@link DateTimeFormat} annotation using Joda-Time.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -85,20 +85,16 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
-
 		if (ReadableInstant.class.isAssignableFrom(fieldType)) {
 			return new ReadableInstantPrinter(formatter);
 		}
-
 		if (ReadablePartial.class.isAssignableFrom(fieldType)) {
 			return new ReadablePartialPrinter(formatter);
 		}
-
 		if (Calendar.class.isAssignableFrom(fieldType)) {
 			// assumes Calendar->ReadableInstant converter is registered
 			return new ReadableInstantPrinter(formatter);
 		}
-
 		// assumes Date->Long converter is registered
 		return new MillisecondInstantPrinter(formatter);
 	}
@@ -121,4 +117,5 @@ public class JodaDateTimeFormatAnnotationFormatterFactory
 		factory.setPattern(resolveEmbeddedValue(annotation.pattern()));
 		return factory.createDateTimeFormatter();
 	}
+
 }

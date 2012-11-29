@@ -17,6 +17,7 @@
 package org.springframework.format.datetime.joda;
 
 import org.joda.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
@@ -26,23 +27,23 @@ import org.springframework.beans.factory.InitializingBean;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @since 3.2
  * @see #setPattern(String)
  * @see #setIso(org.springframework.format.annotation.DateTimeFormat.ISO)
  * @see #setStyle(String)
  * @see DateTimeFormatterFactory
- * @since 3.2
  */
-public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory implements
-		FactoryBean<DateTimeFormatter>, InitializingBean {
+public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
+		implements FactoryBean<DateTimeFormatter>, InitializingBean {
 
 	private DateTimeFormatter dateTimeFormatter;
 
 
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 		this.dateTimeFormatter = createDateTimeFormatter();
 	}
 
-	public DateTimeFormatter getObject() throws Exception {
+	public DateTimeFormatter getObject() {
 		return this.dateTimeFormatter;
 	}
 
@@ -53,4 +54,5 @@ public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory imple
 	public boolean isSingleton() {
 		return true;
 	}
+
 }

@@ -32,13 +32,13 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Sam Brannen
+ * @since 3.2
  * @see #createDateTimeFormatter()
  * @see #createDateTimeFormatter(DateTimeFormatter)
  * @see #setPattern(String)
  * @see #setIso(org.springframework.format.annotation.DateTimeFormat.ISO)
  * @see #setStyle(String)
  * @see DateTimeFormatterFactoryBean
- * @since 3.2
  */
 public class DateTimeFormatterFactory {
 
@@ -72,7 +72,6 @@ public class DateTimeFormatterFactory {
 	 * {@link #setPattern(String) pattern} have been defined the
 	 * {@link DateTimeFormat#mediumDateTime() medium date time format} will be used.
 	 * @return a new date time formatter
-	 * @see #getObject()
 	 * @see #createDateTimeFormatter(DateTimeFormatter)
 	 */
 	public DateTimeFormatter createDateTimeFormatter() {
