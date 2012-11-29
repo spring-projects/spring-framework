@@ -36,9 +36,21 @@ import org.springframework.web.context.request.NativeWebRequest;
  * method can set the {@code DeferredResult} in order to resume processing.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 3.2
  */
 public interface DeferredResultProcessingInterceptor {
+
+	/**
+	 * Invoked immediately before the start of concurrent handling, in the same
+	 * thread that started it. This method may be used to capture state just prior
+	 * to the start of concurrent processing with the given {@code DeferredResult}.
+	 *
+	 * @param request the current request
+	 * @param deferredResult the DeferredResult for the current request
+	 * @throws Exception in case of errors
+	 */
+	<T> void  beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception;
 
 	/**
 	 * Invoked immediately after the start of concurrent handling, in the same

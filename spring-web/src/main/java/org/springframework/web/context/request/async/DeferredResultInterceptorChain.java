@@ -40,6 +40,12 @@ class DeferredResultInterceptorChain {
 		this.interceptors = interceptors;
 	}
 
+	public void applyBeforeConcurrentHandling(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
+		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
+			interceptor.beforeConcurrentHandling(request, deferredResult);
+		}
+	}
+
 	public void applyPreProcess(NativeWebRequest request, DeferredResult<?> deferredResult) throws Exception {
 		for (DeferredResultProcessingInterceptor interceptor : this.interceptors) {
 			interceptor.preProcess(request, deferredResult);
