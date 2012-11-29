@@ -80,6 +80,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, callable);
 		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andReturn(RESULT_NONE);
 		interceptor.afterCompletion(this.asyncWebRequest, callable);
 		replay(interceptor);
@@ -123,6 +124,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, callable);
 		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andReturn(22);
 		replay(interceptor);
 
@@ -145,6 +147,7 @@ public class WebAsyncManagerTimeoutTests {
 		Exception exception = new Exception();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, callable);
 		expect(interceptor.handleTimeout(this.asyncWebRequest, callable)).andThrow(exception);
 		replay(interceptor);
 
@@ -166,6 +169,7 @@ public class WebAsyncManagerTimeoutTests {
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 
 		DeferredResultProcessingInterceptor interceptor = createStrictMock(DeferredResultProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, deferredResult);
 		interceptor.preProcess(this.asyncWebRequest, deferredResult);
 		expect(interceptor.handleTimeout(this.asyncWebRequest, deferredResult)).andReturn(true);
 		interceptor.afterCompletion(this.asyncWebRequest, deferredResult);

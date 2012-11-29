@@ -26,6 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
  * Assists with the invocation of {@link CallableProcessingInterceptor}'s.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 3.2
  */
 class CallableInterceptorChain {
@@ -39,6 +40,12 @@ class CallableInterceptorChain {
 
 	public CallableInterceptorChain(List<CallableProcessingInterceptor> interceptors) {
 		this.interceptors = interceptors;
+	}
+
+	public void applyBeforeConcurrentHandling(NativeWebRequest request, Callable<?> task) throws Exception {
+		for (CallableProcessingInterceptor interceptor : this.interceptors) {
+			interceptor.beforeConcurrentHandling(request, task);
+		}
 	}
 
 	public void applyPreProcess(NativeWebRequest request, Callable<?> task) throws Exception {

@@ -24,9 +24,16 @@ import org.springframework.web.context.request.NativeWebRequest;
  * for simplified implementation of individual methods.
  *
  * @author Rossen Stoyanchev
+ * @author Rob Winch
  * @since 3.2
  */
 public abstract class CallableProcessingInterceptorAdapter implements CallableProcessingInterceptor {
+
+	/**
+	 * This implementation is empty.
+	 */
+	public <T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception {
+	}
 
 	/**
 	 * This implementation is empty.

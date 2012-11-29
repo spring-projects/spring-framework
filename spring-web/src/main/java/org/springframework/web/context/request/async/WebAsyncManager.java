@@ -249,12 +249,13 @@ public final class WebAsyncManager {
 	 * @param callable a unit of work to be executed asynchronously
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
+	 * @throws Exception If concurrent processing failed to start
 	 *
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void startCallableProcessing(final Callable<?> callable, Object... processingContext) {
+	public void startCallableProcessing(final Callable<?> callable, Object... processingContext) throws Exception {
 		Assert.notNull(callable, "Callable must not be null");
 		startCallableProcessing(new WebAsyncTask(callable), processingContext);
 	}
@@ -267,8 +268,9 @@ public final class WebAsyncManager {
 	 * @param webAsyncTask an WebAsyncTask containing the target {@code Callable}
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
+	 * @throws Exception If concurrent processing failed to start
 	 */
-	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext) {
+	public void startCallableProcessing(final WebAsyncTask<?> webAsyncTask, Object... processingContext) throws Exception {
 		Assert.notNull(webAsyncTask, "WebAsyncTask must not be null");
 		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
 
@@ -305,6 +307,8 @@ public final class WebAsyncManager {
 				interceptorChain.triggerAfterCompletion(asyncWebRequest, callable);
 			}
 		});
+
+		interceptorChain.applyBeforeConcurrentHandling(asyncWebRequest, callable);
 
 		startAsyncProcessing(processingContext);
 
@@ -356,12 +360,13 @@ public final class WebAsyncManager {
 	 * @param deferredResult the DeferredResult instance to initialize
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
+	 * @throws Exception If concurrent processing failed to start
 	 *
 	 * @see #getConcurrentResult()
 	 * @see #getConcurrentResultContext()
 	 */
 	public void startDeferredResultProcessing(
-			final DeferredResult<?> deferredResult, Object... processingContext) {
+			final DeferredResult<?> deferredResult, Object... processingContext) throws Exception {
 
 		Assert.notNull(deferredResult, "DeferredResult must not be null");
 		Assert.state(this.asyncWebRequest != null, "AsyncWebRequest must not be null");
@@ -394,6 +399,8 @@ public final class WebAsyncManager {
 				interceptorChain.triggerAfterCompletion(asyncWebRequest, deferredResult);
 			}
 		});
+
+		interceptorChain.applyBeforeConcurrentHandling(asyncWebRequest, deferredResult);
 
 		startAsyncProcessing(processingContext);
 
