@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,14 +117,13 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer)
-			throws JRException {
+	public static void renderAsCsv(JasperReport report, Map<String, Object> parameters, Object reportData,
+			Writer writer) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRCsvExporter(), print, writer);
@@ -136,15 +135,14 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer,
-			Map exporterParameters) throws JRException {
+	public static void renderAsCsv(JasperReport report, Map<String, Object> parameters, Object reportData,
+			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRCsvExporter exporter = new JRCsvExporter();
@@ -158,14 +156,13 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer)
-			throws JRException {
+	public static void renderAsHtml(JasperReport report, Map<String, Object> parameters, Object reportData,
+			Writer writer) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRHtmlExporter(), print, writer);
@@ -177,15 +174,14 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param writer the <code>Writer</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer,
-			Map exporterParameters) throws JRException {
+	public static void renderAsHtml(JasperReport report, Map<String, Object> parameters, Object reportData,
+			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRHtmlExporter exporter = new JRHtmlExporter();
@@ -199,14 +195,13 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsPdf(JasperReport report, Map parameters, Object reportData, OutputStream stream)
-			throws JRException {
+	public static void renderAsPdf(JasperReport report, Map<String, Object> parameters, Object reportData,
+			OutputStream stream) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRPdfExporter(), print, stream);
@@ -218,15 +213,14 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsPdf(JasperReport report, Map parameters, Object reportData, OutputStream stream,
-			Map exporterParameters) throws JRException {
+	public static void renderAsPdf(JasperReport report, Map<String, Object> parameters, Object reportData,
+			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRPdfExporter exporter = new JRPdfExporter();
@@ -240,14 +234,13 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsXls(JasperReport report, Map parameters, Object reportData, OutputStream stream)
-			throws JRException {
+	public static void renderAsXls(JasperReport report, Map<String, Object> parameters, Object reportData,
+			OutputStream stream) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRXlsExporter(), print, stream);
@@ -259,15 +252,14 @@ public abstract class JasperReportsUtils {
 	 * @param report the <code>JasperReport</code> instance to render
 	 * @param parameters the parameters to use for rendering
 	 * @param stream the <code>OutputStream</code> to write the rendered report to
-	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code>
-	 * or object array (converted accordingly), representing the report data to read
-	 * fields from
+	 * @param reportData a <code>JRDataSource</code>, <code>java.util.Collection</code> or object array
+	 * (converted accordingly), representing the report data to read fields from
 	 * @param exporterParameters a {@link Map} of {@link JRExporterParameter exporter parameters}
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsXls(JasperReport report, Map parameters, Object reportData, OutputStream stream,
-			Map exporterParameters) throws JRException {
+	public static void renderAsXls(JasperReport report, Map<String, Object> parameters, Object reportData,
+			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRXlsExporter exporter = new JRXlsExporter();
