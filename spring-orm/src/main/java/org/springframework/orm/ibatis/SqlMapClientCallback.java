@@ -30,7 +30,10 @@ import com.ibatis.sqlmap.client.SqlMapExecutor;
  * @since 24.02.2004
  * @see SqlMapClientTemplate
  * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public interface SqlMapClientCallback<T> {
 
 	/**

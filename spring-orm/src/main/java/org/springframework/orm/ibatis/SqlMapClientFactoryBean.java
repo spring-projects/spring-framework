@@ -66,7 +66,10 @@ import org.springframework.util.ObjectUtils;
  * @see #setDataSource
  * @see SqlMapClientTemplate#setSqlMapClient
  * @see SqlMapClientTemplate#setDataSource
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, InitializingBean {
 
 	private static final ThreadLocal<LobHandler> configTimeLobHandlerHolder = new ThreadLocal<LobHandler>();

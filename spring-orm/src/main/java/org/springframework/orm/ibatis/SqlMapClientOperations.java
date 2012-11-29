@@ -39,7 +39,10 @@ import org.springframework.dao.DataAccessException;
  * @see SqlMapClientTemplate
  * @see com.ibatis.sqlmap.client.SqlMapClient
  * @see com.ibatis.sqlmap.client.SqlMapExecutor
+ * @deprecated as of Spring 3.2, in favor of the native Spring support
+ * in the Mybatis follow-up project (http://code.google.com/p/mybatis/)
  */
+@Deprecated
 public interface SqlMapClientOperations {
 
 	/**
