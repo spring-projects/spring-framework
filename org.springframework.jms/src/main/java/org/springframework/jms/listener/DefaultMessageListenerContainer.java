@@ -297,9 +297,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
 	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic,
+	 * unless vendor-specific setup measures clearly allow for it.</b>
+	 * With regular setup, this would lead to concurrent consumption
+	 * of the same message, which is hardly ever desirable.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 * @see #setMaxConcurrentConsumers
 	 */
@@ -336,9 +337,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
 	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic,
+	 * unless vendor-specific setup measures clearly allow for it.</b>
+	 * With regular setup, this would lead to concurrent consumption
+	 * of the same message, which is hardly ever desirable.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 * @see #setConcurrentConsumers
 	 */
@@ -467,16 +469,6 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	public final int getIdleTaskExecutionLimit() {
 		synchronized (this.lifecycleMonitor) {
 			return this.idleTaskExecutionLimit;
-		}
-	}
-
-	@Override
-	protected void validateConfiguration() {
-		super.validateConfiguration();
-		synchronized (this.lifecycleMonitor) {
-			if (isSubscriptionDurable() && this.concurrentConsumers != 1) {
-				throw new IllegalArgumentException("Only 1 concurrent consumer supported for durable subscription");
-			}
 		}
 	}
 
