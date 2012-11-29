@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 
 	/**
 	 * Set the name of the target bean.
-	 * <p>The target does not <i>have</> to be a non-singleton bean, but realisticially
+	 * <p>The target does not <i>have</i> to be a non-singleton bean, but realistically
 	 * always will be (because if the target bean were a singleton, then said singleton
 	 * bean could simply be injected straight into the dependent object, thus obviating
 	 * the need for the extra level of indirection afforded by this factory approach).
