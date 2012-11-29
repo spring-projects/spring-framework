@@ -41,7 +41,7 @@ import org.springframework.util.FileCopyUtils;
  */
 public class StringHttpMessageConverter extends AbstractHttpMessageConverter<String> {
 
-	public static final Charset DEFAULT_CHARSET = Charset.forName("ISO-8859-1");
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	private final Charset defaultCharset;
 
