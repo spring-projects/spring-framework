@@ -308,6 +308,14 @@ public final class WebAsyncManager {
 
 		startAsyncProcessing(processingContext);
 
+		try {
+			interceptorChain.applyBeforeConcurrentHandling(asyncWebRequest, callable);
+		}
+		catch (Throwable t) {
+			setConcurrentResultAndDispatch(t);
+			return;
+		}
+
 		this.taskExecutor.submit(new Runnable() {
 			public void run() {
 				Object result = null;

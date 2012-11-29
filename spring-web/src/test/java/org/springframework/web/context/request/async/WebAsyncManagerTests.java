@@ -118,6 +118,7 @@ public class WebAsyncManagerTests {
 		Callable<Object> task = new StubCallable(concurrentResult);
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor.preProcess(this.asyncWebRequest, task);
 		interceptor.postProcess(this.asyncWebRequest, task, new Integer(concurrentResult));
 		replay(interceptor);
@@ -140,6 +141,7 @@ public class WebAsyncManagerTests {
 		Callable<Object> task = new StubCallable(concurrentResult);
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor.preProcess(this.asyncWebRequest, task);
 		interceptor.postProcess(this.asyncWebRequest, task, concurrentResult);
 		replay(interceptor);
@@ -156,12 +158,34 @@ public class WebAsyncManagerTests {
 	}
 
 	@Test
+	public void startCallableProcessingBeforeConcurrentHandlingException() throws Exception {
+		Callable<Object> task = new StubCallable(21);
+		Exception exception = new Exception();
+
+		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, task);
+		expectLastCall().andThrow(exception);
+		replay(interceptor);
+
+		setupDefaultAsyncScenario();
+
+		this.asyncManager.registerCallableInterceptor("interceptor", interceptor);
+		this.asyncManager.startCallableProcessing(task);
+
+		assertTrue(this.asyncManager.hasConcurrentResult());
+		assertEquals(exception, this.asyncManager.getConcurrentResult());
+
+		verify(interceptor, this.asyncWebRequest);
+	}
+
+	@Test
 	public void startCallableProcessingPreProcessException() throws Exception {
 
 		Callable<Object> task = new StubCallable(21);
 		Exception exception = new Exception();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor.preProcess(this.asyncWebRequest, task);
 		expectLastCall().andThrow(exception);
 		replay(interceptor);
@@ -184,6 +208,7 @@ public class WebAsyncManagerTests {
 		Exception exception = new Exception();
 
 		CallableProcessingInterceptor interceptor = createStrictMock(CallableProcessingInterceptor.class);
+		interceptor.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor.preProcess(this.asyncWebRequest, task);
 		interceptor.postProcess(this.asyncWebRequest, task, 21);
 		expectLastCall().andThrow(exception);
@@ -207,11 +232,13 @@ public class WebAsyncManagerTests {
 		Exception exception = new Exception();
 
 		CallableProcessingInterceptor interceptor1 = createMock(CallableProcessingInterceptor.class);
+		interceptor1.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor1.preProcess(this.asyncWebRequest, task);
 		interceptor1.postProcess(this.asyncWebRequest, task, 21);
 		replay(interceptor1);
 
 		CallableProcessingInterceptor interceptor2 = createMock(CallableProcessingInterceptor.class);
+		interceptor2.beforeConcurrentHandling(this.asyncWebRequest, task);
 		interceptor2.preProcess(this.asyncWebRequest, task);
 		interceptor2.postProcess(this.asyncWebRequest, task, 21);
 		expectLastCall().andThrow(exception);
