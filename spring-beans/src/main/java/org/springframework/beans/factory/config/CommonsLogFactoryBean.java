@@ -33,7 +33,11 @@ import org.springframework.beans.factory.InitializingBean;
  * @author Juergen Hoeller
  * @since 16.11.2003
  * @see org.apache.commons.logging.Log
+ * @deprecated as of Spring 3.2, in favor of a bean definition that points
+ * to the bean class "org.apache.commons.logging.LogFactory" and the factory
+ * method "getLog", passing in the log name as constructor argument
  */
+@Deprecated
 public class CommonsLogFactoryBean implements FactoryBean<Log>, InitializingBean {
 
 	private Log log;

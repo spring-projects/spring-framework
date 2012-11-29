@@ -42,7 +42,10 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * @since 1.2
  * @see #setTargetBeanName
  * @see PropertyPlaceholderConfigurer
+ * @deprecated as of Spring 3.2, in favor of using regular bean name aliases
+ * (which support placeholder parsing since Spring 2.5)
  */
+@Deprecated
 public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAware {
 
 	private String targetBeanName;
