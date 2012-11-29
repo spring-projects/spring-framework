@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +99,9 @@ public class SpringResourceLoader extends ResourceLoader {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for Velocity resource with name [" + source + "]");
 		}
-		for (int i = 0; i < this.resourceLoaderPaths.length; i++) {
+		for (String resourceLoaderPath : this.resourceLoaderPaths) {
 			org.springframework.core.io.Resource resource =
-					this.resourceLoader.getResource(this.resourceLoaderPaths[i] + source);
+					this.resourceLoader.getResource(resourceLoaderPath + source);
 			try {
 				return resource.getInputStream();
 			}
