@@ -3,6 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2 GA (2012-12-12)
+--------------------------------------
+
+* reworked Hibernate 4 support to avoid reflection, also adding unit tests for Hibernate 4
+* upgraded Spring Framework build and test suite to Joda-Time 2.1, Groovy 1.8.8, JRuby 1.6.5
+* checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
+* checked compatibility of Spring's JasperReports support with JasperReports 5.0
+* deprecated Apache iBATIS support in favor of native Spring support in Mybatis
+* deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
+* DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
+
+
 Changes in version 3.2 RC2 (2012-11-27)
 ---------------------------------------
 
@@ -11,7 +23,7 @@ Changes in version 3.2 RC2 (2012-11-27)
 * DefaultListableBeanFactory avoids wide/interleaved metadata locks to avoid deadlock potential (SPR-10020)
 * DefaultListableBeanFactory avoids singletonObjects lock wherever possible for non-singleton performance (SPR-9819)
 * DefaultListableBeanFactory doesn't cache for autowireBean calls anymore, avoiding ClassLoader leaks (SPR-8956)
-* Java 5 Closeable and Java 7 AutoCloseable automatically detected as destroy methods (SPR-10034)
+* Java 5 Closeable's and Java 7 AutoCloseable's "close()" automatically detected as destroy methods (SPR-10034)
 * @Bean destroy method inference not applying for DisposableBean implementers (avoiding double destruction)
 * @Lazy and @DependsOn not marked as @Inherited anymore - only supported on actual bean types (SPR-9589, SPR-9476)
 * AsyncAnnotationBean/MethodValidation/PersistenceExceptionTranslationPostProcessor cache eligible beans (SPR-7328)
