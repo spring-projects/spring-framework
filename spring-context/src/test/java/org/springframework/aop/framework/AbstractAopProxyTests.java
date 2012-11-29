@@ -16,12 +16,11 @@
 
 package org.springframework.aop.framework;
 
-import static org.junit.Assert.*;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.rmi.MarshalException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,16 +28,26 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.TransactionRequiredException;
-
 import junit.framework.TestCase;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import test.advice.CountingAfterReturningAdvice;
+import test.advice.CountingBeforeAdvice;
+import test.advice.MethodCounter;
+import test.advice.MyThrowsHandler;
+import test.interceptor.NopInterceptor;
+import test.interceptor.SerializableNopInterceptor;
+import test.interceptor.TimestampIntroductionInterceptor;
+import test.mixin.LockMixin;
+import test.mixin.LockMixinAdvisor;
+import test.mixin.Lockable;
+import test.mixin.LockedException;
+import test.util.TimeStamped;
+
 import org.springframework.aop.Advisor;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.DynamicIntroductionAdvice;
@@ -65,18 +74,7 @@ import org.springframework.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 import org.springframework.util.StopWatch;
 
-import test.advice.CountingAfterReturningAdvice;
-import test.advice.CountingBeforeAdvice;
-import test.advice.MethodCounter;
-import test.advice.MyThrowsHandler;
-import test.interceptor.NopInterceptor;
-import test.interceptor.SerializableNopInterceptor;
-import test.interceptor.TimestampIntroductionInterceptor;
-import test.mixin.LockMixin;
-import test.mixin.LockMixinAdvisor;
-import test.mixin.Lockable;
-import test.mixin.LockedException;
-import test.util.TimeStamped;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -1598,12 +1596,12 @@ public abstract class AbstractAopProxyTests {
 		}
 
 		// Subclass of RemoteException
-		ex = new TransactionRequiredException();
+		ex = new MarshalException("");
 		try {
 			proxied.echoException(1, ex);
 			fail();
 		}
-		catch (TransactionRequiredException caught) {
+		catch (MarshalException caught) {
 			assertEquals(ex, caught);
 		}
 		assertEquals(1, th.getCalls("remoteException"));
