@@ -31,6 +31,8 @@ import static org.junit.Assert.fail;
 
 import java.util.concurrent.Callable;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,10 +51,13 @@ public class WebAsyncManagerTests {
 
 	private AsyncWebRequest asyncWebRequest;
 
+	private MockHttpServletRequest servletRequest;
+
 
 	@Before
 	public void setUp() {
-		this.asyncManager = WebAsyncUtils.getAsyncManager(new MockHttpServletRequest());
+		this.servletRequest = new MockHttpServletRequest();
+		this.asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 		this.asyncManager.setTaskExecutor(new SyncTaskExecutor());
 
 		this.asyncWebRequest = createStrictMock(AsyncWebRequest.class);
@@ -275,6 +280,7 @@ public class WebAsyncManagerTests {
 		this.asyncWebRequest.addTimeoutHandler(EasyMock.<Runnable>anyObject());
 		this.asyncWebRequest.addCompletionHandler(EasyMock.<Runnable>anyObject());
 		this.asyncWebRequest.startAsync();
+		expect(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).andReturn(this.servletRequest).times(0, 1);
 		replay(this.asyncWebRequest);
 
 		@SuppressWarnings("unchecked")
@@ -411,6 +417,7 @@ public class WebAsyncManagerTests {
 		this.asyncWebRequest.addTimeoutHandler((Runnable) notNull());
 		this.asyncWebRequest.addCompletionHandler((Runnable) notNull());
 		this.asyncWebRequest.startAsync();
+		expect(this.asyncWebRequest.getNativeRequest(HttpServletRequest.class)).andReturn(this.servletRequest).times(0, 1);
 		expect(this.asyncWebRequest.isAsyncComplete()).andReturn(false);
 		this.asyncWebRequest.dispatch();
 		replay(this.asyncWebRequest);
