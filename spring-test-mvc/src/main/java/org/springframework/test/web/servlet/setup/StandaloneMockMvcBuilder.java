@@ -169,8 +169,9 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	/**
 	 * Set a ContentNegotiationManager.
 	 */
-	protected void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+	protected StandaloneMockMvcBuilder setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
+		return this;
 	}
 
 	/**
@@ -179,8 +180,9 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	 * complete so that a test can verify the results synchronously.
 	 * @param timeout the timeout value in milliseconds
 	 */
-	public void setAsyncRequestTimeout(long timeout) {
+	public StandaloneMockMvcBuilder setAsyncRequestTimeout(long timeout) {
 		this.asyncRequestTimeout = timeout;
+		return this;
 	}
 
 	/**
@@ -203,8 +205,9 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 	/**
 	 * Set the HandlerExceptionResolver types to use.
 	 */
-	public void setHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	public StandaloneMockMvcBuilder setHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.handlerExceptionResolvers = exceptionResolvers;
+		return this;
 	}
 
 	/**
