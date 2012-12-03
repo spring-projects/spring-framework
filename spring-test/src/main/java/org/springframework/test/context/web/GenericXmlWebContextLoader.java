@@ -14,36 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.web;
 
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.test.context.web.WebMergedContextConfiguration;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * TODO [SPR-9864] Document XmlWebContextLoader.
+ * TODO [SPR-9864] Document GenericXmlWebContextLoader.
  *
  * @author Sam Brannen
  * @since 3.2
  */
-public class XmlWebContextLoader extends AbstractGenericWebContextLoader {
+public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader {
+
+	/**
+	 * TODO [SPR-9864] Document overridden loadBeanDefinitions().
+	 *
+	 * @see org.springframework.test.context.web.AbstractGenericWebContextLoader#loadBeanDefinitions(org.springframework.web.context.support.GenericWebApplicationContext, org.springframework.test.context.web.WebMergedContextConfiguration)
+	 */
+	@Override
+	protected void loadBeanDefinitions(GenericWebApplicationContext context,
+			WebMergedContextConfiguration webMergedConfig) {
+		new XmlBeanDefinitionReader(context).loadBeanDefinitions(webMergedConfig.getLocations());
+	}
 
 	/**
 	 * Returns &quot;<code>-context.xml</code>&quot;.
 	 */
 	protected String getResourceSuffix() {
 		return "-context.xml";
-	}
-
-	/**
-	 * TODO [SPR-9864] Document overridden loadBeanDefinitions().
-	 *
-	 * @see org.springframework.test.context.support.AbstractGenericWebContextLoader#loadBeanDefinitions(org.springframework.web.context.support.GenericWebApplicationContext, org.springframework.test.context.web.WebMergedContextConfiguration)
-	 */
-	@Override
-	protected void loadBeanDefinitions(GenericWebApplicationContext context,
-			WebMergedContextConfiguration webMergedConfig) {
-		new XmlBeanDefinitionReader(context).loadBeanDefinitions(webMergedConfig.getLocations());
 	}
 
 }

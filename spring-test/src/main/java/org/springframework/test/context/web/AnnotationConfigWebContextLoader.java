@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.test.context.ContextConfigurationAttributes;
-import org.springframework.test.context.web.WebMergedContextConfiguration;
+import org.springframework.test.context.support.AbstractContextLoader;
+import org.springframework.test.context.support.AnnotationConfigContextLoaderUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 

@@ -57,7 +57,7 @@ abstract class ContextLoaderUtils {
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
 	private static final String DEFAULT_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.DelegatingSmartContextLoader";
-	private static final String DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.support.WebDelegatingSmartContextLoader";
+	private static final String DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME = "org.springframework.test.context.web.WebDelegatingSmartContextLoader";
 
 	private static final String WEB_APP_CONFIGURATION_CLASS_NAME = "org.springframework.test.context.web.WebAppConfiguration";
 	private static final String WEB_MERGED_CONTEXT_CONFIGURATION_CLASS_NAME = "org.springframework.test.context.web.WebMergedContextConfiguration";

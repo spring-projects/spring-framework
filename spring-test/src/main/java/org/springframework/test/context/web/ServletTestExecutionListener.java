@@ -20,7 +20,6 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -29,6 +28,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -39,20 +39,10 @@ import org.springframework.web.context.request.ServletWebRequest;
  * @author Sam Brannen
  * @since 3.2
  */
-public class ServletTestExecutionListener implements TestExecutionListener {
+public class ServletTestExecutionListener extends AbstractTestExecutionListener {
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
-
-	/**
-	 * The default implementation is <em>empty</em>. Can be overridden by
-	 * subclasses as necessary.
-	 *
-	 * @see TestExecutionListener#beforeTestClass(TestContext)
-	 */
-	public void beforeTestClass(TestContext testContext) throws Exception {
-		/* no-op */
-	}
 
 	/**
 	 * TODO [SPR-9864] Document overridden prepareTestInstance().
@@ -85,20 +75,9 @@ public class ServletTestExecutionListener implements TestExecutionListener {
 	}
 
 	/**
-	 * The default implementation is <em>empty</em>. Can be overridden by
-	 * subclasses as necessary.
-	 *
-	 * @see TestExecutionListener#afterTestClass(TestContext)
-	 */
-	public void afterTestClass(TestContext testContext) throws Exception {
-		/* no-op */
-	}
-
-	/**
 	 * TODO [SPR-9864] Document setUpRequestContext().
 	 *
 	 * @param testContext
-	 * @param servletContext
 	 */
 	private void setUpRequestContextIfNecessary(TestContext testContext) {
 

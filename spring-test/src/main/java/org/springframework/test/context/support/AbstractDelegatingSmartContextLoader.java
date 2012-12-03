@@ -63,7 +63,7 @@ import org.springframework.util.ObjectUtils;
  * @since 3.2
  * @see SmartContextLoader
  */
-abstract class AbstractDelegatingSmartContextLoader implements SmartContextLoader {
+public abstract class AbstractDelegatingSmartContextLoader implements SmartContextLoader {
 
 	private static final Log logger = LogFactory.getLog(AbstractDelegatingSmartContextLoader.class);
 

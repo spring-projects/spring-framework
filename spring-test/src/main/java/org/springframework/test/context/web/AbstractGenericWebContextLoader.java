@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.web;
 
 import javax.servlet.ServletContext;
 
@@ -29,7 +29,7 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.MergedContextConfiguration;
-import org.springframework.test.context.web.WebMergedContextConfiguration;
+import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 

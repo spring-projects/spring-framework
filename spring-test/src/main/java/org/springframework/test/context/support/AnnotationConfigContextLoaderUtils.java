@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 3.2
  */
-abstract class AnnotationConfigContextLoaderUtils {
+public abstract class AnnotationConfigContextLoaderUtils {
 
 	private static final Log logger = LogFactory.getLog(AnnotationConfigContextLoaderUtils.class);
 
@@ -86,7 +86,7 @@ abstract class AnnotationConfigContextLoaderUtils {
 	 * @return an array of default configuration classes, potentially empty but
 	 * never <code>null</code>
 	 */
-	static Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
+	public static Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");
 
 		List<Class<?>> configClasses = new ArrayList<Class<?>>();

@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.support;
+package org.springframework.test.context.web;
 
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.support.AbstractDelegatingSmartContextLoader;
 
 /**
  * {@code WebDelegatingSmartContextLoader} is a concrete implementation of
- * {@link AbstractDelegatingSmartContextLoader} that delegates to an
- * {@link XmlWebContextLoader} and an {@link AnnotationConfigWebContextLoader}.
+ * {@link AbstractDelegatingSmartContextLoader} that delegates to a
+ * {@link GenericXmlWebContextLoader} and an {@link AnnotationConfigWebContextLoader}.
  * 
  * @author Sam Brannen
  * @since 3.2
  * @see SmartContextLoader
  * @see AbstractDelegatingSmartContextLoader
- * @see XmlWebContextLoader
+ * @see GenericXmlWebContextLoader
  * @see AnnotationConfigWebContextLoader
  */
 public class WebDelegatingSmartContextLoader extends AbstractDelegatingSmartContextLoader {
 
-	private final SmartContextLoader xmlLoader = new XmlWebContextLoader();
+	private final SmartContextLoader xmlLoader = new GenericXmlWebContextLoader();
 	private final SmartContextLoader annotationConfigLoader = new AnnotationConfigWebContextLoader();
 
 
