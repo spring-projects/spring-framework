@@ -13,7 +13,7 @@ configure(allprojects) {
     ext.aspectjVersion = '1.6.12'
     ext.hsqldbVersion='1.8.0.10'
     ext.junitVersion = '4.11.20120805.1225' // temporary use of snapshot; spring-test
-                                            // still builds against on 4.10
+                                            // still builds against 4.10
     ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
     apply plugin: 'java'
@@ -605,7 +605,7 @@ project('spring-test-mvc') {
             exclude group: 'com.sun.jmx', module: 'jmxri'
         }
         testCompile "javax.servlet:jstl:1.2"
-        testCompile "org.hibernate:hibernate-validator:4.2.0.Final"
+        testCompile "org.hibernate:hibernate-validator:4.3.0.Final"
         testCompile "org.codehaus.jackson:jackson-mapper-asl:1.4.2"
         testCompile project(":spring-oxm")
         testCompile "com.thoughtworks.xstream:xstream:1.3.1"
