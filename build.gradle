@@ -11,6 +11,7 @@ buildscript {
 
 configure(allprojects) {
     ext.aspectjVersion = '1.6.12'
+    ext.easymockVersion='2.5.2'
     ext.hsqldbVersion='1.8.0.10'
     ext.junitVersion = '4.11.20120805.1225' // temporary use of snapshot; spring-test
                                             // still builds against 4.10
@@ -39,7 +40,7 @@ configure(allprojects) {
 
     dependencies {
         testCompile "org.hamcrest:hamcrest-all:1.3"
-        testCompile "org.easymock:easymock:2.5.1"
+        testCompile "org.easymock:easymock:${easymockVersion}"
     }
 }
 
@@ -281,7 +282,7 @@ project('spring-tx') {
         compile("com.ibm.websphere:uow:6.0.2.17", provided)
         compile("javax.resource:connector-api:1.5", optional)
         compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-        testCompile "org.easymock:easymockclassextension:2.3"
+        testCompile "org.easymock:easymockclassextension:${easymockVersion}"
     }
 }
 
@@ -334,7 +335,6 @@ project('spring-jdbc') {
         compile("org.apache.derby:derby:10.5.3.0_1", optional)
         compile("org.apache.derby:derbyclient:10.5.3.0_1", optional)
         compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-        testCompile "org.easymock:easymock:2.5.1"
     }
 }
 
@@ -608,7 +608,7 @@ project('spring-test-mvc') {
         testCompile "cglib:cglib-nodep:2.2"
         testCompile "rome:rome:1.0"
         testCompile "javax.xml.bind:jaxb-api:2.2.6"
-        testCompile "org.easymock:easymockclassextension:2.3"
+        testCompile "org.easymock:easymockclassextension:${easymockVersion}"
         testCompile("org.springframework.security:spring-security-core:3.1.2.RELEASE") {
             exclude group: 'org.springframework'
         }
