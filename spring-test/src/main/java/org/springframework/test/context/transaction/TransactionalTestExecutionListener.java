@@ -64,15 +64,15 @@ import org.springframework.util.StringUtils;
  * <em>rolled back</em> after completion of the test; whereas, changes to the
  * database during a test that is run with {@code @NotTransactional} will
  * <strong>not</strong> be run within a transaction. Test methods that are not
- * annotated with either {@code @Transactional} (at the class or method level)
- * or {@code @NotTransactional} will not be run within a transaction.
+ * annotated with {@code @Transactional} (at the class or method level) will not
+ * be run within a transaction.
  *
  * <p>Transactional commit and rollback behavior can be configured via the
  * class-level {@link TransactionConfiguration @TransactionConfiguration} and
  * method-level {@link Rollback @Rollback} annotations.
  *
  * <p>In case there are multiple instances of {@code PlatformTransactionManager}
- * within the test's {@code ApplicationContext}, @{@code TransactionConfiguration}
+ * within the test's {@code ApplicationContext}, {@code @TransactionConfiguration}
  * supports configuring the bean name of the {@code PlatformTransactionManager}
  * that should be used to drive transactions. Alternatively,
  * {@link TransactionManagementConfigurer} can be implemented in an
@@ -90,6 +90,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
+ * @see TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.NotTransactional
  * @see org.springframework.test.annotation.Rollback
@@ -122,9 +123,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * configured to run within a transaction, this method will run
 	 * {@link BeforeTransaction &#064;BeforeTransaction methods} and start a new
 	 * transaction.
-	 * <p>Note that if a {@code BeforeTransaction &#064;BeforeTransaction method} fails,
-	 * remaining {@code BeforeTransaction &#064;BeforeTransaction methods} will not
-	 * be invoked, and a transaction will not be started.
+	 * <p>Note that if a {@code @BeforeTransaction} method fails, any remaining
+	 * {@code @BeforeTransaction} methods will not be invoked, and a transaction
+	 * will not be started.
 	 * @see org.springframework.transaction.annotation.Transactional
 	 * @see org.springframework.test.annotation.NotTransactional
 	 * @see #getTransactionManager(TestContext, String)
@@ -175,7 +176,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * If a transaction is currently active for the test method of the supplied
 	 * {@link TestContext test context}, this method will end the transaction
 	 * and run {@link AfterTransaction &#064;AfterTransaction methods}.
-	 * <p>{@code AfterTransaction &#064;AfterTransaction methods} are guaranteed to be
+	 * <p>{@code @AfterTransaction} methods are guaranteed to be
 	 * invoked even if an error occurs while ending the transaction.
 	 */
 	@Override
@@ -521,9 +522,9 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Retrieves the {@link TransactionConfigurationAttributes} for the
 	 * specified {@link Class class} which may optionally declare or inherit
 	 * {@link TransactionConfiguration &#064;TransactionConfiguration}. If
-	 * {@code &#064;TransactionConfiguration} is not present for the supplied
+	 * {@code @TransactionConfiguration} is not present for the supplied
 	 * class, the <em>default values</em> for attributes defined in
-	 * {@code &#064;TransactionConfiguration} will be used instead.
+	 * {@code @TransactionConfiguration} will be used instead.
 	 * @param testContext the test context for which the configuration
 	 * attributes should be retrieved
 	 * @return a new TransactionConfigurationAttributes instance
