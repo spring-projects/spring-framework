@@ -51,7 +51,6 @@ import org.apache.tiles.locale.LocaleResolver;
 import org.apache.tiles.preparer.factory.PreparerFactory;
 import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.ApplicationResource;
-import org.apache.tiles.request.servlet.wildcard.WildcardServletApplicationContext;
 import org.apache.tiles.startup.DefaultTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
 import org.slf4j.Logger;
@@ -249,8 +248,8 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 */
 	public void afterPropertiesSet() throws TilesException {
 
-		WildcardServletApplicationContext preliminaryContext =
-				new WildcardServletApplicationContext(this.servletContext);
+		SpringWildcardServletTilesApplicationContext preliminaryContext =
+				new SpringWildcardServletTilesApplicationContext(this.servletContext);
 
 		if (this.tilesInitializer == null) {
 			this.tilesInitializer = new SpringTilesInitializer();

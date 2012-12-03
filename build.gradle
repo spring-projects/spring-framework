@@ -521,10 +521,6 @@ project('spring-webmvc-tiles3') {
         compile("javax.servlet:jstl:1.1.2", provided)
         compile("javax.servlet.jsp:jsp-api:2.1", provided)
         compile("org.apache.tiles:tiles-request-api:1.0.1", optional)
-        compile("org.apache.tiles:tiles-request-servlet-wildcard:1.0.1") { dep->
-            optional dep
-            exclude group: 'org.springframework', module: 'spring-web'
-        }
         compile("org.apache.tiles:tiles-api:3.0.1", optional)
         compile("org.apache.tiles:tiles-core:3.0.1", optional)
         compile("org.apache.tiles:tiles-servlet:3.0.1", optional)
