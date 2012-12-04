@@ -214,7 +214,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	protected abstract boolean supports(Class<?> clazz);
 
 	/**
-	 * Abstract template method that reads the actualy object. Invoked from {@link #read}.
+	 * Abstract template method that reads the actual object. Invoked from {@link #read}.
 	 * @param clazz the type of object to return
 	 * @param inputMessage the HTTP input message to read from
 	 * @return the converted object
