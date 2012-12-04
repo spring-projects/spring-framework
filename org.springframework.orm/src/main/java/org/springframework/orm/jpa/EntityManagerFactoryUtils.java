@@ -254,8 +254,7 @@ public abstract class EntityManagerFactoryUtils {
 
 	/**
 	 * Apply the current transaction timeout, if any, to the given JPA Query object.
-	 * <p>This method sets the JPA 2.0 query hints "javax.persistence.lock.timeout"
-	 * and "javax.persistence.query.timeout" accordingly.
+	 * <p>This method sets the JPA 2.0 query hint "javax.persistence.query.timeout" accordingly.
 	 * @param query the JPA Query object
 	 * @param emf JPA EntityManagerFactory that the Query was created for
 	 */
@@ -264,16 +263,10 @@ public abstract class EntityManagerFactoryUtils {
 		if (emHolder != null && emHolder.hasTimeout()) {
 			int timeoutValue = (int) emHolder.getTimeToLiveInMillis();
 			try {
-				query.setHint("javax.persistence.lock.timeout", timeoutValue);
-			}
-			catch (IllegalArgumentException ex) {
-				// oh well, at least we tried...
-			}
-			try {
 				query.setHint("javax.persistence.query.timeout", timeoutValue);
 			}
 			catch (IllegalArgumentException ex) {
-				// once again, at least we tried...
+				// oh well, at least we tried...
 			}
 		}
 	}
@@ -283,11 +276,10 @@ public abstract class EntityManagerFactoryUtils {
 	 * <code>org.springframework.dao</code> hierarchy.
 	 * Return null if no translation is appropriate: any other exception may
 	 * have resulted from user code, and should not be translated.
-	 * <p>The most important cases like object not found or optimistic locking
-	 * failure are covered here. For more fine-granular conversion, JpaAccessor and
-	 * JpaTransactionManager support sophisticated translation of exceptions via a
-	 * JpaDialect.
-	 * @param ex runtime exception that occured
+	 * <p>The most important cases like object not found or optimistic locking failure
+	 * are covered here. For more fine-granular conversion, JpaTransactionManager etc
+	 * support sophisticated translation of exceptions via a JpaDialect.
+	 * @param ex runtime exception that occurred
 	 * @return the corresponding DataAccessException instance,
 	 * or <code>null</code> if the exception should not be translated
 	 */
