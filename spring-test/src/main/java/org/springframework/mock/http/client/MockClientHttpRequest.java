@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.mock.http.client;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import org.springframework.mock.http.MockHttpOutputMessage;
  * Mock implementation of {@link ClientHttpRequest}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class MockClientHttpRequest extends MockHttpOutputMessage implements ClientHttpRequest {
@@ -74,9 +76,14 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 		this.clientHttpResponse = clientHttpResponse;
 	}
 
+	public boolean isExecuted() {
+		return this.executed;
+	}
+
 	/**
-	 * Sets the {@link #isExecuted() executed} flag to true and returns the
+	 * Set the {@link #isExecuted() executed} flag to {@code true} and return the
 	 * configured {@link #setResponse(ClientHttpResponse) response}.
+	 * @see #executeInternal()
 	 */
 	public final ClientHttpResponse execute() throws IOException {
 		this.executed = true;
@@ -84,7 +91,11 @@ public class MockClientHttpRequest extends MockHttpOutputMessage implements Clie
 	}
 
 	/**
-	 * Override this method to execute the request and provdie a response.
+	 * The default implementation returns the configured
+	 * {@link #setResponse(ClientHttpResponse) response}.
+	 *
+	 * <p>Override this method to execute the request and provide a response,
+	 * potentially different than the configured response.
 	 */
 	protected ClientHttpResponse executeInternal() throws IOException {
 		return this.clientHttpResponse;
