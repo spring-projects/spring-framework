@@ -69,7 +69,10 @@ import org.springframework.web.context.WebApplicationContext;
  * @since 1.1
  * @see WebApplicationContextVariableResolver
  * @see FacesContextUtils#getRequiredWebApplicationContext
+ * @deprecated as of Spring 3.2, in favor of the JSF 1.2 based
+ * {@link org.springframework.web.jsf.el.SpringBeanFacesELResolver}
  */
+@Deprecated
 public class DelegatingVariableResolver extends VariableResolver {
 
 	/** Logger available to subclasses */
