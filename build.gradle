@@ -645,7 +645,7 @@ project('spring-aspects') {
         compile(project(":spring-orm"), optional) // for JPA exception translation support
         aspects project(":spring-orm")
         ajc "org.aspectj:aspectjtools:${aspectjVersion}"
-        compile "org.aspectj:aspectjrt:${aspectjVersion}"
+        compile "org.aspectj:aspectjweaver:${aspectjVersion}"
         testCompile project(":spring-core") // for CodeStyleAspect
         compile project(":spring-beans") // for 'p' namespace visibility
         testCompile project(":spring-test")
