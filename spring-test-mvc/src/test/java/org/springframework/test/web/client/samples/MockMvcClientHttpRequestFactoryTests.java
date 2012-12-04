@@ -41,7 +41,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Tests dependent on access to resources under the web application root directory.
+ * Tests that use a {@link RestTemplate} configured with a
+ * {@link MockMvcClientHttpRequestFactory} that is in turn configured with a
+ * {@link MockMvc} instance that uses a {@link WebApplicationContext} loaded by
+ * the TestContext framework.
  *
  * @author Rossen Stoyanchev
  */
