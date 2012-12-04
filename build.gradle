@@ -414,11 +414,8 @@ project('spring-web') {
 project('spring-orm') {
     description = 'Spring Object/Relational Mapping'
     dependencies {
-        // compiling against both hibernate 3 and 4 here in order to support
-        // our respective orm.hibernate3 and orm.hibernate4 packages
         compile("aopalliance:aopalliance:1.0")
         compile("org.hibernate:hibernate-core:3.3.2.GA", optional)
-        compile("org.hibernate:hibernate-cglib-repack:2.1_3", optional)
         compile("org.hibernate:hibernate-annotations:3.4.0.GA", optional)
         compile("org.hibernate:hibernate-entitymanager:3.4.0.GA", optional)
         compile("org.apache.openjpa:openjpa:1.1.0", optional)
