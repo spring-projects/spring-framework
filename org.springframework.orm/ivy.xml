@@ -40,7 +40,7 @@
 		<dependency org="org.apache.openjpa" name="com.springsource.org.apache.openjpa" rev="1.1.0" conf="optional, openjpa->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="optional, eclipselink->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="optional, hibernate->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.2.GA" conf="optional, hibernate->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.core" rev="4.1.0.Final" conf="optional, hibernate->compile"/>
@@ -62,7 +62,7 @@
 		<dependency org="org.easymock" name="com.springsource.org.easymock" rev="2.5.1" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="test->runtime"/>
-		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->runtime"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.6.1" conf="test->runtime"/>
 	</dependencies>
 
 </ivy-module>

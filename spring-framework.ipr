@@ -1219,13 +1219,13 @@
     </library>
     <library name="SLF4j">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-1.5.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-1.5.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.6.1/com.springsource.slf4j.api-1.6.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.6.1/com.springsource.slf4j.jcl-1.6.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.5.3/com.springsource.slf4j.api-sources-1.5.3.jar!/" />
-        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.5.3/com.springsource.slf4j.jcl-sources-1.5.3.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.api/1.6.1/com.springsource.slf4j.api-sources-1.6.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/ivy-cache/repository/org.slf4j/com.springsource.slf4j.jcl/1.6.1/com.springsource.slf4j.jcl-sources-1.6.1.jar!/" />
       </SOURCES>
     </library>
   </component>
