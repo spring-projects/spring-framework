@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter
+<chapter xml:id="testing"
     xmlns="http://docbook.org/ns/docbook" version="5.0"
     xmlns:xl="http://www.w3.org/1999/xlink"
     xmlns:xi="http://www.w3.org/2001/XInclude"

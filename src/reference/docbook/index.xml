@@ -15,222 +15,152 @@
 
     <releaseinfo>${version}</releaseinfo>
 
-    <mediaobject>
-      <imageobject role="fo">
-        <imagedata align="center" fileref="images/logo.png" format="PNG"
-                   width="240" />
-      </imageobject>
-    </mediaobject>
-
     <authorgroup>
       <author>
         <personname>
           <firstname>Rod</firstname>
           <surname>Johnson</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Juergen</firstname>
           <surname>Hoeller</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Keith</firstname>
           <surname>Donald</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Colin</firstname>
           <surname>Sampaleanu</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Rob</firstname>
           <surname>Harrop</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Thomas</firstname>
           <surname>Risberg</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Alef</firstname>
           <surname>Arendsen</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Darren</firstname>
           <surname>Davison</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Dmitriy</firstname>
           <surname>Kopylenko</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Mark</firstname>
           <surname>Pollack</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Thierry</firstname>
           <surname>Templier</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Erwin</firstname>
           <surname>Vervaet</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Portia</firstname>
           <surname>Tung</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Ben</firstname>
           <surname>Hale</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Adrian</firstname>
           <surname>Colyer</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>John</firstname>
           <surname>Lewis</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Costin</firstname>
           <surname>Leau</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Mark</firstname>
           <surname>Fisher</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Sam</firstname>
           <surname>Brannen</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Ramnivas</firstname>
           <surname>Laddad</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Arjen</firstname>
           <surname>Poutsma</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Chris</firstname>
           <surname>Beams</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Tareq</firstname>
           <surname>Abedrabbo</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Andy</firstname>
           <surname>Clement</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Dave</firstname>
           <surname>Syer</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Oliver</firstname>
           <surname>Gierke</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Rossen</firstname>
           <surname>Stoyanchev</surname>
         </personname>
-      </author>
-
-      <author>
+      </author><author>
         <personname>
           <firstname>Phillip</firstname>
           <surname>Webb</surname>
         </personname>
       </author>
-
     </authorgroup>
 
     <copyright>
       <year>2004-2012</year>
-
-      <holder>Rod Johnson, Juergen Hoeller, Keith Donald, Colin Sampaleanu,
-      Rob Harrop, Alef Arendsen, Thomas Risberg, Darren Davison, Dmitriy
-      Kopylenko, Mark Pollack, Thierry Templier, Erwin Vervaet, Portia Tung,
-      Ben Hale, Adrian Colyer, John Lewis, Costin Leau, Mark Fisher, Sam
-      Brannen, Ramnivas Laddad, Arjen Poutsma, Chris Beams, Tareq Abedrabbo,
-      Andy Clement, Dave Syer, Oliver Gierke, Rossen Stoyanchev,
-      Phillip Webb</holder>
     </copyright>
 
     <legalnotice>
