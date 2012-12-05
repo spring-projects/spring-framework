@@ -14,6 +14,8 @@ Changes in version 3.2 GA (2012-12-12)
 * deprecated Apache iBATIS support in favor of native Spring support in MyBatis
 * deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
 * DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
+* ResourceDatabasePopulator now supports comments within SQL statements (SPR-10075)
+* JdbcTestUtils now supports comments within SQL statements (SPR-9982)
 
 
 Changes in version 3.2 RC2 (2012-11-27)
