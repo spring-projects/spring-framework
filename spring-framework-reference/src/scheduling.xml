@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="scheduling">
@@ -845,112 +845,6 @@ public class ExampleJob extends QuartzJobBean {
       etc. Have a look at the <ulink
       url="http://static.springframework.org/spring/docs/current/api/org/springframework/scheduling/quartz/SchedulerFactoryBean.html">SchedulerFactoryBean
       Javadoc</ulink> for more information.</para>
-    </section>
-  </section>
-
-  <section id="scheduling-jdk-timer">
-    <title>Using JDK Timer support</title>
-
-    <para>The other way to schedule jobs in Spring is to use JDK
-    <classname>Timer</classname> objects. You can create custom timers or use
-    the timer that invokes methods. Wiring timers is done using the
-    <classname>TimerFactoryBean</classname>.</para>
-
-    <section id="scheduling-jdk-timer-creating">
-      <title>Creating custom timers</title>
-
-      <para>Using the <classname>TimerTask</classname> you can create customer
-      timer tasks, similar to Quartz jobs:</para>
-
-      <programlisting language="java">public class CheckEmailAddresses extends TimerTask {
-
-  private List emailAddresses;
-  
-  public void setEmailAddresses(List emailAddresses) {
-    this.emailAddresses = emailAddresses;
-  }
-  
-  public void run() {
-    <lineannotation>// iterate over all email addresses and archive them</lineannotation>
-  }
-}</programlisting>
-
-      <para>Wiring it up is simple:</para>
-
-      <programlisting language="xml">&lt;bean id="checkEmail" class="examples.CheckEmailAddress"&gt;
-    &lt;property name="emailAddresses"&gt;
-        &lt;list&gt;
-            &lt;value&gt;test@springframework.org&lt;/value&gt;
-            &lt;value&gt;foo@bar.com&lt;/value&gt;
-            &lt;value&gt;john@doe.net&lt;/value&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;
-
-&lt;bean id="scheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask"&gt;
-    <lineannotation>&lt;!-- wait 10 seconds before starting repeated execution --&gt;</lineannotation>
-    &lt;property name="delay" value="10000" /&gt;
-    <lineannotation>&lt;!-- run every 50 seconds --&gt;</lineannotation>
-    &lt;property name="period" value="50000" /&gt;
-    &lt;property name="timerTask" ref="checkEmail" /&gt;
-&lt;/bean&gt;</programlisting>
-
-      <para><emphasis> Note that letting the task only run once can be done by
-      changing the <literal>period</literal> property to 0 (or a negative
-      value). </emphasis></para>
-    </section>
-
-    <section id="scheduling-jdk-timer-method-invoking-task">
-      <title>Using the
-      <classname>MethodInvokingTimerTaskFactoryBean</classname></title>
-
-      <para>Similar to the Quartz support, the <classname>Timer</classname>
-      support also features a component that allows you to periodically invoke
-      a method:</para>
-
-      <programlisting language="xml">&lt;bean id="doIt" class="org.springframework.scheduling.timer.MethodInvokingTimerTaskFactoryBean"&gt;
-    &lt;property name="targetObject" ref="exampleBusinessObject" /&gt;
-    &lt;property name="targetMethod" value="doIt" /&gt;
-&lt;/bean&gt;</programlisting>
-
-      <para>The above example will result in the <literal>doIt</literal>
-      method being called on the <literal>exampleBusinessObject</literal> (see
-      below):</para>
-
-      <programlisting language="java">public class BusinessObject {
-  
-  <lineannotation>// properties and collaborators</lineannotation>
-  
-  public void doIt() {
-    <lineannotation>// do the actual work</lineannotation>
-  }
-}</programlisting>
-
-      <para>Changing the <literal>timerTask</literal> reference of the
-      <classname>ScheduledTimerTask</classname> example to the bean
-      <literal>doIt</literal> will result in the <literal>doIt</literal>
-      method being executed on a fixed schedule.</para>
-    </section>
-
-    <section id="scheduling-jdk-timer-factory-bean">
-      <title>Wrapping up: setting up the tasks using the
-      <classname>TimerFactoryBean</classname></title>
-
-      <para>The <classname>TimerFactoryBean</classname> is similar to the
-      Quartz <classname>SchedulerFactoryBean</classname> in that it serves the
-      same purpose: setting up the actual scheduling. The
-      <classname>TimerFactoryBean</classname> sets up an actual
-      <classname>Timer</classname> and schedules the tasks it has references
-      to. You can specify whether or not daemon threads should be used.</para>
-
-      <programlisting language="xml">&lt;bean id="timerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean"&gt;
-    &lt;property name="scheduledTimerTasks"&gt;
-        &lt;list&gt;
-            <lineannotation>&lt;!-- see the example above --&gt;</lineannotation>
-            &lt;ref bean="scheduledTask" /&gt;
-        &lt;/list&gt;
-    &lt;/property&gt;
-&lt;/bean&gt;</programlisting>
     </section>
   </section>
 </chapter>
