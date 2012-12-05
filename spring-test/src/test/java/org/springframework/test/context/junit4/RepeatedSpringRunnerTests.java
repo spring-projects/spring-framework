@@ -16,13 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
@@ -100,7 +101,7 @@ public class RepeatedSpringRunnerTests {
 
 
 	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners( {})
+	@TestExecutionListeners({})
 	public abstract static class AbstractRepeatedTestCase {
 
 		protected void incrementInvocationCount() throws IOException {
@@ -151,8 +152,7 @@ public class RepeatedSpringRunnerTests {
 	 * href="http://jira.springframework.org/browse/SPR-6011"
 	 * target="_blank">SPR-6011</a>.
 	 */
-	@org.junit.Ignore // TODO SPR-8116 causing timeouts on cbeams' (otherwise fast) MBP.
-	// Timeouts are 2x-4x their expected range. Something seems wrong indeed.
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	public static final class TimedRepeatedTestCase extends AbstractRepeatedTestCase {
 
 		@Test

@@ -16,8 +16,11 @@
 
 package org.springframework.remoting.jaxws;
 
+import static org.junit.Assert.*;
+
 import java.net.MalformedURLException;
 import java.net.URL;
+
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Service;
@@ -25,9 +28,8 @@ import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
 import javax.xml.ws.soap.AddressingFeature;
 
-import static org.junit.Assert.*;
+import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
@@ -38,7 +40,8 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  */
-@org.junit.Ignore // TODO SPR-8116 - see https://gist.github.com/1150858
+// TODO SPR-8116 - see https://gist.github.com/1150858
+@Ignore("see https://gist.github.com/1150858")
 public class JaxWsSupportTests {
 
 	@Test

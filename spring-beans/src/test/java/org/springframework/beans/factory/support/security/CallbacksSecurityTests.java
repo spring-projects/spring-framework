@@ -436,7 +436,9 @@ public class CallbacksSecurityTests {
 	}
 
 	@Test
-	@Ignore // TODO SPR-8116 passes under Eclipse, but fails under Gradle with https://gist.github.com/1664133
+	@Ignore("passes under Eclipse, but fails under Gradle with https://gist.github.com/1664133")
+	// TODO SPR-8116 passes under Eclipse, but fails under Gradle with
+	// https://gist.github.com/1664133
 	public void testContainerPrivileges() throws Exception {
 		AccessControlContext acc = provider.getAccessControlContext();
 

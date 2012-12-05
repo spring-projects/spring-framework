@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.junit38;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +24,7 @@ import java.util.Collection;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -104,7 +105,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingBeforeTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -113,7 +114,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@TestExecutionListeners(listeners = AlwaysFailingAfterTestMethodTestExecutionListener.class, inheritListeners = false)
 	public static class AlwaysFailingAfterTestMethodTestCase extends AbstractJUnit38SpringContextTests {
@@ -122,7 +123,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {
@@ -136,7 +137,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@SuppressWarnings("deprecation")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionalTestCase extends AbstractTransactionalJUnit38SpringContextTests {

@@ -16,12 +16,12 @@
 
 package org.springframework.test.context.junit4;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunNotifier;
@@ -146,32 +146,32 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingBeforeTestClassTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestClassTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingAfterTestClassTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestClassTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingPrepareTestInstanceTestExecutionListener.class)
 	public static class AlwaysFailingPrepareTestInstanceTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingBeforeTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingBeforeTestMethodTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@TestExecutionListeners(AlwaysFailingAfterTestMethodTestExecutionListener.class)
 	public static class AlwaysFailingAfterTestMethodTestCase extends BaseTestCase {
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingBeforeTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 
@@ -185,7 +185,7 @@ public class FailingBeforeAndAfterMethodsTests {
 		}
 	}
 
-	@org.junit.Ignore // TODO SPR-8116
+	@Ignore("TestCase classes are run manually by the enclosing test class")
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	public static class FailingAfterTransactionTestCase extends AbstractTransactionalJUnit4SpringContextTests {
 

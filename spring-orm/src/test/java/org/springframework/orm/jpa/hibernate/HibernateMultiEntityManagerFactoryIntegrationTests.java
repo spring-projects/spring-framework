@@ -26,7 +26,6 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  *
  * @author Juergen Hoeller
  */
-@org.junit.Ignore // TODO SPR-8116 work out JPA 1 vs 2 classpath issues in spring-orm
 public class HibernateMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 

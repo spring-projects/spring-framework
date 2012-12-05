@@ -19,6 +19,7 @@ package org.springframework.orm.jpa.toplink;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.junit.Ignore;
 import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrationTests;
 
 /**
@@ -26,13 +27,15 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  *
  * @author Costin Leau
  */
-@org.junit.Ignore // TODO SPR-8116 this test causes gradle to hang. See OJEMFWAJWIT.
+// TODO SPR-8116 this test causes gradle to hang. See OJEMFWAJWIT.
+@Ignore("this test causes gradle to hang. See OJEMFWAJWIT.")
 public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {
 
 	private EntityManagerFactory entityManagerFactory2;
 
 
+	@SuppressWarnings("deprecation")
 	public TopLinkMultiEntityManagerFactoryIntegrationTests() {
 		setAutowireMode(AUTOWIRE_BY_NAME);
 	}
