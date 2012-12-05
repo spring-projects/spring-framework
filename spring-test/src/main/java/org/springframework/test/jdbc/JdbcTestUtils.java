@@ -120,7 +120,7 @@ public class JdbcTestUtils {
 	/**
 	 * Execute the given SQL script.
 	 * <p>The script will typically be loaded from the classpath. There should
-	 * be one statement per line. Any semicolons will be removed.
+	 * be one statement per line. Any semicolons and line comments will be removed.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
 	 * @param resourceLoader the resource loader with which to load the SQL script
@@ -130,6 +130,7 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see #executeSqlScript(JdbcTemplate, Resource, boolean)
 	 */
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
@@ -142,7 +143,8 @@ public class JdbcTestUtils {
 	 * <p>The script will typically be loaded from the classpath. Statements
 	 * should be delimited with a semicolon. If statements are not delimited with
 	 * a semicolon then there should be one statement per line. Statements are
-	 * allowed to span lines only if they are delimited with a semicolon.
+	 * allowed to span lines only if they are delimited with a semicolon. Any
+	 * line comments will be removed.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
 	 * @param resource the resource to load the SQL script from
@@ -151,6 +153,7 @@ public class JdbcTestUtils {
 	 * @throws DataAccessException if there is an error executing a statement
 	 * and {@code continueOnError} is {@code false}
 	 * @see ResourceDatabasePopulator
+	 * @see #executeSqlScript(JdbcTemplate, EncodedResource, boolean)
 	 */
 	public static void executeSqlScript(JdbcTemplate jdbcTemplate, Resource resource, boolean continueOnError)
 			throws DataAccessException {
@@ -160,7 +163,7 @@ public class JdbcTestUtils {
 	/**
 	 * Execute the given SQL script.
 	 * <p>The script will typically be loaded from the classpath. There should
-	 * be one statement per line. Any semicolons will be removed.
+	 * be one statement per line. Any semicolons and line comments will be removed.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
 	 * @param jdbcTemplate the JdbcTemplate with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding)
@@ -245,9 +248,12 @@ public class JdbcTestUtils {
 	/**
 	 * Read a script from the provided {@code LineNumberReader}, using the supplied
 	 * comment prefix, and build a {@code String} containing the lines.
+	 * <p>Lines <em>beginning</em> with the comment prefix are excluded from the
+	 * results; however, line comments anywhere else &mdash; for example, within
+	 * a statement &mdash; will be included in the results.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
 	 * to be processed
-	 * @param commentPrefix the line prefix that identifies comments in the SQL script
+	 * @param commentPrefix the prefix that identifies comments in the SQL script &mdash; typically "--"
 	 * @return a {@code String} containing the script lines
 	 */
 	public static String readScript(LineNumberReader lineNumberReader, String commentPrefix) throws IOException {
@@ -287,25 +293,35 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided
+	 * Split an SQL script into separate statements delimited by the provided
 	 * delimiter character. Each individual statement will be added to the
 	 * provided <code>List</code>.
+	 * <p>Within a statement, "{@code --}" will be used as the comment prefix;
+	 * any text beginning with the comment prefix and extending to the end of
+	 * the line will be omitted from the statement. In addition, multiple adjacent
+	 * whitespace characters will be collapsed into a single space.
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
 	 * @param statements the list that will contain the individual statements
 	 */
 	public static void splitSqlScript(String script, char delim, List<String> statements) {
-		splitSqlScript(script, "" + delim, statements);
+		splitSqlScript(script, "" + delim, DEFAULT_COMMENT_PREFIX, statements);
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided delimiter
-	 * character. Each individual statement will be added to the provided {@code List}.
+	 * Split an SQL script into separate statements delimited by the provided
+	 * delimiter string. Each individual statement will be added to the provided
+	 * {@code List}.
+	 * <p>Within a statement, the provided {@code commentPrefix} will be honored;
+	 * any text beginning with the comment prefix and extending to the end of the
+	 * line will be omitted from the statement. In addition, multiple adjacent
+	 * whitespace characters will be collapsed into a single space.
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement &mdash; typically a ';' character
+	 * @param commentPrefix the prefix that identifies line comments in the SQL script &mdash; typically "--"
 	 * @param statements the List that will contain the individual statements
 	 */
-	private static void splitSqlScript(String script, String delim, List<String> statements) {
+	private static void splitSqlScript(String script, String delim, String commentPrefix, List<String> statements) {
 		StringBuilder sb = new StringBuilder();
 		boolean inLiteral = false;
 		boolean inEscape = false;
@@ -327,7 +343,8 @@ public class JdbcTestUtils {
 				inLiteral = !inLiteral;
 			}
 			if (!inLiteral) {
-				if (startsWithDelimiter(script, i, delim)) {
+				if (script.startsWith(delim, i)) {
+					// we've reached the end of the current statement
 					if (sb.length() > 0) {
 						statements.add(sb.toString());
 						sb = new StringBuilder();
@@ -335,8 +352,27 @@ public class JdbcTestUtils {
 					i += delim.length() - 1;
 					continue;
 				}
-				else if (c == '\n' || c == '\t') {
-					c = ' ';
+				else if (script.startsWith(commentPrefix, i)) {
+					// skip over any content from the start of the comment to the EOL
+					int indexOfNextNewline = script.indexOf("\n", i);
+					if (indexOfNextNewline > i) {
+						i = indexOfNextNewline;
+						continue;
+					}
+					else {
+						// if there's no newline after the comment, we must be at the end
+						// of the script, so stop here.
+						break;
+					}
+				}
+				else if (c == ' ' || c == '\n' || c == '\t') {
+					// avoid multiple adjacent whitespace characters
+					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
+						c = ' ';
+					}
+					else {
+						continue;
+					}
 				}
 			}
 			sb.append(c);
@@ -344,22 +380,6 @@ public class JdbcTestUtils {
 		if (StringUtils.hasText(sb)) {
 			statements.add(sb.toString());
 		}
-	}
-
-	/**
-	 * Return whether the substring of a given source {@link String} starting at the
-	 * given index starts with the given delimiter.
-	 * @param source the source {@link String} to inspect
-	 * @param startIndex the index to look for the delimiter
-	 * @param delim the delimiter to look for
-	 */
-	private static boolean startsWithDelimiter(String source, int startIndex, String delim) {
-		int endIndex = startIndex + delim.length();
-		if (source.length() < endIndex) {
-			// String is too short to contain the delimiter
-			return false;
-		}
-		return source.substring(startIndex, endIndex).equals(delim);
 	}
 
 }
