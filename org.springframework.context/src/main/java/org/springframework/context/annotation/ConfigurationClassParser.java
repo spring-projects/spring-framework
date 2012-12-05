@@ -252,6 +252,16 @@ class ConfigurationClassParser {
 					Class<?> clazz = ((StandardAnnotationMetadata) metadata).getIntrospectedClass();
 					return new StandardAnnotationMetadata(clazz.getSuperclass(), true);
 				}
+				else if (superclass.startsWith("java")) {
+					// never load core JDK classes via ASM, in particular not java.lang.Object!
+					try {
+						return new StandardAnnotationMetadata(
+								this.resourceLoader.getClassLoader().loadClass(superclass), true);
+					}
+					catch (ClassNotFoundException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
 				else {
 					MetadataReader reader = this.metadataReaderFactory.getMetadataReader(superclass);
 					return reader.getAnnotationMetadata();
@@ -317,7 +327,8 @@ class ConfigurationClassParser {
 				if (new AssignableTypeFilter(ImportSelector.class).match(reader, this.metadataReaderFactory)) {
 					// the candidate class is an ImportSelector -> delegate to it to determine imports
 					try {
-						ImportSelector selector = BeanUtils.instantiateClass(Class.forName(candidate), ImportSelector.class);
+						ImportSelector selector = BeanUtils.instantiateClass(
+								this.resourceLoader.getClassLoader().loadClass(candidate), ImportSelector.class);
 						processImport(configClass, selector.selectImports(importingClassMetadata), false);
 					}
 					catch (ClassNotFoundException ex) {
@@ -327,7 +338,8 @@ class ConfigurationClassParser {
 				else if (new AssignableTypeFilter(ImportBeanDefinitionRegistrar.class).match(reader, metadataReaderFactory)) {
 					// the candidate class is an ImportBeanDefinitionRegistrar -> delegate to it to register additional bean definitions
 					try {
-						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(Class.forName(candidate), ImportBeanDefinitionRegistrar.class);
+						ImportBeanDefinitionRegistrar registrar = BeanUtils.instantiateClass(
+								this.resourceLoader.getClassLoader().loadClass(candidate), ImportBeanDefinitionRegistrar.class);
 						registrar.registerBeanDefinitions(importingClassMetadata, registry);
 					}
 					catch (ClassNotFoundException ex) {
