@@ -27,7 +27,7 @@ import org.springframework.orm.jpa.AbstractContainerEntityManagerFactoryIntegrat
  *
  * @author Costin Leau
  */
-// TODO SPR-8116 this test causes gradle to hang. See OJEMFWAJWIT.
+// TODO [SPR-10074] this test causes gradle to hang. See OJEMFWAJWIT.
 @Ignore("this test causes gradle to hang. See OJEMFWAJWIT.")
 public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		AbstractContainerEntityManagerFactoryIntegrationTests {

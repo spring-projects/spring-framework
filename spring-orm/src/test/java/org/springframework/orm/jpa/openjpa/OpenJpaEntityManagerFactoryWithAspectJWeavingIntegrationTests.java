@@ -23,8 +23,8 @@ import org.junit.Ignore;
  *
  * @author Ramnivas Laddad
  */
-// TODO SPR-8116 this test causes gradle to hang.
-// when run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
+// TODO [SPR-10074] this test causes gradle to hang.
+// When run independently e.g. `./gradlew :spring-orm:test -Dtest.single=OpenJpaEntity...`
 // it works fine. When run together with all other tests e.g. `./gradlew :spring-orm:test`
 // it hangs on the 'testCanSerializeProxies' test method. Note that this test DOES pass in
 // Eclipse, even when the entire 'spring-orm' module is run. Run gradle with '-i' to

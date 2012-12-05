@@ -40,7 +40,7 @@ import org.springframework.context.support.GenericApplicationContext;
  * @author Juergen Hoeller
  * @since 2.5
  */
-// TODO SPR-8116 - see https://gist.github.com/1150858
+// TODO [SPR-10074] see https://gist.github.com/1150858
 @Ignore("see https://gist.github.com/1150858")
 public class JaxWsSupportTests {
 
