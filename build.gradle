@@ -13,8 +13,7 @@ configure(allprojects) {
     ext.aspectjVersion  = '1.6.12'
     ext.easymockVersion = '2.5.2'
     ext.hsqldbVersion   = '1.8.0.10'
-    ext.junitVersion    = '4.11.20120805.1225' // temporary use of snapshot;
-                                               // spring-test still builds against 4.10
+    ext.junitVersion    = '4.11'
     ext.slf4jVersion    = '1.6.1'
     ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -47,7 +46,8 @@ configure(allprojects) {
 
 configure(subprojects - project(":spring-test")) {
     dependencies {
-        testCompile ("junit:junit-dep:${junitVersion}") {
+        testCompile ("junit:junit:${junitVersion}") {
+            // We already have hamcrest-all as a global testCompile dependency.
             exclude group: 'org.hamcrest', module: 'hamcrest-core'
         }
     }
@@ -554,7 +554,7 @@ project('spring-test') {
         compile(project(":spring-web"), optional)
         compile(project(":spring-webmvc"), optional)
         compile(project(":spring-webmvc-portlet"), optional)
-        compile("junit:junit-dep:4.10") { dep ->
+        compile("junit:junit:${junitVersion}") { dep ->
             optional dep
             // We already have hamcrest-all as a global testCompile dependency.
             exclude group: 'org.hamcrest', module: 'hamcrest-core'

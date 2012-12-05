@@ -6,11 +6,12 @@ http://www.springsource.org
 Changes in version 3.2 GA (2012-12-12)
 --------------------------------------
 
+* upgraded build and test suite to Joda-Time 2.1, Groovy 1.8.8, JRuby 1.6.5, JUnit 4.11
+* spring-test module again depends on junit:junit for JUnit 4.11 (10044)
 * reworked Hibernate 4 support to avoid reflection, also adding unit tests for Hibernate 4
-* upgraded Spring Framework build and test suite to Joda-Time 2.1, Groovy 1.8.8, JRuby 1.6.5
 * checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
 * checked compatibility of Spring's JasperReports support with JasperReports 5.0
-* deprecated Apache iBATIS support in favor of native Spring support in Mybatis
+* deprecated Apache iBATIS support in favor of native Spring support in MyBatis
 * deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
 * DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
 
