@@ -59,9 +59,11 @@ public class DatabasePopulatorTests {
 		assertEquals(name, jdbcTemplate.queryForObject("select NAME from T_TEST", String.class));
 	}
 
-	private void assertUsersDatabaseCreated() {
-		assertEquals("Sam", jdbcTemplate.queryForObject("select first_name from users where last_name = 'Brannen'",
-				String.class));
+	private void assertUsersDatabaseCreated(String... lastNames) {
+		for (String lastName : lastNames) {
+			assertEquals("Did not find user with last name [" + lastName + "].", 1,
+				jdbcTemplate.queryForInt("select count(0) from users where last_name = ?", lastName));
+		}
 	}
 
 	@After
@@ -72,7 +74,6 @@ public class DatabasePopulatorTests {
 		}
 		db.shutdown();
 	}
-
 
 	@Test
 	public void testBuildWithCommentsAndFailedDrop() throws Exception {
@@ -215,7 +216,22 @@ public class DatabasePopulatorTests {
 			connection.close();
 		}
 
-		assertUsersDatabaseCreated();
+		assertUsersDatabaseCreated("Brannen");
+	}
+
+	@Test
+	public void scriptWithCommentsWithinStatements() throws Exception {
+		databasePopulator.addScript(resourceLoader.getResource("users-schema.sql"));
+		databasePopulator.addScript(resourceLoader.getResource("users-data-with-comments.sql"));
+		Connection connection = db.getConnection();
+		try {
+			databasePopulator.populate(connection);
+		}
+		finally {
+			connection.close();
+		}
+
+		assertUsersDatabaseCreated("Brannen", "Hoeller");
 	}
 
 	@Test
