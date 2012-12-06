@@ -605,16 +605,10 @@ project('spring-test-mvc') {
         testCompile "rome:rome:1.0"
         testCompile "javax.xml.bind:jaxb-api:2.2.6"
         testCompile "org.easymock:easymockclassextension:${easymockVersion}"
-        testCompile("org.springframework.security:spring-security-core:3.1.2.RELEASE") {
-            exclude group: 'org.springframework'
-        }
-        testCompile("org.springframework.security:spring-security-web:3.1.2.RELEASE") {
-            exclude group: 'org.springframework'
-        }
-        testCompile("org.springframework.security:spring-security-config:3.1.2.RELEASE") {
-            exclude group: 'org.springframework'
-        }
-        testCompile("org.springframework.hateoas:spring-hateoas:0.3.0.RELEASE")
+        testCompile "org.apache.tiles:tiles-request-api:1.0.1"
+        testCompile "org.apache.tiles:tiles-api:3.0.1"
+        testCompile "org.apache.tiles:tiles-core:3.0.1"
+        testCompile "org.apache.tiles:tiles-servlet:3.0.1"
     }
 }
 
