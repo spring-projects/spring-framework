@@ -2,6 +2,6 @@ import org.gradle.plugins.ide.eclipse.model.ProjectDependency
 
 // SPR-10042
 eclipse.classpath.file.whenMerged { classpath ->
-	def projectName = 'spring-webmvc-tiles3'
+	def projectName = "spring-webmvc-tiles3"
 	classpath.entries.add(0, new ProjectDependency("/${projectName}", project(":${projectName}").path))
 }

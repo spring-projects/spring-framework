@@ -1,4 +1,4 @@
-apply plugin: 'maven'
+apply plugin: "maven"
 
 ext.optionalDeps = []
 ext.providedDeps = []
@@ -14,45 +14,45 @@ install {
 
 def customizePom(pom, gradleProject) {
 	pom.whenConfigured { generatedPom ->
-		// respect 'optional' and 'provided' dependencies
+		// respect "optional" and "provided" dependencies
 		gradleProject.optionalDeps.each { dep ->
 			generatedPom.dependencies.findAll { it.artifactId == dep.name }*.optional = true
 		}
 		gradleProject.providedDeps.each { dep ->
-			generatedPom.dependencies.findAll { it.artifactId == dep.name }*.scope = 'provided'
+			generatedPom.dependencies.findAll { it.artifactId == dep.name }*.scope = "provided"
 		}
 
 		// eliminate test-scoped dependencies (no need in maven central poms)
 		generatedPom.dependencies.removeAll { dep ->
-			dep.scope == 'test'
+			dep.scope == "test"
 		}
 
 		// add all items necessary for maven central publication
 		generatedPom.project {
 			name = gradleProject.description
 			description = gradleProject.description
-			url = 'https://github.com/SpringSource/spring-framework'
+			url = "https://github.com/SpringSource/spring-framework"
 			organization {
-				name = 'SpringSource'
-				url = 'http://springsource.org/spring-framework'
+				name = "SpringSource"
+				url = "http://springsource.org/spring-framework"
 			}
 			licenses {
 				license {
-					name 'The Apache Software License, Version 2.0'
-					url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-					distribution 'repo'
+					name "The Apache Software License, Version 2.0"
+					url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+					distribution "repo"
 				}
 			}
 			scm {
-				url = 'https://github.com/SpringSource/spring-framework'
-				connection = 'scm:git:git://github.com/SpringSource/spring-framework'
-				developerConnection = 'scm:git:git://github.com/SpringSource/spring-framework'
+				url = "https://github.com/SpringSource/spring-framework"
+				connection = "scm:git:git://github.com/SpringSource/spring-framework"
+				developerConnection = "scm:git:git://github.com/SpringSource/spring-framework"
 			}
 			developers {
 				developer {
-					id = 'jhoeller'
-					name = 'Juergen Hoeller'
-					email = 'jhoeller@vmware.com'
+					id = "jhoeller"
+					name = "Juergen Hoeller"
+					email = "jhoeller@vmware.com"
 				}
 			}
 		}

@@ -11,14 +11,14 @@
  * @param OLD_VERSION_ROOT required, typically pointing to a separate git clone dir
  */
 task jdiff {
-	description = 'Generates a JDiff report'
-	group = 'Documentation'
+	description = "Generates a JDiff report"
+	group = "Documentation"
 
 	def jdiffHome = "${rootProject.rootDir}/gradle/jdiff"
 
 	ant.taskdef(
-			name: 'jdiff',
-			classname: 'jdiff.JDiffAntTask',
+			name: "jdiff",
+			classname: "jdiff.JDiffAntTask",
 			classpath: "${jdiffHome}/antjdiff.jar")
 
 	def previousVersion = rootProject.previousVersion
@@ -38,13 +38,13 @@ task jdiff {
 
 		oldVersionRoot = new File(oldVersionRoot)
 
-		ant.property(name: 'JDIFF_HOME', value: jdiffHome)
+		ant.property(name: "JDIFF_HOME", value: jdiffHome)
 		ant.mkdir(dir: outputDir)
 		ant.jdiff(
 				destdir: outputDir,
-				verbose: 'off',
-				stats: 'on',
-				docchanges: 'on') {
+				verbose: "off",
+				stats: "on",
+				docchanges: "on") {
 			old(name: "Spring Framework ${oldVersion}") {
 				oldVersionRoot.eachDirMatch( {
 						def candidate = new File(it)
@@ -52,19 +52,19 @@ task jdiff {
 						candidate.name.matches("spring-.*") }) { match ->
 					match.eachDirRecurse { subdir ->
 						if (subdir.path ==~ '.*/src/main/java$') {
-							dirset(dir: subdir.path, includes: 'org/**')
+							dirset(dir: subdir.path, includes: "org/**")
 						}
 					}
 				}
 			}
-			'new'(name: "Spring Framework ${currentVersion}") {
+			"new"(name: "Spring Framework ${currentVersion}") {
 				currentVersionRoot.eachDirMatch( {
 						def candidate = new File(it)
 						candidate.name.matches("org.springframework.*") ||
 						candidate.name.matches("spring-.*") }) { match ->
 					match.eachDirRecurse { subdir ->
 						if (subdir.path ==~ '.*/src/main/java$') {
-							dirset(dir: subdir.path, includes: 'org/**')
+							dirset(dir: subdir.path, includes: "org/**")
 						}
 					}
 				}

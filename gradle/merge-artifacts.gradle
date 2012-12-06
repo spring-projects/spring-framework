@@ -1,6 +1,6 @@
 /**
  * Will merge the artifacts of the current project into mergeIntoProject. For example, to
- * bundle spring-test-mvc in spring-test's jars. This script will perform the following
+ * bundle spring-test-mvc in spring-test"s jars. This script will perform the following
  * steps:
  *
  * - Ensure that jar tasks of the project being merged from will execute the tasks of the
@@ -13,14 +13,14 @@
  *
  * Example Usage:
  *
- *   ext.mergeIntoProject = project(':spring-test')
+ *   ext.mergeIntoProject = project(":spring-test")
  *   apply from: "${rootProject.projectDir}/gradle/merge-artifacts.gradle"
  */
 
 def mergeFromProject = project
 
 // invoking a task on mergeFromProject will invoke the task with the same name on mergeIntoProject
-def taskNamesToMerge = ['sourcesJar','jar','javadocJar','javadoc','install','artifactoryPublish']
+def taskNamesToMerge = ["sourcesJar","jar","javadocJar","javadoc","install","artifactoryPublish"]
 taskNamesToMerge.each { taskName ->
 	def taskToRemove = mergeFromProject.tasks.findByPath(taskName)
 	if(taskToRemove) {
