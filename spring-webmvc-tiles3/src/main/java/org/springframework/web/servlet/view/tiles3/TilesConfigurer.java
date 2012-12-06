@@ -28,6 +28,8 @@ import javax.el.ResourceBundleELResolver;
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.tiles.TilesContainer;
 import org.apache.tiles.TilesException;
 import org.apache.tiles.access.TilesAccess;
@@ -53,8 +55,6 @@ import org.apache.tiles.request.ApplicationContext;
 import org.apache.tiles.request.ApplicationResource;
 import org.apache.tiles.startup.DefaultTilesInitializer;
 import org.apache.tiles.startup.TilesInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -106,7 +106,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			ClassUtils.isPresent("javax.servlet.jsp.JspApplicationContext", TilesConfigurer.class.getClassLoader()) &&
 			ClassUtils.isPresent("org.apache.tiles.el.ELAttributeEvaluator", TilesConfigurer.class.getClassLoader());
 
-	protected final Logger logger = LoggerFactory.getLogger(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	private TilesInitializer tilesInitializer;
 
