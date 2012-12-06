@@ -50,19 +50,45 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useSuffixPatternMatch = true;
 
+	private boolean useRegisteredSuffixPatternMatch = false;
+
 	private boolean useTrailingSlashMatch = true;
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final List<String> contentNegotiationFileExtensions = new ArrayList<String>();
+	private final List<String> fileExtensions = new ArrayList<String>();
 
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".
 	 * <p>The default value is {@code true}.
+	 * <p>Also see {@link #setUseRegisteredSuffixPatternMatch(boolean)} for
+	 * more fine-grained control over specific suffices to allow.
 	 */
 	public void setUseSuffixPatternMatch(boolean useSuffixPatternMatch) {
 		this.useSuffixPatternMatch = useSuffixPatternMatch;
+	}
+
+	/**
+	 * Whether to use suffix pattern match for registered file extensions only
+	 * when matching patterns to requests.
+	 *
+	 * <p>If enabled, a controller method mapped to "/users" also matches to
+	 * "/users.json" assuming ".json" is a file extension registered with the
+	 * provided {@link #setContentNegotiationManager(ContentNegotiationManager)
+	 * contentNegotiationManager}. This can be useful for allowing only specific
+	 * URL extensions to be used as well as in cases where a "." in the URL path
+	 * can lead to ambiguous interpretation of path variable content, (e.g. given
+	 * "/users/{user}" and incoming URLs such as "/users/john.j.joe" and
+	 * "/users/john.j.joe.json").
+	 *
+	 * <p>If enabled, this flag also enables
+	 * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch}. The
+	 * default value is {@code false}.
+	 */
+	public void setUseRegisteredSuffixPatternMatch(boolean useRegsiteredSuffixPatternMatch) {
+		this.useRegisteredSuffixPatternMatch = useRegsiteredSuffixPatternMatch;
+		this.useSuffixPatternMatch = useRegsiteredSuffixPatternMatch ? true : this.useSuffixPatternMatch;
 	}
 
 	/**
@@ -81,7 +107,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		Assert.notNull(contentNegotiationManager);
 		this.contentNegotiationManager = contentNegotiationManager;
-		this.contentNegotiationFileExtensions.addAll(contentNegotiationManager.getAllFileExtensions());
 	}
 
 	/**
@@ -90,6 +115,14 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	public boolean useSuffixPatternMatch() {
 		return this.useSuffixPatternMatch;
 	}
+
+	/**
+	 * Whether to use registered suffixes for pattern matching.
+	 */
+	public boolean useRegisteredSuffixPatternMatch() {
+		return useRegisteredSuffixPatternMatch;
+	}
+
 	/**
 	 * Whether to match to URLs irrespective of the presence of a trailing  slash.
 	 */
@@ -105,10 +138,18 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Return the known file extensions for content negotiation.
+	 * Return the file extensions to use for suffix pattern matching.
 	 */
-	public List<String> getContentNegotiationFileExtensions() {
-		return this.contentNegotiationFileExtensions;
+	public List<String> getFileExtensions() {
+		return fileExtensions;
+	}
+
+	@Override
+	public void afterPropertiesSet() {
+		super.afterPropertiesSet();
+		if (this.useRegisteredSuffixPatternMatch) {
+			this.fileExtensions.addAll(contentNegotiationManager.getAllFileExtensions());
+		}
 	}
 
 	/**
@@ -187,7 +228,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		return new RequestMappingInfo(
 				new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(),
-						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.contentNegotiationFileExtensions),
+						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions),
 				new RequestMethodsRequestCondition(annotation.method()),
 				new ParamsRequestCondition(annotation.params()),
 				new HeadersRequestCondition(annotation.headers()),
