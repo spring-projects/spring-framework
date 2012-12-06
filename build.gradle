@@ -378,7 +378,7 @@ project("spring-web") {
 		compile("javax.el:el-api:1.0", optional)
 		compile("javax.faces:jsf-api:1.2_08", optional)
 		compile("javax.portlet:portlet-api:2.0", provided)
-		compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided) // servlet-api 3.0
+		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
 		compile("javax.servlet.jsp:jsp-api:2.1", provided)
 		compile("javax.xml:jaxrpc-api:1.1")
 		compile("javax.xml.soap:saaj-api:1.3", provided)
@@ -488,7 +488,7 @@ project("spring-webmvc") {
 			exclude group: "log4j", module: "log4j"
 		}
 		compile("javax.servlet:jstl:1.1.2", provided)
-		compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided) // servlet-api 3.0
+		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
 		testCompile(project(":spring-aop"))
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("rhino:js:1.7R1")
@@ -536,7 +536,7 @@ project("spring-webmvc-tiles3") {
 			optional dep
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided) // servlet-api 3.0
+		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
 		compile(project(":spring-web").sourceSets*.output) // mock request & response
 	}
 }
@@ -596,7 +596,7 @@ project("spring-test-mvc") {
 		compile(project(":spring-context"))
 		compile(project(":spring-webmvc"))
 		compile(project(":spring-test").sourceSets.main.output)
-		compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided)
+		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
 		compile("org.hamcrest:hamcrest-core:1.3", optional)
 		compile("com.jayway.jsonpath:json-path:0.8.1", optional)
 		compile("xmlunit:xmlunit:1.2", optional)
