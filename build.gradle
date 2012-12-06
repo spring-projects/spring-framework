@@ -1,5 +1,3 @@
-import org.gradle.plugins.ide.eclipse.model.ProjectDependency
-
 buildscript {
 	repositories {
 		maven { url "http://repo.springsource.org/plugins-release" }
