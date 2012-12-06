@@ -11,64 +11,64 @@
  * @param OLD_VERSION_ROOT required, typically pointing to a separate git clone dir
  */
 task jdiff {
-    description = 'Generates a JDiff report'
-    group = 'Documentation'
+	description = 'Generates a JDiff report'
+	group = 'Documentation'
 
-    def jdiffHome = "${rootProject.rootDir}/gradle/jdiff"
+	def jdiffHome = "${rootProject.rootDir}/gradle/jdiff"
 
-    ant.taskdef(
-            name: 'jdiff',
-            classname: 'jdiff.JDiffAntTask',
-            classpath: "${jdiffHome}/antjdiff.jar")
+	ant.taskdef(
+			name: 'jdiff',
+			classname: 'jdiff.JDiffAntTask',
+			classpath: "${jdiffHome}/antjdiff.jar")
 
-    def previousVersion = rootProject.previousVersion
+	def previousVersion = rootProject.previousVersion
 
-    def currentVersion = rootProject.version
-    def currentVersionRoot = rootProject.rootDir
+	def currentVersion = rootProject.version
+	def currentVersionRoot = rootProject.rootDir
 
-    def oldVersion = System.getProperty("OLD_VERSION") ?: previousVersion
-    def oldVersionRoot = System.getProperty("OLD_VERSION_ROOT")
+	def oldVersion = System.getProperty("OLD_VERSION") ?: previousVersion
+	def oldVersionRoot = System.getProperty("OLD_VERSION_ROOT")
 
-    def outputDir = "${rootProject.buildDir}/reports/jdiff/${oldVersion}_to_${currentVersion}"
+	def outputDir = "${rootProject.buildDir}/reports/jdiff/${oldVersion}_to_${currentVersion}"
 
-    doLast {
-        if (oldVersionRoot == null)
-            throw new IllegalArgumentException(
-                "Set OLD_VERSION_ROOT property to indicate the root directory for ${oldVersion}")
+	doLast {
+		if (oldVersionRoot == null)
+			throw new IllegalArgumentException(
+				"Set OLD_VERSION_ROOT property to indicate the root directory for ${oldVersion}")
 
-        oldVersionRoot = new File(oldVersionRoot)
+		oldVersionRoot = new File(oldVersionRoot)
 
-        ant.property(name: 'JDIFF_HOME', value: jdiffHome)
-        ant.mkdir(dir: outputDir)
-        ant.jdiff(
-                destdir: outputDir,
-                verbose: 'off',
-                stats: 'on',
-                docchanges: 'on') {
-            old(name: "Spring Framework ${oldVersion}") {
-                oldVersionRoot.eachDirMatch( {
-                        def candidate = new File(it)
-                        candidate.name.matches("org.springframework.*") ||
-                        candidate.name.matches("spring-.*") }) { match ->
-                    match.eachDirRecurse { subdir ->
-                        if (subdir.path ==~ '.*/src/main/java$') {
-                            dirset(dir: subdir.path, includes: 'org/**')
-                        }
-                    }
-                }
-            }
-            'new'(name: "Spring Framework ${currentVersion}") {
-                currentVersionRoot.eachDirMatch( {
-                        def candidate = new File(it)
-                        candidate.name.matches("org.springframework.*") ||
-                        candidate.name.matches("spring-.*") }) { match ->
-                    match.eachDirRecurse { subdir ->
-                        if (subdir.path ==~ '.*/src/main/java$') {
-                            dirset(dir: subdir.path, includes: 'org/**')
-                        }
-                    }
-                }
-            }
-        }
-    }
+		ant.property(name: 'JDIFF_HOME', value: jdiffHome)
+		ant.mkdir(dir: outputDir)
+		ant.jdiff(
+				destdir: outputDir,
+				verbose: 'off',
+				stats: 'on',
+				docchanges: 'on') {
+			old(name: "Spring Framework ${oldVersion}") {
+				oldVersionRoot.eachDirMatch( {
+						def candidate = new File(it)
+						candidate.name.matches("org.springframework.*") ||
+						candidate.name.matches("spring-.*") }) { match ->
+					match.eachDirRecurse { subdir ->
+						if (subdir.path ==~ '.*/src/main/java$') {
+							dirset(dir: subdir.path, includes: 'org/**')
+						}
+					}
+				}
+			}
+			'new'(name: "Spring Framework ${currentVersion}") {
+				currentVersionRoot.eachDirMatch( {
+						def candidate = new File(it)
+						candidate.name.matches("org.springframework.*") ||
+						candidate.name.matches("spring-.*") }) { match ->
+					match.eachDirRecurse { subdir ->
+						if (subdir.path ==~ '.*/src/main/java$') {
+							dirset(dir: subdir.path, includes: 'org/**')
+						}
+					}
+				}
+			}
+		}
+	}
 }

@@ -22,43 +22,43 @@ def mergeFromProject = project
 // invoking a task on mergeFromProject will invoke the task with the same name on mergeIntoProject
 def taskNamesToMerge = ['sourcesJar','jar','javadocJar','javadoc','install','artifactoryPublish']
 taskNamesToMerge.each { taskName ->
-    def taskToRemove = mergeFromProject.tasks.findByPath(taskName)
-    if(taskToRemove) {
-        taskToRemove.enabled = false
-        taskToRemove.dependsOn mergeIntoProject."$taskName"
-    }
+	def taskToRemove = mergeFromProject.tasks.findByPath(taskName)
+	if(taskToRemove) {
+		taskToRemove.enabled = false
+		taskToRemove.dependsOn mergeIntoProject."$taskName"
+	}
 }
 
 // update mergeIntoProject artifacts to contain the mergeFromProject artifact contents
 mergeIntoProject."sourcesJar" {
-    from mergeFromProject.sourcesJar.source
+	from mergeFromProject.sourcesJar.source
 }
 mergeIntoProject."jar" {
-    from mergeFromProject.jar.source
+	from mergeFromProject.jar.source
 }
 mergeIntoProject."javadoc" {
-    source += mergeFromProject.javadoc.source
-    classpath += mergeFromProject.javadoc.classpath
+	source += mergeFromProject.javadoc.source
+	classpath += mergeFromProject.javadoc.classpath
 }
 
 // Update mergeIntoProject to contain additional configurations that contains all the dependencies from mergeFromProject
 // so that Maven pom generation works
 gradle.taskGraph.whenReady {
-    mergeFromProject.configurations.archives.artifacts.clear()
+	mergeFromProject.configurations.archives.artifacts.clear()
 
-    mergeFromProject.configurations.each { config->
-        def mapping = mergeFromProject.conf2ScopeMappings.getMapping([config])
-        if(mapping.scope) {
-            def newConfigName = mergeFromProject.name + "-"+ config.name
-            mergeIntoProject.configurations.add(newConfigName)
-            config.dependencies.each { dependency ->
-                mergeIntoProject.dependencies.add(newConfigName, dependency)
-            }
-            configure(mergeIntoProject.install.repositories.mavenInstaller.pom.scopeMappings) {
-                addMapping(mapping.priority + 100, mergeIntoProject.configurations."$newConfigName", mapping.scope)
-            }
-            mergeIntoProject.optionalDeps += mergeFromProject.optionalDeps
-            mergeIntoProject.providedDeps += mergeFromProject.providedDeps
-        }
-    }
+	mergeFromProject.configurations.each { config->
+		def mapping = mergeFromProject.conf2ScopeMappings.getMapping([config])
+		if(mapping.scope) {
+			def newConfigName = mergeFromProject.name + "-"+ config.name
+			mergeIntoProject.configurations.add(newConfigName)
+			config.dependencies.each { dependency ->
+				mergeIntoProject.dependencies.add(newConfigName, dependency)
+			}
+			configure(mergeIntoProject.install.repositories.mavenInstaller.pom.scopeMappings) {
+				addMapping(mapping.priority + 100, mergeIntoProject.configurations."$newConfigName", mapping.scope)
+			}
+			mergeIntoProject.optionalDeps += mergeFromProject.optionalDeps
+			mergeIntoProject.providedDeps += mergeFromProject.providedDeps
+		}
+	}
 }
