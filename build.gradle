@@ -165,13 +165,7 @@ project("spring-core") {
 			optional dep
 			exclude group: "org.apache.ant", module: "ant"
 		}
-		compile("log4j:log4j:1.2.15") { dep ->
-			optional dep
-			exclude group: "javax.mail", module: "mail"
-			exclude group: "javax.jms", module: "jms"
-			exclude group: "com.sun.jdmk", module: "jmxtools"
-			exclude group: "com.sun.jmx", module: "jmxri"
-		}
+		compile("log4j:log4j:1.2.17", optional)
 		testCompile("xmlunit:xmlunit:1.2")
 		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7")
 	}
@@ -610,12 +604,7 @@ project("spring-test-mvc") {
 		testCompile("org.slf4j:slf4j-log4j12:${slf4jVersion}") {
 			exclude group: "log4j", module: "log4j"
 		}
-		testCompile("log4j:log4j:1.2.15") {
-			exclude group: "javax.mail", module: "mail"
-			exclude group: "javax.jms", module: "jms"
-			exclude group: "com.sun.jdmk", module: "jmxtools"
-			exclude group: "com.sun.jmx", module: "jmxri"
-		}
+		testCompile("log4j:log4j:1.2.17")
 		testCompile("javax.servlet:jstl:1.2")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
