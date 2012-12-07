@@ -1,3 +1,5 @@
+import org.gradle.api.artifacts.ExcludeRule
+
 /**
  * Will merge the artifacts of the current project into mergeIntoProject. For example, to
  * bundle spring-test-mvc in spring-test's jars. This script will perform the following
@@ -50,7 +52,11 @@ gradle.taskGraph.whenReady {
         def mapping = mergeFromProject.conf2ScopeMappings.getMapping([config])
         if(mapping.scope) {
             def newConfigName = mergeFromProject.name + "-"+ config.name
-            mergeIntoProject.configurations.add(newConfigName)
+            def newConfig = mergeIntoProject.configurations.add(newConfigName)
+            config.excludeRules.each { excludeRule ->
+                def excludeProperties = [(ExcludeRule.GROUP_KEY) : excludeRule.group, (ExcludeRule.MODULE_KEY) : excludeRule.module]
+                newConfig.exclude(excludeProperties)
+            }
             config.dependencies.each { dependency ->
                 mergeIntoProject.dependencies.add(newConfigName, dependency)
             }
