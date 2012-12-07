@@ -92,6 +92,7 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingBeforeTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void beforeTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing beforeTestMethod()");
 		}
@@ -100,6 +101,7 @@ public class FailingBeforeAndAfterMethodsTests {
 	static class AlwaysFailingAfterTestMethodTestExecutionListener extends AbstractTestExecutionListener {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void afterTestMethod(TestContext testContext) {
 			junit.framework.Assert.fail("always failing afterTestMethod()");
 		}

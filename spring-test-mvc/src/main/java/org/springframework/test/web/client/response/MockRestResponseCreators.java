@@ -15,15 +15,11 @@
  */
 package org.springframework.test.web.client.response;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.ResponseCreator;
 
 /**
