@@ -52,6 +52,22 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * processed unless the {@code <web-app>} element's {@code version} attribute is >= "3.0"
  * and the {@code xsi:schemaLocation} for "http://java.sun.com/xml/ns/javaee" is set to
  * "http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd".
+ * <p>A web application can choose to limit the amount of classpath scanning the Servlet
+ * container does at startup either through the metadata-complete attribute in
+ * {@code web.xml}, which controls scanning for Servlet annotations or through an
+ * {@code <absolute-ordering>} element also in {@code web.xml}, which controls which
+ * web fragments (i.e. jars) are allowed to perform a {@code ServletContainerInitializer}
+ * scan. When using this feature, the Spring's {@link SpringServletContainerInitializer}
+ * can be enabled by adding "spring_web" to the list of named web fragments in
+ * {@code web.xml} as follows:
+ *
+ * <pre class="code">
+ * {@code
+ * <absolute-ordering>
+ *   <name>some_web_fragment</name>
+ *   <name>spring_web</name>
+ * </absolute-ordering>
+ * }</pre>
  *
  * <h2>Relationship to Spring's {@code WebApplicationInitializer}</h2>
  * Spring's {@code WebApplicationInitializer} SPI consists of just one method:
@@ -91,6 +107,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  * @see #onStartup(Set, ServletContext)
  * @see WebApplicationInitializer
