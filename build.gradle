@@ -518,7 +518,10 @@ project('spring-webmvc-tiles3') {
         compile("javax.servlet.jsp:jsp-api:2.1", provided)
         compile("org.apache.tiles:tiles-request-api:1.0.1", optional)
         compile("org.apache.tiles:tiles-api:3.0.1", optional)
-        compile("org.apache.tiles:tiles-core:3.0.1", optional)
+        compile("org.apache.tiles:tiles-core:3.0.1") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
         compile("org.apache.tiles:tiles-servlet:3.0.1", optional)
         compile("org.apache.tiles:tiles-jsp:3.0.1", optional)
         compile("org.apache.tiles:tiles-el:3.0.1", optional)
@@ -586,16 +589,6 @@ project('spring-test-mvc') {
         compile("org.hamcrest:hamcrest-core:1.3", optional)
         compile("com.jayway.jsonpath:json-path:0.8.1", optional)
         compile("xmlunit:xmlunit:1.2", optional)
-        testCompile("org.slf4j:jcl-over-slf4j:${slf4jVersion}")
-        testCompile("org.slf4j:slf4j-log4j12:${slf4jVersion}") {
-            exclude group: 'log4j', module: 'log4j'
-        }
-        testCompile("log4j:log4j:1.2.15") {
-            exclude group: 'javax.mail', module: 'mail'
-            exclude group: 'javax.jms', module: 'jms'
-            exclude group: 'com.sun.jdmk', module: 'jmxtools'
-            exclude group: 'com.sun.jmx', module: 'jmxri'
-        }
         testCompile "javax.servlet:jstl:1.2"
         testCompile "org.hibernate:hibernate-validator:4.3.0.Final"
         testCompile "org.codehaus.jackson:jackson-mapper-asl:1.4.2"
@@ -607,7 +600,9 @@ project('spring-test-mvc') {
         testCompile "org.easymock:easymockclassextension:${easymockVersion}"
         testCompile "org.apache.tiles:tiles-request-api:1.0.1"
         testCompile "org.apache.tiles:tiles-api:3.0.1"
-        testCompile "org.apache.tiles:tiles-core:3.0.1"
+        testCompile("org.apache.tiles:tiles-core:3.0.1") {
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
         testCompile "org.apache.tiles:tiles-servlet:3.0.1"
     }
 }
