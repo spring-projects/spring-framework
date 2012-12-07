@@ -1,10 +1,4 @@
-apply plugin: "maven"
-
-ext.optionalDeps = []
-ext.providedDeps = []
-
-ext.optional = { optionalDeps << it }
-ext.provided = { providedDeps << it }
+apply plugin: "propdeps-maven"
 
 install {
 	repositories.mavenInstaller {
@@ -14,14 +8,6 @@ install {
 
 def customizePom(pom, gradleProject) {
 	pom.whenConfigured { generatedPom ->
-		// respect "optional" and "provided" dependencies
-		gradleProject.optionalDeps.each { dep ->
-			generatedPom.dependencies.findAll { it.artifactId == dep.name }*.optional = true
-		}
-		gradleProject.providedDeps.each { dep ->
-			generatedPom.dependencies.findAll { it.artifactId == dep.name }*.scope = "provided"
-		}
-
 		// eliminate test-scoped dependencies (no need in maven central poms)
 		generatedPom.dependencies.removeAll { dep ->
 			dep.scope == "test"

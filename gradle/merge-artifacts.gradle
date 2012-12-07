@@ -57,8 +57,6 @@ gradle.taskGraph.whenReady {
 			configure(mergeIntoProject.install.repositories.mavenInstaller.pom.scopeMappings) {
 				addMapping(mapping.priority + 100, mergeIntoProject.configurations."$newConfigName", mapping.scope)
 			}
-			mergeIntoProject.optionalDeps += mergeFromProject.optionalDeps
-			mergeIntoProject.providedDeps += mergeFromProject.providedDeps
 		}
 	}
 }

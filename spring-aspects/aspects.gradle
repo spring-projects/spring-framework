@@ -26,7 +26,7 @@ task compileJava(overwrite: true)  {
 				aspectPath: configurations.aspects.asPath,
 				inpath: configurations.ajInpath.asPath,
 				sourceRootCopyFilter: "**/*.java",
-				classpath: configurations.compile.asPath) {
+				classpath: sourceSets.main.runtimeClasspath.asPath) {
 			sourceroots {
 				sourceSets.main.java.srcDirs.each {
 					pathelement(location:it.absolutePath)
@@ -55,7 +55,7 @@ task compileTestJava(overwrite: true)  {
 				destDir: outputDir.absolutePath,
 				aspectPath: jar.archivePath,
 				inpath: configurations.ajInpath.asPath,
-				classpath: configurations.testRuntime.asPath + configurations.compile.asPath + jar.archivePath) {
+				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath) {
 			sourceroots {
 				sourceSets.test.java.srcDirs.each {
 					pathelement(location:it.absolutePath)

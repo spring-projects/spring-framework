@@ -3,6 +3,7 @@ buildscript {
 		maven { url "http://repo.springsource.org/plugins-release" }
 	}
 	dependencies {
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.1")
 		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.2")
 	}
 }
@@ -15,9 +16,10 @@ configure(allprojects) {
 	ext.slf4jVersion    = "1.6.1"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
+	apply plugin: "propdeps"
 	apply plugin: "java"
-	apply plugin: "eclipse"
-	apply plugin: "idea"
+	apply plugin: "propdeps-eclipse"
+	apply plugin: "propdeps-idea"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
 	group = "org.springframework"
@@ -39,13 +41,7 @@ configure(allprojects) {
 	dependencies {
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testCompile("org.easymock:easymock:${easymockVersion}")
-	}
-}
-
-configure(subprojects - project(":spring-test")) {
-	dependencies {
 		testCompile("junit:junit:${junitVersion}") {
-			// We already have hamcrest-all as a global testCompile dependency.
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
 	}
@@ -160,12 +156,11 @@ project("spring-core") {
 
 		compile(files(asmRepackJar))
 		compile("commons-logging:commons-logging:1.1.1")
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
-		compile("net.sf.jopt-simple:jopt-simple:3.0") { dep ->
-			optional dep
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		optional("net.sf.jopt-simple:jopt-simple:3.0") {
 			exclude group: "org.apache.ant", module: "ant"
 		}
-		compile("log4j:log4j:1.2.17", optional)
+		optional("log4j:log4j:1.2.17")
 		testCompile("xmlunit:xmlunit:1.2")
 		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7")
 	}
@@ -188,8 +183,9 @@ project("spring-beans") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
-		compile("javax.el:el-api:1.0", provided)
-		compile("javax.inject:javax.inject:1", provided)
+		provided("javax.el:el-api:1.0")
+		provided("javax.inject:javax.inject:1")
+		testCompile("log4j:log4j:1.2.17")
 	}
 }
 
@@ -200,9 +196,9 @@ project("spring-aop") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		compile(project(":spring-beans"))
 		compile("aopalliance:aopalliance:1.0")
-		compile("com.jamonapi:jamon:2.4", optional)
-		compile("commons-pool:commons-pool:1.5.3", optional)
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
+		optional("com.jamonapi:jamon:2.4")
+		optional("commons-pool:commons-pool:1.5.3")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
 }
 
@@ -227,35 +223,35 @@ project("spring-instrument") {
 project("spring-instrument-tomcat") {
 	description = "Spring Instrument Tomcat"
 	dependencies {
-		compile("org.apache.tomcat:catalina:6.0.16", provided)
+		provided("org.apache.tomcat:catalina:6.0.16")
 	}
 }
 
 project("spring-context") {
 	description = "Spring Context"
 	dependencies {
-		compile(project(":spring-instrument"), optional)
+		optional(project(":spring-instrument"))
 		compile(project(":spring-aop"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-expression"))
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
-		compile("backport-util-concurrent:backport-util-concurrent:3.0", optional)
-		compile("javax.ejb:ejb-api:3.0", optional)
-		compile("javax.inject:javax.inject:1", optional)
-		compile("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1", optional)
-		compile("javax.persistence:persistence-api:1.0", optional)
-		compile("javax.validation:validation-api:1.0.0.GA", optional)
-		compile("org.beanshell:bsh:2.0b4", optional)
-		compile("org.codehaus.groovy:groovy-all:1.8.8", optional)
-		compile("org.jruby:jruby:1.6.5.1", optional)
-		compile("joda-time:joda-time:2.1", optional)
-		compile("org.slf4j:slf4j-api:${slf4jVersion}", optional)
-		compile("org.hibernate:hibernate-validator:4.3.0.Final") { dep ->
-			optional dep
+		optional("backport-util-concurrent:backport-util-concurrent:3.0")
+		optional("javax.ejb:ejb-api:3.0")
+		optional("javax.inject:javax.inject:1")
+		optional("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
+		optional("javax.persistence:persistence-api:1.0")
+		optional("javax.validation:validation-api:1.0.0.GA")
+		optional("org.beanshell:bsh:2.0b4")
+		optional("org.codehaus.groovy:groovy-all:1.8.8")
+		optional("org.jruby:jruby:1.6.5.1")
+		optional("joda-time:joda-time:2.1")
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		optional("org.hibernate:hibernate-validator:4.3.0.Final") {
 			exclude group: "org.slf4j", module: "slf4j-api"
 		}
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}", optional)
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
 	}
@@ -268,15 +264,18 @@ project("spring-context") {
 project("spring-tx") {
 	description = "Spring Transaction"
 	dependencies {
-		compile(project(":spring-context"), optional) // for JCA, @EnableTransactionManagement
-		compile(project(":spring-aop"), optional)
+		optional(project(":spring-context")) // for JCA, @EnableTransactionManagement
+		optional(project(":spring-aop"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile("aopalliance:aopalliance:1.0")
-		compile("com.ibm.websphere:uow:6.0.2.17", provided)
-		compile("javax.resource:connector-api:1.5", optional)
-		compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
-		testCompile("org.easymock:easymockclassextension:${easymockVersion}")
+		provided("com.ibm.websphere:uow:6.0.2.17")
+		optional("javax.resource:connector-api:1.5")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		optional("javax.ejb:ejb-api:3.0")
+		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
+		testCompile("javax.persistence:persistence-api:1.0")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
 }
 
@@ -286,13 +285,13 @@ project("spring-oxm") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		compile(project(":spring-context"), optional) // for Jaxb2Marshaller
+		optional(project(":spring-context")) // for Jaxb2Marshaller
 		compile("commons-lang:commons-lang:2.5")
-		compile("com.thoughtworks.xstream:xstream:1.3.1", optional)
-		compile("com.sun.xml.bind:jaxb-impl:2.1.7", optional)
-		compile("org.jibx:jibx-run:1.2.3", optional)
-		compile("org.apache.xmlbeans:xmlbeans:2.4.0", optional)
-		compile("org.codehaus.castor:castor-xml:1.3.2", optional)
+		optional("com.thoughtworks.xstream:xstream:1.3.1")
+		optional("com.sun.xml.bind:jaxb-impl:2.1.7")
+		optional("org.jibx:jibx-run:1.2.3")
+		optional("org.apache.xmlbeans:xmlbeans:2.4.0")
+		optional("org.codehaus.castor:castor-xml:1.3.2")
 		testCompile("org.codehaus.jettison:jettison:1.0.1")
 		testCompile("xmlunit:xmlunit:1.2")
 		testCompile("xmlpull:xmlpull:1.1.3.4a")
@@ -310,9 +309,12 @@ project("spring-jms") {
 		compile(project(":spring-aop"))
 		compile(project(":spring-context"))
 		compile(project(":spring-tx"))
-		compile(project(":spring-oxm"), optional)
+		optional(project(":spring-oxm"))
 		compile("aopalliance:aopalliance:1.0")
-		compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		provided("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
+		optional("javax.resource:connector-api:1.5")
 	}
 }
 
@@ -321,14 +323,14 @@ project("spring-jdbc") {
 	dependencies {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-context"), optional) // for JndiDataSourceLookup
+		optional(project(":spring-context")) // for JndiDataSourceLookup
 		compile(project(":spring-tx"))
-		compile("c3p0:c3p0:0.9.1.2", optional)
-		compile("hsqldb:hsqldb:${hsqldbVersion}", optional)
-		compile("com.h2database:h2:1.0.71", optional)
-		compile("org.apache.derby:derby:10.5.3.0_1", optional)
-		compile("org.apache.derby:derbyclient:10.5.3.0_1", optional)
-		compile("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1", optional)
+		optional("c3p0:c3p0:0.9.1.2")
+		optional("hsqldb:hsqldb:${hsqldbVersion}")
+		optional("com.h2database:h2:1.0.71")
+		optional("org.apache.derby:derby:10.5.3.0_1")
+		optional("org.apache.derby:derbyclient:10.5.3.0_1")
+		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 	}
 }
 
@@ -338,20 +340,22 @@ project("spring-context-support") {
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
-		compile(project(":spring-jdbc"), optional) // for Quartz support
-		compile(project(":spring-tx"), optional) // for Quartz support
-		compile("javax.mail:mail:1.4", optional)
-		compile("javax.cache:cache-api:0.5", optional)
-		compile("net.sf.ehcache:ehcache-core:2.0.0", optional)
-		compile("opensymphony:quartz:1.6.2", optional)
-		compile("org.codehaus.fabric3.api:commonj:1.1.0", optional)
-		compile("velocity:velocity:1.5", optional)
-		compile("org.freemarker:freemarker:2.3.15", optional)
-		compile("com.lowagie:itext:2.1.7", optional)
-		compile("jasperreports:jasperreports:2.0.5") { dep ->
-			optional dep
+		optional(project(":spring-jdbc")) // for Quartz support
+		optional(project(":spring-tx")) // for Quartz support
+		optional("javax.mail:mail:1.4")
+		optional("javax.cache:cache-api:0.5")
+		optional("net.sf.ehcache:ehcache-core:2.0.0")
+		optional("opensymphony:quartz:1.6.2")
+		optional("org.codehaus.fabric3.api:commonj:1.1.0")
+		optional("velocity:velocity:1.5")
+		optional("org.freemarker:freemarker:2.3.15")
+		optional("com.lowagie:itext:2.1.7")
+		optional("jasperreports:jasperreports:2.0.5") {
 			transitive = false
+			exclude group: "bouncycastle", module: "bctsp-jdk14"
 		}
+		optional("org.slf4j:slf4j-api:${slf4jVersion}")
+		provided("javax.activation:activation:1.1")
 		testCompile("org.apache.poi:poi:3.0.2-FINAL") {
 			exclude group: "log4j", module: "log4j"
 		}
@@ -371,32 +375,32 @@ project("spring-web") {
 		compile(project(":spring-beans")) // for MultiPartFilter
 		compile(project(":spring-aop")) // for JaxWsPortProxyFactoryBean
 		compile(project(":spring-context"))
-		compile(project(":spring-oxm"), optional) // for MarshallingHttpMessageConverter
+		optional(project(":spring-oxm")) // for MarshallingHttpMessageConverter
 		compile("aopalliance:aopalliance:1.0")
-		compile("com.caucho:hessian:3.2.1", optional)
-		compile("rome:rome:1.0", optional)
-		compile("javax.el:el-api:1.0", optional)
-		compile("javax.faces:jsf-api:1.2_08", optional)
-		compile("javax.portlet:portlet-api:2.0", provided)
-		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
-		compile("javax.servlet.jsp:jsp-api:2.1", provided)
-		compile("javax.xml:jaxrpc-api:1.1")
-		compile("javax.xml.soap:saaj-api:1.3", provided)
-		compile("commons-fileupload:commons-fileupload:1.2", optional)
-		runtime("commons-io:commons-io:1.3", optional)
-		compile("commons-httpclient:commons-httpclient:3.1", optional)
-		compile("org.apache.httpcomponents:httpclient:4.2", optional)
-		compile("org.codehaus.jackson:jackson-mapper-asl:1.4.2", optional)
-		compile("com.fasterxml.jackson.core:jackson-databind:2.0.1", optional)
-		compile("taglibs:standard:1.1.2", optional)
-		compile("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") { dep ->
-			optional dep
+		optional("com.caucho:hessian:3.2.1")
+		optional("rome:rome:1.0")
+		optional("javax.el:el-api:1.0")
+		optional("javax.faces:jsf-api:1.2_08")
+		provided("javax.portlet:portlet-api:2.0")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.xml:jaxrpc-api:1.1")
+		provided("javax.xml.soap:saaj-api:1.3")
+		provided("javax.activation:activation:1.1")
+		optional("commons-fileupload:commons-fileupload:1.2")
+		optional("commons-io:commons-io:1.3")
+		optional("commons-httpclient:commons-httpclient:3.1")
+		optional("org.apache.httpcomponents:httpclient:4.2")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		optional("taglibs:standard:1.1.2")
+		optional("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
-		compile("org.eclipse.jetty:jetty-server:8.1.5.v20120716") { dep ->
-			optional dep
+		optional("org.eclipse.jetty:jetty-server:8.1.5.v20120716") {
 			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
 		}
+		optional("log4j:log4j:1.2.17")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:1.2")
 	}
@@ -409,29 +413,31 @@ project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
-		compile("org.hibernate:hibernate-core:3.3.2.GA", optional)
-		compile("org.hibernate:hibernate-annotations:3.4.0.GA", optional)
-		compile("org.hibernate:hibernate-entitymanager:3.4.0.GA", optional)
-		compile("org.apache.openjpa:openjpa:1.1.0", optional)
-		compile("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1", optional)
-		compile("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1", optional)
-		compile("toplink.essentials:toplink-essentials:2.0-41b", optional)
-		compile("javax.jdo:jdo-api:3.0", optional)
-		compile("org.apache.ibatis:ibatis-sqlmap:2.3.4.726", optional)
-		testCompile("javax.servlet:servlet-api:2.5")
+		optional("org.hibernate:hibernate-core:3.3.2.GA")
+		optional("org.hibernate:hibernate-annotations:3.4.0.GA")
+		optional("org.hibernate:hibernate-entitymanager:3.4.0.GA")
+		optional("org.apache.openjpa:openjpa:1.1.0")
+		optional("org.eclipse.persistence:org.eclipse.persistence.core:1.0.1")
+		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:1.0.1")
+		optional("toplink.essentials:toplink-essentials:2.0-41b")
+		optional("javax.jdo:jdo-api:3.0")
+		optional("org.apache.ibatis:ibatis-sqlmap:2.3.4.726")
+		optional("javax.persistence:persistence-api:1.0")
+		provided("javax.servlet:servlet-api:2.5")
+		testCompile("javax.servlet:javax.servlet-api:3.0.1")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile(project(":spring-web").sourceSets.test.output)
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
-		compile(project(":spring-aop"), optional)
-		compile(project(":spring-context"), optional)
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))
 		compile(project(":spring-tx"))
 		compile(project(":spring-jdbc"))
-		compile(project(":spring-web")) { dep ->
-			optional dep
+		optional(project(":spring-web")) {
 			exclude group: "javax.persistence", module: "persistence-api"
 		}
 	}
@@ -445,13 +451,12 @@ project("spring-orm-hibernate4") {
 		compile(project(":spring-orm").sourceSets.main.output)
 		compile(project(":spring-tx"))
 		compile(project(":spring-jdbc"))
-		compile("org.hibernate:hibernate-core:4.1.0.Final", optional)
-		compile("org.hibernate:hibernate-entitymanager:4.1.0.Final", optional)
-		compile(project(":spring-web")) { dep ->
-			optional dep
+		optional("org.hibernate:hibernate-core:4.1.0.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.1.0.Final")
+		optional(project(":spring-web")) {
 			exclude group: "javax.persistence", module: "persistence-api"
 		}
-		compile("javax.servlet:servlet-api:2.5", optional)
+		optional("javax.servlet:servlet-api:2.5")
 	}
 }
 
@@ -463,32 +468,28 @@ project("spring-webmvc") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-web"))
 		compile(project(":spring-context"))
-		compile(project(":spring-context-support"), optional) // for Velocity support
-		compile(project(":spring-oxm"), optional) // for MarshallingView
-		compile("org.apache.tiles:tiles-api:2.1.2", optional)
-		compile("org.apache.tiles:tiles-core:2.1.2") { dep ->
-			optional dep
-			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		optional(project(":spring-context-support")) // for Velocity support
+		optional(project(":spring-oxm")) // for MarshallingView
+		optional("org.apache.tiles:tiles-api:2.1.2")
+		optional("org.apache.tiles:tiles-core:2.1.2")
+		optional("org.apache.tiles:tiles-jsp:2.1.2")
+		optional("org.apache.tiles:tiles-servlet:2.1.2")
+		optional("velocity-tools:velocity-tools-view:1.4")
+		optional("net.sourceforge.jexcelapi:jxl:2.6.3")
+		optional("org.apache.poi:poi:3.0.2-FINAL")
+		optional("com.lowagie:itext:2.1.7")
+		optional("jasperreports:jasperreports:2.0.5") {
+			transitive = false
+			exclude group: "xml-apis", module: "xml-apis"
 		}
-		compile("org.apache.tiles:tiles-jsp:2.1.2") { dep ->
-			optional dep
-			exclude group: "org.slf4j", module: "jcl-over-slf4j"
-		}
-		compile("org.apache.tiles:tiles-servlet:2.1.2") { dep ->
-			optional dep
-			exclude group: "org.slf4j", module: "jcl-over-slf4j"
-		}
-		compile("velocity-tools:velocity-tools-view:1.4", optional)
-		compile("net.sourceforge.jexcelapi:jxl:2.6.3") { dep ->
-			optional dep
-			exclude group: "log4j", module: "log4j"
-		}
-		compile("org.apache.poi:poi:3.0.2-FINAL") { dep ->
-			optional dep
-			exclude group: "log4j", module: "log4j"
-		}
-		compile("javax.servlet:jstl:1.1.2", provided)
-		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
+		optional("rome:rome:1.0")
+		optional("velocity:velocity:1.5")
+		optional("org.freemarker:freemarker:2.3.15")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		provided("javax.servlet:jstl:1.2")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet.jsp:jsp-api:2.1")
 		testCompile(project(":spring-aop"))
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("rhino:js:1.7R1")
@@ -501,6 +502,17 @@ project("spring-webmvc") {
 			exclude group: "xom", module: "xom"
 			exclude group: "xerces", module: "xercesImpl"
 		}
+		testCompile("org.eclipse.jetty:jetty-servlet:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("org.eclipse.jetty:jetty-server:8.1.5.v20120716") {
+			exclude group: "org.eclipse.jetty.orbit", module: "javax.servlet"
+		}
+		testCompile("javax.validation:validation-api:1.0.0.GA")
+		testCompile("commons-fileupload:commons-fileupload:1.2")
+		testCompile("commons-io:commons-io:1.3")
+		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
+		testCompile("org.apache.httpcomponents:httpclient:4.2")
 		testCompile(project(":spring-web").sourceSets.test.output)
 	}
 
@@ -515,41 +527,40 @@ project("spring-webmvc-tiles3") {
 	dependencies {
 		compile(project(":spring-context"))
 		compile(project(":spring-webmvc").sourceSets.main.output)
-		compile("javax.el:el-api:1.0", provided)
-		compile("javax.servlet:jstl:1.1.2", provided)
-		compile("javax.servlet.jsp:jsp-api:2.1", provided)
-		compile("org.apache.tiles:tiles-request-api:1.0.1", optional)
-		compile("org.apache.tiles:tiles-api:3.0.1", optional)
-		compile("org.apache.tiles:tiles-core:3.0.1") { dep ->
-			optional dep
+		provided("javax.el:el-api:1.0")
+		provided("javax.servlet:jstl:1.2")
+		provided("javax.servlet.jsp:jsp-api:2.1")
+		optional("org.apache.tiles:tiles-request-api:1.0.1")
+		optional("org.apache.tiles:tiles-api:3.0.1")
+		optional("org.apache.tiles:tiles-core:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		compile("org.apache.tiles:tiles-servlet:3.0.1") { dep ->
-			optional dep
+		optional("org.apache.tiles:tiles-servlet:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		compile("org.apache.tiles:tiles-jsp:3.0.1") { dep ->
-			optional dep
+		optional("org.apache.tiles:tiles-jsp:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		compile("org.apache.tiles:tiles-el:3.0.1") { dep ->
-			optional dep
+		optional("org.apache.tiles:tiles-el:3.0.1") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
-		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
+		provided("javax.servlet:javax.servlet-api:3.0.1")
 		compile(project(":spring-web").sourceSets*.output) // mock request & response
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 }
 
 project("spring-webmvc-portlet") {
 	description = "Spring Web Portlet"
 	dependencies {
-		compile("javax.servlet:servlet-api:2.5", provided)
+		provided("javax.servlet:servlet-api:2.5")
+		provided("javax.portlet:portlet-api:2.0")
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
 		compile(project(":spring-web"))
 		compile(project(":spring-webmvc"))
+		optional("commons-fileupload:commons-fileupload:1.2")
 	}
 
 	// pick up DispatcherPortlet.properties in src/main
@@ -560,30 +571,34 @@ project("spring-test") {
 	description = "Spring TestContext Framework"
 	dependencies {
 		compile(project(":spring-core"))
-		compile(project(":spring-beans"), optional)
-		compile(project(":spring-context"), optional)
-		compile(project(":spring-jdbc"), optional)
-		compile(project(":spring-tx"), optional)
-		compile(project(":spring-orm"), optional)
-		compile(project(":spring-web"), optional)
-		compile(project(":spring-webmvc"), optional)
-		compile(project(":spring-webmvc-portlet"), optional)
-		compile("junit:junit:${junitVersion}") { dep ->
-			optional dep
+		optional(project(":spring-beans"))
+		optional(project(":spring-context"))
+		optional(project(":spring-jdbc"))
+		optional(project(":spring-tx"))
+		optional(project(":spring-orm"))
+		optional(project(":spring-web"))
+		optional(project(":spring-webmvc"))
+		optional(project(":spring-webmvc-portlet"), )
+		optional("junit:junit:${junitVersion}") {
 			// We already have hamcrest-all as a global testCompile dependency.
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		compile("org.testng:testng:6.5.2") { dep ->
-			optional dep
+		optional("org.testng:testng:6.5.2") {
 			exclude group: "junit", module: "junit"
 			// We already have hamcrest-all as a global testCompile dependency.
 			exclude group: "org.hamcrest", module: "hamcrest-core"
 		}
-		compile("javax.servlet:servlet-api:2.5", optional)
-		compile("javax.servlet.jsp:jsp-api:2.1", optional)
-		compile("javax.portlet:portlet-api:2.0", optional)
-		compile("javax.activation:activation:1.0", provided)
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		optional("javax.servlet:servlet-api:2.5")
+		optional("javax.servlet.jsp:jsp-api:2.1")
+		optional("javax.portlet:portlet-api:2.0")
+		optional("javax.persistence:persistence-api:1.0")
+		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile("org.hibernate:hibernate-core:3.3.2.GA")
+		provided("javax.inject:javax.inject:1")
+		provided("javax.activation:activation:1.1")
+		provided("javax.servlet:jstl:1.2")
+		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 }
 
@@ -593,25 +608,25 @@ project("spring-test-mvc") {
 	apply from: "${gradleScriptDir}/merge-artifacts.gradle"
 	apply from: "ide.gradle"
 	dependencies {
-		compile(project(":spring-context"))
+		optional(project(":spring-context"))
 		compile(project(":spring-webmvc"))
 		compile(project(":spring-test").sourceSets.main.output)
-		compile("javax.servlet:javax.servlet-api:3.0.1", provided)
-		compile("org.hamcrest:hamcrest-core:1.3", optional)
-		compile("com.jayway.jsonpath:json-path:0.8.1", optional)
-		compile("xmlunit:xmlunit:1.2", optional)
-		testCompile("org.slf4j:jcl-over-slf4j:${slf4jVersion}")
-		testCompile("org.slf4j:slf4j-log4j12:${slf4jVersion}") {
-			exclude group: "log4j", module: "log4j"
-		}
-		testCompile("log4j:log4j:1.2.17")
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		optional("org.hamcrest:hamcrest-core:1.3")
+		optional("com.jayway.jsonpath:json-path:0.8.1")
+		optional("xmlunit:xmlunit:1.2")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("javax.servlet:jstl:1.2")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		testCompile("com.fasterxml.jackson.core:jackson-databind:2.0.1")
+		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("com.thoughtworks.xstream:xstream:1.3.1")
 		testCompile("cglib:cglib-nodep:2.2")
 		testCompile("rome:rome:1.0")
+		testCompile("javax.activation:activation:1.1")
+		testCompile("javax.mail:mail:1.4")
 		testCompile("javax.xml.bind:jaxb-api:2.2.6")
 		testCompile("org.easymock:easymockclassextension:${easymockVersion}")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
@@ -635,7 +650,8 @@ project("spring-struts") {
 		compile(project(":spring-webmvc"))
 		compile("struts:struts:1.2.9")
 		compile("commons-beanutils:commons-beanutils:1.7.0")
-		compile("javax.servlet:servlet-api:2.5", provided)
+		provided("javax.servlet:servlet-api:2.5")
+		provided("javax.servlet:jstl:1.2")
 		testCompile(project(":spring-test"))
 	}
 }
@@ -644,13 +660,15 @@ project("spring-aspects") {
 	description = "Spring Aspects"
 	apply from: "aspects.gradle"
 	dependencies {
-		compile(project(":spring-beans"), optional) // for @Configurable support
-		compile(project(":spring-aop"), optional) // for @Async support
-		compile(project(":spring-context"), optional) // for @Enable* support
-		compile(project(":spring-context-support"), optional) // for JavaMail support
-		compile(project(":spring-tx"), optional) // for JPA, @Transactional support
-		compile(project(":spring-orm"), optional) // for JPA exception translation support
+		optional(project(":spring-beans")) // for @Configurable support
+		optional(project(":spring-aop")) // for @Async support
+		optional(project(":spring-context")) // for @Enable* support
+		compile(project(":spring-context-support")) // for JavaMail support
+		optional(project(":spring-tx")) // for JPA, @Transactional support
+		optional(project(":spring-orm")) // for JPA exception translation support
 		aspects(project(":spring-orm"))
+		provided("javax.persistence:persistence-api:1.0")
+		testCompile("javax.mail:mail:1.4")
 		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile(project(":spring-core")) // for CodeStyleAspect
@@ -689,8 +707,14 @@ configure(rootProject) {
 		testCompile(project(":spring-test"))
 		testCompile(project(":spring-web"))
 		testCompile(project(":spring-webmvc-portlet"))
+		testCompile(project(":spring-orm"))
 		testCompile("org.hibernate:hibernate-core:4.1.0.Final")
 		testCompile("javax.servlet:servlet-api:2.5")
+		testCompile("javax.portlet:portlet-api:2.0")
+		testCompile("javax.inject:javax.inject:1")
+		testCompile("javax.resource:connector-api:1.5")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
 	task api(type: Javadoc) {
@@ -817,7 +841,8 @@ configure(rootProject) {
 				def projectNames = rootProject.subprojects*.name
 				def artifacts = new HashSet()
 				subprojects.each { subproject ->
-					subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+					(subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts +
+					subproject.configurations.optional.resolvedConfiguration.resolvedArtifacts).each { artifact ->
 						def dependency = artifact.moduleVersion.id
 						if (!projectNames.contains(dependency.name)) {
 							artifacts << artifact.file
