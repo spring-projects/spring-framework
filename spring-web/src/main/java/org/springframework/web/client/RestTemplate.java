@@ -45,6 +45,7 @@ import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
@@ -151,7 +152,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		this.messageConverters.add(new StringHttpMessageConverter());
 		this.messageConverters.add(new ResourceHttpMessageConverter());
 		this.messageConverters.add(new SourceHttpMessageConverter());
-		this.messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 		if (romePresent) {
 			this.messageConverters.add(new AtomFeedHttpMessageConverter());
 			this.messageConverters.add(new RssChannelHttpMessageConverter());

@@ -17,6 +17,7 @@
 package org.springframework.http.converter.xml;
 
 import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 
 /**
  * Extension of {@link org.springframework.http.converter.FormHttpMessageConverter},
@@ -24,6 +25,7 @@ import org.springframework.http.converter.FormHttpMessageConverter;
  *
  * @author Juergen Hoeller
  * @since 3.0.3
+ * @deprecated in favor of {@link AllEncompassingFormHttpMessageConverter}
  */
 public class XmlAwareFormHttpMessageConverter extends FormHttpMessageConverter {
 

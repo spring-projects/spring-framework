@@ -32,6 +32,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -119,7 +120,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new XmlAwareFormHttpMessageConverter());
+		converters.add(new AllEncompassingFormHttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
 		@SuppressWarnings("unchecked")

@@ -40,6 +40,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -55,7 +56,7 @@ public class FormHttpMessageConverterTests {
 
 	@Before
 	public void setUp() {
-		converter = new XmlAwareFormHttpMessageConverter();
+		converter = new AllEncompassingFormHttpMessageConverter();
 	}
 
 	@Test

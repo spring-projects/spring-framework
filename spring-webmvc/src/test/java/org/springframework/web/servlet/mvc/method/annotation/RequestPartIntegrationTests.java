@@ -41,6 +41,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
@@ -102,7 +103,7 @@ public class RequestPartIntegrationTests {
 
 	@Before
 	public void setUp() {
-		XmlAwareFormHttpMessageConverter converter = new XmlAwareFormHttpMessageConverter();
+		AllEncompassingFormHttpMessageConverter converter = new AllEncompassingFormHttpMessageConverter();
 		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
 				new ResourceHttpMessageConverter(), new MappingJacksonHttpMessageConverter()));
 

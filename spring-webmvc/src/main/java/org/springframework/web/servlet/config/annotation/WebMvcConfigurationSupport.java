@@ -46,6 +46,7 @@ import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
 import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonHttpMessageConverter;
+import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
@@ -531,7 +532,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		messageConverters.add(stringConverter);
 		messageConverters.add(new ResourceHttpMessageConverter());
 		messageConverters.add(new SourceHttpMessageConverter<Source>());
-		messageConverters.add(new XmlAwareFormHttpMessageConverter());
+		messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 		if (romePresent) {
 			messageConverters.add(new AtomFeedHttpMessageConverter());
 			messageConverters.add(new RssChannelHttpMessageConverter());
