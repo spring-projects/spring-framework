@@ -473,9 +473,18 @@ project('spring-webmvc') {
         compile(project(":spring-context-support"), optional) // for Velocity support
         compile(project(":spring-oxm"), optional) // for MarshallingView
         compile("org.apache.tiles:tiles-api:2.1.2", optional)
-        compile("org.apache.tiles:tiles-core:2.1.2", optional)
-        compile("org.apache.tiles:tiles-jsp:2.1.2", optional)
-        compile("org.apache.tiles:tiles-servlet:2.1.2", optional)
+        compile("org.apache.tiles:tiles-core:2.1.2") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
+        compile("org.apache.tiles:tiles-jsp:2.1.2") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
+        compile("org.apache.tiles:tiles-servlet:2.1.2") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
         compile("velocity-tools:velocity-tools-view:1.4", optional)
         compile("net.sourceforge.jexcelapi:jxl:2.6.3") { dep ->
             optional dep
@@ -522,9 +531,18 @@ project('spring-webmvc-tiles3') {
             optional dep
             exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
         }
-        compile("org.apache.tiles:tiles-servlet:3.0.1", optional)
-        compile("org.apache.tiles:tiles-jsp:3.0.1", optional)
-        compile("org.apache.tiles:tiles-el:3.0.1", optional)
+        compile("org.apache.tiles:tiles-servlet:3.0.1") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
+        compile("org.apache.tiles:tiles-jsp:3.0.1") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
+        compile("org.apache.tiles:tiles-el:3.0.1") { dep ->
+            optional dep
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
         compile("org.apache.tomcat:tomcat-servlet-api:7.0.32", provided) // servlet-api 3.0
         compile project(":spring-web").sourceSets*.output // mock request & response
     }
@@ -603,7 +621,9 @@ project('spring-test-mvc') {
         testCompile("org.apache.tiles:tiles-core:3.0.1") {
             exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
         }
-        testCompile "org.apache.tiles:tiles-servlet:3.0.1"
+        testCompile("org.apache.tiles:tiles-servlet:3.0.1") {
+            exclude group: 'org.slf4j', module: 'jcl-over-slf4j'
+        }
     }
 }
 
