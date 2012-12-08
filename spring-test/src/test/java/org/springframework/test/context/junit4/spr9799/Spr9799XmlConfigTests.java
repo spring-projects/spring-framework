@@ -24,11 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 /**
  * Integration tests used to assess claims raised in
  * <a href="https://jira.springsource.org/browse/SPR-9799" target="_blank">SPR-9799</a>.
- * 
- * <p>Note: this test class would normally reside in the {@code spring-test} source
- * tree; however, due to classpath issues with slf4j, this class must reside in
- * the {@code spring-test-mvc} source tree.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see Spr9799AnnotationConfigTests
