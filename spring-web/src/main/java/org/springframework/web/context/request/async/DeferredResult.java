@@ -122,7 +122,7 @@ public class DeferredResult<T> {
 	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume
 	 * processing.
 	 */
-	public void onTimeout(Runnable callback) {
+	public final void onTimeout(Runnable callback) {
 		this.timeoutCallback = callback;
 	}
 
@@ -132,7 +132,7 @@ public class DeferredResult<T> {
 	 * reason including timeout and network error. This method is useful for
 	 * detecting that a {@code DeferredResult} instance is no longer usable.
 	 */
-	public void onCompletion(Runnable callback) {
+	public final void onCompletion(Runnable callback) {
 		this.completionCallback = callback;
 	}
 
@@ -163,7 +163,7 @@ public class DeferredResult<T> {
 	 * if the result was already set or the async request expired.
 	 * @see #isSetOrExpired()
 	 */
-	public boolean setResult(T result) {
+	public final boolean setResult(T result) {
 		return setResultInternal(result);
 	}
 
@@ -190,7 +190,7 @@ public class DeferredResult<T> {
 	 * expired.
 	 * @see #isSetOrExpired()
 	 */
-	public boolean setErrorResult(Object result) {
+	public final boolean setErrorResult(Object result) {
 		return setResultInternal(result);
 	}
 
