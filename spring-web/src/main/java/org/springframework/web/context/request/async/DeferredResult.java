@@ -15,6 +15,7 @@
  */
 package org.springframework.web.context.request.async;
 
+import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -28,10 +29,23 @@ import org.springframework.web.context.request.NativeWebRequest;
  * concurrently on behalf of the application, with a {@code DeferredResult} the
  * application can produce the result from a thread of its choice.
  *
+ * <p>Subclasses can extend this class to easily associate additional data or
+ * behavior with the {@link DeferredResult}. For example, one might want to
+ * associate the user used to create the {@link DeferredResult} by extending the
+ * class and adding an addition property for the user. In this way, the user
+ * could easily be accessed later without the need to use a data structure to do
+ * the mapping.
+ *
+ * <p>An example of associating additional behavior to this class might be
+ * realized by extending the class to implement an additional interface. For
+ * example, one might want to implement a {@link Comparable} so that when the
+ * {@link DeferredResult} is added to a {@link PriorityQueue} it is handled in
+ * the correct order.
+ *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public final class DeferredResult<T> {
+public class DeferredResult<T> {
 
 	private static final Log logger = LogFactory.getLog(DeferredResult.class);
 
@@ -88,14 +102,14 @@ public final class DeferredResult<T> {
 	 * timeout result was provided to the constructor. The request may also
 	 * expire due to a timeout or network error.
 	 */
-	public boolean isSetOrExpired() {
+	public final boolean isSetOrExpired() {
 		return ((this.result != RESULT_NONE) || this.expired);
 	}
 
 	/**
 	 * Return the configured timeout value in milliseconds.
 	 */
-	Long getTimeoutValue() {
+	final Long getTimeoutValue() {
 		return this.timeout;
 	}
 
@@ -107,7 +121,7 @@ public final class DeferredResult<T> {
 	 * {@link DeferredResult#setErrorResult(Object) setErrorResult} to resume
 	 * processing.
 	 */
-	public void onTimeout(Runnable callback) {
+	public final void onTimeout(Runnable callback) {
 		this.timeoutCallback = callback;
 	}
 
@@ -117,7 +131,7 @@ public final class DeferredResult<T> {
 	 * reason including timeout and network error. This method is useful for
 	 * detecting that a {@code DeferredResult} instance is no longer usable.
 	 */
-	public void onCompletion(Runnable callback) {
+	public final void onCompletion(Runnable callback) {
 		this.completionCallback = callback;
 	}
 
@@ -126,7 +140,7 @@ public final class DeferredResult<T> {
 	 * @param resultHandler the handler
 	 * @see {@link DeferredResultProcessingInterceptor}
 	 */
-	public void setResultHandler(DeferredResultHandler resultHandler) {
+	public final void setResultHandler(DeferredResultHandler resultHandler) {
 		Assert.notNull(resultHandler, "DeferredResultHandler is required");
 		synchronized (this) {
 			this.resultHandler = resultHandler;
@@ -148,7 +162,7 @@ public final class DeferredResult<T> {
 	 * if the result was already set or the async request expired.
 	 * @see #isSetOrExpired()
 	 */
-	public boolean setResult(T result) {
+	public final boolean setResult(T result) {
 		return setResultInternal(result);
 	}
 
@@ -175,11 +189,11 @@ public final class DeferredResult<T> {
 	 * expired.
 	 * @see #isSetOrExpired()
 	 */
-	public boolean setErrorResult(Object result) {
+	public final boolean setErrorResult(Object result) {
 		return setResultInternal(result);
 	}
 
-	DeferredResultProcessingInterceptor getInterceptor() {
+	final DeferredResultProcessingInterceptor getInterceptor() {
 		return new DeferredResultProcessingInterceptorAdapter() {
 
 			@Override
