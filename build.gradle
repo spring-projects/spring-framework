@@ -46,7 +46,7 @@ configure(allprojects) {
 }
 
 configure(subprojects) { subproject ->
-	apply plugin: MergePlugin
+	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
 	jar {
