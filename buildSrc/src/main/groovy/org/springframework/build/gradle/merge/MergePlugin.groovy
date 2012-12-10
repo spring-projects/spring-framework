@@ -27,6 +27,7 @@ import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.api.invocation.*
 
+
 /**
  * Gradle plugin that allows projects to merged together. Primarily developed to
  * allow Spring to support multiple multiple incompatible versions of third-party
@@ -122,6 +123,11 @@ class MergePlugin implements Plugin<Project> {
 			if(mapping.scope) {
 				Configuration intoConfiguration = project.merge.into.configurations.add(
 					project.name + "-" + configuration.name)
+				configuration.excludeRules.each {
+					configuration.exclude([
+						(ExcludeRule.GROUP_KEY) : it.group,
+						(ExcludeRule.MODULE_KEY) : it.module])
+				}
 				intoConfiguration.dependencies.addAll(configuration.dependencies)
 				project.merge.into.install.repositories.mavenInstaller.pom.scopeMappings.addMapping(
 					mapping.priority + 100, intoConfiguration, mapping.scope)
