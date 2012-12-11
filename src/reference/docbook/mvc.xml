@@ -2358,6 +2358,15 @@ public String myHandleMethod(WebRequest webRequest, Model model) {
         request.</para>
       </section>
     </section>
+
+    <section xml:id="mvc-ann-tests">
+      <title>Testing Controllers</title>
+
+      <para>The <filename>spring-test</filename> module offers first class support
+      for testing annotated controllers.
+      See <xref linkend="spring-mvc-test-framework"/>.</para>
+    </section>
+
   </section>
 
   <section xml:id="mvc-handlermapping">

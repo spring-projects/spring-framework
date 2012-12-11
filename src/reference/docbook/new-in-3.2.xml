@@ -49,10 +49,7 @@
       fluent API and without a servlet container. Server-side tests involve
       use of the <classname>DispatcherServlet</classname> while client-side
       REST tests rely on the <classname>RestTemplate</classname>.
-      See the following presentation for more information before
-      documentation is added:
-      <link xl:href="https://github.com/rstoyanchev/spring-32-test-webapps">
-        "Testing Web Applications with Spring 3.2"</link>.
+      See <xref linkend="spring-mvc-test-framework"/>.
       </para>
 
     </section>

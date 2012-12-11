@@ -2399,6 +2399,531 @@ public class SimpleTest {
       </section>
     </section>
 
+    <section xml:id="spring-mvc-test-framework">
+      <title>Spring MVC Test Framework</title>
+
+      <sidebar xml:id="spring-mvc-test-origins">
+        <title>Standalone project</title>
+
+        <para>Before inclusion in Spring Framework 3.2, the Spring MVC Test
+        framework had already existed as a separate project on Github where
+        it grew and evolved through actual use, feedback, and the contribution of
+        many.</para>
+        <para>The standalone
+        <link xl:href="https://github.com/SpringSource/spring-test-mvc">spring-test-mvc project</link>
+        is still available on Github and can be used in conjunction with
+        Spring Framework 3.1.x. Applications upgrading to 3.2 should replace
+        the <filename>spring-test-mvc</filename> dependency with a dependency on
+        <filename>spring-test</filename>.</para>
+
+        <para>The <filename>spring-test</filename> module uses a
+        different package <classname>org.springframework.test.web</classname>
+        but otherwise is nearly identical with two exceptions.
+        One is support for features new in 3.2 (e.g. async web requests).
+        The other relates to the options
+        for creating a <classname>MockMvc</classname> instance. In Spring
+        Framework 3.2, this can only be done through the TestContext framework,
+        which provides caching benefits for the loaded configuration.</para>
+      </sidebar>
+
+      <para>The <emphasis>Spring MVC Test framework</emphasis> provides
+      first class JUnit support for testing client and server-side
+      Spring MVC code through a fluent API. Typically it loads
+      the actual Spring configuration through the
+      <emphasis>TestContext framework</emphasis> and always uses the
+      <classname>DispatcherServlet</classname> to process requests
+      thus approximating full integration tests without requiring
+      a running servlet container.</para>
+
+      <para>Client-side tests are
+      <classname>RestTemplate</classname>-based and allow tests for code
+      that relies on the <code>RestTemplate</code> without requiring a
+      running server to respond to the requests.
+      </para>
+
+      <section xml:id="spring-mvc-test-server">
+        <title>Server-Side Tests</title>
+
+        <para>Before Spring Framework 3.2, the most likely way to test a Spring MVC
+        controller was to write a unit test that instantiates the controller,
+        injects it with mock or stub dependencies, and then calls its methods
+        directly, using a <classname>MockHttpServletRequest</classname> and
+        <classname>MockHttpServletResponse</classname> where necessary.</para>
+        <para>Although this is pretty easy to do, controllers have many annotations,
+        and much remains not tested. Request mappings, data binding,
+        type conversion, and validation are just a few examples of what isn't tested.
+        Furthermore, there are other types of annotated methods
+        such as <interfacename>@InitBinder</interfacename>,
+        <interfacename>@ModelAttribute</interfacename>, and
+        <interfacename>@ExceptionHandler</interfacename> that get invoked as part
+        of request processing.</para>
+
+        <para>The idea behind Spring MVC Test is to be able to
+        re-write those controller tests by performing actual requests, and generating
+        responses, as they would be at runtime, along the way invoking controllers
+        through the Spring MVC <classname>DispatcherServlet</classname>. Controllers
+        can still be injected with mock dependencies, so tests can remain focused
+        on the web layer.</para>
+
+        <para>Spring MVC Test builds on the familiar "mock" implementations
+        of the Servlet API available in the <filename>spring-test</filename> module.
+        This allows performing requests and generating responses without
+        the need for running in a Servlet container. For the most part everything should
+        work as it does at runtime with the exception of JSP rendering, which is
+        not available outside a Servlet container. Furthermore,
+        if you are familiar with how the <classname>MockHttpServletResponse</classname>
+        works, you'll know that forwards and redirects are not actually executed.
+        Instead "forwarded" and "redirected" URLs are saved and can be asserted
+        in tests. This means if using JSPs, you can verify the JSP page
+        the request was forwarded to.</para>
+
+        <para>All other means of rendering including
+        <interfacename>@ResponseBody</interfacename> methods and
+        <interfacename>View</interfacename> types (besides JSPs) such as
+        Freemarker, Velocity, Thymeleaf, and others for rendering HTML,
+        JSON, XML, and so on should work as expected and the response will
+        contain the generated content.
+        </para>
+
+        <para>Below is an example of a test requesting account information in JSON format:</para>
+
+<programlisting language="java">import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("test-servlet-context.xml")
+public class ExampleTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+    }
+
+    @Test
+    public void getAccount() throws Exception {
+        this.mockMvc.perform(get("/accounts/1").accept("application/json;charset=UTF-8"))
+          .andExpect(status().isOk())
+          .andExpect(content().contentType("application/json"))
+          .andExpect(jsonPath("$.name").value("Lee");
+    }
+
+}</programlisting>
+
+        <para>The test relies on the <interfacename>WebApplicationContext</interfacename>
+        support of the <emphasis>TestContext framework</emphasis>. It loads Spring configuration from
+        an XML config file located in the same
+        package as the test class (also supports Java config) and injects
+        the created <interfacename>WebApplicationContext</interfacename>
+        into the test so a <classname>MockMvc</classname> instance can be
+        created with it.</para>
+
+        <para>The <classname>MockMvc</classname> is then
+        used to perform a request to <filename>"/accounts/1"</filename>
+        and verify the resulting
+        response status is 200, the response content type is
+        <filename>"application/json"</filename>, and response content
+        has a JSON property called "name" with the value "Lee".
+        JSON content is inspected with the help of Jayway's
+        <link xl:href="https://github.com/jayway/JsonPath">JsonPath project</link>.
+        There are lots of other options for verifying the
+        result of the performed request and those will be discussed later.</para>
+
+        <section xml:id="spring-mvc-test-server-static-imports">
+          <title>Static Imports</title>
+
+          <para>The fluent API in the example above requires a few static imports
+          such as <classname>MockMvcRequestBuilders.*</classname>,
+          <classname>MockMvcResultMatchers.*</classname>, and
+          <classname>MockMvcBuilders.*</classname>. An easy way to find
+          these classes is to search for types matching
+          <emphasis>"MockMvc*"</emphasis>.
+          If using Eclipse, be sure to add them as
+          "favorite static members" in the Eclipse preferences under
+          <emphasis>Java -&gt; Editor -&gt; Content Assist -&gt; Favorites</emphasis>.
+          That will allow use of content assist after typing
+          the first character of the static method name.
+          Other IDEs (e.g. IntelliJ) may not require any additional
+          configuration. Just check the support for code completion
+          on static members.
+          </para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-setup-options">
+          <title>Setup Options</title>
+
+          <para>The goal of server-side test setup is to create
+          an instance of <classname>MockMvc</classname> that can be used
+          to perform requests. There are two main options.</para>
+
+          <para>The first option is to point to Spring MVC configuration
+          through the <emphasis>TestContext framework</emphasis>,
+          which loads the Spring configuration and injects a
+          <interfacename>WebApplicationContext</interfacename> into the
+          test to use to create a <classname>MockMvc</classname>:</para>
+
+<programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("my-servlet-context.xml")
+public class MyWebTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+    }
+
+    // ...
+
+}</programlisting>
+
+          <para>The second option is to simply register a controller
+          instance without loading any Spring configuration.
+          Instead basic Spring MVC configuration suitable for testing
+          annotated controllers is automatically created. The created
+          configuration is comparable to that of the MVC Java config
+          (and the MVC namespace) and can be customized to a degree
+          through builder-style methods:</para>
+
+<programlisting language="java">public class MyWebTests {
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.standaloneSetup(new AccountController()).build();
+    }
+
+    // ...
+
+}</programlisting>
+
+          <para>Which option should you use?</para>
+
+          <para>The <emphasis>"webAppContextSetup"</emphasis> loads
+          the actual Spring MVC configuration
+          resulting in a more complete integration test. Since the
+          <emphasis>TestContext framework</emphasis> caches the loaded
+          Spring configuration, it helps to keep tests running fast
+          even as more tests get added. Furthermore, you can inject mock
+          services into controllers through Spring configuration,
+          in order to remain focused on testing the web layer.
+          Here is an example of declaring a mock service with Mockito:</para>
+
+<programlisting language="xml">
+&lt;bean id="accountService" class="org.mockito.Mockito" factory-method="mock"&gt;
+    &lt;constructor-arg value="org.example.AccountService"/&gt;
+&lt;/bean&gt;
+</programlisting>
+
+          <para>Then you can inject the mock service into the test
+          in order set up and verify expectations:</para>
+
+<programlisting language="java">@RunWith(SpringJUnit4ClassRunner.class)
+@WebAppConfiguration
+@ContextConfiguration("test-servlet-context.xml")
+public class AccountTests {
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    private MockMvc mockMvc;
+
+    @Autowired
+    private AccountService accountService;
+
+    // ...
+
+}</programlisting>
+
+          <para>The <emphasis>"standaloneSetup"</emphasis> on the other
+          hand is a little closer to a unit test. It tests one controller at a time,
+          the controller can be injected with mock dependencies manually,
+          and it doesn't involve loading Spring configuration.
+          Such tests are more focused in style and  make it easier to see
+          which controller is being tested, whether any specific Spring MVC
+          configuration is required to work, and so on. The "standaloneSetup" is also
+          a very convenient way to write ad-hoc tests to verify some
+          behavior or to debug an issue.</para>
+
+          <para>Just like with integration vs unit testing, there is no right or
+          wrong answer. Using the "standaloneSetup" does imply the
+          need for some additional "webAppContextSetup" tests to verify the
+          Spring MVC configuration. Alternatively, you can decide write all
+          tests with "webAppContextSetup" and always test against actual
+          Spring MVC configuration.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-server-performing-requests">
+          <title>Performing Requests</title>
+
+          <para>To perform requests, use the appropriate HTTP
+          method and additional builder-style methods corresponding
+          to properties of <classname>MockHttpServletRequest</classname>.
+          For example:</para>
+
+<programlisting language="java">
+mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
+</programlisting>
+
+          <para>In addition to all the HTTP methods, you can also perform file
+          upload requests, which internally creates an instance of
+          <classname>MockMultipartHttpServletRequest</classname>:</para>
+
+<programlisting language="java">
+mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
+</programlisting>
+
+          <para>Query string parameters can be specified in the URI template:</para>
+
+<programlisting language="java">
+mockMvc.perform(get("/hotels?foo={foo}", "bar"));
+</programlisting>
+
+          <para>Or by adding Servlet request parameters:</para>
+
+<programlisting language="java">
+mockMvc.perform(get("/hotels").param("foo", "bar"));
+</programlisting>
+
+          <para>If application code relies on Servlet request parameters, and
+          doesn't check the query string, as is most often the case,
+          then it doesn't matter how parameters are added. Keep in mind
+          though that parameters provided in the URI template will be decoded
+          while parameters provided through the <code>param(...)</code>
+          method are expected to be decoded.</para>
+
+          <para>In most cases it's preferable to leave out the context path and
+          the servlet path from the request URI. If you must test with the full
+          request URI, be sure to set the contextPath and servletPath
+          accordingly so that request mappings will work:</para>
+
+<programlisting language="java">
+mockMvc.perform(get("/app/main/hotels/{id}").contextPath("/app").servletPath("/main"))
+</programlisting>
+
+          <para>Looking at the above example, it would be cumbersome to set
+          the contextPath and servletPath with every peformed request.
+          That's why you can define default request
+          properties when building the <classname>MockMvc</classname>:</para>
+
+<programlisting language="java">
+public class MyWebTests {
+
+    private MockMvc mockMvc;
+
+    @Before
+    public void setup() {
+        mockMvc = standaloneSetup(new AccountController())
+            .defaultRequest(get("/")
+                .contextPath("/app").servletPath("/main")
+                .accept(MediaType.APPLICATION_JSON).build();
+    }
+
+}</programlisting>
+
+          <para>The above properties will apply to every request performed through
+          the <classname>MockMvc</classname>. If the same property is also specified
+          on a given request, it will override the default value. That is why, the
+          HTTP method and URI don't matter, when setting default request properties,
+          since they must be specified on every request.</para>
+
+        </section>
+
+        <section xml:id="spring-mvc-test-server-defining-expectations">
+          <title>Defining Expectations</title>
+
+          <para>Expectations can be defined by appending one or more
+          <code>.andExpect(..)</code> after call to perform the request:</para>
+
+<programlisting language="java">
+mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
+</programlisting>
+
+          <para><code>MockMvcResultMatchers.*</code> defines a number of static
+          members, some of which return types with additional methods, for
+          asserting the result of the performed request. The assertions
+          fall in two general categories.</para>
+
+          <para>The first category of assertions verify properties of the
+          response, i.e the response status, headers, and content.
+          Those are the most important things to test for.</para>
+
+          <para>The second category of assertions go beyond the response, and allow
+          inspecting Spring MVC specific constructs such as which controller
+          method processed the request, whether an exception was raised and handled,
+          what the content of the model is, what view was selected, what flash
+          attributes were added, and so on. It is also possible to
+          verify Servlet specific constructs such as request and session attributes.
+          The following test asserts that binding/validation failed:
+          </para>
+
+<programlisting language="java">
+mockMvc.perform(post("/persons"))
+  .andExpect(status().isOk())
+  .andExpect(model().attributeHasErrors("person"));
+</programlisting>
+
+          <para>Many times when writing tests, it's useful to dump the result
+          of the performed request. This can be done as follows:</para>
+
+<programlisting language="java">
+mockMvc.perform(post("/persons"))
+  .andDo(print())
+  .andExpect(status().isOk())
+  .andExpect(model().attributeHasErrors("person"));
+</programlisting>
+
+          <para>where <code>print()</code> is a static import from
+          <code>MockMvcResultHandlers</code>. As long as request processing
+          does cause an unhandled exception, the <code>print()</code>
+          method will print all the available result data to <code>System.out</code>.</para>
+
+          <para>In some cases, you may want to get direct access to the result and
+          verify something that cannot be verified otherwise. This can be done by
+          appending <code>.andReturn()</code> at the end after all expectations:</para>
+
+<programlisting language="java">
+MvcResult mvcResult = mockMvc.perform(post("/persons")).andExpect(status().isOk()).andReturn();
+// ...
+</programlisting>
+
+          <para>When all tests repeat the same expectations, you can define
+          the common expectations once when building the
+          <classname>MockMvc</classname>:</para>
+
+<programlisting language="java">
+standaloneSetup(new SimpleController())
+    .alwaysExpect(status().isOk())
+    .alwaysExpect(content().contentType("application/json;charset=UTF-8"))
+    .build()
+</programlisting>
+
+          <para>Note that the expectation is <emphasis>always</emphasis> applied
+          and cannot be overridden without creating a separate
+          <classname>MockMvc</classname> instance. </para>
+
+          <para>When JSON response content contains hypermedia links created with
+          <link xl:href="https://github.com/SpringSource/spring-hateoas">Spring HATEOAS</link>,
+          the resulting links can be verified:</para>
+
+<programlisting language="java">
+mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
+  .andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
+</programlisting>
+
+          <para>When XML response content contains hypermedia links created with
+          <link xl:href="https://github.com/SpringSource/spring-hateoas">Spring HATEOAS</link>,
+          the resulting links can be verified:</para>
+
+<programlisting language="java">
+Map&lt;String, String&gt; ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
+mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
+  .andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
+</programlisting>
+
+        </section>
+
+        <section xml:id="spring-mvc-test-server-filters">
+          <title>Filter Registrations</title>
+
+          <para>When setting up a <classname>MockMvc</classname>, you can
+          register one or more <interfacename>Filter</interfacename> instances:</para>
+
+<programlisting language="java">
+mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
+</programlisting>
+
+          <para>Registered filters will be invoked through
+          <classname>MockFilterChain</classname> from
+          <filename>spring-test</filename> and the last filter will delegates to
+          the <classname>DispatcherServlet</classname>.</para>
+
+        </section>
+
+        <section xml:id="spring-mvc-test-server-resources">
+          <title>Further Server-Side Test Examples</title>
+
+            <para>The framework's own tests include
+            <link xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/servlet/samples">many sample tests</link>
+            intended to demonstrate how to use Spring MVC Test.
+            Browse these examples for further ideas. Also the
+            <link xl:href="https://github.com/SpringSource/spring-mvc-showcase">spring-mvc-showcase</link>
+            has full test coverage based on Spring MVC Test.</para>
+        </section>
+
+      </section>
+
+      <section xml:id="spring-mvc-test-client">
+        <title>Client-Side REST Tests</title>
+
+        <para>Client-side tests are for code using the <classname>RestTemplate</classname>.
+        The goal is to define expected requests and provide "stub" responses:</para>
+
+<programlisting language="java">
+RestTemplate restTemplate = new RestTemplate();
+
+MockRestServiceServer mockServer =  MockRestServiceServer.createServer(restTemplate);
+mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", "text/plain"));
+
+// use RestTemplate ...
+
+mockServer.verify();
+</programlisting>
+
+        <para>In the above example, <classname>MockRestServiceServer</classname> --
+        the central class for client-side REST tests -- configures the
+        <classname>RestTemplate</classname> with a custom
+        <interfacename>ClientHttpRequestFactory</interfacename> that asserts
+        actual requests against expectations and returns "stub" responses.
+        In this case we expect a single request to "/greeting" and want to return
+        a 200 response with "text/plain" content. We could define as many
+        additional requests and stub responses as necessary.</para>
+
+        <para>Once expected requests and stub
+        responses have been defined, the <classname>RestTemplate</classname> can
+        be used in client-side code as usual. At the end of the tests
+        <code>mockServer.verify()</code>
+        can be used to verify that all expected requests were performed.</para>
+
+        <section xml:id="spring-mvc-test-client-static-imports">
+          <title>Static Imports</title>
+
+          <para>Just like with server-side tests, the fluent API for client-side tests
+          requires a few static imports. Those are easy to find by searching
+          <emphasis>"MockRest*"</emphasis>. Eclipse users should add
+          <classname>"MockRestRequestMatchers.*"</classname> and
+          <classname>"MockRestResponseCreators.*"</classname>
+          as "favorite static members" in the Eclipse preferences under
+          <emphasis>Java -&gt; Editor -&gt; Content Assist -&gt; Favorites</emphasis>.
+          That allows using content assist after typing
+          the first character of the static method name.
+          Other IDEs (e.g. IntelliJ) may not require any additional
+          configuration. Just check the support for code completion
+          on static members.</para>
+        </section>
+
+        <section xml:id="spring-mvc-test-client-resources">
+          <title>Further Examples of Client-side REST Tests</title>
+
+            <para>Spring MVC Test's own tests include
+            <link xl:href="https://github.com/SpringSource/spring-framework/tree/master/spring-test-mvc/src/test/java/org/springframework/test/web/client/samples">example tests</link>
+            of client-side REST tests.</para>
+        </section>
+
+      </section>
+
+    </section>
+
     <section xml:id="testing-examples-petclinic">
       <title>PetClinic Example</title>
 
