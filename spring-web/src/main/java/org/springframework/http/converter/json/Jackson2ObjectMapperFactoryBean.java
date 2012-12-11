@@ -221,8 +221,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * @see MapperFeature
 	 * @see SerializationFeature
 	 * @see DeserializationFeature
-	 * @see JsonParser.Feature
-	 * @see JsonGenerator.Feature
+	 * @see org.codehaus.jackson.map.JsonParser.Feature
+	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToEnable(Object... featuresToEnable) {
 		if (featuresToEnable != null) {
@@ -238,8 +238,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * @see MapperFeature
 	 * @see SerializationFeature
 	 * @see DeserializationFeature
-	 * @see JsonParser.Feature
-	 * @see JsonGenerator.Feature
+	 * @see org.codehaus.jackson.map.JsonParser.Feature
+	 * @see org.codehaus.jackson.map.JsonGenerator.Feature
 	 */
 	public void setFeaturesToDisable(Object... featuresToDisable) {
 		if (featuresToDisable != null) {

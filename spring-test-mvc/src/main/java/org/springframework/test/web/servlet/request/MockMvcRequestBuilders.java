@@ -87,8 +87,8 @@ public abstract class MockMvcRequestBuilders {
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
-	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, String urlTemplate, Object... urlVars) {
-		return new MockHttpServletRequestBuilder(httpMethod, urlTemplate, urlVars);
+	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) {
+		return new MockHttpServletRequestBuilder(httpMethod, urlTemplate, urlVariables);
 	}
 
 	/**

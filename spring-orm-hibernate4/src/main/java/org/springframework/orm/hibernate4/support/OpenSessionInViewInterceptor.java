@@ -50,17 +50,8 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * transactions via {@link org.springframework.orm.hibernate4.HibernateTransactionManager}
  * as well as for non-transactional execution (if configured appropriately).
  *
- * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate
- * <code>Session</code>, with the flush mode being set to <code>FlushMode.NEVER</code>.
- * It assumes that it will be used in combination with service layer transactions
- * that handle the flushing: the active transaction manager will temporarily change
- * the flush mode to <code>FlushMode.AUTO</code> during a read-write transaction,
- * with the flush mode reset to <code>FlushMode.NEVER</code> at the end of each
- * transaction. If you intend to use this interceptor without transactions, consider
- * changing the default flush mode (through the {@link #setFlushMode "flushMode"} property).
- *
  * <p>In contrast to {@link OpenSessionInViewFilter}, this interceptor is configured
- * in a Spring application context and can thus take advantage of bean wiring..
+ * in a Spring application context and can thus take advantage of bean wiring.
  *
  * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues
  * that have not appeared before, through the use of a single Hibernate
@@ -71,8 +62,6 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  *
  * @author Juergen Hoeller
  * @since 3.1
- * @see #setSingleSession
- * @see #setFlushMode
  * @see OpenSessionInViewFilter
  * @see org.springframework.orm.hibernate4.HibernateTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager

@@ -71,7 +71,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
  * @see #handleHttpMessageNotWritable
  * @see #handleMethodArgumentNotValidException
  * @see #handleMissingServletRequestParameter
- * @see #handleMissingServletRequestPart
+ * @see #handleMissingServletRequestPartException
  * @see #handleBindException
  */
 public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionResolver {

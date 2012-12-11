@@ -37,8 +37,8 @@ import org.springframework.util.StringValueResolver;
  *
  * <p>{@link PropertyPlaceholderConfigurer} is still appropriate for use when:
  * <ul>
- * <li>the {@link org.springframework.context spring-context} module is not available (i.e., one is using
- * Spring's {@code BeanFactory} API as opposed to {@code ApplicationContext}).
+ * <li>the {@code spring-context} module is not available (i.e., one is using Spring's
+ * {@code BeanFactory} API as opposed to {@code ApplicationContext}).
  * <li>existing configuration makes use of the {@link #setSystemPropertiesMode(int) "systemPropertiesMode"} and/or
  * {@link #setSystemPropertiesModeName(String) "systemPropertiesModeName"} properties. Users are encouraged to move
  * away from using these settings, and rather configure property source search order through the container's

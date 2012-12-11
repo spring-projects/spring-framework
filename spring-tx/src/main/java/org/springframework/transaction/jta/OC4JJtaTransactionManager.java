@@ -61,9 +61,6 @@ import org.springframework.util.ClassUtils;
  * @since 2.0.3
  * @see org.springframework.transaction.TransactionDefinition#getName
  * @see org.springframework.transaction.TransactionDefinition#getIsolationLevel
- * @see oracle.j2ee.transaction.OC4JTransactionManager#begin(String)
- * @see oracle.j2ee.transaction.OC4JTransaction#setTransactionIsolation
- * @see oracle.j2ee.transaction.TransactionUtility
  * @deprecated as of Spring 3.2, in favor of {@link WebLogicJtaTransactionManager}
  * since Oracle end-of-lifed OC4J in favor of WebLogic
  */

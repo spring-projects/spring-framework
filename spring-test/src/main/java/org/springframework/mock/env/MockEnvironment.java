@@ -51,7 +51,7 @@ public class MockEnvironment extends AbstractEnvironment {
 	 * Convenient synonym for {@link #setProperty} that returns the current instance.
 	 * Useful for method chaining and fluent-style use.
 	 * @return this {@link MockEnvironment} instance
-	 * @see MockPropertySource#withProperty(String, String)
+	 * @see MockPropertySource#withProperty
 	 */
 	public MockEnvironment withProperty(String key, String value) {
 		this.setProperty(key, value);

@@ -133,7 +133,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 *
 	 * <p><b>Note</b>: this method does not provide a means to set active bean definition
 	 * profiles for the loaded context. See {@link #loadContext(MergedContextConfiguration)}
-	 * and {@link #prepareContext(GenericApplicationContext, MergedContextConfiguration)}
+	 * and {@link AbstractContextLoader#prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)}
 	 * for an alternative.
 	 *
 	 * @return a new application context

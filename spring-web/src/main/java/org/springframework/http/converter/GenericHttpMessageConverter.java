@@ -50,7 +50,6 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 	 * @param type the type of object to return. This type must have previously
 	 * been passed to the {@link #canRead canRead} method of this interface,
 	 * which must have returned {@code true}.
-	 * @param type the type of the target object
 	 * @param contextClass a context class for the target type, for example a class
 	 * in which the target type appears in a method signature, can be {@code null}
 	 * @param inputMessage the HTTP input message to read from

@@ -49,7 +49,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * {@link org.springframework.test.context.ContextLoader ContextLoader} SPI.
  *
  * <p>Concrete subclasses must provide an appropriate implementation of
- * {@link #loadBeanDefinitions()}.
+ * {@link #loadBeanDefinitions}.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -71,18 +71,18 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 *
 	 * <ul>
 	 * <li>Creates a {@link GenericWebApplicationContext} instance.</li>
-	 * <li>Delegates to {@link #configureWebResources()} to create the
+	 * <li>Delegates to {@link #configureWebResources} to create the
 	 * {@link MockServletContext} and set it in the {@code WebApplicationContext}.</li>
-	 * <li>Calls {@link #prepareContext()} to allow for customizing the context
+	 * <li>Calls {@link #prepareContext} to allow for customizing the context
 	 * before bean definitions are loaded.</li>
-	 * <li>Calls {@link #customizeBeanFactory()} to allow for customizing the
+	 * <li>Calls {@link #customizeBeanFactory} to allow for customizing the
 	 * context's {@code DefaultListableBeanFactory}.</li>
-	 * <li>Delegates to {@link #loadBeanDefinitions()} to populate the context
+	 * <li>Delegates to {@link #loadBeanDefinitions} to populate the context
 	 * from the locations or classes in the supplied {@code MergedContextConfiguration}.</li>
 	 * <li>Delegates to {@link AnnotationConfigUtils} for
 	 * {@linkplain AnnotationConfigUtils#registerAnnotationConfigProcessors registering}
 	 * annotation configuration processors.</li>
-	 * <li>Calls {@link #customizeContext()} to allow for customizing the context
+	 * <li>Calls {@link #customizeContext} to allow for customizing the context
 	 * before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>

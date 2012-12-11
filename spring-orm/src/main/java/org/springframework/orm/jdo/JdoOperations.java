@@ -67,8 +67,6 @@ public interface JdoOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see JdoTransactionManager
-	 * @see org.springframework.dao
-	 * @see org.springframework.transaction
 	 * @see javax.jdo.PersistenceManager
 	 */
 	<T> T execute(JdoCallback<T> action) throws DataAccessException;

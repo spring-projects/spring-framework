@@ -147,8 +147,6 @@ public class ContentResultMatchers {
 	/**
 	 * Parse the response content as {@link Node} and apply the given Hamcrest
 	 * {@link Matcher}.
-	 *
-	 * @see org.hamcrest.Matchers#hasXPath
 	 */
 	public ResultMatcher node(final Matcher<? super Node> matcher) {
 		return new ResultMatcher() {

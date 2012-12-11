@@ -783,8 +783,6 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Override the parent class implementation in order to intercept PATCH
 	 * requests.
-	 *
-	 * @see #doPatch(HttpServletRequest, HttpServletResponse)
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)

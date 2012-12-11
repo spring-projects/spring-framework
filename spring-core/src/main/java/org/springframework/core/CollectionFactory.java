@@ -294,7 +294,7 @@ public abstract class CollectionFactory {
 	/**
 	 * Create the most approximate map for the given map.
 	 * <p>Creates a TreeMap or linked Map for a SortedMap or Map, respectively.
-	 * @param collectionType the desired type of the target Map
+	 * @param mapType the desired type of the target Map
 	 * @param initialCapacity the initial capacity
 	 * @return the new Map instance
 	 * @see java.util.TreeMap

@@ -2,6 +2,7 @@
 // compile sources with ajc instead of javac
 
 configurations {
+	rt
 	ajc
 	aspects
 	ajInpath
@@ -26,7 +27,7 @@ task compileJava(overwrite: true)  {
 				aspectPath: configurations.aspects.asPath,
 				inpath: configurations.ajInpath.asPath,
 				sourceRootCopyFilter: "**/*.java",
-				classpath: sourceSets.main.runtimeClasspath.asPath) {
+				classpath: (sourceSets.main.runtimeClasspath + configurations.rt).asPath) {
 			sourceroots {
 				sourceSets.main.java.srcDirs.each {
 					pathelement(location:it.absolutePath)
@@ -55,7 +56,8 @@ task compileTestJava(overwrite: true)  {
 				destDir: outputDir.absolutePath,
 				aspectPath: jar.archivePath,
 				inpath: configurations.ajInpath.asPath,
-				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath) {
+				classpath: sourceSets.test.runtimeClasspath.asPath + jar.archivePath +
+				           System.getProperty("path.separator") + configurations.rt.asPath) {
 			sourceroots {
 				sourceSets.test.java.srcDirs.each {
 					pathelement(location:it.absolutePath)

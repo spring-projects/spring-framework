@@ -56,8 +56,8 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 
 
 	/**
-     * Protected constructor. Not intended for direct instantiation.
-     * @see MockMvcBuilders#webAppContextSetup(WebApplicationContext)
+	 * Protected constructor. Not intended for direct instantiation.
+	 * @see MockMvcBuilders#webAppContextSetup(WebApplicationContext)
 	 */
 	protected DefaultMockMvcBuilder(WebApplicationContext webAppContext) {
 		Assert.notNull(webAppContext, "WebApplicationContext is required");
@@ -116,7 +116,6 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	 *
 	 * @param filter the filter to add
 	 * @param urlPatterns URL patterns to map to; if empty, "/*" is used by default
-	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends Self> T addFilter(Filter filter, String... urlPatterns) {

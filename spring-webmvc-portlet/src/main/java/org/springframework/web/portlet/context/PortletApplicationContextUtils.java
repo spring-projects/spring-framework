@@ -188,15 +188,16 @@ public abstract class PortletApplicationContextUtils {
 	}
 
 	/**
-	 * Replace {@code Servlet}- and {@code Portlet}-based {@link StubPropertySource stub
-	 * property sources} with actual instances populated with the given {@code servletContext},
+	 * Replace {@code Servlet}- and {@code Portlet}-based {@link
+	 * org.springframework.core.env.PropertySource.StubPropertySource stub property
+	 * sources} with actual instances populated with the given {@code servletContext},
 	 * {@code portletContext} and {@code portletConfig} objects.
 	 * <p>This method is idempotent with respect to the fact it may be called any number
 	 * of times but will perform replacement of stub property sources with their
 	 * corresponding actual property sources once and only once.
-	 * @param propertySources the {@link PropertySources} to initialize (must not be {@code null})
+	 * @param propertySources the {@link MutablePropertySources} to initialize (must not be {@code null})
 	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
-	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
+	 * or if the {@link org.springframework.web.context.support.StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
 	 * servlet context property source} has already been initialized)
 	 * @param portletContext the current {@link PortletContext} (ignored if {@code null}
 	 * or if the {@link StandardPortletEnvironment#PORTLET_CONTEXT_PROPERTY_SOURCE_NAME

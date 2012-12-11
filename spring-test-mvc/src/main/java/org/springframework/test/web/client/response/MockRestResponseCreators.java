@@ -56,7 +56,7 @@ public abstract class MockRestResponseCreators {
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) with byte[] body.
 	 * @param body the response body
-	 * @param mediaType the type of the content, may be {@code null}
+	 * @param contentType the type of the content, may be {@code null}
 	 */
 	public static DefaultResponseCreator withSuccess(byte[] body, MediaType contentType) {
 		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);
@@ -65,7 +65,7 @@ public abstract class MockRestResponseCreators {
 	/**
 	 * {@code ResponseCreator} for a 200 response (OK) content with {@link Resource}-based body.
 	 * @param body the response body
-	 * @param mediaType the type of the content, may be {@code null}
+	 * @param contentType the type of the content, may be {@code null}
 	 */
 	public static DefaultResponseCreator withSuccess(Resource body, MediaType contentType) {
 		return new DefaultResponseCreator(HttpStatus.OK).body(body).contentType(contentType);

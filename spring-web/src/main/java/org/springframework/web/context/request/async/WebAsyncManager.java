@@ -51,9 +51,8 @@ import org.springframework.web.util.UrlPathHelper;
  *
  * @see org.springframework.web.context.request.AsyncWebRequestInterceptor
  * @see org.springframework.web.servlet.AsyncHandlerInterceptor
- * @see org.springframework.web.filter.OncePerRequestFilter#shouldFilterAsyncDispatches
+ * @see org.springframework.web.filter.OncePerRequestFilter#shouldNotFilterAsyncDispatch
  * @see org.springframework.web.filter.OncePerRequestFilter#isAsyncDispatch
- * @see org.springframework.web.filter.OncePerRequestFilter#isLastRequestThread
  */
 public final class WebAsyncManager {
 
@@ -195,7 +194,7 @@ public final class WebAsyncManager {
 	/**
 	 * Register a {@link CallableProcessingInterceptor} without a key.
 	 * The key is derived from the class name and hashcode.
-	 * @param interceptor the interceptor to register
+	 * @param interceptors one or more interceptors to register
 	 */
 	public void registerCallableInterceptors(CallableProcessingInterceptor... interceptors) {
 		Assert.notNull(interceptors, "A CallableProcessingInterceptor is required");
@@ -219,8 +218,7 @@ public final class WebAsyncManager {
 	/**
 	 * Register a {@link DeferredResultProcessingInterceptor} without a key.
 	 * The key is derived from the class name and hashcode.
-	 * @param key the key
-	 * @param interceptors the interceptor to register
+	 * @param interceptors one or more interceptors to register
 	 */
 	public void registerDeferredResultInterceptors(DeferredResultProcessingInterceptor... interceptors) {
 		Assert.notNull(interceptors, "A DeferredResultProcessingInterceptor is required");

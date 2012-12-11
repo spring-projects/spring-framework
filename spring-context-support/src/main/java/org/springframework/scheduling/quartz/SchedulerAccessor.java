@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,10 +112,10 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	/**
 	 * Set the location of a Quartz job definition XML file that follows the
-	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD or better. Can be specified to automatically
 	 * register jobs that are defined in such a file, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.JobSchedulingDataProcessor
+	 * @see org.quartz.xml.XmlSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocation(String jobSchedulingDataLocation) {
 		this.jobSchedulingDataLocations = new String[] {jobSchedulingDataLocation};
@@ -123,10 +123,10 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 
 	/**
 	 * Set the locations of Quartz job definition XML files that follow the
-	 * "job_scheduling_data_1_5" XSD. Can be specified to automatically
+	 * "job_scheduling_data_1_5" XSD or better. Can be specified to automatically
 	 * register jobs that are defined in such files, possibly in addition
 	 * to jobs defined directly on this SchedulerFactoryBean.
-	 * @see org.quartz.xml.JobSchedulingDataProcessor
+	 * @see org.quartz.xml.XmlSchedulingDataProcessor
 	 */
 	public void setJobSchedulingDataLocations(String[] jobSchedulingDataLocations) {
 		this.jobSchedulingDataLocations = jobSchedulingDataLocations;

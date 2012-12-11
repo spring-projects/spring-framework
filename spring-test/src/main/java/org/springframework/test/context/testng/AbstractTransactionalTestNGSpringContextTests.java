@@ -115,7 +115,7 @@ public abstract class AbstractTransactionalTestNGSpringContextTests extends Abst
 
 	/**
 	 * Count the rows in the given table, using the provided {@code WHERE} clause.
-	 * <p>See the Javadoc for {@link JdbcTestUtils#countRowsInTableWhere()} for details.
+	 * <p>See the Javadoc for {@link JdbcTestUtils#countRowsInTableWhere} for details.
 	 * @param tableName the name of the table to count rows in
 	 * @param whereClause the {@code WHERE} clause to append to the query
 	 * @return the number of rows in the table that match the provided

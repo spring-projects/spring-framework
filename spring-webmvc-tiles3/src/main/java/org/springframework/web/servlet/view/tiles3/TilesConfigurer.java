@@ -244,7 +244,6 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Creates and exposes a TilesContainer for this web application,
 	 * delegating to the TilesInitializer.
 	 * @throws TilesException in case of setup failure
-	 * @see #createTilesInitializer()
 	 */
 	public void afterPropertiesSet() throws TilesException {
 

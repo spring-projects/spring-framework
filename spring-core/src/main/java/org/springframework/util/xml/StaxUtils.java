@@ -36,8 +36,8 @@ import org.springframework.util.ClassUtils;
 /**
  * Convenience methods for working with the StAX API.
  *
- * <p>In particular, methods for using StAX ({@link javax.xml.stream}) in combination with the TrAX API
- * ({@link javax.xml.transform}), and converting StAX readers/writers into SAX readers/handlers and vice-versa.
+ * <p>In particular, methods for using StAX ({@code javax.xml.stream}) in combination with the TrAX API
+ * ({@code javax.xml.transform}), and converting StAX readers/writers into SAX readers/handlers and vice-versa.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller

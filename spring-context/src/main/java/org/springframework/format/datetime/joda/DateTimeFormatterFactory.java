@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Factory that creates a Joda {@link DateTimeFormatter}. Formatters will be
- * created using the defined {@link #setPattern(String) pattern}, {@link #setIso(ISO) ISO},
+ * created using the defined {@link #setPattern(String) pattern}, {@link #setIso ISO},
  * or {@link #setStyle(String) style} (considered in that order).
  *
  * @author Phillip Webb
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * @see #createDateTimeFormatter()
  * @see #createDateTimeFormatter(DateTimeFormatter)
  * @see #setPattern(String)
- * @see #setIso(org.springframework.format.annotation.DateTimeFormat.ISO)
+ * @see #setIso
  * @see #setStyle(String)
  * @see DateTimeFormatterFactoryBean
  */
@@ -68,7 +68,7 @@ public class DateTimeFormatterFactory {
 
 	/**
 	 * Create a new {@code DateTimeFormatter} using this factory. If no specific
-	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
+	 * {@link #setStyle(String) style}, {@link #setIso ISO}, or
 	 * {@link #setPattern(String) pattern} have been defined the
 	 * {@link DateTimeFormat#mediumDateTime() medium date time format} will be used.
 	 * @return a new date time formatter
@@ -80,7 +80,7 @@ public class DateTimeFormatterFactory {
 
 	/**
 	 * Create a new {@code DateTimeFormatter} using this factory. If no specific
-	 * {@link #setStyle(String) style}, {@link #setIso(ISO) ISO}, or
+	 * {@link #setStyle(String) style}, {@link #setIso ISO}, or
 	 * {@link #setPattern(String) pattern} have been defined the supplied
 	 * {@code fallbackFormatter} will be used.
 	 * @param fallbackFormatter the fall-back formatter to use when no specific factory

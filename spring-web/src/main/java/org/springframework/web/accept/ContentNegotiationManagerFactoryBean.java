@@ -37,7 +37,7 @@ import org.springframework.web.context.ServletContextAware;
  * <p>By default strategies for checking the extension of the request path and
  * the {@code Accept} header are registered. The path extension check will perform
  * lookups through the {@link ServletContext} and the Java Activation Framework
- * (if present) unless {@linkplain #setMediaTypes(Map) media types} are configured.
+ * (if present) unless {@linkplain #setMediaTypes(Properties) media types} are configured.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -99,7 +99,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * {@link #setFavorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
 	 * @see #parameterName
-	 * @see #setMediaTypes(Map)
+	 * @see #setMediaTypes(Properties)
 	 */
 	public void setUseJaf(boolean useJaf) {
 		this.useJaf = useJaf;
@@ -113,7 +113,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * for {@code /hotels?format=pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 * <p>To use this option effectively you must also configure the MediaType
-	 * type mappings via {@link #setMediaTypes(Map)}.
+	 * type mappings via {@link #setMediaTypes(Properties)}.
 	 * @see #setParameterName(String)
 	 */
 	public void setFavorParameter(boolean favorParameter) {

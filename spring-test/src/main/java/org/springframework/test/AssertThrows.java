@@ -76,7 +76,7 @@ package org.springframework.test;
  *
  * Intended for use with JUnit 4 and TestNG (as of Spring 3.0).
  * You might want to compare this class with the
- * {@link junit.extensions.ExceptionTestCase} class.
+ * {@code junit.extensions.ExceptionTestCase} class.
  *
  * @author Rick Evans
  * @author Juergen Hoeller

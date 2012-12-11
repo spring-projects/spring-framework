@@ -247,7 +247,8 @@ public abstract class WebApplicationContextUtils {
 	 * <p>This method is idempotent with respect to the fact it may be called any number
 	 * of times but will perform replacement of stub property sources with their
 	 * corresponding actual property sources once and only once.
-	 * @param propertySources the {@link PropertySources} to initialize (must not be {@code null})
+	 * @param propertySources the {@link MutablePropertySources} to initialize (must not
+	 * be {@code null})
 	 * @param servletContext the current {@link ServletContext} (ignored if {@code null}
 	 * or if the {@link StandardServletEnvironment#SERVLET_CONTEXT_PROPERTY_SOURCE_NAME
 	 * servlet context property source} has already been initialized)

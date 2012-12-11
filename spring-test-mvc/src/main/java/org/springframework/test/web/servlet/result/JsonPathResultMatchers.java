@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
  * Factory for assertions on the response content using <a
  * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
  * An instance of this class is typically accessed via
- * {@link MockMvcResultMatchers#jsonPpath}.
+ * {@link MockMvcResultMatchers#jsonPath}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

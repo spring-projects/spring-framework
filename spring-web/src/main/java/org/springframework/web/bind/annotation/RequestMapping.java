@@ -109,7 +109,7 @@ import java.util.concurrent.Callable;
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
  * and also support access to validation results through an
  * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link RequestPart @RequestPart} annotated parameters
  * (Servlet-only, {@literal @MVC 3.1-only})
@@ -120,7 +120,7 @@ import java.util.concurrent.Callable;
  * converters}. Such parameters may optionally be annotated with {@code @Valid}
  * and support access to validation results through a
  * {@link org.springframework.validation.Errors} argument.
- * Instead a {@link org.springframework.web.servlet.mvc.method.annotation.MethodArgumentNotValidException}
+ * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * (Servlet-only) for access to the Servlet request HTTP headers and contents.

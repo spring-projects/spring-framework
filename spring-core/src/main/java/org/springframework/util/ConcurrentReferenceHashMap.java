@@ -404,8 +404,8 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 
 		/**
 		 * Array of references indexed using the low order bits from the hash. This
-		 * property should only be set via {@link #setReferences(Reference[])} to ensure
-		 * that the resizeThreshold is maintained.
+		 * property should only be set via {@link #setReferences} to ensure that the
+		 * {@code resizeThreshold} is maintained.
 		 */
 		private volatile Reference<K, V>[] references;
 

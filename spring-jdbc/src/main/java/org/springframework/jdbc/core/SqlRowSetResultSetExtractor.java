@@ -22,8 +22,6 @@ import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetFactory;
 import javax.sql.rowset.RowSetProvider;
 
-import com.sun.rowset.CachedRowSetImpl;
-
 import org.springframework.core.JdkVersion;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -91,7 +89,6 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	 * @return a new CachedRowSet instance
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #createSqlRowSet
-	 * @see com.sun.rowset.CachedRowSetImpl
 	 */
 	protected CachedRowSet newCachedRowSet() throws SQLException {
 		return cachedRowSetFactory.createCachedRowSet();
@@ -135,7 +132,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	private static class SunCachedRowSetFactory implements CachedRowSetFactory {
 
 		public CachedRowSet createCachedRowSet() throws SQLException {
-			return new CachedRowSetImpl();
+			return new com.sun.rowset.CachedRowSetImpl();
 		}
 	}
 

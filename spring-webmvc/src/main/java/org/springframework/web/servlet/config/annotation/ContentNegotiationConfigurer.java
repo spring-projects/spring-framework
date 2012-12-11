@@ -29,7 +29,7 @@ import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
  * <p>By default strategies for checking the extension of the request path and
  * the {@code Accept} header are registered. The path extension check will perform
  * lookups through the {@link ServletContext} and the Java Activation Framework
- * (if present) unless {@linkplain #setMediaTypes(Map) media types} are configured.
+ * (if present) unless {@linkplain #mediaTypes(Map) media types} are configured.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -97,7 +97,7 @@ public class ContentNegotiationConfigurer {
 	 * {@link #favorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
 	 * @see #parameterName
-	 * @see #setMediaTypes(Map)
+	 * @see #mediaTypes(Map)
 	 */
 	public ContentNegotiationConfigurer useJaf(boolean useJaf) {
 		this.factoryBean.setUseJaf(useJaf);
@@ -112,7 +112,7 @@ public class ContentNegotiationConfigurer {
 	 * for {@code /hotels?format=pdf} will be interpreted as a request for
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 * <p>To use this option effectively you must also configure the MediaType
-	 * type mappings via {@link #setMediaTypes(Map)}.
+	 * type mappings via {@link #mediaTypes(Map)}.
 	 * @see #parameterName(String)
 	 */
 	public ContentNegotiationConfigurer favorParameter(boolean favorParameter) {
@@ -122,7 +122,7 @@ public class ContentNegotiationConfigurer {
 
 	/**
 	 * Set the parameter name that can be used to determine the requested media type
-	 * if the {@link #setFavorParameter} property is {@code true}.
+	 * if the {@link #favorParameter(boolean)} property is {@code true}.
 	 * <p>The default parameter name is {@code "format"}.
 	 */
 	public ContentNegotiationConfigurer parameterName(String parameterName) {

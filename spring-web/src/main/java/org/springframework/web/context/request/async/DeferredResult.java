@@ -139,7 +139,7 @@ public class DeferredResult<T> {
 	/**
 	 * Provide a handler to use to handle the result value.
 	 * @param resultHandler the handler
-	 * @see {@link DeferredResultProcessingInterceptor}
+	 * @see DeferredResultProcessingInterceptor
 	 */
 	public final void setResultHandler(DeferredResultHandler resultHandler) {
 		Assert.notNull(resultHandler, "DeferredResultHandler is required");

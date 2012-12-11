@@ -297,11 +297,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	/**
 	 * Determines the list of {@link MediaType} for the given {@link HttpServletRequest}.
-	 * <p>The default implementation invokes {@link #getMediaTypeFromFilename(String)} if {@linkplain
-	 * #setFavorPathExtension favorPathExtension} property is <code>true</code>. If the property is
-	 * <code>false</code>, or when a media type cannot be determined from the request path,
-	 * this method will inspect the {@code Accept} header of the request.
-	 * <p>This method can be overridden to provide a different algorithm.
 	 * @param request the current servlet request
 	 * @return the list of media types requested, if any
 	 */

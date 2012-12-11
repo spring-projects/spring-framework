@@ -30,8 +30,7 @@ public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader 
 
 	/**
 	 * Loads bean definitions using an {@link XmlBeanDefinitionReader}.
-	 *
-	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions()
+	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericWebApplicationContext context,

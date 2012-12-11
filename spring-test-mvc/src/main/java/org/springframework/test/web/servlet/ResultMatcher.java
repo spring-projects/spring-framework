@@ -40,7 +40,7 @@ public interface ResultMatcher {
 	/**
 	 * Assert the result of an executed request.
 	 *
-	 * @param mvcResult the result of the executed request
+	 * @param result the result of the executed request
 	 * @throws Exception if a failure occurs
 	 */
 	void match(MvcResult result) throws Exception;

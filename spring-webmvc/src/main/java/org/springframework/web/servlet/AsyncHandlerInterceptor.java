@@ -29,7 +29,7 @@ import org.springframework.web.method.HandlerMethod;
  * exits without invoking {@code postHandle} and {@code afterCompletion}, as it
  * normally does, since the results of request handling (e.g. ModelAndView)
  * will. be produced concurrently in another thread. In such scenarios,
- * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse)}
+ * {@link #afterConcurrentHandlingStarted(HttpServletRequest, HttpServletResponse, Object)}
  * is invoked instead allowing implementations to perform tasks such as cleaning
  * up thread bound attributes.
  *

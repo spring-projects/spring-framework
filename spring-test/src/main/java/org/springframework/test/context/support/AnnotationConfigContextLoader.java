@@ -155,7 +155,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link AnnotatedBeanDefinitionReader} is used to register the appropriate
 	 * bean definitions.
 	 *
-	 * <p>Note that this method does not call {@link #createBeanDefinitionReader()}
+	 * <p>Note that this method does not call {@link #createBeanDefinitionReader}
 	 * since <code>AnnotatedBeanDefinitionReader</code> is not an instance of
 	 * {@link BeanDefinitionReader}.
 	 *

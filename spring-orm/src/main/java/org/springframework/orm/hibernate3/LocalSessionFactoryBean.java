@@ -520,9 +520,9 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * you can also pass in a list or set of listeners objects as value.
 	 * <p>See the Hibernate documentation for further details on listener types
 	 * and associated listener interfaces.
+	 * <p>See {@code org.hibernate.cfg.Configuration#setListener(String, Object)}
 	 * @param eventListeners Map with listener type Strings as keys and
 	 * listener objects as values
-	 * @see org.hibernate.cfg.Configuration#setListener(String, Object)
 	 */
 	public void setEventListeners(Map<String, Object> eventListeners) {
 		this.eventListeners = eventListeners;

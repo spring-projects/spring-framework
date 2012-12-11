@@ -81,8 +81,6 @@ public interface HibernateOperations {
 	 * @return a result object returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of Hibernate errors
 	 * @see HibernateTransactionManager
-	 * @see org.springframework.dao
-	 * @see org.springframework.transaction
 	 * @see org.hibernate.Session
 	 */
 	<T> T execute(HibernateCallback<T> action) throws DataAccessException;

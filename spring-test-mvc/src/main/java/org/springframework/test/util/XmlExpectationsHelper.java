@@ -45,7 +45,6 @@ public class XmlExpectationsHelper {
 
 	/**
 	 * Parse the content as {@link Node} and apply a {@link Matcher}.
-	 * @see org.hamcrest.Matchers#hasXPath
 	 */
 	public void assertNode(String content, Matcher<? super Node> matcher) throws Exception {
 		Document document = parseXmlString(content);

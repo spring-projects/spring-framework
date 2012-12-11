@@ -33,7 +33,7 @@ import org.springframework.util.StringUtils;
 /**
  * Base class for asynchronous method execution aspects, such as
  * {@link org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor}
- * or {@link org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
+ * or {@code org.springframework.scheduling.aspectj.AnnotationAsyncExecutionAspect}.
  *
  * <p>Provides support for <i>executor qualification</i> on a method-by-method basis.
  * {@code AsyncExecutionAspectSupport} objects must be constructed with a default {@code
@@ -87,7 +87,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 
 	/**
 	 * Determine the specific executor to use when executing the given method.
-	 * @returns the executor to use (never {@code null})
+	 * @return the executor to use (never {@code null})
 	 */
 	protected AsyncTaskExecutor determineAsyncExecutor(Method method) {
 		if (!this.executors.containsKey(method)) {
