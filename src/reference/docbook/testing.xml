@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter xml:id="testing"
-    xmlns="http://docbook.org/ns/docbook" version="5.0"
-    xmlns:xl="http://www.w3.org/1999/xlink"
-    xmlns:xi="http://www.w3.org/2001/XInclude"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="
-        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
-        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-
+<chapter version="5.0"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd"
+         xml:id="testing" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:xl="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:ns="http://docbook.org/ns/docbook">
   <title>Testing</title>
 
   <section xml:id="testing-introduction">
@@ -85,8 +84,8 @@
         usage with Spring's Web MVC framework, which are useful for testing
         web contexts and controllers. These mock objects are generally more
         convenient to use than dynamic mock objects such as <link
-        xl:href="http://www.easymock.org">EasyMock</link> or existing
-        Servlet API mock objects such as <link
+        xl:href="http://www.easymock.org">EasyMock</link> or existing Servlet
+        API mock objects such as <link
         xl:href="http://www.mockobjects.com">MockObjects</link>.</para>
       </section>
 
@@ -2558,28 +2557,27 @@ public class HibernateClinicTests extends AbstractClinicTests { }
 
       <listitem>
         <para><link
-        xl:href="http://www.mockobjects.com/">MockObjects.com</link>: Web
-        site dedicated to mock objects, a technique for improving the design
-        of code within test-driven development.</para>
+        xl:href="http://www.mockobjects.com/">MockObjects.com</link>: Web site
+        dedicated to mock objects, a technique for improving the design of
+        code within test-driven development.</para>
       </listitem>
 
       <listitem>
-        <para><link
-        xl:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
+        <para><link xl:href="http://en.wikipedia.org/wiki/Mock_Object">"Mock
         Objects"</link>: Article in Wikipedia.</para>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://www.easymock.org/">EasyMock</link>:
-        Java library <quote> <emphasis>that provides Mock Objects for
-        interfaces (and objects through the class extension) by generating
-        them on the fly using Java's proxy mechanism.</emphasis> </quote> Used
-        by the Spring Framework in its test suite.</para>
+        <para><link xl:href="http://www.easymock.org/">EasyMock</link>: Java
+        library <quote> <emphasis>that provides Mock Objects for interfaces
+        (and objects through the class extension) by generating them on the
+        fly using Java's proxy mechanism.</emphasis> </quote> Used by the
+        Spring Framework in its test suite.</para>
       </listitem>
 
       <listitem>
-        <para><link xl:href="http://www.jmock.org/">JMock</link>: Library
-        that supports test-driven development of Java code with mock
+        <para><link xl:href="http://www.jmock.org/">JMock</link>: Library that
+        supports test-driven development of Java code with mock
         objects.</para>
       </listitem>
 
