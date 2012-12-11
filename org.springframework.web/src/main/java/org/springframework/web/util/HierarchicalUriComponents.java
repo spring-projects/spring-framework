@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  * Extension of {@link UriComponents} for hierarchical URIs.
  *
  * @author Arjen Poutsma
- * @since 3.2
+ * @since 3.1.3
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical URIs</a>
  */
 final class HierarchicalUriComponents extends UriComponents {
@@ -421,12 +421,10 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof OpaqueUriComponents)) {
+		if (!(obj instanceof HierarchicalUriComponents)) {
 			return false;
 		}
-
 		HierarchicalUriComponents other = (HierarchicalUriComponents) obj;
-
 		if (ObjectUtils.nullSafeEquals(getScheme(), other.getScheme())) {
 			return false;
 		}
@@ -448,7 +446,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		if (ObjectUtils.nullSafeEquals(getFragment(), other.getFragment())) {
 			return false;
 		}
-
 		return true;
 	}
 
