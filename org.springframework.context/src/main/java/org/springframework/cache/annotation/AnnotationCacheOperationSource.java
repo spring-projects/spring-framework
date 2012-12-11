@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * {@code CacheOperationSource}.
  *
  * @author Costin Leau
+ * @author Juergen Hoeller
  * @since 3.1
  */
 @SuppressWarnings("serial")
@@ -73,6 +74,16 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 
 	/**
 	 * Create a custom AnnotationCacheOperationSource.
+	 * @param annotationParser the CacheAnnotationParser to use
+	 */
+	public AnnotationCacheOperationSource(CacheAnnotationParser annotationParser) {
+		this.publicMethodsOnly = true;
+		Assert.notNull(annotationParser, "CacheAnnotationParser must not be null");
+		this.annotationParsers = Collections.singleton(annotationParser);
+	}
+
+	/**
+	 * Create a custom AnnotationCacheOperationSource.
 	 * @param annotationParsers the CacheAnnotationParser to use
 	 */
 	public AnnotationCacheOperationSource(CacheAnnotationParser... annotationParsers) {
@@ -81,6 +92,16 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 		Set<CacheAnnotationParser> parsers = new LinkedHashSet<CacheAnnotationParser>(annotationParsers.length);
 		Collections.addAll(parsers, annotationParsers);
 		this.annotationParsers = parsers;
+	}
+
+	/**
+	 * Create a custom AnnotationCacheOperationSource.
+	 * @param annotationParsers the CacheAnnotationParser to use
+	 */
+	public AnnotationCacheOperationSource(Set<CacheAnnotationParser> annotationParsers) {
+		this.publicMethodsOnly = true;
+		Assert.notEmpty(annotationParsers, "At least one CacheAnnotationParser needs to be specified");
+		this.annotationParsers = annotationParsers;
 	}
 
 
@@ -106,7 +127,6 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	 */
 	protected Collection<CacheOperation> determineCacheOperations(AnnotatedElement ae) {
 		Collection<CacheOperation> ops = null;
-
 		for (CacheAnnotationParser annotationParser : this.annotationParsers) {
 			Collection<CacheOperation> annOps = annotationParser.parseCacheAnnotations(ae);
 			if (annOps != null) {
@@ -126,4 +146,24 @@ public class AnnotationCacheOperationSource extends AbstractFallbackCacheOperati
 	protected boolean allowPublicMethodsOnly() {
 		return this.publicMethodsOnly;
 	}
+
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (!(other instanceof AnnotationCacheOperationSource)) {
+			return false;
+		}
+		AnnotationCacheOperationSource otherCos = (AnnotationCacheOperationSource) other;
+		return (this.annotationParsers.equals(otherCos.annotationParsers) &&
+				this.publicMethodsOnly == otherCos.publicMethodsOnly);
+	}
+
+	@Override
+	public int hashCode() {
+		return this.annotationParsers.hashCode();
+	}
+
 }

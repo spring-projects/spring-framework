@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,16 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 		return new Ejb3TransactionAttribute(ann.value());
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || other instanceof Ejb3TransactionAnnotationParser);
+	}
+
+	@Override
+	public int hashCode() {
+		return Ejb3TransactionAnnotationParser.class.hashCode();
+	}
+
 
 	/**
 	 * EJB3-specific TransactionAttribute, implementing EJB3's rollback rules
@@ -58,6 +68,7 @@ public class Ejb3TransactionAnnotationParser implements TransactionAnnotationPar
 			setPropagationBehaviorName(PREFIX_PROPAGATION + type.name());
 		}
 
+		@Override
 		public boolean rollbackOn(Throwable ex) {
 			ApplicationException ann = ex.getClass().getAnnotation(ApplicationException.class);
 			return (ann != null ? ann.rollback() : super.rollbackOn(ex));
