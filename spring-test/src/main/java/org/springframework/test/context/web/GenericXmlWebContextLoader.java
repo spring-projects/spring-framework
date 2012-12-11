@@ -20,7 +20,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
- * TODO [SPR-9864] Document GenericXmlWebContextLoader.
+ * Concrete implementation of {@link AbstractGenericWebContextLoader} that loads
+ * bean definitions from XML resources.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -28,9 +29,9 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader {
 
 	/**
-	 * TODO [SPR-9864] Document overridden loadBeanDefinitions().
+	 * Loads bean definitions using an {@link XmlBeanDefinitionReader}.
 	 *
-	 * @see org.springframework.test.context.web.AbstractGenericWebContextLoader#loadBeanDefinitions(org.springframework.web.context.support.GenericWebApplicationContext, org.springframework.test.context.web.WebMergedContextConfiguration)
+	 * @see AbstractGenericWebContextLoader#loadBeanDefinitions()
 	 */
 	@Override
 	protected void loadBeanDefinitions(GenericWebApplicationContext context,

@@ -23,10 +23,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
 
 /**
- * TODO [SPR-9864] Document AnnotationConfigContextLoaderUtils.
+ * Utility methods for {@link SmartContextLoader SmartContextLoaders} that deal
+ * with annotated classes (e.g., {@link Configuration @Configuration} classes).
  *
  * @author Sam Brannen
  * @since 3.2

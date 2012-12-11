@@ -27,10 +27,28 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * TODO [SPR-9864] Document WebMergedContextConfiguration.
+ * {@code WebMergedContextConfiguration} encapsulates the <em>merged</em>
+ * context configuration declared on a test class and all of its superclasses
+ * via {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
+ * {@link WebAppConfiguration @WebAppConfiguration}, and
+ * {@link org.springframework.test.context.ActiveProfiles @ActiveProfiles}.
+ *
+ * <p>{@code WebMergedContextConfiguration} extends the contract of
+ * {@link MergedContextConfiguration} by adding support for the {@link
+ * #getResourceBasePath() resource base path} configured via {@code @WebAppConfiguration}.
+ * This allows the {@link org.springframework.test.context.TestContext TestContext}
+ * to properly cache the corresponding {@link
+ * org.springframework.web.context.WebApplicationContext WebApplicationContext}
+ * that was loaded using properties of this {@code WebMergedContextConfiguration}.
  *
  * @author Sam Brannen
  * @since 3.2
+ * @see WebAppConfiguration
+ * @see MergedContextConfiguration
+ * @see org.springframework.test.context.ContextConfiguration
+ * @see org.springframework.test.context.ActiveProfiles
+ * @see org.springframework.test.context.ContextConfigurationAttributes
+ * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
  */
 public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
@@ -40,7 +58,25 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 
 
 	/**
-	 * TODO [SPR-9864] Document WebMergedContextConfiguration constructor.
+	 * Create a new {@code WebMergedContextConfiguration} instance for the
+	 * supplied test class, resource locations, annotated classes, context
+	 * initializers, active profiles, resource base path, and {@code ContextLoader}.
+	 *
+	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
+	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
+	 * be stored instead. If a <code>null</code> value is supplied for the
+	 * <code>contextInitializerClasses</code> an empty set will be stored instead.
+	 * If an <em>empty</em> value is supplied for the <code>resourceBasePath</code>
+	 * an empty string will be used. Furthermore, active profiles will be sorted,
+	 * and duplicate profiles will be removed.
+	 *
+	 * @param testClass the test class for which the configuration was merged
+	 * @param locations the merged resource locations
+	 * @param classes the merged annotated classes
+	 * @param contextInitializerClasses the merged context initializer classes
+	 * @param activeProfiles the merged active bean definition profiles
+	 * @param resourceBasePath the resource path to the root directory of the web application
+	 * @param contextLoader the resolved <code>ContextLoader</code>
 	 */
 	public WebMergedContextConfiguration(
 			Class<?> testClass,
@@ -55,7 +91,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	}
 
 	/**
-	 * TODO [SPR-9864] Document getResourceBasePath().
+	 * Get the resource path to the root directory of the web application for the
+	 * {@linkplain #getTestClass() test class}, configured via {@code @WebAppConfiguration}.
+	 * @see WebAppConfiguration
 	 */
 	public String getResourceBasePath() {
 		return this.resourceBasePath;

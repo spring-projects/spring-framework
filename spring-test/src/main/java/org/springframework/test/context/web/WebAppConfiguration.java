@@ -24,10 +24,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TODO [SPR-9864] Document WebAppConfiguration.
+ * {@code @WebAppConfiguration} is a class-level annotation that is used to 
+ * declare that the {@code ApplicationContext} loaded for an integration test
+ * should be a {@link org.springframework.web.context.WebApplicationContext
+ * WebApplicationContext}.
  * 
+ * <p>The mere presence of {@code @WebAppConfiguration} on a test class ensures
+ * that a {@code WebApplicationContext} will be loaded for the test using a default
+ * for the path to the root of the web application. To override the default,
+ * specify an explicit resource path via the {@link #value} attribute.
+ *
+ * <p>Note that {@code @WebAppConfiguration} must be used in conjunction with
+ * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
+ * either within a single test class or within a test class hierarchy. 
+ *
  * @author Sam Brannen
  * @since 3.2
+ * @see org.springframework.web.context.WebApplicationContext
+ * @see org.springframework.test.context.ContextConfiguration
+ * @see ServletTestExecutionListener
  */
 @Documented
 @Inherited
@@ -36,9 +51,15 @@ import java.lang.annotation.Target;
 public @interface WebAppConfiguration {
 
 	/**
-	 * The root directory of the web application (i.e., WAR); should not end with a slash.
-	 * 
-	 * <p>Defaults to {@code "src/main/webapp"}.
+	 * The resource path to the root directory of the web application.
+	 *
+	 * <p>A path that does not include a Spring resource prefix (e.g., {@code classpath:},
+	 * {@code file:}, etc.) will be interpreted as a file system resource, and a
+	 * path should not end with a slash.
+	 *
+	 * <p>Defaults to {@code "src/main/webapp"} as a file system resource. Note
+	 * that this is the standard directory for the root of a web application in
+	 * a project that follows the standard Maven project layout for a WAR.
 	 */
 	String value() default "src/main/webapp";
 

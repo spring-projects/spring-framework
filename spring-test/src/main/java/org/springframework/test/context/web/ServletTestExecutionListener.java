@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,7 +35,24 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
 /**
- * TODO [SPR-9864] Document ServletTestExecutionListener.
+ * {@code TestExecutionListener} which provides mock Servlet API support to
+ * {@link WebApplicationContext WebApplicationContexts} loaded by the <em>Spring
+ * TestContext Framework</em>.
+ * 
+ * <p>Specifically, {@code ServletTestExecutionListener} sets up thread-local
+ * state via Spring Web's {@link RequestContextHolder} during {@linkplain
+ * #prepareTestInstance(TestContext) test instance preparation} and {@linkplain
+ * #beforeTestMethod(TestContext) before each test method} and creates a {@link
+ * MockHttpServletRequest}, {@link MockHttpServletResponse}, and
+ * {@link ServletWebRequest} based on the {@link MockServletContext} present in
+ * the {@code WebApplicationContext}. This listener also ensures that the
+ * {@code MockHttpServletResponse} and {@code ServletWebRequest} can be injected
+ * into the test instance, and once the test is complete this listener {@linkplain
+ * #afterTestMethod(TestContext) cleans up} thread-local state.
+ *
+ * <p>Note that {@code ServletTestExecutionListener} is enabled by default but
+ * takes no action if the {@link ApplicationContext} loaded for the current test
+ * is not a {@link WebApplicationContext}.
  *
  * @author Sam Brannen
  * @since 3.2
@@ -43,27 +61,33 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
-
+	
 	/**
-	 * TODO [SPR-9864] Document overridden prepareTestInstance().
+	 * Sets up thread-local state during the <em>test instance preparation</em>
+	 * callback phase via Spring Web's {@link RequestContextHolder}.
 	 *
 	 * @see TestExecutionListener#prepareTestInstance(TestContext)
+	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
 	}
 
 	/**
-	 * TODO [SPR-9864] Document overridden beforeTestMethod().
+	 * Sets up thread-local state before each test method via Spring Web's
+	 * {@link RequestContextHolder}.
 	 *
 	 * @see TestExecutionListener#beforeTestMethod(TestContext)
+	 * @see #setUpRequestContextIfNecessary(TestContext)
 	 */
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		setUpRequestContextIfNecessary(testContext);
 	}
 
 	/**
-	 * TODO [SPR-9864] Document overridden afterTestMethod().
+	 * Cleans up thread-local state after each test method by {@linkplain
+	 * RequestContextHolder#resetRequestAttributes() resetting} Spring Web's
+	 * {@code RequestContextHolder}.
 	 *
 	 * @see TestExecutionListener#afterTestMethod(TestContext)
 	 */
@@ -74,11 +98,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 		RequestContextHolder.resetRequestAttributes();
 	}
 
-	/**
-	 * TODO [SPR-9864] Document setUpRequestContext().
-	 *
-	 * @param testContext
-	 */
 	private void setUpRequestContextIfNecessary(TestContext testContext) {
 
 		ApplicationContext context = testContext.getApplicationContext();
