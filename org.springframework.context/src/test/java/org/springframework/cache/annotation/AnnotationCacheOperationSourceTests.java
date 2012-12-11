@@ -35,7 +35,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * @author Costin Leau
  */
-public class AnnotationCacheOperationSourceTest {
+public class AnnotationCacheOperationSourceTests {
 
 	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
