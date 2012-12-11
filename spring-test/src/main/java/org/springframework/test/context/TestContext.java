@@ -90,16 +90,16 @@ public class TestContext extends AttributeAccessorSupport {
 			if (logger.isInfoEnabled()) {
 				logger.info(String.format("@ContextConfiguration not found for class [%s]", testClass));
 			}
-			mergedContextConfiguration = new MergedContextConfiguration(testClass, null, null, null, null);
+//			mergedContextConfiguration = new MergedContextConfiguration(testClass, null, null, null, null);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for class [%s]", contextConfiguration,
 					testClass));
 			}
-			mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
-				defaultContextLoaderClassName);
 		}
+		mergedContextConfiguration = ContextLoaderUtils.buildMergedContextConfiguration(testClass,
+				defaultContextLoaderClassName);
 
 		this.contextCache = contextCache;
 		this.mergedContextConfiguration = mergedContextConfiguration;
