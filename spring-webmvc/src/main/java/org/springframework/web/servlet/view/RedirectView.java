@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -77,10 +76,6 @@ import org.springframework.web.util.WebUtils;
  *
  * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
  * that your controller respects the Portlet <code>sendRedirect</code> constraints.
- * When e.g. using {@link org.springframework.web.portlet.mvc.SimpleFormController},
- * make sure to set your controller's
- * {@link org.springframework.web.portlet.mvc.AbstractFormController#setRedirectAction "redirectAction"}
- * property to "true", in order to make the controller base class behave accordingly.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -97,6 +92,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private static final Pattern URI_TEMPLATE_VARIABLE_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
+
 	private boolean contextRelative = false;
 
 	private boolean http10Compatible = true;
@@ -108,6 +104,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	private HttpStatus statusCode;
 
 	private boolean expandUriTemplateVariables = true;
+
 
 	/**
 	 * Constructor for use as a bean.
@@ -233,7 +230,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * and close curly braces "{", "}" and you don't want them interpreted
 	 * as URI variables.
 	 * <p>Defaults to <code>true</code>.
-	 * @param expandUriTemplateVariables
 	 */
 	public void setExpandUriTemplateVariables(boolean expandUriTemplateVariables) {
 		this.expandUriTemplateVariables = expandUriTemplateVariables;
@@ -265,7 +261,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			throws IOException {
 
 		String targetUrl = createTargetUrl(model, request);
-
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
 		
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
@@ -278,7 +273,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 		FlashMapManager flashMapManager = RequestContextUtils.getFlashMapManager(request);
 		flashMapManager.saveOutputFlashMap(flashMap, request, response);
 
-		sendRedirect(request, response, targetUrl.toString(), this.http10Compatible);
+		sendRedirect(request, response, targetUrl, this.http10Compatible);
 	}
 
 	/**
@@ -362,6 +357,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * @throws UnsupportedEncodingException if string encoding failed
 	 * @see #queryProperties
 	 */
+	@SuppressWarnings("unchecked")
 	protected void appendQueryProperties(StringBuilder targetUrl, Map<String, Object> model, String encodingScheme)
 			throws UnsupportedEncodingException {
 
