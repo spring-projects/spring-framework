@@ -3,12 +3,18 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.4 (2012-12-xx)
+Changes in version 3.1.4 (2012-12-19)
 -------------------------------------
 
 * overhauled non-void JavaBean write method support (SPR-10029)
 * CachedIntrospectionResults uses full WeakReference for any non-safe ClassLoader arrangement (SPR-10028)
 * DefaultListableBeanFactory avoids wide/interleaved metadata locks to avoid deadlock potential (SPR-10020)
+* fixed CGLIB proxy class leaks through further equals/hashCode implementations in Spring AOP pointcuts (SPR-8008)
+* ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK classes via ASM (SPR-10058)
+* DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
+* tx timeouts for JPA translate to "javax.persistence.query.timeout" only (for EclipseLink compatibility; SPR-10068)
+* AbstractCachingViewResolver uses a cache limit of 1024 by default, avoiding overflow for redirect URLs (SPR-10065)
+* fixed HierarchicalUriComponents equals implementation (SPR-10088)
 
 
 Changes in version 3.1.3 (2012-10-31)
