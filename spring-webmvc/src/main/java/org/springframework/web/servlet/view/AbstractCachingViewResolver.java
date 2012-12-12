@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.view;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,31 +39,56 @@ import org.springframework.web.servlet.ViewResolver;
  */
 public abstract class AbstractCachingViewResolver extends WebApplicationObjectSupport implements ViewResolver {
 
-	/** Whether we should cache views, once resolved */
-	private boolean cache = true;
+	/** Default maximum number of entries for the view cache: 1024 */
+	public static final int DEFAULT_CACHE_LIMIT = 1024;
+
+
+	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Whether we should refrain from resolving views again if unresolved once */
 	private boolean cacheUnresolved = true;
 
 	/** Map from view key to View instance */
-	private final Map<Object, View> viewCache = new HashMap<Object, View>();
+	private final Map<Object, View> viewCache =
+			new LinkedHashMap<Object, View>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry<Object, View> eldest) {
+					return size() > getCacheLimit();
+				}
+			};
 
 
 	/**
+	 * Specify the maximum number of entries for the view cache.
+	 * Default is 1024.
+	 */
+	public void setCacheLimit(int cacheLimit) {
+		this.cacheLimit = cacheLimit;
+	}
+
+	/**
+	 * Return the maximum number of entries for the view cache.
+	 */
+	public int getCacheLimit() {
+		return this.cacheLimit;
+	}
+
+	/**
 	 * Enable or disable caching.
+	 * <p>This is equivalent to setting the {@link #setCacheLimit "cacheLimit"}
+	 * property to the default limit (1024) or to 0, respectively.
 	 * <p>Default is "true": caching is enabled.
 	 * Disable this only for debugging and development.
-	 * <p><b>Warning: Disabling caching can severely impact performance.</b>
 	 */
 	public void setCache(boolean cache) {
-		this.cache = cache;
+		this.cacheLimit = (cache ? DEFAULT_CACHE_LIMIT : 0);
 	}
 
 	/**
 	 * Return if caching is enabled.
 	 */
 	public boolean isCache() {
-		return this.cache;
+		return (this.cacheLimit > 0);
 	}
 
 	/**
@@ -134,7 +159,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * @param locale the locale for which the view object should be removed
 	 */
 	public void removeFromCache(String viewName, Locale locale) {
-		if (!this.cache) {
+		if (!isCache()) {
 			logger.warn("View caching is SWITCHED OFF -- removal not necessary");			
 		}
 		else {
