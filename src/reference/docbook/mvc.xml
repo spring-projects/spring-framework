@@ -5023,17 +5023,27 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     <section xml:id="mvc-config-content-negotiation">
       <title>Configuring Content Negotiation</title>
 
-      <para>You can configure how Spring MVC determines requested media types for content negotiation purposes.
-      The available strategies are to check the request path extension, a
-      request parameter, the "Accept" header, and also to use a default content type.</para>
+      <para>Staring with Spring Framework 3.2, you can configure how Spring MVC
+      determines the requested media types from the client for request mapping
+      as well as for content negotiation purposes. The available options are
+      to check the file extension in the request URI, the "Accept" header,
+      a request parameter, as well as to fall back on a default content type.
+      By default, file extension in the request URI is checked first and
+      the "Accept" header is checked next.</para>
 
-      <para>By default the path extension is checked first and the "Accept"
-      header is checked second. The path extension check recognizes ".json" if Jackson is available,
-      ".xml" if JAXB2 is available, and ".atom" and ".rss" if the Rome library is available.
-      It also uses the <classname>ServletContext</classname> and the <emphasis>Java Activation Framework</emphasis>
-      to perform lookups as a fallback option.</para>
+      <para>For file extensions in the request URI, the MVC Java config and
+      the MVC namespace, automatically register extensions such as
+      <filename>.json</filename>, <filename>.xml</filename>,
+      <filename>.rss</filename>, and <filename>.atom</filename> if the
+      corresponding dependencies such as Jackson, JAXB2, or Rome
+      are present on the classpath. Additional extensions may be not need
+      to be registered explicitly if they can be discovered via 
+      <classname>ServletContext.getMimeType(String)</classname> or the
+      <emphasis>Java Activation Framework</emphasis>
+      (see <classname>javax.activation.MimetypesFileTypeMap</classname>).</para>
 
-      <para>An example of customizing content negotiation in Java:</para>
+      <para>Below is an example of customizing content negotiation
+      options through the MVC Java config:</para>
 
       <programlisting language="java">@Configuration
 @EnableWebMvc
@@ -5045,10 +5055,12 @@ public class WebConfig extends WebMvcConfigurerAdapter {
   }
 }</programlisting>
 
-     <para>In XML you'll need to use the <code>content-negotiation-manager</code>
-     property of <code>annotation-driven</code>:</para>
+     <para>In the MVC namespace, the <code>&lt;mvc:annotation-driven&gt;</code> element
+     has a <code>content-negotiation-manager</code> attribute, which expects a
+     <classname>ContentNegotiationManager</classname> that in turn can be created
+     with a <classname>ContentNegotiationManagerFactoryBean</classname>:</para>
 
-        <programlisting language="xml">&lt;mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" /&gt;
+     <programlisting language="xml">&lt;mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" /&gt;
 
 &lt;bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"&gt;
     &lt;property name="favorPathExtension" value="false" /&gt;
@@ -5060,6 +5072,30 @@ public class WebConfig extends WebMvcConfigurerAdapter {
         &lt;/value&gt;
     &lt;/property&gt;
 &lt;/bean&gt;</programlisting>
+
+      <para>If not using the MVC Java config or the MVC namespace, you'll need
+      to create an instance of <classname>ContentNegotiationManager</classname>
+      and use it to configure
+      <classname>RequestMappingHandlerMapping</classname> for request mapping
+      purposes, and <classname>RequestMappingHandlerAdapter</classname> and
+      <classname>ExceptionHandlerExceptionResolver</classname> for
+      content negotiation purposes.</para>
+
+      <para>Note that <classname>ContentNegotiatingViewResolver</classname>
+      now can also be configured with a <code>ContentNegotiatingViewResolver</code>,
+      so you can use one instance throughout Spring MVC.</para>
+
+      <para>In more advanced cases, it may be useful to configure
+      multiple <classname>ContentNegotiationManager</classname> instances
+      that in turn may contain custom
+      <classname>ContentNegotiationStrategy</classname> implementations.
+      For example you could configure
+      <classname>ExceptionHandlerExceptionResolver</classname> with
+      a <classname>ContentNegotiationManager</classname> that always
+      resolves the requested media type to <filename>"application/json"</filename>.
+      Or you may want to plug a custom strategy that has some logic to select
+      a default content type (e.g. either XML or JSON) if no content
+      types were requested.</para>
 
     </section>
 

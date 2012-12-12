@@ -56,26 +56,20 @@
 
     <para>A <interfacename>ContentNeogtiationStrategy</interfacename> is now
     available for resolving the requested media types from an incoming
-    request. The available implementations are based on path extension,
-    request parameter, 'Accept' header, and a fixed default content type.
+    request. The available implementations are based on the file extension,
+    query parameter, the 'Accept' header, or a fixed content type.
     Equivalent options were previously available only in the
     ContentNegotiatingViewResolver but are now available throughout.</para>
 
     <para><classname>ContentNegotiationManager</classname> is the central
-    class to use when configuring content negotiation options. It accepts one
-    or more ContentNeogtiationStrategy instances and delegates to them. It can
-    be plugged into <classname>RequestMappingHandlerMapping</classname>,
-    <classname>RequestMappingHandlerAdapter</classname>,
-    <classname>ExceptionHandlerExceptionResolver</classname>, and
-    <classname>ContentNegotiatingViewResolver</classname>. The MVC namespace
-    and the MVC JavaConfig provide convenient options to configure all
-    that.</para>
+    class to use when configuring content negotiation options.
+    For more details see <xref linkend="mvc-config-content-negotiation" />.</para>
 
     <para>The introduction of <classname>ContentNegotiationManger</classname>
-    also enables smart suffix pattern matching for incoming requests. See
+    also enables selective suffix pattern matching for incoming requests.
+    For more details, see the Javadoc of
     <link
-    xl:href="https://github.com/SpringSource/spring-framework/commit/4fd7645">commit
-    message.</link></para>
+    xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.BUILD-SNAPSHOT/api/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)">RequestMappingHandlerMapping.setUseRegisteredSuffixPatternMatch</link>.</para>
   </section>
 
   <section xml:id="new-in-3.2-webmvc-controller-advice">
