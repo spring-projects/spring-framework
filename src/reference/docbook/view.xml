@@ -1147,7 +1147,7 @@ findOwnersForm.url=/WEB-INF/jsp/findOwners.jsp
 &lt;/bean&gt;</programlisting>
 
         <para>Refer to the <link
-        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineFactory.html">API
         documentation</link> for Spring configuration of Velocity, or the
         Velocity documentation for examples and definitions of the
         <filename>'velocity.properties'</filename> file itself.</para>

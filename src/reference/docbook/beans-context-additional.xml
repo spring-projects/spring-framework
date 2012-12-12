@@ -17,7 +17,7 @@
     functionality for managing and manipulating beans, including in a
     programmatic way. The <literal>org.springframework.context</literal> package
     adds the <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
     ><interfacename>ApplicationContext</interfacename></link> interface, which
     extends the <interfacename>BeanFactory</interfacename> interface, in
     addition to extending other interfaces to provide additional functionality
@@ -639,7 +639,7 @@ argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</
       <interfacename>TaskExecutor</interfacename> abstraction.</para>
 
     <para>Check out the JavaDoc of the <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/jca/context/SpringContextResourceAdapter.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jca/context/SpringContextResourceAdapter.html"
       >SpringContextResourceAdapter</link> class for the configuration details
       involved in RAR deployment.</para>
 

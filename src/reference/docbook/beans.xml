@@ -33,11 +33,11 @@ The footnote should x-ref to first section in that chapter but I can't find the 
     <para>The <literal>org.springframework.beans</literal> and
       <literal>org.springframework.context</literal> packages are the basis for
       Spring Framework's IoC container. The <interfacename><link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/BeanFactory.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/BeanFactory.html"
       >BeanFactory</link></interfacename> interface provides an advanced
       configuration mechanism capable of managing any type of object.
       <literal><link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/context/ApplicationContext.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/ApplicationContext.html"
       >ApplicationContext</link></literal> is a sub-interface of
       <interfacename>BeanFactory.</interfacename> It adds easier integration
       with Spring's AOP features; message resource handling (for use in

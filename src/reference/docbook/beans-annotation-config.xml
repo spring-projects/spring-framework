@@ -77,14 +77,14 @@
 &lt;/beans&gt;</programlisting>
 
   <para>(The implicitly registered post-processors include <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html"
     ><classname>AutowiredAnnotationBeanPostProcessor</classname></link>, <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html"
     ><classname>CommonAnnotationBeanPostProcessor</classname></link>, <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html"
     ><classname>PersistenceAnnotationBeanPostProcessor</classname></link>, as
     well as the aforementioned <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html"
     ><classname>RequiredAnnotationBeanPostProcessor</classname></link>.)</para>
 
   <note>
@@ -643,7 +643,7 @@ public @interface MovieQualifier {
     <title><classname>CustomAutowireConfigurer</classname></title>
 
     <para>The <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html"
       ><classname>CustomAutowireConfigurer</classname></link> is a
       <interfacename>BeanFactoryPostProcessor</interfacename> that enables you
       to register your own custom qualifier annotation types even if they are
@@ -724,7 +724,7 @@ public @interface MovieQualifier {
         the <interfacename>ApplicationContext</interfacename> of which the
         <classname>CommonAnnotationBeanPostProcessor</classname> is aware. The
         names can be resolved through JNDI if you configure Spring's <link
-        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jndi/support/SimpleJndiBeanFactory.html"
         ><classname>SimpleJndiBeanFactory</classname></link> explicitly.
         However, it is recommended that you rely on the default behavior and
         simply use Spring's JNDI lookup capabilities to preserve the level of

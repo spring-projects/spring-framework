@@ -215,9 +215,9 @@
     <para>More information on the
       <interfacename>MessageCodesResolver</interfacename> and the default
       strategy can be found online with the Javadocs for <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/MessageCodesResolver.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/MessageCodesResolver.html"
       >MessageCodesResolver</link> and <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/validation/DefaultMessageCodesResolver.html"
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/validation/DefaultMessageCodesResolver.html"
       >DefaultMessageCodesResolver</link> respectively.</para>
   </section>
 

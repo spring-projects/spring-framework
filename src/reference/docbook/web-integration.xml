@@ -88,7 +88,7 @@
     contains all of the 'business beans' in one's application.</para>
 
     <para>On to specifics: all that one need do is to declare a <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></link>
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/ContextLoaderListener.html"><classname>ContextLoaderListener</classname></link>
     in the standard Java EE servlet <literal>web.xml</literal> file of one's web
     application, and add a <literal>contextConfigLocation</literal>
     &lt;context-param/&gt; section (in the same file) that defines which set
@@ -111,7 +111,7 @@
     context parameter, the <classname>ContextLoaderListener</classname> will
     look for a file called <literal>/WEB-INF/applicationContext.xml</literal>
     to load. Once the context files are loaded, Spring creates a <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></link>
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/WebApplicationContext.html"><classname>WebApplicationContext</classname></link>
     object based on the bean definitions and stores it in the
     <interfacename>ServletContext</interfacename> of the web application.</para>
 
@@ -123,7 +123,7 @@
     <programlisting language="java">WebApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(servletContext);</programlisting>
 
     <para>The <link
-    xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></link>
+    xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/context/support/WebApplicationContextUtils.html"><classname>WebApplicationContextUtils</classname></link>
     class is for convenience, so you don't have to remember the name of the
     <interfacename>ServletContext</interfacename> attribute. Its
     <emphasis>getWebApplicationContext()</emphasis> method will return
@@ -181,7 +181,7 @@
 
       <para>The easiest way to integrate one's Spring middle-tier with one's
       JSF web layer is to use the <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
       <classname>DelegatingVariableResolver</classname></link> class. To
       configure this variable resolver in one's application, one will need to
       edit one's <emphasis>faces-context.xml</emphasis> file. After the
@@ -279,7 +279,7 @@
       well when mapping one's properties to beans in
       <emphasis>faces-config.xml</emphasis>, but at times one may need to grab
       a bean explicitly. The <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/jsf/FacesContextUtils.html">
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/FacesContextUtils.html">
       <classname>FacesContextUtils</classname></link> class makes this easy.
       It is similar to <classname>WebApplicationContextUtils</classname>,
       except that it takes a <classname>FacesContext</classname> parameter
@@ -338,7 +338,7 @@
       <title>ContextLoaderPlugin</title>
 
       <para>The <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></link>
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ContextLoaderPlugIn.html"><classname>ContextLoaderPlugin</classname></link>
       is a Struts 1.1+ plug-in that loads a Spring context file for the Struts
       <classname>ActionServlet</classname>. This context refers to the root
       <classname>WebApplicationContext</classname> (loaded by the
@@ -409,7 +409,7 @@
         <title>DelegatingRequestProcessor</title>
 
         <para>To configure the <link
-        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingRequestProcessor.html">
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingRequestProcessor.html">
         <literal>DelegatingRequestProcessor</literal></link> in your
         <emphasis>struts-config.xml</emphasis> file, override the
         "processorClass" property in the &lt;controller&gt; element. These
@@ -437,7 +437,7 @@
         <note>
           <para>If you are using Tiles in your Struts application, you must
           configure your &lt;controller&gt; with the <link
-          xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></link>
+          xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingTilesRequestProcessor.html"><classname>DelegatingTilesRequestProcessor</classname></link>
           instead.</para>
         </note>
       </section>
@@ -449,7 +449,7 @@
         can't use the <classname>DelegatingRequestProcessor</classname> or
         <classname>DelegatingTilesRequestProcessor</classname> approaches, you
         can use the <link
-        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DelegatingActionProxy.html">
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DelegatingActionProxy.html">
         <classname>DelegatingActionProxy</classname></link> as the type in
         your action-mapping.</para>
 
@@ -487,7 +487,7 @@
       is to extend Spring's <classname>Action</classname> classes for Struts.
       For example, instead of subclassing Struts'
       <classname>Action</classname> class, you can subclass Spring's <link
-      xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html">
+      xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html">
       <classname>ActionSupport</classname></link> class.</para>
 
       <para>The <classname>ActionSupport</classname> class provides additional
@@ -516,23 +516,23 @@
       to the name: <itemizedlist spacing="compact">
           <listitem>
             <para><link
-            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></link>,</para>
+            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/ActionSupport.html"><classname>ActionSupport</classname></link>,</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></link>,</para>
+            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/DispatchActionSupport.html"><literal>DispatchActionSupport</literal></link>,</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></link>
+            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/LookupDispatchActionSupport.html"><literal>LookupDispatchActionSupport</literal></link>
             and</para>
           </listitem>
 
           <listitem>
             <para><link
-            xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></link>.</para>
+            xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/struts/MappingDispatchActionSupport.html"><literal>MappingDispatchActionSupport</literal></link>.</para>
           </listitem>
         </itemizedlist></para>
 

@@ -545,7 +545,7 @@
         implement your own scopes, see the <interfacename>Scope</interfacename>
         implementations that are supplied with the Spring Framework itself and
         the <link
-        xl:href="http://static.springframework.org/spring/docs/current/api/org/springframework/beans/factory/config/Scope.html"
+        xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/Scope.html"
         >Scope Javadoc</link>, which explains the methods you need to implement
         in more detail.</para>
 
