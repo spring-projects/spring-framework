@@ -2490,7 +2490,7 @@ deferredResult.setResult(data);
       </para>
 
       <section xml:id="mvc-ann-async-exceptions">
-        <title>Async Request Processing and Exception Handling</title>
+        <title>Exception Handling for Async Requests</title>
 
         <para>What happens if a <interfacename>Callable</interfacename> returned
         from a controller method raises an Exception while being executed?
@@ -2560,38 +2560,78 @@ deferredResult.setResult(data);
       </section>
 
       <section xml:id="mvc-ann-async-configuration">
-        <title>Async Request Configuration</title>
+        <title>Configuration for Async Request Processing</title>
 
-        <para>The MVC Java config and the MVC namespace provide options for
-        configuring async request processing.
-        <interfacename>WebMvcConfigurer</interfacename> has the method
-        <code>configureAsyncSupport</code> while &lt;mvc:annotation-driven&gt;
-        has an &lt;async-support&gt; sub-element.</para>
+        <section xml:id="mvc-ann-async-configuration-servlet3">
+          <title>Servlet 3 Async Config</title>
 
-        <para>Those allow you to configure the default timeout value to use for
-        async requests, which if not set depends on the underlying Servlet
-        container (e.g. 10 seconds on Tomcat). You can also configure an
-        <interfacename>AsyncTaskExecutor</interfacename> to use for executing
-        <interfacename>Callable</interfacename> instances returned from
-        controller methods. It is highly recommended to configure this property
-        since by default Spring MVC uses
-        <classname>SimpleAsyncTaskExecutor</classname>. The MVC Java config
-        and the MVC namespace also allow you to register
-        <interfacename>CallableProcessingInterceptor</interfacename> and
-        <interfacename>DeferredResultProcessingInterceptor</interfacename>
-        instances.</para>
+          <para>To use Servlet 3 async request processing, you need to update
+          <filename>web.xml</filename> to version 3.0:</para>
 
-        <para>If you need to override the default timeout value for a
-        specific <classname>DeferredResult</classname>, you can do so by using
-        the appropriate class constructor. Similarly, for a
-        <interfacename>Callable</interfacename>, you can wrap it in a
-        <classname>WebAsyncTask</classname> and use the appropriate class
-        constructor to customize the timeout value. The class constructor of
-        <classname>WebAsyncTask</classname> also allows providing
-        an <interfacename>AsyncTaskExecutor</interfacename>.</para>
+          <programlisting language="xml">&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+    version="3.0"&gt;
+
+    ...
+
+  &lt;web-app&gt;
+  </programlisting>
+
+          <para>The <classname>DispatcherServlet</classname> and any
+          <interfacename>Filter</interfacename> configuration need to have
+          the <code>&lt;async-supported&gt;true&lt;/async-supported&gt;</code> sub-element.
+          Additionally, any <interfacename>Filter</interfacename> that also needs
+          to get involved in async dispatches should also be configured
+          to support the ASYNC dispatcher type. Note that it is safe
+          to enable the ASYNC dispatcher type for all filters provided with
+          the Spring Framework since they will not get involved in async
+          dispatches unless needed.</para>
+
+          <para>If using Servlet 3, Java based configuration, e.g. via
+          <interfacename>WebApplicationInitializer</interfacename>, you'll
+          also need to set the "asyncSupported" flag as well as the
+          ASYNC dispatcher type just like with <filename>web.xml</filename>.
+          To simplify all this configuration, consider
+          extending <classname>AbstractDispatcherServletInitializer</classname>
+          or <classname>AbstractAnnotationConfigDispatcherServletInitializer</classname>,
+          which automatically set those options and make it very easy to register
+          <interfacename>Filter</interfacename> instances.</para>
+        </section>
+
+        <section xml:id="mvc-ann-async-configuration-spring-mvc">
+          <title>Spring MVC Async Config</title>
+
+          <para>The MVC Java config and the MVC namespace both provide options for
+          configuring async request processing.
+          <interfacename>WebMvcConfigurer</interfacename> has the method
+          <code>configureAsyncSupport</code> while &lt;mvc:annotation-driven&gt;
+          has an &lt;async-support&gt; sub-element.</para>
+
+          <para>Those allow you to configure the default timeout value to use for
+          async requests, which if not set depends on the underlying Servlet
+          container (e.g. 10 seconds on Tomcat). You can also configure an
+          <interfacename>AsyncTaskExecutor</interfacename> to use for executing
+          <interfacename>Callable</interfacename> instances returned from
+          controller methods. It is highly recommended to configure this property
+          since by default Spring MVC uses
+          <classname>SimpleAsyncTaskExecutor</classname>. The MVC Java config
+          and the MVC namespace also allow you to register
+          <interfacename>CallableProcessingInterceptor</interfacename> and
+          <interfacename>DeferredResultProcessingInterceptor</interfacename>
+          instances.</para>
+
+          <para>If you need to override the default timeout value for a
+          specific <classname>DeferredResult</classname>, you can do so by using
+          the appropriate class constructor. Similarly, for a
+          <interfacename>Callable</interfacename>, you can wrap it in a
+          <classname>WebAsyncTask</classname> and use the appropriate class
+          constructor to customize the timeout value. The class constructor of
+          <classname>WebAsyncTask</classname> also allows providing
+          an <interfacename>AsyncTaskExecutor</interfacename>.</para>
+        </section>
 
       </section>
-
     </section>
 
     <section xml:id="mvc-ann-tests">
@@ -5037,7 +5077,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       <filename>.rss</filename>, and <filename>.atom</filename> if the
       corresponding dependencies such as Jackson, JAXB2, or Rome
       are present on the classpath. Additional extensions may be not need
-      to be registered explicitly if they can be discovered via 
+      to be registered explicitly if they can be discovered via
       <classname>ServletContext.getMimeType(String)</classname> or the
       <emphasis>Java Activation Framework</emphasis>
       (see <classname>javax.activation.MimetypesFileTypeMap</classname>).</para>
