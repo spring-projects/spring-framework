@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,8 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aopalliance.aop.Advice;
@@ -136,15 +133,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	private BeanFactory beanFactory;
 
-	private final Set<Object> targetSourcedBeans = Collections.synchronizedSet(new HashSet<Object>());
+	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
 
-	private final Set<Object> earlyProxyReferences = Collections.synchronizedSet(new HashSet<Object>());
+	// using a ConcurrentHashMap as a Set
+	private final Map<String, Boolean> targetSourcedBeans = new ConcurrentHashMap<String, Boolean>(16);
 
-	private final Set<Object> advisedBeans = Collections.synchronizedSet(new HashSet<Object>());
+	// using a ConcurrentHashMap as a Set
+	private final Map<Object, Boolean> earlyProxyReferences = new ConcurrentHashMap<Object, Boolean>(16);
 
-	private final Set<Object> nonAdvisedBeans = Collections.synchronizedSet(new HashSet<Object>());
-
-	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>();
+	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
 
 
 	/**
@@ -264,19 +261,19 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		this.earlyProxyReferences.add(cacheKey);
+		this.earlyProxyReferences.put(cacheKey, Boolean.TRUE);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
-		if (!this.targetSourcedBeans.contains(cacheKey)) {
-			if (this.advisedBeans.contains(cacheKey) || this.nonAdvisedBeans.contains(cacheKey)) {
+		if (!this.targetSourcedBeans.containsKey(beanName)) {
+			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
 			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
-				this.nonAdvisedBeans.add(cacheKey);
+				this.advisedBeans.put(cacheKey, Boolean.FALSE);
 				return null;
 			}
 		}
@@ -286,7 +283,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// The TargetSource will handle target instances in a custom fashion.
 		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 		if (targetSource != null) {
-			this.targetSourcedBeans.add(beanName);
+			this.targetSourcedBeans.put(beanName, Boolean.TRUE);
 			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
 			Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
 			this.proxyTypes.put(cacheKey, proxy.getClass());
@@ -318,7 +315,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
-			if (!this.earlyProxyReferences.contains(cacheKey)) {
+			if (!this.earlyProxyReferences.containsKey(cacheKey)) {
 				return wrapIfNecessary(bean, beanName, cacheKey);
 			}
 		}
@@ -344,27 +341,27 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		if (this.targetSourcedBeans.contains(beanName)) {
+		if (this.targetSourcedBeans.containsKey(beanName)) {
 			return bean;
 		}
-		if (this.nonAdvisedBeans.contains(cacheKey)) {
+		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
 			return bean;
 		}
 		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
-			this.nonAdvisedBeans.add(cacheKey);
+			this.advisedBeans.put(cacheKey, Boolean.FALSE);
 			return bean;
 		}
 
 		// Create proxy if we have advice.
 		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
 		if (specificInterceptors != DO_NOT_PROXY) {
-			this.advisedBeans.add(cacheKey);
+			this.advisedBeans.put(cacheKey, Boolean.TRUE);
 			Object proxy = createProxy(bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
 			this.proxyTypes.put(cacheKey, proxy.getClass());
 			return proxy;
 		}
 
-		this.nonAdvisedBeans.add(cacheKey);
+		this.advisedBeans.put(cacheKey, Boolean.FALSE);
 		return bean;
 	}
 

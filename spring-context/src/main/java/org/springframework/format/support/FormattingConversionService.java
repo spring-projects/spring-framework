@@ -53,10 +53,10 @@ public class FormattingConversionService extends GenericConversionService
 	private StringValueResolver embeddedValueResolver;
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedPrinters =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>();
+			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
 
 	private final Map<AnnotationConverterKey, GenericConverter> cachedParsers =
-			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>();
+			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
 
 
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
@@ -214,11 +214,14 @@ public class FormattingConversionService extends GenericConversionService
 			return sourceType.hasAnnotation(annotationType);
 		}
 
+		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			AnnotationConverterKey converterKey = new AnnotationConverterKey(sourceType.getAnnotation(annotationType), sourceType.getObjectType());
+			AnnotationConverterKey converterKey =
+					new AnnotationConverterKey(sourceType.getAnnotation(annotationType), sourceType.getObjectType());
 			GenericConverter converter = cachedPrinters.get(converterKey);
 			if (converter == null) {
-				Printer<?> printer = annotationFormatterFactory.getPrinter(converterKey.getAnnotation(), converterKey.getFieldType());
+				Printer<?> printer = annotationFormatterFactory.getPrinter(
+						converterKey.getAnnotation(), converterKey.getFieldType());
 				converter = new PrinterConverter(fieldType, printer, FormattingConversionService.this);
 				cachedPrinters.put(converterKey, converter);
 			}
@@ -226,7 +229,8 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public String toString() {
-			return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " + String.class.getName() + ": " + annotationFormatterFactory;
+			return "@" + annotationType.getName() + " " + fieldType.getName() + " -> " +
+					String.class.getName() + ": " + annotationFormatterFactory;
 		}
 	}
 
@@ -254,11 +258,14 @@ public class FormattingConversionService extends GenericConversionService
 			return targetType.hasAnnotation(annotationType);
 		}
 
+		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-			AnnotationConverterKey converterKey = new AnnotationConverterKey(targetType.getAnnotation(annotationType), targetType.getObjectType());
+			AnnotationConverterKey converterKey =
+					new AnnotationConverterKey(targetType.getAnnotation(annotationType), targetType.getObjectType());
 			GenericConverter converter = cachedParsers.get(converterKey);
 			if (converter == null) {
-				Parser<?> parser = annotationFormatterFactory.getParser(converterKey.getAnnotation(), converterKey.getFieldType());
+				Parser<?> parser = annotationFormatterFactory.getParser(
+						converterKey.getAnnotation(), converterKey.getFieldType());
 				converter = new ParserConverter(fieldType, parser, FormattingConversionService.this);
 				cachedParsers.put(converterKey, converter);
 			}
@@ -266,7 +273,8 @@ public class FormattingConversionService extends GenericConversionService
 		}
 
 		public String toString() {
-			return String.class.getName() + " -> @" + annotationType.getName() + " " + fieldType.getName() + ": " + annotationFormatterFactory;
+			return String.class.getName() + " -> @" + annotationType.getName() + " " +
+					fieldType.getName() + ": " + annotationFormatterFactory;
 		}
 	}
 

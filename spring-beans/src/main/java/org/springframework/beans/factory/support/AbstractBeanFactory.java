@@ -24,7 +24,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -151,17 +150,20 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	private boolean hasDestructionAwareBeanPostProcessors;
 
 	/** Map from scope identifier String to corresponding Scope */
-	private final Map<String, Scope> scopes = new HashMap<String, Scope>();
+	private final Map<String, Scope> scopes = new HashMap<String, Scope>(8);
 
 	/** Security context used when running with a SecurityManager */
 	private SecurityContextProvider securityContextProvider;
 
 	/** Map from bean name to merged RootBeanDefinition */
 	private final Map<String, RootBeanDefinition> mergedBeanDefinitions =
-			new ConcurrentHashMap<String, RootBeanDefinition>();
+			new ConcurrentHashMap<String, RootBeanDefinition>(64);
 
-	/** Names of beans that have already been created at least once */
-	private final Set<String> alreadyCreated = Collections.synchronizedSet(new HashSet<String>());
+	/**
+	 * Names of beans that have already been created at least once
+	 * (using a ConcurrentHashMap as a Set)
+	 */
+	private final Map<String, Boolean> alreadyCreated = new ConcurrentHashMap<String, Boolean>(64);
 
 	/** Names of beans that are currently in creation */
 	private final ThreadLocal<Object> prototypesCurrentlyInCreation =
@@ -1372,7 +1374,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 */
 	protected void markBeanAsCreated(String beanName) {
-		this.alreadyCreated.add(beanName);
+		this.alreadyCreated.put(beanName, Boolean.TRUE);
 	}
 
 	/**
@@ -1383,7 +1385,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * at this point already
 	 */
 	protected boolean isBeanEligibleForMetadataCaching(String beanName) {
-		return this.alreadyCreated.contains(beanName);
+		return this.alreadyCreated.containsKey(beanName);
 	}
 
 	/**
@@ -1393,7 +1395,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @return <code>true</code> if actually removed, <code>false</code> otherwise
 	 */
 	protected boolean removeSingletonIfCreatedForTypeCheckOnly(String beanName) {
-		if (!this.alreadyCreated.contains(beanName)) {
+		if (!this.alreadyCreated.containsKey(beanName)) {
 			removeSingleton(beanName);
 			return true;
 		}

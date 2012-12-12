@@ -44,7 +44,8 @@ class ContextCache {
 	/**
 	 * Map of context keys to Spring ApplicationContext instances.
 	 */
-	private final Map<MergedContextConfiguration, ApplicationContext> contextMap = new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>();
+	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
+			new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(64);
 
 	private int hitCount;
 
@@ -69,7 +70,6 @@ class ContextCache {
 
 	/**
 	 * Return whether there is a cached context for the given key.
-	 *
 	 * @param key the context key (never <code>null</code>)
 	 */
 	boolean contains(MergedContextConfiguration key) {
@@ -79,10 +79,8 @@ class ContextCache {
 
 	/**
 	 * Obtain a cached ApplicationContext for the given key.
-	 *
 	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss}
 	 * counts will be updated accordingly.
-	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @return the corresponding ApplicationContext instance,
 	 * or <code>null</code> if not found in the cache.
@@ -135,7 +133,6 @@ class ContextCache {
 
 	/**
 	 * Explicitly add an ApplicationContext instance to the cache under the given key.
-	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @param context the ApplicationContext instance (never <code>null</code>)
 	 */
@@ -147,7 +144,6 @@ class ContextCache {
 
 	/**
 	 * Remove the context with the given key.
-	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @return the corresponding ApplicationContext instance, or <code>null</code>
 	 * if not found in the cache.
@@ -162,11 +158,9 @@ class ContextCache {
 	 * {@link #remove removing} the context from the cache and explicitly
 	 * {@link ConfigurableApplicationContext#close() closing} it if it is an
 	 * instance of {@link ConfigurableApplicationContext}.
-	 *
 	 * <p>Generally speaking, you would only call this method if you change the
 	 * state of a singleton bean, potentially affecting future interaction with
 	 * the context.
-	 *
 	 * @param key the context key (never <code>null</code>)
 	 * @see #remove
 	 */
@@ -192,11 +186,8 @@ class ContextCache {
 	 * as the {@link #hitCount hit} and {@link #missCount miss} counts.
 	 */
 	public String toString() {
-		return new ToStringCreator(this)//
-		.append("size", size())//
-		.append("hitCount", getHitCount())//
-		.append("missCount", getMissCount())//
-		.toString();
+		return new ToStringCreator(this).append("size", size()).append("hitCount", getHitCount()).
+				append("missCount", getMissCount()).toString();
 	}
 
 }

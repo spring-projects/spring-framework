@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.portlet.ClientDataRequest;
 import javax.portlet.Event;
 import javax.portlet.EventRequest;
@@ -76,11 +75,14 @@ import org.springframework.web.servlet.View;
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	// dummy method placeholder
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
+	private static final Method NO_METHOD_FOUND =
+			ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
+
+	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
+			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(64);
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
-	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache = new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>();
 
 	/**
 	 * Set a custom ArgumentResolvers to use for special method parameter types.
@@ -134,18 +136,18 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
 		final Class<?> handlerType = handler.getClass();
 		final Class<? extends Throwable> thrownExceptionType = thrownException.getClass();
-		Method handlerMethod = null;
+		Method handlerMethod;
 
-		Map<Class<? extends Throwable>, Method> handlers = exceptionHandlerCache.get(handlerType);
-
+		Map<Class<? extends Throwable>, Method> handlers = this.exceptionHandlerCache.get(handlerType);
 		if (handlers != null) {
 			handlerMethod = handlers.get(thrownExceptionType);
 			if (handlerMethod != null) {
 				return (handlerMethod == NO_METHOD_FOUND ? null : handlerMethod);
 			}
-		} else {
-			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>();
-			exceptionHandlerCache.put(handlerType, handlers);
+		}
+		else {
+			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			this.exceptionHandlerCache.put(handlerType, handlers);
 		}
 
 		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();
@@ -205,7 +207,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	/**
-	 * Uses the {@link DepthComparator} to find the best matching method
+	 * Uses the {@link ExceptionDepthComparator} to find the best matching method.
 	 * @return the best matching method or {@code null}.
 	 */
 	private Method getBestMatchingMethod(
@@ -217,7 +219,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		Class<? extends Throwable> closestMatch =
 				ExceptionDepthComparator.findClosestMatch(resolverMethods.keySet(), thrownException);
 		Method method = resolverMethods.get(closestMatch);
-		return ((method == null) || (NO_METHOD_FOUND == method)) ? null : method;
+		return (method == null || NO_METHOD_FOUND == method ? null : method);
 	}
 
 	/**

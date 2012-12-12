@@ -178,7 +178,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private transient BeanFactory beanFactory;
 
 	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
 
 
 	/**
@@ -512,10 +512,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private class ResourceElement extends LookupElement {
 
 		protected boolean shareable = true;
-
-		private volatile boolean cached = false;
-
-		private volatile Object cachedFieldValue;
 
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);

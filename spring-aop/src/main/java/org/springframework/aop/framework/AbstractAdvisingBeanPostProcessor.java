@@ -46,7 +46,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private final Map<String, Boolean> eligibleBeans = new ConcurrentHashMap<String, Boolean>();
+	private final Map<String, Boolean> eligibleBeans = new ConcurrentHashMap<String, Boolean>(64);
 
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {

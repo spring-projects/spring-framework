@@ -1387,7 +1387,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	private class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor {
 
-		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>();
+		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(64);
 
 		public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 			if (beanDefinition.isSingleton()) {

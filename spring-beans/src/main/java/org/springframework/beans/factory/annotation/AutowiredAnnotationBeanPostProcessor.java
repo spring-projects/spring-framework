@@ -119,10 +119,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor<?>[]>();
+			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
 
 	private final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
 
 
 	/**

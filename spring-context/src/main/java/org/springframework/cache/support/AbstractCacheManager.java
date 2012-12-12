@@ -29,9 +29,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
 
 /**
- * Abstract base class implementing the common {@link CacheManager}
- * methods. Useful for 'static' environments where the backing caches do
- * not change.
+ * Abstract base class implementing the common {@link CacheManager} methods.
+ * Useful for 'static' environments where the backing caches do not change.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -39,9 +38,9 @@ import org.springframework.util.Assert;
  */
 public abstract class AbstractCacheManager implements CacheManager, InitializingBean {
 
-	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>();
+	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
 
-	private Set<String> cacheNames = new LinkedHashSet<String>();
+	private Set<String> cacheNames = new LinkedHashSet<String>(16);
 
 
 	public void afterPropertiesSet() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.aop.target;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	/**
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
 	 */
-	private final Set<Object> targetSet = Collections.synchronizedSet(new HashSet<Object>());
+	private final Set<Object> targetSet = new HashSet<Object>();
 	
 	private int invocationCount;
 	
@@ -85,7 +84,9 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();
 			this.targetInThread.set(target);
-			this.targetSet.add(target);
+			synchronized (this.targetSet) {
+				this.targetSet.add(target);
+			}
 		}
 		else {
 			++this.hitCount;
@@ -119,7 +120,9 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	}
 
 	public int getObjectCount() {
-		return this.targetSet.size();
+		synchronized (this.targetSet) {
+			return this.targetSet.size();
+		}
 	}
 
 

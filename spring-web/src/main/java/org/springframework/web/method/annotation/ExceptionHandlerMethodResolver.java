@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,10 +46,10 @@ public class ExceptionHandlerMethodResolver {
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods =
-		new ConcurrentHashMap<Class<? extends Throwable>, Method>();
+			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
-		new ConcurrentHashMap<Class<? extends Throwable>, Method>();
+			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
 
 	/**
 	 * A constructor that finds {@link ExceptionHandler} methods in the given type.

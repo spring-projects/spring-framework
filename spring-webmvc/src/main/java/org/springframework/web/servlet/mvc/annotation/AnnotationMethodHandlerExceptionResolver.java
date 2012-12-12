@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -82,7 +81,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Juergen Hoeller
  * @since 3.0
  *
- * @deprecated in Spring 3.2 in favor of
+ * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
@@ -91,7 +90,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
 
 	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>();
+			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(64);
 
 	private WebArgumentResolver[] customArgumentResolvers;
 
@@ -162,8 +161,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		final Class<? extends Throwable> thrownExceptionType = thrownException.getClass();
 		Method handlerMethod = null;
 
-		Map<Class<? extends Throwable>, Method> handlers = exceptionHandlerCache.get(handlerType);
-
+		Map<Class<? extends Throwable>, Method> handlers = this.exceptionHandlerCache.get(handlerType);
 		if (handlers != null) {
 			handlerMethod = handlers.get(thrownExceptionType);
 			if (handlerMethod != null) {
@@ -171,8 +169,8 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 			}
 		}
 		else {
-			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>();
-			exceptionHandlerCache.put(handlerType, handlers);
+			handlers = new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+			this.exceptionHandlerCache.put(handlerType, handlers);
 		}
 
 		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();

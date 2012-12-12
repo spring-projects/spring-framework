@@ -74,7 +74,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	private final Converters converters = new Converters();
 
 	private final Map<ConverterCacheKey, GenericConverter> converterCache =
-			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>();
+			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>(64);
 
 
 	// implementing ConverterRegistry
@@ -182,8 +182,8 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 * @param targetType the target type
 	 * @return the converted value
 	 * @throws ConversionException if a conversion exception occurred
-	 * @throws IllegalArgumentException if targetType is null
-	 * @throws IllegalArgumentException if sourceType is null but source is not null
+	 * @throws IllegalArgumentException if targetType is null,
+	 * or sourceType is null but source is not null
 	 */
 	public Object convert(Object source, TypeDescriptor targetType) {
 		return convert(source, TypeDescriptor.forObject(source), targetType);
@@ -480,7 +480,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 * @param sourceType the source type
 		 * @param targetType the target type
 		 * @return a {@link GenericConverter} or <tt>null</tt>
-		 * @see #getTypeHierarchy(Class)
 		 */
 		public GenericConverter find(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			// Search the full type hierarchy

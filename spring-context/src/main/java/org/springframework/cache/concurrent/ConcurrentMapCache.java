@@ -56,7 +56,7 @@ public class ConcurrentMapCache implements Cache {
 	 * @param name the name of the cache
 	 */
 	public ConcurrentMapCache(String name) {
-		this(name, new ConcurrentHashMap<Object, Object>(), true);
+		this(name, new ConcurrentHashMap<Object, Object>(256), true);
 	}
 
 	/**
@@ -65,7 +65,7 @@ public class ConcurrentMapCache implements Cache {
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
 	public ConcurrentMapCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMap<Object, Object>(), allowNullValues);
+		this(name, new ConcurrentHashMap<Object, Object>(256), allowNullValues);
 	}
 
 	/**

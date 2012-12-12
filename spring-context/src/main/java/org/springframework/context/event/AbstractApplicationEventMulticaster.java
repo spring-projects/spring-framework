@@ -53,7 +53,7 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
 	private final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
-			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>();
+			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
 
 	private BeanFactory beanFactory;
 

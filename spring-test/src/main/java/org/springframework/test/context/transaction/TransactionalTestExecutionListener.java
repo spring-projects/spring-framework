@@ -21,12 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -111,7 +112,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
 	private final Map<Method, TransactionContext> transactionContextCache =
-			Collections.synchronizedMap(new IdentityHashMap<Method, TransactionContext>());
+			new ConcurrentHashMap<Method, TransactionContext>(8);
 
 	private TransactionConfigurationAttributes configurationAttributes;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,10 +182,10 @@ public class PersistenceAnnotationBeanPostProcessor
 	private transient ListableBeanFactory beanFactory;
 
 	private transient final Map<Class<?>, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<Class<?>, InjectionMetadata>();
+			new ConcurrentHashMap<Class<?>, InjectionMetadata>(64);
 
 	private final Map<Object, EntityManager> extendedEntityManagersToClose =
-			new ConcurrentHashMap<Object, EntityManager>();
+			new ConcurrentHashMap<Object, EntityManager>(16);
 
 
 	/**
