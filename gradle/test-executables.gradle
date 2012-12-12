@@ -1,0 +1,20 @@
+
+def testJDKs = project.properties.get("testExecutables")
+if(testJDKs) {
+	 testJDKs.tokenize(",").each {
+		def version = "${it} -version".execute().err.text.readLines().first().toList().findAll{
+			 it in "0123456789._".toList()}.join("")
+		logger.lifecycle("Running tests using additional JDK " + version)
+		configure(allprojects) { project ->
+			def originalTask = project.tasks.getByName("test")
+			def task = project.tasks.replace("test", Test)
+			task.dependsOn(originalTask)
+			task.group = "verification"
+			task.classpath = originalTask.classpath
+			task.executable = it
+			task.testReportDir = project.file("${project.buildDir}/reports-${version}")
+			task.testResultsDir = project.file("${project.buildDir}/test-results-${version}")
+			task.jvmArgs = originalTask.jvmArgs
+		}
+	}
+}

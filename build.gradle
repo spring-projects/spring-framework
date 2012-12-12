@@ -659,6 +659,7 @@ configure(rootProject) {
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
+	apply from: "${gradleScriptDir}/test-executables.gradle"
 
 	eclipse.classpath.file.whenMerged { classpath ->
 		def sourceFolder = new org.gradle.plugins.ide.eclipse.model.SourceFolder(
