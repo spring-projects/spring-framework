@@ -55,6 +55,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	private static final Log logger = LogFactory.getLog(ResourceDatabasePopulator.class);
 
+
 	private List<Resource> scripts = new ArrayList<Resource>();
 
 	private String sqlScriptEncoding;
@@ -127,6 +128,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		this.ignoreFailedDrops = ignoreFailedDrops;
 	}
 
+
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);
@@ -191,8 +193,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 					boolean dropStatement = StringUtils.startsWithIgnoreCase(statement.trim(), "drop");
 					if (continueOnError || (dropStatement && ignoreFailedDrops)) {
 						if (logger.isDebugEnabled()) {
-							logger.debug("Failed to execute SQL script statement at line " + lineNumber
-									+ " of resource " + resource + ": " + statement, ex);
+							logger.debug("Failed to execute SQL script statement at line " + lineNumber +
+									" of resource " + resource + ": " + statement, ex);
 						}
 					}
 					else {
@@ -227,8 +229,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 			String currentStatement = lnr.readLine();
 			StringBuilder scriptBuilder = new StringBuilder();
 			while (currentStatement != null) {
-				if (StringUtils.hasText(currentStatement)
-						&& (this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
+				if (StringUtils.hasText(currentStatement) &&
+						(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
 					if (scriptBuilder.length() > 0) {
 						scriptBuilder.append('\n');
 					}
