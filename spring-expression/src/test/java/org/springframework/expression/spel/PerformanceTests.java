@@ -19,6 +19,8 @@ package org.springframework.expression.spel;
 import junit.framework.Assert;
 import org.junit.Test;
 
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -28,7 +30,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Tests the evaluation of real expressions in a real context.
- * 
+ *
  * @author Andy Clement
  */
 public class PerformanceTests {
@@ -40,9 +42,11 @@ public class PerformanceTests {
 	private static EvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 
 	private static final boolean DEBUG = false;
-	
+
 	@Test
 	public void testPerformanceOfPropertyAccess() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		long starttime = 0;
 		long endtime = 0;
 
@@ -54,7 +58,7 @@ public class PerformanceTests {
 			}
 			expr.getValue(eContext);
 		}
-		
+
 		starttime = System.currentTimeMillis();
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("placeOfBirth.city");
@@ -89,10 +93,13 @@ public class PerformanceTests {
 		}
 	}
 
+	@Test
 	public void testPerformanceOfMethodAccess() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		long starttime = 0;
 		long endtime = 0;
-		
+
 		// warmup
 		for (int i = 0; i < ITERATIONS; i++) {
 			Expression expr = parser.parseExpression("getPlaceOfBirth().getCity()");

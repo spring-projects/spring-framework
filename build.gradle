@@ -37,12 +37,6 @@ configure(allprojects) {
 		maven { url "http://repo.springsource.org/libs-release" }
 		maven { url "http://repo.springsource.org/ebr-maven-external" }
 	}
-
-	dependencies {
-		testCompile("junit:junit:${junitVersion}")
-		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.easymock:easymock:${easymockVersion}")
-	}
 }
 
 configure(subprojects) { subproject ->
@@ -85,6 +79,34 @@ configure(subprojects) { subproject ->
 		archives sourcesJar
 		archives javadocJar
 	}
+}
+
+configure(allprojects - project(":spring-build-junit")) {
+	dependencies {
+		testCompile(project(":spring-build-junit"))
+	}
+
+	eclipse.classpath.file.whenMerged { classpath ->
+		classpath.entries.find{it.path == "/spring-build-junit"}.exported = false
+	}
+
+	test.systemProperties.put("testGroups", properties.get("testGroups"))
+}
+
+project("spring-build-junit") {
+	description = "Build-time JUnit dependencies and utilities"
+
+	// NOTE: This is an internal project and is not published.
+
+	dependencies {
+		compile("commons-logging:commons-logging:1.1.1")
+		compile("junit:junit:${junitVersion}")
+		compile("org.hamcrest:hamcrest-all:1.3")
+		compile("org.easymock:easymock:${easymockVersion}")
+	}
+
+	// Don't actually generate any artifacts
+	configurations.archives.artifacts.clear()
 }
 
 
@@ -659,6 +681,7 @@ configure(rootProject) {
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
+	apply from: "${gradleScriptDir}/test-executables.gradle"
 
 	eclipse.classpath.file.whenMerged { classpath ->
 		def sourceFolder = new org.gradle.plugins.ide.eclipse.model.SourceFolder(
