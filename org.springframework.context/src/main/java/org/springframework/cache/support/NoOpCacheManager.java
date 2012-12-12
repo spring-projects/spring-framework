@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,35 @@ import org.springframework.cache.CacheManager;
 public class NoOpCacheManager implements CacheManager {
 
 	private final ConcurrentMap<String, Cache> caches = new ConcurrentHashMap<String, Cache>();
-	private Set<String> names = new LinkedHashSet<String>();
+
+	private final Set<String> cacheNames = new LinkedHashSet<String>();
+
+
+	/**
+	 * This implementation always returns a {@link Cache} implementation that will not store items.
+	 * Additionally, the request cache will be remembered by the manager for consistency.
+	 */
+	public Cache getCache(String name) {
+		Cache cache = this.caches.get(name);
+		if (cache == null) {
+			this.caches.putIfAbsent(name, new NoOpCache(name));
+			synchronized (this.cacheNames) {
+				this.cacheNames.add(name);
+			}
+		}
+
+		return this.caches.get(name);
+	}
+
+	/**
+	 * This implementation returns the name of the caches previously requested.
+	 */
+	public Collection<String> getCacheNames() {
+		synchronized (this.cacheNames) {
+			return Collections.unmodifiableSet(this.cacheNames);
+		}
+	}
+
 
 	private static class NoOpCache implements Cache {
 
@@ -61,7 +89,7 @@ public class NoOpCacheManager implements CacheManager {
 		}
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public Object getNativeCache() {
@@ -72,30 +100,4 @@ public class NoOpCacheManager implements CacheManager {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 *  This implementation always returns a {@link Cache} implementation that will not
-	 *  store items. Additionally, the request cache will be remembered by the manager for consistency.
-	 */
-	public Cache getCache(String name) {
-		Cache cache = caches.get(name);
-		if (cache == null) {
-			caches.putIfAbsent(name, new NoOpCache(name));
-			synchronized (names) {
-				names.add(name);
-			}
-		}
-
-		return caches.get(name);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * This implementation returns the name of the caches previously requested.
-	 */
-	public Collection<String> getCacheNames() {
-		return Collections.unmodifiableSet(names);
-	}
 }
