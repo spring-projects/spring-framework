@@ -17,6 +17,7 @@
 package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 import javax.annotation.Resource;
 
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.util.StopWatch;
 
@@ -44,10 +47,8 @@ public class AnnotationProcessorPerformanceTests {
 
 	@Test
 	public void testPrototypeCreationWithResourcePropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -70,10 +71,8 @@ public class AnnotationProcessorPerformanceTests {
 
 	@Test
 	public void testPrototypeCreationWithOverriddenResourcePropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -97,10 +96,8 @@ public class AnnotationProcessorPerformanceTests {
 
 	@Test
 	public void testPrototypeCreationWithAutowiredPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
@@ -123,10 +120,8 @@ public class AnnotationProcessorPerformanceTests {
 
 	@Test
 	public void testPrototypeCreationWithOverriddenAutowiredPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ctx);
 		ctx.refresh();
