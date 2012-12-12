@@ -320,6 +320,10 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 				singletonRegistry.registerSingleton(IMPORT_REGISTRY_BEAN_NAME, parser.getImportRegistry());
 			}
 		}
+
+		if (this.metadataReaderFactory instanceof CachingMetadataReaderFactory) {
+			((CachingMetadataReaderFactory) this.metadataReaderFactory).clearCache();
+		}
 	}
 
 	/**
