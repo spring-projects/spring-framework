@@ -9,6 +9,9 @@
          xmlns:ns="http://docbook.org/ns/docbook">
   <title>New Features and Enhancements in Spring Framework 3.2</title>
 
+  <para>This section covers what's new in Spring Framework 3.2. See also
+  <xref linkend="migration-3.2"/></para>
+
   <section xml:id="new-in-3.2-webmvc-async">
     <title>Support for Servlet 3 based asynchronous request processing</title>
 
@@ -163,6 +166,24 @@
     a <classname>JacksonObjectMapperFactoryBean</classname> for convenient
     customization of an <classname>ObjectMapper</classname> in XML
     configuration.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-webmvc-tiles3">
+    <title>Tiles 3</title>
+
+    <para>Tiles 3 is now supported in addition to Tiles 2.x. Configuring
+    it should be very similar to the Tiles 2 configuration, i.e. the
+    combination of <classname>TilesConfigurer</classname>,
+    <classname>TilesViewResolver</classname> and <classname>TilesView</classname>
+    except using the <code>tiles3</code> instead of the <code>tiles2</code>
+    package.</para>
+
+    <para>Also note that besides the version number change, the tiles
+    dependencies have also changed. You will need to have a subset or all of
+    <filename>tiles-request-api</filename>, <filename>tiles-api</filename>,
+    <filename>tiles-core</filename>, <filename>tiles-servlet</filename>,
+    <filename>tiles-jsp</filename>, <filename>tiles-el</filename>.
+    </para>
   </section>
 
   <section xml:id="new-in-3.2-webmvc-request-body-arg-with-binding-result">
