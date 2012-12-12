@@ -37,10 +37,8 @@
       </listitem>
     </itemizedlist>
 
-    <para>See <link
-    xl:href="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">
-    Introducing Servlet 3 Async Support</link> (SpringSource team
-    blog).</para>
+    <para>See <xref linkend="mvc-ann-async"/>.</para>
+
   </section>
 
   <section xml:id="new-in-3.2-spring-mvc-test">
@@ -258,5 +256,6 @@
         linkend="testcontext-ctx-management-initializers">ApplicationContextInitializers</link></para>
       </listitem>
     </itemizedlist>
+
   </section>
 </chapter>
