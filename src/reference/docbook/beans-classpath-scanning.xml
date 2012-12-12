@@ -121,6 +121,13 @@ public class JpaMovieFinder implements MovieFinder {
 
 &lt;/beans&gt;</programlisting>
 
+    <tip>
+      <para>The use of <literal>&lt;context:component-scan&gt;</literal> implicitly
+      enables the functionality of <literal>&lt;context:annotation-config&gt;</literal>.
+      There is usually no need to include the <literal>&lt;context:annotation-config&gt;</literal>
+      element when using <literal>&lt;context:component-scan&gt;</literal>.
+      </para>
+    </tip>
     <note>
       <para>The scanning of classpath packages requires the presence of
         corresponding directory entries in the classpath. When you build JARs
