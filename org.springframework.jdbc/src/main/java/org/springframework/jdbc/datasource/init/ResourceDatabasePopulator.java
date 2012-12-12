@@ -118,10 +118,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.  
+	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
 	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
-	 * <code>IF EXISTS</code> clause in a <code>DROP</code>. The default is false so that if the
-	 * populator runs accidentally, it will fail fast when the script starts with a <code>DROP</code>.
+	 * {@code IF EXISTS} clause in a {@code DROP}. The default is false so that if the
+	 * populator runs accidentally, it will fail fast when the script starts with a {@code DROP}.
 	 */
 	public void setIgnoreFailedDrops(boolean ignoreFailedDrops) {
 		this.ignoreFailedDrops = ignoreFailedDrops;
@@ -151,10 +151,10 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * @param connection the JDBC Connection with which to perform JDBC operations
 	 * @param resource the resource (potentially associated with a specific encoding) to load the SQL script from
 	 * @param continueOnError whether or not to continue without throwing an exception in the event of an error
-	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a <code>DROP</code>
+	 * @param ignoreFailedDrops whether of not to continue in the event of specifically an error on a {@code DROP}
 	 */
-	private void executeSqlScript(Connection connection, EncodedResource resource,
-			boolean continueOnError, boolean ignoreFailedDrops) throws SQLException {
+	private void executeSqlScript(Connection connection, EncodedResource resource, boolean continueOnError,
+			boolean ignoreFailedDrops) throws SQLException {
 
 		if (logger.isInfoEnabled()) {
 			logger.info("Executing SQL script from " + resource);
@@ -219,25 +219,30 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Read a script from the given resource and build a String containing the lines.
 	 * @param resource the resource to be read
-	 * @return <code>String</code> containing the script lines
+	 * @return {@code String} containing the script lines
 	 * @throws IOException in case of I/O errors
 	 */
 	private String readScript(EncodedResource resource) throws IOException {
 		LineNumberReader lnr = new LineNumberReader(resource.getReader());
-		String currentStatement = lnr.readLine();
-		StringBuilder scriptBuilder = new StringBuilder();
-		while (currentStatement != null) {
-			if (StringUtils.hasText(currentStatement) &&
-					(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
-				if (scriptBuilder.length() > 0) {
-					scriptBuilder.append('\n');
+		try {
+			String currentStatement = lnr.readLine();
+			StringBuilder scriptBuilder = new StringBuilder();
+			while (currentStatement != null) {
+				if (StringUtils.hasText(currentStatement) &&
+						(this.commentPrefix != null && !currentStatement.startsWith(this.commentPrefix))) {
+					if (scriptBuilder.length() > 0) {
+						scriptBuilder.append('\n');
+					}
+					scriptBuilder.append(currentStatement);
 				}
-				scriptBuilder.append(currentStatement);
+				currentStatement = lnr.readLine();
 			}
-			currentStatement = lnr.readLine();
+			maybeAddSeparatorToScript(scriptBuilder);
+			return scriptBuilder.toString();
 		}
-		maybeAddSeparatorToScript(scriptBuilder);
-		return scriptBuilder.toString();
+		finally {
+			lnr.close();
+		}
 	}
 
 	private void maybeAddSeparatorToScript(StringBuilder scriptBuilder) {
@@ -248,7 +253,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		if (trimmed.length() == this.separator.length()) {
 			return;
 		}
-		// separator ends in whitespace, so we might want to see if the script is trying to end the same way
+		// separator ends in whitespace, so we might want to see if the script is trying
+		// to end the same way
 		if (scriptBuilder.lastIndexOf(trimmed) == scriptBuilder.length() - trimmed.length()) {
 			scriptBuilder.append(this.separator.substring(trimmed.length()));
 		}
@@ -290,8 +296,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Split an SQL script into separate statements delimited with the provided delimiter
-	 * character. Each individual statement will be added to the provided {@code List}.
+	 * Split an SQL script into separate statements delimited by the provided delimiter
+	 * string. Each individual statement will be added to the provided {@code List}.
 	 * @param script the SQL script
 	 * @param delim character delimiting each statement (typically a ';' character)
 	 * @param statements the List that will contain the individual statements
