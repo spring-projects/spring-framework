@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -269,7 +269,6 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or <code>null</code> if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 		return getAnnotatedElement().getAnnotation(annotationType);
 	}
@@ -311,14 +310,14 @@ public class MethodParameter {
 	 * Return true if the parameter has at least one annotation, false if it has none.
 	 */
 	public boolean hasParameterAnnotations() {
-		return getParameterAnnotations().length != 0;
+		return (getParameterAnnotations().length != 0);
 	}
 
 	/**
 	 * Return true if the parameter has the given annotation type, and false if it doesn't.
 	 */
 	public <T extends Annotation> boolean hasParameterAnnotation(Class<T> annotationType) {
-		return getParameterAnnotation(annotationType) != null;
+		return (getParameterAnnotation(annotationType) != null);
 	}
 
 	/**
@@ -417,28 +416,6 @@ public class MethodParameter {
 		return this.typeIndexesPerLevel;
 	}
 
-
-	/**
-	 * Create a new MethodParameter for the given method or constructor.
-	 * <p>This is a convenience constructor for scenarios where a
-	 * Method or Constructor reference is treated in a generic fashion.
-	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
-	 * @param parameterIndex the index of the parameter
-	 * @return the corresponding MethodParameter instance
-	 */
-	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
-		if (methodOrConstructor instanceof Method) {
-			return new MethodParameter((Method) methodOrConstructor, parameterIndex);
-		}
-		else if (methodOrConstructor instanceof Constructor) {
-			return new MethodParameter((Constructor) methodOrConstructor, parameterIndex);
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
-		}
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -460,7 +437,6 @@ public class MethodParameter {
 		return false;
 	}
 
-
 	@Override
 	public int hashCode() {
 		int result = this.hash;
@@ -470,6 +446,28 @@ public class MethodParameter {
 			this.hash = result;
 		}
 		return result;
+	}
+
+
+	/**
+	 * Create a new MethodParameter for the given method or constructor.
+	 * <p>This is a convenience constructor for scenarios where a
+	 * Method or Constructor reference is treated in a generic fashion.
+	 * @param methodOrConstructor the Method or Constructor to specify a parameter for
+	 * @param parameterIndex the index of the parameter
+	 * @return the corresponding MethodParameter instance
+	 */
+	public static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {
+		if (methodOrConstructor instanceof Method) {
+			return new MethodParameter((Method) methodOrConstructor, parameterIndex);
+		}
+		else if (methodOrConstructor instanceof Constructor) {
+			return new MethodParameter((Constructor) methodOrConstructor, parameterIndex);
+		}
+		else {
+			throw new IllegalArgumentException(
+					"Given object [" + methodOrConstructor + "] is neither a Method nor a Constructor");
+		}
 	}
 
 }

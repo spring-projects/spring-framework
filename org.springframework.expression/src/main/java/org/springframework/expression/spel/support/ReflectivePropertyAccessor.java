@@ -86,7 +86,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			Field field = findField(name, type, target);
 			if (field != null) {
 				TypeDescriptor typeDescriptor = new TypeDescriptor(field);
-				this.readerCache.put(cacheKey, new InvokerPair(field,typeDescriptor));
+				this.readerCache.put(cacheKey, new InvokerPair(field, typeDescriptor));
 				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 				return true;
 			}
@@ -264,15 +264,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			return TypeDescriptor.valueOf(Integer.TYPE);
 		}
 		CacheKey cacheKey = new CacheKey(type, name);
-		TypeDescriptor typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+		TypeDescriptor typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 		if (typeDescriptor == null) {
 			// attempt to populate the cache entry
 			try {
 				if (canRead(context, target, name)) {
-					typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 				}
 				else if (canWrite(context, target, name)) {
-					typeDescriptor =  this.typeDescriptorCache.get(cacheKey);
+					typeDescriptor = this.typeDescriptorCache.get(cacheKey);
 				}
 			}
 			catch (AccessException ex) {

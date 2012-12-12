@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public class MethodParameterTests {
 
 	private MethodParameter intReturnType;
 
+
 	@Before
 	public void setUp() throws NoSuchMethodException {
 		Method method = getClass().getMethod("method", String.class, Long.TYPE);
@@ -42,8 +43,6 @@ public class MethodParameterTests {
 		intReturnType = new MethodParameter(method, -1);
 	}
 
-
-	
 	@Test
 	public void testEquals() throws NoSuchMethodException {
 		assertEquals(stringParameter, stringParameter);
