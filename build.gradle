@@ -9,7 +9,7 @@ buildscript {
 }
 
 configure(allprojects) {
-	ext.aspectjVersion  = "1.6.12"
+	ext.aspectjVersion  = "1.7.1"
 	ext.easymockVersion = "2.5.2"
 	ext.hsqldbVersion   = "1.8.0.10"
 	ext.junitVersion    = "4.11"
