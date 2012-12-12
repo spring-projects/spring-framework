@@ -690,14 +690,6 @@ configure(rootProject) {
 	apply plugin: "groovy"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
-	eclipse.classpath.file.whenMerged { classpath ->
-		def sourceFolder = new org.gradle.plugins.ide.eclipse.model.SourceFolder(
-			"buildSrc/src/main/groovy", null)
-		if(!classpath.entries.contains(sourceFolder)) {
-			classpath.entries.add(0, sourceFolder)
-		}
-	}
-
 	reference {
 		sourceDir = file("src/reference/docbook")
 		pdfFilename = "spring-framework-reference.pdf"
