@@ -54,8 +54,7 @@ class ComponentScanAnnotationParser {
 	private final BeanNameGenerator beanNameGenerator;
 
 
-	public ComponentScanAnnotationParser(
-			ResourceLoader resourceLoader, Environment environment,
+	public ComponentScanAnnotationParser(ResourceLoader resourceLoader, Environment environment,
 			BeanNameGenerator beanNameGenerator, BeanDefinitionRegistry registry) {
 
 		this.resourceLoader = resourceLoader;
@@ -67,7 +66,7 @@ class ComponentScanAnnotationParser {
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan) {
 		ClassPathBeanDefinitionScanner scanner =
-			new ClassPathBeanDefinitionScanner(registry, componentScan.getBoolean("useDefaultFilters"));
+				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
 
 		Assert.notNull(this.environment, "Environment must not be null");
 		scanner.setEnvironment(this.environment);
@@ -77,14 +76,14 @@ class ComponentScanAnnotationParser {
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
 		boolean useInheritedGenerator = BeanNameGenerator.class.equals(generatorClass);
-		scanner.setBeanNameGenerator(useInheritedGenerator
-				? this.beanNameGenerator
-				: BeanUtils.instantiateClass(generatorClass));
+		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
+				BeanUtils.instantiateClass(generatorClass));
 
 		ScopedProxyMode scopedProxyMode = componentScan.getEnum("scopedProxy");
 		if (scopedProxyMode != ScopedProxyMode.DEFAULT) {
 			scanner.setScopedProxyMode(scopedProxyMode);
-		} else {
+		}
+		else {
 			Class<? extends ScopeMetadataResolver> resolverClass = componentScan.getClass("scopeResolver");
 			scanner.setScopeMetadataResolver(BeanUtils.instantiateClass(resolverClass));
 		}
@@ -121,7 +120,7 @@ class ComponentScanAnnotationParser {
 			throw new IllegalStateException("At least one base package must be specified");
 		}
 
-		return scanner.doScan(basePackages.toArray(new String[]{}));
+		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {
@@ -153,4 +152,5 @@ class ComponentScanAnnotationParser {
 		}
 		return typeFilters;
 	}
+
 }

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -121,6 +122,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
+	 * Return the ResourceLoader that this component provider uses.
+	 */
+	public final ResourceLoader getResourceLoader() {
+		return this.resourcePatternResolver;
+	}
+
+	/**
 	 * Set the Environment to use when resolving placeholders and evaluating
 	 * {@link Profile @Profile}-annotated component classes.
 	 * <p>The default is a {@link StandardEnvironment}
@@ -132,13 +140,6 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	public Environment getEnvironment() {
 		return this.environment;
-	}
-
-	/**
-	 * Return the ResourceLoader that this component provider uses.
-	 */
-	public final ResourceLoader getResourceLoader() {
-		return this.resourcePatternResolver;
 	}
 
 	/**

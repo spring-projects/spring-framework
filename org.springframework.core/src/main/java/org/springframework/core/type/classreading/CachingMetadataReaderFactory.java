@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
-	private final Map<Resource, MetadataReader> classReaderCache =
+	private final Map<Resource, MetadataReader> metadataReaderCache =
 			new LinkedHashMap<Resource, MetadataReader>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
 				protected boolean removeEldestEntry(Map.Entry<Resource, MetadataReader> eldest) {
@@ -95,11 +95,11 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 		if (getCacheLimit() <= 0) {
 			return super.getMetadataReader(resource);
 		}
-		synchronized (this.classReaderCache) {
-			MetadataReader metadataReader = this.classReaderCache.get(resource);
+		synchronized (this.metadataReaderCache) {
+			MetadataReader metadataReader = this.metadataReaderCache.get(resource);
 			if (metadataReader == null) {
 				metadataReader = super.getMetadataReader(resource);
-				this.classReaderCache.put(resource, metadataReader);
+				this.metadataReaderCache.put(resource, metadataReader);
 			}
 			return metadataReader;
 		}
