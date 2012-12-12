@@ -7,12 +7,12 @@
     xsi:schemaLocation="
         http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
         http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-  <title>New Features and Enhancements in Spring 3.0</title>
+  <title>New Features and Enhancements in Spring Framework 3.0</title>
 
   <para>If you have been using the Spring Framework for some time, you will be
   aware that Spring has undergone two major revisions: Spring 2.0, released in
   October 2006, and Spring 2.5, released in November 2007. It is now time for
-  a third overhaul resulting in Spring 3.0.</para>
+  a third overhaul resulting in Spring Framework 3.0.</para>
 
   <sidebar xml:id="new-in-3.0-intro-java">
     <title>Java SE and Java EE Support</title>
@@ -52,8 +52,8 @@
     <title>Improved documentation</title>
 
     <para>The Spring reference documentation has also substantially been
-    updated to reflect all of the changes and new features for Spring 3.0.
-    While every effort has been made to ensure that there are no errors in
+    updated to reflect all of the changes and new features for Spring Framework
+    3.0. While every effort has been made to ensure that there are no errors in
     this documentation, some errors may nevertheless have crept in. If you do
     spot any typos or even more serious errors, and you can spare a few cycles
     during lunch, please do bring the error to the attention of the Spring
@@ -65,20 +65,23 @@
     <title>New articles and tutorials</title>
 
     <para>
-        There are many excellent articles and tutorials that show how to get started with Spring 3 features.
-        Read them at the <link xl:href="http://www.springsource.org/documentation">Spring Documentation</link> page.
+        There are many excellent articles and tutorials that show how to get
+        started with Spring Framework 3 features. Read them at the
+        <link xl:href="http://www.springsource.org/documentation">Spring Documentation</link> page.
       </para>
       <para xml:id="new-in-3.0-samples">
-      The samples have been improved and updated to take advantage of the new features in Spring 3.
-      Additionally, the samples have been moved out of the source tree into a dedicated SVN
+      The samples have been improved and updated to take advantage of the new features in Spring
+      Framework 3. Additionally, the samples have been moved out of the source tree into a dedicated SVN
       <link xl:href="https://anonsvn.springframework.org/svn/spring-samples/">repository</link> available at:</para>
 
     <para>
       <literal>https://anonsvn.springframework.org/svn/spring-samples/</literal>
       </para>
 
-      <para>As such, the samples are no longer distributed alongside Spring 3 and need to be downloaded separately from the repository mentioned above. However, this documentation
-      will continue to refer to some samples (in particular Petclinic) to illustrate various features.</para>
+      <para>As such, the samples are no longer distributed alongside Spring
+      Framework 3 and need to be downloaded separately from the repository
+      mentioned above. However, this documentation will continue to refer to
+      some samples (in particular Petclinic) to illustrate various features.</para>
 
       <note><para>For more information on Subversion (or in short SVN), see the project homepage at:
       <literal>http://subversion.apache.org/</literal></para>
@@ -190,7 +193,7 @@
   <section xml:id="new-in-3.0-features-overview">
     <title>Overview of new features</title>
 
-    <para>This is a list of new features for Spring 3.0. We will cover these
+    <para>This is a list of new features for Spring Framework 3.0. We will cover these
     features in more detail later in this section.</para>
 
     <itemizedlist>

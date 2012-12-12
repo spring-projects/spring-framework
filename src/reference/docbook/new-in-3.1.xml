@@ -7,17 +7,13 @@
     xsi:schemaLocation="
         http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
         http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
-  <title>New Features and Enhancements in Spring 3.1</title>
-
-  <para>Building on the support introduced in Spring 3.0, Spring 3.1 is
-  currently under development, and at the time of this writing Spring 3.1 RC1
-  is being prepared for release.</para>
+  <title>New Features and Enhancements in Spring Framework 3.1</title>
 
   <section xml:id="new-in-3.1-features-overview">
     <title>Overview of new features</title>
 
-    <para>This is a list of new features for Spring 3.1. Most features do not
-    yet have dedicated reference documentation but do have Javadoc. In such
+    <para>This is a list of new features for Spring Framework 3.1. A number of features
+    do not have dedicated reference documentation but do have complete Javadoc. In such
     cases, fully-qualified class names are given.</para>
 
     <section xml:id="new-in-3.1-cache-abstraction">
@@ -114,7 +110,7 @@
       form of <interfacename>@Enable</interfacename> annotations. These are
       designed for use in conjunction with Spring's
       <interfacename>@Configuration</interfacename> classes, which were
-      introduced in Spring 3.0.</para>
+      introduced in Spring Framework 3.0.</para>
 
       <itemizedlist>
         <listitem>
@@ -256,10 +252,10 @@
       <title>Support for injection against non-standard JavaBeans
       setters</title>
 
-      <para>Prior to Spring 3.1, in order to inject against a property method
-      it had to conform strictly to JavaBeans property signature rules, namely
-      that any 'setter' method must be void-returning. It is now possible in
-      Spring XML to specify setter methods that return any object type. This
+      <para>Prior to Spring Framework 3.1, in order to inject against a property
+      method it had to conform strictly to JavaBeans property signature rules,
+      namely that any 'setter' method must be void-returning. It is now possible
+      in Spring XML to specify setter methods that return any object type. This
       is useful when considering designing APIs for method-chaining, where
       setter methods return a reference to 'this'.</para>
     </section>
@@ -309,8 +305,8 @@
       which will in turn get searched for <literal>@Entity</literal> classes.
       In many cases, persistence.xml does not contain more than a unit name
       and relies on defaults and/or external setup for all other concerns
-      (such as the DataSource to use, etc). For that reason, Spring 3.1
-      provides an alternative:
+      (such as the DataSource to use, etc). For that reason, Spring Framework
+      3.1 provides an alternative:
       <classname>LocalContainerEntityManagerFactoryBean</classname> accepts a
       'packagesToScan' property, specifying base packages to scan for
       <literal>@Entity</literal> classes. This is analogous to
@@ -328,8 +324,8 @@
       <title>New HandlerMethod-based Support Classes For Annotated Controller
       Processing</title>
 
-      <para>Spring 3.1 introduces a new set of support classes for processing
-      requests with annotated controllers:</para>
+      <para>Spring Framework 3.1 introduces a new set of support classes for
+      processing requests with annotated controllers:</para>
 
       <itemizedlist>
         <listitem>

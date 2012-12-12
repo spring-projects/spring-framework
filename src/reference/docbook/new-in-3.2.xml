@@ -7,7 +7,7 @@
          xmlns:xl="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:ns="http://docbook.org/ns/docbook">
-  <title>New Features and Enhancements in Spring 3.2</title>
+  <title>New Features and Enhancements in Spring Framework 3.2</title>
 
   <section xml:id="new-in-3.2-webmvc-async">
     <title>Support for Servlet 3 based asynchronous request processing</title>
