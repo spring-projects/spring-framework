@@ -3,12 +3,10 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.2 GA (2012-12-12)
+Changes in version 3.2 GA (2012-12-13)
 --------------------------------------
 
-* upgraded to AspectJ 1.7.1 (SPR-10079)
-* spring-test module again depends on junit:junit for JUnit 4.11 (SPR-10044)
-* upgraded Spring Framework build and test suite to Joda-Time 2.1, Groovy 1.8.8, JRuby 1.6.5
+* upgraded Spring Framework build to AspectJ 1.7.1, JUnit 4.11, Groovy 1.8.8, JRuby 1.6.5, Joda-Time 2.1
 * checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
 * checked compatibility of Spring's JasperReports support with JasperReports 5.0
 * added unit tests for Hibernate 4
@@ -18,6 +16,7 @@ Changes in version 3.2 GA (2012-12-12)
 * DeprecatedBeanWarner detects deprecated FactoryBean classes and always logs user-specified bean type
 * fixed CGLIB proxy class leaks through further equals/hashCode implementations in Spring AOP pointcuts (SPR-8008)
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK classes via ASM (SPR-10058)
+* SpEL indexer uses direct access to specific List elements instead of iterating over the Collection (SPR-10035)
 * DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
 * tx timeouts for JPA translate to "javax.persistence.query.timeout" only (for EclipseLink compatibility; SPR-10068)
 * ResourceDatabasePopulator and JdbcTestUtils now support comments within SQL statements (SPR-10075, SPR-9982)
@@ -39,6 +38,7 @@ Changes in version 3.2 RC2 (2012-11-27)
 * AsyncAnnotationBean/MethodValidation/PersistenceExceptionTranslationPostProcessor cache eligible beans (SPR-7328)
 * ConfigurableApplicationContext, LobCreator and Client/ServerHttpResponse implement Closeable for Java 7 (SPR-9962)
 * spring-jms-3.2.xsd declares former nmtoken attributes as string, allowing for placeholders (SPR-9597)
+* ResourceDatabasePopulator explicitly closes its LineNumberReader (SPR-9912)
 * introduced TransactionAwareCacheManagerProxy for cache put synchronization with Spring transactions (SPR-9966)
 * added "transactionAware" bean property to EhCacheCacheManager and JCacheCacheManager (SPR-9966)
 * moved "cache.ehcache" and "cache.jcache" packages from spring-context to spring-context-support module
@@ -113,6 +113,7 @@ Changes in version 3.2 RC1 (2012-11-04)
 * cache and late resolve annotations on bean properties to improve performance (SPR-9166)
 * allow PropertyResolver implementations to ignore unresolvable ${placeholders} (SPR-9569)
 * FormHttpMessageConverter now adds Jackson JSON converters if available on the classpath (SPR-10055)
+
 
 Changes in version 3.2 M2 (2012-09-11)
 --------------------------------------
