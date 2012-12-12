@@ -733,11 +733,11 @@ configure(rootProject) {
 		}
 
 		from (api) {
-			into "api"
+			into "javadoc-api"
 		}
 
 		from (reference) {
-			into "reference"
+			into "spring-framework-reference"
 		}
 	}
 
