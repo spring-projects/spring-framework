@@ -513,10 +513,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 		protected boolean shareable = true;
 
-		private volatile boolean cached = false;
-
-		private volatile Object cachedFieldValue;
-
 		public ResourceElement(Member member, PropertyDescriptor pd) {
 			super(member, pd);
 		}
