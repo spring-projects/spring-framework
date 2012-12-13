@@ -173,183 +173,183 @@
       <para>The following packages and types have been wholly or partially deprecated
       in Spring Framework 3.2 and may be removed in a future version. Click through
       to the linked Javadoc for each item for exact details. See also the
-      <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/deprecated-list.html">
+      <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/deprecated-list.html">
       complete list of deprecations</link> in the framework.</para>
       <itemizedlist>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/ibatis/package-summary.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/ibatis/package-summary.html">
           org.springframework.orm.ibatis</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/scheduling/backportconcurrent/package-summary.html">
           org.springframework.scheduling.backportconcurrent</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ejb/support/package-summary.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ejb/support/package-summary.html">
           org.springframework.ejb.support</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/converter/xml/XmlAwareFormHttpMessageConverter.html">
           org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/DelegatingVariableResolver.html">
           org.springframework.web.jsf.DelegatingVariableResolver</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/jsf/SpringBeanVariableResolver.html">
           org.springframework.web.jsf.SpringBeanVariableResolver</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/CommonsLoggingLogSystem.html">
           org.springframework.ui.velocity.CommonsLoggingLogSystem</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/ui/velocity/VelocityEngineUtils.html">
           org.springframework.ui.velocity.VelocityEngineUtils</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/BeanReferenceFactoryBean.html">
           org.springframework.beans.factory.config.BeanReferenceFactoryBean</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/beans/factory/config/CommonsLogFactoryBean.html">
           org.springframework.beans.factory.config.CommonsLogFactoryBean</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/instrument/classloading/oc4j/OC4JLoadTimeWeaver.html">
           org.springframework.beans.instrument.classloading.oc4j.OC4JLoadTimeWeaver</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/jta/OC4JJtaTransactionManager.html">
           org.springframework.transaction.jta.OC4JJtaTransactionManager</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/ExpressionEvaluationUtils.html">
           org.springframework.web.util.ExpressionEvaluationUtils</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerAdapter.html">
           org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/AnnotationMethodHandlerExceptionResolver.html">
           org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/DefaultAnnotationHandlerMapping.html">
           org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/mvc/annotation/ServletAnnotationMappingUtils.html">
           org.springframework.web.servlet.mvc.annotation.ServletAnnotationMappingUtils</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/jmx/support/MBeanRegistrationSupport.html">
           org.springframework.jmx.support.MBeanRegistrationSupport</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/ContextConfigurationAttributes.html">
           org.springframework.test.context.ContextConfigurationAttributes</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/junit4/AbstractTransactionalJUnit4SpringContextTests.html">
           org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests</link>:
           use of the <varname>simpleJdbcTemplate</varname> instance variable has been deprecated
           in favor of the new <varname>jdbcTemplate</varname> instance variable.</para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/context/testng/AbstractTransactionalTestNGSpringContextTests.html">
           org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests</link>:
           use of the <varname>simpleJdbcTemplate</varname> instance variable has been deprecated
           in favor of the new <varname>jdbcTemplate</varname> instance variable.</para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/test/jdbc/SimpleJdbcTestUtils.html">
           org.springframework.test.jdbc.SimpleJdbcTestUtils</link> has been deprecated in
           favor of <classname>JdbcTestUtils</classname> which now contains all of the
           functionality previously available in <classname>SimpleJdbcTestUtils</classname>.</para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/servlet/view/ContentNegotiatingViewResolver.html">
           org.springframework.web.servlet.view.ContentNegotiatingViewResolver</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/transaction/interceptor/TransactionAspectUtils.html">
           org.springframework.transaction.interceptor.TransactionAspectUtils</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/http/HttpStatus.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/http/HttpStatus.html">
           org.springframework.http.HttpStatus</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriUtils.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/web/util/UriUtils.html">
           org.springframework.web.util.UriUtils</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaDialect.html">
           org.springframework.orm.jpa.vendor.TopLinkJpaDialect</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/orm/jpa/vendor/TopLinkJpaVendorAdapter.html">
           org.springframework.orm.jpa.vendor.TopLinkJpaVendorAdapter</link>
           </para>
         </listitem>
         <listitem>
           <para>
-          <link xl:href="http://static.springsource.org/spring-framework/docs/current/javadoc-api/org/springframework/util/CachingMapDecorator.html">
+          <link xl:href="http://static.springsource.org/spring-framework/docs/3.2.0.RELEASE/javadoc-api/org/springframework/util/CachingMapDecorator.html">
           org.springframework.orm.util.CachingMapDecorator</link>
           </para>
         </listitem>
