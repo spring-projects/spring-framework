@@ -299,6 +299,17 @@
     arrangements for highly concurrent creation of scoped/prototype beans.</para>
   </section>
 
+  <section xml:id="new-in-3.2-build">
+    <title>New Gradle-based build and move to GitHub</title>
+
+    <para>Building and contributing to the framework has never been simpler with
+    our move to a Gradle-based build system and source control at GitHub.
+    See the <link xl:href="https://github.com/SpringSource/spring-framework#building-from-source">
+    building from source</link> section of the README and the
+    <link xl:href="https://github.com/SpringSource/spring-framework/blob/master/CONTRIBUTING.md">
+    contributor guidelines</link> for complete details.</para>
+  </section>
+
   <section xml:id="new-in-3.2-java7">
     <title>Refined Java SE 7 / OpenJDK 7 support</title>
 
