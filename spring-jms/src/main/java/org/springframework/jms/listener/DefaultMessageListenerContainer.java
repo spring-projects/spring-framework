@@ -337,9 +337,10 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 * to scale the consumption of messages coming in from a queue. However,
 	 * note that any ordering guarantees are lost once multiple consumers are
 	 * registered. In general, stick with 1 consumer for low-volume queues.
-	 * <p><b>Do not raise the number of concurrent consumers for a topic.</b>
-	 * This would lead to concurrent consumption of the same message,
-	 * which is hardly ever desirable.
+	 * <p><b>Do not raise the number of concurrent consumers for a topic,
+	 * unless vendor-specific setup measures clearly allow for it.</b>
+	 * With regular setup, this would lead to concurrent consumption
+	 * of the same message, which is hardly ever desirable.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 * @see #setConcurrentConsumers
 	 */
@@ -526,6 +527,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
 			synchronized (this.lifecycleMonitor) {
+				// Waiting for AsyncMessageListenerInvokers to deactivate themselves...
 				while (this.activeInvokerCount > 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
@@ -533,6 +535,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					}
 					this.lifecycleMonitor.wait();
 				}
+				// Clear remaining scheduled invokers, possibly left over as paused tasks...
+				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+					scheduledInvoker.clearResources();
+				}
+				this.scheduledInvokers.clear();
 			}
 		}
 		catch (InterruptedException ex) {

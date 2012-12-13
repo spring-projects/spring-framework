@@ -214,6 +214,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 			wasRunning = this.running;
 			this.running = false;
 			this.active = false;
+			this.pausedTasks.clear();
 			this.lifecycleMonitor.notifyAll();
 		}
 
