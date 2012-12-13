@@ -24,6 +24,13 @@
     build configuration.</para>
   </section>
 
+  <section xml:id="migration-3.2-ehcache-support">
+    <title>EHCache support moved to spring-context-support</title>
+    <para>Along with Spring's new JCache support, the EHCache support classes in the
+    <literal>org.springframework.cache.ehcache</literal> package moved from the
+    <literal>spring-context</literal> module to <literal>spring-context-support</literal>.</para>
+  </section>
+
   <section xml:id="migration-3.2-inline-asm">
     <title>Inlining of spring-asm jar</title>
     <para>In versions 3.0 and 3.1, we published a discrete <literal>spring-asm</literal>

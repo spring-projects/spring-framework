@@ -217,6 +217,24 @@
     namespace and the MVC JavaConfig both expose these options.</para>
   </section>
 
+  <section xml:id="new-in-3.2-meta-annotations">
+    <title>Using meta-annotations for injection points and for bean definition methods</title>
+
+    <para>As of 3.2, Spring allows for <interfacename>@Autowired</interfacename> and
+    <interfacename>@Value</interfacename> to be used as meta-annotations,
+    e.g. to build custom injection annotations in combination with specific qualifiers.
+    Analogously, you may build custom <interfacename>@Bean</interfacename> definition
+    annotations for <interfacename>@Configuration</interfacename> classes,
+    e.g. in combination with specific qualifiers, @Lazy, @Primary, etc.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-jcache">
+    <title>Initial support for JCache 0.5</title>
+
+    <para>Spring provides a CacheManager adapter for JCache, building against the JCache 0.5
+    preview release. Full JCache support is coming next year, along with Java EE 7 final.</para>
+  </section>
+
   <section xml:id="new-in-3.2-date-time-format-without-joda">
     <title>Support for <interfacename>@DateTimeFormat</interfacename> without
     Joda Time</title>
@@ -271,6 +289,23 @@
         linkend="testcontext-ctx-management-initializers">ApplicationContextInitializers</link></para>
       </listitem>
     </itemizedlist>
-
   </section>
+
+  <section xml:id="new-in-3.2-concurrency">
+    <title>Refined concurrency within the framework</title>
+
+    <para>Spring Framework 3.2 includes fine-tuning of concurrent data structures
+    in many parts of the framework, minimizing locks and generally improving the
+    arrangements for highly concurrent creation of scoped/prototype beans.</para>
+  </section>
+
+  <section xml:id="new-in-3.2-java7">
+    <title>Refined Java SE 7 support</title>
+
+    <para>Last but not least, Spring Framework 3.2 comes with refined Java 7 support
+    within the framework as well as through upgraded third-party dependencies:
+    specifically, CGLIB 3.0, ASM 4.0 (both of which come as inlined dependencies with
+    Spring now) and AspectJ 1.7 support (next to the existing AspectJ 1.6 support).</para>
+  </section>
+
 </chapter>
