@@ -292,7 +292,7 @@
   </section>
 
   <section xml:id="new-in-3.2-concurrency">
-    <title>Refined concurrency within the framework</title>
+    <title>Concurrency refinements across the framework</title>
 
     <para>Spring Framework 3.2 includes fine-tuning of concurrent data structures
     in many parts of the framework, minimizing locks and generally improving the
@@ -300,7 +300,7 @@
   </section>
 
   <section xml:id="new-in-3.2-java7">
-    <title>Refined Java SE 7 support</title>
+    <title>Refined Java SE 7 / OpenJDK 7 support</title>
 
     <para>Last but not least, Spring Framework 3.2 comes with refined Java 7 support
     within the framework as well as through upgraded third-party dependencies:

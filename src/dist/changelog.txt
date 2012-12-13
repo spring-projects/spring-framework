@@ -9,7 +9,7 @@ Changes in version 3.2 GA (2012-12-13)
 * upgraded Spring Framework build to AspectJ 1.7.1, JUnit 4.11, Groovy 1.8.8, JRuby 1.6.5, Joda-Time 2.1
 * checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
 * checked compatibility of Spring's JasperReports support with JasperReports 5.0
-* added unit tests for Hibernate 4
+* added unit tests for Spring's Hibernate 4 support
 * deprecated Apache iBATIS support in favor of native Spring support in Mybatis (the iBATIS successor)
 * deprecated JSF 1.1 VariableResolver implementations in favor of Spring-provided JSF 1.2 ELResolvers
 * deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
