@@ -10,14 +10,15 @@ Changes in version 3.2 GA (2012-12-13)
 * checked compatibility of Spring's Velocity support with Velocity 1.7 and Velocity Tools 2.0
 * checked compatibility of Spring's JasperReports support with JasperReports 5.0
 * added unit tests for Hibernate 4
-* deprecated Apache iBATIS support in favor of native Spring support in Mybatis
-* deprecated JSF 1.1 VariableResolver implementations in favor of Spring-provided ELResolvers
+* deprecated Apache iBATIS support in favor of native Spring support in Mybatis (the iBATIS successor)
+* deprecated JSF 1.1 VariableResolver implementations in favor of Spring-provided JSF 1.2 ELResolvers
 * deprecated BeanReferenceFactoryBean and CommonsLogFactoryBean
 * DeprecatedBeanWarner detects deprecated FactoryBean classes and always logs user-specified bean type
 * fixed CGLIB proxy class leaks through further equals/hashCode implementations in Spring AOP pointcuts (SPR-8008)
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK classes via ASM (SPR-10058)
 * SpEL indexer uses direct access to specific List elements instead of iterating over the Collection (SPR-10035)
 * DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
+* DefaultMessageListenerContainer clears resources of paused tasks when shutting down after stop (SPR-10092)
 * tx timeouts for JPA translate to "javax.persistence.query.timeout" only (for EclipseLink compatibility; SPR-10068)
 * ResourceDatabasePopulator and JdbcTestUtils now support comments within SQL statements (SPR-10075, SPR-9982)
 * AbstractCachingViewResolver uses a cache limit of 1024 by default, avoiding overflow for redirect URLs (SPR-10065)
