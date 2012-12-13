@@ -325,7 +325,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		getterName = "is" + StringUtils.capitalize(propertyName);
 		for (Method method : ms) {
 			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
-					boolean.class.equals(method.getReturnType()) &&
+					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
