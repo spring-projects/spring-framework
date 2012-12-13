@@ -124,10 +124,10 @@
     <para>You will no longer be able to use the
     <classname>MockMvcBuilders</classname> <code>annotationConfigSetup</code>
     and <code>xmlConfigSetup</code> options. Instead you'll need to switch
-    to using the <interfacename>@WebApplicationContext</interfacename> support
+    to using the <interfacename>@WebAppConfiguration</interfacename> support
     of <filename>spring-test</filename> for loading Spring configuration,
     then inject a <interfacename>WebApplicationContext</interfacename> into
-    the test and use it to create a <classname>MockMvc</classname>.
+    the test and use it to create a <classname>MockMvc</classname>. See
     <xref linkend="spring-mvc-test-framework" /> for details.</para>
   </section>
 
