@@ -527,6 +527,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		logger.debug("Waiting for shutdown of message listener invokers");
 		try {
 			synchronized (this.lifecycleMonitor) {
+				// Waiting for AsyncMessageListenerInvokers to deactivate themselves...
 				while (this.activeInvokerCount > 0) {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
@@ -534,6 +535,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 					}
 					this.lifecycleMonitor.wait();
 				}
+				// Clear remaining scheduled invokers, possibly left over as paused tasks...
+				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {
+					scheduledInvoker.clearResources();
+				}
+				this.scheduledInvokers.clear();
 			}
 		}
 		catch (InterruptedException ex) {
