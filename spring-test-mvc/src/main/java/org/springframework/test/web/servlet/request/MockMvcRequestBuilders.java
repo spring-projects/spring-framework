@@ -81,6 +81,17 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
+     * Create a {@link MockHttpServletRequestBuilder} for an OPTIONS request.
+     *
+     * @param urlTemplate a URL template; the resulting URL will be encoded
+     * @param urlVariables zero or more URL variables
+     */
+    public static MockHttpServletRequestBuilder options(String urlTemplate, Object... urlVariables) {
+        return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
+    }
+
+
+	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
 	 *
 	 * @param httpMethod the HTTP method

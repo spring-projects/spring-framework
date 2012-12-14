@@ -31,6 +31,7 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 /**
  * An concrete implementation of {@link MockMvcBuilder} with methods for
@@ -53,6 +54,8 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	private final List<ResultMatcher> globalResultMatchers = new ArrayList<ResultMatcher>();
 
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
+	
+	private Boolean dispatchOptions = Boolean.FALSE;
 
 
 	/**
@@ -177,6 +180,17 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 		this.globalResultHandlers.add(resultHandler);
 		return (T) this;
 	}
+	
+	/**
+     * Should the {@link DispatcherServlet} dispatch OPTIONS request to controllers.
+     * @param dispatchOptions
+     * @see {@link DispatcherServlet#setDispatchOptionsRequest(boolean)}
+     */
+	@SuppressWarnings("unchecked")
+    public final <T extends Self> T dispatchOptions(boolean dispatchOptions) {
+        this.dispatchOptions = dispatchOptions;
+        return (T) this;
+    }
 
 	/**
 	 * Build a {@link MockMvc} instance.
@@ -191,7 +205,7 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 		Filter[] filterArray = this.filters.toArray(new Filter[this.filters.size()]);
 
 		return super.createMockMvc(filterArray, mockServletConfig, this.webAppContext,
-				this.defaultRequestBuilder, this.globalResultMatchers, this.globalResultHandlers);
+				this.defaultRequestBuilder, this.globalResultMatchers, this.globalResultHandlers,this.dispatchOptions);
 	}
 
 	/**
