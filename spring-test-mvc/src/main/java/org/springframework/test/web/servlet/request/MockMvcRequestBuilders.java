@@ -79,6 +79,17 @@ public abstract class MockMvcRequestBuilders {
 	public static MockHttpServletRequestBuilder delete(String urlTemplate, Object... urlVariables) {
 		return new MockHttpServletRequestBuilder(HttpMethod.DELETE, urlTemplate, urlVariables);
 	}
+	
+	/**
+     * Create a {@link MockHttpServletRequestBuilder} for a OPTIONS request.
+     *
+     * @param urlTemplate a URL template; the resulting URL will be encoded
+     * @param urlVariables zero or more URL variables
+     */
+    public static MockHttpServletRequestBuilder options(String urlTemplate, Object... urlVariables) {
+        return new MockHttpServletRequestBuilder(HttpMethod.OPTIONS, urlTemplate, urlVariables);
+    }
+	
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
