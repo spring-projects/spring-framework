@@ -50,6 +50,7 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * &#47;&#47; Use the hotel instance...
  *
  * mockServer.verify();
+ * </pre>
  *
  * <p>To create an instance of this class, use {@link #createServer(RestTemplate)}
  * and provide the {@code RestTemplate} to set up for the mock testing.
