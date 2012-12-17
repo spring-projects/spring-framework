@@ -41,7 +41,7 @@ import test.mixin.Lockable;
 /**
  * Tests for auto proxy creation by advisor recognition.
  *
- * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorIntegrationTests;
+ * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorIntegrationTests
  *
  * @author Rod Johnson
  * @author Dave Syer

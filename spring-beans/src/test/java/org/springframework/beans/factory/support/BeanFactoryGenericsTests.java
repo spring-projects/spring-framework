@@ -630,8 +630,8 @@ public class BeanFactoryGenericsTests {
 	 * public static <T> T createMock(Class<T> toMock)
 	 * }</pre>
 	 *
+	 * See SPR-9493
 	 * @since 3.2
-	 * @see SPR-9493
 	 */
 	@Test
 	public void parameterizedFactoryMethod() {

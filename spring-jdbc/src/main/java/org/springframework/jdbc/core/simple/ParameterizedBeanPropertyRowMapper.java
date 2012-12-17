@@ -36,7 +36,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
  *
  * <p>The mapper can be configured to use the primitives default value when mapping null values
- * by setting the {@link #setPrimitivesDefaultedForNullValue 'primitivesDefaultedForNullValue'}
+ * by setting the '{@link #setPrimitivesDefaultedForNullValue primitivesDefaultedForNullValue}'
  * flag to 'true'.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
