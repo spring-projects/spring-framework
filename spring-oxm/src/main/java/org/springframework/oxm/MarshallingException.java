@@ -28,7 +28,7 @@ package org.springframework.oxm;
 public abstract class MarshallingException extends XmlMappingException {
 
 	/**
-	 * Construct a <code>MarshallingException</code> with the specified detail message.
+	 * Construct a {@code MarshallingException} with the specified detail message.
 	 * @param msg the detail message
 	 */
 	protected MarshallingException(String msg) {
@@ -36,7 +36,7 @@ public abstract class MarshallingException extends XmlMappingException {
 	}
 
 	/**
-	 * Construct a <code>MarshallingException</code> with the specified detail message
+	 * Construct a {@code MarshallingException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

@@ -1,7 +1,7 @@
 package org.springframework.web.servlet.tags.form;
 
 /**
- * Test related data types for <code>org.springframework.web.servlet.tags.form</code> package.
+ * Test related data types for {@code org.springframework.web.servlet.tags.form} package.
  *
  * @author Scott Andrews
  */

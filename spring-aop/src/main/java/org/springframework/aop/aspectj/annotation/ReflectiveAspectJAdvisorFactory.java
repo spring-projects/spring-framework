@@ -144,7 +144,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
 	 * @param introductionField the field to introspect
-	 * @return <code>null</code> if not an Advisor
+	 * @return {@code null} if not an Advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);

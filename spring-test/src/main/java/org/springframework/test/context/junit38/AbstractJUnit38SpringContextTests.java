@@ -63,11 +63,11 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * AbstractJUnit38SpringContextTests()} and
  * {@link #AbstractJUnit38SpringContextTests(String)
  * AbstractJUnit38SpringContextTests(String)} and delegate to
- * <code>super();</code> and <code>super(name);</code> respectively.</li>
+ * {@code super();} and {@code super(name);} respectively.</li>
  * </ul>
  * <p>
  * The following list constitutes all annotations currently supported directly
- * by <code>AbstractJUnit38SpringContextTests</code>. <i>(Note that additional
+ * by {@code AbstractJUnit38SpringContextTests}. <i>(Note that additional
  * annotations may be supported by various
  * {@link org.springframework.test.context.TestExecutionListener
  * TestExecutionListeners})</i>
@@ -161,7 +161,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 
 	/**
 	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
-	 * supplied <code>name</code>; initializes the internal
+	 * supplied {@code name}; initializes the internal
 	 * {@link TestContextManager} for the current test; and retrieves the
 	 * configured (or default) {@link ProfileValueSource}.
 	 *
@@ -245,7 +245,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 *
 	 * @param tec the test execution callback to run
 	 * @param testMethod the actual test method: used to retrieve the
-	 * <code>timeout</code>
+	 * {@code timeout}
 	 * @throws Throwable if any exception is thrown
 	 * @see Timed
 	 * @see #runTest

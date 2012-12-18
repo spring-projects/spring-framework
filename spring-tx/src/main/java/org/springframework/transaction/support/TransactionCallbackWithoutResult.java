@@ -35,7 +35,7 @@ public abstract class TransactionCallbackWithoutResult implements TransactionCal
 	}
 
 	/**
-	 * Gets called by <code>TransactionTemplate.execute</code> within a transactional
+	 * Gets called by {@code TransactionTemplate.execute} within a transactional
 	 * context. Does not need to care about transactions itself, although it can retrieve
 	 * and influence the status of the current transaction via the given status object,
 	 * e.g. setting rollback-only.

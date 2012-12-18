@@ -131,7 +131,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	/**
 	 * Return the thread group that threads should be created in
-	 * (or <code>null</code>) for the default group.
+	 * (or {@code null}) for the default group.
 	 */
 	public ThreadGroup getThreadGroup() {
 		return this.threadGroup;
@@ -170,7 +170,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	/**
 	 * Build the default thread name prefix for this factory.
-	 * @return the default thread name prefix (never <code>null</code>)
+	 * @return the default thread name prefix (never {@code null})
 	 */
 	protected String getDefaultThreadNamePrefix() {
 		return ClassUtils.getShortName(getClass()) + "-";

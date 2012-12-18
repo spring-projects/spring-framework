@@ -40,7 +40,7 @@ public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJ
 	/**
 	 * Classpath-based resource path for the application context configuration
 	 * for {@link SpringJUnit4ClassRunnerAppCtxTests}:
-	 * <code>&quot;classpath:/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+	 * {@code &quot;classpath:/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
 	 *
 	 * @see SpringJUnit4ClassRunnerAppCtxTests#DEFAULT_CONTEXT_RESOURCE_PATH
 	 * @see ResourceUtils#CLASSPATH_URL_PREFIX

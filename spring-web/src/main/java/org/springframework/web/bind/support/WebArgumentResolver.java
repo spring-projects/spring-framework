@@ -55,7 +55,7 @@ public interface WebArgumentResolver {
 	 * Resolve an argument for the given handler method parameter within the given web request.
 	 * @param methodParameter the handler method parameter to resolve
 	 * @param webRequest the current web request, allowing access to the native request as well
-	 * @return the argument value, or <code>UNRESOLVED</code> if not resolvable
+	 * @return the argument value, or {@code UNRESOLVED} if not resolvable
 	 * @throws Exception in case of resolution failure
 	 */
 	Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception;

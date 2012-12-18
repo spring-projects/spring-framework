@@ -107,7 +107,7 @@ public class BeanFactoryAdvisorRetrievalHelper {
 
 	/**
 	 * Determine whether the aspect bean with the given name is eligible.
-	 * <p>The default implementation always returns <code>true</code>.
+	 * <p>The default implementation always returns {@code true}.
 	 * @param beanName the name of the aspect bean
 	 * @return whether the bean is eligible
 	 */

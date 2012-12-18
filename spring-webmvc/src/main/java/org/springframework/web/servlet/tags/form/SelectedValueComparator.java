@@ -36,22 +36,22 @@ import org.springframework.web.servlet.support.BindStatus;
  * <p><h1><a name="equality-contract">Equality Contract</a></h1>
  * For single-valued objects equality is first tested using standard {@link Object#equals Java equality}. As
  * such, user code should endeavour to implement {@link Object#equals} to speed up the comparison process. If
- * {@link Object#equals} returns <code>false</code> then an attempt is made at an
+ * {@link Object#equals} returns {@code false} then an attempt is made at an
  * {@link #exhaustiveCompare exhaustive comparison} with the aim being to <strong>prove</strong> equality rather
  * than disprove it.
  *
- * <p>Special support is given for instances of {@link LabeledEnum} with a <code>String</code>-based
+ * <p>Special support is given for instances of {@link LabeledEnum} with a {@code String}-based
  * comparison of the candidate value against the code of the {@link LabeledEnum}. This can be useful when a
- * {@link LabeledEnum} is used to define a list of '<code>&lt;option&gt;</code>' elements in HTML.
+ * {@link LabeledEnum} is used to define a list of '{@code &lt;option&gt;}' elements in HTML.
  *
- * <p>Next, an attempt is made to compare the <code>String</code> representations of both the candidate and bound
- * values. This may result in <code>true</code> in a number of cases due to the fact both values will be represented
- * as <code>Strings</code> when shown to the user.
+ * <p>Next, an attempt is made to compare the {@code String} representations of both the candidate and bound
+ * values. This may result in {@code true} in a number of cases due to the fact both values will be represented
+ * as {@code Strings} when shown to the user.
  *
- * <p>Next, if the candidate value is a <code>String</code>, an attempt is made to compare the bound value to
+ * <p>Next, if the candidate value is a {@code String}, an attempt is made to compare the bound value to
  * result of applying the corresponding {@link PropertyEditor} to the candidate. This comparison may be
- * executed twice, once against the direct <code>String</code> instances, and then against the <code>String</code>
- * representations if the first comparison results in <code>false</code>.
+ * executed twice, once against the direct {@code String} instances, and then against the {@code String}
+ * representations if the first comparison results in {@code false}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -60,7 +60,7 @@ import org.springframework.web.servlet.support.BindStatus;
 abstract class SelectedValueComparator {
 
 	/**
-	 * Returns <code>true</code> if the supplied candidate value is equal to the value bound to
+	 * Returns {@code true} if the supplied candidate value is equal to the value bound to
 	 * the supplied {@link BindStatus}. Equality in this case differs from standard Java equality and
 	 * is described in more detail <a href="#equality-contract">here</a>.
 	 */

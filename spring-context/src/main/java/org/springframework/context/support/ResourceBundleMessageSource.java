@@ -49,9 +49,9 @@ import org.springframework.util.StringUtils;
  * the generated MessageFormats for each message. It also implements rendering of
  * no-arg messages without MessageFormat, as supported by the AbstractMessageSource
  * base class. The caching provided by this MessageSource is significantly faster
- * than the built-in caching of the <code>java.util.ResourceBundle</code> class.
+ * than the built-in caching of the {@code java.util.ResourceBundle} class.
  *
- * <p>Unfortunately, <code>java.util.ResourceBundle</code> caches loaded bundles
+ * <p>Unfortunately, {@code java.util.ResourceBundle} caches loaded bundles
  * forever: Reloading a bundle during VM execution is <i>not</i> possible.
  * As this MessageSource relies on ResourceBundle, it faces the same limitation.
  * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
@@ -103,7 +103,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	/**
 	 * Set a single basename, following {@link java.util.ResourceBundle} conventions:
 	 * essentially, a fully-qualified classpath location. If it doesn't contain a
-	 * package qualifier (such as <code>org.mypackage</code>), it will be resolved
+	 * package qualifier (such as {@code org.mypackage}), it will be resolved
 	 * from the classpath root.
 	 * <p>Messages will normally be held in the "/lib" or "/classes" directory of
 	 * a web application's WAR structure. They can also be held in jar files on
@@ -111,7 +111,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasenames
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
@@ -122,7 +122,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	/**
 	 * Set an array of basenames, each following {@link java.util.ResourceBundle}
 	 * conventions: essentially, a fully-qualified classpath location. If it
-	 * doesn't contain a package qualifier (such as <code>org.mypackage</code>),
+	 * doesn't contain a package qualifier (such as {@code org.mypackage}),
 	 * it will be resolved from the classpath root.
 	 * <p>The associated resource bundles will be checked sequentially
 	 * when resolving a message code. Note that message definitions in a
@@ -131,7 +131,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see #setBasename
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
@@ -151,7 +151,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 	/**
 	 * Set the default charset to use for parsing resource bundle files.
-	 * <p>Default is none, using the <code>java.util.ResourceBundle</code>
+	 * <p>Default is none, using the {@code java.util.ResourceBundle}
 	 * default encoding: ISO-8859-1.
 	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
 	 * {@link ReloadableResourceBundleMessageSource} for JDK 1.5 support
@@ -167,7 +167,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * fallback will be the default file (e.g. "messages.properties" for
 	 * basename "messages").
 	 * <p>Falling back to the system Locale is the default behavior of
-	 * <code>java.util.ResourceBundle</code>. However, this is often not desirable
+	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
 	 * <p><b>NOTE: Only works on JDK 1.6 and higher.</b> Consider using
@@ -266,7 +266,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * fetching already generated MessageFormats from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
-	 * @return the resulting ResourceBundle, or <code>null</code> if none
+	 * @return the resulting ResourceBundle, or {@code null} if none
 	 * found for the given basename and Locale
 	 */
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
@@ -338,7 +338,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param bundle the ResourceBundle to work on
 	 * @param code the message code to retrieve
 	 * @param locale the Locale to use to build the MessageFormat
-	 * @return the resulting MessageFormat, or <code>null</code> if no message
+	 * @return the resulting MessageFormat, or {@code null} if no message
 	 * defined for the given code
 	 * @throws MissingResourceException if thrown by the ResourceBundle
 	 */
@@ -413,7 +413,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 
 	/**
-	 * Custom implementation of Java 6's <code>ResourceBundle.Control</code>,
+	 * Custom implementation of Java 6's {@code ResourceBundle.Control},
 	 * adding support for custom file encodings, deactivating the fallback to the
 	 * system locale and activating ResourceBundle's native cache, if desired.
 	 */

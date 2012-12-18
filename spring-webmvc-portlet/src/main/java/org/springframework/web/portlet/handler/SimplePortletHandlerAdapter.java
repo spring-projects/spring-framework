@@ -36,7 +36,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Adapter to use the Portlet interface with the generic DispatcherPortlet.
- * Calls the Portlet's <code>render</code> and <code>processAction</code>
+ * Calls the Portlet's {@code render} and {@code processAction}
  * methods to handle a request.
  *
  * <p>This adapter is not activated by default; it needs to be defined as a

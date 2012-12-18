@@ -37,7 +37,7 @@ class OC4JClassPreprocessorAdapter implements InvocationHandler {
 	/**
 	 * Creates a new {@link OC4JClassPreprocessorAdapter}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
-	 * not be <code>null</code>)
+	 * not be {@code null})
 	 */
 	public OC4JClassPreprocessorAdapter(ClassFileTransformer transformer) {
 		this.transformer = transformer;

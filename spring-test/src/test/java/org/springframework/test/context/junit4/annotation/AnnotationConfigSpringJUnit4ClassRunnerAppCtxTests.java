@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTest
  * <p>Furthermore, by extending {@link SpringJUnit4ClassRunnerAppCtxTests},
  * this class also verifies support for several basic features of the
  * Spring TestContext Framework. See JavaDoc in
- * <code>SpringJUnit4ClassRunnerAppCtxTests</code> for details.
+ * {@code SpringJUnit4ClassRunnerAppCtxTests} for details.
  *
  * <p>Configuration will be loaded from {@link PojoAndStringConfig}.
  *

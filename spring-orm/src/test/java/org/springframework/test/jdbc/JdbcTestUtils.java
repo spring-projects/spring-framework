@@ -33,8 +33,8 @@ public class JdbcTestUtils {
 
 	/**
 	 * Read a script from the LineNumberReaded and build a String containing the lines.
-	 * @param lineNumberReader the <code>LineNumberReader</> containing the script to be processed
-	 * @return <code>String</code> containing the script lines
+	 * @param lineNumberReader the {@code LineNumberReader} containing the script to be processed
+	 * @return {@code String} containing the script lines
 	 * @throws IOException
 	 */
 	public static String readScript(LineNumberReader lineNumberReader) throws IOException {
@@ -73,7 +73,7 @@ public class JdbcTestUtils {
 
 	/**
 	 * Split an SQL script into separate statements delimited with the provided delimiter character. Each
-	 * individual statement will be added to the provided <code>List</code>.
+	 * individual statement will be added to the provided {@code List}.
 	 * @param script the SQL script
 	 * @param delim charecter delimiting each statement - typically a ';' character
 	 * @param statements the List that will contain the individual statements

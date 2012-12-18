@@ -97,8 +97,8 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 
 	/**
-	 * Set the list of <code>RollbackRuleAttribute</code> objects
-	 * (and/or <code>NoRollbackRuleAttribute</code> objects) to apply.
+	 * Set the list of {@code RollbackRuleAttribute} objects
+	 * (and/or {@code NoRollbackRuleAttribute} objects) to apply.
 	 * @see RollbackRuleAttribute
 	 * @see NoRollbackRuleAttribute
 	 */
@@ -107,8 +107,8 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	}
 
 	/**
-	 * Return the list of <code>RollbackRuleAttribute</code> objects
-	 * (never <code>null</code>).
+	 * Return the list of {@code RollbackRuleAttribute} objects
+	 * (never {@code null}).
 	 */
 	public List<RollbackRuleAttribute> getRollbackRules() {
 		if (this.rollbackRules == null) {

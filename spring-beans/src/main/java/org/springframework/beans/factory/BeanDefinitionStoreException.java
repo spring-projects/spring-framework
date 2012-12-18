@@ -44,7 +44,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	/**
 	 * Create a new BeanDefinitionStoreException.
 	 * @param msg the detail message (used as exception message as-is)
-	 * @param cause the root cause (may be <code>null</code>)
+	 * @param cause the root cause (may be {@code null})
 	 */
 	public BeanDefinitionStoreException(String msg, Throwable cause) {
 		super(msg, cause);
@@ -64,7 +64,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * Create a new BeanDefinitionStoreException.
 	 * @param resourceDescription description of the resource that the bean definition came from
 	 * @param msg the detail message (used as exception message as-is)
-	 * @param cause the root cause (may be <code>null</code>)
+	 * @param cause the root cause (may be {@code null})
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String msg, Throwable cause) {
 		super(msg, cause);
@@ -88,7 +88,7 @@ public class BeanDefinitionStoreException extends FatalBeanException {
 	 * @param beanName the name of the bean requested
 	 * @param msg the detail message (appended to an introductory message that indicates
 	 * the resource and the name of the bean)
-	 * @param cause the root cause (may be <code>null</code>)
+	 * @param cause the root cause (may be {@code null})
 	 */
 	public BeanDefinitionStoreException(String resourceDescription, String beanName, String msg, Throwable cause) {
 		super("Invalid bean definition with name '" + beanName + "' defined in " + resourceDescription + ": " + msg, cause);

@@ -40,7 +40,7 @@ public interface ParameterMapper {
 	 * it is best to avoid using such proprietary RDBMS features if possible.
 	 * @throws SQLException if a SQLException is encountered setting
 	 * parameter values (that is, there's no need to catch SQLException)
-	 * @return Map of input parameters, keyed by name (never <code>null</code>)
+	 * @return Map of input parameters, keyed by name (never {@code null})
 	 */
 	Map<String, ?> createMap(Connection con) throws SQLException;
 

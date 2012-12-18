@@ -41,13 +41,13 @@ import org.springframework.util.StringUtils;
  * Mainly for test environments, but also usable for standalone applications.
  *
  * <p>This class is not intended for direct usage by applications, although it
- * can be used for example to override JndiTemplate's <code>createInitialContext</code>
+ * can be used for example to override JndiTemplate's {@code createInitialContext}
  * method in unit tests. Typically, SimpleNamingContextBuilder will be used to
  * set up a JVM-level JNDI environment.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see org.springframework.mock.jndi.SimpleNamingContextBuilder
+ * @see SimpleNamingContextBuilder
  * @see org.springframework.jndi.JndiTemplate#createInitialContext
  */
 public class SimpleNamingContext implements Context {

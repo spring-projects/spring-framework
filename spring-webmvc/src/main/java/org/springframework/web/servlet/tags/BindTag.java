@@ -152,10 +152,10 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 	/**
 	 * Retrieve the property that this tag is currently bound to,
-	 * or <code>null</code> if bound to an object rather than a specific property.
+	 * or {@code null} if bound to an object rather than a specific property.
 	 * Intended for cooperating nesting tags.
 	 * @return the property that this tag is currently bound to,
-	 * or <code>null</code> if none
+	 * or {@code null} if none
 	 */
 	public final String getProperty() {
 		return this.status.getExpression();
@@ -164,7 +164,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 	/**
 	 * Retrieve the Errors instance that this tag is currently bound to.
 	 * Intended for cooperating nesting tags.
-	 * @return the current Errors instance, or <code>null</code> if none
+	 * @return the current Errors instance, or {@code null} if none
 	 */
 	public final Errors getErrors() {
 		return this.status.getErrors();

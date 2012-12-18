@@ -31,9 +31,9 @@ import java.lang.annotation.Target;
  * test will be enabled.
  * </p>
  * <p>
- * Note: <code>&#064;IfProfileValue</code> can be applied at the class level,
- * the method level, or both. <code>&#064;IfProfileValue</code> at the class
- * level overrides method-level usage of <code>&#064;IfProfileValue</code> for
+ * Note: {@code &#064;IfProfileValue} can be applied at the class level,
+ * the method level, or both. {@code &#064;IfProfileValue} at the class
+ * level overrides method-level usage of {@code &#064;IfProfileValue} for
  * any methods within that class.
  * </p>
  * <p>
@@ -49,7 +49,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * <p>
- * You can alternatively configure <code>&#064;IfProfileValue</code> with
+ * You can alternatively configure {@code &#064;IfProfileValue} with
  * <em>OR</em> semantics for multiple {@link #values() values} as follows
  * (assuming a {@link ProfileValueSource} has been appropriately configured for
  * the &quot;test-groups&quot; name):
@@ -79,13 +79,13 @@ import java.lang.annotation.Target;
 public @interface IfProfileValue {
 
 	/**
-	 * The <code>name</code> of the <em>profile value</em> against which to
+	 * The {@code name} of the <em>profile value</em> against which to
 	 * test.
 	 */
 	String name();
 
 	/**
-	 * A single, permissible <code>value</code> of the <em>profile value</em>
+	 * A single, permissible {@code value} of the <em>profile value</em>
 	 * for the given {@link #name() name}.
 	 * <p>
 	 * Note: Assigning values to both {@link #value()} and {@link #values()}
@@ -94,7 +94,7 @@ public @interface IfProfileValue {
 	String value() default "";
 
 	/**
-	 * A list of all permissible <code>values</code> of the
+	 * A list of all permissible {@code values} of the
 	 * <em>profile value</em> for the given {@link #name() name}.
 	 * <p>
 	 * Note: Assigning values to both {@link #value()} and {@link #values()}

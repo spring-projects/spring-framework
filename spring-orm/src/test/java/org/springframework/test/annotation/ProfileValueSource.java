@@ -22,7 +22,7 @@ package org.springframework.test.annotation;
  * testing environment.
  * </p>
  * <p>
- * Concrete implementations must provide a <code>public</code> no-args
+ * Concrete implementations must provide a {@code public} no-args
  * constructor.
  * </p>
  * <p>
@@ -44,7 +44,7 @@ public interface ProfileValueSource {
 	/**
 	 * Get the <em>profile value</em> indicated by the specified key.
 	 * @param key the name of the <em>profile value</em>
-	 * @return the String value of the <em>profile value</em>, or <code>null</code>
+	 * @return the String value of the <em>profile value</em>, or {@code null}
 	 * if there is no <em>profile value</em> with that key
 	 */
 	String get(String key);

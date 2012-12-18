@@ -33,17 +33,17 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
  *
  * <p>Subclasses must implement the {@link #newRowMapper} method to provide
  * an object that can extract the results of iterating over the
- * <code>ResultSet</code> created during the execution of the query.
+ * {@code ResultSet} created during the execution of the query.
  *
- * <p>This class provides a number of public <code>execute</code> methods that are
+ * <p>This class provides a number of public {@code execute} methods that are
  * analogous to the different convenient JDO query execute methods. Subclasses
  * can either rely on one of these inherited methods, or can add their own
  * custom execution methods, with meaningful names and typed parameters
  * (definitely a best practice). Each custom query method will invoke one of
  * this class's untyped query methods.
  *
- * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
- * Framework, <code>SqlQuery</code> instances are thread-safe after their
+ * <p>Like all {@code RdbmsOperation} classes that ship with the Spring
+ * Framework, {@code SqlQuery} instances are thread-safe after their
  * initialization is complete. That is, after they are constructed and configured
  * via their setter methods, they can be used safely from multiple threads.
  *
@@ -60,15 +60,15 @@ public abstract class SqlQuery<T> extends SqlOperation {
 
 	/**
 	 * Constructor to allow use as a JavaBean.
-	 * <p>The <code>DataSource</code> and SQL must be supplied before
+	 * <p>The {@code DataSource} and SQL must be supplied before
 	 * compilation and use.
 	 */
 	public SqlQuery() {
 	}
 
 	/**
-	 * Convenient constructor with a <code>DataSource</code> and SQL string.
-	 * @param ds the <code>DataSource</code> to use to get connections
+	 * Convenient constructor with a {@code DataSource} and SQL string.
+	 * @param ds the {@code DataSource} to use to get connections
 	 * @param sql the SQL to execute; SQL can also be supplied at runtime
 	 * by overriding the {@link #getSql()} method.
 	 */
@@ -100,7 +100,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param params parameters, similar to JDO query parameters.
 	 * Primitive parameters must be represented by their Object wrapper type.
 	 * The ordering of parameters is significant.
-	 * @param context contextual information passed to the <code>mapRow</code>
+	 * @param context contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -213,7 +213,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * the SqlParameters. Primitive parameters must be represented by their Object wrapper
 	 * type. The ordering of parameters is not significant since they are supplied in a
 	 * SqlParameterMap which is an implementation of the Map interface.
-	 * @param context contextual information passed to the <code>mapRow</code>
+	 * @param context contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -241,10 +241,10 @@ public abstract class SqlQuery<T> extends SqlOperation {
 
 
 	/**
-	 * Generic object finder method, used by all other <code>findObject</code> methods.
+	 * Generic object finder method, used by all other {@code findObject} methods.
 	 * Object finder methods are like EJB entity bean finders, in that it is
 	 * considered an error if they return more than one result.
-	 * @return the result object, or <code>null</code> if not found. Subclasses may
+	 * @return the result object, or {@code null} if not found. Subclasses may
 	 * choose to treat this as an error and throw an exception.
 	 * @see org.springframework.dao.support.DataAccessUtils#singleResult
 	 */
@@ -325,7 +325,7 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	 * @param paramMap Map of parameter name to parameter object,
 	 * matching named parameters specified in the SQL statement.
 	 * Ordering is not significant.
-	 * @param context contextual information passed to the <code>mapRow</code>
+	 * @param context contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @return a List of objects, one per row of the ResultSet. Normally all these
@@ -350,10 +350,10 @@ public abstract class SqlQuery<T> extends SqlOperation {
 	/**
 	 * Subclasses must implement this method to extract an object per row, to be
 	 * returned by the <cod>execute</code> method as an aggregated {@link List}.
-	 * @param parameters the parameters to the <code>execute()</code> method,
-	 * in case subclass is interested; may be <code>null</code> if there
+	 * @param parameters the parameters to the {@code execute()} method,
+	 * in case subclass is interested; may be {@code null} if there
 	 * were no parameters.
-	 * @param context contextual information passed to the <code>mapRow</code>
+	 * @param context contextual information passed to the {@code mapRow}
 	 * callback method. The JDBC operation itself doesn't rely on this parameter,
 	 * but it can be useful for creating the objects of the result list.
 	 * @see #execute

@@ -168,7 +168,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
 	 * both "/test" and "/team". For details, see the AntPathMatcher class.
 	 * @param urlPath URL the bean is mapped to
-	 * @return the associated cache seconds, or <code>null</code> if not found
+	 * @return the associated cache seconds, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
 	protected Integer lookupCacheSeconds(String urlPath) {

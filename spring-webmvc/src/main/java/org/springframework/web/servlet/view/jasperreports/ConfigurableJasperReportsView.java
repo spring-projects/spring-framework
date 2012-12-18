@@ -40,8 +40,8 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 
 
 	/**
-	 * Set the {@link JRExporter} implementation <code>Class</code> to use. Throws
-	 * {@link IllegalArgumentException} if the <code>Class</code> doesn't implement
+	 * Set the {@link JRExporter} implementation {@code Class} to use. Throws
+	 * {@link IllegalArgumentException} if the {@code Class} doesn't implement
 	 * {@link JRExporter}. Required setting, as it does not have a default.
 	 */
 	public void setExporterClass(Class<? extends JRExporter> exporterClass) {
@@ -51,8 +51,8 @@ public class ConfigurableJasperReportsView extends AbstractJasperReportsSingleFo
 
 	/**
 	 * Specifies whether or not the {@link JRExporter} writes to the {@link java.io.PrintWriter}
-	 * of the associated with the request (<code>true</code>) or whether it writes directly to the
-	 * {@link java.io.InputStream} of the request (<code>false</code>). Default is <code>true</code>.
+	 * of the associated with the request ({@code true}) or whether it writes directly to the
+	 * {@link java.io.InputStream} of the request ({@code false}). Default is {@code true}.
 	 */
 	public void setUseWriter(boolean useWriter) {
 		this.useWriter = useWriter;

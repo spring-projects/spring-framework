@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Extension of the standard JavaBeans PropertyDescriptor class,
- * overriding <code>getPropertyType()</code> such that a generically
+ * overriding {@code getPropertyType()} such that a generically
  * declared type will be resolved against the containing bean class.
  *
  * @author Juergen Hoeller

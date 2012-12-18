@@ -27,8 +27,8 @@ import org.springframework.util.StringUtils;
  * <p>Uses the "required" error code and the field name to resolve message codes
  * for a missing field error.
  *
- * <p>Creates a <code>FieldError</code> for each <code>PropertyAccessException</code>
- * given, using the <code>PropertyAccessException</code>'s error code ("typeMismatch",
+ * <p>Creates a {@code FieldError} for each {@code PropertyAccessException}
+ * given, using the {@code PropertyAccessException}'s error code ("typeMismatch",
  * "methodInvocation") for resolving message codes.
  *
  * @author Alef Arendsen

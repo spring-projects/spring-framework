@@ -34,8 +34,8 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * JUnit 4 based unit test which verifies proper
- * {@link ContextLoader#processLocations(Class,String...) processing} of
- * <code>resource locations</code> by a {@link GenericXmlContextLoader}
+ * {@link ContextLoader#processLocations(Class, String...) processing} of
+ * {@code resource locations} by a {@link GenericXmlContextLoader}
  * configured via {@link ContextConfiguration @ContextConfiguration}.
  * Specifically, this test addresses the issues raised in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3949"

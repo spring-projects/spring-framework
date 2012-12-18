@@ -68,21 +68,21 @@ import org.springframework.web.servlet.mvc.LastModified;
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator} will be
  * used to determine the view name.
  *
- * <p>When returning <code>void</code> a return value of <code>null</code> is
+ * <p>When returning {@code void} a return value of {@code null} is
  * assumed meaning that the handler method is responsible for writing the
  * response directly to the supplied {@link HttpServletResponse}.
  *
  * <p>This model allows for rapid coding, but loses the advantage of
- * compile-time checking. It is similar to a Struts <code>DispatchAction</code>,
+ * compile-time checking. It is similar to a Struts {@code DispatchAction},
  * but more sophisticated. Also supports delegation to another object.
  *
  * <p>An implementation of the {@link MethodNameResolver} interface defined in
  * this package should return a method name for a given request, based on any
  * aspect of the request, such as its URL or an "action" parameter. The actual
  * strategy can be configured via the "methodNameResolver" bean property, for
- * each <code>MultiActionController</code>.
+ * each {@code MultiActionController}.
  *
- * <p>The default <code>MethodNameResolver</code> is
+ * <p>The default {@code MethodNameResolver} is
  * {@link InternalPathMethodNameResolver}; further included strategies are
  * {@link PropertiesMethodNameResolver} and {@link ParameterMethodNameResolver}.
  *
@@ -94,13 +94,13 @@ import org.springframework.web.servlet.mvc.LastModified;
  * The third parameter can be any subclass or {@link Exception} or
  * {@link RuntimeException}.
  *
- * <p>There can also be an optional <code>xxxLastModified</code> method for
+ * <p>There can also be an optional {@code xxxLastModified} method for
  * handlers, of signature:
  *
  * <pre class="code">public long anyMeaningfulNameLastModified(HttpServletRequest request)</pre>
  *
  * If such a method is present, it will be invoked. Default return from
- * <code>getLastModified</code> is -1, meaning that the content must always be
+ * {@code getLastModified} is -1, meaning that the content must always be
  * regenerated.
  *
  * <p><b>Note that all handler methods need to be public and that
@@ -172,7 +172,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 
 	/**
-	 * Constructor for <code>MultiActionController</code> that looks for
+	 * Constructor for {@code MultiActionController} that looks for
 	 * handler methods in the present subclass.
 	 */
 	public MultiActionController() {
@@ -182,7 +182,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	}
 
 	/**
-	 * Constructor for <code>MultiActionController</code> that looks for
+	 * Constructor for {@code MultiActionController} that looks for
 	 * handler methods in delegate, rather than a subclass of this class.
 	 * @param delegate handler object. This does not need to implement any
 	 * particular interface, as everything is done using reflection.
@@ -193,7 +193,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 
 	/**
-	 * Set the delegate used by this class; the default is <code>this</code>,
+	 * Set the delegate used by this class; the default is {@code this},
 	 * assuming that handler methods have been added by a subclass.
 	 * <p>This method does not get invoked once the class is configured.
 	 * @param delegate an object containing handler methods
@@ -226,7 +226,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Set the {@link Validator Validators} for this controller.
-	 * <p>The <code>Validators</code> must support the specified command class.
+	 * <p>The {@code Validators} must support the specified command class.
 	 */
 	public final void setValidators(Validator[] validators) {
 		this.validators = validators;
@@ -283,7 +283,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Is the supplied method a valid handler method?
-	 * <p>Does not consider <code>Controller.handleRequest</code> itself
+	 * <p>Does not consider {@code Controller.handleRequest} itself
 	 * as handler method (to avoid potential stack overflow).
 	 */
 	private boolean isHandlerMethod(Method method) {
@@ -420,7 +420,7 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * @param ex the NoSuchRequestHandlingMethodException to be handled
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @return a ModelAndView to render, or {@code null} if handled directly
 	 * @throws Exception an Exception that should be thrown as result of the servlet request
 	 */
 	protected ModelAndView handleNoSuchRequestHandlingMethod(
@@ -483,7 +483,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Processes the return value of a handler method to ensure that it either returns
-	 * <code>null</code> or an instance of {@link ModelAndView}. When returning a {@link Map},
+	 * {@code null} or an instance of {@link ModelAndView}. When returning a {@link Map},
 	 * the {@link Map} instance is wrapped in a new {@link ModelAndView} instance.
 	 */
 	@SuppressWarnings("unchecked")
@@ -507,7 +507,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Create a new command object of the given class.
-	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
+	 * <p>This implementation uses {@code BeanUtils.instantiateClass},
 	 * so commands need to have public no-arg constructors.
 	 * Subclasses can override this implementation if desired.
 	 * @throws Exception if the command object could not be instantiated
@@ -542,10 +542,10 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Create a new binder instance for the given command and request.
-	 * <p>Called by <code>bind</code>. Can be overridden to plug in custom
+	 * <p>Called by {@code bind}. Can be overridden to plug in custom
 	 * ServletRequestDataBinder subclasses.
 	 * <p>The default implementation creates a standard ServletRequestDataBinder,
-	 * and invokes <code>initBinder</code>. Note that <code>initBinder</code>
+	 * and invokes {@code initBinder}. Note that {@code initBinder}
 	 * will not be invoked if you override this method!
 	 * @param request current HTTP request
 	 * @param command the command to bind onto
@@ -573,7 +573,7 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
-	 * Called by <code>createBinder</code>.
+	 * Called by {@code createBinder}.
 	 * <p>This method allows you to register custom editors for certain fields of your
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
@@ -597,8 +597,8 @@ public class MultiActionController extends AbstractController implements LastMod
 
 	/**
 	 * Determine the exception handler method for the given exception.
-	 * <p>Can return <code>null</code> if not found.
-	 * @return a handler for the given exception type, or <code>null</code>
+	 * <p>Can return {@code null} if not found.
+	 * @return a handler for the given exception type, or {@code null}
 	 * @param exception the exception to handle
 	 */
 	protected Method getExceptionHandler(Throwable exception) {

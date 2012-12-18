@@ -34,7 +34,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>form</code>' whose
+ * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
  * inner elements are bound to properties on a <em>form object</em>.
  *
  * <p>Users should place the form object into the
@@ -43,7 +43,7 @@ import org.springframework.web.util.HtmlUtils;
  * configured using the {@link #setModelAttribute "modelAttribute"} property.
  *
  * <p>The default value for the {@link #setModelAttribute "modelAttribute"}
- * property is '<code>command</code>' which corresponds to the default name
+ * property is '{@code command}' which corresponds to the default name
  * when using the
  * {@link org.springframework.web.servlet.mvc.SimpleFormController SimpleFormController}.
  *
@@ -61,7 +61,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	/** The default attribute name: &quot;command&quot; */
 	public static final String DEFAULT_COMMAND_NAME = "command";
 
-	/** The name of the '<code>modelAttribute</code>' setting */
+	/** The name of the '{@code modelAttribute}' setting */
 	private static final String MODEL_ATTRIBUTE = "modelAttribute";
 
 	/**
@@ -71,7 +71,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	public static final String MODEL_ATTRIBUTE_VARIABLE_NAME =
 			Conventions.getQualifiedAttributeName(AbstractFormTag.class, MODEL_ATTRIBUTE);
 
-	/** Default method parameter, i.e. <code>_method</code>. */
+	/** Default method parameter, i.e. {@code _method}. */
 	private static final String DEFAULT_METHOD_PARAM = "_method";
 
 	private static final String FORM_TAG = "form";
@@ -162,7 +162,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '<code>name</code>' attribute.
+	 * Set the value of the '{@code name}' attribute.
 	 * <p>May be a runtime expression.
 	 * <p>Name is not a valid attribute for form on XHTML 1.0. However,
 	 * it is sometimes needed for backward compatibility.
@@ -172,7 +172,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>name</code>' attribute.
+	 * Get the value of the '{@code name}' attribute.
 	 */
 	@Override
 	protected String getName() throws JspException {
@@ -180,7 +180,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '<code>action</code>' attribute.
+	 * Set the value of the '{@code action}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setAction(String action) {
@@ -188,14 +188,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>action</code>' attribute.
+	 * Get the value of the '{@code action}' attribute.
 	 */
 	protected String getAction() {
 		return this.action;
 	}
 
 	/**
-	 * Set the value of the '<code>method</code>' attribute.
+	 * Set the value of the '{@code method}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setMethod(String method) {
@@ -203,14 +203,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>method</code>' attribute.
+	 * Get the value of the '{@code method}' attribute.
 	 */
 	protected String getMethod() {
 		return this.method;
 	}
 
 	/**
-	 * Set the value of the '<code>target</code>' attribute.
+	 * Set the value of the '{@code target}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setTarget(String target) {
@@ -218,14 +218,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>target</code>' attribute.
+	 * Get the value of the '{@code target}' attribute.
 	 */
 	public String getTarget() {
 		return this.target;
 	}
 
 	/**
-	 * Set the value of the '<code>enctype</code>' attribute.
+	 * Set the value of the '{@code enctype}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setEnctype(String enctype) {
@@ -233,14 +233,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>enctype</code>' attribute.
+	 * Get the value of the '{@code enctype}' attribute.
 	 */
 	protected String getEnctype() {
 		return this.enctype;
 	}
 
 	/**
-	 * Set the value of the '<code>acceptCharset</code>' attribute.
+	 * Set the value of the '{@code acceptCharset}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setAcceptCharset(String acceptCharset) {
@@ -248,14 +248,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>acceptCharset</code>' attribute.
+	 * Get the value of the '{@code acceptCharset}' attribute.
 	 */
 	protected String getAcceptCharset() {
 		return this.acceptCharset;
 	}
 
 	/**
-	 * Set the value of the '<code>onsubmit</code>' attribute.
+	 * Set the value of the '{@code onsubmit}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setOnsubmit(String onsubmit) {
@@ -263,14 +263,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>onsubmit</code>' attribute.
+	 * Get the value of the '{@code onsubmit}' attribute.
 	 */
 	protected String getOnsubmit() {
 		return this.onsubmit;
 	}
 
 	/**
-	 * Set the value of the '<code>onreset</code>' attribute.
+	 * Set the value of the '{@code onreset}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public void setOnreset(String onreset) {
@@ -278,14 +278,14 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>onreset</code>' attribute.
+	 * Get the value of the '{@code onreset}' attribute.
 	 */
 	protected String getOnreset() {
 		return this.onreset;
 	}
 
 	/**
-	 * Set the value of the '<code>autocomplete</code>' attribute.
+	 * Set the value of the '{@code autocomplete}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAutocomplete(String autocomplete) {
@@ -293,7 +293,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>autocomplete</code>' attribute.
+	 * Get the value of the '{@code autocomplete}' attribute.
 	 */
 	protected String getAutocomplete() {
 		return this.autocomplete;
@@ -321,7 +321,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Writes the opening part of the block	'<code>form</code>' tag and exposes
+	 * Writes the opening part of the block	'{@code form}' tag and exposes
 	 * the form object name in the {@link javax.servlet.jsp.PageContext}.
 	 * @param tagWriter the {@link TagWriter} to which the form content is to be written
 	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
@@ -389,7 +389,7 @@ public class FormTag extends AbstractHtmlElementTag {
 
 	/**
 	 * {@link #evaluate Resolves} and returns the name of the form object.
-	 * @throws IllegalArgumentException if the form object resolves to <code>null</code>
+	 * @throws IllegalArgumentException if the form object resolves to {@code null}
 	 */
 	protected String resolveModelAttribute() throws JspException {
 		Object resolvedModelAttribute = evaluate(MODEL_ATTRIBUTE, getModelAttribute());
@@ -400,12 +400,12 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Resolve the value of the '<code>action</code>' attribute.
-	 * <p>If the user configured an '<code>action</code>' value then
+	 * Resolve the value of the '{@code action}' attribute.
+	 * <p>If the user configured an '{@code action}' value then
 	 * the result of evaluating this value is used. Otherwise, the
 	 * {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI}
 	 * is used.
-	 * @return the value that is to be used for the '<code>action</code>' attribute
+	 * @return the value that is to be used for the '{@code action}' attribute
 	 */
 	protected String resolveAction() throws JspException {
 		String action = getAction();
@@ -447,7 +447,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Closes the '<code>form</code>' block tag and removes the form object name
+	 * Closes the '{@code form}' block tag and removes the form object name
 	 * from the {@link javax.servlet.jsp.PageContext}.
 	 */
 	@Override

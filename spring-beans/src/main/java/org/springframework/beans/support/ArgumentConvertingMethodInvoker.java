@@ -125,7 +125,7 @@ public class ArgumentConvertingMethodInvoker extends MethodInvoker {
 	 * Actually find a method with matching parameter type, i.e. where each
 	 * argument value is assignable to the corresponding parameter type.
 	 * @param arguments the argument values to match against method parameters
-	 * @return a matching method, or <code>null</code> if none
+	 * @return a matching method, or {@code null} if none
 	 */
 	protected Method doFindMatchingMethod(Object[] arguments) {
 		TypeConverter converter = getTypeConverter();

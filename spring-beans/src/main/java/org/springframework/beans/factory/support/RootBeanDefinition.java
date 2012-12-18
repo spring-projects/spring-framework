@@ -268,7 +268,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Return the resolved factory method as a Java Method object, if available.
-	 * @return the factory method, or <code>null</code> if not found or not resolved yet
+	 * @return the factory method, or {@code null} if not found or not resolved yet
 	 */
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {

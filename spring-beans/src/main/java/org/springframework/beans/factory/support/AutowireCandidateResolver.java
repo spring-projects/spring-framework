@@ -42,7 +42,7 @@ public interface AutowireCandidateResolver {
 	 * Determine whether a default value is suggested for the given dependency.
 	 * @param descriptor the descriptor for the target method parameter or field
 	 * @return the value suggested (typically an expression String),
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 * @since 3.0
 	 */
 	Object getSuggestedValue(DependencyDescriptor descriptor);

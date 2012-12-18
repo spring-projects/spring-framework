@@ -30,7 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  * cookies, etc. The default implementation is AcceptHeaderLocaleResolver,
  * simply using the request's locale provided by the respective HTTP header.
  *
- * <p>Use <code>RequestContext.getLocale()</code> to retrieve the current locale
+ * <p>Use {@code RequestContext.getLocale()} to retrieve the current locale
  * in controllers or views, independent of the actual resolution strategy.
  *
  * @author Juergen Hoeller
@@ -44,7 +44,7 @@ public interface LocaleResolver {
    * Resolve the current locale via the given request.
    * Should return a default locale as fallback in any case.
    * @param request the request to resolve the locale for
-   * @return the current locale (never <code>null</code>)
+   * @return the current locale (never {@code null})
    */
 	Locale resolveLocale(HttpServletRequest request);
 
@@ -52,9 +52,9 @@ public interface LocaleResolver {
    * Set the current locale to the given one.
    * @param request the request to be used for locale modification
    * @param response the response to be used for locale modification
-   * @param locale the new locale, or <code>null</code> to clear the locale
-	 * @throws UnsupportedOperationException if the LocaleResolver implementation
-	 * does not support dynamic changing of the theme
+   * @param locale the new locale, or {@code null} to clear the locale
+   * @throws UnsupportedOperationException if the LocaleResolver implementation
+   * does not support dynamic changing of the theme
    */
 	void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale);
 

@@ -25,7 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Adapter to use the Servlet interface with the generic DispatcherServlet.
- * Calls the Servlet's <code>service</code> method to handle a request.
+ * Calls the Servlet's {@code service} method to handle a request.
  *
  * <p>Last-modified checking is not explicitly supported: This is typically
  * handled by the Servlet implementation itself (usually deriving from

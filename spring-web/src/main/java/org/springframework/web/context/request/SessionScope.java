@@ -27,8 +27,8 @@ import org.springframework.beans.factory.ObjectFactory;
  * {@link org.springframework.web.filter.RequestContextFilter} or
  * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>This <code>Scope</code> will also work for Portlet environments,
- * through an alternate <code>RequestAttributes</code> implementation
+ * <p>This {@code Scope} will also work for Portlet environments,
+ * through an alternate {@code RequestAttributes} implementation
  * (as exposed out-of-the-box by Spring's
  * {@link org.springframework.web.portlet.DispatcherPortlet}.
  *
@@ -66,10 +66,10 @@ public class SessionScope extends AbstractRequestAttributesScope {
 	 * If this flag is on, objects will be put into the "application scope" session;
 	 * else they will end up in the "portlet scope" session (the typical default).
 	 * <p>In a Servlet environment, this flag is effectively ignored.
-	 * @param globalSession <code>true</code> in case of the global session as target;
-	 * <code>false</code> in case of a component-specific session as target
+	 * @param globalSession {@code true} in case of the global session as target;
+	 * {@code false} in case of a component-specific session as target
 	 * @see org.springframework.web.portlet.context.PortletRequestAttributes
-	 * @see org.springframework.web.context.request.ServletRequestAttributes
+	 * @see ServletRequestAttributes
 	 */
 	public SessionScope(boolean globalSession) {
 		this.scope = (globalSession ? RequestAttributes.SCOPE_GLOBAL_SESSION : RequestAttributes.SCOPE_SESSION);

@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
  * ApplicationContext configuration class for various integration tests.
  *
  * <p>The beans defined in this configuration class map directly to the
- * beans defined in <code>SpringJUnit4ClassRunnerAppCtxTests-context.xml</code>.
+ * beans defined in {@code SpringJUnit4ClassRunnerAppCtxTests-context.xml}.
  * Consequently, the application contexts loaded from these two sources
  * should be identical with regard to bean definitions.
  *

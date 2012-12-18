@@ -36,7 +36,7 @@ public interface ResourceAwareController {
 
 	/**
 	 * Process the resource request and return a ModelAndView object which the DispatcherPortlet
-	 * will render. A <code>null</code> return value is not an error: It indicates that this
+	 * will render. A {@code null} return value is not an error: It indicates that this
 	 * object completed request processing itself, thus there is no ModelAndView to render.
 	 * @param request current portlet resource request
 	 * @param response current portlet resource response

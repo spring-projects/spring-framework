@@ -26,7 +26,7 @@ import org.springframework.web.portlet.ModelAndView;
 /**
  * Base portlet Controller interface, representing a component that receives
  * RenderRequest/RenderResponse and ActionRequest/ActionResponse like a
- * <code>Portlet</code> but is able to participate in an MVC workflow.
+ * {@code Portlet} but is able to participate in an MVC workflow.
  *
  * <p>Any implementation of the portlet Controller interface should be a
  * <i>reusable, threadsafe</i> class, capable of handling multiple
@@ -74,7 +74,7 @@ public interface Controller {
 
 	/**
 	 * Process the render request and return a ModelAndView object which the DispatcherPortlet
-	 * will render. A <code>null</code> return value is not an error: It indicates that this
+	 * will render. A {@code null} return value is not an error: It indicates that this
 	 * object completed request processing itself, thus there is no ModelAndView to render.
 	 * @param request current portlet render request
 	 * @param response current portlet render response

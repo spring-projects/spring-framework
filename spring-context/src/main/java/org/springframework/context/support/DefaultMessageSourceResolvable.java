@@ -131,7 +131,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	/**
 	 * Default implementation exposes the attributes of this MessageSourceResolvable.
 	 * To be overridden in more specific subclasses, potentially including the
-	 * resolvable content through <code>resolvableToString()</code>.
+	 * resolvable content through {@code resolvableToString()}.
 	 * @see #resolvableToString()
 	 */
 	@Override

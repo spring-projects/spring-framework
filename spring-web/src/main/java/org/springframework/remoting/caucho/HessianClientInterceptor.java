@@ -81,7 +81,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 	/**
 	 * Specify the Hessian SerializerFactory to use.
 	 * <p>This will typically be passed in as an inner bean definition
-	 * of type <code>com.caucho.hessian.io.SerializerFactory</code>,
+	 * of type {@code com.caucho.hessian.io.SerializerFactory},
 	 * with custom bean property values applied.
 	 */
 	public void setSerializerFactory(SerializerFactory serializerFactory) {

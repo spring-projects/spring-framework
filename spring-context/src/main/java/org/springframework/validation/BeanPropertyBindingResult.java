@@ -30,9 +30,9 @@ import org.springframework.util.Assert;
  *
  * <p>Performs standard JavaBean property access, also supporting nested
  * properties. Normally, application code will work with the
- * <code>Errors</code> interface or the <code>BindingResult</code> interface.
- * A {@link DataBinder} returns its <code>BindingResult</code> via
- * {@link org.springframework.validation.DataBinder#getBindingResult()}.
+ * {@code Errors} interface or the {@code BindingResult} interface.
+ * A {@link DataBinder} returns its {@code BindingResult} via
+ * {@link DataBinder#getBindingResult()}.
  *
  * @author Juergen Hoeller
  * @since 2.0

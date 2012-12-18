@@ -22,7 +22,7 @@ import org.springframework.ejb.access.SimpleRemoteStatelessSessionProxyFactoryBe
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
- * implementation for parsing '<code>remote-slsb</code>' tags and
+ * implementation for parsing '{@code remote-slsb}' tags and
  * creating {@link SimpleRemoteStatelessSessionProxyFactoryBean} definitions.
  *
  * @author Rob Harrop

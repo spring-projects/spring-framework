@@ -33,7 +33,7 @@ import java.util.ListIterator;
  * <p>Note: This class is not thread-safe. To create a thread-safe version,
  * use the {@link java.util.Collections#synchronizedList} utility methods.
  *
- * <p>Inspired by <code>LazyList</code> from Commons Collections.
+ * <p>Inspired by {@code LazyList} from Commons Collections.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -54,7 +54,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by a standard
+	 * Creates a new {@code AutoPopulatingList} that is backed by a standard
 	 * {@link ArrayList} and adds new instances of the supplied {@link Class element Class}
 	 * to the backing {@link List} on demand.
 	 */
@@ -63,7 +63,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by the supplied {@link List}
+	 * Creates a new {@code AutoPopulatingList} that is backed by the supplied {@link List}
 	 * and adds new instances of the supplied {@link Class element Class} to the backing
 	 * {@link List} on demand.
 	 */
@@ -72,7 +72,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by a standard
+	 * Creates a new {@code AutoPopulatingList} that is backed by a standard
 	 * {@link ArrayList} and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(ElementFactory<E> elementFactory) {
@@ -80,7 +80,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by the supplied {@link List}
+	 * Creates a new {@code AutoPopulatingList} that is backed by the supplied {@link List}
 	 * and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(List<E> backingList, ElementFactory<E> elementFactory) {
@@ -244,8 +244,8 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	/**
 	 * Reflective implementation of the ElementFactory interface,
-	 * using <code>Class.newInstance()</code> on a given element class.
-	 * @see java.lang.Class#newInstance()
+	 * using {@code Class.newInstance()} on a given element class.
+	 * @see Class#newInstance()
 	 */
 	private static class ReflectiveElementFactory<E> implements ElementFactory<E>, Serializable {
 

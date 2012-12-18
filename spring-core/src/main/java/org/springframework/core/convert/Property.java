@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * A description of a JavaBeans Property that allows us to avoid a dependency on
- * <code>java.beans.PropertyDescriptor</code>. The <code>java.beans</code> package
+ * {@code java.beans.PropertyDescriptor}. The {@code java.beans} package
  * is not available in a number of environments (e.g. Android, Java ME), so this is
  * desirable for portability of Spring's core conversion facility.
  *
@@ -90,21 +90,21 @@ public final class Property {
 	}
 
 	/**
-	 * The property type: e.g. <code>java.lang.String</code>
+	 * The property type: e.g. {@code java.lang.String}
 	 */
 	public Class<?> getType() {
 		return this.methodParameter.getParameterType();
 	}
 
 	/**
-	 * The property getter method: e.g. <code>getFoo()</code>
+	 * The property getter method: e.g. {@code getFoo()}
 	 */
 	public Method getReadMethod() {
 		return this.readMethod;
 	}
 
 	/**
-	 * The property setter method: e.g. <code>setFoo(String)</code>
+	 * The property setter method: e.g. {@code setFoo(String)}
 	 */
 	public Method getWriteMethod() {
 		return this.writeMethod;

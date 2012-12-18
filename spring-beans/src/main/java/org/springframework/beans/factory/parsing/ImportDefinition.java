@@ -47,7 +47,7 @@ public class ImportDefinition implements BeanMetadataElement {
 	/**
 	 * Create a new ImportDefinition.
 	 * @param importedResource the location of the imported resource
-	 * @param source the source object (may be <code>null</code>)
+	 * @param source the source object (may be {@code null})
 	 */
 	public ImportDefinition(String importedResource, Object source) {
 		this(importedResource, null, source);
@@ -56,7 +56,7 @@ public class ImportDefinition implements BeanMetadataElement {
 	/**
 	 * Create a new ImportDefinition.
 	 * @param importedResource the location of the imported resource
-	 * @param source the source object (may be <code>null</code>)
+	 * @param source the source object (may be {@code null})
 	 */
 	public ImportDefinition(String importedResource, Resource[] actualResources, Object source) {
 		Assert.notNull(importedResource, "Imported resource must not be null");

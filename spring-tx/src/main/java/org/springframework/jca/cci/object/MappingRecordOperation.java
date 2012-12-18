@@ -33,8 +33,8 @@ import org.springframework.jca.cci.core.RecordExtractor;
  * converting to and from CCI Records.
  *
  * <p>Concrete subclasses must implement the abstract
- * <code>createInputRecord(RecordFactory, Object)</code> and
- * <code>extractOutputData(Record)</code> methods, to create an input
+ * {@code createInputRecord(RecordFactory, Object)} and
+ * {@code extractOutputData(Record)} methods, to create an input
  * Record from an object and to convert an output Record into an object,
  * respectively.
  *
@@ -64,10 +64,10 @@ public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
 	 * Set a RecordCreator that should be used for creating default output Records.
-	 * <p>Default is none: CCI's <code>Interaction.execute</code> variant
+	 * <p>Default is none: CCI's {@code Interaction.execute} variant
 	 * that returns an output Record will be called.
 	 * <p>Specify a RecordCreator here if you always need to call CCI's
-	 * <code>Interaction.execute</code> variant with a passed-in output Record.
+	 * {@code Interaction.execute} variant with a passed-in output Record.
 	 * This RecordCreator will then be invoked to create a default output Record instance.
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record)
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record, Record)
@@ -80,8 +80,8 @@ public abstract class MappingRecordOperation extends EisOperation {
 	/**
 	 * Execute the interaction encapsulated by this operation object.
 	 * @param inputObject the input data, to be converted to a Record
-	 * by the <code>createInputRecord</code> method
-	 * @return the output data extracted with the <code>extractOutputData</code> method
+	 * by the {@code createInputRecord} method
+	 * @return the output data extracted with the {@code extractOutputData} method
 	 * @throws DataAccessException if there is any problem
 	 * @see #createInputRecord
 	 * @see #extractOutputData
@@ -94,7 +94,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
 	 * Subclasses must implement this method to generate an input Record
-	 * from an input object passed into the <code>execute</code> method.
+	 * from an input object passed into the {@code execute} method.
 	 * @param inputObject the passed-in input object
 	 * @return the CCI input Record
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
@@ -106,7 +106,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
 	 * Subclasses must implement this method to convert the Record returned
-	 * by CCI execution into a result object for the <code>execute</code> method.
+	 * by CCI execution into a result object for the {@code execute} method.
 	 * @param outputRecord the Record returned by CCI execution
 	 * @return the result object
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
@@ -119,7 +119,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
 	 * Implementation of RecordCreator that calls the enclosing
-	 * class's <code>createInputRecord</code> method.
+	 * class's {@code createInputRecord} method.
 	 */
 	protected class RecordCreatorImpl implements RecordCreator {
 
@@ -137,7 +137,7 @@ public abstract class MappingRecordOperation extends EisOperation {
 
 	/**
 	 * Implementation of RecordExtractor that calls the enclosing
-	 * class's <code>extractOutputData</code> method.
+	 * class's {@code extractOutputData} method.
 	 */
 	protected class RecordExtractorImpl implements RecordExtractor {
 

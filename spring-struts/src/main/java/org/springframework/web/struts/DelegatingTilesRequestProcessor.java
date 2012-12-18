@@ -117,7 +117,7 @@ public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 	 * given ActionMapping and looks up the corresponding bean in the
 	 * WebApplicationContext.
 	 * @param mapping the Struts ActionMapping
-	 * @return the delegate Action, or <code>null</code> if none found
+	 * @return the delegate Action, or {@code null} if none found
 	 * @throws BeansException if thrown by WebApplicationContext methods
 	 * @see #determineActionBeanName
 	 */

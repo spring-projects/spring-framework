@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * <p>Such init-binder methods support all arguments that {@link RequestMapping}
  * supports, except for command/form objects and corresponding validation result
  * objects. Init-binder methods must not have a return value; they are usually
- * declared as <code>void</code>.
+ * declared as {@code void}.
  *
  * <p>Typical arguments are {@link org.springframework.web.bind.WebDataBinder}
  * in combination with {@link org.springframework.web.context.request.WebRequest}

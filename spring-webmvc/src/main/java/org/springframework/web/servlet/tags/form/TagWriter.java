@@ -97,7 +97,7 @@ public class TagWriter {
 	}
 
 	/**
-	 * Write an HTML attribute if the supplied value is not <code>null</code>
+	 * Write an HTML attribute if the supplied value is not {@code null}
 	 * or zero length.
 	 * @see #writeAttribute(String, String)
 	 */

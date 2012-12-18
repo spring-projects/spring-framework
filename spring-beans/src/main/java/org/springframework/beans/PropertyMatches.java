@@ -122,7 +122,7 @@ final class PropertyMatches {
 
 	/**
 	 * Generate possible property alternatives for the given property and
-	 * class. Internally uses the <code>getStringDistance</code> method, which
+	 * class. Internally uses the {@code getStringDistance} method, which
 	 * in turn uses the Levenshtein algorithm to determine the distance between
 	 * two Strings.
 	 * @param propertyDescriptors the JavaBeans property descriptors to search

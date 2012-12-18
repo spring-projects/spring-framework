@@ -95,7 +95,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 	/**
 	 * Determine the context class that any context passed to
-	 * <code>setApplicationContext</code> must be an instance of.
+	 * {@code setApplicationContext} must be an instance of.
 	 * Can be overridden in subclasses.
 	 * @see #setApplicationContext
 	 */
@@ -105,7 +105,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 
 	/**
 	 * Subclasses can override this for custom initialization behavior.
-	 * Gets called by <code>setApplicationContext</code> after setting the context instance.
+	 * Gets called by {@code setApplicationContext} after setting the context instance.
 	 * <p>Note: Does </i>not</i> get called on reinitialization of the context
 	 * but rather just on first initialization of this object's context reference.
 	 * <p>The default implementation calls the overloaded {@link #initApplicationContext()}

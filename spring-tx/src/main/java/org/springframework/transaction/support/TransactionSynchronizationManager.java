@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * Supports a list of transaction synchronizations if synchronization is active.
  *
  * <p>Resource management code should check for thread-bound resources, e.g. JDBC
- * Connections or Hibernate Sessions, via <code>getResource</code>. Such code is
+ * Connections or Hibernate Sessions, via {@code getResource}. Such code is
  * normally not supposed to bind resources to threads, as this is the responsibility
  * of transaction managers. A further option is to lazily bind on first use if
  * transaction synchronization is active, for performing transactions that span
@@ -103,7 +103,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Return all resources that are bound to the current thread.
 	 * <p>Mainly for debugging purposes. Resource managers should always invoke
-	 * <code>hasResource</code> for a specific resource key that they are interested in.
+	 * {@code hasResource} for a specific resource key that they are interested in.
 	 * @return a Map with resource keys (usually the resource factory) and resource
 	 * values (usually the active resource object), or an empty Map if there are
 	 * currently no resources bound
@@ -130,7 +130,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Retrieve a resource for the given key that is bound to the current thread.
 	 * @param key the key to check (usually the resource factory)
 	 * @return a value bound to the current thread (usually the active
-	 * resource object), or <code>null</code> if none
+	 * resource object), or {@code null} if none
 	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static Object getResource(Object key) {
@@ -215,7 +215,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Unbind a resource for the given key from the current thread.
 	 * @param key the key to unbind (usually the resource factory)
-	 * @return the previously bound value, or <code>null</code> if none bound
+	 * @return the previously bound value, or {@code null} if none bound
 	 */
 	public static Object unbindResourceIfPossible(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);
@@ -340,7 +340,7 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose the name of the current transaction, if any.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 * @param name the name of the transaction, or <code>null</code> to reset it
+	 * @param name the name of the transaction, or {@code null} to reset it
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
 	 */
 	public static void setCurrentTransactionName(String name) {
@@ -348,7 +348,7 @@ public abstract class TransactionSynchronizationManager {
 	}
 
 	/**
-	 * Return the name of the current transaction, or <code>null</code> if none set.
+	 * Return the name of the current transaction, or {@code null} if none set.
 	 * To be called by resource management code for optimizations per use case,
 	 * for example to optimize fetch strategies for specific named transactions.
 	 * @see org.springframework.transaction.TransactionDefinition#getName()
@@ -360,8 +360,8 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose a read-only flag for the current transaction.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 * @param readOnly <code>true</code> to mark the current transaction
-	 * as read-only; <code>false</code> to reset such a read-only marker
+	 * @param readOnly {@code true} to mark the current transaction
+	 * as read-only; {@code false} to reset such a read-only marker
 	 * @see org.springframework.transaction.TransactionDefinition#isReadOnly()
 	 */
 	public static void setCurrentTransactionReadOnly(boolean readOnly) {
@@ -373,7 +373,7 @@ public abstract class TransactionSynchronizationManager {
 	 * To be called by resource management code when preparing a newly
 	 * created resource (for example, a Hibernate Session).
 	 * <p>Note that transaction synchronizations receive the read-only flag
-	 * as argument for the <code>beforeCommit</code> callback, to be able
+	 * as argument for the {@code beforeCommit} callback, to be able
 	 * to suppress change detection on commit. The present method is meant
 	 * to be used for earlier read-only checks, for example to set the
 	 * flush mode of a Hibernate Session to "FlushMode.NEVER" upfront.
@@ -389,7 +389,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Called by the transaction manager on transaction begin and on cleanup.
 	 * @param isolationLevel the isolation level to expose, according to the
 	 * JDBC Connection constants (equivalent to the corresponding Spring
-	 * TransactionDefinition constants), or <code>null</code> to reset it
+	 * TransactionDefinition constants), or {@code null} to reset it
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
@@ -410,7 +410,7 @@ public abstract class TransactionSynchronizationManager {
 	 * created resource (for example, a JDBC Connection).
 	 * @return the currently exposed isolation level, according to the
 	 * JDBC Connection constants (equivalent to the corresponding Spring
-	 * TransactionDefinition constants), or <code>null</code> if none
+	 * TransactionDefinition constants), or {@code null} if none
 	 * @see java.sql.Connection#TRANSACTION_READ_UNCOMMITTED
 	 * @see java.sql.Connection#TRANSACTION_READ_COMMITTED
 	 * @see java.sql.Connection#TRANSACTION_REPEATABLE_READ
@@ -428,8 +428,8 @@ public abstract class TransactionSynchronizationManager {
 	/**
 	 * Expose whether there currently is an actual transaction active.
 	 * Called by the transaction manager on transaction begin and on cleanup.
-	 * @param active <code>true</code> to mark the current thread as being associated
-	 * with an actual transaction; <code>false</code> to reset that marker
+	 * @param active {@code true} to mark the current thread as being associated
+	 * with an actual transaction; {@code false} to reset that marker
 	 */
 	public static void setActualTransactionActive(boolean active) {
 		actualTransactionActive.set(active ? Boolean.TRUE : null);

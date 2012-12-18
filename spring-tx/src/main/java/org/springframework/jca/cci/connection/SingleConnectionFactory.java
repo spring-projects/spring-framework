@@ -35,8 +35,8 @@ import org.springframework.util.Assert;
 
 /**
  * A CCI ConnectionFactory adapter that returns the same Connection on all
- * <code>getConnection</code> calls, and ignores calls to
- * <code>Connection.close()</code>.
+ * {@code getConnection} calls, and ignores calls to
+ * {@code Connection.close()}.
  *
  * <p>Useful for testing and standalone environments, to keep using the same
  * Connection for multiple CciTemplate calls, without having a pooling

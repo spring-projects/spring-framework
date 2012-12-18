@@ -72,7 +72,7 @@ public interface MethodMetadata {
 	 * @param annotationType the annotation type to look for
 	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
 	 * and the defined attribute value as Map value. This return value will be
-	 * <code>null</code> if no matching annotation is defined.
+	 * {@code null} if no matching annotation is defined.
 	 */
 	Map<String, Object> getAnnotationAttributes(String annotationType);
 

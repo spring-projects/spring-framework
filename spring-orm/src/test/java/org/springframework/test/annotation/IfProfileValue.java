@@ -79,12 +79,12 @@ import java.lang.annotation.Target;
 public @interface IfProfileValue {
 
 	/**
-	 * The <code>name</code> of the <em>profile value</em> against which to test.
+	 * The {@code name} of the <em>profile value</em> against which to test.
 	 */
 	String name();
 
 	/**
-	 * A single, permissible <code>value</code> of the <em>profile value</em>
+	 * A single, permissible {@code value} of the <em>profile value</em>
 	 * for the given {@link #name() name}.
 	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.
@@ -92,7 +92,7 @@ public @interface IfProfileValue {
 	String value() default "";
 
 	/**
-	 * A list of all permissible <code>values</code> of the
+	 * A list of all permissible {@code values} of the
 	 * <em>profile value</em> for the given {@link #name() name}.
 	 * <p>Note: Assigning values to both {@link #value()} and {@link #values()}
 	 * will lead to a configuration conflict.

@@ -135,8 +135,8 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	 * the expected type.
 	 * @param destination the Destination object to validate
 	 * @param destinationName the name of the destination
-	 * @param pubSubDomain <code>true</code> if a Topic is expected,
-	 * <code>false</code> in case of a Queue
+	 * @param pubSubDomain {@code true} if a Topic is expected,
+	 * {@code false} in case of a Queue
 	 */
 	protected void validateDestination(Destination destination, String destinationName, boolean pubSubDomain) {
 		Class targetClass = Queue.class;

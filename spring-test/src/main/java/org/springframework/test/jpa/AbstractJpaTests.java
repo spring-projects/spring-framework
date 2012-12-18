@@ -122,8 +122,8 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	/**
 	 * Create an EntityManager that will always automatically enlist itself in current
 	 * transactions, in contrast to an EntityManager returned by
-	 * <code>EntityManagerFactory.createEntityManager()</code>
-	 * (which requires an explicit <code>joinTransaction()</code> call).
+	 * {@code EntityManagerFactory.createEntityManager()}
+	 * (which requires an explicit {@code joinTransaction()} call).
 	 */
 	protected EntityManager createContainerManagedEntityManager() {
 		return ExtendedEntityManagerCreator.createContainerManagedEntityManager(this.entityManagerFactory);

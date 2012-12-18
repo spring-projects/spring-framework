@@ -94,7 +94,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 
 	/**
 	 * Specify JPA properties, to be passed into
-	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor)
 	 * or a "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
@@ -105,7 +105,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 
 	/**
 	 * Specify JPA properties as a Map, to be passed into
-	 * <code>EntityManagerFactory.createEntityManager(Map)</code> (if any).
+	 * {@code EntityManagerFactory.createEntityManager(Map)} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
@@ -158,7 +158,7 @@ public abstract class EntityManagerFactoryAccessor implements BeanFactoryAware {
 
 	/**
 	 * Obtain the transactional EntityManager for this accessor's EntityManagerFactory, if any.
-	 * @return the transactional EntityManager, or <code>null</code> if none
+	 * @return the transactional EntityManager, or {@code null} if none
 	 * @throws IllegalStateException if this accessor is not configured with an EntityManagerFactory
 	 * @see EntityManagerFactoryUtils#getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see EntityManagerFactoryUtils#getTransactionalEntityManager(javax.persistence.EntityManagerFactory, java.util.Map)

@@ -35,9 +35,9 @@ import org.springframework.core.io.Resource;
 public class PassThroughSourceExtractor implements SourceExtractor {
 
 	/**
-	 * Simply returns the supplied <code>sourceCandidate</code> as-is.
+	 * Simply returns the supplied {@code sourceCandidate} as-is.
 	 * @param sourceCandidate the source metadata
-	 * @return the supplied <code>sourceCandidate</code>
+	 * @return the supplied {@code sourceCandidate}
 	 */
 	public Object extractSource(Object sourceCandidate, Resource definingResource) {
 		return sourceCandidate;

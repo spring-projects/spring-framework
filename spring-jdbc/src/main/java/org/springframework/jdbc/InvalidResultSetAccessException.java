@@ -22,7 +22,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * Exception thrown when a ResultSet has been accessed in an invalid fashion.
- * Such exceptions always have a <code>java.sql.SQLException</code> root cause.
+ * Such exceptions always have a {@code java.sql.SQLException} root cause.
  *
  * <p>This typically happens when an invalid ResultSet column index or name
  * has been specified. Also thrown by disconnected SqlRowSets.

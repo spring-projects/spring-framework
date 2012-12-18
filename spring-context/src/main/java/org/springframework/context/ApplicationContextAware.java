@@ -29,7 +29,7 @@ import org.springframework.beans.factory.Aware;
  * for bean lookup purposes.
  *
  * <p>This interface can also be implemented if an object needs access to file
- * resources, i.e. wants to call <code>getResource</code>, wants to publish
+ * resources, i.e. wants to call {@code getResource}, wants to publish
  * an application event, or requires access to the MessageSource. However,
  * it is preferable to implement the more specific {@link ResourceLoaderAware},
  * {@link ApplicationEventPublisherAware} or {@link MessageSourceAware} interface

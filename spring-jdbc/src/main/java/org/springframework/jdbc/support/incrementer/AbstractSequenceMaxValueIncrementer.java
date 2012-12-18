@@ -88,7 +88,7 @@ public abstract class AbstractSequenceMaxValueIncrementer extends AbstractDataFi
 	/**
 	 * Return the database-specific query to use for retrieving a sequence value.
 	 * <p>The provided SQL is supposed to result in a single row with a single
-	 * column that allows for extracting a <code>long</code> value.
+	 * column that allows for extracting a {@code long} value.
 	 */
 	protected abstract String getSequenceQuery();
 

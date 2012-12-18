@@ -635,14 +635,14 @@ public class SelectTagTests extends AbstractFormTagTests {
 	 * href="http://opensource.atlassian.com/projects/spring/browse/SPR-2660"
 	 * target="_blank">SPR-2660</a>.
 	 * <p>
-	 * Specifically, if the <code>items</code> attribute is supplied a
-	 * {@link Map}, and <code>itemValue</code> and <code>itemLabel</code>
+	 * Specifically, if the {@code items} attribute is supplied a
+	 * {@link Map}, and {@code itemValue} and {@code itemLabel}
 	 * are supplied non-null values, then:
 	 * </p>
 	 * <ul>
-	 * <li><code>itemValue</code> will be used as the property name of the
+	 * <li>{@code itemValue} will be used as the property name of the
 	 * map's <em>key</em>, and</li>
-	 * <li><code>itemLabel</code> will be used as the property name of the
+	 * <li>{@code itemLabel} will be used as the property name of the
 	 * map's <em>value</em>.</li>
 	 * </ul>
 	 */

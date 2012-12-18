@@ -44,7 +44,7 @@ public interface PersistenceExceptionTranslator {
 	 * Implementations may use Spring JDBC's sophisticated exception translation
 	 * to provide further information in the event of SQLException as a root cause.
 	 * @param ex a RuntimeException thrown
-	 * @return the corresponding DataAccessException (or <code>null</code> if the
+	 * @return the corresponding DataAccessException (or {@code null} if the
 	 * exception could not be translated, as in this case it may result from
 	 * user code rather than an actual persistence problem)
 	 * @see org.springframework.dao.DataIntegrityViolationException

@@ -22,10 +22,10 @@ import org.apache.commons.logging.Log;
 import org.springframework.util.StopWatch;
 
 /**
- * Simple AOP Alliance <code>MethodInterceptor</code> for performance monitoring.
+ * Simple AOP Alliance {@code MethodInterceptor} for performance monitoring.
  * This interceptor has no effect on the intercepted method call.
  *
- * <p>Uses a <code>StopWatch</code> for the actual performance measuring.
+ * <p>Uses a {@code StopWatch} for the actual performance measuring.
  *
  * @author Rod Johnson
  * @author Dmitriy Kopylenko

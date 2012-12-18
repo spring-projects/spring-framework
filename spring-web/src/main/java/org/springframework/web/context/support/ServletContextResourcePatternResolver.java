@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 /**
  * ServletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
- * via Servlet 2.3's <code>ServletContext.getResourcePaths</code>.
+ * via Servlet 2.3's {@code ServletContext.getResourcePaths}.
  * Falls back to the superclass' file system checking for other resources.
  *
  * @author Juergen Hoeller
@@ -69,7 +69,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 
 	/**
 	 * Overridden version which checks for ServletContextResource
-	 * and uses <code>ServletContext.getResourcePaths</code> to find
+	 * and uses {@code ServletContext.getResourcePaths} to find
 	 * matching resources below the web application root directory.
 	 * In case of other resources, delegates to the superclass version.
 	 * @see #doRetrieveMatchingServletContextResources

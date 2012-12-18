@@ -34,7 +34,7 @@ public interface Trigger {
 	 * @param triggerContext context object encapsulating last execution times
 	 * and last completion time
 	 * @return the next execution time as defined by the trigger,
-	 * or <code>null</code> if the trigger won't fire anymore
+	 * or {@code null} if the trigger won't fire anymore
 	 */
 	Date nextExecutionTime(TriggerContext triggerContext);
 

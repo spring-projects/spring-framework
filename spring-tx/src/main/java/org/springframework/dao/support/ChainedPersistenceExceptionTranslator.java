@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 /**
  * Implementation of {@link PersistenceExceptionTranslator} that supports chaining,
  * allowing the addition of PersistenceExceptionTranslator instances in order.
- * Returns <code>non-null</code> on the first (if any) match.
+ * Returns {@code non-null} on the first (if any) match.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

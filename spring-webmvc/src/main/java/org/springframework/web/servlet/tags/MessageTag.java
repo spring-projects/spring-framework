@@ -37,7 +37,7 @@ import org.springframework.web.util.TagUtils;
  * resolved using the ApplicationContext and thus support internationalization.
  *
  * <p>Detects an HTML escaping setting, either on this tag instance, the page level,
- * or the <code>web.xml</code> level. Can also apply JavaScript escaping.
+ * or the {@code web.xml} level. Can also apply JavaScript escaping.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
  * message. Thus, this tag can also be used for HTML escaping of any texts.

@@ -31,8 +31,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * An implementation of the {@link ObjectNamingStrategy} interface
- * that reads the <code>ObjectName</code> from the source-level metadata.
- * Falls back to the bean key (bean name) if no <code>ObjectName</code>
+ * that reads the {@code ObjectName} from the source-level metadata.
+ * Falls back to the bean key (bean name) if no {@code ObjectName}
  * can be found in source-level metadata.
  *
  * <p>Uses the {@link JmxAttributeSource} strategy interface, so that
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
 public class MetadataNamingStrategy implements ObjectNamingStrategy, InitializingBean {
 
 	/**
-	 * The <code>JmxAttributeSource</code> implementation to use for reading metadata.
+	 * The {@code JmxAttributeSource} implementation to use for reading metadata.
 	 */
 	private JmxAttributeSource attributeSource;
 
@@ -57,15 +57,15 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 
 
 	/**
-	 * Create a new <code>MetadataNamingStrategy<code> which needs to be
+	 * Create a new {@code MetadataNamingStrategy} which needs to be
 	 * configured through the {@link #setAttributeSource} method.
 	 */
 	public MetadataNamingStrategy() {
 	}
 
 	/**
-	 * Create a new <code>MetadataNamingStrategy<code> for the given
-	 * <code>JmxAttributeSource</code>.
+	 * Create a new {@code MetadataNamingStrategy} for the given
+	 * {@code JmxAttributeSource}.
 	 * @param attributeSource the JmxAttributeSource to use
 	 */
 	public MetadataNamingStrategy(JmxAttributeSource attributeSource) {
@@ -75,7 +75,7 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 
 
 	/**
-	 * Set the implementation of the <code>JmxAttributeSource</code> interface to use
+	 * Set the implementation of the {@code JmxAttributeSource} interface to use
 	 * when reading the source-level metadata.
 	 */
 	public void setAttributeSource(JmxAttributeSource attributeSource) {
@@ -102,8 +102,8 @@ public class MetadataNamingStrategy implements ObjectNamingStrategy, Initializin
 
 
 	/**
-	 * Reads the <code>ObjectName</code> from the source-level metadata associated
-	 * with the managed resource's <code>Class</code>.
+	 * Reads the {@code ObjectName} from the source-level metadata associated
+	 * with the managed resource's {@code Class}.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		Class managedClass = AopUtils.getTargetClass(managedBean);

@@ -53,11 +53,11 @@ import org.springframework.util.ObjectUtils;
  * JMS {@link MessageConverter}. By default, a {@link SimpleMessageConverter}
  * will be used. (If you do not want such automatic message conversion taking
  * place, then be sure to set the {@link #setMessageConverter MessageConverter}
- * to <code>null</code>.)
+ * to {@code null}.)
  *
  * <p>If a target listener method returns a non-null object (typically of a
- * message content type such as <code>String</code> or byte array), it will get
- * wrapped in a JMS <code>Message</code> and sent to the response destination
+ * message content type such as {@code String} or byte array), it will get
+ * wrapped in a JMS {@code Message} and sent to the response destination
  * (either the JMS "reply-to" destination or a
  * {@link #setDefaultResponseDestination(javax.jms.Destination) specified default
  * destination}).
@@ -68,10 +68,10 @@ import org.springframework.util.ObjectUtils;
  * does <i>not</i> support the generation of response messages.
  *
  * <p>Find below some examples of method signatures compliant with this
- * adapter class. This first example handles all <code>Message</code> types
- * and gets passed the contents of each <code>Message</code> type as an
- * argument. No <code>Message</code> will be sent back as all of these
- * methods return <code>void</code>.
+ * adapter class. This first example handles all {@code Message} types
+ * and gets passed the contents of each {@code Message} type as an
+ * argument. No {@code Message} will be sent back as all of these
+ * methods return {@code void}.
  *
  * <pre class="code">public interface MessageContentsDelegate {
  *    void handleMessage(String text);
@@ -80,10 +80,10 @@ import org.springframework.util.ObjectUtils;
  *    void handleMessage(Serializable obj);
  * }</pre>
  *
- * This next example handles all <code>Message</code> types and gets
- * passed the actual (raw) <code>Message</code> as an argument. Again, no
- * <code>Message</code> will be sent back as all of these methods return
- * <code>void</code>.
+ * This next example handles all {@code Message} types and gets
+ * passed the actual (raw) {@code Message} as an argument. Again, no
+ * {@code Message} will be sent back as all of these methods return
+ * {@code void}.
  *
  * <pre class="code">public interface RawMessageDelegate {
  *    void handleMessage(TextMessage message);
@@ -92,22 +92,22 @@ import org.springframework.util.ObjectUtils;
  *    void handleMessage(ObjectMessage message);
  * }</pre>
  *
- * This next example illustrates a <code>Message</code> delegate
- * that just consumes the <code>String</code> contents of
+ * This next example illustrates a {@code Message} delegate
+ * that just consumes the {@code String} contents of
  * {@link javax.jms.TextMessage TextMessages}. Notice also how the
- * name of the <code>Message</code> handling method is different from the
+ * name of the {@code Message} handling method is different from the
  * {@link #ORIGINAL_DEFAULT_LISTENER_METHOD original} (this will have to
- * be configured in the attandant bean definition). Again, no <code>Message</code>
- * will be sent back as the method returns <code>void</code>.
+ * be configured in the attandant bean definition). Again, no {@code Message}
+ * will be sent back as the method returns {@code void}.
  *
  * <pre class="code">public interface TextMessageContentDelegate {
  *    void onMessage(String text);
  * }</pre>
  *
- * This final example illustrates a <code>Message</code> delegate
- * that just consumes the <code>String</code> contents of
+ * This final example illustrates a {@code Message} delegate
+ * that just consumes the {@code String} contents of
  * {@link javax.jms.TextMessage TextMessages}. Notice how the return type
- * of this method is <code>String</code>: This will result in the configured
+ * of this method is {@code String}: This will result in the configured
  * {@link MessageListenerAdapter} sending a {@link javax.jms.TextMessage} in response.
  *
  * <pre class="code">public interface ResponsiveTextMessageContentDelegate {
@@ -396,7 +396,7 @@ public class MessageListenerAdapter
 
 	/**
 	 * Extract the message body from the given JMS message.
-	 * @param message the JMS <code>Message</code>
+	 * @param message the JMS {@code Message}
 	 * @return the content of the message, to be passed into the
 	 * listener method as argument
 	 * @throws JMSException if thrown by JMS API methods
@@ -417,7 +417,7 @@ public class MessageListenerAdapter
 	 * @param originalMessage the JMS request message
 	 * @param extractedMessage the converted JMS request message,
 	 * to be passed into the listener method as argument
-	 * @return the name of the listener method (never <code>null</code>)
+	 * @return the name of the listener method (never {@code null})
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setDefaultListenerMethod
 	 */
@@ -482,9 +482,9 @@ public class MessageListenerAdapter
 	/**
 	 * Handle the given result object returned from the listener method,
 	 * sending a response message back.
-	 * @param result the result object to handle (never <code>null</code>)
+	 * @param result the result object to handle (never {@code null})
 	 * @param request the original request message
-	 * @param session the JMS Session to operate on (may be <code>null</code>)
+	 * @param session the JMS Session to operate on (may be {@code null})
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #buildMessage
 	 * @see #postProcessResponse
@@ -514,7 +514,7 @@ public class MessageListenerAdapter
 	 * Build a JMS message to be sent as response based on the given result object.
 	 * @param session the JMS Session to operate on
 	 * @param result the content of the message, as returned from the listener method
-	 * @return the JMS <code>Message</code> (never <code>null</code>)
+	 * @return the JMS {@code Message} (never {@code null})
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setMessageConverter
 	 */
@@ -553,15 +553,15 @@ public class MessageListenerAdapter
 	/**
 	 * Determine a response destination for the given message.
 	 * <p>The default implementation first checks the JMS Reply-To
-	 * {@link Destination} of the supplied request; if that is not <code>null</code>
-	 * it is returned; if it is <code>null</code>, then the configured
+	 * {@link Destination} of the supplied request; if that is not {@code null}
+	 * it is returned; if it is {@code null}, then the configured
 	 * {@link #resolveDefaultResponseDestination default response destination}
-	 * is returned; if this too is <code>null</code>, then an
+	 * is returned; if this too is {@code null}, then an
 	 * {@link InvalidDestinationException} is thrown.
 	 * @param request the original incoming JMS message
 	 * @param response the outgoing JMS message about to be sent
 	 * @param session the JMS Session to operate on
-	 * @return the response destination (never <code>null</code>)
+	 * @return the response destination (never {@code null})
 	 * @throws JMSException if thrown by JMS API methods
 	 * @throws InvalidDestinationException if no {@link Destination} can be determined
 	 * @see #setDefaultResponseDestination

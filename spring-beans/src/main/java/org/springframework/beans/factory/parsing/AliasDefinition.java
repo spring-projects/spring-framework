@@ -48,7 +48,7 @@ public class AliasDefinition implements BeanMetadataElement {
 	 * Create a new AliasDefinition.
 	 * @param beanName the canonical name of the bean
 	 * @param alias the alias registered for the bean
-	 * @param source the source object (may be <code>null</code>)
+	 * @param source the source object (may be {@code null})
 	 */
 	public AliasDefinition(String beanName, String alias, Object source) {
 		Assert.notNull(beanName, "Bean name must not be null");

@@ -28,7 +28,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * Abstract PreparedStatementCallback implementation that manages a LobCreator.
  * Typically used as inner class, with access to surrounding method arguments.
  *
- * <p>Delegates to the <code>setValues</code> template method for setting values
+ * <p>Delegates to the {@code setValues} template method for setting values
  * on the PreparedStatement, using a given LobCreator for BLOB/CLOB arguments.
  *
  * <p>A usage example with JdbcTemplate:

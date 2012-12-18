@@ -73,7 +73,7 @@ import org.springframework.util.ReflectionUtils;
  * @see javax.xml.rpc.Service#getPort
  * @see org.springframework.remoting.RemoteAccessException
  * @see org.springframework.jndi.JndiObjectFactoryBean
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
@@ -292,7 +292,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * port stub should be used instead of the dynamic call mechanism.
 	 * See the javadoc of the "serviceInterface" property for more details.
 	 * <p>The interface must be suitable for a JAX-RPC port, that is, it must be
-	 * an RMI service interface (that extends <code>java.rmi.Remote</code>).
+	 * an RMI service interface (that extends {@code java.rmi.Remote}).
 	 * <p><b>NOTE:</b> Check whether your JAX-RPC provider returns thread-safe
 	 * port stubs. If not, use the dynamic call mechanism instead, which will
 	 * always be thread-safe. In particular, do not use JAX-RPC port stubs
@@ -354,7 +354,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Create and initialize the JAX-RPC service for the specified port.
 	 * <p>Prepares a JAX-RPC stub if possible (if an RMI interface is available);
 	 * falls back to JAX-RPC dynamic calls else. Using dynamic calls can be enforced
-	 * through overriding {@link #alwaysUseJaxRpcCall} to return <code>true</code>.
+	 * through overriding {@link #alwaysUseJaxRpcCall} to return {@code true}.
 	 * <p>{@link #postProcessJaxRpcService} and {@link #postProcessPortStub}
 	 * hooks are available for customization in subclasses. When using dynamic calls,
 	 * each can be post-processed via {@link #postProcessJaxRpcCall}.
@@ -432,7 +432,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Return whether to always use JAX-RPC dynamic calls.
-	 * Called by <code>afterPropertiesSet</code>.
+	 * Called by {@code afterPropertiesSet}.
 	 * <p>Default is "false"; if an RMI interface is specified as "portInterface"
 	 * or "serviceInterface", it will be used to create a JAX-RPC port stub.
 	 * <p>Can be overridden to enforce the use of the JAX-RPC Call API,
@@ -708,7 +708,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @param method the service interface method that we invoked
 	 * @param ex the original RemoteException
 	 * @return the exception to rethrow (may be the original RemoteException
-	 * or an extracted/wrapped exception, but never <code>null</code>)
+	 * or an extracted/wrapped exception, but never {@code null})
 	 */
 	protected Throwable handleRemoteException(Method method, RemoteException ex) {
 		boolean isConnectFailure = isConnectFailure(ex);
@@ -733,7 +733,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 
 	/**
 	 * Determine whether the given RMI exception indicates a connect failure.
-	 * <p>The default implementation returns <code>true</code> unless the
+	 * <p>The default implementation returns {@code true} unless the
 	 * exception class name (or exception superclass name) contains the term
 	 * "Fault" (e.g. "AxisFault"), assuming that the JAX-RPC provider only
 	 * throws RemoteException in case of WSDL faults and connect failures.

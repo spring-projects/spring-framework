@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
  *
  * <p>Should almost always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type-based functionality
- * like <code>LabeledEnumResolver.getLabeledEnumSet(type)</code> in this case.
+ * like {@code LabeledEnumResolver.getLabeledEnumSet(type)} in this case.
  *
  * @author Keith Donald
  * @since 1.2.2
@@ -41,7 +41,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	/**
 	 * Create a new LetterCodedLabeledEnum instance.
 	 * @param code the letter code
-	 * @param label the label (can be <code>null</code>)
+	 * @param label the label (can be {@code null})
 	 */
 	public LetterCodedLabeledEnum(char code, String label) {
 		super(label);

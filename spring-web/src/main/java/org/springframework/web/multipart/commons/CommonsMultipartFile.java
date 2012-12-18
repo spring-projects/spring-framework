@@ -59,7 +59,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	/**
-	 * Return the underlying <code>org.apache.commons.fileupload.FileItem</code>
+	 * Return the underlying {@code org.apache.commons.fileupload.FileItem}
 	 * instance. There is hardly any need to access this.
 	 */
 	public final FileItem getFileItem() {

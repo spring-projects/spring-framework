@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base implementation of {@link DataFieldMaxValueIncrementer} that delegates
- * to a single {@link #getNextKey} template method that returns a <code>long</code>.
+ * to a single {@link #getNextKey} template method that returns a {@code long}.
  * Uses longs for String values, padding with zeroes if required.
  *
  * @author Dmitriy Kopylenko

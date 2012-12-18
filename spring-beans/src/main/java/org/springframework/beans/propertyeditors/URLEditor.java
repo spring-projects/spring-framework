@@ -25,7 +25,7 @@ import org.springframework.core.io.ResourceEditor;
 import org.springframework.util.Assert;
 
 /**
- * Editor for <code>java.net.URL</code>, to directly populate a URL property
+ * Editor for {@code java.net.URL}, to directly populate a URL property
  * instead of using a String property as bridge.
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL

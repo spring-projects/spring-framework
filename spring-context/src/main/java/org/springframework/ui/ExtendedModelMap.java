@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * Subclass of {@link ModelMap} that implements the {@link Model} interface.
- * Java 5 specific like the <code>Model</code> interface itself.
+ * Java 5 specific like the {@code Model} interface itself.
  *
  * @author Juergen Hoeller
  * @since 2.5.1

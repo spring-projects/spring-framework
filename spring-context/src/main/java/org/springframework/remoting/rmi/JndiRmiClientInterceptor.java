@@ -54,7 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * Spring's unchecked RemoteAccessException.
  *
  * <p>The JNDI environment can be specified as "jndiEnvironment" property,
- * or be configured in a <code>jndi.properties</code> file or as system properties.
+ * or be configured in a {@code jndi.properties} file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;

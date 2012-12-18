@@ -22,7 +22,7 @@ import javax.sql.DataSource;
  * Strategy interface for looking up DataSources by name.
  *
  * <p>Used, for example, to resolve data source names in JPA
- * <code>persistence.xml</code> files.
+ * {@code persistence.xml} files.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -34,7 +34,7 @@ public interface DataSourceLookup {
 	/**
 	 * Retrieve the DataSource identified by the given name.
 	 * @param dataSourceName the name of the DataSource
-	 * @return the DataSource (never <code>null</code>)
+	 * @return the DataSource (never {@code null})
 	 * @throws DataSourceLookupFailureException if the lookup failed
 	 */
 	DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException;

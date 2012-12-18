@@ -437,7 +437,7 @@ public abstract class AbstractAopProxyTests {
 
 	/**
 	 * Test that the proxy returns itself when the
-	 * target returns <code>this</code>
+	 * target returns {@code this}
 	 */
 	@Test
 	public void testTargetReturnsThis() throws Throwable {

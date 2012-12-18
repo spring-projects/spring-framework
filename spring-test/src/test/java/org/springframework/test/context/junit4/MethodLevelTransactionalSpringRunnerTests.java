@@ -50,10 +50,10 @@ import org.springframework.transaction.annotation.Transactional;
  * <li>{@link TransactionalTestExecutionListener}</li>
  * </ul>
  * <p>
- * This class specifically tests usage of <code>&#064;Transactional</code>
+ * This class specifically tests usage of {@code &#064;Transactional}
  * defined at the <strong>method level</strong>. In contrast to
  * {@link ClassLevelTransactionalSpringRunnerTests}, this class omits usage of
- * <code>&#064;NotTransactional</code>.
+ * {@code &#064;NotTransactional}.
  * </p>
  *
  * @author Sam Brannen

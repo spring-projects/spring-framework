@@ -60,7 +60,7 @@ public enum Propagation {
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
 	 * on all transaction managers. This in particular applies to JtaTransactionManager,
-	 * which requires the <code>javax.transaction.TransactionManager</code> to be
+	 * which requires the {@code javax.transaction.TransactionManager} to be
 	 * made available it to it (which is server-specific in standard J2EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */
@@ -71,7 +71,7 @@ public enum Propagation {
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>Note: Actual transaction suspension will not work on out-of-the-box
 	 * on all transaction managers. This in particular applies to JtaTransactionManager,
-	 * which requires the <code>javax.transaction.TransactionManager</code> to be
+	 * which requires the {@code javax.transaction.TransactionManager} to be
 	 * made available it to it (which is server-specific in standard J2EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
 	 */

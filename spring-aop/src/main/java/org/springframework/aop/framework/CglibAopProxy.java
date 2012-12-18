@@ -234,7 +234,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	/**
-	 * Checks to see whether the supplied <code>Class</code> has already been validated and
+	 * Checks to see whether the supplied {@code Class} has already been validated and
 	 * validates it if not.
 	 */
 	private void validateClassIfNecessary(Class<?> proxySuperClass) {
@@ -249,7 +249,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	}
 
 	/**
-	 * Checks for final methods on the <code>Class</code> and writes warnings to the log
+	 * Checks for final methods on the {@code Class} and writes warnings to the log
 	 * for each one found.
 	 */
 	private void doValidateClass(Class<?> proxySuperClass) {
@@ -376,7 +376,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 	 * Method interceptor used for static targets with no advice chain. The call
 	 * is passed directly back to the target. Used when the proxy needs to be
 	 * exposed and it can't be determined that the method won't return
-	 * <code>this</code>.
+	 * {@code this}.
 	 */
 	private static class StaticUnadvisedInterceptor implements MethodInterceptor, Serializable {
 
@@ -509,7 +509,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Dispatcher for the <code>equals</code> method.
+	 * Dispatcher for the {@code equals} method.
 	 * Ensures that the method call is always handled by this class.
 	 */
 	private static class EqualsInterceptor implements MethodInterceptor, Serializable {
@@ -541,7 +541,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/**
-	 * Dispatcher for the <code>hashCode</code> method.
+	 * Dispatcher for the {@code hashCode} method.
 	 * Ensures that the method call is always handled by this class.
 	 */
 	private static class HashCodeInterceptor implements MethodInterceptor, Serializable {
@@ -609,7 +609,7 @@ final class CglibAopProxy implements AopProxy, Serializable {
 					oldProxy = AopContext.setCurrentProxy(proxy);
 					setProxyContext = true;
 				}
-				// May be <code>null</code>. Get as late as possible to minimize the time we
+				// May be null Get as late as possible to minimize the time we
 				// "own" the target, in case it comes from a pool.
 				target = getTarget();
 				if (target != null) {
@@ -745,11 +745,11 @@ final class CglibAopProxy implements AopProxy, Serializable {
 		 * invoke the advice chain. Otherwise a DyanmicAdvisedInterceptor is
 		 * used.</dd>
 		 * <dt>For non-advised methods:</dt>
-		 * <dd>Where it can be determined that the method will not return <code>this</code>
-		 * or when <code>ProxyFactory.getExposeProxy()</code> returns <code>false</code>,
+		 * <dd>Where it can be determined that the method will not return {@code this}
+		 * or when {@code ProxyFactory.getExposeProxy()} returns {@code false},
 		 * then a Dispatcher is used. For static targets, the StaticDispatcher is used;
 		 * and for dynamic targets, a DynamicUnadvisedInterceptor is used.
-		 * If it possible for the method to return <code>this</code> then a
+		 * If it possible for the method to return {@code this} then a
 		 * StaticUnadvisedInterceptor is used for static targets - the
 		 * DynamicUnadvisedInterceptor already considers this.</dd>
 		 * </dl>

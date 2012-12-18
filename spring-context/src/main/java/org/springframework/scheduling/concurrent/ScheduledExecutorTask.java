@@ -131,12 +131,12 @@ public class ScheduledExecutorTask {
 	 * <p>Note that the semantics of the period value vary between fixed-rate and
 	 * fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) is <i>not</i> supported,
-	 * simply because <code>java.util.concurrent.ScheduledExecutorService</code> itself
+	 * simply because {@code java.util.concurrent.ScheduledExecutorService} itself
 	 * does not support it. Hence a value of 0 will be treated as one-time execution;
 	 * however, that value should never be specified explicitly in the first place!
 	 * @see #setFixedRate
 	 * @see #isOneTimeTask()
-	 * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(java.lang.Runnable, long, long, java.util.concurrent.TimeUnit)
+	 * @see java.util.concurrent.ScheduledExecutorService#scheduleWithFixedDelay(Runnable, long, long, java.util.concurrent.TimeUnit)
 	 */
 	public void setPeriod(long period) {
 		this.period = period;
@@ -151,7 +151,7 @@ public class ScheduledExecutorTask {
 
 	/**
 	 * Is this task only ever going to execute once?
-	 * @return <code>true</code> if this task is only ever going to execute once
+	 * @return {@code true} if this task is only ever going to execute once
 	 * @see #getPeriod()
 	 */
 	public boolean isOneTimeTask() {
@@ -160,7 +160,7 @@ public class ScheduledExecutorTask {
 
 	/**
 	 * Specify the time unit for the delay and period values.
-	 * Default is milliseconds (<code>TimeUnit.MILLISECONDS</code>).
+	 * Default is milliseconds ({@code TimeUnit.MILLISECONDS}).
 	 * @see java.util.concurrent.TimeUnit#MILLISECONDS
 	 * @see java.util.concurrent.TimeUnit#SECONDS
 	 */

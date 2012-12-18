@@ -94,8 +94,8 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/**
 	 * Specify the target class explicitly, to avoid any kind of access to the
 	 * target bean (for example, to avoid initialization of a FactoryBean instance).
-	 * <p>Default is to detect the type automatically, through a <code>getType</code>
-	 * call on the BeanFactory (or even a full <code>getBean</code> call as fallback).
+	 * <p>Default is to detect the type automatically, through a {@code getType}
+	 * call on the BeanFactory (or even a full {@code getBean} call as fallback).
 	 */
 	public void setTargetClass(Class targetClass) {
 		this.targetClass = targetClass;
@@ -103,7 +103,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	/**
 	 * Set the owning BeanFactory. We need to save a reference so that we can
-	 * use the <code>getBean</code> method on every invocation.
+	 * use the {@code getBean} method on every invocation.
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {

@@ -178,7 +178,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 
 	/**
 	 * Set a ResourceLoader to use for this context. If set, the context will
-	 * delegate all <code>getResource</code> calls to the given ResourceLoader.
+	 * delegate all {@code getResource} calls to the given ResourceLoader.
 	 * If not set, default resource loading will apply.
 	 * <p>The main reason to specify a custom ResourceLoader is to resolve
 	 * resource paths (without URL prefix) in a specific fashion.
@@ -186,7 +186,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	 * To resolve resource paths as file system locations, specify a
 	 * FileSystemResourceLoader here.
 	 * <p>You can also pass in a full ResourcePatternResolver, which will
-	 * be autodetected by the context and used for <code>getResources</code>
+	 * be autodetected by the context and used for {@code getResources}
 	 * calls as well. Else, default resource pattern matching will apply.
 	 * @see #getResource
 	 * @see org.springframework.core.io.DefaultResourceLoader

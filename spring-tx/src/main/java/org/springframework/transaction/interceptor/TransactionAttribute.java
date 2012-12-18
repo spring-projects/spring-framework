@@ -19,8 +19,8 @@ package org.springframework.transaction.interceptor;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
- * This interface adds a <code>rollbackOn</code> specification to {@link TransactionDefinition}.
- * As custom <code>rollbackOn</code> is only possible with AOP, this class resides
+ * This interface adds a {@code rollbackOn} specification to {@link TransactionDefinition}.
+ * As custom {@code rollbackOn} is only possible with AOP, this class resides
  * in the AOP transaction package.
  *
  * @author Rod Johnson

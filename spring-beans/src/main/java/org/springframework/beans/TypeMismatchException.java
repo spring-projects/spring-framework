@@ -51,8 +51,8 @@ public class TypeMismatchException extends PropertyAccessException {
 	/**
 	 * Create a new TypeMismatchException.
 	 * @param propertyChangeEvent the PropertyChangeEvent that resulted in the problem
-	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param cause the root cause (may be <code>null</code>)
+	 * @param requiredType the required target type (or {@code null} if not known)
+	 * @param cause the root cause (may be {@code null})
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class requiredType, Throwable cause) {
 		super(propertyChangeEvent,
@@ -69,8 +69,8 @@ public class TypeMismatchException extends PropertyAccessException {
 
 	/**
 	 * Create a new TypeMismatchException without PropertyChangeEvent.
-	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
-	 * @param requiredType the required target type (or <code>null</code> if not known)
+	 * @param value the offending value that couldn't be converted (may be {@code null})
+	 * @param requiredType the required target type (or {@code null} if not known)
 	 */
 	public TypeMismatchException(Object value, Class requiredType) {
 		this(value, requiredType, null);
@@ -78,9 +78,9 @@ public class TypeMismatchException extends PropertyAccessException {
 
 	/**
 	 * Create a new TypeMismatchException without PropertyChangeEvent.
-	 * @param value the offending value that couldn't be converted (may be <code>null</code>)
-	 * @param requiredType the required target type (or <code>null</code> if not known)
-	 * @param cause the root cause (may be <code>null</code>)
+	 * @param value the offending value that couldn't be converted (may be {@code null})
+	 * @param requiredType the required target type (or {@code null} if not known)
+	 * @param cause the root cause (may be {@code null})
 	 */
 	public TypeMismatchException(Object value, Class requiredType, Throwable cause) {
 		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
@@ -92,7 +92,7 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	/**
-	 * Return the offending value (may be <code>null</code>)
+	 * Return the offending value (may be {@code null})
 	 */
 	@Override
 	public Object getValue() {

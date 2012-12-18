@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * Utility class for handling registration of auto-proxy creators used internally
- * by the '<code>aop</code>' namespace tags.
+ * by the '{@code aop}' namespace tags.
  *
  * <p>Only a single auto-proxy creator can be registered and multiple tags may wish
  * to register different concrete implementations. As such this class delegates to
@@ -42,12 +42,12 @@ import org.springframework.beans.factory.xml.ParserContext;
 public abstract class AopNamespaceUtils {
 
 	/**
-	 * The <code>proxy-target-class</code> attribute as found on AOP-related XML tags.
+	 * The {@code proxy-target-class} attribute as found on AOP-related XML tags.
 	 */
 	public static final String PROXY_TARGET_CLASS_ATTRIBUTE = "proxy-target-class";
 
 	/**
-	 * The <code>expose-proxy</code> attribute as found on AOP-related XML tags.
+	 * The {@code expose-proxy} attribute as found on AOP-related XML tags.
 	 */
 	private static final String EXPOSE_PROXY_ATTRIBUTE = "expose-proxy";
 

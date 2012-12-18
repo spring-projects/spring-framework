@@ -49,21 +49,21 @@ import org.springframework.validation.ObjectError;
  * rejected values (which Spring's binding keeps even for non-String fields).
  *
  * <p>Consequently, Struts views can be written in a completely traditional
- * fashion (with standard <code>html:form</code>, <code>html:errors</code>, etc),
+ * fashion (with standard {@code html:form}, {@code html:errors}, etc),
  * seamlessly accessing a Spring-bound POJO form object underneath.
  *
  * <p>Note this ActionForm is designed explicitly for use in <i>request scope</i>.
- * It expects to receive an <code>expose</code> call from the Action, passing
+ * It expects to receive an {@code expose} call from the Action, passing
  * in the Errors object to expose plus the current HttpServletRequest.
  *
- * <p>Example definition in <code>struts-config.xml</code>:
+ * <p>Example definition in {@code struts-config.xml}:
  *
  * <pre>
  * &lt;form-beans&gt;
  *   &lt;form-bean name="actionForm" type="org.springframework.web.struts.SpringBindingActionForm"/&gt;
  * &lt;/form-beans&gt;</pre>
  *
- * Example code in a custom Struts <code>Action</code>:
+ * Example code in a custom Struts {@code Action}:
  *
  * <pre>
  * public ActionForward execute(ActionMapping actionMapping, ActionForm actionForm, HttpServletRequest request, HttpServletResponse response) throws Exception {

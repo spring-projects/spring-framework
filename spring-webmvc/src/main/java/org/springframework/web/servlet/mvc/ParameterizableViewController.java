@@ -41,7 +41,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  *  <li>Request is received by the controller</li>
  *  <li>call to {@link #handleRequestInternal handleRequestInternal} which
  *      just returns the view, named by the configuration property
- *      <code>viewName</code>. Nothing more, nothing less</li>
+ *      {@code viewName}. Nothing more, nothing less</li>
  * </ol>
  * </p>
  *

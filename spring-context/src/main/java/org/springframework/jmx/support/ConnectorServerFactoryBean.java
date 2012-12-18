@@ -39,17 +39,17 @@ import org.springframework.util.CollectionUtils;
  * {@link FactoryBean} that creates a JSR-160 {@link JMXConnectorServer},
  * optionally registers it with the {@link MBeanServer} and then starts it.
  *
- * <p>The <code>JMXConnectorServer</code> can be started in a separate thread by setting the
- * <code>threaded</code> property to <code>true</code>. You can configure this thread to be a
- * daemon thread by setting the <code>daemon</code> property to <code>true</code>.
+ * <p>The {@code JMXConnectorServer} can be started in a separate thread by setting the
+ * {@code threaded} property to {@code true}. You can configure this thread to be a
+ * daemon thread by setting the {@code daemon} property to {@code true}.
  *
- * <p>The <code>JMXConnectorServer</code> is correctly shutdown when an instance of this
- * class is destroyed on shutdown of the containing <code>ApplicationContext</code>.
+ * <p>The {@code JMXConnectorServer} is correctly shutdown when an instance of this
+ * class is destroyed on shutdown of the containing {@code ApplicationContext}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2
- * @see	FactoryBean
+ * @see    FactoryBean
  * @see JMXConnectorServer
  * @see MBeanServer
  */
@@ -76,23 +76,23 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	/**
-	 * Set the service URL for the <code>JMXConnectorServer</code>.
+	 * Set the service URL for the {@code JMXConnectorServer}.
 	 */
 	public void setServiceUrl(String serviceUrl) {
 		this.serviceUrl = serviceUrl;
 	}
 
 	/**
-	 * Set the environment properties used to construct the <code>JMXConnectorServer</code>
-	 * as <code>java.util.Properties</code> (String key/value pairs).
+	 * Set the environment properties used to construct the {@code JMXConnectorServer}
+	 * as {@code java.util.Properties} (String key/value pairs).
 	 */
 	public void setEnvironment(Properties environment) {
 		CollectionUtils.mergePropertiesIntoMap(environment, this.environment);
 	}
 
 	/**
-	 * Set the environment properties used to construct the <code>JMXConnector</code>
-	 * as a <code>Map</code> of String keys and arbitrary Object values.
+	 * Set the environment properties used to construct the {@code JMXConnector}
+	 * as a {@code Map} of String keys and arbitrary Object values.
 	 */
 	public void setEnvironmentMap(Map<String, ?> environment) {
 		if (environment != null) {
@@ -101,31 +101,31 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 	}
 
 	/**
-	 * Set an MBeanServerForwarder to be applied to the <code>JMXConnectorServer</code>.
+	 * Set an MBeanServerForwarder to be applied to the {@code JMXConnectorServer}.
 	 */
 	public void setForwarder(MBeanServerForwarder forwarder) {
 		this.forwarder = forwarder;
 	}
 
 	/**
-	 * Set the <code>ObjectName</code> used to register the <code>JMXConnectorServer</code>
-	 * itself with the <code>MBeanServer</code>, as <code>ObjectName</code> instance
-	 * or as <code>String</code>.
-	 * @throws MalformedObjectNameException if the <code>ObjectName</code> is malformed
+	 * Set the {@code ObjectName} used to register the {@code JMXConnectorServer}
+	 * itself with the {@code MBeanServer}, as {@code ObjectName} instance
+	 * or as {@code String}.
+	 * @throws MalformedObjectNameException if the {@code ObjectName} is malformed
 	 */
 	public void setObjectName(Object objectName) throws MalformedObjectNameException {
 		this.objectName = ObjectNameManager.getInstance(objectName);
 	}
 
 	/**
-	 * Set whether the <code>JMXConnectorServer</code> should be started in a separate thread.
+	 * Set whether the {@code JMXConnectorServer} should be started in a separate thread.
 	 */
 	public void setThreaded(boolean threaded) {
 		this.threaded = threaded;
 	}
 
 	/**
-	 * Set whether any threads started for the <code>JMXConnectorServer</code> should be
+	 * Set whether any threads started for the {@code JMXConnectorServer} should be
 	 * started as daemon threads.
 	 */
 	public void setDaemon(boolean daemon) {
@@ -134,12 +134,12 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	/**
-	 * Start the connector server. If the <code>threaded</code> flag is set to <code>true</code>,
-	 * the <code>JMXConnectorServer</code> will be started in a separate thread.
-	 * If the <code>daemon</code> flag is set to <code>true</code>, that thread will be
+	 * Start the connector server. If the {@code threaded} flag is set to {@code true},
+	 * the {@code JMXConnectorServer} will be started in a separate thread.
+	 * If the {@code daemon} flag is set to {@code true}, that thread will be
 	 * started as a daemon thread.
 	 * @throws JMException if a problem occured when registering the connector server
-	 * with the <code>MBeanServer</code>
+	 * with the {@code MBeanServer}
 	 * @throws IOException if there is a problem starting the connector server
 	 */
 	public void afterPropertiesSet() throws JMException, IOException {
@@ -214,8 +214,8 @@ public class ConnectorServerFactoryBean extends MBeanRegistrationSupport
 
 
 	/**
-	 * Stop the <code>JMXConnectorServer</code> managed by an instance of this class.
-	 * Automatically called on <code>ApplicationContext</code> shutdown.
+	 * Stop the {@code JMXConnectorServer} managed by an instance of this class.
+	 * Automatically called on {@code ApplicationContext} shutdown.
 	 * @throws IOException if there is an error stopping the connector server
 	 */
 	public void destroy() throws IOException {

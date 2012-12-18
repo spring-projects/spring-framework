@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The associated destruction mechanism relies on a
  * {@link org.springframework.web.context.ContextCleanupListener} being registered in
- * <code>web.xml</code>. Note that {@link org.springframework.web.context.ContextLoaderListener}
+ * {@code web.xml}. Note that {@link org.springframework.web.context.ContextLoaderListener}
  * includes ContextCleanupListener's functionality.
  *
  * <p>This scope is registered as default scope with key

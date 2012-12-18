@@ -54,7 +54,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Creates a new instance of the {@link OC4JLoadTimeWeaver} class
 	 * using the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
 	 */
 	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");

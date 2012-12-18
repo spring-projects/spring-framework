@@ -56,7 +56,7 @@ import org.springframework.web.util.WebUtils;
  * @since 16.12.2003
  * @see #init
  * @see #getWebApplicationContext
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public abstract class ServletEndpointSupport implements ServiceLifecycle {

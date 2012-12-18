@@ -27,7 +27,7 @@ package org.springframework.transaction.support;
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementations. It is mainly provided as a start for custom transaction
  * manager implementations and as a static mock for testing transactional
- * code (either as part of a mock <code>PlatformTransactionManager</code> or
+ * code (either as part of a mock {@code PlatformTransactionManager} or
  * as argument passed into a {@link TransactionCallback} to be tested).
  *
  * @author Juergen Hoeller

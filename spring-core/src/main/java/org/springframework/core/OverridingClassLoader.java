@@ -22,7 +22,7 @@ import java.io.InputStream;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * <code>ClassLoader</code> that does <i>not</i> always delegate to the
+ * {@code ClassLoader} that does <i>not</i> always delegate to the
  * parent loader, as normal class loaders do. This enables, for example,
  * instrumentation to be forced in the overriding ClassLoader, or a
  * "throwaway" class loading behavior, where selected classes are
@@ -87,7 +87,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * <p>The default implementation delegates to {@link #findLoadedClass},
 	 * {@link #loadBytesForClass} and {@link #defineClass}.
 	 * @param name the name of the class
-	 * @return the Class object, or <code>null</code> if no class defined for that name
+	 * @return the Class object, or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
 	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
@@ -108,7 +108,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * and {@link #transformIfNecessary}.
 	 * @param name the name of the class
 	 * @return the byte content (with transformers already applied),
-	 * or <code>null</code> if no class defined for that name
+	 * or {@code null} if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
 	protected byte[] loadBytesForClass(String name) throws ClassNotFoundException {
@@ -130,7 +130,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	/**
 	 * Open an InputStream for the specified class.
 	 * <p>The default implementation loads a standard class file through
-	 * the parent ClassLoader's <code>getResourceAsStream</code> method.
+	 * the parent ClassLoader's {@code getResourceAsStream} method.
 	 * @param name the name of the class
 	 * @return the InputStream containing the byte code for the specified class
 	 */
@@ -145,7 +145,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * <p>The default implementation simply returns the given bytes as-is.
 	 * @param name the fully-qualified name of the class being transformed
 	 * @param bytes the raw bytes of the class
-	 * @return the transformed bytes (never <code>null</code>;
+	 * @return the transformed bytes (never {@code null};
 	 * same as the input bytes if the transformation produced no changes)
 	 */
 	protected byte[] transformIfNecessary(String name, byte[] bytes) {

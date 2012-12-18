@@ -22,8 +22,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link java.beans.PropertyEditor Editor} for {@link MediaType}
- * descriptors, to automatically convert <code>String</code> specifications
- * (e.g. <code>"text/html"</code>) to <code>MediaType</code> properties.
+ * descriptors, to automatically convert {@code String} specifications
+ * (e.g. {@code "text/html"}) to {@code MediaType} properties.
  *
  * @author Juergen Hoeller
  * @since 3.0

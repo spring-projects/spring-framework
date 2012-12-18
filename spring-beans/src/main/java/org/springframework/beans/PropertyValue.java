@@ -65,7 +65,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	/**
 	 * Create a new PropertyValue instance.
-	 * @param name the name of the property (never <code>null</code>)
+	 * @param name the name of the property (never {@code null})
 	 * @param value the value of the property (possibly before type conversion)
 	 */
 	public PropertyValue(String name, Object value) {
@@ -75,7 +75,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 
 	/**
 	 * Copy constructor.
-	 * @param original the PropertyValue to copy (never <code>null</code>)
+	 * @param original the PropertyValue to copy (never {@code null})
 	 */
 	public PropertyValue(PropertyValue original) {
 		Assert.notNull(original, "Original must not be null");
@@ -94,7 +94,7 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	/**
 	 * Constructor that exposes a new value for an original value holder.
 	 * The original holder will be exposed as source of the new holder.
-	 * @param original the PropertyValue to link to (never <code>null</code>)
+	 * @param original the PropertyValue to link to (never {@code null})
 	 * @param newValue the new value to apply
 	 */
 	public PropertyValue(PropertyValue original, Object newValue) {
@@ -149,8 +149,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	}
 
 	/**
-	 * Return whether this holder contains a converted value already (<code>true</code>),
-	 * or whether the value still needs to be converted (<code>false</code>).
+	 * Return whether this holder contains a converted value already ({@code true}),
+	 * or whether the value still needs to be converted ({@code false}).
 	 */
 	public synchronized boolean isConverted() {
 		return this.converted;

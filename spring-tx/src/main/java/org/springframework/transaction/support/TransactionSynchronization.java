@@ -86,8 +86,8 @@ public interface TransactionSynchronization {
 	/**
 	 * Invoked before transaction commit/rollback.
 	 * Can perform resource cleanup <i>before</i> transaction completion.
-	 * <p>This method will be invoked after <code>beforeCommit</code>, even when
-	 * <code>beforeCommit</code> threw an exception. This callback allows for
+	 * <p>This method will be invoked after {@code beforeCommit}, even when
+	 * {@code beforeCommit} threw an exception. This callback allows for
 	 * closing resources before transaction completion, for any outcome.
 	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
@@ -106,7 +106,7 @@ public interface TransactionSynchronization {
 	 * any data access code triggered at this point will still "participate" in the
 	 * original transaction, allowing to perform some cleanup (with no commit following
 	 * anymore!), unless it explicitly declares that it needs to run in a separate
-	 * transaction. Hence: <b>Use <code>PROPAGATION_REQUIRES_NEW</code> for any
+	 * transaction. Hence: <b>Use {@code PROPAGATION_REQUIRES_NEW} for any
 	 * transactional operation that is called from here.</b>
 	 * @throws RuntimeException in case of errors; will be <b>propagated to the caller</b>
 	 * (note: do not throw TransactionException subclasses here!)
@@ -121,9 +121,9 @@ public interface TransactionSynchronization {
 	 * consequence, any data access code triggered at this point will still "participate"
 	 * in the original transaction, allowing to perform some cleanup (with no commit
 	 * following anymore!), unless it explicitly declares that it needs to run in a
-	 * separate transaction. Hence: <b>Use <code>PROPAGATION_REQUIRES_NEW</code>
+	 * separate transaction. Hence: <b>Use {@code PROPAGATION_REQUIRES_NEW}
 	 * for any transactional operation that is called from here.</b>
-	 * @param status completion status according to the <code>STATUS_*</code> constants
+	 * @param status completion status according to the {@code STATUS_*} constants
 	 * @throws RuntimeException in case of errors; will be <b>logged but not propagated</b>
 	 * (note: do not throw TransactionException subclasses here!)
 	 * @see #STATUS_COMMITTED

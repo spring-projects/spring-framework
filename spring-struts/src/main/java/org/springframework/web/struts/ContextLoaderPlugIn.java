@@ -277,8 +277,8 @@ public class ContextLoaderPlugIn implements PlugIn {
 	/**
 	 * Initialize and publish the WebApplicationContext for the ActionServlet.
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation.
-	 * <p>Can be overridden in subclasses. Call <code>getActionServlet()</code>
-	 * and/or <code>getModuleConfig()</code> to access the Struts configuration
+	 * <p>Can be overridden in subclasses. Call {@code getActionServlet()}
+	 * and/or {@code getModuleConfig()} to access the Struts configuration
 	 * that this PlugIn is associated with.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
 	 * @throws IllegalStateException if there is already a context for the Struts ActionServlet

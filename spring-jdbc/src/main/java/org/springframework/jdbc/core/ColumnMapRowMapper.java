@@ -25,7 +25,7 @@ import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * {@link RowMapper} implementation that creates a <code>java.util.Map</code>
+ * {@link RowMapper} implementation that creates a {@code java.util.Map}
  * for each row, representing all columns as key-value pairs: one
  * entry for each column, with the column name as key.
  *
@@ -83,7 +83,7 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 
 	/**
 	 * Retrieve a JDBC object value for the specified column.
-	 * <p>The default implementation uses the <code>getObject</code> method.
+	 * <p>The default implementation uses the {@code getObject} method.
 	 * Additionally, this implementation includes a "hack" to get around Oracle
 	 * returning a non standard object for their TIMESTAMP datatype.
 	 * @param rs is the ResultSet holding the data

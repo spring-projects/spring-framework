@@ -21,7 +21,7 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 
 /**
- * Parser for the <code>&lt;oxm:jibx-marshaller/&gt; element.
+ * Parser for the {@code <oxm:jibx-marshaller/>} element.
  *
  * @author Arjen Poutsma
  * @since 3.0

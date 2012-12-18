@@ -108,7 +108,7 @@ public @interface ContextConfiguration {
 	 * AbstractContextLoader} subclass such as
 	 * {@link org.springframework.test.context.support.GenericXmlContextLoader
 	 * GenericXmlContextLoader} which is the effective default implementation
-	 * used at runtime if <code>locations</code> are configured. See the
+	 * used at runtime if {@code locations} are configured. See the
 	 * documentation for {@link #loader} for further details regarding default
 	 * loaders.
 	 *
@@ -166,7 +166,7 @@ public @interface ContextConfiguration {
 	 * Whether or not {@link #locations resource locations} or <em>annotated
 	 * classes</em> from test superclasses should be <em>inherited</em>.
 	 *
-	 * <p>The default value is <code>true</code>. This means that an annotated
+	 * <p>The default value is {@code true}. This means that an annotated
 	 * class will <em>inherit</em> the resource locations or annotated classes
 	 * defined by test superclasses. Specifically, the resource locations or
 	 * annotated classes for a given test class will be appended to the list of
@@ -174,7 +174,7 @@ public @interface ContextConfiguration {
 	 * Thus, subclasses have the option of <em>extending</em> the list of resource
 	 * locations or annotated classes.
 	 *
-	 * <p>If <code>inheritLocations</code> is set to <code>false</code>, the
+	 * <p>If {@code inheritLocations} is set to {@code false}, the
 	 * resource locations or annotated classes for the annotated class
 	 * will <em>shadow</em> and effectively replace any resource locations
 	 * or annotated classes defined by superclasses.
@@ -225,14 +225,14 @@ public @interface ContextConfiguration {
 	 * Whether or not {@linkplain #initializers context initializers} from test
 	 * superclasses should be <em>inherited</em>.
 	 *
-	 * <p>The default value is <code>true</code>. This means that an annotated
+	 * <p>The default value is {@code true}. This means that an annotated
 	 * class will <em>inherit</em> the application context initializers defined
 	 * by test superclasses. Specifically, the initializers for a given test
 	 * class will be added to the set of initializers defined by test
 	 * superclasses. Thus, subclasses have the option of <em>extending</em> the
 	 * set of initializers.
 	 *
-	 * <p>If <code>inheritInitializers</code> is set to <code>false</code>, the
+	 * <p>If {@code inheritInitializers} is set to {@code false}, the
 	 * initializers for the annotated class will <em>shadow</em> and effectively
 	 * replace any initializers defined by superclasses.
 	 *

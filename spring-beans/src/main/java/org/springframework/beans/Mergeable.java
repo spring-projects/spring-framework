@@ -40,9 +40,9 @@ public interface Mergeable {
 	 * the callee's value set must override those of the supplied object.
 	 * @param parent the object to merge with
 	 * @return the result of the merge operation
-	 * @throws IllegalArgumentException if the supplied parent is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied parent is {@code null}
 	 * @exception IllegalStateException if merging is not enabled for this instance
-	 * (i.e. <code>mergeEnabled</code> equals <code>false</code>).
+	 * (i.e. {@code mergeEnabled} equals {@code false}).
 	 */
 	Object merge(Object parent);
 

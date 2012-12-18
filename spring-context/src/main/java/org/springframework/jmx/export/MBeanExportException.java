@@ -28,7 +28,7 @@ import org.springframework.jmx.JmxException;
 public class MBeanExportException extends JmxException {
 
 	/**
-	 * Create a new <code>MBeanExportException</code> with the
+	 * Create a new {@code MBeanExportException} with the
 	 * specified error message.
 	 * @param msg the detail message
 	 */
@@ -37,7 +37,7 @@ public class MBeanExportException extends JmxException {
 	}
 
 	/**
-	 * Create a new <code>MBeanExportException</code> with the
+	 * Create a new {@code MBeanExportException} with the
 	 * specified error message and root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause

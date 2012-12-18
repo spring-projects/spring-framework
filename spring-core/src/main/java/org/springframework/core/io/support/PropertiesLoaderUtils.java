@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ResourceUtils;
 
 /**
- * Convenient utility methods for loading of <code>java.util.Properties</code>,
+ * Convenient utility methods for loading of {@code java.util.Properties},
  * performing standard handling of input streams.
  *
  * <p>For more configurable properties loading, including the option of a
@@ -90,7 +90,7 @@ public abstract class PropertiesLoaderUtils {
 	 * found in the class path.
 	 * @param resourceName the name of the class path resource
 	 * @param classLoader the ClassLoader to use for loading
-	 * (or <code>null</code> to use the default class loader)
+	 * (or {@code null} to use the default class loader)
 	 * @return the populated Properties instance
 	 * @throws IOException if loading failed
 	 */

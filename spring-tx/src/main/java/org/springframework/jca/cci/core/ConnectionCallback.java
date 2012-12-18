@@ -32,7 +32,7 @@ import org.springframework.dao.DataAccessException;
  * <p>This is particularly useful for delegating to existing data access code
  * that expects a Connection to work on and throws ResourceException. For newly
  * written code, it is strongly recommended to use CciTemplate's more specific
- * <code>execute</code> variants.
+ * {@code execute} variants.
  *
  * @author Thierry Templier
  * @author Juergen Hoeller
@@ -44,7 +44,7 @@ import org.springframework.dao.DataAccessException;
 public interface ConnectionCallback<T> {
 
 	/**
-	 * Gets called by <code>CciTemplate.execute</code> with an active CCI Connection.
+	 * Gets called by {@code CciTemplate.execute} with an active CCI Connection.
 	 * Does not need to care about activating or closing the Connection, or handling
 	 * transactions.
 	 *
@@ -56,14 +56,14 @@ public interface ConnectionCallback<T> {
 	 *
 	 * <p>Allows for returning a result object created within the callback, i.e.
 	 * a domain object or a collection of domain objects. Note that there's special
-	 * support for single step actions: see the <code>CciTemplate.execute</code>
+	 * support for single step actions: see the {@code CciTemplate.execute}
 	 * variants. A thrown RuntimeException is treated as application exception:
 	 * it gets propagated to the caller of the template.
 	 *
 	 * @param connection active CCI Connection
 	 * @param connectionFactory the CCI ConnectionFactory that the Connection was
 	 * created with (gives access to RecordFactory and ResourceAdapterMetaData)
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
 	 * to a DataAccessException
 	 * @throws SQLException if thrown by a ResultSet method, to be auto-converted

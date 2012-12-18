@@ -101,7 +101,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	/**
 	 * Return the underlying ScheduledExecutorService for native access.
-	 * @return the underlying ScheduledExecutorService (never <code>null</code>)
+	 * @return the underlying ScheduledExecutorService (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskScheduler hasn't been initialized yet
 	 */
 	public ScheduledExecutorService getScheduledExecutor() throws IllegalStateException {

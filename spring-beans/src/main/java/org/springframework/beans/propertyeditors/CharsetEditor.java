@@ -22,11 +22,11 @@ import java.nio.charset.Charset;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.nio.charset.Charset<code>, translating charset
+ * Editor for {@code java.nio.charset.Charset}, translating charset
  * String representations into Charset objects and back.
  *
  * <p>Expects the same syntax as Charset's {@link java.nio.charset.Charset#name()},
- * e.g. <code>UTF-8</code>, <code>ISO-8859-16</code>, etc.
+ * e.g. {@code UTF-8}, {@code ISO-8859-16}, etc.
  *
  * @author Arjen Poutsma
  * @since 2.5.4

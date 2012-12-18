@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>password</code>'.
+ * Databinding-aware JSP tag for rendering an HTML '{@code input}'
+ * element with a '{@code type}' of '{@code password}'.
  *
  * @author Rob Harrop
  * @author Rick Evans
@@ -34,7 +34,7 @@ public class PasswordInputTag extends InputTag {
 
 	/**
 	 * Is the password value to be rendered?
-	 * @return <code>true</code> if the password value to be rendered.
+	 * @return {@code true} if the password value to be rendered.
 	 */
 	public boolean isShowPassword() {
 		return this.showPassword;
@@ -42,7 +42,7 @@ public class PasswordInputTag extends InputTag {
 
 	/**
 	 * Is the password value to be rendered?
-	 * @param showPassword <code>true</code> if the password value is to be rendered.
+	 * @param showPassword {@code true} if the password value is to be rendered.
 	 */
 	public void setShowPassword(boolean showPassword) {
 		this.showPassword = showPassword;
@@ -57,8 +57,8 @@ public class PasswordInputTag extends InputTag {
 	}
 
 	/**
-	 * Return '<code>password</code>' causing the rendered HTML '<code>input</code>'
-	 * element to have a '<code>type</code>' of '<code>password</code>'.
+	 * Return '{@code password}' causing the rendered HTML '{@code input}'
+	 * element to have a '{@code type}' of '{@code password}'.
 	 */
 	@Override
 	protected String getType() {

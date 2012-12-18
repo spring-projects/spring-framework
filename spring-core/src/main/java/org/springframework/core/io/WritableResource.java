@@ -32,9 +32,9 @@ public interface WritableResource extends Resource {
 	/**
 	 * Return whether the contents of this resource can be modified,
 	 * e.g. via {@link #getOutputStream()} or {@link #getFile()}.
-	 * <p>Will be <code>true</code> for typical resource descriptors;
+	 * <p>Will be {@code true} for typical resource descriptors;
 	 * note that actual content writing may still fail when attempted.
-	 * However, a value of <code>false</code> is a definitive indication
+	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be modified.
 	 * @see #getOutputStream()
 	 * @see #isReadable()

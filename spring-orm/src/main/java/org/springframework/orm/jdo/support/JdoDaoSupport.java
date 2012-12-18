@@ -37,12 +37,12 @@ import org.springframework.orm.jdo.PersistenceManagerFactoryUtils;
  * <p>This base class is mainly intended for JdoTemplate usage but can also
  * be used when working with PersistenceManagerFactoryUtils directly, for example
  * in combination with JdoInterceptor-managed PersistenceManagers. Convenience
- * <code>getPersistenceManager</code> and <code>releasePersistenceManager</code>
+ * {@code getPersistenceManager} and {@code releasePersistenceManager}
  * methods are provided for that usage style.
  *
  * <p>This class will create its own JdoTemplate if only a PersistenceManagerFactory
  * is passed in. The "allowCreate" flag on that JdoTemplate will be "true" by default.
- * A custom JdoTemplate instance can be used through overriding <code>createJdoTemplate</code>.
+ * A custom JdoTemplate instance can be used through overriding {@code createJdoTemplate}.
  *
  * @author Juergen Hoeller
  * @since 28.07.2003

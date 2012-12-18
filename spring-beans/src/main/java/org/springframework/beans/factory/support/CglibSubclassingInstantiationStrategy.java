@@ -98,10 +98,10 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		/**
 		 * Create a new instance of a dynamically generated subclasses implementing the
 		 * required lookups.
-		 * @param ctor constructor to use. If this is <code>null</code>, use the
+		 * @param ctor constructor to use. If this is {@code null}, use the
 		 * no-arg constructor (no parameterization, or Setter Injection)
 		 * @param args arguments to use for the constructor.
-		 * Ignored if the ctor parameter is <code>null</code>.
+		 * Ignored if the ctor parameter is {@code null}.
 		 * @return new instance of the dynamically generated class
 		 */
 		public Object instantiate(Constructor ctor, Object[] args) {

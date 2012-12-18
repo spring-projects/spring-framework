@@ -38,7 +38,7 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class
+	 * Creates a new instance of the {@code GlassFishLoadTimeWeaver} class
 	 * using the default {@link ClassLoader}.
 	 * @see #GlassFishLoadTimeWeaver(ClassLoader)
 	 */
@@ -47,10 +47,10 @@ public class GlassFishLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Creates a new instance of the <code>GlassFishLoadTimeWeaver</code> class.
-	 * @param classLoader the specific {@link ClassLoader} to use; must not be <code>null</code>
-	 * @throws IllegalArgumentException if the supplied <code>classLoader</code> is <code>null</code>;
-	 * or if the supplied <code>classLoader</code> is not an
+	 * Creates a new instance of the {@code GlassFishLoadTimeWeaver} class.
+	 * @param classLoader the specific {@link ClassLoader} to use; must not be {@code null}
+	 * @throws IllegalArgumentException if the supplied {@code classLoader} is {@code null};
+	 * or if the supplied {@code classLoader} is not an
 	 * {@link org.glassfish.api.deployment.InstrumentableClassLoader InstrumentableClassLoader}
 	 */
 	public GlassFishLoadTimeWeaver(ClassLoader classLoader) {

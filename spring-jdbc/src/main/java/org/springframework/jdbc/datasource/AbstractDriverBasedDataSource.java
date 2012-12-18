@@ -109,7 +109,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 
 
 	/**
-	 * This implementation delegates to <code>getConnectionFromDriver</code>,
+	 * This implementation delegates to {@code getConnectionFromDriver},
 	 * using the default username and password of this DataSource.
 	 * @see #getConnectionFromDriver(String, String)
 	 * @see #setUsername
@@ -120,7 +120,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * This implementation delegates to <code>getConnectionFromDriver</code>,
+	 * This implementation delegates to {@code getConnectionFromDriver},
 	 * using the given username and password.
 	 * @see #getConnectionFromDriver(String, String)
 	 */

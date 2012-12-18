@@ -26,14 +26,14 @@ import org.apache.velocity.runtime.log.LogSystem;
  * Velocity LogSystem implementation for Jakarta Commons Logging.
  * Used by VelocityConfigurer to redirect log output.
  *
- * <p><b>NOTE:</b> To be replaced by Velocity 1.5's <code>LogChute</code> mechanism
- * and Velocity 1.6's <code>CommonsLogLogChute</code> implementation once we
+ * <p><b>NOTE:</b> To be replaced by Velocity 1.5's {@code LogChute} mechanism
+ * and Velocity 1.6's {@code CommonsLogLogChute} implementation once we
  * upgrade to Velocity 1.6+ (likely Velocity 1.7+) in a future version of Spring.
  *
  * @author Juergen Hoeller
  * @since 07.08.2003
  * @see VelocityEngineFactoryBean
- * @deprecated as of Spring 3.2, in favor of Velocity 1.6's <code>CommonsLogLogChute</code>
+ * @deprecated as of Spring 3.2, in favor of Velocity 1.6's {@code CommonsLogLogChute}
  */
 @Deprecated
 public class CommonsLoggingLogSystem implements LogSystem {

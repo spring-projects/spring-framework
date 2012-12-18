@@ -188,7 +188,7 @@ public class MethodInvoker {
 
 	/**
 	 * Resolve the given class name into a Class.
-	 * <p>The default implementations uses <code>ClassUtils.forName</code>,
+	 * <p>The default implementations uses {@code ClassUtils.forName},
 	 * using the thread context class loader.
 	 * @param className the class name to resolve
 	 * @return the resolved Class
@@ -200,7 +200,7 @@ public class MethodInvoker {
 
 	/**
 	 * Find a matching method with the specified name for the specified arguments.
-	 * @return a matching method, or <code>null</code> if none
+	 * @return a matching method, or {@code null} if none
 	 * @see #getTargetClass()
 	 * @see #getTargetMethod()
 	 * @see #getArguments()
@@ -233,7 +233,7 @@ public class MethodInvoker {
 	/**
 	 * Return the prepared Method object that will be invoked.
 	 * <p>Can for example be used to determine the return type.
-	 * @return the prepared Method object (never <code>null</code>)
+	 * @return the prepared Method object (never {@code null})
 	 * @throws IllegalStateException if the invoker hasn't been prepared yet
 	 * @see #prepare
 	 * @see #invoke
@@ -257,13 +257,13 @@ public class MethodInvoker {
 	 * Invoke the specified method.
 	 * <p>The invoker needs to have been prepared before.
 	 * @return the object (possibly null) returned by the method invocation,
-	 * or <code>null</code> if the method has a void return type
+	 * or {@code null} if the method has a void return type
 	 * @throws InvocationTargetException if the target method threw an exception
 	 * @throws IllegalAccessException if the target method couldn't be accessed
 	 * @see #prepare
 	 */
 	public Object invoke() throws InvocationTargetException, IllegalAccessException {
-		// In the static case, target will simply be <code>null</code>.
+		// In the static case, target will simply be {@code null}.
 		Object targetObject = getTargetObject();
 		Method preparedMethod = getPreparedMethod();
 		if (targetObject == null && !Modifier.isStatic(preparedMethod.getModifiers())) {

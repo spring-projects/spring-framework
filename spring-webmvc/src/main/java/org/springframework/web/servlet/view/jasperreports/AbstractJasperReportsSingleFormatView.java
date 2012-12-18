@@ -29,12 +29,12 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Extends <code>AbstractJasperReportsView</code> to provide basic rendering logic
+ * Extends {@code AbstractJasperReportsView} to provide basic rendering logic
  * for views that use a fixed format, e.g. always PDF or always HTML.
  *
- * <p>Subclasses need to implement two template methods: <code>createExporter</code>
+ * <p>Subclasses need to implement two template methods: {@code createExporter}
  * to create a JasperReports exporter for a specific output format, and
- * <code>useWriter</code> to determine whether to write text or binary content.
+ * {@code useWriter} to determine whether to write text or binary content.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -75,7 +75,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	/**
 	 * We need to write text to the response Writer.
 	 * @param exporter the JasperReports exporter to use
-	 * @param populatedReport the populated <code>JasperPrint</code> to render
+	 * @param populatedReport the populated {@code JasperPrint} to render
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
@@ -100,7 +100,7 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	/**
 	 * We need to write binary output to the response OutputStream.
 	 * @param exporter the JasperReports exporter to use
-	 * @param populatedReport the populated <code>JasperPrint</code> to render
+	 * @param populatedReport the populated {@code JasperPrint} to render
 	 * @param response the HTTP response the report should be rendered to
 	 * @throws Exception if rendering failed
 	 */
@@ -117,15 +117,15 @@ public abstract class AbstractJasperReportsSingleFormatView extends AbstractJasp
 	/**
 	 * Create a JasperReports exporter for a specific output format,
 	 * which will be used to render the report to the HTTP response.
-	 * <p>The <code>useWriter</code> method determines whether the
+	 * <p>The {@code useWriter} method determines whether the
 	 * output will be written as text or as binary content.
 	 * @see #useWriter()
 	 */
 	protected abstract JRExporter createExporter();
 
 	/**
-	 * Return whether to use a <code>java.io.Writer</code> to write text content
-	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * Return whether to use a {@code java.io.Writer} to write text content
+	 * to the HTTP response. Else, a {@code java.io.OutputStream} will be used,
 	 * to write binary content to the response.
 	 * @see javax.servlet.ServletResponse#getWriter()
 	 * @see javax.servlet.ServletResponse#getOutputStream()

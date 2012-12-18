@@ -67,7 +67,7 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 
 	/**
 	 * Set the URIResolver used in the transform.
-	 * <p>The URIResolver handles calls to the XSLT <code>document()</code> function.
+	 * <p>The URIResolver handles calls to the XSLT {@code document()} function.
 	 */
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
@@ -89,7 +89,7 @@ public class XsltViewResolver extends UrlBasedViewResolver {
 	/**
 	 * Set whether the XSLT transformer may add additional whitespace when
 	 * outputting the result tree.
-	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
+	 * <p>Default is {@code true} (on); set this to {@code false} (off)
 	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */

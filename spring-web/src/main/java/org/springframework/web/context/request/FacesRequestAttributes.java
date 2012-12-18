@@ -41,7 +41,7 @@ import org.springframework.web.util.WebUtils;
  * <i>not</i> support destruction callbacks for scoped attributes, neither for the
  * request scope nor for the session scope. If you rely on such implicit destruction
  * callbacks, consider defining a Spring {@link RequestContextListener} in your
- * <code>web.xml</code>.
+ * {@code web.xml}.
  *
  * @author Juergen Hoeller
  * @since 2.5.2

@@ -1,4 +1,3 @@
-
 /**
  *
  * JdbcTemplate variant with named parameter support.
@@ -9,7 +8,7 @@
  * NamedParameterJdbcOperations interface.
  *
  * <P>If you need the full power of Spring JDBC for less common operations, use
- * the <code>getJdbcOperations()</code> method of NamedParameterJdbcTemplate and
+ * the {@code getJdbcOperations()} method of NamedParameterJdbcTemplate and
  * work with the returned classic template, or use a JdbcTemplate instance directly.
  *
  */

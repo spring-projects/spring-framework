@@ -43,7 +43,7 @@ import javax.resource.cci.ConnectionFactory;
  *
  * <p>Delegates to {@link ConnectionFactoryUtils} for automatically participating in
  * thread-bound transactions, for example managed by {@link CciLocalTransactionManager}.
- * <code>getConnection</code> calls and <code>close</code> calls on returned Connections
+ * {@code getConnection} calls and {@code close} calls on returned Connections
  * will behave properly within a transaction, i.e. always operate on the transactional
  * Connection. If not within a transaction, normal ConnectionFactory behavior applies.
  *
@@ -61,8 +61,8 @@ import javax.resource.cci.ConnectionFactory;
  * @since 1.2
  * @see javax.resource.cci.ConnectionFactory#getConnection
  * @see javax.resource.cci.Connection#close
- * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doGetConnection
- * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doReleaseConnection
+ * @see ConnectionFactoryUtils#doGetConnection
+ * @see ConnectionFactoryUtils#doReleaseConnection
  */
 public class TransactionAwareConnectionFactoryProxy extends DelegatingConnectionFactory {
 
@@ -97,12 +97,12 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 
 	/**
 	 * Wrap the given Connection with a proxy that delegates every method call to it
-	 * but delegates <code>close</code> calls to ConnectionFactoryUtils.
+	 * but delegates {@code close} calls to ConnectionFactoryUtils.
 	 * @param target the original Connection to wrap
 	 * @param cf ConnectionFactory that the Connection came from
 	 * @return the wrapped Connection
 	 * @see javax.resource.cci.Connection#close()
-	 * @see org.springframework.jca.cci.connection.ConnectionFactoryUtils#doReleaseConnection
+	 * @see ConnectionFactoryUtils#doReleaseConnection
 	 */
 	protected Connection getTransactionAwareConnectionProxy(Connection target, ConnectionFactory cf) {
 		return (Connection) Proxy.newProxyInstance(

@@ -24,11 +24,11 @@ import javax.servlet.http.HttpSessionListener;
 /**
  * Servlet 2.3 HttpSessionListener that automatically exposes the
  * session mutex when an HttpSession gets created.
- * To be registered as a listener in <code>web.xml</code>.
+ * To be registered as a listener in {@code web.xml}.
  *
  * <p>The session mutex is guaranteed to be the same object during
  * the entire lifetime of the session, available under the key defined
- * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+ * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
  * safe reference to synchronize on for locking on the current session.
  *
  * <p>In many cases, the HttpSession reference itself is a safe mutex

@@ -33,7 +33,7 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 
 	/**
 	 * Create a new StaticLabeledEnum instance.
-	 * @param label the label; if <code>null</code>), the enum's code
+	 * @param label the label; if {@code null}), the enum's code
 	 * will be used as label
 	 */
 	protected AbstractGenericLabeledEnum(String label) {

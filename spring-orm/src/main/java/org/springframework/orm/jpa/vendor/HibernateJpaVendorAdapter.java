@@ -95,7 +95,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	/**
 	 * Determine the Hibernate database dialect class for the given target database.
 	 * @param database the target database
-	 * @return the Hibernate database dialect class, or <code>null<code> if none found
+	 * @return the Hibernate database dialect class, or {@code null} if none found
 	 */
 	protected Class determineDatabaseDialectClass(Database database) {
 		switch (database) {

@@ -99,7 +99,7 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Order value for TransactionSynchronization objects that clean up Hibernate Sessions.
-	 * Returns <code>DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100</code>
+	 * Returns {@code DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100}
 	 * to execute Session cleanup before JDBC Connection cleanup, if any.
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
 	 */
@@ -115,7 +115,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Determine the DataSource of the given SessionFactory.
 	 * @param sessionFactory the SessionFactory to check
-	 * @return the DataSource, or <code>null</code> if none found
+	 * @return the DataSource, or {@code null} if none found
 	 * @see org.hibernate.engine.SessionFactoryImplementor#getConnectionProvider
 	 * @see LocalDataSourceConnectionProvider
 	 */
@@ -153,7 +153,7 @@ public abstract class SessionFactoryUtils {
 	 * SessionFactoryImplementor (the usual case), falling back to the
 	 * SessionFactory reference that the Session itself carries.
 	 * @param sessionFactory Hibernate SessionFactory
-	 * @param session Hibernate Session (can also be <code>null</code>)
+	 * @param session Hibernate Session (can also be {@code null})
 	 * @return the JTA TransactionManager, if any
 	 * @see javax.transaction.TransactionManager
 	 * @see SessionFactoryImplementor#getTransactionManager
@@ -179,9 +179,9 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using {@link HibernateTransactionManager}. Will create a new
-	 * Session otherwise, if "allowCreate" is <code>true</code>.
-	 * <p>This is the <code>getSession</code> method used by typical data access code,
-	 * in combination with <code>releaseSession</code> called when done with
+	 * Session otherwise, if "allowCreate" is {@code true}.
+	 * <p>This is the {@code getSession} method used by typical data access code,
+	 * in combination with {@code releaseSession} called when done with
 	 * the Session. Note that HibernateTemplate allows to write data access code
 	 * without caring about such resource handling.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
@@ -190,7 +190,7 @@ public abstract class SessionFactoryUtils {
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and
-	 * "allowCreate" is <code>false</code>
+	 * "allowCreate" is {@code false}
 	 * @see #getSession(SessionFactory, Interceptor, SQLExceptionTranslator)
 	 * @see #releaseSession
 	 * @see HibernateTemplate
@@ -217,9 +217,9 @@ public abstract class SessionFactoryUtils {
 	 * (i.e. on LocalSessionFactoryBean), on HibernateTransactionManager, or on
 	 * HibernateInterceptor/HibernateTemplate.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
+	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
-	 * Session on transaction synchronization (may be <code>null</code>; only used
+	 * Session on transaction synchronization (may be {@code null}; only used
 	 * when actually registering a transaction synchronization)
 	 * @return the Hibernate Session
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
@@ -243,7 +243,7 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using {@link HibernateTransactionManager}. Will create a new
-	 * Session otherwise, if "allowCreate" is <code>true</code>.
+	 * Session otherwise, if "allowCreate" is {@code true}.
 	 * <p>Throws the original HibernateException, in contrast to {@link #getSession}.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
 	 * @param allowCreate whether a non-transactional Session should be created
@@ -262,18 +262,18 @@ public abstract class SessionFactoryUtils {
 	 * Get a Hibernate Session for the given SessionFactory. Is aware of and will
 	 * return any existing corresponding Session bound to the current thread, for
 	 * example when using {@link HibernateTransactionManager}. Will create a new
-	 * Session otherwise, if "allowCreate" is <code>true</code>.
+	 * Session otherwise, if "allowCreate" is {@code true}.
 	 * <p>Same as {@link #getSession}, but throwing the original HibernateException.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
+	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
-	 * Session on transaction synchronization (may be <code>null</code>)
+	 * Session on transaction synchronization (may be {@code null})
 	 * @param allowCreate whether a non-transactional Session should be created
 	 * when no transactional Session can be found for the current thread
 	 * @return the Hibernate Session
 	 * @throws HibernateException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and
-	 * "allowCreate" is <code>false</code>
+	 * "allowCreate" is {@code false}
 	 */
 	private static Session doGetSession(
 			SessionFactory sessionFactory, Interceptor entityInterceptor,
@@ -366,7 +366,7 @@ public abstract class SessionFactoryUtils {
 	 * @param sessionHolder the SessionHolder to check
 	 * @param sessionFactory the SessionFactory to get the JTA TransactionManager from
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
-	 * Session on transaction synchronization (may be <code>null</code>)
+	 * Session on transaction synchronization (may be {@code null})
 	 * @return the associated Session, if any
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 */
@@ -438,7 +438,7 @@ public abstract class SessionFactoryUtils {
 	 * @param session the Session to register
 	 * @param sessionFactory the SessionFactory that the Session was created with
 	 * @param jdbcExceptionTranslator SQLExcepionTranslator to use for flushing the
-	 * Session on transaction synchronization (may be <code>null</code>)
+	 * Session on transaction synchronization (may be {@code null})
 	 */
 	private static void registerJtaSynchronization(Session session, SessionFactory sessionFactory,
 			SQLExceptionTranslator jdbcExceptionTranslator, SessionHolder sessionHolder) {
@@ -504,7 +504,7 @@ public abstract class SessionFactoryUtils {
 	 * that shares the transaction's JDBC Connection. More specifically,
 	 * it will use the same JDBC Connection as the pre-bound Hibernate Session.
 	 * @param sessionFactory Hibernate SessionFactory to create the session with
-	 * @param entityInterceptor Hibernate entity interceptor, or <code>null</code> if none
+	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @return the new Session
 	 */
 	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {
@@ -537,10 +537,10 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Stringify the given Session for debug logging.
-	 * Returns output equivalent to <code>Object.toString()</code>:
+	 * Returns output equivalent to {@code Object.toString()}:
 	 * the fully qualified class name + "@" + the identity hash code.
 	 * <p>The sole reason why this is necessary is because Hibernate3's
-	 * <code>Session.toString()</code> implementation is broken (and won't be fixed):
+	 * {@code Session.toString()} implementation is broken (and won't be fixed):
 	 * it logs the toString representation of all persistent objects in the Session,
 	 * which might lead to ConcurrentModificationExceptions if the persistent objects
 	 * in turn refer to the Session (for example, for lazy loading).
@@ -554,7 +554,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Return whether there is a transactional Hibernate Session for the current thread,
 	 * that is, a Session bound to the current thread by Spring's transaction facilities.
-	 * @param sessionFactory Hibernate SessionFactory to check (may be <code>null</code>)
+	 * @param sessionFactory Hibernate SessionFactory to check (may be {@code null})
 	 * @return whether there is a transactional Session for current thread
 	 */
 	public static boolean hasTransactionalSession(SessionFactory sessionFactory) {
@@ -571,7 +571,7 @@ public abstract class SessionFactoryUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param session the Hibernate Session to check
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return whether the Session is transactional
 	 */
 	public static boolean isSessionTransactional(Session session, SessionFactory sessionFactory) {
@@ -588,7 +588,7 @@ public abstract class SessionFactoryUtils {
 	 * Hibernate Query object.
 	 * @param query the Hibernate Query object
 	 * @param sessionFactory Hibernate SessionFactory that the Query was created for
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @see org.hibernate.Query#setTimeout
 	 */
 	public static void applyTransactionTimeout(Query query, SessionFactory sessionFactory) {
@@ -620,7 +620,7 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy.
+	 * from the {@code org.springframework.dao} hierarchy.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateAccessor#convertHibernateAccessException
@@ -753,9 +753,9 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Close the given Session, created via the given factory,
 	 * if it is not managed externally (i.e. not bound to the thread).
-	 * @param session the Hibernate Session to close (may be <code>null</code>)
+	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public static void releaseSession(Session session, SessionFactory sessionFactory) {
 		if (session == null) {
@@ -771,7 +771,7 @@ public abstract class SessionFactoryUtils {
 	 * Close the given Session or register it for deferred close.
 	 * @param session the Hibernate Session to close
 	 * @param sessionFactory Hibernate SessionFactory that the Session was created with
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @see #initDeferredClose
 	 * @see #processDeferredClose
 	 */
@@ -792,7 +792,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Perform actual closing of the Hibernate Session,
 	 * catching and logging any cleanup exceptions thrown.
-	 * @param session the Hibernate Session to close (may be <code>null</code>)
+	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @see org.hibernate.Session#close()
 	 */
 	public static void closeSession(Session session) {

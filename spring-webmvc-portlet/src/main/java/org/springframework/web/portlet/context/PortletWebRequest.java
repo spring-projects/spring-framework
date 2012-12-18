@@ -142,7 +142,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	/**
 	 * Last-modified handling not supported for portlet requests:
-	 * As a consequence, this method always returns <code>false</code>.
+	 * As a consequence, this method always returns {@code false}.
 	 */
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		return false;
@@ -150,7 +150,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	/**
 	 * Last-modified handling not supported for portlet requests:
-	 * As a consequence, this method always returns <code>false</code>.
+	 * As a consequence, this method always returns {@code false}.
 	 */
 	public boolean checkNotModified(String eTag) {
 		return false;

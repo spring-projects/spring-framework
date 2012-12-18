@@ -29,7 +29,7 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  *
  * <p>Using the RMI invoker mechanism, RMI communication operates at the {@link RmiInvocationHandler}
  * level, sharing a common invoker stub for any number of services. Service interfaces are <i>not</i>
- * required to extend <code>java.rmi.Remote</code> or declare <code>java.rmi.RemoteException</code>
+ * required to extend {@code java.rmi.Remote} or declare {@code java.rmi.RemoteException}
  * on all service methods. However, in and out parameters still have to be serializable.
  *
  * @author Juergen Hoeller

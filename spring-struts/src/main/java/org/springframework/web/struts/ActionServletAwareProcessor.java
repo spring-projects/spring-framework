@@ -25,7 +25,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
  * {@link org.springframework.beans.factory.config.BeanPostProcessor}
  * implementation that passes the ActionServlet to beans that extend
  * the Struts {@link org.apache.struts.action.Action} class.
- * Invokes <code>Action.setServlet</code> with <code>null</dode> on
+ * Invokes {@code Action.setServlet} with {@code null} on
  * bean destruction, providing the same lifecycle handling as the
  * native Struts ActionServlet.
  *

@@ -21,7 +21,7 @@ import org.w3c.dom.Element;
 import org.springframework.beans.factory.xml.AbstractSimpleBeanDefinitionParser;
 
 /**
- * Parser for the <code>&lt;oxm:castor-marshaller/&gt;</code> element.
+ * Parser for the {@code &lt;oxm:castor-marshaller/&gt;} element.
  *
  * @author Jakub Narloch
  * @since 3.1

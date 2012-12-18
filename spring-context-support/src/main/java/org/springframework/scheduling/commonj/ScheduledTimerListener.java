@@ -179,7 +179,7 @@ public class ScheduledTimerListener {
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) <i>is</i>
 	 * supported, because the CommonJ specification defines this as a legal value.
 	 * Hence a value of 0 will result in immediate re-execution after a job has
-	 * finished (not in one-time execution like with <code>java.util.Timer</code>).
+	 * finished (not in one-time execution like with {@code java.util.Timer}).
 	 * @see #setFixedRate
 	 * @see #isOneTimeTask()
 	 * @see commonj.timers.TimerManager#schedule(commonj.timers.TimerListener, long, long)
@@ -197,7 +197,7 @@ public class ScheduledTimerListener {
 
 	/**
 	 * Is this task only ever going to execute once?
-	 * @return <code>true</code> if this task is only ever going to execute once
+	 * @return {@code true} if this task is only ever going to execute once
 	 * @see #getPeriod()
 	 */
 	public boolean isOneTimeTask() {

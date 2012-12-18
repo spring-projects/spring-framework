@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * <p>Subclasses may also need a custom metadata resolution strategy, in the
  * {@link BeanWiringInfoResolver} interface. The default implementation looks
  * for a bean with the same name as the fully-qualified class name. (This is
- * the default name of the bean in a Spring XML file if the '<code>id</code>'
+ * the default name of the bean in a Spring XML file if the '{@code id}'
  * attribute is not used.)
 
  * @author Rob Harrop
@@ -87,7 +87,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * Create the default BeanWiringInfoResolver to be used if none was
 	 * specified explicitly.
 	 * <p>The default implementation builds a {@link ClassNameBeanWiringInfoResolver}.
-	 * @return the default BeanWiringInfoResolver (never <code>null</code>)
+	 * @return the default BeanWiringInfoResolver (never {@code null})
 	 */
 	protected BeanWiringInfoResolver createDefaultBeanWiringInfoResolver() {
 		return new ClassNameBeanWiringInfoResolver();
@@ -115,7 +115,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * <p>Subclasses can override this to provide custom configuration logic.
 	 * Typically called by an aspect, for all bean instances matched by a
 	 * pointcut.
-	 * @param beanInstance the bean instance to configure (must <b>not</b> be <code>null</code>)
+	 * @param beanInstance the bean instance to configure (must <b>not</b> be {@code null})
 	 */
 	public void configureBean(Object beanInstance) {
 		if (this.beanFactory == null) {

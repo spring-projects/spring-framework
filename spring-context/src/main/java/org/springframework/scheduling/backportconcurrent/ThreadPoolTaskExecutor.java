@@ -130,7 +130,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
@@ -188,7 +188,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue
@@ -243,7 +243,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 
 	/**
-	 * Calls <code>initialize()</code> after the container applied all property values.
+	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
 	public void afterPropertiesSet() {
@@ -290,7 +290,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Return the underlying ThreadPoolExecutor for native access.
-	 * @return the underlying ThreadPoolExecutor (never <code>null</code>)
+	 * @return the underlying ThreadPoolExecutor (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskExecutor hasn't been initialized yet
 	 */
 	public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {
@@ -357,7 +357,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 
 	/**
-	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * Calls {@code shutdown} when the BeanFactory destroys
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */

@@ -30,7 +30,7 @@ import org.springframework.web.servlet.support.RequestContext;
 /**
  * Superclass for all tags that require a {@link RequestContext}.
  *
- * <p>The <code>RequestContext</code> instance provides easy access
+ * <p>The {@code RequestContext} instance provides easy access
  * to current state like the
  * {@link org.springframework.web.context.WebApplicationContext},
  * the {@link java.util.Locale}, the
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *
  * <p>Mainly intended for
  * {@link org.springframework.web.servlet.DispatcherServlet} requests;
- * will use fallbacks when used outside <code>DispatcherServlet</code>.
+ * will use fallbacks when used outside {@code DispatcherServlet}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

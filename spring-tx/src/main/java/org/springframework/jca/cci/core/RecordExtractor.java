@@ -49,7 +49,7 @@ public interface RecordExtractor<T> {
 	 * Process the data in the given Record, creating a corresponding result object.
 	 * @param record the Record to extract data from
 	 * (possibly a CCI ResultSet)
-	 * @return an arbitrary result object, or <code>null</code> if none
+	 * @return an arbitrary result object, or {@code null} if none
 	 * (the extractor will typically be stateful in the latter case)
 	 * @throws ResourceException if thrown by a CCI method, to be auto-converted
 	 * to a DataAccessException

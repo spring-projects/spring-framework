@@ -44,9 +44,9 @@ public interface ProducerCallback<T> {
 	 * Perform operations on the given {@link Session} and {@link MessageProducer}.
 	 * <p>The message producer is not associated with any destination unless
 	 * when specified in the JmsTemplate call.
-	 * @param session the JMS <code>Session</code> object to use
-	 * @param producer the JMS <code>MessageProducer</code> object to use
-	 * @return a result object from working with the <code>Session</code>, if any (can be <code>null</code>)
+	 * @param session the JMS {@code Session} object to use
+	 * @param producer the JMS {@code MessageProducer} object to use
+	 * @return a result object from working with the {@code Session}, if any (can be {@code null})
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	T doInJms(Session session, MessageProducer producer) throws JMSException;

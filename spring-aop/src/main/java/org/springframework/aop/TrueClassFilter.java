@@ -40,7 +40,7 @@ class TrueClassFilter implements ClassFilter, Serializable {
 	/**
 	 * Required to support serialization. Replaces with canonical
 	 * instance on deserialization, protecting Singleton pattern.
-	 * Alternative to overriding <code>equals()</code>.
+	 * Alternative to overriding {@code equals()}.
 	 */
 	private Object readResolve() {
 		return INSTANCE;

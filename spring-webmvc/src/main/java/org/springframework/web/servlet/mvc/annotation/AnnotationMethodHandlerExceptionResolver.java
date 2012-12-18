@@ -154,7 +154,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * Finds the handler method that matches the thrown exception best.
 	 * @param handler the handler object
 	 * @param thrownException the exception to be handled
-	 * @return the best matching method; or <code>null</code> if none is found
+	 * @return the best matching method; or {@code null} if none is found
 	 */
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
 		final Class<?> handlerType = ClassUtils.getUserClass(handler);

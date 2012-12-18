@@ -62,7 +62,7 @@ import org.springframework.web.util.WebUtils;
  * {@link #isEligibleProperty(String, Object)} method.
  *
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
- * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
+ * suitable for HttpServletResponse's {@code sendRedirect} method, which
  * is what actually does the redirect if the HTTP 1.0 flag is on, or via sending
  * back an HTTP 303 code - if the HTTP 1.0 compatibility flag is off.
  *
@@ -75,7 +75,7 @@ import org.springframework.web.util.WebUtils;
  * paths which are to be considered relative to the web application root.
  *
  * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
- * that your controller respects the Portlet <code>sendRedirect</code> constraints.
+ * that your controller respects the Portlet {@code sendRedirect} constraints.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -185,7 +185,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Set whether to stay compatible with HTTP 1.0 clients.
 	 * <p>In the default implementation, this will enforce HTTP status code 302
-	 * in any case, i.e. delegate to <code>HttpServletResponse.sendRedirect</code>.
+	 * in any case, i.e. delegate to {@code HttpServletResponse.sendRedirect}.
 	 * Turning this off will send HTTP status code 303, which is the correct
 	 * code for HTTP 1.1 clients, but not understood by HTTP 1.0 clients.
 	 * <p>Many HTTP 1.1 clients treat 302 just like 303, not making any
@@ -198,9 +198,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
-	 * Set the <code>exposeModelAttributes</code> flag which denotes whether
+	 * Set the {@code exposeModelAttributes} flag which denotes whether
 	 * or not model attributes should be exposed as HTTP query parameters.
-	 * <p>Defaults to <code>true</code>.
+	 * <p>Defaults to {@code true}.
 	 */
 	public void setExposeModelAttributes(final boolean exposeModelAttributes) {
 		this.exposeModelAttributes = exposeModelAttributes;
@@ -226,10 +226,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * Whether to treat the redirect URL as a URI template.
-	 * Set this flag to <code>false</code> if the redirect URL contains open
+	 * Set this flag to {@code false} if the redirect URL contains open
 	 * and close curly braces "{", "}" and you don't want them interpreted
 	 * as URI variables.
-	 * <p>Defaults to <code>true</code>.
+	 * <p>Defaults to {@code true}.
 	 */
 	public void setExpandUriTemplateVariables(boolean expandUriTemplateVariables) {
 		this.expandUriTemplateVariables = expandUriTemplateVariables;
@@ -486,7 +486,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>The default implementation uses <code>URLEncoder.encode(input, enc)</code>.
+	 * <p>The default implementation uses {@code URLEncoder.encode(input, enc)}.
 	 * @param input the unencoded input String
 	 * @param encodingScheme the encoding scheme
 	 * @return the encoded output String

@@ -37,9 +37,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * {@link FactoryBean} that creates a JMX 1.2 <code>MBeanServerConnection</code>
- * to a remote <code>MBeanServer</code> exposed via a <code>JMXServerConnector</code>.
- * Exposes the <code>MBeanServer</code> for bean references.
+ * {@link FactoryBean} that creates a JMX 1.2 {@code MBeanServerConnection}
+ * to a remote {@code MBeanServer} exposed via a {@code JMXServerConnector}.
+ * Exposes the {@code MBeanServer} for bean references.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -68,23 +68,23 @@ public class MBeanServerConnectionFactoryBean
 
 
 	/**
-	 * Set the service URL of the remote <code>MBeanServer</code>.
+	 * Set the service URL of the remote {@code MBeanServer}.
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
 	}
 
 	/**
-	 * Set the environment properties used to construct the <code>JMXConnector</code>
-	 * as <code>java.util.Properties</code> (String key/value pairs).
+	 * Set the environment properties used to construct the {@code JMXConnector}
+	 * as {@code java.util.Properties} (String key/value pairs).
 	 */
 	public void setEnvironment(Properties environment) {
 		CollectionUtils.mergePropertiesIntoMap(environment, this.environment);
 	}
 
 	/**
-	 * Set the environment properties used to construct the <code>JMXConnector</code>
-	 * as a <code>Map</code> of String keys and arbitrary Object values.
+	 * Set the environment properties used to construct the {@code JMXConnector}
+	 * as a {@code Map} of String keys and arbitrary Object values.
 	 */
 	public void setEnvironmentMap(Map<String, ?> environment) {
 		if (environment != null) {
@@ -107,8 +107,8 @@ public class MBeanServerConnectionFactoryBean
 
 
 	/**
-	 * Creates a <code>JMXConnector</code> for the given settings
-	 * and exposes the associated <code>MBeanServerConnection</code>.
+	 * Creates a {@code JMXConnector} for the given settings
+	 * and exposes the associated {@code MBeanServerConnection}.
 	 */
 	public void afterPropertiesSet() throws IOException {
 		if (this.serviceUrl == null) {
@@ -124,7 +124,7 @@ public class MBeanServerConnectionFactoryBean
 	}
 
 	/**
-	 * Connects to the remote <code>MBeanServer</code> using the configured service URL and
+	 * Connects to the remote {@code MBeanServer} using the configured service URL and
 	 * environment properties.
 	 */
 	private void connect() throws IOException {
@@ -133,7 +133,7 @@ public class MBeanServerConnectionFactoryBean
 	}
 
 	/**
-	 * Creates lazy proxies for the <code>JMXConnector</code> and <code>MBeanServerConnection</code>
+	 * Creates lazy proxies for the {@code JMXConnector} and {@code MBeanServerConnection}
 	 */
 	private void createLazyConnection() {
 		this.connectorTargetSource = new JMXConnectorLazyInitTargetSource();
@@ -160,7 +160,7 @@ public class MBeanServerConnectionFactoryBean
 
 
 	/**
-	 * Closes the underlying <code>JMXConnector</code>.
+	 * Closes the underlying {@code JMXConnector}.
 	 */
 	public void destroy() throws IOException {
 		if (this.connectorTargetSource == null || this.connectorTargetSource.isInitialized()) {
@@ -170,7 +170,7 @@ public class MBeanServerConnectionFactoryBean
 
 
 	/**
-	 * Lazily creates a <code>JMXConnector</code> using the configured service URL
+	 * Lazily creates a {@code JMXConnector} using the configured service URL
 	 * and environment properties.
 	 * @see MBeanServerConnectionFactoryBean#setServiceUrl(String)
 	 * @see MBeanServerConnectionFactoryBean#setEnvironment(java.util.Properties)
@@ -190,7 +190,7 @@ public class MBeanServerConnectionFactoryBean
 
 
 	/**
-	 * Lazily creates an <code>MBeanServerConnection</code>.
+	 * Lazily creates an {@code MBeanServerConnection}.
 	 */
 	private class MBeanServerConnectionLazyInitTargetSource extends AbstractLazyCreationTargetSource {
 

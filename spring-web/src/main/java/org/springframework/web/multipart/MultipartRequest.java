@@ -45,7 +45,7 @@ public interface MultipartRequest {
 
 	/**
 	 * Return the contents plus description of an uploaded file in this request,
-	 * or <code>null</code> if it does not exist.
+	 * or {@code null} if it does not exist.
 	 * @param name a String specifying the parameter name of the multipart file
 	 * @return the uploaded content in the form of a {@link MultipartFile} object
 	 */
@@ -78,7 +78,7 @@ public interface MultipartRequest {
 	/**
 	 * Determine the content type of the specified request part.
 	 * @param paramOrFileName the name of the part
-	 * @return the associated content type, or <code>null</code> if not defined
+	 * @return the associated content type, or {@code null} if not defined
 	 * @since 3.1
 	 */
 	String getMultipartContentType(String paramOrFileName);

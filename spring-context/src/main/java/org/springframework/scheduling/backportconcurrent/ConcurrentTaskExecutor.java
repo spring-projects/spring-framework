@@ -29,7 +29,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Adapter that takes a JSR-166 backport
- * <code>edu.emory.mathcs.backport.java.util.concurrent.Executor</code> and
+ * {@code edu.emory.mathcs.backport.java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  *
  * <p><b>NOTE:</b> This class implements Spring's

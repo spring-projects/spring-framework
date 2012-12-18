@@ -205,7 +205,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 
 
 	/**
-	 * Invokes the <code>create()</code> method on the cached EJB home object.
+	 * Invokes the {@code create()} method on the cached EJB home object.
 	 * @return a new EJBObject or EJBLocalObject
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method

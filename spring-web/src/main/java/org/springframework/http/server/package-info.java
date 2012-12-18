@@ -1,9 +1,8 @@
-
 /**
  *
  * Contains an abstraction over server-side HTTP. This package
- * contains the <code>ServerHttpRequest</code> and
- * <code>ServerHttpResponse</code>, as well as a Servlet-based implementation of these
+ * contains the {@code ServerHttpRequest} and
+ * {@code ServerHttpResponse}, as well as a Servlet-based implementation of these
  * interfaces.
  *
  */

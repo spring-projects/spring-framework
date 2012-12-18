@@ -62,7 +62,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
 	 * JdbcTemplate.
-	 * @param dataSource the <code>DataSource</code> to use
+	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcCall(DataSource dataSource) {
@@ -71,7 +71,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 	/**
 	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the <code>JdbcTemplate</code> to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {

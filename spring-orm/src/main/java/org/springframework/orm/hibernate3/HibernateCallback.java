@@ -24,9 +24,9 @@ import org.hibernate.Session;
 /**
  * Callback interface for Hibernate code. To be used with {@link HibernateTemplate}'s
  * execution methods, often as anonymous classes within a method implementation.
- * A typical implementation will call <code>Session.load/find/update</code> to perform
+ * A typical implementation will call {@code Session.load/find/update} to perform
  * some operations on persistent objects. It can also perform direct JDBC operations
- * via Hibernate's <code>Session.connection()</code>, operating on a JDBC Connection.
+ * via Hibernate's {@code Session.connection()}, operating on a JDBC Connection.
  *
  * <p>Note that Hibernate works on unmodified plain Java objects, performing dirty
  * detection via copies made at load time. Returned objects can thus be used outside
@@ -44,9 +44,9 @@ import org.hibernate.Session;
 public interface HibernateCallback<T> {
 
 	/**
-	 * Gets called by <code>HibernateTemplate.execute</code> with an active
-	 * Hibernate <code>Session</code>. Does not need to care about activating
-	 * or closing the <code>Session</code>, or handling transactions.
+	 * Gets called by {@code HibernateTemplate.execute} with an active
+	 * Hibernate {@code Session}. Does not need to care about activating
+	 * or closing the {@code Session}, or handling transactions.
 	 *
 	 * <p>If called without a thread-bound Hibernate transaction (initiated
 	 * by HibernateTransactionManager), the code will simply get executed on the
@@ -60,7 +60,7 @@ public interface HibernateCallback<T> {
 	 * It gets propagated to the caller of the template.
 	 *
 	 * @param session active Hibernate session
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws HibernateException if thrown by the Hibernate API
 	 * @throws SQLException if thrown by Hibernate-exposed JDBC API
 	 * @see HibernateTemplate#execute

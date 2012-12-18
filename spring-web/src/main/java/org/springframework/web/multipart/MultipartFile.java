@@ -38,7 +38,7 @@ public interface MultipartFile {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
-	 * @return the name of the parameter (never <code>null</code> or empty)
+	 * @return the name of the parameter (never {@code null} or empty)
 	 */
 	String getName();
 
@@ -47,14 +47,14 @@ public interface MultipartFile {
 	 * <p>This may contain path information depending on the browser used,
 	 * but it typically will not with any other than Opera.
 	 * @return the original filename, or the empty String if no file
-	 * has been chosen in the multipart form, or <code>null</code>
+	 * has been chosen in the multipart form, or {@code null}
 	 * if not defined or not available
 	 */
 	String getOriginalFilename();
 
 	/**
 	 * Return the content type of the file.
-	 * @return the content type, or <code>null</code> if not defined
+	 * @return the content type, or {@code null} if not defined
 	 * (or no file has been chosen in the multipart form)
 	 */
 	String getContentType();

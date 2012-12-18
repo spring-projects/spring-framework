@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * to the resulting bean.
  *
  * <p>This base class controls the creation of the {@link ProxyFactoryBean} bean definition
- * and wraps the original as an inner-bean definition for the <code>target</code> property
+ * and wraps the original as an inner-bean definition for the {@code target} property
  * of {@link ProxyFactoryBean}.
  *
  * <p>Chaining is correctly handled, ensuring that only one {@link ProxyFactoryBean} definition
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * already created the {@link org.springframework.aop.framework.ProxyFactoryBean} then the
  * interceptor is simply added to the existing definition.
  *
- * <p>Subclasses have only to create the <code>BeanDefinition</code> to the interceptor that
+ * <p>Subclasses have only to create the {@code BeanDefinition} to the interceptor that
  * they wish to add.
  *
  * @author Rob Harrop
@@ -118,7 +118,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	}
 
 	/**
-	 * Subclasses should implement this method to return the <code>BeanDefinition</code>
+	 * Subclasses should implement this method to return the {@code BeanDefinition}
 	 * for the interceptor they wish to apply to the bean being decorated.
 	 */
 	protected abstract BeanDefinition createInterceptorDefinition(Node node);

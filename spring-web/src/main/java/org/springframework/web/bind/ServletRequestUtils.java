@@ -45,11 +45,11 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get an Integer parameter, or <code>null</code> if not present.
+	 * Get an Integer parameter, or {@code null} if not present.
 	 * Throws an exception if it the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the Integer value, or <code>null</code> if not present
+	 * @return the Integer value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
@@ -123,11 +123,11 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get a Long parameter, or <code>null</code> if not present.
+	 * Get a Long parameter, or {@code null} if not present.
 	 * Throws an exception if it the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the Long value, or <code>null</code> if not present
+	 * @return the Long value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
@@ -201,11 +201,11 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get a Float parameter, or <code>null</code> if not present.
+	 * Get a Float parameter, or {@code null} if not present.
 	 * Throws an exception if it the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the Float value, or <code>null</code> if not present
+	 * @return the Float value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
@@ -279,11 +279,11 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get a Double parameter, or <code>null</code> if not present.
+	 * Get a Double parameter, or {@code null} if not present.
 	 * Throws an exception if it the parameter value isn't a number.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the Double value, or <code>null</code> if not present
+	 * @return the Double value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
@@ -357,13 +357,13 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get a Boolean parameter, or <code>null</code> if not present.
+	 * Get a Boolean parameter, or {@code null} if not present.
 	 * Throws an exception if it the parameter value isn't a boolean.
 	 * <p>Accepts "true", "on", "yes" (any case) and "1" as values for true;
 	 * treats every other non-empty value as false (i.e. parses leniently).
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the Boolean value, or <code>null</code> if not present
+	 * @return the Boolean value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */
@@ -447,10 +447,10 @@ public abstract class ServletRequestUtils {
 
 
 	/**
-	 * Get a String parameter, or <code>null</code> if not present.
+	 * Get a String parameter, or {@code null} if not present.
 	 * @param request current HTTP request
 	 * @param name the name of the parameter
-	 * @return the String value, or <code>null</code> if not present
+	 * @return the String value, or {@code null} if not present
 	 * @throws ServletRequestBindingException a subclass of ServletException,
 	 * so it doesn't need to be caught
 	 */

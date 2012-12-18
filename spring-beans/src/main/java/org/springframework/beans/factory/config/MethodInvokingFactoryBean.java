@@ -194,7 +194,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	/**
 	 * Return the type of object that this FactoryBean creates,
-	 * or <code>null</code> if not known in advance.
+	 * or {@code null} if not known in advance.
 	 */
 	public Class<?> getObjectType() {
 		if (!isPrepared()) {

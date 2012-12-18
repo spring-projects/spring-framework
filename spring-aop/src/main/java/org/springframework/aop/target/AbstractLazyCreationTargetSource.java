@@ -26,7 +26,7 @@ import org.springframework.aop.TargetSource;
  * lazily create a user-managed object.
  *
  * <p>Creation of the lazy target object is controlled by the user by implementing
- * the {@link #createObject()} method. This <code>TargetSource</code> will invoke
+ * the {@link #createObject()} method. This {@code TargetSource} will invoke
  * this method the first time the proxy is accessed.
  *
  * <p>Useful when you need to pass a reference to some dependency to an object
@@ -57,11 +57,11 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	}
 
 	/**
-	 * This default implementation returns <code>null</code> if the
-	 * target is <code>null</code> (it is hasn't yet been initialized),
+	 * This default implementation returns {@code null} if the
+	 * target is {@code null} (it is hasn't yet been initialized),
 	 * or the target class if the target has already been initialized.
 	 * <p>Subclasses may wish to override this method in order to provide
-	 * a meaningful value when the target is still <code>null</code>.
+	 * a meaningful value when the target is still {@code null}.
 	 * @see #isInitialized()
 	 */
 	public synchronized Class<?> getTargetClass() {

@@ -72,7 +72,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	}
 
 	/**
-	 * Create a new <code>AspectJProxyFactory</code>.
+	 * Create a new {@code AspectJProxyFactory}.
 	 * No target, only interfaces. Must add interceptors.
 	 */
 	public AspectJProxyFactory(Class[] interfaces) {

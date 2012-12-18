@@ -23,11 +23,11 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 /**
  * Interface to be implemented for setting values for more complex database-specific
- * types not supported by the standard <code>setObject</code> method. This is
+ * types not supported by the standard {@code setObject} method. This is
  * effectively an extended variant of {@link org.springframework.jdbc.support.SqlValue}.
  *
  * <p>Implementations perform the actual work of setting the actual values. They must
- * implement the callback method <code>setTypeValue</code> which can throw SQLExceptions
+ * implement the callback method {@code setTypeValue} which can throw SQLExceptions
  * that will be caught and translated by the calling code. This callback method has
  * access to the underlying Connection via the given PreparedStatement object, if that
  * should be needed to create any database-specific objects.
@@ -44,7 +44,7 @@ public interface SqlTypeValue {
 
 	/**
 	 * Constant that indicates an unknown (or unspecified) SQL type.
-	 * Passed into <code>setTypeValue</code> if the original operation method
+	 * Passed into {@code setTypeValue} if the original operation method
 	 * does not specify a SQL type.
 	 * @see java.sql.Types
 	 * @see JdbcOperations#update(String, Object[])

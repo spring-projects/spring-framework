@@ -34,7 +34,7 @@ public interface HttpInvokerClientConfiguration {
 	/**
 	 * Return the codebase URL to download classes from if not found locally.
 	 * Can consist of multiple URLs, separated by spaces.
-	 * @return the codebase URL, or <code>null</code> if none
+	 * @return the codebase URL, or {@code null} if none
 	 * @see java.rmi.server.RMIClassLoader
 	 */
 	String getCodebaseUrl();

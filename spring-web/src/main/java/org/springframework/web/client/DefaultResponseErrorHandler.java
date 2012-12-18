@@ -68,7 +68,7 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * or {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR SERVER_ERROR}.
 	 * Can be overridden in subclasses.
 	 * @param statusCode the HTTP status code
-	 * @return <code>true</code> if the response has an error; <code>false</code> otherwise
+	 * @return {@code true} if the response has an error; {@code false} otherwise
 	 */
 	protected boolean hasError(HttpStatus statusCode) {
 		return (statusCode.series() == HttpStatus.Series.CLIENT_ERROR ||

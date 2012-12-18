@@ -49,8 +49,8 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
- * its config parameters (<code>init-param</code> entries within the
- * <code>servlet</code> tag in <code>web.xml</code>) as bean properties.
+ * its config parameters ({@code init-param} entries within the
+ * {@code servlet} tag in {@code web.xml}) as bean properties.
  *
  * <p>A handy superclass for any type of servlet. Type conversion of config
  * parameters is automatic, with the corresponding setter method getting
@@ -59,7 +59,7 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * setter will simply be ignored.
  *
  * <p>This servlet leaves request handling to subclasses, inheriting the default
- * behavior of HttpServlet (<code>doGet</code>, <code>doPost</code>, etc).
+ * behavior of HttpServlet ({@code doGet}, {@code doPost}, etc).
  *
  * <p>This generic servlet base class has no dependency on the Spring
  * {@link org.springframework.context.ApplicationContext} concept. Simple
@@ -155,7 +155,7 @@ public abstract class HttpServletBean extends HttpServlet
 
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */
@@ -165,7 +165,7 @@ public abstract class HttpServletBean extends HttpServlet
 	}
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */

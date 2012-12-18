@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
 public @interface ManagedResource {
 
 	/**
-	 * The annotation value is equivalent to the <code>objectName</code>
+	 * The annotation value is equivalent to the {@code objectName}
 	 * attribute, for simple default usage.
 	 */
 	String value() default "";

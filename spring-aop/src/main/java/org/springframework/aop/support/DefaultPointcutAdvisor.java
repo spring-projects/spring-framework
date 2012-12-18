@@ -42,14 +42,14 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
 	 * <p>Advice must be set before use using setter methods.
-	 * Pointcut will normally be set also, but defaults to <code>Pointcut.TRUE</code>.
+	 * Pointcut will normally be set also, but defaults to {@code Pointcut.TRUE}.
 	 */
 	public DefaultPointcutAdvisor() {
 	}
 
 	/**
 	 * Create a DefaultPointcutAdvisor that matches all methods.
-	 * <p><code>Pointcut.TRUE</code> will be used as Pointcut.
+	 * <p>{@code Pointcut.TRUE} will be used as Pointcut.
 	 * @param advice the Advice to use
 	 */
 	public DefaultPointcutAdvisor(Advice advice) {
@@ -69,7 +69,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
 	/**
 	 * Specify the pointcut targeting the advice.
-	 * <p>Default is <code>Pointcut.TRUE</code>.
+	 * <p>Default is {@code Pointcut.TRUE}.
 	 * @see #setAdvice
 	 */
 	public void setPointcut(Pointcut pointcut) {

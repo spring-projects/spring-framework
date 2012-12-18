@@ -45,7 +45,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional read-only execution.
  *
  * <p>Looks up the PersistenceManagerFactory in Spring's root web application context.
- * Supports a "persistenceManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports a "persistenceManagerFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "persistenceManagerFactory". Looks up the PersistenceManagerFactory
  * on each request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
@@ -118,7 +118,7 @@ public class OpenPersistenceManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the PersistenceManagerFactory that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>Default implementation delegates to the <code>lookupPersistenceManagerFactory</code>
+	 * <p>Default implementation delegates to the {@code lookupPersistenceManagerFactory}
 	 * without arguments.
 	 * @return the PersistenceManagerFactory to use
 	 * @see #lookupPersistenceManagerFactory()

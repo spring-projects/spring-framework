@@ -82,7 +82,7 @@ public class ParameterHandlerMapping extends AbstractMapBasedHandlerMapping<Stri
 
 
 	/**
-	 * Calls the <code>registerHandlers</code> method in addition
+	 * Calls the {@code registerHandlers} method in addition
 	 * to the superclass's initialization.
 	 * @see #registerHandlers
 	 */

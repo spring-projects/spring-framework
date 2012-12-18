@@ -174,7 +174,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	/**
 	 * Set the default charset to use for parsing properties files.
 	 * Used if no file-specific charset is specified for a file.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * <p>Default is none, using the {@code java.util.Properties}
 	 * default encoding: ISO-8859-1.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param defaultEncoding the default charset
@@ -205,7 +205,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * fallback will be the default file (e.g. "messages.properties" for
 	 * basename "messages").
 	 * <p>Falling back to the system Locale is the default behavior of
-	 * <code>java.util.ResourceBundle</code>. However, this is often not desirable
+	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
 	 */
@@ -217,7 +217,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * Set the number of seconds to cache loaded properties files.
 	 * <ul>
 	 * <li>Default is "-1", indicating to cache forever (just like
-	 * <code>java.util.ResourceBundle</code>).
+	 * {@code java.util.ResourceBundle}).
 	 * <li>A positive number will cache loaded properties files for the given
 	 * number of seconds. This is essentially the interval between refresh checks.
 	 * Note that a refresh attempt will first check the last-modified timestamp
@@ -445,7 +445,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 
 	/**
 	 * Refresh the PropertiesHolder for the given bundle filename.
-	 * The holder can be <code>null</code> if not cached before, or a timed-out cache entry
+	 * The holder can be {@code null} if not cached before, or a timed-out cache entry
 	 * (potentially getting re-validated against the current last-modified timestamp).
 	 * @param filename the bundle filename (basename + Locale)
 	 * @param propHolder the current PropertiesHolder for the bundle

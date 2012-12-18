@@ -136,14 +136,14 @@ public class ServletForwardingController extends AbstractController implements B
 	}
 
 	/**
-	 * Determine whether to use RequestDispatcher's <code>include</code> or
-	 * <code>forward</code> method.
+	 * Determine whether to use RequestDispatcher's {@code include} or
+	 * {@code forward} method.
 	 * <p>Performs a check whether an include URI attribute is found in the request,
 	 * indicating an include request, and whether the response has already been committed.
 	 * In both cases, an include will be performed, as a forward is not possible anymore.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return <code>true</code> for include, <code>false</code> for forward
+	 * @return {@code true} for include, {@code false} for forward
 	 * @see javax.servlet.RequestDispatcher#forward
 	 * @see javax.servlet.RequestDispatcher#include
 	 * @see javax.servlet.ServletResponse#isCommitted

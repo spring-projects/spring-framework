@@ -45,7 +45,7 @@ public interface HandlerExceptionResolver {
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to,
-	 * or <code>null</code> for default processing
+	 * or {@code null} for default processing
 	 */
 	ModelAndView resolveException(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex);
@@ -59,7 +59,7 @@ public interface HandlerExceptionResolver {
 	 * the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
 	 * @return a corresponding ModelAndView to forward to,
-	 * or <code>null</code> for default processing
+	 * or {@code null} for default processing
 	 */
 	ModelAndView resolveException(
 			ResourceRequest request, ResourceResponse response, Object handler, Exception ex);

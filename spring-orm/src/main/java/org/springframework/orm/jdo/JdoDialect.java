@@ -60,12 +60,12 @@ public interface JdoDialect {
 	 * given Spring transaction definition (in particular, an isolation level
 	 * and a timeout). Invoked by JdoTransactionManager on transaction begin.
 	 * <p>An implementation can configure the JDO Transaction object and then
-	 * invoke <code>begin</code>, or invoke a special begin method that takes,
+	 * invoke {@code begin}, or invoke a special begin method that takes,
 	 * for example, an isolation level.
 	 * <p>An implementation can also apply read-only flag and isolation level to the
 	 * underlying JDBC Connection before beginning the transaction. In that case,
 	 * a transaction data object can be returned that holds the previous isolation
-	 * level (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * level (and possibly other data), to be reset in {@code cleanupTransaction}.
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
 	 * passed-in TransactionDefinition, to optimize for specific data access use cases
 	 * (effectively using the current transaction name as use case identifier).
@@ -101,7 +101,7 @@ public interface JdoDialect {
 	 * if accessing a relational database. This method will just get invoked if actually
 	 * needing access to the underlying JDBC Connection, usually within an active JDO
 	 * transaction (for example, by JdoTransactionManager). The returned handle will
-	 * be passed into the <code>releaseJdbcConnection</code> method when not needed anymore.
+	 * be passed into the {@code releaseJdbcConnection} method when not needed anymore.
 	 * <p>Implementations are encouraged to return an unwrapped Connection object, i.e.
 	 * the Connection as they got it from the connection pool. This makes it easier for
 	 * application code to get at the underlying native JDBC Connection, like an
@@ -110,12 +110,12 @@ public interface JdoDialect {
 	 * <p>In a simple case where the returned Connection will be auto-closed with the
 	 * PersistenceManager or can be released via the Connection object itself, an
 	 * implementation can return a SimpleConnectionHandle that just contains the
-	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
+	 * Connection. If some other object is needed in {@code releaseJdbcConnection},
 	 * an implementation should use a special handle that references that other object.
 	 * @param pm the current JDO PersistenceManager
 	 * @param readOnly whether the Connection is only needed for read-only purposes
 	 * @return a handle for the JDBC Connection, to be passed into
-	 * <code>releaseJdbcConnection</code>, or <code>null</code>
+	 * {@code releaseJdbcConnection}, or {@code null}
 	 * if no JDBC Connection can be retrieved
 	 * @throws JDOException if thrown by JDO methods
 	 * @throws SQLException if thrown by JDBC methods
@@ -130,10 +130,10 @@ public interface JdoDialect {
 
 	/**
 	 * Release the given JDBC Connection, which has originally been retrieved
-	 * via <code>getJdbcConnection</code>. This should be invoked in any case,
+	 * via {@code getJdbcConnection}. This should be invoked in any case,
 	 * to allow for proper release of the retrieved Connection handle.
 	 * <p>An implementation might simply do nothing, if the Connection returned
-	 * by <code>getJdbcConnection</code> will be implicitly closed when the JDO
+	 * by {@code getJdbcConnection} will be implicitly closed when the JDO
 	 * transaction completes or when the PersistenceManager is closed.
 	 * @param conHandle the JDBC Connection handle to release
 	 * @param pm the current JDO PersistenceManager
@@ -170,7 +170,7 @@ public interface JdoDialect {
 	 * <p>Can use a SQLExceptionTranslator for translating underlying SQLExceptions
 	 * in a database-specific fashion.
 	 * @param ex the JDOException thrown
-	 * @return the corresponding DataAccessException (must not be <code>null</code>)
+	 * @return the corresponding DataAccessException (must not be {@code null})
 	 * @see JdoAccessor#convertJdoAccessException
 	 * @see JdoTransactionManager#convertJdoAccessException
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException

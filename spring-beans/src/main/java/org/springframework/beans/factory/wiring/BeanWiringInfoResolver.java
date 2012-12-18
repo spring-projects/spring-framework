@@ -37,7 +37,7 @@ public interface BeanWiringInfoResolver {
 	/**
 	 * Resolve the BeanWiringInfo for the given bean instance.
 	 * @param beanInstance the bean instance to resolve info for
-	 * @return the BeanWiringInfo, or <code>null</code> if not found
+	 * @return the BeanWiringInfo, or {@code null} if not found
 	 */
 	BeanWiringInfo resolveWiringInfo(Object beanInstance);
 

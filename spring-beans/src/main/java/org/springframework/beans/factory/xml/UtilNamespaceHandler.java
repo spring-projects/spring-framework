@@ -34,7 +34,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link NamespaceHandler} for the <code>util</code> namespace.
+ * {@link NamespaceHandler} for the {@code util} namespace.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

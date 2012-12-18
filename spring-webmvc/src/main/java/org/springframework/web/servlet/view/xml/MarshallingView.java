@@ -54,7 +54,7 @@ public class MarshallingView extends AbstractView {
 	private String modelKey;
 
 	/**
-	 * Constructs a new <code>MarshallingView</code> with no {@link Marshaller} set. The marshaller must be set after
+	 * Constructs a new {@code MarshallingView} with no {@link Marshaller} set. The marshaller must be set after
 	 * construction by invoking {@link #setMarshaller(Marshaller)}.
 	 */
 	public MarshallingView() {
@@ -63,7 +63,7 @@ public class MarshallingView extends AbstractView {
 	}
 
 	/**
-	 * Constructs a new <code>MarshallingView</code> with the given {@link Marshaller} set.
+	 * Constructs a new {@code MarshallingView} with the given {@link Marshaller} set.
 	 */
 	public MarshallingView(Marshaller marshaller) {
 		Assert.notNull(marshaller, "'marshaller' must not be null");
@@ -118,7 +118,7 @@ public class MarshallingView extends AbstractView {
 	 * Marshaller#supports(Class) supported type}.
 	 *
 	 * @param model the model Map
-	 * @return the Object to be marshalled (or <code>null</code> if none found)
+	 * @return the Object to be marshalled (or {@code null} if none found)
 	 * @throws ServletException if the model object specified by the {@linkplain #setModelKey(String) model key} is not
 	 *                          supported by the marshaller
 	 * @see #setModelKey(String)

@@ -21,8 +21,8 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.bind.WebDataBinder;
 
 /**
- * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
- * elements with a '<code>type</code>' of '<code>checkbox</code>'.
+ * Databinding-aware JSP tag for rendering multiple HTML '{@code input}'
+ * elements with a '{@code type}' of '{@code checkbox}'.
  *
  * <p>Intended to be used with a Collection as the {@link #getItems()} bound value}.
  *

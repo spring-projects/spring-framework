@@ -28,7 +28,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Special variant of an overriding ClassLoader, used for temporary type
  * matching in {@link AbstractApplicationContext}. Redefines classes from
- * a cached byte array for every <code>loadClass</code> call in order to
+ * a cached byte array for every {@code loadClass} call in order to
  * pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller

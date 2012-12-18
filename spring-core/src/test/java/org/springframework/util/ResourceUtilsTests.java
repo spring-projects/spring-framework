@@ -58,7 +58,7 @@ public class ResourceUtilsTests extends TestCase {
 
 	/**
 	 * Dummy URLStreamHandler that's just specified to suppress the standard
-	 * <code>java.net.URL</code> URLStreamHandler lookup, to be able to
+	 * {@code java.net.URL} URLStreamHandler lookup, to be able to
 	 * use the standard URL class for parsing "rmi:..." URLs.
 	 */
 	private static class DummyURLStreamHandler extends URLStreamHandler {

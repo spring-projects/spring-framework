@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * All interfaces except IntroductionInterceptor are picked up from
  * the subclass or delegate by default.
  *
- * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
+ * <p>The {@code suppressInterface} method can be used to suppress interfaces
  * implemented by the delegate but which should not be introduced to the owning
  * AOP proxy.
  *

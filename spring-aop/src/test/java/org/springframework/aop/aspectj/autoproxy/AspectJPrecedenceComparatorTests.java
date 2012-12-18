@@ -41,29 +41,6 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
  */
 public final class AspectJPrecedenceComparatorTests {
 
-	/*
-	 * Specification for the comparator (as defined in the
-	 * AspectJPrecedenceComparator class)
-	 *
-	 * <p>
-	 * Orders AspectJ advice/advisors by invocation order.
-	 * </p>
-	 * <p>
-	 * Given two pieces of advice, <code>a</code> and <code>b</code>:
-	 * </p>
-	 * <ul>
-	 *   <li>if <code>a</code> and <code>b</code> are defined in different
-	 *   aspects, then the advice in the aspect with the lowest order
-	 *   value has the highest precedence</li>
-	 *   <li>if <code>a</code> and <code>b</code> are defined in the same
-	 *   aspect, then if one of <code>a</code> or <code>b</code> is a form of
-	 *   after advice, then the advice declared last in the aspect has the
-	 *   highest precedence. If neither <code>a</code> nor <code>b</code> is a
-	 *   form of after advice, then the advice declared first in the aspect has
-	 *   the highest precedence.</li>
-	 * </ul>
-	 */
-
 	private static final int HIGH_PRECEDENCE_ADVISOR_ORDER = 100;
 	private static final int LOW_PRECEDENCE_ADVISOR_ORDER = 200;
 	private static final int EARLY_ADVICE_DECLARATION_ORDER = 5;

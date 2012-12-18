@@ -28,7 +28,7 @@ import java.util.Map;
  * <p>Preserves the original order as well as the original casing of keys,
  * while allowing for contains, get and remove calls with any case of key.
  *
- * <p>Does <i>not</i> support <code>null</code> keys.
+ * <p>Does <i>not</i> support {@code null} keys.
  *
  * @author Juergen Hoeller
  * @since 3.0

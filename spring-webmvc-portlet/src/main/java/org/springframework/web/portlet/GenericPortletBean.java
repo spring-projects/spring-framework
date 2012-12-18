@@ -46,14 +46,14 @@ import org.springframework.web.portlet.context.PortletContextResourceLoader;
 import org.springframework.web.portlet.context.StandardPortletEnvironment;
 
 /**
- * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
+ * Simple extension of {@code javax.portlet.GenericPortlet} that treats
  * its config parameters as bean properties.
  *
  * <p>A very handy superclass for any type of portlet. Type conversion is automatic.
  * It is also possible for subclasses to specify required properties.
  *
  * <p>This portlet leaves request handling to subclasses, inheriting the default
- * behaviour of GenericPortlet (<code>doDispatch</code>, <code>processAction</code>, etc).
+ * behaviour of GenericPortlet ({@code doDispatch}, {@code processAction}, etc).
  *
  * <p>This portlet superclass has no dependency on a Spring application context,
  * in contrast to the FrameworkPortlet class which loads its own context.
@@ -140,7 +140,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
@@ -150,7 +150,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	}
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */

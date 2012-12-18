@@ -35,7 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see javax.xml.rpc.Service
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JaxRpcPortProxyFactoryBean
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory

@@ -21,21 +21,21 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * <code>NamespaceHandler</code> for the <code>aop</code> namespace.
+ * {@code NamespaceHandler} for the {@code aop} namespace.
  *
  * <p>Provides a {@link org.springframework.beans.factory.xml.BeanDefinitionParser} for the
- * <code>&lt;aop:config&gt;</code> tag. A <code>config</code> tag can include nested
- * <code>pointcut</code>, <code>advisor</code> and <code>aspect</code> tags.
+ * {@code &lt;aop:config&gt;} tag. A {@code config} tag can include nested
+ * {@code pointcut}, {@code advisor} and {@code aspect} tags.
  *
- * <p>The <code>pointcut</code> tag allows for creation of named
+ * <p>The {@code pointcut} tag allows for creation of named
  * {@link AspectJExpressionPointcut} beans using a simple syntax:
  * <pre class="code">
  * &lt;aop:pointcut id=&quot;getNameCalls&quot; expression=&quot;execution(* *..ITestBean.getName(..))&quot;/&gt;
  * </pre>
  *
- * <p>Using the <code>advisor</code> tag you can configure an {@link org.springframework.aop.Advisor}
+ * <p>Using the {@code advisor} tag you can configure an {@link org.springframework.aop.Advisor}
  * and have it applied to all relevant beans in you {@link org.springframework.beans.factory.BeanFactory}
- * automatically. The <code>advisor</code> tag supports both in-line and referenced
+ * automatically. The {@code advisor} tag supports both in-line and referenced
  * {@link org.springframework.aop.Pointcut Pointcuts}:
  *
  * <pre class="code">
@@ -56,8 +56,8 @@ public class AopNamespaceHandler extends NamespaceHandlerSupport {
 
 	/**
 	 * Register the {@link BeanDefinitionParser BeanDefinitionParsers} for the
-	 * '<code>config</code>', '<code>spring-configured</code>', '<code>aspectj-autoproxy</code>'
-	 * and '<code>scoped-proxy</code>' tags.
+	 * '{@code config}', '{@code spring-configured}', '{@code aspectj-autoproxy}'
+	 * and '{@code scoped-proxy}' tags.
 	 */
 	public void init() {
 		// In 2.0 XSD as well as in 2.1 XSD.

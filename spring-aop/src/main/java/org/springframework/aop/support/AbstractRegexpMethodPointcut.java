@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
  * </ul>
  *
  * <p>Note: the regular expressions must be a match. For example,
- * <code>.*get.*</code> will match com.mycom.Foo.getBar().
- * <code>get.*</code> will not.
+ * {@code .*get.*} will match com.mycom.Foo.getBar().
+ * {@code get.*} will not.
  *
  * <p>This base class is serializable. Subclasses should declare all fields transient
  * - the initPatternRepresentation method in this class will be invoked again on the
@@ -172,17 +172,17 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 
 	/**
 	 * Does the pattern at the given index match this string?
-	 * @param pattern <code>String</code> pattern to match
+	 * @param pattern {@code String} pattern to match
 	 * @param patternIndex index of pattern from 0
-	 * @return <code>true</code> if there is a match, else <code>false</code>.
+	 * @return {@code true} if there is a match, else {@code false}.
 	 */
 	protected abstract boolean matches(String pattern, int patternIndex);
 
 	/**
 	 * Does the exclusion pattern at the given index match this string?
-	 * @param pattern <code>String</code> pattern to match.
+	 * @param pattern {@code String} pattern to match.
 	 * @param patternIndex index of pattern starting from 0.
-	 * @return <code>true</code> if there is a match, else <code>false</code>.
+	 * @return {@code true} if there is a match, else {@code false}.
 	 */
 	protected abstract boolean matchesExclusion(String pattern, int patternIndex);
 

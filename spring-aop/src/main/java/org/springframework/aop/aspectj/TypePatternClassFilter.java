@@ -50,7 +50,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * Create a fully configured {@link TypePatternClassFilter} using the
 	 * given type pattern.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
 	 * or is recognized as invalid
 	 */
 	public TypePatternClassFilter(String typePattern) {
@@ -68,11 +68,11 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * <code class="code">
 	 * org.springframework.beans.ITestBean+
 	 * </code>
-	 * This will match the <code>ITestBean</code> interface and any class
+	 * This will match the {@code ITestBean} interface and any class
 	 * that implements it.
 	 * <p>These conventions are established by AspectJ, not Spring AOP.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
 	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
@@ -102,9 +102,9 @@ public class TypePatternClassFilter implements ClassFilter {
 
 	/**
 	 * If a type pattern has been specified in XML, the user cannot
-	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
-	 * We also allow <code>and</code> between two sub-expressions.
-	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 * write {@code and} as "&&" (though &amp;&amp; will work).
+	 * We also allow {@code and} between two sub-expressions.
+	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		pcExpr = StringUtils.replace(pcExpr," and "," && ");

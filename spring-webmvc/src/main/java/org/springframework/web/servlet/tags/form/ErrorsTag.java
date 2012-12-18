@@ -33,9 +33,9 @@ import org.springframework.util.StringUtils;
  * <p>This tag supports three main usage patterns:
  *
  * <ol>
- *	<li>Field only - set '<code>path</code>' to the field name (or path)</li>
- *	<li>Object errors only - omit '<code>path</code>'</li>
- *	<li>All errors - set '<code>path</code>' to '<code>*</code>'</li>
+ *	<li>Field only - set '{@code path}' to the field name (or path)</li>
+ *	<li>Object errors only - omit '{@code path}'</li>
+ *	<li>All errors - set '{@code path}' to '{@code *}'</li>
  * </ol>
  *
  * @author Rob Harrop
@@ -52,7 +52,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	public static final String MESSAGES_ATTRIBUTE = "messages";
 
 	/**
-	 * The HTML '<code>span</code>' tag.
+	 * The HTML '{@code span}' tag.
 	 */
 	public static final String SPAN_TAG = "span";
 
@@ -71,7 +71,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Set the HTML element must be used to render the error messages.
-	 * <p>Defaults to an HTML '<code>&lt;span/&gt;</code>' tag.
+	 * <p>Defaults to an HTML '{@code &lt;span/&gt;}' tag.
 	 */
 	public void setElement(String element) {
 		Assert.hasText(element, "'element' cannot be null or blank");
@@ -87,7 +87,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Set the delimiter to be used between error messages.
-	 * <p>Defaults to an HTML '<code>&lt;br/&gt;</code>' tag.
+	 * <p>Defaults to an HTML '{@code &lt;br/&gt;}' tag.
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
@@ -102,11 +102,11 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * Get the value for the HTML '<code>id</code>' attribute.
-	 * <p>Appends '<code>.errors</code>' to the value returned by {@link #getPropertyPath()}
-	 * or to the model attribute name if the <code>&lt;form:errors/&gt;</code> tag's
-	 * '<code>path</code>' attribute has been omitted.
-	 * @return the value for the HTML '<code>id</code>' attribute
+	 * Get the value for the HTML '{@code id}' attribute.
+	 * <p>Appends '{@code .errors}' to the value returned by {@link #getPropertyPath()}
+	 * or to the model attribute name if the {@code &lt;form:errors/&gt;} tag's
+	 * '{@code path}' attribute has been omitted.
+	 * @return the value for the HTML '{@code id}' attribute
 	 * @see #getPropertyPath()
 	 */
 	@Override
@@ -120,9 +120,9 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Get the value for the HTML '<code>name</code>' attribute.
-	 * <p>Simply returns <code>null</code> because the '<code>name</code>' attribute
-	 * is not a validate attribute for the '<code>span</code>' element.
+	 * Get the value for the HTML '{@code name}' attribute.
+	 * <p>Simply returns {@code null} because the '{@code name}' attribute
+	 * is not a validate attribute for the '{@code span}' element.
 	 */
 	@Override
 	protected String getName() throws JspException {
@@ -132,7 +132,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Should rendering of this tag proceed at all?
 	 * <p>Only renders output when there are errors for the configured {@link #setPath path}.
-	 * @return <code>true</code> only when there are errors for the configured {@link #setPath path}
+	 * @return {@code true} only when there are errors for the configured {@link #setPath path}
 	 */
 	@Override
 	protected boolean shouldRender() throws JspException {
@@ -164,7 +164,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Exposes any bind status error messages under {@link #MESSAGES_ATTRIBUTE this key}
 	 * in the {@link PageContext#PAGE_SCOPE}.
-	 * <p>Only called if {@link #shouldRender()} returns <code>true</code>.
+	 * <p>Only called if {@link #shouldRender()} returns {@code true}.
 	 * @see #removeAttributes()
 	 */
 	@Override

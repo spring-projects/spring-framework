@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * If this test case fails, uncomment diagnostics in
- * <code>assertProtocolAndFilenames</code> method.
+ * {@code assertProtocolAndFilenames} method.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller

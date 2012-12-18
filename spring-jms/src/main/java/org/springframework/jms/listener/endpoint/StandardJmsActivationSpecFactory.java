@@ -113,7 +113,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * Determine the ActivationSpec class for the given ResourceAdapter,
 	 * if possible. Called if no 'activationSpecClass' has been set explicitly
 	 * @param adapter the ResourceAdapter to check
-	 * @return the corresponding ActivationSpec class, or <code>null</code>
+	 * @return the corresponding ActivationSpec class, or {@code null}
 	 * if not determinable
 	 * @see #setActivationSpecClass
 	 */
@@ -170,7 +170,7 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	 * Apply the specified acknowledge mode to the ActivationSpec object.
 	 * <p>This implementation applies the standard JCA 1.5 acknowledge modes
 	 * "Auto-acknowledge" and "Dups-ok-acknowledge". It throws an exception in
-	 * case of <code>CLIENT_ACKNOWLEDGE</code> or <code>SESSION_TRANSACTED</code>
+	 * case of {@code CLIENT_ACKNOWLEDGE} or {@code SESSION_TRANSACTED}
 	 * having been requested.
 	 * @param bw the BeanWrapper wrapping the ActivationSpec object
 	 * @param ackMode the configured acknowledge mode

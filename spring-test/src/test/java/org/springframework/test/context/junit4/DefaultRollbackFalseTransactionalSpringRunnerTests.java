@@ -35,7 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * JUnit 4 based integration test which verifies proper transactional behavior when the
  * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
- * of the {@link TransactionConfiguration} annotation is set to <strong><code>false</code></strong>.
+ * of the {@link TransactionConfiguration} annotation is set to <strong>{@code false}</strong>.
  * Also tests configuration of the
  * {@link TransactionConfiguration#transactionManager() transaction manager name}.
  * </p>

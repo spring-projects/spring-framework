@@ -66,14 +66,14 @@ public interface ClassMetadata {
 	 * Return whether the underlying class has an enclosing class
 	 * (i.e. the underlying class is an inner/nested class or
 	 * a local class within a method).
-	 * <p>If this method returns <code>false</code>, then the
+	 * <p>If this method returns {@code false}, then the
 	 * underlying class is a top-level class.
 	 */
 	boolean hasEnclosingClass();
 
 	/**
 	 * Return the name of the enclosing class of the underlying class,
-	 * or <code>null</code> if the underlying class is a top-level class.
+	 * or {@code null} if the underlying class is a top-level class.
 	 */
 	String getEnclosingClassName();
 
@@ -84,7 +84,7 @@ public interface ClassMetadata {
 
 	/**
 	 * Return the name of the super class of the underlying class,
-	 * or <code>null</code> if there is no super class defined.
+	 * or {@code null} if there is no super class defined.
 	 */
 	String getSuperClassName();
 

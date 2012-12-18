@@ -76,7 +76,7 @@ public class ViewRendererServlet extends HttpServlet {
 	/**
 	 * Process this request, handling exceptions.
 	 * The actually event handling is performed by the abstract
-	 * <code>renderView()</code> template method.
+	 * {@code renderView()} template method.
 	 * @see #renderView
 	 */
 	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)

@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link MethodMetadata} implementation that uses standard reflection
- * to introspect a given <code>Method</code>.
+ * to introspect a given {@code Method}.
  *
  * @author Juergen Hoeller
  * @author Mark Pollack

@@ -277,13 +277,13 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	 * definition (presumably the child).
 	 * <ul>
 	 * <li>Will override beanClass if specified in the given bean definition.
-	 * <li>Will always take <code>abstract</code>, <code>scope</code>,
-	 * <code>lazyInit</code>, <code>autowireMode</code>, <code>dependencyCheck</code>,
-	 * and <code>dependsOn</code> from the given bean definition.
-	 * <li>Will add <code>constructorArgumentValues</code>, <code>propertyValues</code>,
-	 * <code>methodOverrides</code> from the given bean definition to existing ones.
-	 * <li>Will override <code>factoryBeanName</code>, <code>factoryMethodName</code>,
-	 * <code>initMethodName</code>, and <code>destroyMethodName</code> if specified
+	 * <li>Will always take {@code abstract}, {@code scope},
+	 * {@code lazyInit}, {@code autowireMode}, {@code dependencyCheck},
+	 * and {@code dependsOn} from the given bean definition.
+	 * <li>Will add {@code constructorArgumentValues}, {@code propertyValues},
+	 * {@code methodOverrides} from the given bean definition to existing ones.
+	 * <li>Will override {@code factoryBeanName}, {@code factoryMethodName},
+	 * {@code initMethodName}, and {@code destroyMethodName} if specified
 	 * in the given bean definition.
 	 * </ul>
 	 */
@@ -369,7 +369,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Return the class of the wrapped bean, if already resolved.
-	 * @return the bean class, or <code>null</code> if none defined
+	 * @return the bean class, or {@code null} if none defined
 	 * @throws IllegalStateException if the bean definition does not define a bean class,
 	 * or a specified bean class name has not been resolved into an actual Class
 	 */
@@ -499,7 +499,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Set whether this bean should be lazily initialized.
-	 * <p>If <code>false</code>, the bean will get instantiated on startup by bean
+	 * <p>If {@code false}, the bean will get instantiated on startup by bean
 	 * factories that perform eager initialization of singletons.
 	 */
 	public void setLazyInit(boolean lazyInit) {
@@ -696,7 +696,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Specify whether to resolve constructors in lenient mode (<code>true</code>,
+	 * Specify whether to resolve constructors in lenient mode ({@code true},
 	 * which is the default) or to switch to strict resolution (throwing an exception
 	 * in case of ambigious constructors that all match when converting the arguments,
 	 * whereas lenient mode would use the one with the 'closest' type matches).
@@ -721,7 +721,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Return constructor argument values for this bean (never <code>null</code>).
+	 * Return constructor argument values for this bean (never {@code null}).
 	 */
 	public ConstructorArgumentValues getConstructorArgumentValues() {
 		return this.constructorArgumentValues;
@@ -742,7 +742,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Return property values for this bean (never <code>null</code>).
+	 * Return property values for this bean (never {@code null}).
 	 */
 	public MutablePropertyValues getPropertyValues() {
 		return this.propertyValues;
@@ -782,7 +782,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the name of the initializer method. The default is <code>null</code>
+	 * Set the name of the initializer method. The default is {@code null}
 	 * in which case there is no initializer method.
 	 */
 	public void setInitMethodName(String initMethodName) {
@@ -798,7 +798,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured init method is the default.
-	 * Default value is <code>false</code>.
+	 * Default value is {@code false}.
 	 * @see #setInitMethodName
 	 */
 	public void setEnforceInitMethod(boolean enforceInitMethod) {
@@ -814,7 +814,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the name of the destroy method. The default is <code>null</code>
+	 * Set the name of the destroy method. The default is {@code null}
 	 * in which case there is no destroy method.
 	 */
 	public void setDestroyMethodName(String destroyMethodName) {
@@ -830,7 +830,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	/**
 	 * Specify whether or not the configured destroy method is the default.
-	 * Default value is <code>false</code>.
+	 * Default value is {@code false}.
 	 * @see #setDestroyMethodName
 	 */
 	public void setEnforceDestroyMethod(boolean enforceDestroyMethod) {
@@ -849,7 +849,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set whether this bean definition is 'synthetic', that is, not defined
 	 * by the application itself (for example, an infrastructure bean such
-	 * as a helper for auto-proxying, created through <code>&ltaop:config&gt;</code>).
+	 * as a helper for auto-proxying, created through {@code &ltaop:config&gt;}).
 	 */
 	public void setSynthetic(boolean synthetic) {
 		this.synthetic = synthetic;
@@ -864,14 +864,14 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	}
 
 	/**
-	 * Set the role hint for this <code>BeanDefinition</code>.
+	 * Set the role hint for this {@code BeanDefinition}.
 	 */
 	public void setRole(int role) {
 		this.role = role;
 	}
 
 	/**
-	 * Return the role hint for this <code>BeanDefinition</code>.
+	 * Return the role hint for this {@code BeanDefinition}.
 	 */
 	public int getRole() {
 		return this.role;
@@ -981,9 +981,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 
 	/**
-	 * Public declaration of Object's <code>clone()</code> method.
+	 * Public declaration of Object's {@code clone()} method.
 	 * Delegates to {@link #cloneBeanDefinition()}.
-	 * @see java.lang.Object#clone()
+	 * @see Object#clone()
 	 */
 	@Override
 	public Object clone() {

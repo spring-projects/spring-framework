@@ -35,8 +35,8 @@ import org.xml.sax.Locator;
 import org.springframework.util.StringUtils;
 
 /**
- * SAX <code>ContentHandler</code> that transforms callback calls to <code>XMLEvent</code>s
- * and writes them to a <code>XMLEventConsumer</code>.
+ * SAX {@code ContentHandler} that transforms callback calls to {@code XMLEvent}s
+ * and writes them to a {@code XMLEventConsumer}.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -51,8 +51,8 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 
 
 	/**
-	 * Construct a new instance of the <code>StaxEventContentHandler</code> that writes to the given
-	 * <code>XMLEventConsumer</code>. A default <code>XMLEventFactory</code> will be created.
+	 * Construct a new instance of the {@code StaxEventContentHandler} that writes to the given
+	 * {@code XMLEventConsumer}. A default {@code XMLEventFactory} will be created.
 	 * @param consumer the consumer to write events to
 	 */
 	StaxEventContentHandler(XMLEventConsumer consumer) {
@@ -61,8 +61,8 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	}
 
 	/**
-	 * Construct a new instance of the <code>StaxEventContentHandler</code> that uses the given
-	 * event factory to create events and writes to the given <code>XMLEventConsumer</code>.
+	 * Construct a new instance of the {@code StaxEventContentHandler} that uses the given
+	 * event factory to create events and writes to the given {@code XMLEventConsumer}.
 	 * @param consumer the consumer to write events to
 	 * @param factory  the factory used to create events
 	 */
@@ -123,7 +123,7 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 	}
 
 	/**
-	 * Create and return a list of <code>NameSpace</code> objects from the <code>NamespaceContext</code>.
+	 * Create and return a list of {@code NameSpace} objects from the {@code NamespaceContext}.
 	 */
 	private List<Namespace> createNamespaces(SimpleNamespaceContext namespaceContext) {
 		if (namespaceContext == null) {

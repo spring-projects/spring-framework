@@ -86,7 +86,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, ResourceLoader resourceLoader,
 			String sqlResourcePath, boolean continueOnError) throws DataAccessException {
@@ -106,7 +106,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, Resource resource,
 			boolean continueOnError) throws DataAccessException {
@@ -125,7 +125,7 @@ public abstract class SimpleJdbcTestUtils {
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error.
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	public static void executeSqlScript(SimpleJdbcTemplate simpleJdbcTemplate, EncodedResource resource,
 			boolean continueOnError) throws DataAccessException {

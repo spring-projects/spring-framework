@@ -32,7 +32,7 @@ public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 	/**
 	 * Apply this BeanPostProcessor to the given bean instance before
 	 * its destruction. Can invoke custom destruction callbacks.
-	 * <p>Like DisposableBean's <code>destroy</code> and a custom destroy method,
+	 * <p>Like DisposableBean's {@code destroy} and a custom destroy method,
 	 * this callback just applies to singleton beans in the factory (including
 	 * inner beans).
 	 * @param bean the bean instance to be destroyed

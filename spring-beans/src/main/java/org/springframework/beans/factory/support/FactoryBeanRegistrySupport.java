@@ -50,7 +50,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Determine the type for the given FactoryBean.
 	 * @param factoryBean the FactoryBean instance to check
 	 * @return the FactoryBean's object type,
-	 * or <code>null</code> if the type cannot be determined yet
+	 * or {@code null} if the type cannot be determined yet
 	 */
 	protected Class getTypeForFactoryBean(final FactoryBean factoryBean) {
 		try {
@@ -78,7 +78,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * in cached form. Quick check for minimal synchronization.
 	 * @param beanName the name of the bean
 	 * @return the object obtained from the FactoryBean,
-	 * or <code>null</code> if not available
+	 * or {@code null} if not available
 	 */
 	protected Object getCachedObjectForFactoryBean(String beanName) {
 		Object object = this.factoryBeanObjectCache.get(beanName);

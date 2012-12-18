@@ -56,7 +56,7 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 
 
 	/**
-	 * Create a new instance of the <code>CommonsHttpRequestFactory</code> with a default
+	 * Create a new instance of the {@code CommonsHttpRequestFactory} with a default
 	 * {@link HttpClient} that uses a default {@link MultiThreadedHttpConnectionManager}.
 	 */
 	public CommonsClientHttpRequestFactory() {
@@ -65,7 +65,7 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	}
 
 	/**
-	 * Create a new instance of the <code>CommonsHttpRequestFactory</code> with the given
+	 * Create a new instance of the {@code CommonsHttpRequestFactory} with the given
 	 * {@link HttpClient} instance.
 	 * @param httpClient the HttpClient instance to use for this factory
 	 */
@@ -76,14 +76,14 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 
 
 	/**
-	 * Set the <code>HttpClient</code> used by this factory.
+	 * Set the {@code HttpClient} used by this factory.
 	 */
 	public void setHttpClient(HttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
 	/**
-	 * Return the <code>HttpClient</code> used by this factory.
+	 * Return the {@code HttpClient} used by this factory.
 	 */
 	public HttpClient getHttpClient() {
 		return this.httpClient;

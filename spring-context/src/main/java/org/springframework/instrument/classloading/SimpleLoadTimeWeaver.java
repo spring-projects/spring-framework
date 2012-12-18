@@ -22,12 +22,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * <code>LoadTimeWeaver</code> that builds and exposes a
+ * {@code LoadTimeWeaver} that builds and exposes a
  * {@link SimpleInstrumentableClassLoader}.
  *
  * <p>Mainly intended for testing environments, where it is sufficient to
  * perform all class transformation on a newly created
- * <code>ClassLoader</code> instance.
+ * {@code ClassLoader} instance.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,8 +42,8 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Create a new <code>SimpleLoadTimeWeaver</code> for the current context
-	 * <code>ClassLoader</code>.
+	 * Create a new {@code SimpleLoadTimeWeaver} for the current context
+	 * {@code ClassLoader}.
 	 * @see SimpleInstrumentableClassLoader
 	 */
 	public SimpleLoadTimeWeaver() {
@@ -51,10 +51,10 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Create a new <code>SimpleLoadTimeWeaver</code> for the given
-	 * <code>ClassLoader</code>.
-	 * @param classLoader the <code>ClassLoader</code> to build a simple
-	 * instrumentable <code>ClassLoader</code> on top of
+	 * Create a new {@code SimpleLoadTimeWeaver} for the given
+	 * {@code ClassLoader}.
+	 * @param classLoader the {@code ClassLoader} to build a simple
+	 * instrumentable {@code ClassLoader} on top of
 	 */
 	public SimpleLoadTimeWeaver(SimpleInstrumentableClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");

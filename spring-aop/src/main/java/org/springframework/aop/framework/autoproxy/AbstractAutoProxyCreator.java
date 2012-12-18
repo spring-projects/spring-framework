@@ -147,7 +147,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Set the ordering which will apply to this class's implementation
 	 * of Ordered, used when applying multiple BeanPostProcessors.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @param order ordering value
 	 */
 	public final void setOrder(int order) {
@@ -243,7 +243,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Return the owning BeanFactory.
-	 * May be <code>null</code>, as this object doesn't need to belong to a bean factory.
+	 * May be {@code null}, as this object doesn't need to belong to a bean factory.
 	 */
 	protected BeanFactory getBeanFactory() {
 		return this.beanFactory;
@@ -390,10 +390,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 	/**
-	 * Subclasses should override this method to return <code>true</code> if the
+	 * Subclasses should override this method to return {@code true} if the
 	 * given bean should not be considered for auto-proxying by this post-processor.
 	 * <p>Sometimes we need to be able to avoid this happening if it will lead to
-	 * a circular reference. This implementation returns <code>false</code>.
+	 * a circular reference. This implementation returns {@code false}.
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean
 	 * @return whether to skip the given bean
@@ -404,7 +404,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 
 	/**
 	 * Create a target source for bean instances. Uses any TargetSourceCreators if set.
-	 * Returns <code>null</code> if no custom TargetSource should be used.
+	 * Returns {@code null} if no custom TargetSource should be used.
 	 * <p>This implementation uses the "customTargetSourceCreators" property.
 	 * Subclasses can override this method to use a different mechanism.
 	 * @param beanClass the class of the bean to create a TargetSource for
@@ -497,7 +497,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * Return whether the Advisors returned by the subclass are pre-filtered
 	 * to match the bean's target class already, allowing the ClassFilter check
 	 * to be skipped when building advisors chains for AOP invocations.
-	 * <p>Default is <code>false</code>. Subclasses may override this if they
+	 * <p>Default is {@code false}. Subclasses may override this if they
 	 * will always return pre-filtered Advisors.
 	 * @return whether the Advisors are pre-filtered
 	 * @see #getAdvicesAndAdvisorsForBean
@@ -581,10 +581,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @param beanName the name of the bean
 	 * @param customTargetSource the TargetSource returned by the
 	 * {@link #getCustomTargetSource} method: may be ignored.
-	 * Will be <code>null</code> if no custom target source is in use.
+	 * Will be {@code null} if no custom target source is in use.
 	 * @return an array of additional interceptors for the particular bean;
 	 * or an empty array if no additional interceptors but just the common ones;
-	 * or <code>null</code> if no proxy at all, not even with the common interceptors.
+	 * or {@code null} if no proxy at all, not even with the common interceptors.
 	 * See constants DO_NOT_PROXY and PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS.
 	 * @throws BeansException in case of errors
 	 * @see #DO_NOT_PROXY

@@ -41,19 +41,19 @@ import org.springframework.util.ClassUtils;
  * up a shared JPA EntityManagerFactory in a Spring application context;
  * the EntityManagerFactory can then be passed to JPA-based DAOs via
  * dependency injection. Note that switching to a JNDI lookup or to a
- * {@link org.springframework.orm.jpa.LocalEntityManagerFactoryBean}
+ * {@link LocalEntityManagerFactoryBean}
  * definition is just a matter of configuration!
  *
  * <p>As with {@link LocalEntityManagerFactoryBean}, configuration settings
- * are usually read in from a <code>META-INF/persistence.xml</code> config file,
+ * are usually read in from a {@code META-INF/persistence.xml} config file,
  * residing in the class path, according to the general JPA configuration contract.
  * However, this FactoryBean is more flexible in that you can override the location
- * of the <code>persistence.xml</code> file, specify the JDBC DataSources to link to,
+ * of the {@code persistence.xml} file, specify the JDBC DataSources to link to,
  * etc. Furthermore, it allows for pluggable class instrumentation through Spring's
  * {@link org.springframework.instrument.classloading.LoadTimeWeaver} abstraction,
  * instead of being tied to a special VM agent specified on JVM startup.
  *
- * <p>Internally, this FactoryBean parses the <code>persistence.xml</code> file
+ * <p>Internally, this FactoryBean parses the {@code persistence.xml} file
  * itself and creates a corresponding {@link javax.persistence.spi.PersistenceUnitInfo}
  * object (with further configuration merged in, such as JDBC DataSources and the
  * Spring LoadTimeWeaver), to be passed to the chosen JPA
@@ -97,7 +97,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p>For reuse of existing persistence unit configuration or more advanced forms
 	 * of custom persistence unit handling, consider defining a separate
 	 * PersistenceUnitManager bean (typically a DefaultPersistenceUnitManager instance)
-	 * and linking it in here. <code>persistence.xml</code> location, DataSource
+	 * and linking it in here. {@code persistence.xml} location, DataSource
 	 * configuration and LoadTimeWeaver will be defined on that separate
 	 * DefaultPersistenceUnitManager bean in such a scenario.
 	 * @see #setPersistenceXmlLocation
@@ -110,12 +110,12 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Set the location of the <code>persistence.xml</code> file
+	 * Set the location of the {@code persistence.xml} file
 	 * we want to use. This is a Spring resource location.
 	 * <p>Default is "classpath:META-INF/persistence.xml".
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @param persistenceXmlLocation a Spring resource String
-	 * identifying the location of the <code>persistence.xml</code> file
+	 * identifying the location of the {@code persistence.xml} file
 	 * that this LocalContainerEntityManagerFactoryBean should parse
 	 * @see #setPersistenceUnitManager
 	 */
@@ -136,8 +136,8 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 
 	/**
 	 * Set whether to use Spring-based scanning for entity classes in the classpath
-	 * instead of using JPA's standard scanning of jar files with <code>persistence.xml</code>
-	 * markers in them. In case of Spring-based scanning, no <code>persistence.xml</code>
+	 * instead of using JPA's standard scanning of jar files with {@code persistence.xml}
+	 * markers in them. In case of Spring-based scanning, no {@code persistence.xml}
 	 * is necessary; all you need to do is to specify base packages to search here.
 	 * <p>Default is none. Specify packages to search for autodetection of your entity
 	 * classes in the classpath. This is analogous to Spring's component-scan feature
@@ -152,13 +152,13 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	}
 
 	/**
-	 * Specify one or more mapping resources (equivalent to <code>&lt;mapping-file&gt;</code>
-	 * entries in <code>persistence.xml</code>) for the default persistence unit.
+	 * Specify one or more mapping resources (equivalent to {@code &lt;mapping-file&gt;}
+	 * entries in {@code persistence.xml}) for the default persistence unit.
 	 * Can be used on its own or in combination with entity scanning in the classpath,
-	 * in both cases avoiding <code>persistence.xml</code>.
+	 * in both cases avoiding {@code persistence.xml}.
 	 * <p>Note that mapping resources must be relative to the classpath root,
 	 * e.g. "META-INF/mappings.xml" or "com/mycompany/repository/mappings.xml",
-	 * so that they can be loaded through <code>ClassLoader.getResource</code>.
+	 * so that they can be loaded through {@code ClassLoader.getResource}.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
 	 */
@@ -169,11 +169,11 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	/**
 	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
 	 * to use for accessing the database. This is an alternative to keeping the
-	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
+	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
 	 * DataSource instead.
 	 * <p>In JPA speak, a DataSource passed in here will be used as "nonJtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
-	 * overriding data source configuration in <code>persistence.xml</code> (if any).
+	 * overriding data source configuration in {@code persistence.xml} (if any).
 	 * Note that this variant typically works for JTA transaction management as well;
 	 * if it does not, consider using the explicit {@link #setJtaDataSource} instead.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
@@ -188,11 +188,11 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	/**
 	 * Specify the JDBC DataSource that the JPA persistence provider is supposed
 	 * to use for accessing the database. This is an alternative to keeping the
-	 * JDBC configuration in <code>persistence.xml</code>, passing in a Spring-managed
+	 * JDBC configuration in {@code persistence.xml}, passing in a Spring-managed
 	 * DataSource instead.
 	 * <p>In JPA speak, a DataSource passed in here will be used as "jtaDataSource"
 	 * on the PersistenceUnitInfo passed to the PersistenceProvider, as well as
-	 * overriding data source configuration in <code>persistence.xml</code> (if any).
+	 * overriding data source configuration in {@code persistence.xml} (if any).
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see javax.persistence.spi.PersistenceUnitInfo#getJtaDataSource()
 	 * @see #setPersistenceUnitManager
@@ -207,7 +207,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * PersistenceUnitInfo used for creating this EntityManagerFactory.
 	 * <p>Such post-processors can, for example, register further entity
 	 * classes and jar files, in addition to the metadata read from
-	 * <code>persistence.xml</code>.
+	 * {@code persistence.xml}.
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * @see #setPersistenceUnitManager
 	 */
@@ -229,7 +229,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * <p><b>NOTE:</b> As of Spring 2.5, the context's default LoadTimeWeaver (defined
 	 * as bean with name "loadTimeWeaver") will be picked up automatically, if available,
 	 * removing the need for LoadTimeWeaver configuration on each affected target bean.</b>
-	 * Consider using the <code>context:load-time-weaver</code> XML tag for creating
+	 * Consider using the {@code context:load-time-weaver} XML tag for creating
 	 * such a shared LoadTimeWeaver (autodetecting the environment by default).
 	 * <p><b>NOTE: Only applied if no external PersistenceUnitManager specified.</b>
 	 * Otherwise, the external {@link #setPersistenceUnitManager PersistenceUnitManager}
@@ -295,7 +295,7 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * Determine the PersistenceUnitInfo to use for the EntityManagerFactory
 	 * created by this bean.
 	 * <p>The default implementation reads in all persistence unit infos from
-	 * <code>persistence.xml</code>, as defined in the JPA specification.
+	 * {@code persistence.xml}, as defined in the JPA specification.
 	 * If no entity manager name was specified, it takes the first info in the
 	 * array as returned by the reader. Otherwise, it checks for a matching name.
 	 * @param persistenceUnitManager the PersistenceUnitManager to obtain from

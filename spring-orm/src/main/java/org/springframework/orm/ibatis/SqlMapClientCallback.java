@@ -23,7 +23,7 @@ import com.ibatis.sqlmap.client.SqlMapExecutor;
 /**
  * Callback interface for data access code that works with the iBATIS
  * {@link com.ibatis.sqlmap.client.SqlMapExecutor} interface. To be used
- * with {@link SqlMapClientTemplate}'s <code>execute</code> method,
+ * with {@link SqlMapClientTemplate}'s {@code execute} method,
  * assumably often as anonymous classes within a method implementation.
  *
  * @author Juergen Hoeller
@@ -37,9 +37,9 @@ import com.ibatis.sqlmap.client.SqlMapExecutor;
 public interface SqlMapClientCallback<T> {
 
 	/**
-	 * Gets called by <code>SqlMapClientTemplate.execute</code> with an active
-	 * <code>SqlMapExecutor</code>. Does not need to care about activating
-	 * or closing the <code>SqlMapExecutor</code>, or handling transactions.
+	 * Gets called by {@code SqlMapClientTemplate.execute} with an active
+	 * {@code SqlMapExecutor}. Does not need to care about activating
+	 * or closing the {@code SqlMapExecutor}, or handling transactions.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
 	 * DataSourceTransactionManager), the code will simply get executed on the
@@ -54,7 +54,7 @@ public interface SqlMapClientCallback<T> {
 	 *
 	 * @param executor an active iBATIS SqlMapSession, passed-in as
 	 * SqlMapExecutor interface here to avoid manual lifecycle handling
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by the iBATIS SQL Maps API
 	 * @see SqlMapClientTemplate#execute
 	 * @see SqlMapClientTemplate#executeWithListResult

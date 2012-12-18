@@ -32,15 +32,15 @@ import org.apache.commons.logging.LogFactory;
  * not be overriden by subclasses. (Unfortunately the EJB specification
  * forbids enforcing this by making EJB lifecycle methods final.)
  *
- * <p>There should be no need to override the <code>setSessionContext()</code>
- * or <code>ejbCreate()</code> lifecycle methods.
+ * <p>There should be no need to override the {@code setSessionContext()}
+ * or {@code ejbCreate()} lifecycle methods.
  *
- * <p>Subclasses are left to implement the <code>onEjbCreate()</code> method
+ * <p>Subclasses are left to implement the {@code onEjbCreate()} method
  * to do whatever initialization they wish to do after their BeanFactory has
- * already been loaded, and is available from the <code>getBeanFactory()</code>
+ * already been loaded, and is available from the {@code getBeanFactory()}
  * method.
  *
- * <p>This class provides the no-arg <code>ejbCreate()</code> method required
+ * <p>This class provides the no-arg {@code ejbCreate()} method required
  * by the EJB specification, but not the SessionBean interface, eliminating
  * a common cause of EJB deployment failure.
  *
@@ -71,10 +71,10 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
 	/**
 	 * Subclasses must implement this method to do any initialization
-	 * they would otherwise have done in an <code>ejbCreate()</code> method.
-	 * In contrast to <code>ejbCreate</code>, the BeanFactory will have been loaded here.
+	 * they would otherwise have done in an {@code ejbCreate()} method.
+	 * In contrast to {@code ejbCreate}, the BeanFactory will have been loaded here.
 	 * <p>The same restrictions apply to the work of this method as
-	 * to an <code>ejbCreate()</code> method.
+	 * to an {@code ejbCreate()} method.
 	 * @throws CreateException
 	 */
 	protected abstract void onEjbCreate() throws CreateException;

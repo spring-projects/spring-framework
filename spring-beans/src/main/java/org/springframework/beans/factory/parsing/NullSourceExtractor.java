@@ -19,7 +19,7 @@ package org.springframework.beans.factory.parsing;
 import org.springframework.core.io.Resource;
 
 /**
- * Simple implementation of {@link SourceExtractor} that returns <code>null</code>
+ * Simple implementation of {@link SourceExtractor} that returns {@code null}
  * as the source metadata.
  *
  * <p>This is the default implementation and prevents too much metadata from being
@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
 public class NullSourceExtractor implements SourceExtractor {
 
 	/**
-	 * This implementation simply returns <code>null</code> for any input.
+	 * This implementation simply returns {@code null} for any input.
 	 */
 	public Object extractSource(Object sourceCandidate, Resource definitionResource) {
 		return null;

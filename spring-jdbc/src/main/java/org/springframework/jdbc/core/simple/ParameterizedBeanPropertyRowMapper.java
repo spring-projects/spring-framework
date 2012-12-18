@@ -24,7 +24,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * and it must have a default or no-arg constructor.
  *
  * <p>Uses Java 5 covariant return types to override the return type of the {@link #mapRow}
- * method to be the type parameter <code>T</code>.
+ * method to be the type parameter {@code T}.
  *
  * <p>Column values are mapped based on matching the column name as obtained from result set
  * metadata to public setters for the corresponding properties. The names are matched either
@@ -33,7 +33,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  *
  * <p>Mapping is provided for fields in the target class for many common types, e.g.:
  * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
- * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
+ * float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
  * <p>The mapper can be configured to use the primitives default value when mapping null values
  * by setting the '{@link #setPrimitivesDefaultedForNullValue primitivesDefaultedForNullValue}'

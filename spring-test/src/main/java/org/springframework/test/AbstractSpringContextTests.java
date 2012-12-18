@@ -106,11 +106,11 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 	}
 
 	/**
-	 * Determine if the supplied context <code>key</code> is <em>empty</em>.
-	 * <p>By default, <code>null</code> values, empty strings, and zero-length
+	 * Determine if the supplied context {@code key} is <em>empty</em>.
+	 * <p>By default, {@code null} values, empty strings, and zero-length
 	 * arrays are considered <em>empty</em>.
 	 * @param key the context key to check
-	 * @return <code>true</code> if the supplied context key is empty
+	 * @return {@code true} if the supplied context key is empty
 	 */
 	protected boolean isContextKeyEmpty(Object key) {
 		return (key == null) || ((key instanceof String) && !StringUtils.hasText((String) key)) ||
@@ -119,9 +119,9 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 
 	/**
 	 * Obtain an ApplicationContext for the given key, potentially cached.
-	 * @param key the context key; may be <code>null</code>.
+	 * @param key the context key; may be {@code null}.
 	 * @return the corresponding ApplicationContext instance (potentially cached),
-	 * or <code>null</code> if the provided <code>key</code> is <em>empty</em>
+	 * or {@code null} if the provided {@code key} is <em>empty</em>
 	 */
 	protected final ConfigurableApplicationContext getContext(Object key) throws Exception {
 		if (isContextKeyEmpty(key)) {

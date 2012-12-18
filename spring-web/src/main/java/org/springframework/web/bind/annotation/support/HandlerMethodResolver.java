@@ -36,8 +36,8 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 
 /**
  * Support class for resolving web method annotations in a handler type.
- * Processes <code>@RequestMapping</code>, <code>@InitBinder</code>,
- * <code>@ModelAttribute</code> and <code>@SessionAttributes</code>.
+ * Processes {@code @RequestMapping}, {@code @InitBinder},
+ * {@code @ModelAttribute} and {@code @SessionAttributes}.
  *
  * <p>Used by {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
  * and {@link org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter}.

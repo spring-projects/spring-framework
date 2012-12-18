@@ -49,7 +49,7 @@ public class BeanDefinitionReaderUtils {
 	 * @param parentName the name of the parent bean, if any
 	 * @param className the name of the bean class, if any
 	 * @param classLoader the ClassLoader to use for loading bean classes
-	 * (can be <code>null</code> to just register bean classes by name)
+	 * (can be {@code null} to just register bean classes by name)
 	 * @return the bean definition
 	 * @throws ClassNotFoundException if the bean class could not be loaded
 	 */

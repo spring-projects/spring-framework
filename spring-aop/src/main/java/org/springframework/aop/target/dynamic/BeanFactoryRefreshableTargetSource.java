@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 /**
  * Refreshable TargetSource that fetches fresh target beans from a BeanFactory.
  *
- * <p>Can be subclassed to override <code>requiresRefresh()</code> to suppress
+ * <p>Can be subclassed to override {@code requiresRefresh()} to suppress
  * unnecessary refreshes. By default, a refresh will be performed every time
  * the "refreshCheckDelay" has elapsed.
  *

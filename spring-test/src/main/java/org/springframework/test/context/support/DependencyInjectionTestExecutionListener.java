@@ -24,7 +24,7 @@ import org.springframework.core.Conventions;
 import org.springframework.test.context.TestContext;
 
 /**
- * <code>TestExecutionListener</code> which provides support for dependency
+ * {@code TestExecutionListener} which provides support for dependency
  * injection and initialization of test instances.
  *
  * @author Sam Brannen
@@ -99,7 +99,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * <p>The {@link #REINJECT_DEPENDENCIES_ATTRIBUTE} will be subsequently removed
 	 * from the test context, regardless of its value.
 	 * @param testContext the test context for which dependency injection should
-	 * be performed (never <code>null</code>)
+	 * be performed (never {@code null})
 	 * @throws Exception allows any exception to propagate
 	 * @see #prepareTestInstance(TestContext)
 	 * @see #beforeTestMethod(TestContext)

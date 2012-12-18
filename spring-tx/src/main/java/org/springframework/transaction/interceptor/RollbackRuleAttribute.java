@@ -50,13 +50,13 @@ public class RollbackRuleAttribute implements Serializable{
 
 
 	/**
-	 * Create a new instance of the <code>RollbackRuleAttribute</code> class.
+	 * Create a new instance of the {@code RollbackRuleAttribute} class.
 	 * <p>This is the preferred way to construct a rollback rule that matches
 	 * the supplied {@link Exception} class (and subclasses).
 	 * @param clazz throwable class; must be {@link Throwable} or a subclass
-	 * of <code>Throwable</code>
-	 * @throws IllegalArgumentException if the supplied <code>clazz</code> is
-	 * not a <code>Throwable</code> type or is <code>null</code>
+	 * of {@code Throwable}
+	 * @throws IllegalArgumentException if the supplied {@code clazz} is
+	 * not a {@code Throwable} type or is {@code null}
 	 */
 	public RollbackRuleAttribute(Class clazz) {
 		Assert.notNull(clazz, "'clazz' cannot be null.");
@@ -68,11 +68,11 @@ public class RollbackRuleAttribute implements Serializable{
 	}
 
 	/**
-	 * Create a new instance of the <code>RollbackRuleAttribute</code> class
-	 * for the given <code>exceptionName</code>.
+	 * Create a new instance of the {@code RollbackRuleAttribute} class
+	 * for the given {@code exceptionName}.
 	 * <p>This can be a substring, with no wildcard support at present. A value
 	 * of "ServletException" would match
-	 * <code>javax.servlet.ServletException</code> and subclasses, for example.
+	 * {@code javax.servlet.ServletException} and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and
 	 * whether to include package information (which is not mandatory). For
 	 * example, "Exception" will match nearly anything, and will probably hide
@@ -83,7 +83,7 @@ public class RollbackRuleAttribute implements Serializable{
 	 * @param exceptionName the exception name pattern; can also be a fully
 	 * package-qualified class name
 	 * @throws IllegalArgumentException if the supplied
-	 * <code>exceptionName</code> is <code>null</code> or empty
+	 * {@code exceptionName} is {@code null} or empty
 	 */
 	public RollbackRuleAttribute(String exceptionName) {
 		Assert.hasText(exceptionName, "'exceptionName' cannot be null or empty.");
@@ -100,8 +100,8 @@ public class RollbackRuleAttribute implements Serializable{
 
 	/**
 	 * Return the depth of the superclass matching.
-	 * <p><code>0</code> means <code>ex</code> matches exactly. Returns
-	 * <code>-1</code> if there is no match. Otherwise, returns depth with the
+	 * <p>{@code 0} means {@code ex} matches exactly. Returns
+	 * {@code -1} if there is no match. Otherwise, returns depth with the
 	 * lowest depth winning.
 	 */
 	public int getDepth(Throwable ex) {

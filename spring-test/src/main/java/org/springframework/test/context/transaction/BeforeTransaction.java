@@ -24,13 +24,13 @@ import java.lang.annotation.Target;
 
 /**
  * <p>
- * Test annotation to indicate that the annotated <code>public void</code>
+ * Test annotation to indicate that the annotated {@code public void}
  * method should be executed <em>before</em> a transaction is started for test
  * methods configured to run within a transaction via the
- * <code>&#064;Transactional</code> annotation.
+ * {@code &#064;Transactional} annotation.
  * </p>
  * <p>
- * The <code>&#064;BeforeTransaction</code> methods of superclasses will be
+ * The {@code &#064;BeforeTransaction} methods of superclasses will be
  * executed before those of the current class.
  * </p>
  *

@@ -24,7 +24,7 @@ import org.springframework.util.ObjectUtils;
  * field value.
  *
  * <p>See the {@link DefaultMessageCodesResolver} javadoc for details on
- * how a message code list is built for a <code>FieldError</code>.
+ * how a message code list is built for a {@code FieldError}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

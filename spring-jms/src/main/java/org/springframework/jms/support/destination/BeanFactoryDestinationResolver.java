@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * {@link DestinationResolver} implementation based on a Spring {@link BeanFactory}.
  *
  * <p>Will lookup Spring managed beans identified by bean name,
- * expecting them to be of type <code>javax.jms.Destination</code>.
+ * expecting them to be of type {@code javax.jms.Destination}.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -42,7 +42,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 
 	/**
 	 * Create a new instance of the {@link BeanFactoryDestinationResolver} class.
-	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
+	 * <p>The BeanFactory to access must be set via {@code setBeanFactory}.
 	 * @see #setBeanFactory
 	 */
 	public BeanFactoryDestinationResolver() {

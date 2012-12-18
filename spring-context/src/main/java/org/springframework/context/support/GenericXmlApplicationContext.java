@@ -84,7 +84,7 @@ public class GenericXmlApplicationContext extends GenericApplicationContext {
 	}
 
 	/**
-	 * Set whether to use XML validation. Default is <code>true</code>.
+	 * Set whether to use XML validation. Default is {@code true}.
 	 */
 	public void setValidating(boolean validating) {
 		this.reader.setValidating(validating);

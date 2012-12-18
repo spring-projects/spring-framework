@@ -69,7 +69,7 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Order value for TransactionSynchronization objects that clean up Hibernate Sessions.
-	 * Returns <code>DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100</code>
+	 * Returns {@code DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100}
 	 * to execute Session cleanup before JDBC Connection cleanup, if any.
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#CONNECTION_SYNCHRONIZATION_ORDER
 	 */
@@ -82,7 +82,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Determine the DataSource of the given SessionFactory.
 	 * @param sessionFactory the SessionFactory to check
-	 * @return the DataSource, or <code>null</code> if none found
+	 * @return the DataSource, or {@code null} if none found
 	 * @see org.hibernate.engine.spi.SessionFactoryImplementor#getConnectionProvider
 	 */
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
@@ -96,7 +96,7 @@ public abstract class SessionFactoryUtils {
 	/**
 	 * Perform actual closing of the Hibernate Session,
 	 * catching and logging any cleanup exceptions thrown.
-	 * @param session the Hibernate Session to close (may be <code>null</code>)
+	 * @param session the Hibernate Session to close (may be {@code null})
 	 * @see org.hibernate.Session#close()
 	 */
 	public static void closeSession(Session session) {
@@ -115,7 +115,7 @@ public abstract class SessionFactoryUtils {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy.
+	 * from the {@code org.springframework.dao} hierarchy.
 	 * @param ex HibernateException that occured
 	 * @return the corresponding DataAccessException instance
 	 * @see HibernateExceptionTranslator#convertHibernateAccessException

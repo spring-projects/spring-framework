@@ -20,7 +20,7 @@ import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 
 /**
- * Implementation of <code>AbstractJasperReportsSingleFormatView</code>
+ * Implementation of {@code AbstractJasperReportsSingleFormatView}
  * that renders report results in PDF format.
  *
  * @author Rob Harrop

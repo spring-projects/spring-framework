@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  *
  * <p>Mapping is provided for fields in the target class for many common types, e.g.:
  * String, boolean, Boolean, byte, Byte, short, Short, int, Integer, long, Long,
- * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
+ * float, Float, double, Double, BigDecimal, {@code java.util.Date}, etc.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,
  * try using column aliases in the SQL statement like "select fname as first_name from customer".
@@ -190,7 +190,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Set whether we're strictly validating that all bean properties have been
 	 * mapped from corresponding database fields.
-	 * <p>Default is <code>false</code>, accepting unpopulated properties in the
+	 * <p>Default is {@code false}, accepting unpopulated properties in the
 	 * target bean.
 	 */
 	public void setCheckFullyPopulated(boolean checkFullyPopulated) {
@@ -208,7 +208,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	/**
 	 * Set whether we're defaulting Java primitives in the case of mapping a null value
 	 * from corresponding database fields.
-	 * <p>Default is <code>false</code>, throwing an exception when nulls are mapped to Java primitives.
+	 * <p>Default is {@code false}, throwing an exception when nulls are mapped to Java primitives.
 	 */
 	public void setPrimitivesDefaultedForNullValue(boolean primitivesDefaultedForNullValue) {
 		this.primitivesDefaultedForNullValue = primitivesDefaultedForNullValue;
@@ -295,11 +295,11 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * <p>The default implementation calls
 	 * {@link JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)}.
 	 * Subclasses may override this to check specific value types upfront,
-	 * or to post-process values return from <code>getResultSetValue</code>.
+	 * or to post-process values return from {@code getResultSetValue}.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @param pd the bean property that each result object is expected to match
-	 * (or <code>null</code> if none specified)
+	 * (or {@code null} if none specified)
 	 * @return the Object value
 	 * @throws SQLException in case of extraction failure
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue(java.sql.ResultSet, int, Class)

@@ -59,7 +59,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * Return the SQL type for the given parameter, if registered.
 	 * @param paramName the name of the parameter
 	 * @return the SQL type of the parameter,
-	 * or <code>TYPE_UNKNOWN</code> if not registered
+	 * or {@code TYPE_UNKNOWN} if not registered
 	 */
 	public int getSqlType(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
@@ -74,7 +74,7 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * Return the type name for the given parameter, if registered.
 	 * @param paramName the name of the parameter
 	 * @return the type name of the parameter,
-	 * or <code>null</code> if not registered
+	 * or {@code null} if not registered
 	 */
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");

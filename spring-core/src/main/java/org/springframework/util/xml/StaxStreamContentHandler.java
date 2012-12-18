@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * SAX <code>ContentHandler</code> that writes to a <code>XMLStreamWriter</code>.
+ * SAX {@code ContentHandler} that writes to a {@code XMLStreamWriter}.
  *
  * @author Arjen Poutsma
  * @see XMLStreamWriter
@@ -39,8 +39,8 @@ class StaxStreamContentHandler extends AbstractStaxContentHandler {
 	private final XMLStreamWriter streamWriter;
 
 	/**
-	 * Constructs a new instance of the <code>StaxStreamContentHandler</code> that writes to the given
-	 * <code>XMLStreamWriter</code>.
+	 * Constructs a new instance of the {@code StaxStreamContentHandler} that writes to the given
+	 * {@code XMLStreamWriter}.
 	 *
 	 * @param streamWriter the stream writer to write to
 	 */

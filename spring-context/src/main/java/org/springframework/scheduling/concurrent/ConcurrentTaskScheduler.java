@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.ScheduledExecutorService</code>
+ * Adapter that takes a JDK 1.5 {@code java.util.concurrent.ScheduledExecutorService}
  * and exposes a Spring {@link org.springframework.scheduling.TaskScheduler} for it.
  * Extends {@link ConcurrentTaskExecutor} in order to implement the
  * {@link org.springframework.scheduling.SchedulingTaskExecutor} interface as well.

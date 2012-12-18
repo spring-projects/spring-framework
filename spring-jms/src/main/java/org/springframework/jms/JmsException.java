@@ -51,7 +51,7 @@ public abstract class JmsException extends NestedRuntimeException {
 
 	/**
 	 * Constructor that takes a plain root cause, intended for
-	 * subclasses mirroring corresponding <code>javax.jms</code> exceptions.
+	 * subclasses mirroring corresponding {@code javax.jms} exceptions.
 	 * @param cause the cause of the exception. This argument is generally
 	 * expected to be a proper subclass of {@link javax.jms.JMSException}.
 	 */
@@ -64,7 +64,7 @@ public abstract class JmsException extends NestedRuntimeException {
 	 * Convenience method to get the vendor specific error code if
 	 * the root cause was an instance of JMSException.
 	 * @return a string specifying the vendor-specific error code if the
-	 * root cause is an instance of JMSException, or <code>null</code>
+	 * root cause is an instance of JMSException, or {@code null}
 	 */
 	public String getErrorCode() {
 		Throwable cause = getCause();

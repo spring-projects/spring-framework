@@ -36,7 +36,7 @@ public interface GroovyObjectCustomizer {
 	 * Customize the supplied {@link GroovyObject}.
 	 * <p>For example, this can be used to set a custom metaclass to
 	 * handle missing methods.
-	 * @param goo the <code>GroovyObject</code> to customize
+	 * @param goo the {@code GroovyObject} to customize
 	 */
 	void customize(GroovyObject goo);
 

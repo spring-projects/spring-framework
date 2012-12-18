@@ -25,7 +25,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
 
 /**
  * The operator 'instanceof' checks if an object is of the class specified in the right hand operand,
- * in the same way that <code>instanceof</code> does in Java.
+ * in the same way that {@code instanceof} does in Java.
  *
  * @author Andy Clement
  * @since 3.0

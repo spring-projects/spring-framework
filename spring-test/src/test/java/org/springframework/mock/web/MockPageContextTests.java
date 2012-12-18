@@ -21,7 +21,7 @@ import junit.framework.TestCase;
 import javax.servlet.jsp.PageContext;
 
 /**
- * Unit tests for the <code>MockPageContext</code> class.
+ * Unit tests for the {@code MockPageContext} class.
  *
  * @author Rick Evans
  */

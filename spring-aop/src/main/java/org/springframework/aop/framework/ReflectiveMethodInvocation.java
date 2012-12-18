@@ -253,7 +253,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * This method provides an invocation-bound alternative to a ThreadLocal.
 	 * <p>This map is initialized lazily and is not used in the AOP framework itself.
 	 * @return any user attributes associated with this invocation
-	 * (never <code>null</code>)
+	 * (never {@code null})
 	 */
 	public Map<String, Object> getUserAttributes() {
 		if (this.userAttributes == null) {

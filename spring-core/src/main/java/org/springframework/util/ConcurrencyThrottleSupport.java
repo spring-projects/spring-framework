@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>Designed for use as a base class, with the subclass invoking
  * the {@link #beforeAccess()} and {@link #afterAccess()} methods at
- * appropriate points of its workflow. Note that <code>afterAccess</code>
+ * appropriate points of its workflow. Note that {@code afterAccess}
  * should usually be called in a finally block!
  *
  * <p>The default concurrency limit of this support class is -1
@@ -88,7 +88,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Return whether this throttle is currently active.
-	 * @return <code>true</code> if the concurrency limit for this instance is active
+	 * @return {@code true} if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
 	 */
 	public boolean isThrottleActive() {

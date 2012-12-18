@@ -54,7 +54,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * Set the mappings between exception class names and error view names.
 	 * The exception class name can be a substring, with no wildcard support
 	 * at present. A value of "PortletException" would match
-	 * <code>javax.portet.PortletException</code> and subclasses, for example.
+	 * {@code javax.portet.PortletException} and subclasses, for example.
 	 * <p><b>NB:</b> Consider carefully how specific the pattern is, and whether
 	 * to include package information (which isn't mandatory). For example,
 	 * "Exception" will match nearly anything, and will probably hide other rules.
@@ -126,7 +126,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * {@link #setDefaultErrorView "defaultErrorView"} as fallback.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current portlet request (useful for obtaining metadata)
-	 * @return the resolved view name, or <code>null</code> if none found
+	 * @return the resolved view name, or {@code null} if none found
 	 */
 	protected String determineViewName(Exception ex, PortletRequest request) {
 		String viewName = null;
@@ -149,7 +149,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 	 * Find a matching view name in the given exception mappings
 	 * @param exceptionMappings mappings between exception class names and error view names
 	 * @param ex the exception that got thrown during handler execution
-	 * @return the view name, or <code>null</code> if none found
+	 * @return the view name, or {@code null} if none found
 	 * @see #setExceptionMappings
 	 */
 	protected String findMatchingViewName(Properties exceptionMappings, Exception ex) {
@@ -198,7 +198,7 @@ public class SimpleMappingExceptionResolver extends AbstractHandlerExceptionReso
 
 	/**
 	 * Return a ModelAndView for the given request, view name and exception.
-	 * Default implementation delegates to <code>getModelAndView(viewName, ex)</code>.
+	 * Default implementation delegates to {@code getModelAndView(viewName, ex)}.
 	 * @param viewName the name of the error view
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current portlet request (useful for obtaining metadata)

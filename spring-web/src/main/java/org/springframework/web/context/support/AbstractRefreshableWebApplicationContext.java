@@ -86,7 +86,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/** Servlet config that this context runs in, if any */
 	private ServletConfig servletConfig;
 
-	/** Namespace of this context, or <code>null</code> if root */
+	/** Namespace of this context, or {@code null} if root */
 	private String namespace;
 
 	/** the ThemeSource for this ApplicationContext */

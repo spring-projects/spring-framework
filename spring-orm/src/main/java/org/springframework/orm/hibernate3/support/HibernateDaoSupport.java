@@ -105,7 +105,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * You may introspect its configuration, but not modify the configuration
 	 * (other than from within an {@link #initDao} implementation).
 	 * Consider creating a custom HibernateTemplate instance via
-	 * <code>new HibernateTemplate(getSessionFactory())</code>, in which
+	 * {@code new HibernateTemplate(getSessionFactory())}, in which
 	 * case you're allowed to customize the settings on the resulting instance.
 	 */
 	public final HibernateTemplate getHibernateTemplate() {
@@ -175,7 +175,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
+	 * {@code org.springframework.dao} hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
 	 * <p>Delegates to the
 	 * {@link org.springframework.orm.hibernate3.HibernateTemplate#convertHibernateAccessException}

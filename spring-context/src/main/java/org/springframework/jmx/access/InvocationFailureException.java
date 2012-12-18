@@ -29,7 +29,7 @@ import org.springframework.jmx.JmxException;
 public class InvocationFailureException extends JmxException {
 
 	/**
-	 * Create a new <code>InvocationFailureException</code> with the supplied
+	 * Create a new {@code InvocationFailureException} with the supplied
 	 * error message.
 	 * @param msg the detail message
 	 */
@@ -38,7 +38,7 @@ public class InvocationFailureException extends JmxException {
 	}
 
 	/**
-	 * Create a new <code>InvocationFailureException</code> with the
+	 * Create a new {@code InvocationFailureException} with the
 	 * specified error message and root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause

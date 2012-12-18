@@ -27,9 +27,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 /**
- * Spring-configurable <code>FileTypeMap</code> implementation that will read
+ * Spring-configurable {@code FileTypeMap} implementation that will read
  * MIME type to file extension mappings from a standard JavaMail MIME type
- * mapping file, using a standard <code>MimetypesFileTypeMap</code> underneath.
+ * mapping file, using a standard {@code MimetypesFileTypeMap} underneath.
  *
  * <p>The mapping file should be in the following format, as specified by the
  * Java Activation Framework:
@@ -38,18 +38,18 @@ import org.springframework.core.io.Resource;
  * # map text/html to .htm and .html files
  * text/html  html htm HTML HTM</pre>
  *
- * Lines starting with <code>#</code> are treated as comments and are ignored. All
+ * Lines starting with {@code #} are treated as comments and are ignored. All
  * other lines are treated as mappings. Each mapping line should contain the MIME
  * type as the first entry and then each file extension to map to that MIME type
  * as subsequent entries. Each entry is separated by spaces or tabs.
  *
- * <p>By default, the mappings in the <code>mime.types</code> file located in the
+ * <p>By default, the mappings in the {@code mime.types} file located in the
  * same package as this class are used, which cover many common file extensions
- * (in contrast to the out-of-the-box mappings in <code>activation.jar</code>).
- * This can be overridden using the <code>mappingLocation</code> property.
+ * (in contrast to the out-of-the-box mappings in {@code activation.jar}).
+ * This can be overridden using the {@code mappingLocation} property.
  *
- * <p>Additional mappings can be added via the <code>mappings</code> bean property,
- * as lines that follow the <code>mime.types<code> file format.
+ * <p>Additional mappings can be added via the {@code mappings} bean property,
+ * as lines that follow the {@code mime.types} file format.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -61,7 +61,7 @@ import org.springframework.core.io.Resource;
 public class ConfigurableMimeFileTypeMap extends FileTypeMap implements InitializingBean {
 
 	/**
-	 * The <code>Resource</code> to load the mapping file from.
+	 * The {@code Resource} to load the mapping file from.
 	 */
 	private Resource mappingLocation = new ClassPathResource("mime.types", getClass());
 
@@ -72,16 +72,16 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 
 	/**
 	 * The delegate FileTypeMap, compiled from the mappings in the mapping file
-	 * and the entries in the <code>mappings</code> property.
+	 * and the entries in the {@code mappings} property.
 	 */
 	private FileTypeMap fileTypeMap;
 
 
 	/**
-	 * Specify the <code>Resource</code> from which mappings are loaded.
-	 * <p>Needs to follow the <code>mime.types<code> file format, as specified
+	 * Specify the {@code Resource} from which mappings are loaded.
+	 * <p>Needs to follow the {@code mime.types} file format, as specified
 	 * by the Java Activation Framework, containing lines such as:<br>
-	 * <code>text/html  html htm HTML HTM</code>
+	 * {@code text/html  html htm HTML HTM}
 	 */
 	public void setMappingLocation(Resource mappingLocation) {
 		this.mappingLocation = mappingLocation;
@@ -89,9 +89,9 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 
 	/**
 	 * Specify additional MIME type mappings as lines that follow the
-	 * <code>mime.types<code> file format, as specified by the
+	 * {@code mime.types} file format, as specified by the
 	 * Java Activation Framework, for example:<br>
-	 * <code>text/html  html htm HTML HTM</code>
+	 * {@code text/html  html htm HTML HTM}
 	 */
 	public void setMappings(String[] mappings) {
 		this.mappings = mappings;
@@ -107,7 +107,7 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 
 	/**
 	 * Return the delegate FileTypeMap, compiled from the mappings in the mapping file
-	 * and the entries in the <code>mappings</code> property.
+	 * and the entries in the {@code mappings} property.
 	 * @see #setMappingLocation
 	 * @see #setMappings
 	 * @see #createFileTypeMap
@@ -131,8 +131,8 @@ public class ConfigurableMimeFileTypeMap extends FileTypeMap implements Initiali
 	 * <p>The default implementation creates an Activation Framework {@link MimetypesFileTypeMap},
 	 * passing in an InputStream from the mapping resource (if any) and registering
 	 * the mapping lines programmatically.
-	 * @param mappingLocation a <code>mime.types</code> mapping resource (can be <code>null</code>)
-	 * @param mappings MIME type mapping lines (can be <code>null</code>)
+	 * @param mappingLocation a {@code mime.types} mapping resource (can be {@code null})
+	 * @param mappings MIME type mapping lines (can be {@code null})
 	 * @return the compiled FileTypeMap
 	 * @throws IOException if resource access failed
 	 * @see javax.activation.MimetypesFileTypeMap#MimetypesFileTypeMap(java.io.InputStream)

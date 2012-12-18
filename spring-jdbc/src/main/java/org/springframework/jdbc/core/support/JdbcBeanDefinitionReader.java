@@ -99,7 +99,7 @@ public class JdbcBeanDefinitionReader {
 	 * @param sql SQL query to use for loading bean definitions.
 	 * The first three columns must be bean name, property name and value.
 	 * Any join and any other columns are permitted: e.g.
-	 * <code>SELECT BEAN_NAME, PROPERTY, VALUE FROM CONFIG WHERE CONFIG.APP_ID = 1</code>
+	 * {@code SELECT BEAN_NAME, PROPERTY, VALUE FROM CONFIG WHERE CONFIG.APP_ID = 1}
 	 * It's also possible to perform a join. Column names are not significant --
 	 * only the ordering of these first three columns.
 	 */

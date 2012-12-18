@@ -36,7 +36,7 @@ public abstract class ApplicationEvent extends EventObject {
 
 	/**
 	 * Create a new ApplicationEvent.
-	 * @param source the component that published the event (never <code>null</code>)
+	 * @param source the component that published the event (never {@code null})
 	 */
 	public ApplicationEvent(Object source) {
 		super(source);

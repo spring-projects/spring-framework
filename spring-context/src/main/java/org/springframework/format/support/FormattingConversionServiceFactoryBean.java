@@ -42,7 +42,7 @@ import org.springframework.util.StringValueResolver;
  * of registrars to use through {@link #setFormatterRegistrars(Set)}.
  *
  * <p>A good example for registering converters and formatters in code is
- * <code>JodaTimeFormatterRegistrar</code>, which registers a number of
+ * {@code JodaTimeFormatterRegistrar}, which registers a number of
  * date-related formatters and converters. For a more detailed list of cases
  * see {@link #setFormatterRegistrars(Set)}
  *

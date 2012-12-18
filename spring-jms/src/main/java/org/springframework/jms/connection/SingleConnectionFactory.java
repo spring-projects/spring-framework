@@ -52,8 +52,8 @@ import org.springframework.util.Assert;
  *
  * <p>Note that when using the JMS 1.0.2 API, this ConnectionFactory will switch
  * into queue/topic mode according to the JMS API methods used at runtime:
- * <code>createQueueConnection</code> and <code>createTopicConnection</code> will
- * lead to queue/topic mode, respectively; generic <code>createConnection</code>
+ * {@code createQueueConnection} and {@code createTopicConnection} will
+ * lead to queue/topic mode, respectively; generic {@code createConnection}
  * calls will lead to a JMS 1.1 connection which is able to serve both modes.
  *
  * <p>Useful for testing and standalone environments in order to keep using the
@@ -367,14 +367,14 @@ public class SingleConnectionFactory
 
 	/**
 	 * Template method for obtaining a (potentially cached) Session.
-	 * <p>The default implementation always returns <code>null</code>.
+	 * <p>The default implementation always returns {@code null}.
 	 * Subclasses may override this for exposing specific Session handles,
 	 * possibly delegating to {@link #createSession} for the creation of raw
 	 * Session objects that will then get wrapped and returned from here.
 	 * @param con the JMS Connection to operate on
 	 * @param mode the Session acknowledgement mode
-	 * (<code>Session.TRANSACTED</code> or one of the common modes)
-	 * @return the Session to use, or <code>null</code> to indicate
+	 * ({@code Session.TRANSACTED} or one of the common modes)
+	 * @return the Session to use, or {@code null} to indicate
 	 * creation of a raw standard Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
@@ -387,7 +387,7 @@ public class SingleConnectionFactory
 	 * adaptign to JMS 1.0.2 style queue/topic mode if necessary.
 	 * @param con the JMS Connection to operate on
 	 * @param mode the Session acknowledgement mode
-	 * (<code>Session.TRANSACTED</code> or one of the common modes)
+	 * ({@code Session.TRANSACTED} or one of the common modes)
 	 * @return the newly created Session
 	 * @throws JMSException if thrown by the JMS API
 	 */

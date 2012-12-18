@@ -19,9 +19,9 @@ package org.springframework.core.style;
 import org.springframework.util.Assert;
 
 /**
- * Utility class that builds pretty-printing <code>toString()</code> methods
+ * Utility class that builds pretty-printing {@code toString()} methods
  * with pluggable styling conventions. By default, ToStringCreator adheres
- * to Spring's <code>toString()</code> styling conventions.
+ * to Spring's {@code toString()} styling conventions.
  *
  * @author Keith Donald
  * @author Juergen Hoeller

@@ -57,7 +57,7 @@ public abstract class JmsDestinationAccessor extends JmsAccessor {
 	}
 
 	/**
-	 * Return the DestinationResolver for this accessor (never <code>null</code>).
+	 * Return the DestinationResolver for this accessor (never {@code null}).
 	 */
 	public DestinationResolver getDestinationResolver() {
 		return this.destinationResolver;

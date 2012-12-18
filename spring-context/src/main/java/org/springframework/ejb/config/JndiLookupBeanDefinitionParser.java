@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * Simple {@link org.springframework.beans.factory.xml.BeanDefinitionParser} implementation that
- * translates <code>jndi-lookup</code> tag into {@link JndiObjectFactoryBean} definitions.
+ * translates {@code jndi-lookup} tag into {@link JndiObjectFactoryBean} definitions.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

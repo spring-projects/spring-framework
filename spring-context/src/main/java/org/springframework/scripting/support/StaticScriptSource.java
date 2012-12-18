@@ -50,7 +50,7 @@ public class StaticScriptSource implements ScriptSource {
 	 * Create a new StaticScriptSource for the given script.
 	 * @param script the script String
 	 * @param className the suggested class name for the script
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public StaticScriptSource(String script, String className) {
 		setScript(script);

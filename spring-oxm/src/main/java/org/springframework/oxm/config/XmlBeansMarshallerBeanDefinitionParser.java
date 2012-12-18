@@ -24,7 +24,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the <code>&lt;oxm:xmlbeans-marshaller/&gt; element.
+ * Parser for the {@code <oxm:xmlbeans-marshaller/>} element.
  *
  * @author Arjen Poutsma
  * @since 3.0

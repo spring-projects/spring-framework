@@ -35,17 +35,17 @@ public interface PropertyValues {
 	/**
 	 * Return the property value with the given name, if any.
 	 * @param propertyName the name to search for
-	 * @return the property value, or <code>null</code>
+	 * @return the property value, or {@code null}
 	 */
 	PropertyValue getPropertyValue(String propertyName);
 
 	/**
 	 * Return the changes since the previous PropertyValues.
-	 * Subclasses should also override <code>equals</code>.
+	 * Subclasses should also override {@code equals}.
 	 * @param old old property values
 	 * @return PropertyValues updated or new properties.
 	 * Return empty PropertyValues if there are no changes.
-	 * @see java.lang.Object#equals
+	 * @see Object#equals
 	 */
 	PropertyValues changesSince(PropertyValues old);
 

@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  * that always returns a fixed default locale. Default is the current
  * JVM's default locale.
  *
- * <p>Note: Does not support <code>setLocale</code>, as the fixed locale
+ * <p>Note: Does not support {@code setLocale}, as the fixed locale
  * cannot be changed.
  *
  * @author Juergen Hoeller

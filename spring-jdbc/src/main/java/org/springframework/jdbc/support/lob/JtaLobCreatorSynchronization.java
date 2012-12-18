@@ -22,12 +22,12 @@ import org.springframework.util.Assert;
 
 /**
  * Callback for resource cleanup at the end of a JTA transaction.
- * Invokes <code>LobCreator.close()</code> to clean up temporary LOBs
+ * Invokes {@code LobCreator.close()} to clean up temporary LOBs
  * that might have been created.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.jdbc.support.lob.LobCreator#close()
+ * @see LobCreator#close()
  * @see javax.transaction.Transaction#registerSynchronization
  */
 public class JtaLobCreatorSynchronization implements Synchronization {

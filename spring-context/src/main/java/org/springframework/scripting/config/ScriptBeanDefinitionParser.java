@@ -33,18 +33,18 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * BeanDefinitionParser implementation for the '<code>&lt;lang:groovy/&gt;</code>',
- * '<code>&lt;lang:jruby/&gt;</code>' and '<code>&lt;lang:bsh/&gt;</code>' tags.
+ * BeanDefinitionParser implementation for the '{@code &lt;lang:groovy/&gt;}',
+ * '{@code &lt;lang:jruby/&gt;}' and '{@code &lt;lang:bsh/&gt;}' tags.
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>The script for each object can be specified either as a reference to the Resource
- * containing it (using the '<code>script-source</code>' attribute) or inline in the XML configuration
- * itself (using the '<code>inline-script</code>' attribute.
+ * containing it (using the '{@code script-source}' attribute) or inline in the XML configuration
+ * itself (using the '{@code inline-script}' attribute.
  *
  * <p>By default, dynamic objects created with these tags are <strong>not</strong> refreshable.
  * To enable refreshing, specify the refresh check delay for each object (in milliseconds) using the
- * '<code>refresh-check-delay</code>' attribute.
+ * '{@code refresh-check-delay}' attribute.
  *
  * @author Rob Harrop
  * @author Rod Johnson
@@ -196,9 +196,9 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	}
 
 	/**
-	 * Resolves the script source from either the '<code>script-source</code>' attribute or
-	 * the '<code>inline-script</code>' element. Logs and {@link XmlReaderContext#error} and
-	 * returns <code>null</code> if neither or both of these values are specified.
+	 * Resolves the script source from either the '{@code script-source}' attribute or
+	 * the '{@code inline-script}' element. Logs and {@link XmlReaderContext#error} and
+	 * returns {@code null} if neither or both of these values are specified.
 	 */
 	private String resolveScriptSource(Element element, XmlReaderContext readerContext) {
 		boolean hasScriptSource = element.hasAttribute(SCRIPT_SOURCE_ATTRIBUTE);

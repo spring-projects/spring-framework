@@ -90,8 +90,8 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	}
 
 	/**
-	 * Set the value that will replace '<code>/</code>' as the separator
-	 * in the view name. The default behavior simply leaves '<code>/</code>'
+	 * Set the value that will replace '{@code /}' as the separator
+	 * in the view name. The default behavior simply leaves '{@code /}'
 	 * as the separator.
 	 */
 	public void setSeparator(String separator) {

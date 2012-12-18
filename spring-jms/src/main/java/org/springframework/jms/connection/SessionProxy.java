@@ -34,7 +34,7 @@ public interface SessionProxy extends Session {
 	 * Return the target Session of this proxy.
 	 * <p>This will typically be the native provider Session
 	 * or a wrapper from a session pool.
-	 * @return the underlying Session (never <code>null</code>)
+	 * @return the underlying Session (never {@code null})
 	 */
 	Session getTargetSession();
 

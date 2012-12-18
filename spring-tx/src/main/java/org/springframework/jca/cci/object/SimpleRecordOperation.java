@@ -49,7 +49,7 @@ public class SimpleRecordOperation extends EisOperation {
 
 	/**
 	 * Execute the CCI interaction encapsulated by this operation object.
-	 * <p>This method will call CCI's <code>Interaction.execute</code> variant
+	 * <p>This method will call CCI's {@code Interaction.execute} variant
 	 * that returns an output Record.
 	 * @param inputRecord the input record
 	 * @return the output record
@@ -62,7 +62,7 @@ public class SimpleRecordOperation extends EisOperation {
 
 	/**
 	 * Execute the CCI interaction encapsulated by this operation object.
-	 * <p>This method will call CCI's <code>Interaction.execute</code> variant
+	 * <p>This method will call CCI's {@code Interaction.execute} variant
 	 * with a passed-in output Record.
 	 * @param inputRecord the input record
 	 * @param outputRecord the output record

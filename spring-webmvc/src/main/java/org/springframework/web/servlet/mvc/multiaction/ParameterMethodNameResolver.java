@@ -33,14 +33,14 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>The simplest strategy looks for a specific named parameter, whose value is
  * considered the name of the method to invoke. The name of the parameter may be
- * specified as a JavaBean property, if the default <code>action</code> is not
+ * specified as a JavaBean property, if the default {@code action} is not
  * acceptable.
  *
  * <p>The alternative strategy uses the very existence of a request parameter (
  * i.e. a request parameter with a certain name is found) as an indication that a
  * method with the same name should be dispatched to. In this case, the actual
  * request parameter value is ignored. The list of parameter/method names may
- * be set via the <code>methodParamNames<code> JavaBean property.
+ * be set via the {@code methodParamNames} JavaBean property.
  *
  * <p>The second resolution strategy is primarily expected to be used with web
  * pages containing multiple submit buttons. The 'name' attribute of each
@@ -52,7 +52,7 @@ import org.springframework.web.util.WebUtils;
  * type 'image'. That is, an image submit button named 'reset' will normally be
  * submitted by the browser as two request paramters called 'reset.x', and
  * 'reset.y'. When checking for the existence of a paramter from the
- * <code>methodParamNames</code> list, to indicate that a specific method should
+ * {@code methodParamNames} list, to indicate that a specific method should
  * be called, the code will look for request parameter in the "reset" form
  * (exactly as spcified in the list), and in the "reset.x" form ('.x' appended to
  * the name in the list). In this way it can handle both normal and image submit

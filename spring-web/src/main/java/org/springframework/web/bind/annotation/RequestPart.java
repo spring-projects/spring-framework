@@ -67,9 +67,9 @@ public @interface RequestPart {
 
 	/**
 	 * Whether the part is required.
-	 * <p>Default is <code>true</code>, leading to an exception thrown in case
-	 * of the part missing in the request. Switch this to <code>false</code>
-	 * if you prefer a <code>null</value> in case of the part missing.
+	 * <p>Default is {@code true}, leading to an exception thrown in case
+	 * of the part missing in the request. Switch this to {@code false}
+	 * if you prefer a {@code null} in case of the part missing.
 	 */
 	boolean required() default true;
 

@@ -32,7 +32,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * annotation to identify which classes need autowiring.
  *
  * <p>The bean name to look up will be taken from the
- * <code>&#64;Configurable</code> annotation if specified, otherwise the
+ * {@code &#64;Configurable} annotation if specified, otherwise the
  * default bean name to look up will be the FQN of the class being configured.
  *
  * @author Rod Johnson

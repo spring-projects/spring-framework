@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * (i.e. the interval between successive executions is measured from each
  * <emphasis>completion</emphasis> time). To measure the interval between the
  * scheduled <emphasis>start</emphasis> time of each execution instead, set the
- * 'fixedRate' property to <code>true</code>.
+ * 'fixedRate' property to {@code true}.
  * <p>
  * Note that the TaskScheduler interface already defines methods for scheduling
  * tasks at fixed-rate or with fixed-delay. Both also support an optional value

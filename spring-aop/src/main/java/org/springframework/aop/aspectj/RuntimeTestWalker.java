@@ -44,7 +44,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>It relies on implementation specific knowledge in AspectJ to break
  * encapsulation and do something AspectJ was not designed to do: query
  * the types of runtime tests that will be performed. The code here should
- * migrate to <code>ShadowMatch.getVariablesInvolvedInRuntimeTest()</code>
+ * migrate to {@code ShadowMatch.getVariablesInvolvedInRuntimeTest()}
  * or some similar operation.
  *
  * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.

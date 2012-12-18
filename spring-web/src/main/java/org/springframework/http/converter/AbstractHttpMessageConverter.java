@@ -187,7 +187,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@link #setSupportedMediaTypes(List) supportedMediaTypes} property, if any.
 	 * Can be overridden in subclasses.
 	 * @param t the type to return the content type for
-	 * @return the content type, or <code>null</code> if not known
+	 * @return the content type, or {@code null} if not known
 	 */
 	protected MediaType getDefaultContentType(T t) throws IOException {
 		List<MediaType> mediaTypes = getSupportedMediaTypes();
@@ -209,7 +209,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Indicates whether the given class is supported by this converter.
 	 * @param clazz the class to test for support
-	 * @return <code>true</code> if supported; <code>false</code> otherwise
+	 * @return {@code true} if supported; {@code false} otherwise
 	 */
 	protected abstract boolean supports(Class<?> clazz);
 

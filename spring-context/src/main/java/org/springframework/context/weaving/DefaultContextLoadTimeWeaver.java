@@ -35,11 +35,11 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
- * decorating an automatically detected internal <code>LoadTimeWeaver</code>.
+ * decorating an automatically detected internal {@code LoadTimeWeaver}.
  *
  * <p>Typically registered for the default bean name
- * "<code>loadTimeWeaver</code>"; the most convenient way to achieve this is
- * Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
+ * "{@code loadTimeWeaver}"; the most convenient way to achieve this is
+ * Spring's {@code &lt;context:load-time-weaver&gt;} XML tag.
  *
  * <p>This class implements a runtime environment check for obtaining
  * the appropriate weaver implementation: As of Spring 3.1, it detects

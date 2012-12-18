@@ -81,7 +81,7 @@ public abstract class AbstractLobType implements UserType {
 
 	/**
 	 * Constructor used for testing: takes an explicit LobHandler
-	 * and an explicit JTA TransactionManager (can be <code>null</code>).
+	 * and an explicit JTA TransactionManager (can be {@code null}).
 	 */
 	protected AbstractLobType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		this.lobHandler = lobHandler;

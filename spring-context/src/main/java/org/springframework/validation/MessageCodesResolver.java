@@ -47,7 +47,7 @@ public interface MessageCodesResolver {
 	 * @param errorCode the error code used for rejecting the value
 	 * @param objectName the name of the object
 	 * @param field the field name
-	 * @param fieldType the field type (may be <code>null</code> if not determinable)
+	 * @param fieldType the field type (may be {@code null} if not determinable)
 	 * @return the message codes to use
 	 */
 	String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType);

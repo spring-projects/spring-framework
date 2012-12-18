@@ -42,27 +42,27 @@ import org.springframework.web.context.support.ServletContextResource;
  * of this servlet, and use the "JSP include" action to include this URL,
  * with the "resource" parameter indicating the actual target path in the WAR.
  *
- * <p>The <code>defaultUrl</code> property can be set to the internal
+ * <p>The {@code defaultUrl} property can be set to the internal
  * resource path of a default URL, to be rendered when the target resource
  * is not found or not specified in the first place.
  *
- * <p>The "resource" parameter and the <code>defaultUrl</code> property can
+ * <p>The "resource" parameter and the {@code defaultUrl} property can
  * also specify a list of target resources to combine. Those resources will be
  * included one by one to build the response. If last-modified determination
  * is active, the newest timestamp among those files will be used.
  *
- * <p>The <code>allowedResources</code> property can be set to a URL
+ * <p>The {@code allowedResources} property can be set to a URL
  * pattern of resources that should be available via this servlet.
  * If not set, any target resource can be requested, including resources
  * in the WEB-INF directory!
  *
  * <p>If using this servlet for direct access rather than via includes,
- * the <code>contentType</code> property should be specified to apply a
+ * the {@code contentType} property should be specified to apply a
  * proper content type. Note that a content type header in the target JSP will
  * be ignored when including the resource via a RequestDispatcher include.
  *
  * <p>To apply last-modified timestamps for the target resource, set the
- * <code>applyLastModified</code> property to true. This servlet will then
+ * {@code applyLastModified} property to true. This servlet will then
  * return the file timestamp of the target resource as last-modified value,
  * falling back to the startup time of this servlet if not retrievable.
  *
@@ -231,7 +231,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * <p>Default implementation returns the value of the "resource" parameter.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the URL of the target resource, or <code>null</code> if none found
+	 * @return the URL of the target resource, or {@code null} if none found
 	 * @see #RESOURCE_PARAM_NAME
 	 */
 	protected String determineResourceUrl(HttpServletRequest request) {

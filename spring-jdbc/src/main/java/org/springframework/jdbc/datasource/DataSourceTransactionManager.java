@@ -33,7 +33,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementation for a single JDBC {@link javax.sql.DataSource}. This class is
  * capable of working in any environment with any JDBC driver, as long as the setup
- * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 <code>javax.sql.DataSource</code>
+ * uses a JDBC 2.0 Standard Extensions / JDBC 3.0 {@code javax.sql.DataSource}
  * as its Connection factory mechanism. Binds a JDBC Connection from the specified
  * DataSource to the current thread, potentially allowing for one thread-bound
  * Connection per DataSource.

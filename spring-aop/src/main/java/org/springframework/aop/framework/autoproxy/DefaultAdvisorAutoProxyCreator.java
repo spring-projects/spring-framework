@@ -24,10 +24,10 @@ import org.springframework.beans.factory.BeanNameAware;
  * no special code to handle any particular aspects, such as pooling aspects.
  *
  * <p>It's possible to filter out advisors - for example, to use multiple post processors
- * of this type in the same factory - by setting the <code>usePrefix</code> property
+ * of this type in the same factory - by setting the {@code usePrefix} property
  * to true, in which case only advisors beginning with the DefaultAdvisorAutoProxyCreator's
  * bean name followed by a dot (like "aapc.") will be used. This default prefix can be
- * changed from the bean name by setting the <code>advisorBeanNamePrefix</code> property.
+ * changed from the bean name by setting the {@code advisorBeanNamePrefix} property.
  * The separator (.) will also be used in this case.
  *
  * @author Rod Johnson

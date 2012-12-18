@@ -89,7 +89,7 @@ public class SimpleMessageListenerContainer102 extends SimpleMessageListenerCont
 
 	/**
 	 * This implementation overrides the superclass method to avoid using
-	 * JMS 1.1's Session <code>getAcknowledgeMode()</code> method.
+	 * JMS 1.1's Session {@code getAcknowledgeMode()} method.
 	 * The best we can do here is to check the setting on the listener container.
 	 */
 	protected boolean isClientAcknowledge(Session session) throws JMSException {

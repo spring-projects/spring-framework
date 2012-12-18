@@ -27,7 +27,7 @@ import org.springframework.web.util.WebUtils;
  * This is most appropriate if the application needs user sessions anyway.
  *
  * <p>Custom controllers can override the user's theme by calling
- * <code>setThemeName</code>, e.g. responding to a theme change request.
+ * {@code setThemeName}, e.g. responding to a theme change request.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller
@@ -39,7 +39,7 @@ public class SessionThemeResolver extends AbstractThemeResolver {
 	/**
 	 * Name of the session attribute that holds the theme name.
 	 * Only used internally by this implementation.
-	 * Use <code>RequestContext(Utils).getTheme()</code>
+	 * Use {@code RequestContext(Utils).getTheme()}
 	 * to retrieve the current theme in controllers or views.
 	 * @see org.springframework.web.servlet.support.RequestContext#getTheme
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getTheme

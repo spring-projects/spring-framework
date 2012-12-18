@@ -17,7 +17,7 @@
 package org.springframework.core.style;
 
 /**
- * A strategy interface for pretty-printing <code>toString()</code> methods.
+ * A strategy interface for pretty-printing {@code toString()} methods.
  * Encapsulates the print algorithms; some other object such as a builder
  * should provide the workflow.
  *
@@ -27,14 +27,14 @@ package org.springframework.core.style;
 public interface ToStringStyler {
 
 	/**
-	 * Style a <code>toString()</code>'ed object before its fields are styled.
+	 * Style a {@code toString()}'ed object before its fields are styled.
 	 * @param buffer the buffer to print to
 	 * @param obj the object to style
 	 */
 	void styleStart(StringBuilder buffer, Object obj);
 
 	/**
-	 * Style a <code>toString()</code>'ed object after it's fields are styled.
+	 * Style a {@code toString()}'ed object after it's fields are styled.
 	 * @param buffer the buffer to print to
 	 * @param obj the object to style
 	 */

@@ -60,7 +60,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	/**
 	 * Returns an instance which uses the default "classpath*:beanRefContext.xml", as
 	 * the name of the definition file(s). All resources returned by the current
-	 * thread's context class loader's <code>getResources</code> method with this
+	 * thread's context class loader's {@code getResources} method with this
 	 * name will be combined to create a definition, which is just a BeanFactory.
 	 * @return the corresponding BeanFactoryLocator instance
 	 * @throws BeansException in case of factory loading failure
@@ -73,7 +73,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	 * Returns an instance which uses the the specified selector, as the name of the
 	 * definition file(s). In the case of a name with a Spring "classpath*:" prefix,
 	 * or with no prefix, which is treated the same, the current thread's context class
-	 * loader's <code>getResources</code> method will be called with this value to get
+	 * loader's {@code getResources} method will be called with this value to get
 	 * all resources having that name. These resources will then be combined to form a
 	 * definition. In the case where the name uses a Spring "classpath:" prefix, or
 	 * a standard URL prefix, then only one resource file will be loaded as the

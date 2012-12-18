@@ -20,7 +20,7 @@ import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.export.JRXlsExporter;
 
 /**
- * Implementation of <code>AbstractJasperReportsSingleFormatView</code>
+ * Implementation of {@code AbstractJasperReportsSingleFormatView}
  * that renders report results in XLS format.
  *
  * @author Rob Harrop

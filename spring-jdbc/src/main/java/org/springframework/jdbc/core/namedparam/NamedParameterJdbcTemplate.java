@@ -305,7 +305,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
-	 * <p>Note: Not used for the <code>update</code> variant with generated key handling.
+	 * <p>Note: Not used for the {@code update} variant with generated key handling.
 	 * @param sql SQL to execute
 	 * @param paramSource container of arguments to bind
 	 * @return the corresponding PreparedStatementCreator

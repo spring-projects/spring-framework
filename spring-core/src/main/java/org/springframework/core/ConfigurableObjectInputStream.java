@@ -129,7 +129,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	 * since there is no fallback available.
 	 * @param className the class name to resolve
 	 * @param ex the original exception thrown when attempting to load the class
-	 * @return the newly resolved class (never <code>null</code>)
+	 * @return the newly resolved class (never {@code null})
 	 */
 	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException{
@@ -140,7 +140,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	/**
 	 * Return the fallback ClassLoader to use when no ClassLoader was specified
 	 * and ObjectInputStream's own default ClassLoader failed.
-	 * <p>The default implementation simply returns <code>null</code>.
+	 * <p>The default implementation simply returns {@code null}.
 	 */
 	protected ClassLoader getFallbackClassLoader() throws IOException {
 		return null;

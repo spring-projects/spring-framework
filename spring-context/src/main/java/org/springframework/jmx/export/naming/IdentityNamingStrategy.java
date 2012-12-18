@@ -26,10 +26,10 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * An implementation of the <code>ObjectNamingStrategy</code> interface that
+ * An implementation of the {@code ObjectNamingStrategy} interface that
  * creates a name based on the the identity of a given instance.
  *
- * <p>The resulting <code>ObjectName</code> will be in the form
+ * <p>The resulting {@code ObjectName} will be in the form
  * <i>package</i>:class=<i>class name</i>,hashCode=<i>identity hash (in hex)</i>
  *
  * @author Rob Harrop
@@ -44,7 +44,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 
 
 	/**
-	 * Returns an instance of <code>ObjectName</code> based on the identity
+	 * Returns an instance of {@code ObjectName} based on the identity
 	 * of the managed resource.
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {

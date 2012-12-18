@@ -36,7 +36,7 @@ public interface MethodNameResolver {
 	 * mappings are typically, but not necessarily, based on URL.
 	 * @param request current HTTP request
 	 * @return a method name that can handle this request.
-	 * Never returns <code>null</code>; throws exception if not resolvable.
+	 * Never returns {@code null}; throws exception if not resolvable.
 	 * @throws NoSuchRequestHandlingMethodException if no handler method
 	 * can be found for the given request
 	 */

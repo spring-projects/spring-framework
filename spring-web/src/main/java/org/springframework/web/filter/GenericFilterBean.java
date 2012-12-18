@@ -50,8 +50,8 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Simple base implementation of {@link javax.servlet.Filter} which treats
- * its config parameters (<code>init-param</code> entries within the
- * <code>filter</code> tag in <code>web.xml</code>) as bean properties.
+ * its config parameters ({@code init-param} entries within the
+ * {@code filter} tag in {@code web.xml}) as bean properties.
  *
  * <p>A handy superclass for any type of filter. Type conversion of config
  * parameters is automatic, with the corresponding setter method getting
@@ -132,10 +132,10 @@ public abstract class GenericFilterBean implements
 	}
 
 	/**
-	 * Calls the <code>initFilterBean()</code> method that might
+	 * Calls the {@code initFilterBean()} method that might
 	 * contain custom initialization of a subclass.
 	 * <p>Only relevant in case of initialization as bean, where the
-	 * standard <code>init(FilterConfig)</code> method won't be called.
+	 * standard {@code init(FilterConfig)} method won't be called.
 	 * @see #initFilterBean()
 	 * @see #init(javax.servlet.FilterConfig)
 	 */
@@ -212,10 +212,10 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the FilterConfig of this filter available, if any.
-	 * Analogous to GenericServlet's <code>getServletConfig()</code>.
-	 * <p>Public to resemble the <code>getFilterConfig()</code> method
+	 * Analogous to GenericServlet's {@code getServletConfig()}.
+	 * <p>Public to resemble the {@code getFilterConfig()} method
 	 * of the Servlet Filter version that shipped with WebLogic 6.1.
-	 * @return the FilterConfig instance, or <code>null</code> if none available
+	 * @return the FilterConfig instance, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletConfig()
 	 */
 	public final FilterConfig getFilterConfig() {
@@ -224,11 +224,11 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the name of this filter available to subclasses.
-	 * Analogous to GenericServlet's <code>getServletName()</code>.
+	 * Analogous to GenericServlet's {@code getServletName()}.
 	 * <p>Takes the FilterConfig's filter name by default.
 	 * If initialized as bean in a Spring application context,
 	 * it falls back to the bean name as defined in the bean factory.
-	 * @return the filter name, or <code>null</code> if none available
+	 * @return the filter name, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletName()
 	 * @see javax.servlet.FilterConfig#getFilterName()
 	 * @see #setBeanName
@@ -239,11 +239,11 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the ServletContext of this filter available to subclasses.
-	 * Analogous to GenericServlet's <code>getServletContext()</code>.
+	 * Analogous to GenericServlet's {@code getServletContext()}.
 	 * <p>Takes the FilterConfig's ServletContext by default.
 	 * If initialized as bean in a Spring application context,
 	 * it falls back to the ServletContext that the bean factory runs in.
-	 * @return the ServletContext instance, or <code>null</code> if none available
+	 * @return the ServletContext instance, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletContext()
 	 * @see javax.servlet.FilterConfig#getServletContext()
 	 * @see #setServletContext

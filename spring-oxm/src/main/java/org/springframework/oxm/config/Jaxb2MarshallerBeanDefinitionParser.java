@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * Parser for the <code>&lt;oxm:jaxb2-marshaller/&gt; element.
+ * Parser for the {@code <oxm:jaxb2-marshaller/>} element.
  *
  * @author Arjen Poutsma
  * @since 3.0

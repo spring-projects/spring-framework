@@ -29,7 +29,7 @@ import org.springframework.test.context.junit4.PropertiesBasedSpringJUnit4ClassR
 /**
  * Integration tests which verify that the same custom {@link ContextLoader} can
  * be used at all levels within a test class hierarchy when the
- * <code>loader</code> is <i>inherited</i> (i.e., not explicitly declared) via
+ * {@code loader} is <i>inherited</i> (i.e., not explicitly declared) via
  * {@link ContextConfiguration &#064;ContextConfiguration}.
  *
  * @author Sam Brannen

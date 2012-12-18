@@ -54,16 +54,16 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 
 	/**
-	 * Role hint indicating that a <code>BeanDefinition</code> is a major part
+	 * Role hint indicating that a {@code BeanDefinition} is a major part
 	 * of the application. Typically corresponds to a user-defined bean.
 	 */
 	int ROLE_APPLICATION = 0;
 
 	/**
-	 * Role hint indicating that a <code>BeanDefinition</code> is a supporting
+	 * Role hint indicating that a {@code BeanDefinition} is a supporting
 	 * part of some larger configuration, typically an outer
 	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
-	 * <code>SUPPORT</code> beans are considered important enough to be aware
+	 * {@code SUPPORT} beans are considered important enough to be aware
 	 * of when looking more closely at a particular
 	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition},
 	 * but not when looking at the overall configuration of an application.
@@ -71,7 +71,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	int ROLE_SUPPORT = 1;
 
 	/**
-	 * Role hint indicating that a <code>BeanDefinition</code> is providing an
+	 * Role hint indicating that a {@code BeanDefinition} is providing an
 	 * entirely background role and has no relevance to the end-user. This hint is
 	 * used when registering beans that are completely part of the internal workings
 	 * of a {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
@@ -126,14 +126,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * The method will be invoked on the specified factory bean, if any,
 	 * or otherwise as a static method on the local bean class.
 	 * @param factoryMethodName static factory method name,
-	 * or <code>null</code> if normal constructor creation should be used
+	 * or {@code null} if normal constructor creation should be used
 	 * @see #getBeanClassName()
 	 */
 	void setFactoryMethodName(String factoryMethodName);
 
 	/**
 	 * Return the name of the current target scope for this bean,
-	 * or <code>null</code> if not known yet.
+	 * or {@code null} if not known yet.
 	 */
 	String getScope();
 
@@ -152,7 +152,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**
 	 * Set whether this bean should be lazily initialized.
-	 * <p>If <code>false</code>, the bean will get instantiated on startup by bean
+	 * <p>If {@code false}, the bean will get instantiated on startup by bean
 	 * factories that perform eager initialization of singletons.
 	 */
 	void setLazyInit(boolean lazyInit);
@@ -196,14 +196,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	/**
 	 * Return the constructor argument values for this bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
-	 * @return the ConstructorArgumentValues object (never <code>null</code>)
+	 * @return the ConstructorArgumentValues object (never {@code null})
 	 */
 	ConstructorArgumentValues getConstructorArgumentValues();
 
 	/**
 	 * Return the property values to be applied to a new instance of the bean.
 	 * <p>The returned instance can be modified during bean factory post-processing.
-	 * @return the MutablePropertyValues object (never <code>null</code>)
+	 * @return the MutablePropertyValues object (never {@code null})
 	 */
 	MutablePropertyValues getPropertyValues();
 
@@ -228,9 +228,9 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	boolean isAbstract();
 
 	/**
-	 * Get the role hint for this <code>BeanDefinition</code>. The role hint
+	 * Get the role hint for this {@code BeanDefinition}. The role hint
 	 * provides tools with an indication of the importance of a particular
-	 * <code>BeanDefinition</code>.
+	 * {@code BeanDefinition}.
 	 * @see #ROLE_APPLICATION
 	 * @see #ROLE_INFRASTRUCTURE
 	 * @see #ROLE_SUPPORT
@@ -249,7 +249,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	String getResourceDescription();
 
 	/**
-	 * Return the originating BeanDefinition, or <code>null</code> if none.
+	 * Return the originating BeanDefinition, or {@code null} if none.
 	 * Allows for retrieving the decorated bean definition, if any.
 	 * <p>Note that this method returns the immediate originator. Iterate through the
 	 * originator chain to find the original BeanDefinition as defined by the user.

@@ -18,7 +18,7 @@ package org.springframework.mock.staticmock;
 
 /**
  * Annotation-based aspect to use in test build to enable mocking static methods
- * on JPA-annotated <code>@Entity</code> classes, as used by Roo for finders.
+ * on JPA-annotated {@code @Entity} classes, as used by Roo for finders.
  *
  * <p>Mocking will occur in the call stack of any method in a class (typically a test class)
  * that is annotated with the @MockStaticEntityMethods annotation.

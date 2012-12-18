@@ -104,11 +104,11 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * given Spring transaction definition (in particular, an isolation level
 	 * and a timeout). Called by JpaTransactionManager on transaction begin.
 	 * <p>An implementation can configure the JPA Transaction object and then
-	 * invoke <code>begin</code>, or invoke a special begin method that takes,
+	 * invoke {@code begin}, or invoke a special begin method that takes,
 	 * for example, an isolation level.
 	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
 	 * a transaction data object can be returned that holds the previous flush mode
-	 * (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * (and possibly other data), to be reset in {@code cleanupTransaction}.
 	 * It may also apply the read-only flag and isolation level to the underlying
 	 * JDBC Connection before beginning the transaction.
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
@@ -138,7 +138,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * EntityManagerFactoryUtils when enlisting an EntityManager in a JTA transaction.
 	 * <p>An implementation can apply the read-only flag as flush mode. In that case,
 	 * a transaction data object can be returned that holds the previous flush mode
-	 * (and possibly other data), to be reset in <code>cleanupTransaction</code>.
+	 * (and possibly other data), to be reset in {@code cleanupTransaction}.
 	 * <p>Implementations can also use the Spring transaction name, as exposed by the
 	 * passed-in TransactionDefinition, to optimize for specific data access use cases
 	 * (effectively using the current transaction name as use case identifier).
@@ -171,7 +171,7 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * if accessing a relational database. This method will just get invoked if actually
 	 * needing access to the underlying JDBC Connection, usually within an active JPA
 	 * transaction (for example, by JpaTransactionManager). The returned handle will
-	 * be passed into the <code>releaseJdbcConnection</code> method when not needed anymore.
+	 * be passed into the {@code releaseJdbcConnection} method when not needed anymore.
 	 * <p>This strategy is necessary as JPA 1.0 does not provide a standard way to retrieve
 	 * the underlying JDBC Connection (due to the fact that a JPA implementation might not
 	 * work with a relational database at all).
@@ -183,12 +183,12 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 	 * <p>In a simple case where the returned Connection will be auto-closed with the
 	 * EntityManager or can be released via the Connection object itself, an
 	 * implementation can return a SimpleConnectionHandle that just contains the
-	 * Connection. If some other object is needed in <code>releaseJdbcConnection</code>,
+	 * Connection. If some other object is needed in {@code releaseJdbcConnection},
 	 * an implementation should use a special handle that references that other object.
 	 * @param entityManager the current JPA EntityManager
 	 * @param readOnly whether the Connection is only needed for read-only purposes
 	 * @return a handle for the JDBC Connection, to be passed into
-	 * <code>releaseJdbcConnection</code>, or <code>null</code>
+	 * {@code releaseJdbcConnection}, or {@code null}
 	 * if no JDBC Connection can be retrieved
 	 * @throws javax.persistence.PersistenceException if thrown by JPA methods
 	 * @throws java.sql.SQLException if thrown by JDBC methods
@@ -203,10 +203,10 @@ public interface JpaDialect extends PersistenceExceptionTranslator {
 
 	/**
 	 * Release the given JDBC Connection, which has originally been retrieved
-	 * via <code>getJdbcConnection</code>. This should be invoked in any case,
+	 * via {@code getJdbcConnection}. This should be invoked in any case,
 	 * to allow for proper release of the retrieved Connection handle.
 	 * <p>An implementation might simply do nothing, if the Connection returned
-	 * by <code>getJdbcConnection</code> will be implicitly closed when the JPA
+	 * by {@code getJdbcConnection} will be implicitly closed when the JPA
 	 * transaction completes or when the EntityManager is closed.
 	 * @param conHandle the JDBC Connection handle to release
 	 * @param entityManager the current JPA EntityManager

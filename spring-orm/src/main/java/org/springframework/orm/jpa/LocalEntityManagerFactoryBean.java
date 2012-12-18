@@ -28,10 +28,10 @@ import javax.persistence.spi.PersistenceProvider;
  * shared JPA EntityManagerFactory in a Spring application context; the
  * EntityManagerFactory can then be passed to JPA-based DAOs via
  * dependency injection. Note that switching to a JNDI lookup or to a
- * {@link org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean}
+ * {@link LocalContainerEntityManagerFactoryBean}
  * definition is just a matter of configuration!
  *
- * <p>Configuration settings are usually read from a <code>META-INF/persistence.xml</code>
+ * <p>Configuration settings are usually read from a {@code META-INF/persistence.xml}
  * config file, residing in the class path, according to the JPA standalone bootstrap
  * contract. Additionally, most JPA providers will require a special VM agent
  * (specified on JVM startup) that allows them to instrument application classes.

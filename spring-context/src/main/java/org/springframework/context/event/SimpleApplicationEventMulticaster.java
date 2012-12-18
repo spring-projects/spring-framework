@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationListener;
  *
  * <p>Multicasts all events to all registered listeners, leaving it up to
  * the listeners to ignore events that they are not interested in.
- * Listeners will usually perform corresponding <code>instanceof</code>
+ * Listeners will usually perform corresponding {@code instanceof}
  * checks on the passed-in event object.
  *
  * <p>By default, all listeners are invoked in the calling thread.

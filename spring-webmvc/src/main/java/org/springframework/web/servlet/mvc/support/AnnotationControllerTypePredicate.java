@@ -21,7 +21,7 @@ import org.springframework.stereotype.Controller;
 
 /**
  * Extension of {@link ControllerTypePredicate} that detects
- * annotated <code>@Controller</code/> beans as well.
+ * annotated {@code @Controller} beans as well.
  *
  * @author Juergen Hoeller
  * @since 2.5.3

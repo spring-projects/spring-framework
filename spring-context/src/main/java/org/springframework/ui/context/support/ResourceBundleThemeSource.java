@@ -76,7 +76,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasenamePrefix(String basenamePrefix) {

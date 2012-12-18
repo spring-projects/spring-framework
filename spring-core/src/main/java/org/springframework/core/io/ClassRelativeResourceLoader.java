@@ -21,11 +21,11 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ResourceLoader} implementation that interprets plain resource paths
- * as relative to a given <code>java.lang.Class</code>.
+ * as relative to a given {@code java.lang.Class}.
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see java.lang.Class#getResource(String)
+ * @see Class#getResource(String)
  * @see ClassPathResource#ClassPathResource(String, Class)
  */
 public class ClassRelativeResourceLoader extends DefaultResourceLoader {

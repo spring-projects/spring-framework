@@ -30,7 +30,7 @@ public interface MultiValueMap<K, V> extends Map<K, List<V>> {
 	/**
 	 * Return the first value for the given key.
 	 * @param key the key
-	 * @return the first value for the specified key, or <code>null</code>
+	 * @return the first value for the specified key, or {@code null}
 	 */
 	V getFirst(K key);
 

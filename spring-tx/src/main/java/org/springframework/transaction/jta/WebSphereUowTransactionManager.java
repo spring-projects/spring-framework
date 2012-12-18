@@ -52,15 +52,15 @@ import org.springframework.util.ReflectionUtils;
  * a {@link TransactionCallback} through the {@link #execute} method, which
  * will be handled through the callback-based WebSphere UOWManager API instead
  * of through standard JTA API (UserTransaction / TransactionManager). This avoids
- * the use of the non-public <code>javax.transaction.TransactionManager</code>
+ * the use of the non-public {@code javax.transaction.TransactionManager}
  * API on WebSphere, staying within supported WebSphere API boundaries.
  *
  * <p>This transaction manager implementation derives from Spring's standard
  * {@link JtaTransactionManager}, inheriting the capability to support programmatic
- * transaction demarcation via <code>getTransaction</code> / <code>commit</code> /
- * <code>rollback</code> calls through a JTA UserTransaction handle, for callers
+ * transaction demarcation via {@code getTransaction} / {@code commit} /
+ * {@code rollback} calls through a JTA UserTransaction handle, for callers
  * that do not use the TransactionCallback-based {@link #execute} method. However,
- * transaction suspension is <i>not</i> supported in this <code>getTransaction</code>
+ * transaction suspension is <i>not</i> supported in this {@code getTransaction}
  * style (unless you explicitly specify a {@link #setTransactionManager} reference,
  * despite the official WebSphere recommendations). Use the {@link #execute} style
  * for any code that might require transaction suspension.
@@ -196,9 +196,9 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	}
 
 	/**
-	 * Returns <code>true</code> since WebSphere ResourceAdapters (as exposed in JNDI)
+	 * Returns {@code true} since WebSphere ResourceAdapters (as exposed in JNDI)
 	 * implicitly perform transaction enlistment if the MessageEndpointFactory's
-	 * <code>isDeliveryTransacted</code> method returns <code>true</code>.
+	 * {@code isDeliveryTransacted} method returns {@code true}.
 	 * In that case we'll simply skip the {@link #createTransaction} call.
 	 * @see javax.resource.spi.endpoint.MessageEndpointFactory#isDeliveryTransacted
 	 * @see org.springframework.jca.endpoint.AbstractMessageEndpointFactory

@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * SAX <code>XMLReader</code> that reads from a StAX <code>XMLStreamReader</code>.  Reads from an
- * <code>XMLStreamReader</code>, and calls the corresponding methods on the SAX callback interfaces.
+ * SAX {@code XMLReader} that reads from a StAX {@code XMLStreamReader}.  Reads from an
+ * {@code XMLStreamReader}, and calls the corresponding methods on the SAX callback interfaces.
  *
  * @author Arjen Poutsma
  * @see XMLStreamReader
@@ -53,11 +53,11 @@ class StaxStreamXMLReader extends AbstractStaxXMLReader {
 	private String encoding;
 
 	/**
-	 * Constructs a new instance of the <code>StaxStreamXmlReader</code> that reads from the given
-	 * <code>XMLStreamReader</code>.  The supplied stream reader must be in <code>XMLStreamConstants.START_DOCUMENT</code>
-	 * or <code>XMLStreamConstants.START_ELEMENT</code> state.
+	 * Constructs a new instance of the {@code StaxStreamXmlReader} that reads from the given
+	 * {@code XMLStreamReader}.  The supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT}
+	 * or {@code XMLStreamConstants.START_ELEMENT} state.
 	 *
-	 * @param reader the <code>XMLEventReader</code> to read from
+	 * @param reader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxStreamXMLReader(XMLStreamReader reader) {

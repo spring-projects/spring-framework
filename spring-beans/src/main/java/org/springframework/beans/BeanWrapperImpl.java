@@ -55,18 +55,18 @@ import org.springframework.util.StringUtils;
  * for all typical use cases. Caches introspection results for efficiency.
  *
  * <p>Note: Auto-registers default property editors from the
- * <code>org.springframework.beans.propertyeditors</code> package, which apply
+ * {@code org.springframework.beans.propertyeditors} package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
  * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
  * to register an editor for a particular instance (i.e. they are not shared
  * across the application). See the base class
  * {@link PropertyEditorRegistrySupport} for details.
  *
- * <p><code>BeanWrapperImpl</code> will convert collection and array values
+ * <p>{@code BeanWrapperImpl} will convert collection and array values
  * to the corresponding target collections or arrays, if necessary. Custom
  * property editors that deal with collections or arrays can either be
- * written via PropertyEditor's <code>setValue</code>, or against a
- * comma-delimited String via <code>setAsText</code>, as String arrays are
+ * written via PropertyEditor's {@code setValue}, or against a
+ * comma-delimited String via {@code setAsText}, as String arrays are
  * converted in such a format if the array itself is not assignable.
  *
  * <p><b>NOTE: As of Spring 2.5, this is - for almost all purposes - an
@@ -179,7 +179,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
-	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
+	 * @param superBw the containing BeanWrapper (must not be {@code null})
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
@@ -341,10 +341,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	/**
 	 * Internal version of {@link #getPropertyDescriptor}:
-	 * Returns <code>null</code> if not found rather than throwing an exception.
+	 * Returns {@code null} if not found rather than throwing an exception.
 	 * @param propertyName the property to obtain the descriptor for
 	 * @return the property descriptor for the specified property,
-	 * or <code>null</code> if not found
+	 * or {@code null} if not found
 	 * @throws BeansException in case of introspection failure
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
@@ -474,7 +474,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Convert the given value for the specified property to the latter's type.
 	 * <p>This method is only intended for optimizations in a BeanFactory.
-	 * Use the <code>convertIfNecessary</code> methods for programmatic conversion.
+	 * Use the {@code convertIfNecessary} methods for programmatic conversion.
 	 * @param value the value to convert
 	 * @param propertyName the target property
 	 * (note that nested or indexed properties are not supported here)

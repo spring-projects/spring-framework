@@ -60,15 +60,15 @@ import org.springframework.util.Assert;
  * respectively. These defaults can be overridden through the "destinationResolver"
  * and "messageConverter" bean properties.
  *
- * <p><b>NOTE: The <code>ConnectionFactory</code> used with this template should
+ * <p><b>NOTE: The {@code ConnectionFactory} used with this template should
  * return pooled Connections (or a single shared Connection) as well as pooled
  * Sessions and MessageProducers. Otherwise, performance of ad-hoc JMS operations
  * is going to suffer.</b> The simplest option is to use the Spring-provided
  * {@link org.springframework.jms.connection.SingleConnectionFactory} as a
- * decorator for your target <code>ConnectionFactory</code>, reusing a single
+ * decorator for your target {@code ConnectionFactory}, reusing a single
  * JMS Connection in a thread-safe fashion; this is often good enough for the
  * purpose of sending messages via this template. In a J2EE environment,
- * make sure that the <code>ConnectionFactory</code> is obtained from the
+ * make sure that the {@code ConnectionFactory} is obtained from the
  * application's environment naming context via JNDI; application servers
  * typically expose pooled, transaction-aware factories there.
  *
@@ -433,11 +433,11 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Execute the action specified by the given action object within a
-	 * JMS Session. Generalized version of <code>execute(SessionCallback)</code>,
+	 * JMS Session. Generalized version of {@code execute(SessionCallback)},
 	 * allowing the JMS Connection to be started on the fly.
-	 * <p>Use <code>execute(SessionCallback)</code> for the general case.
+	 * <p>Use {@code execute(SessionCallback)} for the general case.
 	 * Starting the JMS Connection is just necessary for receiving messages,
-	 * which is preferably achieved through the <code>receive</code> methods.
+	 * which is preferably achieved through the {@code receive} methods.
 	 * @param action callback object that exposes the Session
 	 * @param startConnection whether to start the Connection
 	 * @return the result object from working with the Session
@@ -712,8 +712,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Receive a JMS message.
 	 * @param session the JMS Session to operate on
 	 * @param destination the JMS Destination to receive from
-	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
-	 * @return the JMS Message received, or <code>null</code> if none
+	 * @param messageSelector the message selector for this consumer (can be {@code null})
+	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected Message doReceive(Session session, Destination destination, String messageSelector)
@@ -726,7 +726,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Actually receive a JMS message.
 	 * @param session the JMS Session to operate on
 	 * @param consumer the JMS MessageConsumer to receive with
-	 * @return the JMS Message received, or <code>null</code> if none
+	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	protected Message doReceive(Session session, MessageConsumer consumer) throws JMSException {
@@ -763,7 +763,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * Actually receive a message from the given consumer.
 	 * @param consumer the JMS MessageConsumer to receive with
 	 * @param timeout the receive timeout
-	 * @return the JMS Message received, or <code>null</code> if none
+	 * @return the JMS Message received, or {@code null} if none
 	 * @throws JMSException if thrown by JMS API methods
 	 */
 	private Message doReceive(MessageConsumer consumer, long timeout) throws JMSException {
@@ -809,8 +809,8 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	/**
 	 * Extract the content from the given JMS message.
-	 * @param message the JMS Message to convert (can be <code>null</code>)
-	 * @return the content of the message, or <code>null</code> if none
+	 * @param message the JMS Message to convert (can be {@code null})
+	 * @return the content of the message, or {@code null} if none
 	 */
 	protected Object doConvertFromMessage(Message message) {
 		if (message != null) {
@@ -902,7 +902,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>This implementation accepts any JMS 1.1 Connection.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Connection fetched from the holder,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection();
@@ -913,7 +913,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>This implementation accepts any JMS 1.1 Session.
 	 * @param holder the JmsResourceHolder
 	 * @return an appropriate Session fetched from the holder,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession();
@@ -976,7 +976,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * <p>This implementation uses JMS 1.1 API.
 	 * @param session the JMS Session to create a MessageConsumer for
 	 * @param destination the JMS Destination to create a MessageConsumer for
-	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @param messageSelector the message selector for this consumer (can be {@code null})
 	 * @return the new JMS MessageConsumer
 	 * @throws JMSException if thrown by JMS API methods
 	 */
@@ -1001,7 +1001,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	 * JMS MessageProducer, which needs to be specific to JMS 1.1 or 1.0.2.
 	 * @param session the JMS Session to create a QueueBrowser for
 	 * @param queue the JMS Queue to create a QueueBrowser for
-	 * @param messageSelector the message selector for this consumer (can be <code>null</code>)
+	 * @param messageSelector the message selector for this consumer (can be {@code null})
 	 * @return the new JMS QueueBrowser
 	 * @throws JMSException if thrown by JMS API methods
 	 * @see #setMessageIdEnabled

@@ -195,7 +195,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the JDO PersistenceManagerFactory,
-	 * as returned by the <code>getConnectionFactory()</code> method. Default is "true".
+	 * as returned by the {@code getConnectionFactory()} method. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource,
 	 * to not expose JDO transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
@@ -509,7 +509,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * {@code org.springframework.dao} hierarchy.
 	 * <p>The default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured
@@ -588,7 +588,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
+	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
 	private static class SuspendedResourcesHolder {
 

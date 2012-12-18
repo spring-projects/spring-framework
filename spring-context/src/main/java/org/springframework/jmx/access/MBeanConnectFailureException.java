@@ -29,7 +29,7 @@ import org.springframework.jmx.JmxException;
 public class MBeanConnectFailureException extends JmxException {
 
 	/**
-	 * Create a new <code>MBeanConnectFailureException</code>
+	 * Create a new {@code MBeanConnectFailureException}
 	 * with the specified error message and root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause

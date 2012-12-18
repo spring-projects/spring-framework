@@ -24,8 +24,8 @@ import java.util.Date;
 import org.springframework.util.StringUtils;
 
 /**
- * Property editor for <code>java.util.Date</code>,
- * supporting a custom <code>java.text.DateFormat</code>.
+ * Property editor for {@code java.util.Date},
+ * supporting a custom {@code java.text.DateFormat}.
  *
  * <p>This is not meant to be used as system PropertyEditor but rather
  * as locale-specific date editor within custom controller code,
@@ -33,8 +33,8 @@ import org.springframework.util.StringUtils;
  * and rendering them in the UI form.
  *
  * <p>In web MVC code, this editor will typically be registered with
- * <code>binder.registerCustomEditor</code> calls in a custom
- * <code>initBinder</code> method.
+ * {@code binder.registerCustomEditor} calls in a custom
+ * {@code initBinder} method.
  *
  * @author Juergen Hoeller
  * @since 28.04.2003
@@ -76,7 +76,7 @@ public class CustomDateEditor extends PropertyEditorSupport {
 	 * <p>The "exactDateLength" parameter states that IllegalArgumentException gets
 	 * thrown if the String does not exactly match the length specified. This is useful
 	 * because SimpleDateFormat does not enforce strict parsing of the year part,
-	 * not even with <code>setLenient(false)</code>. Without an "exactDateLength"
+	 * not even with {@code setLenient(false)}. Without an "exactDateLength"
 	 * specified, the "01/01/05" would get parsed to "01/01/0005". However, even
 	 * with an "exactDateLength" specified, prepended zeros in the day or month
 	 * part may still allow for a shorter year part, so consider this as just

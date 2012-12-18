@@ -25,8 +25,8 @@ package org.springframework.web.context.request;
  * {@link org.springframework.web.filter.RequestContextFilter} or
  * {@link org.springframework.web.servlet.DispatcherServlet}.
  *
- * <p>This <code>Scope</code> will also work for Portlet environments,
- * through an alternate <code>RequestAttributes</code> implementation
+ * <p>This {@code Scope} will also work for Portlet environments,
+ * through an alternate {@code RequestAttributes} implementation
  * (as exposed out-of-the-box by Spring's
  * {@link org.springframework.web.portlet.DispatcherPortlet}.
  *
@@ -50,7 +50,7 @@ public class RequestScope extends AbstractRequestAttributesScope {
 
 	/**
 	 * There is no conversation id concept for a request, so this method
-	 * returns <code>null</code>.
+	 * returns {@code null}.
 	 */
 	public String getConversationId() {
 		return null;

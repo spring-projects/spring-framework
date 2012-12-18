@@ -56,8 +56,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS Connection and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param con the JMS Connection to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param con the JMS Connection to close (may be {@code null})
 	 */
 	public static void closeConnection(Connection con) {
 		closeConnection(con, false);
@@ -65,9 +65,9 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS Connection and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param con the JMS Connection to close (may be <code>null</code>)
-	 * @param stop whether to call <code>stop()</code> before closing
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param con the JMS Connection to close (may be {@code null})
+	 * @param stop whether to call {@code stop()} before closing
 	 */
 	public static void closeConnection(Connection con, boolean stop) {
 		if (con != null) {
@@ -99,8 +99,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS Session and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param session the JMS Session to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param session the JMS Session to close (may be {@code null})
 	 */
 	public static void closeSession(Session session) {
 		if (session != null) {
@@ -119,8 +119,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS MessageProducer and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param producer the JMS MessageProducer to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param producer the JMS MessageProducer to close (may be {@code null})
 	 */
 	public static void closeMessageProducer(MessageProducer producer) {
 		if (producer != null) {
@@ -139,8 +139,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS MessageConsumer and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param consumer the JMS MessageConsumer to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param consumer the JMS MessageConsumer to close (may be {@code null})
 	 */
 	public static void closeMessageConsumer(MessageConsumer consumer) {
 		if (consumer != null) {
@@ -168,8 +168,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS QueueBrowser and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param browser the JMS QueueBrowser to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param browser the JMS QueueBrowser to close (may be {@code null})
 	 */
 	public static void closeQueueBrowser(QueueBrowser browser) {
 		if (browser != null) {
@@ -188,8 +188,8 @@ public abstract class JmsUtils {
 
 	/**
 	 * Close the given JMS QueueRequestor and ignore any thrown exception.
-	 * This is useful for typical <code>finally</code> blocks in manual JMS code.
-	 * @param requestor the JMS QueueRequestor to close (may be <code>null</code>)
+	 * This is useful for typical {@code finally} blocks in manual JMS code.
+	 * @param requestor the JMS QueueRequestor to close (may be {@code null})
 	 */
 	public static void closeQueueRequestor(QueueRequestor requestor) {
 		if (requestor != null) {

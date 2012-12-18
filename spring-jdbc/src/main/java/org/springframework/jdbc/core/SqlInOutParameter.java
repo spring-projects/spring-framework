@@ -18,7 +18,7 @@ package org.springframework.jdbc.core;
 
 /**
  * Subclass of {@link SqlOutParameter} to represent an INOUT parameter.
- * Will return <code>true</code> for SqlParameter's {@link #isInputValueProvided}
+ * Will return {@code true} for SqlParameter's {@link #isInputValueProvided}
  * test, in contrast to a standard SqlOutParameter.
  *
  * <p>Output parameters - like all stored procedure parameters -
@@ -103,7 +103,7 @@ public class SqlInOutParameter extends SqlOutParameter {
 
 
 	/**
-	 * This implementation always returns <code>true</code>.
+	 * This implementation always returns {@code true}.
 	 */
 	@Override
 	public boolean isInputValueProvided() {

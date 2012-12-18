@@ -43,7 +43,7 @@ import org.springframework.beans.BeanUtils;
  * @see LocalJaxRpcServiceFactoryBean
  * @see JaxRpcPortClientInterceptor
  * @see JaxRpcPortProxyFactoryBean
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class LocalJaxRpcServiceFactory {
@@ -100,7 +100,7 @@ public class LocalJaxRpcServiceFactory {
 	}
 
 	/**
-	 * Return the ServiceFactory class to use, or <code>null</code> if default.
+	 * Return the ServiceFactory class to use, or {@code null} if default.
 	 */
 	public Class getServiceFactoryClass() {
 		return this.serviceFactoryClass;

@@ -93,7 +93,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	/**
 	 * Check whether the given bean is eligible for advising with this
 	 * post-processor's {@link Advisor}.
-	 * <p>Implements caching of <code>canApply</code> results per bean name.
+	 * <p>Implements caching of {@code canApply} results per bean name.
 	 * @param bean the bean instance
 	 * @param beanName the name of the bean
 	 * @see AopUtils#canApply(Advisor, Class)

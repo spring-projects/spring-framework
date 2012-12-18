@@ -223,9 +223,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
-	 * We also allow <code>and</code> between two pointcut sub-expressions.
-	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 * write {@code and} as "&&" (though &amp;&amp; will work).
+	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		String result = StringUtils.replace(pcExpr, " and ", " && ");
@@ -494,10 +494,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	/**
-	 * Handler for the Spring-specific <code>bean()</code> pointcut designator
+	 * Handler for the Spring-specific {@code bean()} pointcut designator
 	 * extension to AspectJ.
 	 * <p>This handler must be added to each pointcut object that needs to
-	 * handle the <code>bean()</code> PCD. Matching context is obtained
+	 * handle the {@code bean()} PCD. Matching context is obtained
 	 * automatically by examining a thread local variable and therefore a matching
 	 * context need not be set on the pointcut.
 	 */

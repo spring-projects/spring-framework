@@ -105,7 +105,7 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 	/**
 	 * Specify the PersistenceManager interface to expose,
 	 * possibly including vendor extensions.
-	 * <p>Default is the standard <code>javax.jdo.PersistenceManager</code> interface.
+	 * <p>Default is the standard {@code javax.jdo.PersistenceManager} interface.
 	 */
 	public void setPersistenceManagerInterface(Class<? extends PersistenceManager> persistenceManagerInterface) {
 		this.persistenceManagerInterface = persistenceManagerInterface;
@@ -127,8 +127,8 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 	 * <p>Default is "true". Can be turned off to enforce access to
 	 * transactional PersistenceManagers, which safely allows for DAOs
 	 * written to get a PersistenceManager without explicit closing
-	 * (i.e. a <code>PersistenceManagerFactory.getPersistenceManager()</code>
-	 * call without corresponding <code>PersistenceManager.close()</code> call).
+	 * (i.e. a {@code PersistenceManagerFactory.getPersistenceManager()}
+	 * call without corresponding {@code PersistenceManager.close()} call).
 	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {

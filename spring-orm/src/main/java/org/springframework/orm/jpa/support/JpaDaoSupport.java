@@ -34,7 +34,7 @@ import org.springframework.orm.jpa.JpaTemplate;
  *
  * <p>This class will create its own JpaTemplate if an EntityManagerFactory
  * or EntityManager reference is passed in. A custom JpaTemplate instance
- * can be used through overriding <code>createJpaTemplate</code>.
+ * can be used through overriding {@code createJpaTemplate}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -44,7 +44,7 @@ import org.springframework.orm.jpa.JpaTemplate;
  * @see #setJpaTemplate
  * @see org.springframework.orm.jpa.JpaTemplate
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  */
 @Deprecated
 public abstract class JpaDaoSupport extends DaoSupport {

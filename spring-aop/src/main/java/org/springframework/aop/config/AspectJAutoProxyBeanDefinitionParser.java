@@ -27,7 +27,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 
 /**
- * {@link BeanDefinitionParser} for the <code>aspectj-autoproxy</code> tag,
+ * {@link BeanDefinitionParser} for the {@code aspectj-autoproxy} tag,
  * enabling the automatic application of @AspectJ-style aspects found in
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *

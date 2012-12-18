@@ -33,12 +33,12 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Used by Spring Web MVC's BaseCommandController and MultiActionController.
  * Note that BaseCommandController and its subclasses allow for easy customization
- * of the binder instances that they use through overriding <code>initBinder</code>.
+ * of the binder instances that they use through overriding {@code initBinder}.
  *
  * <p>Can also be used for manual data binding in custom web controllers:
  * for example, in a plain Controller implementation or in a MultiActionController
  * handler method. Simply instantiate a ServletRequestDataBinder for each binding
- * process, and invoke <code>bind</code> with the current ServletRequest as argument:
+ * process, and invoke {@code bind} with the current ServletRequest as argument:
  *
  * <pre class="code">
  * MyBean myBean = new MyBean();
@@ -65,7 +65,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new ServletRequestDataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -75,7 +75,7 @@ public class ServletRequestDataBinder extends WebDataBinder {
 
 	/**
 	 * Create a new ServletRequestDataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */

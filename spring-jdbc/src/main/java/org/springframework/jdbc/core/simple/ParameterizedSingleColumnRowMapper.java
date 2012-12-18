@@ -21,14 +21,14 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
 /**
  * {@link ParameterizedRowMapper} implementation that converts a single column
  * into a single result value per row. Expects to operate on a
- * <code>java.sql.ResultSet</code> that just contains a single column.
+ * {@code java.sql.ResultSet} that just contains a single column.
  *
  * <p>The type of the result value for each row can be specified. The value
- * for the single column will be extracted from the <code>ResultSet</code>
+ * for the single column will be extracted from the {@code ResultSet}
  * and converted into the specified target type.
  *
  * <p>Uses Java 5 covariant return types to override the return type of the
- * {@link #mapRow} method to be the type parameter <code>T</code>.
+ * {@link #mapRow} method to be the type parameter {@code T}.
  *
  * @author Juergen Hoeller
  * @since 2.5.2

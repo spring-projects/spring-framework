@@ -80,7 +80,7 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Create a new WebDataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -90,7 +90,7 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Create a new WebDataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
@@ -112,7 +112,7 @@ public class WebDataBinder extends DataBinder {
 	 * <p>One way to address this is to look for a checkbox parameter value if
 	 * you know that the checkbox has been visible in the form, resetting the
 	 * checkbox if no value found. In Spring web MVC, this typically happens
-	 * in a custom <code>onBind</code> implementation.
+	 * in a custom {@code onBind} implementation.
 	 * <p>This auto-reset mechanism addresses this deficiency, provided
 	 * that a marker parameter is sent for each checkbox field, like
 	 * "_subscribeToNewsletter" for a "subscribeToNewsletter" field.
@@ -245,9 +245,9 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Determine an empty value for the specified field.
-	 * <p>Default implementation returns <code>Boolean.FALSE</code>
+	 * <p>Default implementation returns {@code Boolean.FALSE}
 	 * for boolean fields and an empty array of array types.
-	 * Else, <code>null</code> is used as default.
+	 * Else, {@code null} is used as default.
 	 * @param field the name of the field
 	 * @param fieldType the type of the field
 	 * @return the empty value (for most fields: null)

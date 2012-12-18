@@ -41,10 +41,10 @@ public interface LoadTimeWeaverAware extends Aware {
 	 * {@link org.springframework.context.ApplicationContextAware ApplicationContextAware's}
 	 * {@link org.springframework.context.ApplicationContextAware#setApplicationContext setApplicationContext(..)}.
 	 * <p><b>NOTE:</b> This method will only be called if there actually is a
-	 * <code>LoadTimeWeaver</code> available in the application context. If
+	 * {@code LoadTimeWeaver} available in the application context. If
 	 * there is none, the method will simply not get invoked, assuming that the
 	 * implementing object is able to activate its weaving dependency accordingly.
-	 * @param loadTimeWeaver the <code>LoadTimeWeaver</code> instance (never <code>null</code>)
+	 * @param loadTimeWeaver the {@code LoadTimeWeaver} instance (never {@code null})
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.context.ApplicationContextAware#setApplicationContext
 	 */

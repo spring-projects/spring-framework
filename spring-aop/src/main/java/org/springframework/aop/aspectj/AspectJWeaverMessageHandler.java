@@ -33,7 +33,7 @@ import org.aspectj.bridge.IMessageHandler;
  * <p><code class="code">-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler</code>
  *
  * <p>to the weaver; for example, specifying the following in a
- * "<code>META-INF/aop.xml</code> file:
+ * "{@code META-INF/aop.xml} file:
  *
  * <p><code class="code">&lt;weaver options="..."/&gt;</code>
  *

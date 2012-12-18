@@ -53,10 +53,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional read-only execution.
  *
  * <p>Looks up the EntityManagerFactory in Spring's root web application context.
- * Supports an "entityManagerFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports an "entityManagerFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "entityManagerFactory". As an alternative, the
  * "persistenceUnitName" init-param allows for retrieval by logical unit name
- * (as specified in <code>persistence.xml</code>).
+ * (as specified in {@code persistence.xml}).
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -195,7 +195,7 @@ public class OpenEntityManagerInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the EntityManagerFactory that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>The default implementation delegates to the <code>lookupEntityManagerFactory</code>
+	 * <p>The default implementation delegates to the {@code lookupEntityManagerFactory}
 	 * without arguments, caching the EntityManagerFactory reference once obtained.
 	 * @return the EntityManagerFactory to use
 	 * @see #lookupEntityManagerFactory()

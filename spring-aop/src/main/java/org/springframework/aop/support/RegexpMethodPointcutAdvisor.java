@@ -128,7 +128,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	/**
 	 * Create the actual pointcut: By default, a {@link JdkRegexpMethodPointcut}
 	 * will be used.
-	 * @return the Pointcut instance (never <code>null</code>)
+	 * @return the Pointcut instance (never {@code null})
 	 */
 	protected AbstractRegexpMethodPointcut createPointcut() {
 		return new JdkRegexpMethodPointcut();

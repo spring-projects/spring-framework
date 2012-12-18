@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 
 /**
  * Response extractor that uses the given {@linkplain HttpMessageConverter entity
- * converters} to convert the response into a type <code>T</code>.
+ * converters} to convert the response into a type {@code T}.
  *
  * @author Arjen Poutsma
  * @see RestTemplate

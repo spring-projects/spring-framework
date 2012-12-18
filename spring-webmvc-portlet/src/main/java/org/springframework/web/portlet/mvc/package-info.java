@@ -1,4 +1,3 @@
-
 /**
  *
  * <p>
@@ -8,9 +7,9 @@
  * </p>
  *
  * <p>
- *     A <code>Controller</code> - as defined in this package - is analogous to a Struts
- *     <code>Action</code>. Usually <code>Controllers</code> are JavaBeans
- *     to allow easy configuration. Controllers define the <code>C</code> from so-called
+ *     A {@code Controller} - as defined in this package - is analogous to a Struts
+ *     {@code Action}. Usually {@code Controllers} are JavaBeans
+ *     to allow easy configuration. Controllers define the {@code C} from so-called
  *     MVC paradigm and can be used in conjunction with the {@link
  *     org.springframework.web.portlet.ModelAndView ModelAndView} to achieve interactive
  *     applications. The view might be represented by a HTML interface, but, because of

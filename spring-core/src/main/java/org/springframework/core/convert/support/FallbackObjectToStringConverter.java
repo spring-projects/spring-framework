@@ -24,7 +24,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Simply calls {@link Object#toString()} to convert any supported Object to a String.
- * Supports CharSequence, StringWriter, and any class with a String constructor or <code>valueOf(String)</code> method.
+ * Supports CharSequence, StringWriter, and any class with a String constructor or {@code valueOf(String)} method.
  *
  * <p>Used by the default ConversionService as a fallback if there are no other explicit
  * to-String converters registered.

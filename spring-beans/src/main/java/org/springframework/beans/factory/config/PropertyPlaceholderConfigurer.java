@@ -137,8 +137,8 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	/**
 	 * Resolve the given placeholder using the given properties, performing
 	 * a system properties check according to the given mode.
-	 * <p>The default implementation delegates to <code>resolvePlaceholder
-	 * (placeholder, props)</code> before/after the system properties check.
+	 * <p>The default implementation delegates to {@code resolvePlaceholder
+	 * (placeholder, props)} before/after the system properties check.
 	 * <p>Subclasses can override this for custom resolution strategies,
 	 * including customized points for the system properties check.
 	 * @param placeholder the placeholder to resolve
@@ -174,7 +174,7 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * after this method is invoked, according to the system properties mode.
 	 * @param placeholder the placeholder to resolve
 	 * @param props the merged properties of this configurer
-	 * @return the resolved value, of <code>null</code> if none
+	 * @return the resolved value, of {@code null} if none
 	 * @see #setSystemPropertiesMode
 	 */
 	protected String resolvePlaceholder(String placeholder, Properties props) {
@@ -185,10 +185,10 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 	 * Resolve the given key as JVM system property, and optionally also as
 	 * system environment variable if no matching system property has been found.
 	 * @param key the placeholder to resolve as system property key
-	 * @return the system property value, or <code>null</code> if not found
+	 * @return the system property value, or {@code null} if not found
 	 * @see #setSearchSystemEnvironment
-	 * @see java.lang.System#getProperty(String)
-	 * @see java.lang.System#getenv(String)
+	 * @see System#getProperty(String)
+	 * @see System#getenv(String)
 	 */
 	protected String resolveSystemProperty(String key) {
 		try {

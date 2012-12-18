@@ -26,9 +26,9 @@ import org.springframework.util.ResourceUtils;
  * configured differently.
  * <p>
  * As of Spring 3.0,
- * <code>MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests</code> is also used
- * to verify support for the new <code>value</code> attribute alias for
- * <code>&#064;ContextConfiguration</code>'s <code>locations</code> attribute.
+ * {@code MultipleResourcesSpringJUnit4ClassRunnerAppCtxTests} is also used
+ * to verify support for the new {@code value} attribute alias for
+ * {@code &#064;ContextConfiguration}'s {@code locations} attribute.
  * </p>
  *
  * @author Sam Brannen

@@ -94,7 +94,7 @@ class BeanDefinitionValueResolver {
 	 * Collections that will need to be resolved.
 	 * <li>A ManagedMap. In this case the value may be a RuntimeBeanReference
 	 * or Collection that will need to be resolved.
-	 * <li>An ordinary object or <code>null</code>, in which case it's left alone.
+	 * <li>An ordinary object or {@code null}, in which case it's left alone.
 	 * @param argName the name of the argument that the value is defined for
 	 * @param value the value object to resolve
 	 * @return the resolved object
@@ -232,7 +232,7 @@ class BeanDefinitionValueResolver {
 	/**
 	 * Resolve the target type in the given TypedStringValue.
 	 * @param value the TypedStringValue to resolve
-	 * @return the resolved target type (or <code>null</code> if none specified)
+	 * @return the resolved target type (or {@code null} if none specified)
 	 * @throws ClassNotFoundException if the specified type cannot be resolved
 	 * @see TypedStringValue#resolveTargetType
 	 */

@@ -32,8 +32,8 @@ public interface Unmarshaller {
 	/**
 	 * Indicates whether this unmarshaller can unmarshal instances of the supplied type.
 	 * @param clazz the class that this unmarshaller is being asked if it can marshal
-	 * @return <code>true</code> if this unmarshaller can indeed unmarshal to the supplied class;
-	 * <code>false</code> otherwise
+	 * @return {@code true} if this unmarshaller can indeed unmarshal to the supplied class;
+	 * {@code false} otherwise
 	 */
 	boolean supports(Class<?> clazz);
 

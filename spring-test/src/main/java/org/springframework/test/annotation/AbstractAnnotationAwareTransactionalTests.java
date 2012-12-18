@@ -98,7 +98,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 	/**
 	 * Constructs a new AbstractAnnotationAwareTransactionalTests instance with
-	 * the specified JUnit <code>name</code> and retrieves the configured (or
+	 * the specified JUnit {@code name} and retrieves the configured (or
 	 * default) {@link ProfileValueSource}.
 	 * @param name the name of the current test
 	 * @see ProfileValueUtils#retrieveProfileValueSource(Class)
@@ -119,10 +119,10 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	/**
 	 * Search for a unique {@link ProfileValueSource} in the supplied
 	 * {@link ApplicationContext}. If found, the
-	 * <code>profileValueSource</code> for this test will be set to the unique
+	 * {@code profileValueSource} for this test will be set to the unique
 	 * {@link ProfileValueSource}.
 	 * @param applicationContext the ApplicationContext in which to search for
-	 * the ProfileValueSource; may not be <code>null</code>
+	 * the ProfileValueSource; may not be {@code null}
 	 * @deprecated Use {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} instead.
 	 */
 	@Deprecated
@@ -191,12 +191,12 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 	}
 
 	/**
-	 * Determine if the test for the supplied <code>testMethod</code> should
+	 * Determine if the test for the supplied {@code testMethod} should
 	 * run in the current environment.
 	 * <p>The default implementation is based on
 	 * {@link IfProfileValue @IfProfileValue} semantics.
 	 * @param testMethod the test method
-	 * @return <code>true</code> if the test is <em>disabled</em> in the current environment
+	 * @return {@code true} if the test is <em>disabled</em> in the current environment
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment
 	 */
 	protected boolean isDisabledInThisEnvironment(Method testMethod) {

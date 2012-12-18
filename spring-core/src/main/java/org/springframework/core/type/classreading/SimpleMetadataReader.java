@@ -30,7 +30,7 @@ import org.springframework.core.type.ClassMetadata;
  * {@link org.springframework.asm.ClassReader}.
  *
  * <p>Package-visible in order to allow for repackaging the ASM library
- * without effect on users of the <code>core.type</code> package.
+ * without effect on users of the {@code core.type} package.
  *
  * @author Juergen Hoeller
  * @author Costin Leau

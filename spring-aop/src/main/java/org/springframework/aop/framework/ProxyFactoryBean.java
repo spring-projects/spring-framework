@@ -233,7 +233,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
 	 * Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
-	 * <code>getObject()</code> for a proxy.
+	 * {@code getObject()} for a proxy.
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
@@ -351,7 +351,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	/**
 	 * Return the proxy object to expose.
-	 * <p>The default implementation uses a <code>getProxy</code> call with
+	 * <p>The default implementation uses a {@code getProxy} call with
 	 * the factory's bean class loader. Can be overridden to specify a
 	 * custom class loader.
 	 * @param aopProxy the prepared AopProxy instance to get the proxy from
@@ -392,7 +392,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * which concludes the interceptorNames list, is an Advisor or Advice,
 	 * or may be a target.
 	 * @param beanName bean name to check
-	 * @return <code>true</code> if it's an Advisor or Advice
+	 * @return {@code true} if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
 		Class namedBeanClass = this.beanFactory.getType(beanName);

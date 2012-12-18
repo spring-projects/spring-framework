@@ -22,7 +22,7 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.logging.Log;
 
 /**
- * Simple <code>javax.xml.transform.ErrorListener</code> implementation:
+ * Simple {@code javax.xml.transform.ErrorListener} implementation:
  * logs warnings using the given Commons Logging logger instance,
  * and rethrows errors to discontinue the XML transformation.
  *

@@ -63,7 +63,7 @@ public class MapAccessor implements PropertyAccessor {
 
 
 	/**
-	 * Exception thrown from <code>read</code> in order to reset a cached
+	 * Exception thrown from {@code read} in order to reset a cached
 	 * PropertyAccessor, allowing other accessors to have a try.
 	 */
 	private static class MapAccessException extends AccessException {

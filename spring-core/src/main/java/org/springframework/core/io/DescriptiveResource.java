@@ -24,7 +24,7 @@ import java.io.InputStream;
  * Simple {@link Resource} implementation that holds a resource description
  * but does not point to an actually readable resource.
  *
- * <p>To be used as placeholder if a <code>Resource</code> argument is
+ * <p>To be used as placeholder if a {@code Resource} argument is
  * expected by an API but not necessarily used for actual reading.
  *
  * @author Juergen Hoeller

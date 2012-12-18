@@ -33,17 +33,17 @@ import org.springframework.web.multipart.MultipartResolver;
  * in the root web application context.
  *
  * <p>Looks up the MultipartResolver in Spring's root web application context.
- * Supports a "multipartResolverBeanName" filter init-param in <code>web.xml</code>;
+ * Supports a "multipartResolverBeanName" filter init-param in {@code web.xml};
  * the default bean name is "filterMultipartResolver". Looks up the MultipartResolver
  * on each request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
  *
  * <p>If no MultipartResolver bean is found, this filter falls back to a default
  * MultipartResolver: {@link StandardServletMultipartResolver} for Servlet 3.0,
- * based on a multipart-config section in <code>web.xml</code>.
+ * based on a multipart-config section in {@code web.xml}.
  *
  * <p>MultipartResolver lookup is customizable: Override this filter's
- * <code>lookupMultipartResolver</code> method to use a custom MultipartResolver
+ * {@code lookupMultipartResolver} method to use a custom MultipartResolver
  * instance, for example if not using a Spring web application context.
  * Note that the lookup method should not create a new MultipartResolver instance
  * for each call but rather return a reference to a pre-built instance.
@@ -128,7 +128,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	/**
 	 * Look up the MultipartResolver that this filter should use,
 	 * taking the current HTTP request as argument.
-	 * <p>The default implementation delegates to the <code>lookupMultipartResolver</code>
+	 * <p>The default implementation delegates to the {@code lookupMultipartResolver}
 	 * without arguments.
 	 * @return the MultipartResolver to use
 	 * @see #lookupMultipartResolver()
@@ -143,7 +143,7 @@ public class MultipartFilter extends OncePerRequestFilter {
 	 * bean name is "filterMultipartResolver".
 	 * <p>This can be overridden to use a custom MultipartResolver instance,
 	 * for example if not using a Spring web application context.
-	 * @return the MultipartResolver instance, or <code>null</code> if none found
+	 * @return the MultipartResolver instance, or {@code null} if none found
 	 */
 	protected MultipartResolver lookupMultipartResolver() {
 		WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(getServletContext());

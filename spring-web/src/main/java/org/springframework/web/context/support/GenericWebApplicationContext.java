@@ -40,13 +40,13 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>Implements the
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * but is not intended for declarative setup in <code>web.xml</code>. Instead,
+ * but is not intended for declarative setup in {@code web.xml}. Instead,
  * it is designed for programmatic setup, for example for building nested contexts or
  * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
- * reading the bean definitions in an implementation of the <code>loadBeanDefinitions</code>
+ * reading the bean definitions in an implementation of the {@code loadBeanDefinitions}
  * method.</b>
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath

@@ -45,7 +45,7 @@ public final class JodaTimeContextHolder {
 	/**
 	 * Associate the given JodaTimeContext with the current thread.
 	 * @param jodaTimeContext the current JodaTimeContext,
-	 * or <code>null</code> to reset the thread-bound context
+	 * or {@code null} to reset the thread-bound context
 	 */
 	public static void setJodaTimeContext(JodaTimeContext jodaTimeContext) {
 		if (jodaTimeContext == null) {
@@ -58,7 +58,7 @@ public final class JodaTimeContextHolder {
 
 	/**
 	 * Return the JodaTimeContext associated with the current thread, if any.
-	 * @return the current JodaTimeContext, or <code>null</code> if none
+	 * @return the current JodaTimeContext, or {@code null} if none
 	 */
 	public static JodaTimeContext getJodaTimeContext() {
 		return jodaTimeContextHolder.get();
@@ -69,7 +69,7 @@ public final class JodaTimeContextHolder {
 	 * Obtain a DateTimeFormatter with user-specific settings applied to the given base Formatter.
 	 * @param formatter the base formatter that establishes default formatting rules
 	 * (generally user independent)
-	 * @param locale the current user locale (may be <code>null</code> if not known)
+	 * @param locale the current user locale (may be {@code null} if not known)
 	 * @return the user-specific DateTimeFormatter
 	 */
 	public static DateTimeFormatter getFormatter(DateTimeFormatter formatter, Locale locale) {
