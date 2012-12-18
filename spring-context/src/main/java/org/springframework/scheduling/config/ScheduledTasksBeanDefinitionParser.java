@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Parser for the 'scheduled-tasks' element of the scheduling namespace.
- * 
+ *
  * @author Mark Fisher
  * @author Chris Beams
  * @since 3.0

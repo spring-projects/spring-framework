@@ -35,7 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
  * HTML checkboxes and select options: detecting that a field was part of
  * the form, but did not generate a request parameter because it was empty.
  * A field marker allows to detect that state and reset the corresponding
- * bean property accordingly. Default values, for parameters that are otherwise 
+ * bean property accordingly. Default values, for parameters that are otherwise
  * not present, can specify a value for the field other then empty.
  *
  * @author Juergen Hoeller
@@ -65,7 +65,7 @@ public class WebDataBinder extends DataBinder {
 	/**
 	 * Default prefix that field default parameters start with, followed by the field
 	 * name: e.g. "!subscribeToNewsletter" for a field "subscribeToNewsletter".
-	 * <p>Default parameters differ from field markers in that they provide a default 
+	 * <p>Default parameters differ from field markers in that they provide a default
 	 * value instead of an empty value.
 	 * @see #setFieldDefaultPrefix
 	 */
@@ -134,15 +134,15 @@ public class WebDataBinder extends DataBinder {
 
 	/**
 	 * Specify a prefix that can be used for parameters that indicate default
-	 * value fields, having "prefix + field" as name. The value of the default 
+	 * value fields, having "prefix + field" as name. The value of the default
 	 * field is used when the field is not provided.
 	 * <p>Default is "!", for "!FIELD" parameters (e.g. "!subscribeToNewsletter").
 	 * Set this to null if you want to turn off the field defaults completely.
 	 * <p>HTML checkboxes only send a value when they're checked, so it is not
 	 * possible to detect that a formerly checked box has just been unchecked,
-	 * at least not with standard HTML means.  A default field is especially 
+	 * at least not with standard HTML means.  A default field is especially
 	 * useful when a checkbox represents a non-boolean value.
-	 * <p>The presence of a default parameter preempts the behavior of a field 
+	 * <p>The presence of a default parameter preempts the behavior of a field
 	 * marker for the given field.
 	 * @see #DEFAULT_FIELD_DEFAULT_PREFIX
 	 * @see org.springframework.web.servlet.mvc.BaseCommandController#onBind
@@ -208,7 +208,7 @@ public class WebDataBinder extends DataBinder {
 					String field = pv.getName().substring(fieldDefaultPrefix.length());
 					if (getPropertyAccessor().isWritableProperty(field) && !mpvs.contains(field)) {
 						mpvs.add(field, pv.getValue());
-					} 
+					}
 					mpvs.removePropertyValue(pv);
 				}
 			}

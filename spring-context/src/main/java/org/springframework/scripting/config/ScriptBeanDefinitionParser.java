@@ -114,7 +114,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 		bd.setBeanClassName(this.scriptFactoryClassName);
 		bd.setSource(parserContext.extractSource(element));
 		bd.setAttribute(ScriptFactoryPostProcessor.LANGUAGE_ATTRIBUTE, element.getLocalName());
-		
+
 		// Determine bean scope.
 		String scope = element.getAttribute(SCOPE_ATTRIBUTE);
 		if (StringUtils.hasLength(scope)) {

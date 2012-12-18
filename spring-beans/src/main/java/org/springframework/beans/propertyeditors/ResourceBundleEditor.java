@@ -26,13 +26,13 @@ import java.util.ResourceBundle;
 /**
  * {@link java.beans.PropertyEditor} implementation for
  * {@link java.util.ResourceBundle ResourceBundles}.
- * 
+ *
  * <p>Only supports conversion <i>from</i> a String, but not
  * <i>to</i> a String.
- * 
- * Find below some examples of using this class in a 
+ *
+ * Find below some examples of using this class in a
  * (properly configured) Spring container using XML-based metadata:
- * 
+ *
  * <pre class="code"> &lt;bean id="errorDialog" class="..."&gt;
  *    &lt;!--
  *        the 'messages' property is of type java.util.ResourceBundle.
@@ -40,18 +40,18 @@ import java.util.ResourceBundle;
  *    --&gt;
  *    &lt;property name="messages" value="DialogMessages"/&gt;
  * &lt;/bean&gt;</pre>
- * 
+ *
  * <pre class="code"> &lt;bean id="errorDialog" class="..."&gt;
  *    &lt;!--
  *        the 'DialogMessages.properties' file exists in the 'com/messages' package
  *    --&gt;
  *    &lt;property name="messages" value="com/messages/DialogMessages"/&gt;
  * &lt;/bean&gt;</pre>
- * 
+ *
  * <p>A 'properly configured' Spring {@link org.springframework.context.ApplicationContext container}
  * might contain a {@link org.springframework.beans.factory.config.CustomEditorConfigurer}
  * definition such that the conversion can be effected transparently:
- * 
+ *
  * <pre class="code"> &lt;bean class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *    &lt;property name="customEditors"&gt;
  *        &lt;map&gt;
@@ -61,10 +61,10 @@ import java.util.ResourceBundle;
  *        &lt;/map&gt;
  *    &lt;/property&gt;
  * &lt;/bean&gt;</pre>
- * 
+ *
  * <p>Please note that this {@link java.beans.PropertyEditor} is
  * <b>not</b> registered by default with any of the Spring infrastructure.
- * 
+ *
  * <p>Thanks to David Leal Valmana for the suggestion and initial prototype.
  *
  * @author Rick Evans

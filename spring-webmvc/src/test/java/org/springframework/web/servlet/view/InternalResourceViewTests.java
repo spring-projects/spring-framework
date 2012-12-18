@@ -63,7 +63,7 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("I", obj);
 
 		String url = "forward-to";
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
 		request.setContextPath("/mycontext");
 		request.setServletPath("/myservlet");

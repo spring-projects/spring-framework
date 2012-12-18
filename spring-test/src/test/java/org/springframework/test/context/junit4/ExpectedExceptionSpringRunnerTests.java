@@ -35,7 +35,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>JUnit's {@link Test#expected() &#064;Test(expected=...)}</li>
  * <li>Spring's {@link ExpectedException &#064;ExpectedException}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

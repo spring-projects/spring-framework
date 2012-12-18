@@ -56,12 +56,12 @@ public class TypedValue {
 		this.value = value;
 		this.typeDescriptor = typeDescriptor;
 	}
-	
+
 
 	public Object getValue() {
 		return this.value;
 	}
-	
+
 	public TypeDescriptor getTypeDescriptor() {
 		if (this.typeDescriptor == null) {
 			this.typeDescriptor = TypeDescriptor.forObject(this.value);
@@ -76,5 +76,5 @@ public class TypedValue {
 		str.append("TypedValue: '").append(this.value).append("' of [").append(getTypeDescriptor() + "]");
 		return str.toString();
 	}
-	
+
 }

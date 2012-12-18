@@ -59,9 +59,9 @@ public final class PrototypeBasedTargetSourceTests {
 		assertNotNull(sts.getTarget());
 	}
 
-	
+
 	private static class TestTargetSource extends AbstractPrototypeBasedTargetSource {
-		
+
 		/**
 		 * Nonserializable test field to check that subclass
 		 * state can't prevent serialization from working

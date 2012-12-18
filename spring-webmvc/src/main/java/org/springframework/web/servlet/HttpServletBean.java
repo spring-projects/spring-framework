@@ -86,7 +86,7 @@ public abstract class HttpServletBean extends HttpServlet
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
@@ -230,7 +230,7 @@ public abstract class HttpServletBean extends HttpServlet
 		 */
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 		    throws ServletException {
-			
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 

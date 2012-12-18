@@ -70,8 +70,8 @@ public abstract class UriUtils {
 	/**
 	 * Encodes the given source URI into an encoded String. All various URI components are
 	 * encoded according to their respective valid character sets.
-	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
-	 * characters in query parameter names and query parameter values because they cannot 
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
+	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
 	 * <pre>
 	 * UriComponents uriComponents = UriComponentsBuilder.fromUri("/path?name={value}").buildAndExpand("a=b");
@@ -111,8 +111,8 @@ public abstract class UriUtils {
 	 * encoded according to their respective valid character sets.
 	 * <p><strong>Note</strong> that this method does not support fragments ({@code #}),
 	 * as these are not supposed to be sent to the server, but retained by the client.
-	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
-	 * characters in query parameter names and query parameter values because they cannot 
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
+	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
 	 * <pre>
 	 * UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("/path?name={value}").buildAndExpand("a=b");

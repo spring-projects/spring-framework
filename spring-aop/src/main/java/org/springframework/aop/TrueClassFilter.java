@@ -24,9 +24,9 @@ import java.io.Serializable;
  * @author Rod Johnson
  */
 class TrueClassFilter implements ClassFilter, Serializable {
-	
+
 	public static final TrueClassFilter INSTANCE = new TrueClassFilter();
-	
+
 	/**
 	 * Enforce Singleton pattern.
 	 */
@@ -36,7 +36,7 @@ class TrueClassFilter implements ClassFilter, Serializable {
 	public boolean matches(Class clazz) {
 		return true;
 	}
-	
+
 	/**
 	 * Required to support serialization. Replaces with canonical
 	 * instance on deserialization, protecting Singleton pattern.

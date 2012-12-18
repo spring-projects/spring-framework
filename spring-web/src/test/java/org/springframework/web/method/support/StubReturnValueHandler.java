@@ -20,16 +20,16 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * Supports a fixed return value type. Records the last handled return value. 
- * 
+ * Supports a fixed return value type. Records the last handled return value.
+ *
  * @author Rossen Stoyanchev
  */
 public class StubReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	private final Class<?> returnType;
-	
+
 	private Object returnValue;
-	
+
 	public StubReturnValueHandler(Class<?> returnType) {
 		this.returnType = returnType;
 	}

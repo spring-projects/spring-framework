@@ -39,7 +39,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 
 /**
  * Unit tests for {@link CustomEditorConfigurer}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 31.07.2004

@@ -41,7 +41,7 @@ public class SyncTaskExecutor implements TaskExecutor, Serializable {
 	/**
 	 * Executes the given <code>task</code> synchronously, through direct
 	 * invocation of it's {@link Runnable#run() run()} method.
-	 * @throws IllegalArgumentException if the given <code>task</code> is <code>null</code> 
+	 * @throws IllegalArgumentException if the given <code>task</code> is <code>null</code>
 	 */
 	public void execute(Runnable task) {
 		Assert.notNull(task, "Runnable must not be null");

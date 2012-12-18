@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * System tests for {@link Import} annotation support.
- * 
+ *
  * @author Chris Beams
  */
 public class ImportTests {
@@ -125,7 +125,7 @@ public class ImportTests {
 	@Configuration
 	@Import(DataSourceConfig.class)
 	static class AppConfig {
-		
+
 		@Bean
 		public ITestBean transferService() {
 			return new TestBean(accountRepository());

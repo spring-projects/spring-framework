@@ -45,7 +45,7 @@ import org.springframework.test.jdbc.SimpleJdbcTestUtils;
 /**
  * Combined integration test for {@link AbstractJUnit4SpringContextTests} and
  * {@link AbstractTransactionalJUnit4SpringContextTests}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

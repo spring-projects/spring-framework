@@ -47,7 +47,7 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	}
 
 	/**
-	 * Set the list of exception resolvers to delegate to. 
+	 * Set the list of exception resolvers to delegate to.
 	 */
 	public void setExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.resolvers = exceptionResolvers;
@@ -61,7 +61,7 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	}
 
 	/**
-	 * Resolve the exception by iterating over the list of configured exception resolvers. 
+	 * Resolve the exception by iterating over the list of configured exception resolvers.
 	 * The first one to return a ModelAndView instance wins. Otherwise {@code null} is returned.
 	 */
 	public ModelAndView resolveException(HttpServletRequest request,

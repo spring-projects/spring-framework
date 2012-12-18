@@ -95,15 +95,15 @@ public class MockPortletConfig implements PortletConfig {
 		this.portletName = portletName;
 	}
 
-	
+
 	public String getPortletName() {
 		return this.portletName;
 	}
-	
+
 	public PortletContext getPortletContext() {
 		return this.portletContext;
 	}
-	
+
 	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.resourceBundles.put(locale, resourceBundle);

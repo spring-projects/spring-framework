@@ -664,7 +664,7 @@ public class HandlerMethodInvoker {
 		}
 		throw new IllegalArgumentException(
 				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
-		
+
 	}
 
 	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,

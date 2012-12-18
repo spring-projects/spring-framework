@@ -81,7 +81,7 @@ public @interface ContextConfiguration {
 
 	/**
 	 * Alias for {@link #locations}.
-	 * 
+	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction
 	 * with {@link #locations} or {@link #classes}, but it may be used
 	 * instead of {@link #locations}.
@@ -93,7 +93,7 @@ public @interface ContextConfiguration {
 	/**
 	 * The resource locations to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
-	 * 
+	 *
 	 * <p>Check out the Javadoc for
 	 * {@link org.springframework.test.context.support.AbstractContextLoader#modifyLocations
 	 * AbstractContextLoader.modifyLocations()} for details on how a location
@@ -102,7 +102,7 @@ public @interface ContextConfiguration {
 	 * {@link org.springframework.test.context.support.AbstractContextLoader#generateDefaultLocations
 	 * AbstractContextLoader.generateDefaultLocations()} for details on the default
 	 * locations that are going to be used if none are specified.
-	 * 
+	 *
 	 * <p>Note that the above-mentioned default rules only apply for a standard
 	 * {@link org.springframework.test.context.support.AbstractContextLoader
 	 * AbstractContextLoader} subclass such as
@@ -111,7 +111,7 @@ public @interface ContextConfiguration {
 	 * used at runtime if <code>locations</code> are configured. See the
 	 * documentation for {@link #loader} for further details regarding default
 	 * loaders.
-	 * 
+	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value} or {@link #classes}, but it may be used instead of
 	 * {@link #value}.
@@ -123,14 +123,14 @@ public @interface ContextConfiguration {
 	/**
 	 * The <em>annotated classes</em> to use for loading an
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}.
-	 * 
+	 *
 	 * <p>Check out the Javadoc for
 	 * {@link org.springframework.test.context.support.AnnotationConfigContextLoader#detectDefaultConfigurationClasses
 	 * AnnotationConfigContextLoader.detectDefaultConfigurationClasses()} for details
 	 * on how default configuration classes will be detected if no
 	 * <em>annotated classes</em> are specified. See the documentation for
 	 * {@link #loader} for further details regarding default loaders.
-	 * 
+	 *
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #locations} or {@link #value}.
 	 *
@@ -144,7 +144,7 @@ public @interface ContextConfiguration {
 	/**
 	 * The application context <em>initializer classes</em> to use for initializing
 	 * a {@link ConfigurableApplicationContext}.
-	 * 
+	 *
 	 * <p>The concrete {@code ConfigurableApplicationContext} type supported by each
 	 * declared initializer must be compatible with the type of {@code ApplicationContext}
 	 * created by the {@link SmartContextLoader} in use.
@@ -173,12 +173,12 @@ public @interface ContextConfiguration {
 	 * resource locations or annotated classes defined by test superclasses.
 	 * Thus, subclasses have the option of <em>extending</em> the list of resource
 	 * locations or annotated classes.
-	 * 
+	 *
 	 * <p>If <code>inheritLocations</code> is set to <code>false</code>, the
 	 * resource locations or annotated classes for the annotated class
-	 * will <em>shadow</em> and effectively replace any resource locations 
+	 * will <em>shadow</em> and effectively replace any resource locations
 	 * or annotated classes defined by superclasses.
-	 * 
+	 *
 	 * <p>In the following example that uses path-based resource locations, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for {@code ExtendedTest} will be loaded from
@@ -191,18 +191,18 @@ public @interface ContextConfiguration {
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * 
+	 *
 	 * &#064;ContextConfiguration(&quot;extended-context.xml&quot;)
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
 	 * }
 	 * </pre>
-	 * 
+	 *
 	 * <p>Similarly, in the following example that uses annotated
 	 * classes, the
 	 * {@link org.springframework.context.ApplicationContext ApplicationContext}
 	 * for {@code ExtendedTest} will be loaded from the
-	 * {@code BaseConfig} <strong>and</strong> {@code ExtendedConfig} 
+	 * {@code BaseConfig} <strong>and</strong> {@code ExtendedConfig}
 	 * configuration classes, in that order. Beans defined in
 	 * {@code ExtendedConfig} may therefore override those defined in
 	 * {@code BaseConfig}.
@@ -211,7 +211,7 @@ public @interface ContextConfiguration {
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * 
+	 *
 	 * &#064;ContextConfiguration(classes=ExtendedConfig.class)
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
@@ -249,7 +249,7 @@ public @interface ContextConfiguration {
 	 * public class BaseTest {
 	 *     // ...
 	 * }
-	 * 
+	 *
 	 * &#064;ContextConfiguration(initializers = ExtendedInitializer.class)
 	 * public class ExtendedTest extends BaseTest {
 	 *     // ...
@@ -263,12 +263,12 @@ public @interface ContextConfiguration {
 	 * The type of {@link SmartContextLoader} (or {@link ContextLoader}) to use
 	 * for loading an {@link org.springframework.context.ApplicationContext
 	 * ApplicationContext}.
-	 * 
+	 *
 	 * <p>If not specified, the loader will be inherited from the first superclass
 	 * that is annotated with {@code @ContextConfiguration} and specifies an
 	 * explicit loader. If no class in the hierarchy specifies an explicit
 	 * loader, a default loader will be used instead.
-	 * 
+	 *
 	 * <p>The default concrete implementation chosen at runtime will be
 	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
 	 * DelegatingSmartContextLoader}. For further details on the default behavior

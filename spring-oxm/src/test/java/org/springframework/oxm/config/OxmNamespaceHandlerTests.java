@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 
 /**
  * Tests the {@link OxmNamespaceHandler} class.
- * 
+ *
  * @author Arjen Poustma
  * @author Jakub Narloch
  */

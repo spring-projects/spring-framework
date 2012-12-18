@@ -33,11 +33,11 @@ import org.springframework.web.portlet.ModelAndView;
 public class PortletModeNameViewControllerTests extends TestCase {
 
 	private PortletModeNameViewController controller;
-	
+
 	public void setUp() {
 		controller = new PortletModeNameViewController();
 	}
-	
+
 	public void testEditPortletMode() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
@@ -53,7 +53,7 @@ public class PortletModeNameViewControllerTests extends TestCase {
 		ModelAndView mav = controller.handleRenderRequest(request, response);
 		assertEquals("help", mav.getViewName());
 	}
-	
+
 	public void testViewPortletMode() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
@@ -61,7 +61,7 @@ public class PortletModeNameViewControllerTests extends TestCase {
 		ModelAndView mav = controller.handleRenderRequest(request, response);
 		assertEquals("view", mav.getViewName());
 	}
-	
+
 	public void testActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();

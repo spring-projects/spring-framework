@@ -33,7 +33,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Testing variations on map access.
- * 
+ *
  * @author Andy Clement
  */
 public class MapAccessTests extends ExpressionTestCase {
@@ -170,7 +170,7 @@ public class MapAccessTests extends ExpressionTestCase {
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
 		}
-		
+
 	}
 
 }

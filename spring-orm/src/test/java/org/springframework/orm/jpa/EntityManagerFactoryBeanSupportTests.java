@@ -20,7 +20,7 @@ package org.springframework.orm.jpa;
  * @author Rod Johnson
  */
 public class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerFactoryBeanTests {
-	
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -28,17 +28,17 @@ public class EntityManagerFactoryBeanSupportTests extends AbstractEntityManagerF
 		emfMc.setVoidCallable();
 		emfMc.replay();
 	}
-		
+
 	public void testHookIsCalled() throws Exception {
 		DummyEntityManagerFactoryBean demf = new DummyEntityManagerFactoryBean(mockEmf);
-		
+
 		demf.afterPropertiesSet();
-		
+
 		checkInvariants(demf);
-		
+
 		// Should trigger close method expected by EntityManagerFactory mock
 		demf.destroy();
-		
+
 		emfMc.verify();
 	}
 

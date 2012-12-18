@@ -76,7 +76,7 @@ public class MockPortletSession implements PortletSession {
 		this.portletContext = (portletContext != null ? portletContext : new MockPortletContext());
 	}
 
-	
+
 	public Object getAttribute(String name) {
 		return this.portletAttributes.get(name);
 	}

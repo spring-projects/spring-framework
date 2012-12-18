@@ -797,7 +797,7 @@ public abstract class AbstractAopProxyTests {
 	}
 
 	/**
-	 * Note that an introduction can't throw an unexpected checked exception, 
+	 * Note that an introduction can't throw an unexpected checked exception,
 	 * as it's constained by the interface.
 	 */
 	@Test
@@ -1268,8 +1268,8 @@ public abstract class AbstractAopProxyTests {
 				return target;
 			}
 
-			public void releaseTarget(Object target) throws Exception {				
-			}			
+			public void releaseTarget(Object target) throws Exception {
+			}
 		});
 
 		// Just test anything: it will fail if context wasn't found
@@ -1422,7 +1422,7 @@ public abstract class AbstractAopProxyTests {
 		}
 		assertEquals(6, cca.getCalls());
 	}
-	
+
 	@Test
 	public void testBeforeAdviceThrowsException() {
 		final RuntimeException rex = new RuntimeException();
@@ -1909,31 +1909,31 @@ public abstract class AbstractAopProxyTests {
 		}
 	}
 
-	
+
 	@SuppressWarnings("serial")
 	public static class CountingMultiAdvice extends MethodCounter implements MethodBeforeAdvice,
 			AfterReturningAdvice, ThrowsAdvice {
-	
+
 		public void before(Method m, Object[] args, Object target) throws Throwable {
 			count(m);
 		}
-	
+
 		public void afterReturning(Object o, Method m, Object[] args, Object target)
 				throws Throwable {
 			count(m);
 		}
-	
+
 		public void afterThrowing(IOException ex) throws Throwable {
 			count(IOException.class.getName());
 		}
-	
+
 		public void afterThrowing(UncheckedException ex) throws Throwable {
 			count(UncheckedException.class.getName());
 		}
-	
+
 	}
-	
-	
+
+
 	@SuppressWarnings("serial")
 	public static class CountingThrowsAdvice extends MethodCounter implements ThrowsAdvice {
 
@@ -1946,36 +1946,36 @@ public abstract class AbstractAopProxyTests {
 		}
 
 	}
-	
+
 
 	@SuppressWarnings("serial")
 	static class UncheckedException extends RuntimeException {
-		
+
 	}
-	
+
 
 	@SuppressWarnings("serial")
 	static class SpecializedUncheckedException extends UncheckedException {
 
 		public SpecializedUncheckedException(String string, SQLException exception) {
 		}
-		
+
 	}
-	
-	
+
+
 	static class MockTargetSource implements TargetSource {
-		
+
 		private Object target;
-		
+
 		public int gets;
-		
+
 		public int releases;
-		
+
 		public void reset() {
 			this.target = null;
 			gets = releases = 0;
 		}
-		
+
 		public void setTarget(Object target) {
 			this.target = target;
 		}
@@ -2003,7 +2003,7 @@ public abstract class AbstractAopProxyTests {
 				throw new RuntimeException("Released wrong target");
 			++releases;
 		}
-		
+
 		/**
 		 * Check that gets and releases match
 		 *
@@ -2021,8 +2021,8 @@ public abstract class AbstractAopProxyTests {
 		}
 
 	}
-	
-	
+
+
 	static abstract class ExposedInvocationTestBean extends TestBean {
 
 		public String getName() {
@@ -2036,18 +2036,18 @@ public abstract class AbstractAopProxyTests {
 			assertions(invocation);
 			super.absquatulate();
 		}
-		
+
 		protected abstract void assertions(MethodInvocation invocation);
 	}
-	
-	
+
+
 	static class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
 		protected void assertions(MethodInvocation invocation) {
 			TestCase.assertTrue(invocation.getThis() == this);
-			TestCase.assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+			TestCase.assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
 					ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
 		}
 	}
-	
+
 }
 

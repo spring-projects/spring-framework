@@ -189,7 +189,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		m = clazz.getMethod("getDate", null);
 		names = discoverer.getParameterNames(m);
 		assertEquals(0, names.length);
-		
+
 		//System.in.read();
 	}
 

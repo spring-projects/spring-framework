@@ -143,7 +143,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
 		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
 	}
-	
+
 }
 
 class TestWebArgumentResolver implements WebArgumentResolver {
@@ -176,7 +176,7 @@ class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHan
 			MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
 	}
-	
+
 }
 
 class TestMessageCodesResolver implements MessageCodesResolver {

@@ -39,14 +39,14 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
  * @author Jeremy Grelle
  */
 public class FormTagTests extends AbstractHtmlElementTagTests {
-	
+
 	private static final String REQUEST_URI = "/my/form";
 
 	private static final String QUERY_STRING = "foo=bar";
 
 
 	private FormTag tag;
-	
+
 	private MockHttpServletRequest request;
 
 
@@ -187,25 +187,10 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("<form id=\"command\" action=\"/my/form?foo=bar&amp;stuff=&quot;&gt;&lt;script&gt;alert(&#39;XSS!&#39;)&lt;/script&gt;\" method=\"post\">",
 				getOutput());
 	}
-	
+
 	public void testGet() throws Exception {
 		this.tag.setMethod("get");
-		
-		this.tag.doStartTag();
-		this.tag.doEndTag();
-		this.tag.doFinally();
-		
-		String output = getOutput();
-		String formOutput = getFormTag(output);
-		String inputOutput = getInputTag(output);
-		
-		assertContainsAttribute(formOutput, "method", "get");
-		assertEquals("", inputOutput);
-	}
-	
-	public void testPost() throws Exception {
-		this.tag.setMethod("post");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 		this.tag.doFinally();
@@ -213,14 +198,29 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		String output = getOutput();
 		String formOutput = getFormTag(output);
 		String inputOutput = getInputTag(output);
-		
+
+		assertContainsAttribute(formOutput, "method", "get");
+		assertEquals("", inputOutput);
+	}
+
+	public void testPost() throws Exception {
+		this.tag.setMethod("post");
+
+		this.tag.doStartTag();
+		this.tag.doEndTag();
+		this.tag.doFinally();
+
+		String output = getOutput();
+		String formOutput = getFormTag(output);
+		String inputOutput = getInputTag(output);
+
 		assertContainsAttribute(formOutput, "method", "post");
 		assertEquals("", inputOutput);
 	}
-	
+
 	public void testPut() throws Exception {
 		this.tag.setMethod("put");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 		this.tag.doFinally();
@@ -234,10 +234,10 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "value", "put");
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
-	
+
 	public void testDelete() throws Exception {
 		this.tag.setMethod("delete");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 		this.tag.doFinally();
@@ -251,11 +251,11 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		assertContainsAttribute(inputOutput, "value", "delete");
 		assertContainsAttribute(inputOutput, "type", "hidden");
 	}
-	
+
 	public void testCustomMethodParameter() throws Exception {
 		this.tag.setMethod("put");
 		this.tag.setMethodParam("methodParameter");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 		this.tag.doFinally();
@@ -279,24 +279,24 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 		this.tag.doFinally();
 		assertNull(getPageContext().getAttribute(FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME, PageContext.REQUEST_SCOPE));
 	}
-	
+
 	public void testRequestDataValueProcessorHooks() throws Exception {
 		String action = "/my/form?foo=bar";
 		RequestDataValueProcessor processor = getMockRequestDataValueProcessor();
 		expect(processor.processAction(this.request, action)).andReturn(action);
 		expect(processor.getExtraHiddenFields(this.request)).andReturn(Collections.singletonMap("key", "value"));
 		replay(processor);
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 		this.tag.doFinally();
-		
+
 		String output = getOutput();
-		
+
 		assertEquals("<input type=\"hidden\" name=\"key\" value=\"value\"></input>", getInputTag(output));
 		assertFormTagOpened(output);
 		assertFormTagClosed(output);
-		
+
 		verify(processor);
 	}
 
@@ -320,5 +320,5 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	private static void assertFormTagClosed(String output) {
 		assertTrue(output.endsWith("</form>"));
 	}
-	
+
 }

@@ -31,9 +31,9 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Should ideally be eliminated.  Copied when splitting .testsuite up into individual bundles.
- * 
+ *
  * @see org.springframework.web.context.XmlWebApplicationContextTests
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -52,7 +52,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 		listener.zeroCounter();
 		TestListener parentListener = (TestListener) this.applicationContext.getParent().getBean("parentListener");
 		parentListener.zeroCounter();
-		
+
 		parentListener.zeroCounter();
 		assertTrue("0 events before publication", listener.getEventCount() == 0);
 		assertTrue("0 parent events before publication", parentListener.getEventCount() == 0);

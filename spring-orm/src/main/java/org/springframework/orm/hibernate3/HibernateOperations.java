@@ -239,7 +239,7 @@ public interface HibernateOperations {
 
 	/**
 	 * Return all persistent instances of the given entity class.
-	 * Note: Use queries or criteria for retrieving a specific subset. 
+	 * Note: Use queries or criteria for retrieving a specific subset.
 	 * @param entityClass a persistent class
 	 * @return a {@link List} containing 0 or more persistent instances
 	 * @throws org.springframework.dao.DataAccessException if there is a Hibernate error

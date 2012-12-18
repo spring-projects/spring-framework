@@ -36,7 +36,7 @@ import test.beans.TestBean;
 
 /**
  * Unit tests for {@link BeanUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams

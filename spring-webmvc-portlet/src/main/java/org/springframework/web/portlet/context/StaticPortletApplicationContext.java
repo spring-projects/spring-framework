@@ -51,7 +51,7 @@ public class StaticPortletApplicationContext extends StaticApplicationContext
 		implements ConfigurablePortletApplicationContext {
 
 	private ServletContext servletContext;
-	
+
 	private PortletContext portletContext;
 
 	private PortletConfig portletConfig;

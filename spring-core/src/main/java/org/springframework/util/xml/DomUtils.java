@@ -119,7 +119,7 @@ public abstract class DomUtils {
 	}
 
 	/**
-	 * Retrieve all child elements of the given DOM element	
+	 * Retrieve all child elements of the given DOM element
 
 	 * @param ele		   the DOM element to analyze
 	 * @return a List of child <code>org.w3c.dom.Element</code> instances

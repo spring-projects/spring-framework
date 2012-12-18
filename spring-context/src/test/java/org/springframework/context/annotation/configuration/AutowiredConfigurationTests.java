@@ -37,13 +37,13 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * System tests covering use of {@link Autowired} and {@link Value} within
  * {@link Configuration} classes.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  */
 public class AutowiredConfigurationTests {
 
-	@Test 
+	@Test
 	public void testAutowiredConfigurationDependencies() {
 		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
 		        AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);

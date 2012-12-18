@@ -56,7 +56,7 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 		AopProxy proxy = proxyFactory.createAopProxy(advisedSupport);
 		rootElementCglib = (RootElement) proxy.getProxy();
 	}
-	
+
 	@Test
 	public void canRead() throws Exception {
 		assertTrue("Converter does not support reading @XmlRootElement", converter.canRead(RootElement.class, null));
@@ -79,7 +79,7 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 		RootElement result = (RootElement) converter.read((Class) RootElement.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.type.s);
 	}
-	
+
 	@Test
 	@SuppressWarnings("unchecked")
 	public void readXmlRootElementSubclass() throws Exception {

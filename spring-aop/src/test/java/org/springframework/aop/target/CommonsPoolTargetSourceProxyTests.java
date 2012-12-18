@@ -33,7 +33,7 @@ import test.beans.ITestBean;
  * @since 2.0
  */
 public final class CommonsPoolTargetSourceProxyTests {
-	
+
 	private static final Resource CONTEXT =
 		qualifiedResource(CommonsPoolTargetSourceProxyTests.class, "context.xml");
 

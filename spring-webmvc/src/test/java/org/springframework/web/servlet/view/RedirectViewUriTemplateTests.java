@@ -36,7 +36,7 @@ public class RedirectViewUriTemplateTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
-	
+
 	@Before
 	public void setUp() {
 		this.request = new MockHttpServletRequest();
@@ -56,7 +56,7 @@ public class RedirectViewUriTemplateTests {
 
 		assertEquals(baseUrl + "/bar", this.response.getRedirectedUrl());
 	}
-	
+
 	@Test
 	public void uriTemplateEncode() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -68,7 +68,7 @@ public class RedirectViewUriTemplateTests {
 
 		assertEquals(baseUrl + "/context path/bar%2Fbar%20baz", this.response.getRedirectedUrl());
 	}
-	
+
 	@Test
 	public void uriTemplateAndArrayQueryParam() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -98,7 +98,7 @@ public class RedirectViewUriTemplateTests {
 		model.put("key1", "value1");
 		model.put("name", "value2");
 		model.put("key3", "value3");
-		
+
 		Map<String, String> currentRequestUriTemplateVars = new HashMap<String, String>();
 		currentRequestUriTemplateVars.put("var1", "v1");
 		currentRequestUriTemplateVars.put("name", "v2");
@@ -116,7 +116,7 @@ public class RedirectViewUriTemplateTests {
 	public void uriTemplateNullValue() throws Exception {
 		new RedirectView("/{foo}").renderMergedOutputModel(new ModelMap(), this.request, this.response);
 	}
-	
+
 	@Test
 	public void emptyRedirectString() throws Exception {
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -138,5 +138,5 @@ public class RedirectViewUriTemplateTests {
 
 		assertEquals(url, this.response.getRedirectedUrl());
 	}
-	
+
 }

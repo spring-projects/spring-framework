@@ -47,7 +47,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		assertEquals("Correct JmsTemplate", mockConnectionFactory, gateway.getJmsTemplate().getConnectionFactory());
 		assertEquals("initGatway called", test.size(), 1);
 		connectionFactoryControl.verify();
-		
+
 	}
 	public void testJmsGatewaySupportWithJmsTemplate() throws Exception {
 		JmsTemplate template = new JmsTemplate();
@@ -60,7 +60,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		gateway.setJmsTemplate(template);
 		gateway.afterPropertiesSet();
 		assertEquals("Correct JmsTemplate", template, gateway.getJmsTemplate());
-		assertEquals("initGateway called", test.size(), 1);		
+		assertEquals("initGateway called", test.size(), 1);
 	}
 
 }

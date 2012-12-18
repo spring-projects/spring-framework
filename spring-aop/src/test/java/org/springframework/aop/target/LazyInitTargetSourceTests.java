@@ -34,9 +34,9 @@ import test.beans.ITestBean;
  * @since 07.01.2005
  */
 public final class LazyInitTargetSourceTests {
-	
+
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
-	
+
 	private static final Resource SINGLETON_CONTEXT = qualifiedResource(CLASS, "singleton.xml");
 	private static final Resource CUSTOM_TARGET_CONTEXT = qualifiedResource(CLASS, "customTarget.xml");
 	private static final Resource FACTORY_BEAN_CONTEXT = qualifiedResource(CLASS, "factoryBean.xml");

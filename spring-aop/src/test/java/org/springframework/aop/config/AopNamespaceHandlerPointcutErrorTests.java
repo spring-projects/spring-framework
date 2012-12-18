@@ -29,7 +29,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
  * @author Chris Beams
  */
 public final class AopNamespaceHandlerPointcutErrorTests {
-	
+
 	@Test
 	public void testDuplicatePointcutConfig() {
 		try {

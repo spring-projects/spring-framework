@@ -18,9 +18,9 @@ package org.springframework.core.enums;
 
 /**
  * Base class for static type-safe labeled enum instances.
- * 
+ *
  * Usage example:
- * 
+ *
  * <pre>
  * public class FlowSessionStatus extends StaticLabeledEnum {
  *
@@ -30,15 +30,15 @@ package org.springframework.core.enums;
  *     public static FlowSessionStatus PAUSED = new FlowSessionStatus(2, &quot;Paused&quot;);
  *     public static FlowSessionStatus SUSPENDED = new FlowSessionStatus(3, &quot;Suspended&quot;);
  *     public static FlowSessionStatus ENDED = new FlowSessionStatus(4, &quot;Ended&quot;);
- *     
+ *
  *     // private constructor!
  *     private FlowSessionStatus(int code, String label) {
  *         super(code, label);
  *     }
- *     
+ *
  *     // custom behavior
  * }</pre>
- * 
+ *
  * @author Keith Donald
  * @since 1.2.6
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.

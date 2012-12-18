@@ -363,5 +363,5 @@ public class AnnotationUtilsTests {
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @interface Transactional {
-	
+
 }

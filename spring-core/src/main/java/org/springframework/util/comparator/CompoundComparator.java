@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  *
  * <p>This facilitates in-memory sorting similar to multi-column sorting in SQL.
  * The order of any single Comparator in the list can also be reversed.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2

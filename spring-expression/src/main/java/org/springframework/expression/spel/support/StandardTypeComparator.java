@@ -22,7 +22,7 @@ import org.springframework.expression.spel.SpelMessage;
 
 /**
  * A simple basic TypeComparator implementation. It supports comparison of numbers and types implementing Comparable.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -68,7 +68,7 @@ public class StandardTypeComparator implements TypeComparator {
 		} catch (ClassCastException cce) {
 			throw new SpelEvaluationException(cce, SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 		}
-		
+
 		throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 

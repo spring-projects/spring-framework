@@ -34,7 +34,7 @@ public final class AnnotationBindingTests {
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
-		
+
 		testBean = (AnnotatedTestBean) ctx.getBean("testBean");
 	}
 

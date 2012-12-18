@@ -144,12 +144,12 @@ public class TableMetaDataContextTests extends TestCase {
 		ctrlMetaDataResultSet.replay();
 		ctrlColumnsResultSet.replay();
 		replay();
-		
+
 		MapSqlParameterSource map = new MapSqlParameterSource();
 		map.addValue("id", 1);
 		map.addValue("name", "Sven");
 		map.addValue("customersince", new Date());
-		map.addValue("version", 0);		
+		map.addValue("version", 0);
 		map.registerSqlType("customersince", Types.DATE);
 		map.registerSqlType("version", Types.NUMERIC);
 

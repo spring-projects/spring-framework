@@ -67,7 +67,7 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
 	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
-		final String beanKey = "myTestBean";	
+		final String beanKey = "myTestBean";
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		Properties ignored = new Properties();
 		ignored.setProperty(beanKey, "dontExposeMe,setSuperman");

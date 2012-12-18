@@ -47,7 +47,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * the <code>labelProperty</code>). These properties are then used when
  * rendering each element of the array/{@link Collection} as an '<code>option</code>'.
  * If either property name is omitted, the value of {@link Object#toString()} of
- * the corresponding array/{@link Collection} element is used instead.  However, 
+ * the corresponding array/{@link Collection} element is used instead.  However,
  * if the item is an enum, {@link Enum#name()} is used as the default value.
  * </p>
  * <h3>Using a {@link Map}:</h3>
@@ -228,7 +228,7 @@ class OptionWriter {
 
 		String valueDisplayString = getDisplayString(value);
 		String labelDisplayString = getDisplayString(label);
-		
+
 		valueDisplayString = processOptionValue(valueDisplayString);
 
 		// allows render values to handle some strange browser compat issues.
@@ -254,13 +254,13 @@ class OptionWriter {
 	}
 
 	/**
-	 * Process the option value before it is written. 
-	 * The default implementation simply returns the same value unchanged. 
+	 * Process the option value before it is written.
+	 * The default implementation simply returns the same value unchanged.
 	 */
 	protected String processOptionValue(String resolvedValue) {
 		return resolvedValue;
 	}
-	
+
 	/**
 	 * Determine whether the supplied values matched the selected value.
 	 * Delegates to {@link SelectedValueComparator#isSelected}.

@@ -65,7 +65,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 				return new TagWriter(getWriter());
 			}
 			public String getName() {
-				// Should not be used other than to delegate to 
+				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
 				return "testName";
 			}
@@ -103,11 +103,11 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals("myClass", element.attribute("class").getValue());
 		assertEquals("CLICK", element.attribute("onclick").getValue());
 	}
-	
+
 	public void testWithCollectionAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		getPageContext().setAttribute(
 				SelectTag.LIST_VALUE_PAGE_ATTRIBUTE, new BindStatus(getRequestContext(), "testBean.country", false));
 
@@ -119,7 +119,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setOnclick("CLICK");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
@@ -203,18 +203,18 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		this.tag.setItemValue("isoCode");
 		this.tag.setItemLabel("name");
 		this.selectTag.setPath("testBean");
-		
+
 		this.selectTag.doStartTag();
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		this.tag.doEndTag();
 		this.selectTag.doEndTag();
-		
+
 		String output = getOutput();
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		
+
 		List children = rootElement.elements();
 		assertEquals("Incorrect number of children", 0, children.size());
 	}
@@ -223,7 +223,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
-		
+
 		this.selectTag.setPath("testBean.testEnum");
 
 		this.selectTag.doStartTag();
@@ -237,7 +237,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		
+
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("option[@value = 'VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("option[@value = 'VALUE_2']");
@@ -250,7 +250,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
-		
+
 		this.selectTag.setPath("testBean.testEnum");
 		this.tag.setItemLabel("enumLabel");
 		this.tag.setItemValue("enumValue");
@@ -266,7 +266,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		
+
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("option[@value = 'Value: VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("option[@value = 'Value: VALUE_2']");
@@ -304,5 +304,5 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		RequestContext context = new RequestContext((HttpServletRequest) pageContext.getRequest(), model);
 		pageContext.setAttribute(RequestContextAwareTag.REQUEST_CONTEXT_PAGE_ATTRIBUTE, context);
 	}
-	
+
 }

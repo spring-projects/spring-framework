@@ -50,7 +50,7 @@ public class SessionLocaleResolver extends AbstractLocaleResolver {
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	public static final String LOCALE_SESSION_ATTRIBUTE_NAME = SessionLocaleResolver.class.getName() + ".LOCALE";
-	
+
 
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale locale = (Locale) WebUtils.getSessionAttribute(request, LOCALE_SESSION_ATTRIBUTE_NAME);

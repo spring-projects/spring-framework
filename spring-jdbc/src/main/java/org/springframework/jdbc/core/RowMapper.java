@@ -47,7 +47,7 @@ import java.sql.SQLException;
  */
 public interface RowMapper<T> {
 
-	/** 
+	/**
 	 * Implementations must implement this method to map each row of data
 	 * in the ResultSet. This method should not call <code>next()</code> on
 	 * the ResultSet; it is only supposed to map values of the current row.
@@ -57,7 +57,6 @@ public interface RowMapper<T> {
 	 * @throws SQLException if a SQLException is encountered getting
 	 * column values (that is, there's no need to catch SQLException)
 	 */
-	T mapRow(ResultSet rs, int rowNum) throws SQLException; 
+	T mapRow(ResultSet rs, int rowNum) throws SQLException;
 
 }
- 

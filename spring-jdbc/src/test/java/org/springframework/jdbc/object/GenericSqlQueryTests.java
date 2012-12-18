@@ -60,7 +60,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 
 	private BeanFactory bf;
 
-	
+
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();

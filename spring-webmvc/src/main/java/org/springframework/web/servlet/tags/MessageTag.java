@@ -68,9 +68,9 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
 	private String text;
-	
+
 	private String var;
-	
+
 	private String scope = TagUtils.SCOPE_PAGE;
 
 	private boolean javaScriptEscape = false;
@@ -118,7 +118,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 	/**
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
@@ -128,7 +128,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setVar(String var) {
 		this.var = var;
 	}
-	
+
 	/**
 	 * Set the scope to export the variable to.
 	 * Default is SCOPE_PAGE ("page").

@@ -22,7 +22,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * See SPR-1682.
- * 
+ *
  * @author Adrian Colyer
  * @author Chris Beams
  */
@@ -30,7 +30,7 @@ public final class SharedPointcutWithArgsMismatchTests {
 
 	private ToBeAdvised toBeAdvised;
 
-	
+
 	@Before
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =

@@ -42,7 +42,7 @@ import org.springframework.core.io.Resource;
  * @see ResourceEntityResolver
  */
 public class BeansDtdResolver implements EntityResolver {
-	
+
 	private static final String DTD_EXTENSION = ".dtd";
 
 	private static final String[] DTD_NAMES = {"spring-beans-2.0", "spring-beans"};

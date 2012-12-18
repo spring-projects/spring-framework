@@ -43,7 +43,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  * @since 15.06.2004
  */
 public class OpenPersistenceManagerInViewTests extends TestCase {
-    
+
 	public void testOpenPersistenceManagerInViewInterceptor() throws Exception {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();

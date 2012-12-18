@@ -342,7 +342,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			if (logger.isDebugEnabled()) {
 				logger.debug("Showing wizard page " + page + " for form bean '" + getCommandName() + "'");
 			}
-			
+
 			// Set page session attribute, expose overriding request attribute.
 			Integer pageInteger = new Integer(page);
 			String pageAttrName = getPageSessionAttributeName(request);
@@ -353,7 +353,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 				request.getPortletSession().setAttribute(pageAttrName, pageInteger);
 			}
 			request.setAttribute(pageAttrName, pageInteger);
-			
+
 			// Set page request attribute for evaluation by views.
 			Map controlModel = new HashMap();
 			if (this.pageAttribute != null) {
@@ -647,7 +647,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 			request.getPortletSession().removeAttribute(pageAttrName);
 		}
 		request.setAttribute(pageAttrName, new Integer(currentPage));
-		
+
 		// cancel?
 		if (isCancelRequest(request)) {
 			if (logger.isDebugEnabled()) {

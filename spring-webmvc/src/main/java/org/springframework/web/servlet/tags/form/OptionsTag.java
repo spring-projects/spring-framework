@@ -29,16 +29,16 @@ import org.springframework.web.util.TagUtils;
  * Convenient tag that allows one to supply a collection of objects
  * that are to be rendered as '<code>option</code>' tags within a
  * '<code>select</code>' tag.
- * 
+ *
  * <p><i>Must</i> be used within a {@link SelectTag 'select' tag}.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @since 2.0
  */
 public class OptionsTag extends AbstractHtmlElementTag {
-	
+
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
 	 * objects used to generate the inner '<code>option</code>' tags.
@@ -200,8 +200,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Inner class that adapts OptionWriter for multiple options to be rendered.
 	 */
 	private class OptionsWriter extends OptionWriter {
-		
-		private final String selectName; 
+
+		private final String selectName;
 
 		public OptionsWriter(String selectName, Object optionSource, String valueProperty, String labelProperty) {
 			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
@@ -223,7 +223,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		protected String processOptionValue(String value) {
 			return processFieldValue(this.selectName, value, "option");
 		}
-		
+
 	}
 
 }

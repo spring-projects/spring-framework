@@ -33,5 +33,5 @@ public class CastorMarshallerBeanDefinitionParser extends AbstractSimpleBeanDefi
 	@Override
 	protected String getBeanClassName(Element element) {
 		return CASTOR_MARSHALLER_CLASS_NAME;
-	}	
+	}
 }

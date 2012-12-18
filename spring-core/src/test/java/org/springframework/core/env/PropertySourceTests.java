@@ -32,7 +32,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link AbstractPropertySource} implementations.
- * 
+ *
  * @author Chris Beams
  * @since 3.1
  */

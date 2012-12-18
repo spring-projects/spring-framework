@@ -115,7 +115,7 @@ public abstract class BeanFactoryUtils {
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
 	}
-	
+
 	/**
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory

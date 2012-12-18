@@ -152,7 +152,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 			logger.trace("No relevant rollback rule found: applying default rules");
 			return super.rollbackOn(ex);
 		}
-			
+
 		return !(winner instanceof NoRollbackRuleAttribute);
 	}
 

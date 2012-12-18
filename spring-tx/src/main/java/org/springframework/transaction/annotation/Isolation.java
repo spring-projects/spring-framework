@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 1.2
  */
 public enum Isolation {
-	
+
 	/**
 	 * Use the default isolation level of the underlying datastore.
 	 * All other levels correspond to the JDBC isolation levels.
@@ -82,7 +82,7 @@ public enum Isolation {
 
 
 	Isolation(int value) { this.value = value; }
-	
+
 	public int value() { return this.value; }
-	
+
 }

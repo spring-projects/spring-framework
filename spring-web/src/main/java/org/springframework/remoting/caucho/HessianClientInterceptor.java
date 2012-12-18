@@ -223,7 +223,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		}
 		catch (InvocationTargetException ex) {
 			Throwable targetEx = ex.getTargetException();
-			// Hessian 4.0 check: another layer of InvocationTargetException. 
+			// Hessian 4.0 check: another layer of InvocationTargetException.
 			if (targetEx instanceof InvocationTargetException) {
 				targetEx = ((InvocationTargetException) targetEx).getTargetException();
 			}

@@ -34,14 +34,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public final class SPR3064Tests {
 
 	private Service service;
-	
+
 	@Test
 	public void testServiceIsAdvised() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		service = (Service) ctx.getBean("service");
-		
+
 		try {
 			this.service.serveMe();
 			fail("service operation has not been advised by transaction interceptor");
@@ -50,7 +50,7 @@ public final class SPR3064Tests {
 			assertEquals("advice invoked",ex.getMessage());
 		}
 	}
-	
+
 }
 
 
@@ -62,7 +62,7 @@ public final class SPR3064Tests {
 
 @Aspect
 class TransactionInterceptor {
-	
+
 	@Around(value="execution(* *..Service.*(..)) && @annotation(transaction)")
 	public Object around(ProceedingJoinPoint pjp, Transaction transaction) throws Throwable {
 		throw new RuntimeException("advice invoked");
@@ -73,7 +73,7 @@ class TransactionInterceptor {
 
 
 interface Service {
-	
+
 	void serveMe();
 
 }

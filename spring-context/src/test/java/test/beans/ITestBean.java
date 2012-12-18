@@ -21,7 +21,7 @@ import java.io.IOException;
 /**
  * Interface used for test beans. Two methods are the same as on Person, but if this extends
  * person it breaks quite a few tests
- * 
+ *
  * @author Rod Johnson
  */
 public interface ITestBean {
@@ -53,7 +53,7 @@ public interface ITestBean {
 
 	/**
 	 * Increment the age by one.
-	 * 
+	 *
 	 * @return the previous age
 	 */
 	int haveBirthday();

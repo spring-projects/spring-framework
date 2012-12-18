@@ -63,7 +63,7 @@ import org.springframework.web.portlet.ModelAndView;
  * @since 2.0
  */
 public class ParameterizableViewController extends AbstractController {
-	
+
 	private String viewName;
 
 

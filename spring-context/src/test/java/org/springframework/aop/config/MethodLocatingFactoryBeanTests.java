@@ -35,15 +35,15 @@ public final class MethodLocatingFactoryBeanTests {
 	private static final String BEAN_NAME = "string";
 	private MethodLocatingFactoryBean factory;
 	private BeanFactory beanFactory;
-	
+
 	@Before
 	public void setUp() {
 		factory = new MethodLocatingFactoryBean();
-		
+
 		// methods must set up expectations and call replay() manually for this mock
 		beanFactory = createMock(BeanFactory.class);
 	}
-	
+
 	@After
 	public void tearDown() {
 		verify(beanFactory);
@@ -64,7 +64,7 @@ public final class MethodLocatingFactoryBeanTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNullTargetBeanName() {
 		replay(beanFactory);
-		
+
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
 	}
@@ -72,7 +72,7 @@ public final class MethodLocatingFactoryBeanTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithEmptyTargetBeanName() {
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName("");
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
@@ -81,7 +81,7 @@ public final class MethodLocatingFactoryBeanTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNullTargetMethodName() {
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setBeanFactory(beanFactory);
 	}
@@ -89,7 +89,7 @@ public final class MethodLocatingFactoryBeanTests {
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithEmptyTargetMethodName() {
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("");
 		factory.setBeanFactory(beanFactory);
@@ -99,7 +99,7 @@ public final class MethodLocatingFactoryBeanTests {
 	public void testWhenTargetBeanClassCannotBeResolved() {
 		expect(beanFactory.getType(BEAN_NAME)).andReturn(null);
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
@@ -109,7 +109,7 @@ public final class MethodLocatingFactoryBeanTests {
 	public void testSunnyDayPath() throws Exception {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
@@ -124,7 +124,7 @@ public final class MethodLocatingFactoryBeanTests {
 	public void testWhereMethodCannotBeResolved() {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
-		
+
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("loadOfOld()");
 		factory.setBeanFactory(beanFactory);

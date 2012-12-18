@@ -273,7 +273,7 @@ public class RmiSupportTests extends TestCase {
 
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(
 			Class rmiExceptionClass, Class springExceptionClass) throws Exception {
-		
+
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.setServiceUrl("rmi://localhost:1090/test");
@@ -309,7 +309,7 @@ public class RmiSupportTests extends TestCase {
 		try {
 			client.afterPropertiesSet();
 			fail("url isn't set, expected IllegalArgumentException");
-		} 
+		}
 		catch(IllegalArgumentException e){
 			// expected
 		}

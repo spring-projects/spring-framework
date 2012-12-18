@@ -27,7 +27,7 @@ import javax.servlet.jsp.JspException;
  *
  * <p>A typical usage pattern will involved multiple tag instances bound
  * to the same property but with different values.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0

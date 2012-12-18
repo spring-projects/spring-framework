@@ -54,7 +54,7 @@ import javax.portlet.PortletRequest;
  * @see org.springframework.web.portlet.handler.PortletModeParameterHandlerMapping
  */
 public interface HandlerMapping {
-	
+
 	/**
 	 * Return a handler and any interceptors for this request. The choice may be made
 	 * on portlet mode, session state, or any factor the implementing class chooses.

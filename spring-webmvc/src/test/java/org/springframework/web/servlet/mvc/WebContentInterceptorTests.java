@@ -76,7 +76,7 @@ public class WebContentInterceptorTests {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
 		interceptor.setCacheSeconds(10);
 		interceptor.setCacheMappings(mappings);
-		
+
 		request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
 		interceptor.preHandle(request, response, null);
 

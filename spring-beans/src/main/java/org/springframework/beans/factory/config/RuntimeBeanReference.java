@@ -18,7 +18,7 @@ package org.springframework.beans.factory.config;
 
 import org.springframework.util.Assert;
 
-/** 
+/**
  * Immutable placeholder class used for a property value object when it's
  * a reference to another bean in the factory, to be resolved at runtime.
  *
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  */
 public class RuntimeBeanReference implements BeanReference {
-	
+
 	private final String beanName;
 
 	private final boolean toParent;

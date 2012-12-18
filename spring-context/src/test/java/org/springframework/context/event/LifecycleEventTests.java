@@ -55,7 +55,7 @@ public class LifecycleEventTests extends TestCase {
 		assertFalse(lifecycleBean.isRunning());
 		context.start();
 		assertTrue(lifecycleBean.isRunning());
-		assertEquals(0, listener.getStoppedCount());		
+		assertEquals(0, listener.getStoppedCount());
 		context.stop();
 		assertFalse(lifecycleBean.isRunning());
 		assertEquals(1, listener.getStoppedCount());

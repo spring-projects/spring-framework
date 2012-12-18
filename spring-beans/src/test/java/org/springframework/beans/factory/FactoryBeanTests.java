@@ -33,9 +33,9 @@ import org.springframework.util.Assert;
 public final class FactoryBeanTests {
 
 	private static final Class<?> CLASS = FactoryBeanTests.class;
-	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml"); 
-	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml"); 
-	
+	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml");
+	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml");
+
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(RETURNS_NULL_CONTEXT);
@@ -46,10 +46,10 @@ public final class FactoryBeanTests {
 	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
-		
+
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
-		
+
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
@@ -63,10 +63,10 @@ public final class FactoryBeanTests {
 	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
-		
+
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
-		
+
 		Beta beta = (Beta) factory.getBean("beta");
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Gamma gamma = (Gamma) factory.getBean("gamma");

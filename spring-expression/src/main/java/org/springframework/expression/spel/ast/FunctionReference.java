@@ -74,7 +74,7 @@ public class FunctionReference extends SpelNodeImpl {
 
 	/**
 	 * Execute a function represented as a java.lang.reflect.Method.
-	 * 
+	 *
 	 * @param state the expression evaluation state
 	 * @param the java method to invoke
 	 * @return the return value of the invoked Java method

@@ -102,7 +102,7 @@ public class BeanConfigurerSupportTests extends TestCase {
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
 		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
-		
+
 		mock.verify();
 	}
 
@@ -126,7 +126,7 @@ public class BeanConfigurerSupportTests extends TestCase {
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
 		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
-		
+
 		mock.verify();
 	}
 

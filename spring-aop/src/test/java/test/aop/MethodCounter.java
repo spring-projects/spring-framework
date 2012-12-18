@@ -22,7 +22,7 @@ import java.util.HashMap;
 
 /**
  * Abstract superclass for counting advices etc.
- * 
+ *
  * @author Rod Johnson
  * @author Chris Beams
  */

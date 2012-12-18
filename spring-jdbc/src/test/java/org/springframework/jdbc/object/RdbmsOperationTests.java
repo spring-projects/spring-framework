@@ -84,7 +84,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setTypes(new int[] { Types.INTEGER });
 		try {
 			operation.validateParameters((Object[]) null);
-			fail("Shouldn't validate without enough parameters"); 
+			fail("Shouldn't validate without enough parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK
@@ -123,7 +123,7 @@ public class RdbmsOperationTests extends TestCase {
 		operation.setSql("select * from mytable");
 		try {
 			operation.validateParameters(new Object[] {new Integer(1), new Integer(2)});
-			fail("Shouldn't validate with too many parameters"); 
+			fail("Shouldn't validate with too many parameters");
 		}
 		catch (InvalidDataAccessApiUsageException idaauex) {
 			// OK

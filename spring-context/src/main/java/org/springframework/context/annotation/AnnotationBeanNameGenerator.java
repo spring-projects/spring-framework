@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.stereotype.Component @Component} as a
  * meta-annotation. For example, Spring's stereotype annotations (such as
  * {@link org.springframework.stereotype.Repository @Repository}) are
- * themselves annotated with 
+ * themselves annotated with
  * {@link org.springframework.stereotype.Component @Component}.
  *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and

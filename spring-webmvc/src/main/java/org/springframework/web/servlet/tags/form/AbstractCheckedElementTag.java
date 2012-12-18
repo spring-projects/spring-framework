@@ -96,7 +96,7 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	protected boolean isValidDynamicAttribute(String localName, Object value) {
 		return !"type".equals(localName);
 	}
-	
+
 	/**
 	 * Return the type of the HTML input element to generate:
 	 * "checkbox" or "radio".

@@ -45,14 +45,14 @@ public final class GenericParameterMatchingTests {
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-context.xml", getClass());
-		
+
 		counterAspect = (CounterAspect) ctx.getBean("counterAspect");
 		counterAspect.reset();
-		
+
 		testBean = (GenericInterface<String>) ctx.getBean("testBean");
 	}
 
-	
+
 	@Test
 	public void testGenericInterfaceGenericArgExecution() {
 		testBean.save("");
@@ -64,7 +64,7 @@ public final class GenericParameterMatchingTests {
 		testBean.saveAll(null);
 		assertEquals(1, counterAspect.genericInterfaceGenericCollectionArgExecutionCount);
 	}
-	
+
 	@Test
 	public void testGenericInterfaceSubtypeGenericCollectionArgExecution() {
 		testBean.saveAll(null);
@@ -96,21 +96,21 @@ public final class GenericParameterMatchingTests {
 		int genericInterfaceGenericArgExecutionCount;
 		int genericInterfaceGenericCollectionArgExecutionCount;
 		int genericInterfaceSubtypeGenericCollectionArgExecutionCount;
-		
+
 		public void reset() {
 			genericInterfaceGenericArgExecutionCount = 0;
 			genericInterfaceGenericCollectionArgExecutionCount = 0;
 			genericInterfaceSubtypeGenericCollectionArgExecutionCount = 0;
 		}
-		
+
 		@Pointcut("execution(* org.springframework.aop.aspectj.generic.GenericParameterMatchingTests.GenericInterface.save(..))")
-		public void genericInterfaceGenericArgExecution() {} 
-		
+		public void genericInterfaceGenericArgExecution() {}
+
 		@Pointcut("execution(* org.springframework.aop.aspectj.generic.GenericParameterMatchingTests.GenericInterface.saveAll(..))")
-		public void GenericInterfaceGenericCollectionArgExecution() {} 
+		public void GenericInterfaceGenericCollectionArgExecution() {}
 
 		@Pointcut("execution(* org.springframework.aop.aspectj.generic.GenericParameterMatchingTests.GenericInterface+.saveAll(..))")
-		public void genericInterfaceSubtypeGenericCollectionArgExecution() {} 
+		public void genericInterfaceSubtypeGenericCollectionArgExecution() {}
 
 		@Before("genericInterfaceGenericArgExecution()")
 		public void incrementGenericInterfaceGenericArgExecution() {

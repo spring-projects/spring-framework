@@ -33,7 +33,7 @@ public interface ITestBean {
 
 	void setAge(int age);
 
-	String getName(); 
+	String getName();
 
 	void setName(String name);
 

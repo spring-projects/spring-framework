@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 /**
  * Encapsulates an object error, that is, a global reason for rejecting
  * an object.
- * 
+ *
  * <p>See the {@link DefaultMessageCodesResolver} javadoc for details on
  * how a message code list is built for an <code>ObjectError</code>.
  *

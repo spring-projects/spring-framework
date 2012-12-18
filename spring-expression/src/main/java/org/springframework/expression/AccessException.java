@@ -18,7 +18,7 @@ package org.springframework.expression;
 
 /**
  * An AccessException is thrown by an accessor if it has an unexpected problem.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

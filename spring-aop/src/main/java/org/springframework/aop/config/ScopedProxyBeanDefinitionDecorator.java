@@ -47,7 +47,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
 			}
 		}
-		
+
 		// Register the original bean definition as it will be referenced by the scoped proxy
 		// and is relevant for tooling (validation, navigation).
 		BeanDefinitionHolder holder =

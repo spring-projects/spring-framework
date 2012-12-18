@@ -67,7 +67,7 @@ public class TrickyAspectJPointcutExpressionTests {
 
 		// Test with default class loader first...
 		testAdvice(new DefaultPointcutAdvisor(pointcut, logAdvice), logAdvice, new TestServiceImpl(), "TestServiceImpl");
-		
+
 		// Then try again with a different class loader on the target...
 		SimpleThrowawayClassLoader loader = new SimpleThrowawayClassLoader(new TestServiceImpl().getClass().getClassLoader());
 		// Make sure the interface is loaded from the  parent class loader
@@ -102,7 +102,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		}
 		assertEquals(1, logAdvice.getCountThrows());
 	}
-	
+
 	public static class SimpleThrowawayClassLoader extends OverridingClassLoader {
 
 		/**
@@ -114,7 +114,7 @@ public class TrickyAspectJPointcutExpressionTests {
 		}
 
 	}
-	
+
 	public static class TestException extends RuntimeException {
 
 		public TestException(String string) {
@@ -129,11 +129,11 @@ public class TrickyAspectJPointcutExpressionTests {
 	@Inherited
 	public static @interface Log {
 	}
-	
+
 	public static interface TestService {
 	    public String sayHello();
 	}
-	
+
 	@Log
 	public static class TestServiceImpl implements TestService{
 	    public String sayHello() {
@@ -142,11 +142,11 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 	public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
-		
+
 		private int countBefore = 0;
-		
+
 		private int countThrows = 0;
-		
+
 		public void before(Method method, Object[] objects, Object o) throws Throwable {
 			countBefore++;
 	    }
@@ -163,12 +163,12 @@ public class TrickyAspectJPointcutExpressionTests {
 		public int getCountThrows() {
 			return countThrows;
 		}
-		
+
 		public void reset() {
 			countThrows = 0;
 			countBefore = 0;
 		}
 
 	}
-	
+
 }

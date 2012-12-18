@@ -35,7 +35,7 @@ import java.util.List;
  * @since 2.0
  */
 public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscoverer {
-	
+
 	private final List<ParameterNameDiscoverer> parameterNameDiscoverers =
 			new LinkedList<ParameterNameDiscoverer>();
 

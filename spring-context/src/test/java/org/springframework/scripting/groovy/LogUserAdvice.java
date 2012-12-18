@@ -6,11 +6,11 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.ThrowsAdvice;
 
 public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
-	
+
 	private int countBefore = 0;
-	
+
 	private int countThrows = 0;
-	
+
 	public void before(Method method, Object[] objects, Object o) throws Throwable {
 		countBefore++;
         System.out.println("Method:"+method.getName());
@@ -32,7 +32,7 @@ public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 	public int getCountThrows() {
 		return countThrows;
 	}
-	
+
 	public void reset() {
 		countThrows = 0;
 		countBefore = 0;

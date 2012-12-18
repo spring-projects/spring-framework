@@ -130,10 +130,10 @@ public class SQLErrorCodesFactory {
 			logger.warn("Error loading SQL error codes from config file", ex);
 			errorCodes = Collections.emptyMap();
 		}
-		
+
 		this.errorCodesMap = errorCodes;
 	}
-	
+
 	/**
 	 * Load the given resource from the class path.
 	 * <p><b>Not to be overridden by application developers, who should obtain
@@ -159,7 +159,7 @@ public class SQLErrorCodesFactory {
 	 */
 	public SQLErrorCodes getErrorCodes(String dbName) {
 		Assert.notNull(dbName, "Database product name must not be null");
-		
+
 		SQLErrorCodes sec = this.errorCodesMap.get(dbName);
 		if (sec == null) {
 			for (SQLErrorCodes candidate : this.errorCodesMap.values()) {

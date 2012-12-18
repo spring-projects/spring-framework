@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
-	
+
 	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER =
 			new AspectJAnnotationParameterNameDiscoverer();
 
@@ -121,7 +121,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * We need to detect this as "code-style" AspectJ aspects should not be
-	 * interpreted by Spring AOP. 
+	 * interpreted by Spring AOP.
 	 */
 	private boolean compiledByAjc(Class<?> clazz) {
 		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
@@ -154,11 +154,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
 			throw new AopConfigException(aspectClass.getName() + " uses percflowbelow instantiation model: " +
 					"This is not supported in Spring AOP.");
-		}	
+		}
 	}
 
 	/**
-	 * The pointcut and advice annotations both have an "argNames" member which contains a 
+	 * The pointcut and advice annotations both have an "argNames" member which contains a
 	 * comma-separated list of the argument names. We use this (if non-empty) to build the
 	 * formal parameters for the pointcut.
 	 */
@@ -169,13 +169,13 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		if (pointcutParameterNames != null) {
 			pointcutParameterTypes = extractPointcutParameterTypes(pointcutParameterNames,annotatedMethod);
 		}
-		
+
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
 		ajexp.setLocation(annotatedMethod.toString());
 		return ajexp;
 	}
-	
+
 	/**
 	 * Create the pointcut parameters needed by aspectj based on the given argument names
 	 * and the argument types that are available from the adviceMethod. Needs to take into
@@ -326,10 +326,10 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 				return names;
 			}
 			else {
-				return null; 				
+				return null;
 			}
 		}
-		
+
 		public String[] getParameterNames(Constructor ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}

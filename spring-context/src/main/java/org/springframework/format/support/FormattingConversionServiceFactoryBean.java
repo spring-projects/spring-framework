@@ -96,15 +96,15 @@ public class FormattingConversionServiceFactoryBean
 	}
 
 	/**
-	 * <p>Configure the set of FormatterRegistrars to invoke to register 
-	 * Converters and Formatters in addition to those added declaratively 
+	 * <p>Configure the set of FormatterRegistrars to invoke to register
+	 * Converters and Formatters in addition to those added declaratively
 	 * via {@link #setConverters(Set)} and {@link #setFormatters(Set)}.
-	 * <p>FormatterRegistrars are useful when registering multiple related 
-	 * converters and formatters for a formatting category, such as Date 
-	 * formatting. All types related needed to support the formatting 
+	 * <p>FormatterRegistrars are useful when registering multiple related
+	 * converters and formatters for a formatting category, such as Date
+	 * formatting. All types related needed to support the formatting
 	 * category can be registered from one place.
-	 * <p>FormatterRegistrars can also be used to register Formatters 
-	 * indexed under a specific field type different from its own &lt;T&gt;, 
+	 * <p>FormatterRegistrars can also be used to register Formatters
+	 * indexed under a specific field type different from its own &lt;T&gt;,
 	 * or when registering a Formatter from a Printer/Parser pair.
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Formatter)
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Printer, Parser)

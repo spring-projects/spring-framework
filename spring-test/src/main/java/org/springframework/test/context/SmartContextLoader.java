@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationContext;
  * <p>See the Javadoc for
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
  * for a definition of <em>annotated class</em>.
- * 
+ *
  * <p>Clients of a {@code SmartContextLoader} should call
  * {@link #processContextConfiguration(ContextConfigurationAttributes)
  * processContextConfiguration()} prior to calling

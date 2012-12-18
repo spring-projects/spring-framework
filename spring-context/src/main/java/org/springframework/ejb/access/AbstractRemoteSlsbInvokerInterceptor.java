@@ -42,7 +42,7 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * @author Juergen Hoeller
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
-	
+
 	private Class homeInterface;
 
 	private boolean refreshHomeOnConnectFailure = false;

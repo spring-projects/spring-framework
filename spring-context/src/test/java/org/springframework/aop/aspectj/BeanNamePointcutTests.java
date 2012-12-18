@@ -48,7 +48,7 @@ public final class BeanNamePointcutTests {
 	private ITestBean interceptThis;
 	private ITestBean dontInterceptThis;
 	private TestInterceptor testInterceptor;
-	
+
 	private ClassPathXmlApplicationContext ctx;
 
 
@@ -64,7 +64,7 @@ public final class BeanNamePointcutTests {
 		interceptThis = (ITestBean) ctx.getBean("interceptThis");
 		dontInterceptThis = (ITestBean) ctx.getBean("dontInterceptThis");
 		testInterceptor = (TestInterceptor) ctx.getBean("testInterceptor");
-		
+
 		counterAspect.reset();
 	}
 
@@ -90,7 +90,7 @@ public final class BeanNamePointcutTests {
 	public void testNonMatchingNestedBeanName() {
 		assertFalse("Non-matching bean must *not* be advised (proxied)", this.testBeanContainingNestedBean.getDoctor() instanceof Advised);
 	}
-	
+
 	@Test
 	public void testMatchingFactoryBeanObject() {
 		assertTrue("Matching bean must be advised (proxied)", this.testFactoryBean1 instanceof Advised);
@@ -125,7 +125,7 @@ public final class BeanNamePointcutTests {
 	public static class TestInterceptor implements MethodBeforeAdvice {
 
 		private int interceptionCount;
-		
+
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			interceptionCount++;
 		}

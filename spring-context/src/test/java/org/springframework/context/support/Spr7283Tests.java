@@ -44,5 +44,5 @@ public class Spr7283Tests {
     public static class B {
     	public B() {}
     }
-        
+
 }

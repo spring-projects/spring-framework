@@ -28,7 +28,7 @@ import org.springframework.core.io.support.EncodedResource;
 
 /**
  * Unit tests for {@link JdbcTestUtils}.
- * 
+ *
  * @author Thomas Risberg
  * @author Sam Brannen
  * @since 2.5.4

@@ -56,7 +56,7 @@ public class HttpMessageConverterTests {
 		assertFalse(converter.canRead(MyType.class, new MediaType("foo", "*")));
 		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
 	}
-	
+
 	@Test
 	public void canWrite() {
 		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {

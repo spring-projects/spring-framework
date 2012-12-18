@@ -25,7 +25,7 @@ package org.springframework.expression;
  * to determine if it can read or write them. Property resolvers are considered to be ordered and each will be called in
  * turn. The only rule that affects the call order is that any naming the target class directly in
  * getSpecifiedTargetClasses() will be called first, before the general resolvers.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

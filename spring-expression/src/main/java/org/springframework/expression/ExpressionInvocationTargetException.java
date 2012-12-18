@@ -20,7 +20,7 @@ package org.springframework.expression;
  * It differs from a SpelEvaluationException because this indicates the occurrence of a checked exception
  * that the invoked method was defined to throw.  SpelEvaluationExceptions are for handling (and wrapping)
  * unexpected exceptions.
- * 
+ *
  * @author Andy Clement
  * @since 3.0.3
  */

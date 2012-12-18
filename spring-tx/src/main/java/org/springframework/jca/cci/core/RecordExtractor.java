@@ -23,7 +23,7 @@ import javax.resource.cci.Record;
 
 import org.springframework.dao.DataAccessException;
 
-/** 
+/**
  * Callback interface for extracting a result object from a CCI Record instance.
  *
  * <p>Used for output object creation in CciTemplate. Alternatively, output
@@ -44,8 +44,8 @@ import org.springframework.dao.DataAccessException;
  * @see javax.resource.cci.ResultSet
  */
 public interface RecordExtractor<T> {
-	
-	/** 
+
+	/**
 	 * Process the data in the given Record, creating a corresponding result object.
 	 * @param record the Record to extract data from
 	 * (possibly a CCI ResultSet)

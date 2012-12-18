@@ -29,7 +29,7 @@ import org.springframework.util.MethodInvoker;
 
 /**
  * Unit tests for {@link MethodInvokingFactoryBean}.
- * 
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @author Chris Beams

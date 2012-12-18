@@ -26,12 +26,12 @@ package org.springframework.beans;
  * @see PropertyValue
  */
 public interface PropertyValues {
-   
-	/** 
+
+	/**
 	 * Return an array of the PropertyValue objects held in this object.
 	 */
-	PropertyValue[] getPropertyValues();	
-	
+	PropertyValue[] getPropertyValues();
+
 	/**
 	 * Return the property value with the given name, if any.
 	 * @param propertyName the name to search for

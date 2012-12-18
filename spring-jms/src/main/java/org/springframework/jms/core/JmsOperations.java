@@ -24,7 +24,7 @@ import org.springframework.jms.JmsException;
 
 /**
  * Specifies a basic set of JMS operations.
- * 
+ *
  * <p>Implemented by {@link JmsTemplate}. Not often used but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *

@@ -29,7 +29,7 @@ public class LongLiteral extends Literal {
 	private final TypedValue value;
 
 	LongLiteral(String payload, int pos, long value) {
-		super(payload, pos); 
+		super(payload, pos);
 		this.value = new TypedValue(value);
 	}
 

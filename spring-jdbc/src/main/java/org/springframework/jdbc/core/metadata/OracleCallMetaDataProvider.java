@@ -45,7 +45,7 @@ public class OracleCallMetaDataProvider extends GenericCallMetaDataProvider {
 	public boolean isReturnResultSetSupported() {
 		return false;
 	}
-	
+
 	@Override
 	public boolean isRefCursorSupported() {
 		return true;

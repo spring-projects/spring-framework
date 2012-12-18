@@ -155,5 +155,5 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		return rs;
 	}
-	
+
 }

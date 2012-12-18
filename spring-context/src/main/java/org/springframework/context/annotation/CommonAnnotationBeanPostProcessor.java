@@ -127,7 +127,7 @@ import org.springframework.util.StringUtils;
  * to specify a custom CommonAnnotationBeanPostProcessor bean definition!
  * <p><b>NOTE:</b> Annotation injection will be performed <i>before</i> XML injection; thus
  * the latter configuration will override the former for properties wired through
- * both approaches. 
+ * both approaches.
  *
  * @author Juergen Hoeller
  * @since 2.5

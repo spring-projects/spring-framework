@@ -356,7 +356,7 @@ public class InputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", "number");
 		assertValueAttribute(output, "12.34");
 	}
-	
+
 	public void testDynamicTypeRadioAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "radio");
@@ -366,7 +366,7 @@ public class InputTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"radio\" is not allowed", e.getMessage());
 		}
 	}
-	
+
 	public void testDynamicTypeCheckboxAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "checkbox");
@@ -376,7 +376,7 @@ public class InputTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"checkbox\" is not allowed", e.getMessage());
 		}
 	}
-	
+
 	protected final void assertTagClosed(String output) {
 		assertTrue("Tag not closed properly", output.endsWith("/>"));
 	}

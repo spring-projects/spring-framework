@@ -76,7 +76,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      gets applied to populate the new form object with initial request parameters and the
  *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is
  *      called. <em>Note:</em> any defined Validators are not applied at this point, to allow
- *      partial binding. However be aware that any Binder customizations applied via 
+ *      partial binding. However be aware that any Binder customizations applied via
  *      initBinder() (such as
  *      {@link org.springframework.validation.DataBinder#setRequiredFields(String[])} will
  *      still apply. As such, if using bindOnNewForm=true and initBinder() customizations are

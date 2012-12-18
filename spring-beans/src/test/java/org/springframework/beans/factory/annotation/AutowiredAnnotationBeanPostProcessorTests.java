@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AutowiredAnnotationBeanPostProcessor}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen

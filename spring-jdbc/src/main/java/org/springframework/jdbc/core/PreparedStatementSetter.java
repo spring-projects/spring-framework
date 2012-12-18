@@ -42,7 +42,7 @@ import java.sql.SQLException;
  */
 public interface PreparedStatementSetter {
 
-	/** 
+	/**
 	 * Set parameter values on the given PreparedStatement.
 	 * @param ps the PreparedStatement to invoke setter methods on
 	 * @throws SQLException if a SQLException is encountered

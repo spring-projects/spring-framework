@@ -59,7 +59,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
 public class SimplePortletHandlerAdapter implements HandlerAdapter, PortletContextAware {
-	
+
 	private PortletContext portletContext;
 
 

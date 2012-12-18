@@ -43,7 +43,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
-public aspect AnnotationBeanConfigurerAspect 
+public aspect AnnotationBeanConfigurerAspect
 		extends AbstractInterfaceDrivenDependencyInjectionAspect
 		implements BeanFactoryAware, InitializingBean, DisposableBean {
 
@@ -51,7 +51,7 @@ public aspect AnnotationBeanConfigurerAspect
 
 	public pointcut inConfigurableBean() : @this(Configurable);
 
-	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*); 
+	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*);
 
 	declare parents: @Configurable * implements ConfigurableObject;
 
@@ -80,10 +80,10 @@ public aspect AnnotationBeanConfigurerAspect
 	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if(c.preConstruction());
 
 	/*
-	 * This declaration shouldn't be needed, 
+	 * This declaration shouldn't be needed,
 	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
 	 */
-	declare parents: @Configurable Serializable+ 
+	declare parents: @Configurable Serializable+
 		implements ConfigurableDeserializationSupport;
 
 }

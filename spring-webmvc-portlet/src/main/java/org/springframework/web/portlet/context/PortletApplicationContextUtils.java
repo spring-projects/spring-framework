@@ -55,7 +55,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class PortletApplicationContextUtils {
-	
+
 	/**
 	 * Find the root WebApplicationContext for this portlet application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.

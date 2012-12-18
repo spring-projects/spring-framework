@@ -22,7 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
- * 
+ *
  * @author Andy Clement
  */
 public class FormatHelper {
@@ -46,7 +46,7 @@ public class FormatHelper {
 				sb.append(formatClassNameForMessage(typeDescriptor.getType()));
 			}
 			else {
-				sb.append(formatClassNameForMessage(null));				
+				sb.append(formatClassNameForMessage(null));
 			}
 		}
 		sb.append(")");
@@ -60,7 +60,7 @@ public class FormatHelper {
 	 * @return a formatted string suitable for message inclusion
 	 */
 	public static String formatClassNameForMessage(Class<?> clazz) {
-		if (clazz == null) { 
+		if (clazz == null) {
 			return "null";
 		}
 		StringBuilder fmtd = new StringBuilder();

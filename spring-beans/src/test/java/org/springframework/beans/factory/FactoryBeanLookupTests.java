@@ -40,31 +40,31 @@ public class FactoryBeanLookupTests {
 		beanFactory = new XmlBeanFactory(
 				new ClassPathResource("FactoryBeanLookupTests-context.xml", this.getClass()));
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByNameDereferencing() {
 		Object fooFactory = beanFactory.getBean("&fooFactory");
 		assertThat(fooFactory, instanceOf(FooFactoryBean.class));
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByType() {
 		FooFactoryBean fooFactory = beanFactory.getBean(FooFactoryBean.class);
 		assertNotNull(fooFactory);
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByTypeAndNameDereference() {
 		FooFactoryBean fooFactory = beanFactory.getBean("&fooFactory", FooFactoryBean.class);
 		assertNotNull(fooFactory);
 	}
-	
+
 	@Test
 	public void factoryBeanObjectLookupByName() {
 		Object fooFactory = beanFactory.getBean("fooFactory");
 		assertThat(fooFactory, instanceOf(Foo.class));
 	}
-	
+
 	@Test
 	public void factoryBeanObjectLookupByNameAndType() {
 		Foo foo = beanFactory.getBean("fooFactory", Foo.class);

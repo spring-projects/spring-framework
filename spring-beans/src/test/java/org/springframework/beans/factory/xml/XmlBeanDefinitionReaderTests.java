@@ -106,7 +106,7 @@ public class XmlBeanDefinitionReaderTests extends TestCase {
 		catch (BeanDefinitionStoreException expected) {
 		}
 	}
-	                                                                           
+
 	public void testWithInputSourceAndExplicitValidationMode() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();;
 		InputSource resource = new InputSource(getClass().getResourceAsStream("test.xml"));

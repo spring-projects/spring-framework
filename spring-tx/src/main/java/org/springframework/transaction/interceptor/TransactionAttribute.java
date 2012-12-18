@@ -44,5 +44,5 @@ public interface TransactionAttribute extends TransactionDefinition {
 	 * @return whether to perform a rollback or not
 	 */
 	boolean rollbackOn(Throwable ex);
-	
+
 }

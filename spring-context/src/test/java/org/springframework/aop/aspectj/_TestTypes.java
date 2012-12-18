@@ -26,7 +26,7 @@ import org.aspectj.lang.JoinPoint;
  * intention of reducing the surface area of java files within this
  * package.  This allows developers to think about tests first, and deal
  * with these second class testing artifacts on an as-needed basis.
- * 
+ *
  * Types here should be defined as package-private top level classes in
  * order to avoid needing to fully qualify, e.g.: _TestTypes$Foo.
  *
@@ -49,24 +49,24 @@ class AdviceBindingTestAspect {
 	public void setCollaborator(AdviceBindingCollaborator aCollaborator) {
 		this.collaborator = aCollaborator;
 	}
-	
+
 	// "advice" methods
 	public void oneIntArg(int age) {
 		this.collaborator.oneIntArg(age);
 	}
-	
+
 	public void oneObjectArg(Object bean) {
 		this.collaborator.oneObjectArg(bean);
 	}
-	
+
 	public void oneIntAndOneObject(int x, Object o) {
 		this.collaborator.oneIntAndOneObject(x,o);
 	}
-	
+
 	public void needsJoinPoint(JoinPoint tjp) {
 		this.collaborator.needsJoinPoint(tjp.getSignature().getName());
 	}
-	
+
 	public void needsJoinPointStaticPart(JoinPoint.StaticPart tjpsp) {
 		this.collaborator.needsJoinPointStaticPart(tjpsp.getSignature().getName());
 	}
@@ -108,7 +108,7 @@ interface ICounter {
 
 /**
  * A simple counter for use in simple tests (for example, how many times an advice was executed)
- * 
+ *
  * @author Ramnivas Laddad
  */
 final class Counter implements ICounter {
@@ -121,7 +121,7 @@ final class Counter implements ICounter {
 	public void increment() {
 		count++;
 	}
-	
+
 	public void decrement() {
 		count--;
 	}
@@ -133,7 +133,7 @@ final class Counter implements ICounter {
 	public void setCount(int counter) {
 		this.count = counter;
 	}
-	
+
 	public void reset() {
 		this.count = 0;
 	}

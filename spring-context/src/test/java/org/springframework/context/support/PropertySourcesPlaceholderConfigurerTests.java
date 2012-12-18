@@ -40,7 +40,7 @@ import test.beans.TestBean;
 
 /**
  * Unit tests for {@link PropertySourcesPlaceholderConfigurer}.
- * 
+ *
  * @author Chris Beams
  * @since 3.1
  */

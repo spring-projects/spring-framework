@@ -227,7 +227,7 @@ public abstract class NamedParameterUtils {
 		}
 		return position;
 	}
-	
+
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder and any select list
@@ -482,7 +482,7 @@ public abstract class NamedParameterUtils {
 		public int getStartIndex() {
 			return startIndex;
 		}
-		
+
 		public int getEndIndex() {
 			return endIndex;
 		}

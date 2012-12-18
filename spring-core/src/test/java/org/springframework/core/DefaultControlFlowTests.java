@@ -22,7 +22,7 @@ package org.springframework.core;
  * @author Rod Johnson
  */
 public class DefaultControlFlowTests extends AbstractControlFlowTests {
-	
+
 	/**
 	 * Necessary only because Eclipse won't run test suite unless
 	 * it declares some methods as well as inherited methods.

@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * ceo.$0(ref)=secretary          // inject 'secretary' bean as 0th constructor arg
  * ceo.$1=1000000                 // inject value '1000000' at 1st constructor arg
  * </pre>
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop

@@ -180,7 +180,7 @@ public final class AspectJAutoProxyCreatorTests {
 	public void testAspectsAndAdvisorAreAppliedEvenIfComingFromParentFactory() {
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		GenericApplicationContext childAc = new GenericApplicationContext(ac);
-		// Create a child factory with a bean that should be woven                                              
+		// Create a child factory with a bean that should be woven
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.getPropertyValues().addPropertyValue(new PropertyValue("name", "Adrian"))
 				.addPropertyValue(new PropertyValue("age", new Integer(34)));
@@ -297,7 +297,7 @@ public final class AspectJAutoProxyCreatorTests {
 		adrian1.getAge();
 		AdviceUsingThisJoinPoint aspectInstance = (AdviceUsingThisJoinPoint) bf.getBean("aspect");
 		//(AdviceUsingThisJoinPoint) Aspects.aspectOf(AdviceUsingThisJoinPoint.class);
-		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());		
+		//assertEquals("method-execution(int TestBean.getAge())",aspectInstance.getLastMethodEntered());
 		assertTrue(aspectInstance.getLastMethodEntered().indexOf("TestBean.getAge())") != 0);
 	}
 

@@ -71,10 +71,10 @@ import test.beans.SideEffectBean;
  * @author Chris Beams
  */
 public final class ProxyFactoryBeanTests {
-	
+
 	private static final Class<?> CLASS = ProxyFactoryBeanTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String CONTEXT = CLASSNAME + "-context.xml";
 	private static final String SERIALIZATION_CONTEXT = CLASSNAME + "-serialization.xml";
 	private static final String AUTOWIRING_CONTEXT = CLASSNAME + "-autowiring.xml";
@@ -86,7 +86,7 @@ public final class ProxyFactoryBeanTests {
 	private static final String PROTOTYPE_CONTEXT = CLASSNAME + "-prototype.xml";
 	private static final String THROWS_ADVICE_CONTEXT = CLASSNAME + "-throws-advice.xml";
 	private static final String INNER_BEAN_TARGET_CONTEXT = CLASSNAME + "-inner-bean-target.xml";
-	
+
 	private BeanFactory factory;
 
 	@Before
@@ -243,7 +243,7 @@ public final class ProxyFactoryBeanTests {
 	 * be a prototype
 	 */
 	private Object testPrototypeInstancesAreIndependent(String beanName) {
-		// Initial count value set in bean factory XML 
+		// Initial count value set in bean factory XML
 		int INITIAL_COUNT = 10;
 
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource(PROTOTYPE_CONTEXT, CLASS));
@@ -301,7 +301,7 @@ public final class ProxyFactoryBeanTests {
 		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("test1")));
 
 		ITestBean tb = (ITestBean) factory.getBean("test1");
-		// no exception 
+		// no exception
 		tb.hashCode();
 
 		final Exception ex = new UnsupportedOperationException("invoke");
@@ -313,12 +313,12 @@ public final class ProxyFactoryBeanTests {
 		});
 		assertEquals("Have correct advisor count", 2, config.getAdvisors().length);
 
-		tb = (ITestBean) factory.getBean("test1"); 
+		tb = (ITestBean) factory.getBean("test1");
 		try {
 			// Will fail now
 			tb.toString();
 			fail("Evil interceptor added programmatically should fail all method calls");
-		} 
+		}
 		catch (Exception thrown) {
 			assertTrue(thrown == ex);
 		}
@@ -570,7 +570,7 @@ public final class ProxyFactoryBeanTests {
 
 		// Remove offending interceptor...
 		assertTrue(((Advised) p).removeAdvice(nop));
-		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));	
+		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));
 	}
 
 	@Test
@@ -728,7 +728,7 @@ public final class ProxyFactoryBeanTests {
 
 
 	/**
-	 * Use as a global interceptor. Checks that 
+	 * Use as a global interceptor. Checks that
 	 * global interceptors can add aspect interfaces.
 	 * NB: Add only via global interceptors in XML file.
 	 */

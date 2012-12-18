@@ -747,7 +747,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return -1;
 		}
 	}
-	
+
 	public void setMethod(String method) {
 		this.method = method;
 	}

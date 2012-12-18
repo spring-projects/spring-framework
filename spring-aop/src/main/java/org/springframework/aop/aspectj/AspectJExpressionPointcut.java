@@ -259,7 +259,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 						ex);
 				return false;
 			}
-		} 
+		}
 		catch (BCException ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 			return false;
@@ -554,7 +554,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			String advisedBeanName = getCurrentProxiedBeanName();
 			if (advisedBeanName == null) {  // no proxy creation in progress
 				// abstain; can't return YES, since that will make pointcut with negation fail
-				return FuzzyBoolean.MAYBE; 
+				return FuzzyBoolean.MAYBE;
 			}
 			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
 				return FuzzyBoolean.NO;

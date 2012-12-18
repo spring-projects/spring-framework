@@ -32,7 +32,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @see InvalidResultSetAccessException
  */
 public class BadSqlGrammarException extends InvalidDataAccessResourceUsageException {
-	
+
 	private String sql;
 
 

@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,24 +33,24 @@ import org.w3c.dom.Node;
  * attributes directly through to bean properties. An important point to note is
  * that this <code>NamespaceHandler</code> does not have a corresponding schema
  * since there is no way to know in advance all possible attribute names.
- * 
+ *
  * <p>
  * An example of the usage of this <code>NamespaceHandler</code> is shown below:
- * 
+ *
  * <pre class="code">
  * &lt;bean id=&quot;author&quot; class=&quot;..TestBean&quot; c:name=&quot;Enescu&quot; c:work-ref=&quot;compositions&quot;/&gt;
  * </pre>
- * 
+ *
  * Here the '<code>c:name</code>' corresponds directly to the '<code>name</code>
  * ' argument declared on the constructor of class '<code>TestBean</code>'. The
  * '<code>c:work-ref</code>' attributes corresponds to the '<code>work</code>'
  * argument and, rather than being the concrete value, it contains the name of
  * the bean that will be considered as a parameter.
- * 
+ *
  * <b>Note</b>: This implementation supports only named parameters - there is no
  * support for indexes or types. Further more, the names are used as hints by
  * the container which, by default, does type introspection.
- * 
+ *
  * @see SimplePropertyNamespaceHandler
  * @author Costin Leau
  */
@@ -90,7 +90,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 			if (argName.startsWith(DELIMITER_PREFIX)) {
 				String arg = argName.substring(1).trim();
 
-				// fast default check 
+				// fast default check
 				if (!StringUtils.hasText(arg)) {
 					cvs.addGenericArgumentValue(valueHolder);
 				}
@@ -107,13 +107,13 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 						parserContext.getReaderContext().error(
 								"Constructor argument '" + argName + "' specifies a negative index", attr);
 					}
-					
+
 					if (cvs.hasIndexedArgumentValue(index)){
 						parserContext.getReaderContext().error(
 								"Constructor argument '" + argName + "' with index "+ index+" already defined using <constructor-arg>." +
 								" Only one approach may be used per argument.", attr);
 					}
-					
+
 					cvs.addIndexedArgumentValue(index, valueHolder);
 				}
 			}
@@ -139,7 +139,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 
 		return true;
 	}
-	
+
 	private boolean checkName(String name, Collection<ValueHolder> values) {
 		for (ValueHolder holder : values) {
 			if (name.equals(holder.getName())) {

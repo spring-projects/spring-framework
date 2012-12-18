@@ -27,7 +27,7 @@ import org.springframework.core.MethodParameter;
 
 /**
  * Test fixture with {@link HandlerMethodReturnValueHandlerComposite}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class HandlerMethodReturnValueHandlerCompositeTests {
@@ -35,7 +35,7 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	private HandlerMethodReturnValueHandlerComposite handlers;
 
 	ModelAndViewContainer mavContainer;
-	
+
 	private MethodParameter paramInt;
 
 	private MethodParameter paramStr;
@@ -43,11 +43,11 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 	@Before
 	public void setUp() throws Exception {
 		handlers = new HandlerMethodReturnValueHandlerComposite();
-		mavContainer = new ModelAndViewContainer(); 
+		mavContainer = new ModelAndViewContainer();
 		paramInt = new MethodParameter(getClass().getDeclaredMethod("handleInteger"), -1);
 		paramStr = new MethodParameter(getClass().getDeclaredMethod("handleString"), -1);
 	}
-	
+
 	@Test
 	public void supportsReturnType() throws Exception {
 		registerHandler(Integer.class);
@@ -55,12 +55,12 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		assertTrue(this.handlers.supportsReturnType(paramInt));
 		assertFalse(this.handlers.supportsReturnType(paramStr));
 	}
-	
+
 	@Test
 	public void handleReturnValue() throws Exception {
 		StubReturnValueHandler handler = registerHandler(Integer.class);
 		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
-		
+
 		assertEquals(Integer.valueOf(55), handler.getReturnValue());
 	}
 
@@ -69,28 +69,28 @@ public class HandlerMethodReturnValueHandlerCompositeTests {
 		StubReturnValueHandler h1 = registerHandler(Integer.class);
 		StubReturnValueHandler h2 = registerHandler(Integer.class);
 		this.handlers.handleReturnValue(Integer.valueOf(55), paramInt, mavContainer, null);
-		
+
 		assertEquals("Didn't use the 1st registered handler", Integer.valueOf(55), h1.getReturnValue());
 		assertNull("Shouldn't have use the 2nd registered handler", h2.getReturnValue());
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void noSuitableReturnValueHandler() throws Exception {
 		registerHandler(Integer.class);
 		this.handlers.handleReturnValue("value", paramStr, null, null);
 	}
-	
+
 	private StubReturnValueHandler registerHandler(Class<?> returnType) {
 		StubReturnValueHandler handler = new StubReturnValueHandler(returnType);
 		handlers.addHandler(handler);
 		return handler;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private Integer handleInteger() {
 		return null;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private String handleString() {
 		return null;

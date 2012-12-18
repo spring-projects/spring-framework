@@ -969,7 +969,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		Assert.assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
 		Assert.assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
-	
+
 	public void testNamedParameterQueryReusingParameter() throws SQLException {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);

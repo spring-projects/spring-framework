@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ParseState} entry representing an autowire candidate qualifier.
- * 
+ *
  * @author Mark Fisher
  * @since 2.5
  */

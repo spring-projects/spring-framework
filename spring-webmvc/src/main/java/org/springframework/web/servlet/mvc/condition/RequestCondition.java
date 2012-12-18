@@ -67,5 +67,5 @@ public interface RequestCondition<T> {
 	 * to ensure they have content relevant to current request only.
 	 */
 	int compareTo(T other, HttpServletRequest request);
-	
+
 }

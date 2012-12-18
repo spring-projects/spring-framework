@@ -42,7 +42,7 @@ import org.springframework.util.ClassUtils;
 public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFilter, Ordered, Serializable {
 
 	private final Advice advice;
-	
+
 	private final Set<Class> interfaces = new HashSet<Class>();
 
 	private int order = Integer.MAX_VALUE;

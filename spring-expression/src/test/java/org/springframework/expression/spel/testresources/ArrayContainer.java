@@ -17,7 +17,7 @@
 
 /**
  * Hold the various kinds of primitive array for access through the test evaluation context.
- * 
+ *
  * @author Andy Clement
  */
 public class ArrayContainer {
@@ -29,7 +29,7 @@ public class ArrayContainer {
 	public short[] shorts = new short[3];
 	public boolean[] booleans = new boolean[3];
 	public float[] floats = new float[3];
-	
+
 	public ArrayContainer() {
 		// setup some values
 		ints[0] = 42;

@@ -147,7 +147,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 		return context;
 	}
-	
+
 	private ConversionService getConversionService(PageContext pageContext) {
 		return (ConversionService) pageContext.getRequest().getAttribute(ConversionService.class.getName());
 	}
@@ -188,7 +188,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.variableResolver == null) {
 				return null;

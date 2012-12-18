@@ -272,7 +272,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
-		
+
 		mockPreparedStatement.setString(1, "rod");
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();

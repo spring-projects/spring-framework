@@ -25,11 +25,11 @@ import junit.framework.TestCase;
 import org.springframework.beans.TestBean;
 
 public class PrioritizedParameterNameDiscovererTests extends TestCase {
-	
+
 	private static final String[] FOO_BAR = new String[] { "foo", "bar" };
-	
+
 	private static final String[] SOMETHING_ELSE = new String[] { "something", "else" };
-	
+
 	ParameterNameDiscoverer returnsFooBar = new ParameterNameDiscoverer() {
 		public String[] getParameterNames(Method m) {
 			return FOO_BAR;
@@ -38,7 +38,7 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 			return FOO_BAR;
 		}
 	};
-	
+
 	ParameterNameDiscoverer returnsSomethingElse = new ParameterNameDiscoverer() {
 		public String[] getParameterNames(Method m) {
 			return SOMETHING_ELSE;
@@ -47,20 +47,20 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 			return SOMETHING_ELSE;
 		}
 	};
-	
+
 	private final Method anyMethod;
 	private final Class anyClass = Object.class;
-	
+
 	public PrioritizedParameterNameDiscovererTests() throws SecurityException, NoSuchMethodException {
 		anyMethod = TestBean.class.getMethod("getAge", (Class[]) null);
 	}
-	
+
 	public void testNoParametersDiscoverers() {
 		ParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		assertNull(pnd.getParameterNames(anyMethod));
 		assertNull(pnd.getParameterNames((Constructor) null));
 	}
-	
+
 	public void testOrderedParameterDiscoverers1() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsFooBar);
@@ -70,7 +70,7 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames(anyMethod)));
 		assertTrue(Arrays.equals(FOO_BAR, pnd.getParameterNames((Constructor) null)));
 	}
-	
+
 	public void testOrderedParameterDiscoverers2() {
 		PrioritizedParameterNameDiscoverer pnd = new PrioritizedParameterNameDiscoverer();
 		pnd.addDiscoverer(returnsSomethingElse);

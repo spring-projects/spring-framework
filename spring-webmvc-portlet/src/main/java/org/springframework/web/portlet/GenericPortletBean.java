@@ -74,7 +74,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this portlet.
 	 */
@@ -105,7 +105,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 		if (logger.isInfoEnabled()) {
 			logger.info("Initializing portlet '" + getPortletName() + "'");
 		}
-		
+
 		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
@@ -127,7 +127,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 			logger.info("Portlet '" + getPortletName() + "' configured successfully");
 		}
 	}
-	
+
 	/**
 	 * Initialize the BeanWrapper for this GenericPortletBean,
 	 * possibly with custom editors.
@@ -215,7 +215,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 		 */
 		private PortletConfigPropertyValues(PortletConfig config, Set<String> requiredProperties)
 			throws PortletException {
-				
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 

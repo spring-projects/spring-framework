@@ -27,25 +27,25 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 
 /**
  * Encapsulates information required to create a resource handlers.
- * 
+ *
  * @author Rossen Stoyanchev
  * @author Keith Donald
- * 
+ *
  * @since 3.1
  */
 public class ResourceHandlerRegistration {
 
 	private final ResourceLoader resourceLoader;
-	
+
 	private final String[] pathPatterns;
-	
+
 	private final List<Resource> locations = new ArrayList<Resource>();
-	
+
 	private Integer cachePeriod;
 
 	/**
 	 * Create a {@link ResourceHandlerRegistration} instance.
-	 * @param resourceLoader a resource loader for turning a String location into a {@link Resource} 
+	 * @param resourceLoader a resource loader for turning a String location into a {@link Resource}
 	 * @param pathPatterns one or more resource URL path patterns
 	 */
 	public ResourceHandlerRegistration(ResourceLoader resourceLoader, String... pathPatterns) {
@@ -53,7 +53,7 @@ public class ResourceHandlerRegistration {
 		this.resourceLoader = resourceLoader;
 		this.pathPatterns = pathPatterns;
 	}
-	
+
 	/**
 	 * Add one or more resource locations from which to serve static content. Each location must point to a valid
 	 * directory. Multiple locations may be specified as a comma-separated list, and the locations will be checked
@@ -69,7 +69,7 @@ public class ResourceHandlerRegistration {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Specify the cache period for the resources served by the resource handler, in seconds. The default is to not
 	 * send any cache headers but to rely on last-modified timestamps only. Set to 0 in order to send cache headers

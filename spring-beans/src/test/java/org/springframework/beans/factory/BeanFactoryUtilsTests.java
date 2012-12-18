@@ -45,12 +45,12 @@ import static test.util.TestResourceUtils.qualifiedResource;
  * @since 04.07.2003
  */
 public final class BeanFactoryUtilsTests {
-	
+
 	private static final Class<?> CLASS = BeanFactoryUtilsTests.class;
-	private static final Resource ROOT_CONTEXT = qualifiedResource(CLASS, "root.xml"); 
-	private static final Resource MIDDLE_CONTEXT = qualifiedResource(CLASS, "middle.xml"); 
-	private static final Resource LEAF_CONTEXT = qualifiedResource(CLASS, "leaf.xml"); 
-	private static final Resource DEPENDENT_BEANS_CONTEXT = qualifiedResource(CLASS, "dependentBeans.xml"); 
+	private static final Resource ROOT_CONTEXT = qualifiedResource(CLASS, "root.xml");
+	private static final Resource MIDDLE_CONTEXT = qualifiedResource(CLASS, "middle.xml");
+	private static final Resource LEAF_CONTEXT = qualifiedResource(CLASS, "leaf.xml");
+	private static final Resource DEPENDENT_BEANS_CONTEXT = qualifiedResource(CLASS, "dependentBeans.xml");
 
 	private ConfigurableListableBeanFactory listableBeanFactory;
 

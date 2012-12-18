@@ -212,7 +212,7 @@ public abstract class TypeUtils {
 
 		return true;
 	}
-	
+
 	public static boolean isAssignableBound(Type lhsType, Type rhsType) {
 		if (rhsType == null) {
 			return true;

@@ -93,7 +93,7 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	}
 
 	/**
-	 * Prepare the {@link ConfigurableApplicationContext} created by this 
+	 * Prepare the {@link ConfigurableApplicationContext} created by this
 	 * {@code SmartContextLoader} <i>before</i> bean definitions are read.
 	 *
 	 * <p>The default implementation:

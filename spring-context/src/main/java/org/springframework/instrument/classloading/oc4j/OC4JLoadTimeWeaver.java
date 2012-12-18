@@ -45,7 +45,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Creates a new instance of thie {@link OC4JLoadTimeWeaver} class
 	 * using the default {@link ClassLoader class loader}.
-	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader() 
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	public OC4JLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());

@@ -91,10 +91,10 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		else {
 			invokeAwareInterfaces(bean);
 		}
-		
+
 		return bean;
 	}
-	
+
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {

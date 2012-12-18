@@ -32,7 +32,7 @@ public interface XmlResultProvider {
 	 * Implementations must implement this method to provide the XML content
 	 * for the <code>Result</code>. Implementations will vary depending on
 	 * the <code>Result</code> implementation used.
-	 * @param result the <code>Result</code> object being used to provide the XML input 
+	 * @param result the <code>Result</code> object being used to provide the XML input
 	 */
 	void provideXml(Result result);
 

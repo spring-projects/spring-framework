@@ -41,7 +41,7 @@ import org.springframework.orm.jpa.JpaDialect;
  * Thanks to Mike Keith for the original EclipseLink support prototype!
  *
  * <p>NOTE: No need to filter out classes from the JPA providers package for
- * EclipseLink (see SPR-6040) 
+ * EclipseLink (see SPR-6040)
  *
  * @author Juergen Hoeller
  * @author Thomas Risberg

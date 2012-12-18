@@ -159,11 +159,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "Default Message");
 		assertBlockTagContains(output, "Too Short");
 	}
-	
+
 	public void testWithErrorsAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 

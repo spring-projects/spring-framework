@@ -30,7 +30,7 @@ package org.springframework.aop;
  * @see IntroductionInterceptor
  */
 public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
-	
+
 	/**
 	 * Return the filter determining which target classes this introduction
 	 * should apply to.
@@ -39,7 +39,7 @@ public interface IntroductionAdvisor extends Advisor, IntroductionInfo {
 	 * @return the class filter
 	 */
 	ClassFilter getClassFilter();
-	
+
 	/**
 	 * Can the advised interfaces be implemented by the introduction advice?
 	 * Invoked before adding an IntroductionAdvisor.

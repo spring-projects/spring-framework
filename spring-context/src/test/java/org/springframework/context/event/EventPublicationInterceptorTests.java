@@ -39,7 +39,7 @@ import org.springframework.context.support.StaticApplicationContext;
  * @author Rick Evans
  */
 public class EventPublicationInterceptorTests {
-	
+
 	private ApplicationEventPublisher publisher;
 
 
@@ -48,7 +48,7 @@ public class EventPublicationInterceptorTests {
 		publisher = createMock(ApplicationEventPublisher.class);
 		replay(publisher);
 	}
-	
+
 	@After
 	public void tearDown() {
 		verify(publisher);

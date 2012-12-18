@@ -37,7 +37,7 @@ import org.apache.derby.jdbc.EmbeddedDriver;
 final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
 	private static final Log logger = LogFactory.getLog(DerbyEmbeddedDatabaseConfigurer.class);
-	
+
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
 
 	// Error code that indicates successful shutdown

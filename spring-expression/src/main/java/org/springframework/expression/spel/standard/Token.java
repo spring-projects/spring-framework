@@ -18,17 +18,17 @@ package org.springframework.expression.spel.standard;
 
 /**
  * Holder for a kind of token, the associated data and its position in the input data stream (start/end).
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
 class Token {
-	
+
 	TokenKind kind;
 	String data;
 	int startpos; // index of first character
 	int endpos;   // index of char after the last character
-	
+
 	/**
 	 * Constructor for use when there is no particular data for the token (eg. TRUE or '+')
 	 * @param startpos the exact start
@@ -39,17 +39,17 @@ class Token {
 		this.startpos = startpos;
 		this.endpos = endpos;
 	}
-	
+
 	Token(TokenKind tokenKind, char[] tokenData, int pos, int endpos) {
 		this(tokenKind,pos,endpos);
 		this.data = new String(tokenData);
 	}
-	
-	
+
+
 	public TokenKind getKind() {
 		return kind;
 	}
-	
+
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		s.append("[").append(kind.toString());

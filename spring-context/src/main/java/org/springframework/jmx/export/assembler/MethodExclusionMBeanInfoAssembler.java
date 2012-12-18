@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 /**
  * <code>AbstractReflectiveMBeanInfoAssembler</code> subclass that allows
  * method names to be explicitly excluded as MBean operations and attributes.
- * 
+ *
  * <p>Any method not explicitly excluded from the management interface will be exposed to
  * JMX. JavaBean getters and setters will automatically be exposed as JMX attributes.
  *

@@ -115,7 +115,7 @@ public class ResourceScriptSource implements ScriptSource {
 	/**
 	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
 	 * A null value, implies the platform default.
-	 * 
+	 *
 	 * @param encoding charset encoding used for reading the script.
 	 */
 	public void setEncoding(String encoding) {

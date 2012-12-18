@@ -23,7 +23,7 @@ import java.util.Locale;
  * Parses text strings to produce instances of T.
  *
  * @author Keith Donald
- * @since 3.0 
+ * @since 3.0
  * @param <T> the type of object this Parser produces
  */
 public interface Parser<T> {

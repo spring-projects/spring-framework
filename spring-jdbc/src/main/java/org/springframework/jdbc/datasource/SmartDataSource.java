@@ -36,8 +36,8 @@ import javax.sql.DataSource;
  * @see org.springframework.jdbc.core.JdbcTemplate
  */
 public interface SmartDataSource extends DataSource {
-		
-	/** 
+
+	/**
 	 * Should we close this Connection, obtained from this DataSource?
 	 * <p>Code that uses Connections from a SmartDataSource should always
 	 * perform a check via this method before invoking <code>close()</code>.

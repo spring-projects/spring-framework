@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
 /**
  * Utility class for handling registration of AOP auto-proxy creators.
  *
- * <p>Only a single auto-proxy creator can be registered yet multiple concrete 
- * implementations are available. Therefore this class wraps a simple escalation 
+ * <p>Only a single auto-proxy creator can be registered yet multiple concrete
+ * implementations are available. Therefore this class wraps a simple escalation
  * protocol, allowing classes to request a particular auto-proxy creator and know
  * that class, <code>or a subclass thereof</code>, will eventually be resident
  * in the application context.

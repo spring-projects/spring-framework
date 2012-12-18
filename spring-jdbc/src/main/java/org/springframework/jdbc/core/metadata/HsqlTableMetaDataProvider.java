@@ -20,7 +20,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 /**
- * The HSQL specific implementation of the {@link TableMetaDataProvider}. Suports a feature for 
+ * The HSQL specific implementation of the {@link TableMetaDataProvider}. Suports a feature for
  * retreiving generated keys without the JDBC 3.0 getGeneratedKeys support.
  *
  * @author Thomas Risberg

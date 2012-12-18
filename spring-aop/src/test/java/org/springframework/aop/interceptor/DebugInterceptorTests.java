@@ -34,7 +34,7 @@ public final class DebugInterceptorTests {
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
 		Log log = createMock(Log.class);
-		
+
 		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
 
 		expect(log.isTraceEnabled()).andReturn(true);
@@ -56,7 +56,7 @@ public final class DebugInterceptorTests {
 	@Test
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
 		Log log = createMock(Log.class);
-		
+
 		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
 
 		expect(log.isTraceEnabled()).andReturn(true);

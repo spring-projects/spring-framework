@@ -30,7 +30,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
  * intention of reducing the surface area of java files within this
  * package.  This allows developers to think about tests first, and deal
  * with these second class testing artifacts on an as-needed basis.
- * 
+ *
  * Types here should be defined as package-private top level classes in
  * order to avoid needing to fully qualify, e.g.: _TestTypes$Foo.
  *

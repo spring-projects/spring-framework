@@ -39,7 +39,7 @@ import test.beans.TestBean;
  */
 public class ImportedConfigurationClassEnhancementTests {
 
-	
+
 	@Test
 	public void autowiredConfigClassIsEnhancedWhenImported() {
 		autowiredConfigClassIsEnhanced(ConfigThatDoesImport.class);
@@ -49,25 +49,25 @@ public class ImportedConfigurationClassEnhancementTests {
 	public void autowiredConfigClassIsEnhancedWhenRegisteredViaConstructor() {
 		autowiredConfigClassIsEnhanced(ConfigThatDoesNotImport.class, ConfigToBeAutowired.class);
 	}
-	
+
 	private void autowiredConfigClassIsEnhanced(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);
 		assertTrue("autowired config class has not been enhanced",
 				ClassUtils.isCglibProxy(config.autowiredConfig));
 	}
-	
-	
+
+
 	@Test
 	public void autowiredConfigClassBeanMethodsRespectScopingWhenImported() {
 		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesImport.class);
 	}
-	
+
 	@Test
 	public void autowiredConfigClassBeanMethodsRespectScopingWhenRegisteredViaConstructor() {
 		autowiredConfigClassBeanMethodsRespectScoping(ConfigThatDoesNotImport.class, ConfigToBeAutowired.class);
 	}
-	
+
 	private void autowiredConfigClassBeanMethodsRespectScoping(Class<?>... configClasses) {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(configClasses);
 		Config config = ctx.getBean(Config.class);

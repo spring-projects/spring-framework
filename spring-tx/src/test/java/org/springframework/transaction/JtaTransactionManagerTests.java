@@ -43,7 +43,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since 12.05.2003
  */
 public class JtaTransactionManagerTests extends TestCase {
-	
+
 	public void testJtaTransactionManagerWithCommit() throws Exception {
 		MockControl utControl = MockControl.createControl(UserTransaction.class);
 		UserTransaction ut = (UserTransaction) utControl.getMock();

@@ -49,7 +49,7 @@ public interface JmxAttributeSource {
 	 * @throws InvalidMetadataException in case of invalid attributes
 	 */
 	ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException;
-	
+
 	/**
 	 * Implementations should return an instance of <code>ManagedMetric</code>
 	 * if the supplied <code>Method</code> has the corresponding metadata.
@@ -89,7 +89,7 @@ public interface JmxAttributeSource {
 	 * @throws InvalidMetadataException in the case of invalid metadata
 	 */
 	ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException;
-	
-	
-	
+
+
+
 }

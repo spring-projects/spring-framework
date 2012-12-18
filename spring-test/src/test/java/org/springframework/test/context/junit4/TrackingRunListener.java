@@ -25,7 +25,7 @@ import org.junit.runner.notification.RunListener;
 /**
  * Simple {@link RunListener} which tracks how many times certain JUnit callback
  * methods were called: only intended for the integration test suite.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

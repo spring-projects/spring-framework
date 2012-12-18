@@ -23,9 +23,9 @@ import java.util.List;
 /**
  * Abstract aspect to enable mocking of methods picked out by a pointcut.
  * Sub-aspects must define the mockStaticsTestMethod() pointcut to
- * indicate call stacks when mocking should be triggered, and the 
+ * indicate call stacks when mocking should be triggered, and the
  * methodToMock() pointcut to pick out a method invocations to mock.
- * 
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  */
@@ -42,7 +42,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 	// Represents a list of expected calls to static entity methods
 	// Public to allow inserted code to access: is this normal??
 	public class Expectations {
-		
+
 		// Represents an expected call to a static entity method
 		private class Call {
 			private final String signature;
@@ -50,21 +50,21 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 
 			private Object responseObject; // return value or throwable
 			private CallResponse responseType = CallResponse.nothing;
-			
+
 			public Call(String name, Object[] args) {
 				this.signature = name;
 				this.args = args;
 			}
-			
+
 			public boolean hasResponseSpecified() {
 				return responseType != CallResponse.nothing;
 			}
-			
+
 			public void setReturnVal(Object retVal) {
 				this.responseObject = retVal;
 				responseType = CallResponse.return_;
 			}
-			
+
 			public void setThrow(Throwable throwable) {
 				this.responseObject = throwable;
 				responseType = CallResponse.throw_;
@@ -89,7 +89,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 				}
 			}
 		}
-		
+
 		private List<Call> calls = new LinkedList<Call>();
 
 		// Calls already verified
@@ -101,7 +101,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 						+ " calls, received " + verified);
 			}
 		}
-		
+
 		/**
 		 * Validate the call and provide the expected return value
 		 * @param lastSig
@@ -175,7 +175,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 			return expectations.respond(thisJoinPointStaticPart.toLongString(), thisJoinPoint.getArgs());
 		}
 	}
-	
+
 	public void expectReturnInternal(Object retVal) {
 		if (!recording) {
 			throw new IllegalStateException("Not recording: Cannot set return value");

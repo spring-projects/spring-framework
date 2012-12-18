@@ -56,7 +56,7 @@ public class ParameterizableViewControllerTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 	public void testActionRequestNotHandled() throws Exception {
 		ParameterizableViewController controller = new ParameterizableViewController();
 		ActionRequest request = new MockActionRequest();
@@ -69,5 +69,5 @@ public class ParameterizableViewControllerTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 }

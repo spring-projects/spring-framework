@@ -181,7 +181,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	public void setTargetPackage(String targetPackage) {
 		this.targetPackages = new String[] {targetPackage};
 	}
-	
+
 	/**
 	 * Set the names of packages with the Castor descriptor classes.
 	 */

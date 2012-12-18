@@ -35,7 +35,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Test fixture with {@link UriComponentsBuilderMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class UriComponentsBuilderMethodArgumentResolverTests {
@@ -45,7 +45,7 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 	private MethodParameter builderParam;
 
 	private MethodParameter servletBuilderParam;
-	
+
 	private MethodParameter intParam;
 
 	private ServletWebRequest webRequest;
@@ -62,22 +62,22 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 		this.servletRequest = new MockHttpServletRequest();
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 	}
-	
+
 	@Test
 	public void supportsParameter() throws Exception {
 		assertTrue(this.resolver.supportsParameter(this.builderParam));
 		assertTrue(this.resolver.supportsParameter(this.servletBuilderParam));
 		assertFalse(this.resolver.supportsParameter(this.intParam));
 	}
-	
+
 	@Test
 	public void resolveArgument() throws Exception {
 		this.servletRequest.setContextPath("/myapp");
 		this.servletRequest.setServletPath("/main");
 		this.servletRequest.setPathInfo("/accounts");
-		
+
 		Object actual = this.resolver.resolveArgument(this.builderParam, new ModelAndViewContainer(), this.webRequest, null);
-		
+
 		assertNotNull(actual);
 		assertEquals(ServletUriComponentsBuilder.class, actual.getClass());
 		assertEquals("http://localhost/myapp/main", ((ServletUriComponentsBuilder) actual).build().toUriString());
@@ -86,5 +86,5 @@ public class UriComponentsBuilderMethodArgumentResolverTests {
 
 	void handle(UriComponentsBuilder builder, ServletUriComponentsBuilder servletBuilder, int value) {
 	}
-	
+
 }

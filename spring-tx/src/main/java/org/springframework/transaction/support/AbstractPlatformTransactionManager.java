@@ -64,7 +64,7 @@ import org.springframework.transaction.UnexpectedRollbackException;
  * transaction for closing at transaction completion time, allowing e.g. for reuse
  * of the same Hibernate Session within the transaction. The same mechanism can
  * also be leveraged for custom synchronization needs in an application.
- * 
+ *
  * <p>The state of this class is serializable, to allow for serializing the
  * transaction strategy along with proxies that carry a transaction interceptor.
  * It is up to subclasses if they wish to make their state to be serializable too.

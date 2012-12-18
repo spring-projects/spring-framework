@@ -32,7 +32,7 @@ import test.annotation.transaction.Tx;
 import test.beans.TestBean;
 
 
-/** 
+/**
  * Java5-specific {@link AspectJExpressionPointcutTests}.
  *
  * @author Rod Johnson
@@ -54,10 +54,10 @@ public final class TigerAspectJExpressionPointcutTests {
 			methodsOnHasGeneric.put(m.getName(), m);
 		}
 	}
-	
+
 
 	public static class HasGeneric {
-		
+
 		public void setFriends(List<TestBean> friends) {
 		}
 		public void setEnemies(List<TestBean> enemies) {
@@ -73,20 +73,20 @@ public final class TigerAspectJExpressionPointcutTests {
 		String expression = "execution(* set*(java.util.List<test.beans.TestBean>) )";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
-		
+
 		// TODO this will currently map, would be nice for optimization
 		//assertTrue(ajexp.matches(HasGeneric.class));
 		//assertFalse(ajexp.matches(TestBean.class));
-		
+
 		Method takesGenericList = methodsOnHasGeneric.get("setFriends");
 		assertTrue(ajexp.matches(takesGenericList, HasGeneric.class));
 		assertTrue(ajexp.matches(methodsOnHasGeneric.get("setEnemies"), HasGeneric.class));
 		assertFalse(ajexp.matches(methodsOnHasGeneric.get("setPartners"), HasGeneric.class));
 		assertFalse(ajexp.matches(methodsOnHasGeneric.get("setPhoneNumbers"), HasGeneric.class));
-		
+
 		assertFalse(ajexp.matches(getAge, TestBean.class));
 	}
-	
+
 	@Test
 	public void testMatchVarargs() throws SecurityException, NoSuchMethodException {
 		class MyTemplate {
@@ -94,20 +94,20 @@ public final class TigerAspectJExpressionPointcutTests {
 		        return 0;
 		    }
 		}
-	
+
 		String expression = "execution(int *.*(String, Object...))";
 		AspectJExpressionPointcut jdbcVarArgs = new AspectJExpressionPointcut();
 		jdbcVarArgs.setExpression(expression);
-		
+
 		// TODO: the expression above no longer matches Object[]
 		// assertFalse(jdbcVarArgs.matches(
 		//        JdbcTemplate.class.getMethod("queryForInt", String.class, Object[].class),
 		//        JdbcTemplate.class));
-		
+
 		assertTrue(jdbcVarArgs.matches(
 				MyTemplate.class.getMethod("queryForInt", String.class, Object[].class),
 				MyTemplate.class));
-		
+
 		Method takesGenericList = methodsOnHasGeneric.get("setFriends");
 		assertFalse(jdbcVarArgs.matches(takesGenericList, HasGeneric.class));
 		assertFalse(jdbcVarArgs.matches(methodsOnHasGeneric.get("setEnemies"), HasGeneric.class));
@@ -115,44 +115,44 @@ public final class TigerAspectJExpressionPointcutTests {
 		assertFalse(jdbcVarArgs.matches(methodsOnHasGeneric.get("setPhoneNumbers"), HasGeneric.class));
 		assertFalse(jdbcVarArgs.matches(getAge, TestBean.class));
 	}
-	
+
 	@Test
 	public void testMatchAnnotationOnClassWithAtWithin() throws SecurityException, NoSuchMethodException {
 		String expression = "@within(test.annotation.transaction.Tx)";
 		testMatchAnnotationOnClass(expression);
 	}
-	
+
 	@Test
 	public void testMatchAnnotationOnClassWithoutBinding() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@test.annotation.transaction.Tx *)";
 		testMatchAnnotationOnClass(expression);
 	}
-	
+
 	@Test
 	public void testMatchAnnotationOnClassWithSubpackageWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@(test.annotation..*) *)";
 		AspectJExpressionPointcut springAnnotatedPc = testMatchAnnotationOnClass(expression);
-		assertFalse(springAnnotatedPc.matches(TestBean.class.getMethod("setName", String.class), 
+		assertFalse(springAnnotatedPc.matches(TestBean.class.getMethod("setName", String.class),
 				TestBean.class));
-		assertTrue(springAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo", (Class[]) null), 
+		assertTrue(springAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo", (Class[]) null),
 				SpringAnnotated.class));
-		
+
 		expression = "within(@(test.annotation.transaction..*) *)";
 		AspectJExpressionPointcut springTxAnnotatedPc = testMatchAnnotationOnClass(expression);
-		assertFalse(springTxAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo", (Class[]) null), 
+		assertFalse(springTxAnnotatedPc.matches(SpringAnnotated.class.getMethod("foo", (Class[]) null),
 				SpringAnnotated.class));
 	}
-	
+
 	@Test
 	public void testMatchAnnotationOnClassWithExactPackageWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "within(@(test.annotation.transaction.*) *)";
 		testMatchAnnotationOnClass(expression);
 	}
-	
+
 	private AspectJExpressionPointcut testMatchAnnotationOnClass(String expression) throws SecurityException, NoSuchMethodException {
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
-		
+
 		assertFalse(ajexp.matches(getAge, TestBean.class));
 		assertTrue(ajexp.matches(HasTransactionalAnnotation.class.getMethod("foo", (Class[]) null), HasTransactionalAnnotation.class));
 		assertTrue(ajexp.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class));
@@ -160,13 +160,13 @@ public final class TigerAspectJExpressionPointcutTests {
 		assertFalse(ajexp.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
 		return ajexp;
 	}
-	
+
 	@Test
 	public void testAnnotationOnMethodWithFQN() throws SecurityException, NoSuchMethodException {
 		String expression = "@annotation(test.annotation.transaction.Tx)";
 		AspectJExpressionPointcut ajexp = new AspectJExpressionPointcut();
 		ajexp.setExpression(expression);
-		
+
 		assertFalse(ajexp.matches(getAge, TestBean.class));
 		assertFalse(ajexp.matches(HasTransactionalAnnotation.class.getMethod("foo", (Class[]) null), HasTransactionalAnnotation.class));
 		assertFalse(ajexp.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class));
@@ -174,13 +174,13 @@ public final class TigerAspectJExpressionPointcutTests {
 		assertTrue(ajexp.matches(BeanA.class.getMethod("getAge", (Class[]) null), BeanA.class));
 		assertFalse(ajexp.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
 	}
-	
+
 	@Test
 	public void testAnnotationOnMethodWithWildcard() throws SecurityException, NoSuchMethodException {
 		String expression = "execution(@(test.annotation..*) * *(..))";
 		AspectJExpressionPointcut anySpringMethodAnnotation = new AspectJExpressionPointcut();
 		anySpringMethodAnnotation.setExpression(expression);
-		
+
 		assertFalse(anySpringMethodAnnotation.matches(getAge, TestBean.class));
 		assertFalse(anySpringMethodAnnotation.matches(HasTransactionalAnnotation.class.getMethod("foo", (Class[]) null), HasTransactionalAnnotation.class));
 		assertFalse(anySpringMethodAnnotation.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class));
@@ -194,43 +194,43 @@ public final class TigerAspectJExpressionPointcutTests {
 		String expression = "@args(*, test.annotation.EmptySpringAnnotation))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
 		takesSpringAnnotatedArgument2.setExpression(expression);
-		
+
 		assertFalse(takesSpringAnnotatedArgument2.matches(getAge, TestBean.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("foo", (Class[]) null), HasTransactionalAnnotation.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("getAge", (Class[]) null), BeanA.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
-		
+
 		assertTrue(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesAnnotatedParameters", TestBean.class, SpringAnnotated.class),
 				ProcessesSpringAnnotatedParameters.class));
-		
+
 		// True because it maybeMatches with potential argument subtypes
 		assertTrue(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
 				ProcessesSpringAnnotatedParameters.class));
-		
+
 		assertFalse(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesNoAnnotatedParameters", TestBean.class, BeanA.class),
 				ProcessesSpringAnnotatedParameters.class,
 				new Object[] { new TestBean(), new BeanA()})
 		);
 	}
-	
+
 	@Test
 	public void testAnnotationOnMethodArgumentsWithWildcards() throws SecurityException, NoSuchMethodException {
 		String expression = "execution(* *(*, @(test..*) *))";
 		AspectJExpressionPointcut takesSpringAnnotatedArgument2 = new AspectJExpressionPointcut();
 		takesSpringAnnotatedArgument2.setExpression(expression);
-		
+
 		assertFalse(takesSpringAnnotatedArgument2.matches(getAge, TestBean.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("foo", (Class[]) null), HasTransactionalAnnotation.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(HasTransactionalAnnotation.class.getMethod("bar", String.class), HasTransactionalAnnotation.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("getAge", (Class[]) null), BeanA.class));
 		assertFalse(takesSpringAnnotatedArgument2.matches(BeanA.class.getMethod("setName", String.class), BeanA.class));
-		
+
 		assertTrue(takesSpringAnnotatedArgument2.matches(
 				ProcessesSpringAnnotatedParameters.class.getMethod("takesAnnotatedParameters", TestBean.class, SpringAnnotated.class),
 				ProcessesSpringAnnotatedParameters.class));
@@ -267,7 +267,7 @@ public final class TigerAspectJExpressionPointcutTests {
 		}
 	}
 
-	
+
 	static class BeanA {
 		private String name;
 
@@ -283,7 +283,7 @@ public final class TigerAspectJExpressionPointcutTests {
 		}
 	}
 
-	
+
 	@Tx
 	static class BeanB {
 		private String name;

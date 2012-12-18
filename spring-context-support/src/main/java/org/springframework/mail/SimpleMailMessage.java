@@ -67,7 +67,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy constructor for creating a new <code>SimpleMailMessage</code> from the state
 	 * of an existing <code>SimpleMailMessage</code> instance.
-	 * @throws IllegalArgumentException if the supplied message is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied message is <code>null</code>
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
 		Assert.notNull(original, "The 'original' message argument cannot be null");
@@ -168,7 +168,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	/**
 	 * Copy the contents of this message to the given target message.
 	 * @param target the <code>MailMessage</code> to copy to
-	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code>
 	 */
 	public void copyTo(MailMessage target) {
 		Assert.notNull(target, "The 'target' message argument cannot be null");

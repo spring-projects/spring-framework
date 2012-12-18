@@ -23,7 +23,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * Simple {@link ConfigurableEnvironment} implementation exposing
  * {@link #setProperty(String, String)} and {@link #withProperty(String, String)}
  * methods for testing purposes.
- * 
+ *
  * @author Chris Beams
  * @author Sam Brannen
  * @since 3.2

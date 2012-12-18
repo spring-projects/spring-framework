@@ -79,7 +79,7 @@ import static org.springframework.context.annotation.AnnotationConfigUtils.*;
  * that any {@link Bean} methods declared in Configuration classes have their
  * respective bean definitions registered before any other BeanFactoryPostProcessor
  * executes.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @since 3.0

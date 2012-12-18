@@ -23,7 +23,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
 
 /**
  * Convenient TargetSourceCreator using bean name prefixes to create one of three
- * well-known TargetSource types: 
+ * well-known TargetSource types:
  * <li>: CommonsPoolTargetSource
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
@@ -59,5 +59,5 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 			return null;
 		}
 	}
-	
+
 }

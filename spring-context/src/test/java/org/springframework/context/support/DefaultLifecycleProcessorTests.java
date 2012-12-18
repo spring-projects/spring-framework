@@ -295,7 +295,7 @@ public class DefaultLifecycleProcessorTests {
 	@Test
 	public void singleLifecycleShutdown() throws Exception {
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
-		Lifecycle bean = new TestLifecycleBean(null, stoppedBeans); 
+		Lifecycle bean = new TestLifecycleBean(null, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.getBeanFactory().registerSingleton("bean", bean);
 		context.refresh();
@@ -636,7 +636,7 @@ public class DefaultLifecycleProcessorTests {
 		}
 
 		public void setAutoStartup(boolean autoStartup) {
-			this.autoStartup = autoStartup; 
+			this.autoStartup = autoStartup;
 		}
 
 		public void stop(final Runnable callback) {

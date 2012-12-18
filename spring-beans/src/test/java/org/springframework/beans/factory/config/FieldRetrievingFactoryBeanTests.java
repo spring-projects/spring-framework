@@ -30,13 +30,13 @@ import test.beans.TestBean;
 
 /**
  * Unit tests for {@link FieldRetrievingFactoryBean}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 31.07.2004
  */
 public final class FieldRetrievingFactoryBeanTests {
-	
+
 	private static final Resource CONTEXT =
 		qualifiedResource(FieldRetrievingFactoryBeanTests.class, "context.xml");
 

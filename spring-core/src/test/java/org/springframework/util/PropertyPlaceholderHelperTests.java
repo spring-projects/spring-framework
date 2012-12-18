@@ -98,7 +98,7 @@ public class PropertyPlaceholderHelperTests {
 		String text = "foo=${foo},bar=${bar}";
 		Properties props = new Properties();
 		props.setProperty("foo", "bar");
-		
+
 		assertEquals("foo=bar,bar=${bar}", this.helper.replacePlaceholders(text, props));
 	}
 

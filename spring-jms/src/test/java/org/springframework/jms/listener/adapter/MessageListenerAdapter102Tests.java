@@ -379,7 +379,7 @@ public final class MessageListenerAdapter102Tests {
 		QueueSender queueSender = (QueueSender) mockQueueSender.getMock();
 		queueSender.send(responseTextMessage);
 		mockQueueSender.setThrowable(new JMSException("Dow!"));
-		// ensure that regardless of a JMSException the producer is closed... 
+		// ensure that regardless of a JMSException the producer is closed...
 		queueSender.close();
 		mockQueueSender.setVoidCallable();
 		mockQueueSender.replay();

@@ -36,7 +36,7 @@ import org.springframework.aop.support.AbstractPointcutAdvisor;
  * @see TransactionProxyFactoryBean
  */
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
-	
+
 	private TransactionInterceptor transactionInterceptor;
 
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marks a class as being eligible for Spring-driven configuration.
- * 
+ *
  * <p>Typically used with the AspectJ <code>AnnotationBeanConfigurerAspect</code>.
  *
  * @author Rod Johnson
@@ -54,7 +54,7 @@ public @interface Configurable {
 	 * Is dependency checking to be performed for configured objects?
 	 */
 	boolean dependencyCheck() default false;
-	
+
 	/**
 	 * Are dependencies to be injected prior to the construction of an object?
 	 */

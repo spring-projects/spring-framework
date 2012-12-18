@@ -622,7 +622,7 @@ public abstract class AbstractJdbcInsert {
 			}
 		}
 	}
-	
+
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.

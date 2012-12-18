@@ -72,8 +72,8 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		for (Advisor element : advisors) {
 			partiallyComparableAdvisors.add(
 					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
-		}		
-		
+		}
+
 		// sort it
 		List<PartiallyComparableAdvisorHolder> sorted =
 				(List<PartiallyComparableAdvisorHolder>) PartialOrder.sort(partiallyComparableAdvisors);
@@ -81,13 +81,13 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			// TODO: work harder to give a better error message here.
 			throw new IllegalArgumentException("Advice precedence circularity error");
 		}
-		
+
 		// extract results again
 		List<Advisor> result = new LinkedList<Advisor>();
 		for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
 			result.add(pcAdvisor.getAdvisor());
 		}
-		
+
 		return result;
 	}
 

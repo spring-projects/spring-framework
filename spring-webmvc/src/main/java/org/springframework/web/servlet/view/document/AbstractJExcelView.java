@@ -33,7 +33,7 @@ import org.springframework.web.servlet.view.AbstractView;
 
 /**
  * Convenient superclass for Excel document views.
- * 
+ *
  * <p>This class uses the <i>JExcelAPI</i> instead of <i>POI</i>. More
  * information on <i>JExcelAPI</i> can be found on their <a
  * href="http://www.andykhan.com/jexcelapi/" target="_blank">website</a>.
@@ -43,19 +43,19 @@ import org.springframework.web.servlet.view.AbstractView;
  * <li>url (optional): The url of an existing Excel document to pick as a
  * starting point. It is done without localization part nor the .xls extension.
  * </ul>
- * 
+ *
  * <p>The file will be searched with locations in the following order:
  * <ul>
  * <li>[url]_[language]_[country].xls
  * <li>[url]_[language].xls
  * <li>[url].xls
  * </ul>
- * 
+ *
  * <p>For working with the workbook in the subclass, see <a
  * href="http://www.andykhan.com/jexcelapi/">Java Excel API site</a>
- * 
+ *
  * <p>As an example, you can try this snippet:
- * 
+ *
  * <pre class="code">
  * protected void buildExcelDocument(
  *      Map&lt;String, Object&gt; model, WritableWorkbook workbook,
@@ -64,15 +64,15 @@ import org.springframework.web.servlet.view.AbstractView;
  * 	 if (workbook.getNumberOfSheets() == 0) {
  * 	     workbook.createSheet(&quot;Spring&quot;, 0);
  *   }
- * 
+ *
  * 	 WritableSheet sheet = workbook.getSheet(&quot;Spring&quot;);
  * 	 Label label = new Label(0, 0, &quot;This is a nice label&quot;);
  * 	 sheet.addCell(label);
  * }</pre>
- * 
+ *
  * The use of this view is close to the AbstractExcelView class,
  * just using the JExcel API instead of the Apache POI API.
- * 
+ *
  * @author Bram Smeets
  * @author Alef Arendsen
  * @author Juergen Hoeller
@@ -120,7 +120,7 @@ public abstract class AbstractJExcelView extends AbstractView {
 	@Override
 	protected final void renderMergedOutputModel(
 			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
+
 		// Set the content type and get the output stream.
 		response.setContentType(getContentType());
 		OutputStream out = response.getOutputStream();
@@ -129,7 +129,7 @@ public abstract class AbstractJExcelView extends AbstractView {
 		if (this.url != null) {
 			Workbook template = getTemplateSource(this.url, request);
 			workbook = Workbook.createWorkbook(out, template);
-		} 
+		}
 		else {
 			logger.debug("Creating Excel Workbook from scratch");
 			workbook = Workbook.createWorkbook(out);

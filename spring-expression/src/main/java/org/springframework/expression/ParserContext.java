@@ -28,13 +28,13 @@ public interface ParserContext {
 	/**
 	 * Whether or not the expression being parsed is a template. A template expression consists of literal text that can
 	 * be mixed with evaluatable blocks. Some examples:
-	 * 
+	 *
 	 * <pre>
 	 * 	   Some literal text
 	 *     Hello #{name.firstName}!
 	 *     #{3 + 4}
 	 * </pre>
-	 * 
+	 *
 	 * @return true if the expression is a template, false otherwise
 	 */
 	boolean isTemplate();
@@ -54,7 +54,7 @@ public interface ParserContext {
 	 * @return the suffix that identifies the end of an expression
 	 */
 	String getExpressionSuffix();
-	
+
 	/**
 	 * The default ParserContext implementation that enables template expression parsing mode.
 	 * The expression prefix is #{ and the expression suffix is }.
@@ -73,7 +73,7 @@ public interface ParserContext {
 		public boolean isTemplate() {
 			return true;
 		}
-		
+
 	};
 
 }

@@ -25,7 +25,7 @@ package org.springframework.core;
  * @see org.springframework.core.Constants
  */
 public class ConstantException extends IllegalArgumentException {
-	
+
 	/**
 	 * Thrown when an invalid constant name is requested.
 	 * @param className name of the class containing the constant definitions

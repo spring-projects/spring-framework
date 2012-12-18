@@ -59,7 +59,7 @@ import test.beans.TestBean;
  * @author Rob Harrop
  * @author Arjen Poutsma
  * @author Chris Beams
- * 
+ *
  * @since 10.06.2003
  */
 public class CustomEditorTests {
@@ -511,7 +511,7 @@ public class CustomEditorTests {
 
 		bw.setPropertyValue("myChar", "\\u0022");
 		assertEquals('"', cb.getMyChar());
-		
+
 		CharacterEditor editor = new CharacterEditor(false);
 		editor.setAsText("M");
 		assertEquals("M", editor.getAsText());
@@ -672,7 +672,7 @@ public class CustomEditorTests {
 
 		patternEditor = new PatternEditor();
 		assertEquals("", patternEditor.getAsText());
-		
+
 		patternEditor = new PatternEditor();
 		patternEditor.setAsText(null);
 		assertEquals("", patternEditor.getAsText());

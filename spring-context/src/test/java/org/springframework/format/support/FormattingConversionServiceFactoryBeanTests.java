@@ -195,7 +195,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		public void registerFormatters(FormatterRegistry registry) {
 			registry.addFormatter(new TestBeanFormatter());
 		}
-		
+
 	}
-	
+
 }

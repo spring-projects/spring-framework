@@ -26,13 +26,13 @@ import org.springframework.core.io.Resource;
 
 /**
  * Unit tests for {@link PropertiesFactoryBean}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 01.11.2003
  */
 public final class PropertiesFactoryBeanTests {
-	
+
 	private static final Class<?> CLASS = PropertiesFactoryBeanTests.class;
 	private static final Resource TEST_PROPS = qualifiedResource(CLASS, "test.properties");
 	private static final Resource TEST_PROPS_XML = qualifiedResource(CLASS, "test.properties.xml");

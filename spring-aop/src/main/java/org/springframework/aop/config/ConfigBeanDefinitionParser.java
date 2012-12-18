@@ -93,7 +93,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
 	private ParseState parseState = new ParseState();
-	
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
@@ -281,10 +281,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(TYPE_PATTERN));
-		
+
 		String defaultImpl = declareParentsElement.getAttribute(DEFAULT_IMPL);
 		String delegateRef = declareParentsElement.getAttribute(DELEGATE_REF);
-		
+
 		if (StringUtils.hasText(defaultImpl) && !StringUtils.hasText(delegateRef)) {
 			builder.addConstructorArgValue(defaultImpl);
 		}
@@ -435,7 +435,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String expression = pointcutElement.getAttribute(EXPRESSION);
 
 		AbstractBeanDefinition pointcutDefinition = null;
-		
+
 		try {
 			this.parseState.push(new PointcutEntry(id));
 			pointcutDefinition = createPointcutDefinition(expression);

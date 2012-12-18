@@ -28,7 +28,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * Verifies support for JUnit 4.7 {@link Rule Rules} in conjunction with the
  * {@link SpringJUnit4ClassRunner}. The body of this test class is taken from
  * the JUnit 4.7 release notes.
- * 
+ *
  * @author JUnit 4.7 Team
  * @author Sam Brannen
  * @since 3.0

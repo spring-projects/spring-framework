@@ -39,7 +39,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertFalse(notMatchingFilter.match(metadataReader, metadataReaderFactory));
 		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
 	}
-	
+
 	public void testInterfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
@@ -49,7 +49,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
@@ -59,7 +59,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testInterfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";

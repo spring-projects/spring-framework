@@ -231,7 +231,7 @@ public class RequestContext {
 			// Ignored
 		}
 	}
-	
+
 	/**
 	 * Determine the fallback locale for this context. <p>The default implementation checks for a JSTL locale attribute
 	 * in request, session or application scope; if not found, returns the <code>HttpServletRequest.getLocale()</code>.

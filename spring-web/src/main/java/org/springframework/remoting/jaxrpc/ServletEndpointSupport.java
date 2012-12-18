@@ -62,7 +62,7 @@ import org.springframework.web.util.WebUtils;
 public abstract class ServletEndpointSupport implements ServiceLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	private ServletEndpointContext servletEndpointContext;
 
 	private WebApplicationContext webApplicationContext;

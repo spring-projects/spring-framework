@@ -38,7 +38,7 @@ public final class TargetPointcutSelectionTests {
 	public TestAspect testAspectForTestImpl1;
 	public TestAspect testAspectForAbstractTestImpl;
 	public TestInterceptor testInterceptor;
-	
+
 
 	@Before
 	public void setUp() {
@@ -49,12 +49,12 @@ public final class TargetPointcutSelectionTests {
 		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
 		testAspectForAbstractTestImpl = (TestAspect) ctx.getBean("testAspectForAbstractTestImpl");
 		testInterceptor = (TestInterceptor) ctx.getBean("testInterceptor");
-		
+
 		testAspectForTestImpl1.count = 0;
 		testAspectForAbstractTestImpl.count = 0;
 		testInterceptor.count = 0;
 	}
-	
+
 	@Test
 	public void testTargetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
@@ -76,7 +76,7 @@ public final class TargetPointcutSelectionTests {
 
 		public void interfaceMethod();
 	}
-	
+
 
 	// Reproducing bug requires that the class specified in target() pointcut doesn't
 	// include the advised method's implementation (instead a base class should include it)
@@ -85,7 +85,7 @@ public final class TargetPointcutSelectionTests {
 		public void interfaceMethod() {
 		}
 	}
-	
+
 
 	public static class TestImpl1 extends AbstractTestImpl {
 	}
@@ -98,12 +98,12 @@ public final class TargetPointcutSelectionTests {
 	public static class TestAspect {
 
 		public int count;
-		
+
 		public void increment() {
 			count++;
 		}
 	}
-	
+
 
 	public static class TestInterceptor extends TestAspect implements MethodInterceptor {
 

@@ -49,5 +49,5 @@ public interface ScopedObject extends RawTargetAccess {
 	 * the exact same target object in the target scope).
 	 */
 	void removeFromScope();
-	
+
 }

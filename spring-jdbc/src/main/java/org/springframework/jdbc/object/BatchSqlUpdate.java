@@ -180,7 +180,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 		if (this.parameterQueue.isEmpty()) {
 			return new int[0];
 		}
-		
+
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
 				getSql(),
 				new BatchPreparedStatementSetter() {

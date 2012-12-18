@@ -63,7 +63,7 @@ public final class TypePatternClassFilterTests {
 		assertFalse("Must be excluded: not subclass", tpcf.matches(IOther.class));
 		assertFalse("Must be excluded: not subclass", tpcf.matches(DefaultListableBeanFactory.class));
 	}
-	
+
 	@Test
 	public void testAndOrNotReplacement() {
 		TypePatternClassFilter tpcf = new TypePatternClassFilter("java.lang.Object or java.lang.String");
@@ -75,7 +75,7 @@ public final class TypePatternClassFilterTests {
 		assertFalse("matches Double",tpcf.matches(Double.class));
 		tpcf = new TypePatternClassFilter("java.lang.Number+ and not java.lang.Float");
 		assertFalse("matches Float",tpcf.matches(Float.class));
-		assertTrue("matches Double",tpcf.matches(Double.class));	
+		assertTrue("matches Double",tpcf.matches(Double.class));
 	}
 
 	@Test(expected=IllegalArgumentException.class)

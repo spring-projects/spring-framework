@@ -39,10 +39,10 @@ import org.springframework.util.SerializationTestUtils;
  * @author Chris Beams
  */
 public class ScopedProxyTests {
-	
+
 	private static final Class<?> CLASS = ScopedProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final ClassPathResource LIST_CONTEXT = new ClassPathResource(CLASSNAME + "-list.xml", CLASS);
 	private static final ClassPathResource MAP_CONTEXT = new ClassPathResource(CLASSNAME + "-map.xml", CLASS);
 	private static final ClassPathResource OVERRIDE_CONTEXT = new ClassPathResource(CLASSNAME + "-override.xml", CLASS);

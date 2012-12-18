@@ -328,7 +328,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		private InputStream getInputStream() {
 			return this.in.get();
 		}
-		
+
 		@Override
 		public int read() throws IOException {
 			InputStream in = getInputStream();

@@ -22,7 +22,7 @@ import javax.jms.Session;
 
 /**
  * Creates a JMS message given a {@link Session}.
- * 
+ *
  * <p>The <code>Session</code> typically is provided by an instance
  * of the {@link JmsTemplate} class.
  *
@@ -40,7 +40,7 @@ public interface MessageCreator {
 	/**
 	 * Create a {@link Message} to be sent.
 	 * @param session the JMS {@link Session} to be used to create the
-	 * <code>Message</code> (never <code>null</code>) 
+	 * <code>Message</code> (never <code>null</code>)
 	 * @return the <code>Message</code> to be sent
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */

@@ -118,7 +118,7 @@ public abstract class TransactionSynchronizationManager {
 	 * Check if there is a resource for the given key bound to the current thread.
 	 * @param key the key to check (usually the resource factory)
 	 * @return if there is a value bound to the current thread
-	 * @see ResourceTransactionManager#getResourceFactory() 
+	 * @see ResourceTransactionManager#getResourceFactory()
 	 */
 	public static boolean hasResource(Object key) {
 		Object actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);

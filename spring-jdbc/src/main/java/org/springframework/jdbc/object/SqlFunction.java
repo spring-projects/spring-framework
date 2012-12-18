@@ -24,8 +24,8 @@ import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 /**
- * SQL "function" wrapper for a query that returns a single row of results. 
- * The default behavior is to return an int, but that can be overridden by 
+ * SQL "function" wrapper for a query that returns a single row of results.
+ * The default behavior is to return an int, but that can be overridden by
  * using the constructor with an extra return type parameter.
  *
  * <p>Intended to use to call SQL functions that return a single result using a

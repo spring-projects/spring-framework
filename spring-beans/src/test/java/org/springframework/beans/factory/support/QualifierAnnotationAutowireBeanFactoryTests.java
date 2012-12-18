@@ -53,9 +53,9 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		RootBeanDefinition rbd = new RootBeanDefinition(Person.class, cavs, null);
 		lbf.registerBeanDefinition(JUERGEN, rbd);
 		assertTrue(lbf.isAutowireCandidate(JUERGEN, null));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, 
+		assertTrue(lbf.isAutowireCandidate(JUERGEN,
 				new DependencyDescriptor(Person.class.getDeclaredField("name"), false)));
-		assertTrue(lbf.isAutowireCandidate(JUERGEN, 
+		assertTrue(lbf.isAutowireCandidate(JUERGEN,
 				new DependencyDescriptor(Person.class.getDeclaredField("name"), true)));
 	}
 
@@ -68,16 +68,16 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 		rbd.setAutowireCandidate(false);
 		lbf.registerBeanDefinition(JUERGEN, rbd);
 		assertFalse(lbf.isAutowireCandidate(JUERGEN, null));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, 
+		assertFalse(lbf.isAutowireCandidate(JUERGEN,
 				new DependencyDescriptor(Person.class.getDeclaredField("name"), false)));
-		assertFalse(lbf.isAutowireCandidate(JUERGEN, 
+		assertFalse(lbf.isAutowireCandidate(JUERGEN,
 				new DependencyDescriptor(Person.class.getDeclaredField("name"), true)));
 	}
 
 	@Ignore
 	@Test
 	public void testAutowireCandidateWithFieldDescriptor() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
@@ -101,7 +101,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Test
 	public void testAutowireCandidateExplicitlyFalseWithFieldDescriptor() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
@@ -119,7 +119,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Test
 	public void testAutowireCandidateWithShortClassName() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person = new RootBeanDefinition(Person.class, cavs, null);
@@ -137,7 +137,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	@Ignore
 	@Test
 	public void testAutowireCandidateWithConstructorDescriptor() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
@@ -159,7 +159,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 	@Ignore
 	@Test
 	public void testAutowireCandidateWithMethodDescriptor() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
@@ -189,7 +189,7 @@ public class QualifierAnnotationAutowireBeanFactoryTests {
 
 	@Test
 	public void testAutowireCandidateWithMultipleCandidatesDescriptor() throws Exception {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();	
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
 		cavs1.addGenericArgumentValue(JUERGEN);
 		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);

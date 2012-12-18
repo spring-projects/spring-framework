@@ -40,11 +40,11 @@ import org.springframework.util.StringUtils;
  * class immediately clear. Consider the following class definition:
  *
  * <pre class="code">public class SimpleCache implements Cache {
- * 
+ *
  *     public void setName(String name) {...}
  *     public void setTimeout(int timeout) {...}
  *     public void setEvictionPolicy(EvictionPolicy policy) {...}
- * 
+ *
  *     // remaining class definition elided for clarity...
  * }</pre>
  *
@@ -62,7 +62,7 @@ import org.springframework.util.StringUtils;
  *     protected Class getBeanClass(Element element) {
  *         return SimpleCache.class;
  *     }
- * }</pre> 
+ * }</pre>
  *
  * <p>Please note that the <code>AbstractSimpleBeanDefinitionParser</code>
  * is limited to populating the created bean definition with property values.
@@ -121,7 +121,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * property.
 	 * @param element the XML element being parsed
 	 * @param builder used to define the <code>BeanDefinition</code>
-	 * @see #extractPropertyName(String) 
+	 * @see #extractPropertyName(String)
 	 */
 	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {

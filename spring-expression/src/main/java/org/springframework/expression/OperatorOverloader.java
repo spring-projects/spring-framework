@@ -19,7 +19,7 @@ package org.springframework.expression;
 /**
  * By default the mathematical operators {@link Operation} support simple types like numbers. By providing an
  * implementation of OperatorOverloader, a user of the expression language can support these operations on other types.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

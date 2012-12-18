@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * Note that the scope of execution to be repeated includes execution of the
  * test method itself as well as any <em>set up</em> or <em>tear down</em> of
  * the test fixture.
- * 
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0

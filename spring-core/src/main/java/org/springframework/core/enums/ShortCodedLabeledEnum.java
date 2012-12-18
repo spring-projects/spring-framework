@@ -46,7 +46,7 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 		this.code = new Short((short) code);
 	}
 
-	
+
 	public Comparable getCode() {
 		return code;
 	}

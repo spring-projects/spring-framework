@@ -30,7 +30,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * Unit tests for {@link CustomAutowireConfigurer}.
- * 
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams

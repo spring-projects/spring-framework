@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
 public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
-	
+
 	private final GroovyObjectCustomizer groovyObjectCustomizer;
 
 	private GroovyClassLoader groovyClassLoader;

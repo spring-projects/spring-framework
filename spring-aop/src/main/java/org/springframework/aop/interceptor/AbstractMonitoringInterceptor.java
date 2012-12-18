@@ -28,7 +28,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * <p>Subclasses should call the <code>createInvocationTraceName(MethodInvocation)</code>
  * method to create a name for the given trace that includes information about the
  * method invocation under trace along with the prefix and suffix added as appropriate.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2.7

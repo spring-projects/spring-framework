@@ -48,7 +48,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param defaultImpl the default implementation class
 	 */
 	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Class defaultImpl) {
-		this(interfaceType, typePattern, defaultImpl, 
+		this(interfaceType, typePattern, defaultImpl,
 			 new DelegatePerTargetObjectIntroductionInterceptor(defaultImpl, interfaceType));
 	}
 
@@ -59,7 +59,7 @@ public class DeclareParentsAdvisor implements IntroductionAdvisor {
 	 * @param delegateRef the delegate implementation object
 	 */
 	public DeclareParentsAdvisor(Class interfaceType, String typePattern, Object delegateRef) {
-		this(interfaceType, typePattern, delegateRef.getClass(), 
+		this(interfaceType, typePattern, delegateRef.getClass(),
 			 new DelegatingIntroductionInterceptor(delegateRef));
 	}
 

@@ -42,5 +42,5 @@ public class DataRetrievalFailureException extends NonTransientDataAccessExcepti
 	public DataRetrievalFailureException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-	
+
 }

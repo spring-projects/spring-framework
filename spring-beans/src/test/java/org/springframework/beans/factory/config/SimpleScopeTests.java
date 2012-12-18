@@ -39,11 +39,11 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public final class SimpleScopeTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(SimpleScopeTests.class, "context.xml");
 
 	private DefaultListableBeanFactory beanFactory;
-	
+
 	@Before
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
@@ -71,7 +71,7 @@ public final class SimpleScopeTests {
 		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(beanFactory);
 		xbdr.loadBeanDefinitions(CONTEXT);
 	}
-	
+
 	@Test
 	public void testCanGetScopedObject() {
 		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");

@@ -41,9 +41,9 @@ import test.interceptor.NopInterceptor;
  * @author Chris Beams
  */
 public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemblerTests {
-	
+
 	protected static final String QUEUE_SIZE_METRIC = "QueueSize";
-	
+
 	protected static final String CACHE_ENTRIES_METRIC = "CacheEntries";
 
 	public void testDescription() throws Exception {
@@ -170,7 +170,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		assertTrue("Not included in autodetection", assembler.includeBean(proxy.getClass(), "some bean name"));
 	}
-	
+
 	public void testMetricDescription() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo metric = inf.getAttribute(QUEUE_SIZE_METRIC);
@@ -180,7 +180,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("The description for the getter operation of the queue size metric is incorrect",
 				"The QueueSize metric", operation.getDescription());
 	}
-	
+
 	public void testMetricDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(QUEUE_SIZE_METRIC).getDescriptor();
@@ -192,7 +192,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("Metric Type should be COUNTER", "COUNTER",desc.getFieldValue("metricType"));
 		assertEquals("Metric Category should be utilization", "utilization",desc.getFieldValue("metricCategory"));
 	}
-	
+
 	public void testMetricDescriptorDefaults() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(CACHE_ENTRIES_METRIC).getDescriptor();
