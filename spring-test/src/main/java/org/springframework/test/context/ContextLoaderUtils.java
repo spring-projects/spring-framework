@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -203,28 +203,25 @@ abstract class ContextLoaderUtils {
 
 		final List<ContextConfigurationAttributes> attributesList = new ArrayList<ContextConfigurationAttributes>();
 
-		Class<ContextConfiguration> annotationType = ContextConfiguration.class;
-		Class<?> declaringClass = findAnnotationDeclaringClass(annotationType, testClass);
-		Assert.notNull(declaringClass, String.format(
-			"Could not find an 'annotation declaring class' for annotation type [%s] and class [%s]",
-			annotationType.getName(), testClass.getName()));
+		Map<Class<?>, ContextConfiguration> extractedAnnotations = extractAnnotations(ContextConfiguration.class, testClass, true);
 
-		while (declaringClass != null) {
-			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
+		for (Map.Entry<Class<?>, ContextConfiguration> entry : extractedAnnotations.entrySet())  {
+
+			Class<?> clazz = entry.getKey();
+			ContextConfiguration contextConfiguration = entry.getValue();
+
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass.getName()));
+					contextConfiguration, clazz.getName()));
 			}
 
-			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
+			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(clazz, 
 				contextConfiguration);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved context configuration attributes: " + attributes);
 			}
 
 			attributesList.add(attributes);
-
-			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
 		return attributesList;
