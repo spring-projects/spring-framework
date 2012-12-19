@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -736,7 +736,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 			JmsResourceHolder resourceHolder =
 					(JmsResourceHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 			if (resourceHolder != null && resourceHolder.hasTimeout()) {
-				timeout = resourceHolder.getTimeToLiveInMillis();
+				timeout = Math.min(timeout, resourceHolder.getTimeToLiveInMillis());
 			}
 			Message message = doReceive(consumer, timeout);
 			if (session.getTransacted()) {
