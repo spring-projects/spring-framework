@@ -35,7 +35,26 @@ configure(allprojects) {
 	sourceCompatibility=1.5
 	targetCompatibility=1.5
 
-	[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:none"]
+	[compileJava, compileTestJava]*.options*.compilerArgs = [
+		"-Xlint:serial",
+		"-Xlint:varargs",
+		"-Xlint:cast",
+		"-Xlint:classfile",
+		"-Xlint:dep-ann",
+		"-Xlint:divzero",
+		"-Xlint:empty",
+		"-Xlint:finally",
+		"-Xlint:overrides",
+		"-Xlint:path",
+		"-Xlint:processing",
+		"-Xlint:static",
+		"-Xlint:try",
+		"-Xlint:-options",     // intentionally disabled
+		"-Xlint:-fallthrough", // intentionally disabled
+		"-Xlint:-rawtypes",    // TODO enable and fix warnings
+		"-Xlint:-deprecation", // TODO enable and fix warnings
+		"-Xlint:-unchecked"    // TODO enable and fix warnings
+	]
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
