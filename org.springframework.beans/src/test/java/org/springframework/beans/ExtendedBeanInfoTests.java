@@ -23,6 +23,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 
 import org.junit.Test;
 
@@ -582,6 +583,20 @@ public class ExtendedBeanInfoTests {
 		}
 	}
 
+	/**
+	 * Prior to SPR-10111 (a follow-up fix for SPR-9702), this method would throw an
+	 * IntrospectionException regarding a "type mismatch between indexed and non-indexed
+	 * methods" intermittently (approximately one out of every four times) under JDK 7
+	 * due to non-deterministic results from {@link Class#getDeclaredMethods()}.
+	 * See http://bugs.sun.com/view_bug.do?bug_id=7023180
+	 * @see #cornerSpr9702()
+	 */
+	@Test
+	public void cornerSpr10111() throws Exception {
+		new ExtendedBeanInfo(Introspector.getBeanInfo(BigDecimal.class));
+	}
+
+
 	@Test
 	public void subclassWriteMethodWithCovariantReturnType() throws IntrospectionException {
 		@SuppressWarnings("unused") class B {
@@ -694,7 +709,7 @@ public class ExtendedBeanInfoTests {
 
 		for (PropertyDescriptor pd : ebi.getPropertyDescriptors()) {
 			if (pd.getName().equals("foo")) {
-				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", int.class)));
+				assertThat(pd.getWriteMethod(), is(C.class.getMethod("setFoo", String.class)));
 				return;
 			}
 		}
@@ -732,7 +747,7 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasReadMethodForProperty(ebi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(ebi, "dateFormat"), is(true));
 		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(true));
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(trueUntilJdk17()));
 	}
 
 	@Test
@@ -943,4 +958,5 @@ public class ExtendedBeanInfoTests {
 			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
 		}
 	}
+
 }

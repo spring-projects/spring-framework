@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
@@ -115,6 +116,14 @@ class ExtendedBeanInfo implements BeanInfo {
 				matches.add(method);
 			}
 		}
+		// sort non-void returning write methods to guard against the ill effects of
+		// non-deterministic sorting of methods returned from Class#getDeclaredMethods
+		// under JDK 7. See http://bugs.sun.com/view_bug.do?bug_id=7023180
+		Collections.sort(matches, new Comparator<Method>() {
+			public int compare(Method m1, Method m2) {
+				return m2.toString().compareTo(m1.toString());
+			}
+		});
 		return matches;
 	}
 
@@ -260,7 +269,7 @@ class SimpleNonIndexedPropertyDescriptor extends PropertyDescriptor {
 	public SimpleNonIndexedPropertyDescriptor(String propertyName,
 			Method readMethod, Method writeMethod) throws IntrospectionException {
 
-		super(propertyName, readMethod, writeMethod);
+		super(propertyName, null, null);
 		this.setReadMethod(readMethod);
 		this.setWriteMethod(writeMethod);
 		this.propertyType = findPropertyType(readMethod, writeMethod);
@@ -349,7 +358,7 @@ class SimpleIndexedPropertyDescriptor extends IndexedPropertyDescriptor {
 				Method indexedReadMethod, Method indexedWriteMethod)
 			throws IntrospectionException {
 
-		super(propertyName, readMethod, writeMethod, indexedReadMethod, indexedWriteMethod);
+		super(propertyName, null, null, null, null);
 		this.setReadMethod(readMethod);
 		this.setWriteMethod(writeMethod);
 		this.propertyType = findPropertyType(readMethod, writeMethod);
@@ -494,7 +503,7 @@ class PropertyDescriptorUtils {
 		// copy all attributes (emulating behavior of private FeatureDescriptor#addTable)
 		Enumeration<String> keys = source.attributeNames();
 		while (keys.hasMoreElements()) {
-			String key = (String)keys.nextElement();
+			String key = keys.nextElement();
 			target.setValue(key, source.getValue(key));
 		}
 
