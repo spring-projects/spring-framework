@@ -52,7 +52,7 @@ public abstract class ValidationUtils {
 	 * the validation of the supplied object's type
 	 */
 	public static void invokeValidator(Validator validator, Object obj, Errors errors) {
-		invokeValidator(validator, obj, errors, (Class[]) null);
+		invokeValidator(validator, obj, errors, (Object[]) null);
 	}
 
 	/**

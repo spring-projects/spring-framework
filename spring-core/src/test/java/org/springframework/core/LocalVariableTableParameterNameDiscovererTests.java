@@ -185,7 +185,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("x", names[1]);
 		assertEquals("i", names[2]);
 
-		m = clazz.getMethod("getDate", null);
+		m = clazz.getMethod("getDate");
 		names = discoverer.getParameterNames(m);
 		assertEquals(0, names.length);
 
@@ -202,7 +202,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		Class clazz = Component.class;
 		String methodName = "list";
 
-		Method m = clazz.getMethod(methodName, null);
+		Method m = clazz.getMethod(methodName);
 		String[] names = discoverer.getParameterNames(m);
 		assertNull(names);
 
