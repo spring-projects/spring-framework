@@ -3,6 +3,7 @@ Bundle-Name: Spring JMS
 Bundle-Vendor: SpringSource
 Bundle-ManifestVersion: 2
 Import-Template: 
+ com.fasterxml.jackson.*;version="[2.0.0, 3.0.0)";resolution:=optional,
  javax.jms.*;version="[1.1.0, 2.0.0)",
  javax.naming.*;version="0";resolution:=optional,
  javax.resource.*;version="[1.5.0, 2.0.0)";resolution:=optional,

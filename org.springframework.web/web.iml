@@ -155,22 +155,22 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-databind/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-databind-2.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-core/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-core-2.0.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-databind/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-databind-2.0.2-sources.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-core/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-core-2.0.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-core/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-core-2.0.2.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-databind/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-databind-2.0.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-core/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-core-2.0.2-sources.jar!/" />
+          <root url="jar://$IVY_CACHE$/com.fasterxml.jackson.core/com.springsource.com.fasterxml.jackson.core.jackson-databind/2.0.2/com.springsource.com.fasterxml.jackson.core.jackson-databind-2.0.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
