@@ -1444,7 +1444,6 @@ public class DataBinderTests extends TestCase {
 		assertEquals("badName", nameError.getCode());
 	}
 
-	@SuppressWarnings("unchecked")
 	public void testBindingWithResortedList() {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
@@ -1590,6 +1589,7 @@ public class DataBinderTests extends TestCase {
 		mpv.add("f[list][1]", "secondValue");
 		binder.bind(mpv);
 		assertFalse(binder.getBindingResult().hasErrors());
+		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) form.getF().get("list");
 		assertEquals("firstValue", list.get(0));
 		assertEquals("secondValue", list.get(1));

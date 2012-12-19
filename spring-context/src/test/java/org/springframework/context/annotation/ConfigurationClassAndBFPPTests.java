@@ -99,14 +99,11 @@ public class ConfigurationClassAndBFPPTests {
 
 
 	@Test
-	@SuppressWarnings("static-access")
 	public void staticBeanMethodsDoNotRespectScoping() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithStaticBeanMethod.class);
 		ctx.refresh();
-
-		ConfigWithStaticBeanMethod config = ctx.getBean(ConfigWithStaticBeanMethod.class);
-		assertThat(config.testBean(), not(sameInstance(config.testBean())));
+		assertThat(ConfigWithStaticBeanMethod.testBean(), not(sameInstance(ConfigWithStaticBeanMethod.testBean())));
 	}
 
 

@@ -70,8 +70,8 @@ public class SimpleMapScope implements Scope, Serializable {
 	}
 
 	public void close() {
-		for (Iterator it = this.callbacks.iterator(); it.hasNext();) {
-			Runnable runnable = (Runnable) it.next();
+		for (Iterator<Runnable> it = this.callbacks.iterator(); it.hasNext();) {
+			Runnable runnable = it.next();
 			runnable.run();
 		}
 	}
