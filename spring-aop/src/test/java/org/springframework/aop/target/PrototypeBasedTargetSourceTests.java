@@ -62,6 +62,8 @@ public final class PrototypeBasedTargetSourceTests {
 
 	private static class TestTargetSource extends AbstractPrototypeBasedTargetSource {
 
+		private static final long serialVersionUID = 1L;
+
 		/**
 		 * Nonserializable test field to check that subclass
 		 * state can't prevent serialization from working

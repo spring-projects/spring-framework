@@ -20,6 +20,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
 
 import test.util.TimeStamped;
 
+@SuppressWarnings("serial")
 public class TimestampIntroductionInterceptor extends DelegatingIntroductionInterceptor
 	implements TimeStamped {
 

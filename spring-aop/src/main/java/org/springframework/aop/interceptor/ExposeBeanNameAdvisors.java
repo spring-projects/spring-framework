@@ -123,6 +123,7 @@ public abstract class ExposeBeanNameAdvisors {
 	/**
 	 * Introduction that exposes the specified bean name as invocation attribute.
 	 */
+	@SuppressWarnings("serial")
 	private static class ExposeBeanNameIntroduction extends DelegatingIntroductionInterceptor implements NamedBean {
 
 		private final String beanName;

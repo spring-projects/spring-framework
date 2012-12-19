@@ -23,6 +23,7 @@ import org.springframework.aop.support.DefaultIntroductionAdvisor;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class LockMixinAdvisor extends DefaultIntroductionAdvisor {
 
 	public LockMixinAdvisor() {

@@ -440,7 +440,7 @@ public class PortletAnnotationControllerTests extends TestCase {
 	}
 
 	public void testMavResolver() throws Exception {
-		@SuppressWarnings("serial") DispatcherPortlet portlet = new DispatcherPortlet() {
+		DispatcherPortlet portlet = new DispatcherPortlet() {
 			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();

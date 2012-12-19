@@ -42,6 +42,7 @@ package org.springframework.transaction;
  * @see java.sql.Statement#setQueryTimeout
  * @see java.sql.SQLException
  */
+@SuppressWarnings("serial")
 public class TransactionTimedOutException extends TransactionException {
 
 	/**

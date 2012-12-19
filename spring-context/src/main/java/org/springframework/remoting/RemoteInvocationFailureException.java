@@ -25,6 +25,7 @@ package org.springframework.remoting;
  * @since 2.5
  * @see RemoteProxyFailureException
  */
+@SuppressWarnings("serial")
 public class RemoteInvocationFailureException extends RemoteAccessException {
 
 	/**

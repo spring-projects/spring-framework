@@ -75,6 +75,7 @@ import org.springframework.web.util.UriUtils;
  * @since 3.0
  * @see ParamTag
  */
+@SuppressWarnings("serial")
 public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	private static final String URL_TEMPLATE_DELIMITER_PREFIX = "{";

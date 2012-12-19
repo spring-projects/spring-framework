@@ -40,6 +40,7 @@ import org.springframework.transaction.TransactionException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OpenJpaDialect extends DefaultJpaDialect {
 
 	@Override

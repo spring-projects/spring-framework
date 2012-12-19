@@ -94,6 +94,7 @@ import org.springframework.util.StringUtils;
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
+@SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
@@ -992,7 +993,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Minimal id reference to the factory.
 	 * Resolved to the actual factory instance on deserialization.
 	 */
-	@SuppressWarnings("serial")
 	private static class SerializedBeanFactoryReference implements Serializable {
 
 		private final String id;
@@ -1020,7 +1020,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	@SuppressWarnings("serial")
 	private class DependencyObjectFactory implements ObjectFactory<Object>, Serializable {
 
 		private final DependencyDescriptor descriptor;
@@ -1042,7 +1041,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	@SuppressWarnings("serial")
 	private class DependencyProvider extends DependencyObjectFactory implements Provider<Object> {
 
 		public DependencyProvider(DependencyDescriptor descriptor, String beanName) {

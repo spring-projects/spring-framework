@@ -30,6 +30,7 @@ package org.springframework.dao;
  * @see DeadlockLoserDataAccessException
  * @see OptimisticLockingFailureException
  */
+@SuppressWarnings("serial")
 public class PessimisticLockingFailureException extends ConcurrencyFailureException {
 
 	/**

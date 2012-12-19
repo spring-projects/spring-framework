@@ -29,6 +29,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
  */
+@SuppressWarnings("serial")
 public class HibernateOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 
 	public HibernateOptimisticLockingFailureException(StaleObjectStateException ex) {

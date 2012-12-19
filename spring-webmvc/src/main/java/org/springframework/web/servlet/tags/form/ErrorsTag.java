@@ -43,6 +43,7 @@ import org.springframework.util.StringUtils;
  * @author Rick Evans
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**

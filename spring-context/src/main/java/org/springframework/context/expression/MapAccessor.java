@@ -66,6 +66,7 @@ public class MapAccessor implements PropertyAccessor {
 	 * Exception thrown from {@code read} in order to reset a cached
 	 * PropertyAccessor, allowing other accessors to have a try.
 	 */
+	@SuppressWarnings("serial")
 	private static class MapAccessException extends AccessException {
 
 		private final String key;

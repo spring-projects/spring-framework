@@ -54,6 +54,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 	private SelectTag selectTag;
 	private OptionsTag tag;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionsTag() {
 			protected TagWriter createTagWriter() {

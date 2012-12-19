@@ -49,6 +49,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cacheUnresolved = true;
 
 	/** Map from view key to View instance */
+	@SuppressWarnings("serial")
 	private final Map<Object, View> viewCache =
 			new LinkedHashMap<Object, View>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override

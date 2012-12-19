@@ -87,6 +87,7 @@ public abstract class ClassFilters {
 	/**
 	 * ClassFilter implementation for a union of the given ClassFilters.
 	 */
+	@SuppressWarnings("serial")
 	private static class UnionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;
@@ -120,6 +121,7 @@ public abstract class ClassFilters {
 	/**
 	 * ClassFilter implementation for an intersection of the given ClassFilters.
 	 */
+	@SuppressWarnings("serial")
 	private static class IntersectionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;

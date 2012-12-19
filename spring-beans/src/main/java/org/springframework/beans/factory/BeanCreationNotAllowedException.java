@@ -24,6 +24,7 @@ package org.springframework.beans.factory;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class BeanCreationNotAllowedException extends BeanCreationException {
 
 	/**

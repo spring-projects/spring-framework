@@ -23,6 +23,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public abstract class UncategorizedDataAccessException extends NonTransientDataAccessException {
 
 	/**

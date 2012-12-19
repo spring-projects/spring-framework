@@ -27,6 +27,7 @@ import test.beans.TestBean;
  * @author Juergen Hoeller
  * @since 09.11.2003
  */
+@SuppressWarnings("serial")
 public class ConstructorDependenciesBean implements Serializable {
 
 	private int age;

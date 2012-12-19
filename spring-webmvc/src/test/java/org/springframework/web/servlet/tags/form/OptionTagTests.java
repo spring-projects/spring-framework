@@ -51,6 +51,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private SelectTag parentTag;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
 			protected TagWriter createTagWriter() {
@@ -529,6 +530,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class RulesVariant implements Serializable {
 
 		private String rules;

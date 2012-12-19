@@ -32,6 +32,7 @@ public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 
 	private SelectTag parentTag;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
 			protected TagWriter createTagWriter() {

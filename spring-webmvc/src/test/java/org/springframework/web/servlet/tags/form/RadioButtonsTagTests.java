@@ -53,6 +53,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonsTag() {
 			protected TagWriter createTagWriter() {

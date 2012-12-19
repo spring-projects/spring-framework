@@ -24,6 +24,7 @@ package org.springframework.dao;
  * @since 2.5
  * @see java.sql.SQLTransientConnectionException
  */
+@SuppressWarnings("serial")
 public class TransientDataAccessResourceException extends TransientDataAccessException {
 
 	/**

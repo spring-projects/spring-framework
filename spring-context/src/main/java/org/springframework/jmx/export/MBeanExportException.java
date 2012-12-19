@@ -25,6 +25,7 @@ import org.springframework.jmx.JmxException;
  * @since 2.0
  * @see MBeanExportOperations
  */
+@SuppressWarnings("serial")
 public class MBeanExportException extends JmxException {
 
 	/**

@@ -25,6 +25,7 @@ import java.beans.PropertyChangeEvent;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class ConversionNotSupportedException extends TypeMismatchException {
 
 	/**

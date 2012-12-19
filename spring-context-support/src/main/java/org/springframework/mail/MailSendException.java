@@ -30,6 +30,7 @@ import org.springframework.util.ObjectUtils;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class MailSendException extends MailException {
 
 	private transient final Map<Object, Exception> failedMessages;

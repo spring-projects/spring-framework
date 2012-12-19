@@ -120,6 +120,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestEvent extends ApplicationEvent {
 
 		public TestEvent(Object source) {
@@ -128,6 +129,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static final class TestEventWithNoValidOneArgObjectCtor extends ApplicationEvent {
 
 		public TestEventWithNoValidOneArgObjectCtor() {

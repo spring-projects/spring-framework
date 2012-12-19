@@ -34,6 +34,7 @@ public class ServletRequestAttributesTests {
 
 	private static final String KEY = "ThatThingThatThing";
 
+	@SuppressWarnings("serial")
 	private static final Serializable VALUE = new Serializable() {
 	};
 

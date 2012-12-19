@@ -24,6 +24,7 @@ package org.springframework.beans;
  * @author Alef Arendsen
  * @author Arjen Poutsma
  */
+@SuppressWarnings("serial")
 public class NotWritablePropertyException extends InvalidPropertyException {
 
 	private String[] possibleMatches = null;

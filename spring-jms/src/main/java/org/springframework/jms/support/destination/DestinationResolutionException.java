@@ -25,6 +25,7 @@ import org.springframework.jms.JmsException;
  * @since 1.1
  * @see DestinationResolver
  */
+@SuppressWarnings("serial")
 public class DestinationResolutionException extends JmsException {
 
 	/**

@@ -32,6 +32,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class SpringTransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {

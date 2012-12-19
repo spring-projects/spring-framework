@@ -24,6 +24,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class BeanExpressionException extends FatalBeanException {
 
 	/**

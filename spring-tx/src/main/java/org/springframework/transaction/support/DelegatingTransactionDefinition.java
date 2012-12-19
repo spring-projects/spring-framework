@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public abstract class DelegatingTransactionDefinition implements TransactionDefinition, Serializable {
 
 	private final TransactionDefinition targetDefinition;

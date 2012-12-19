@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 13 May 2001
  */
+@SuppressWarnings("serial")
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	private final List<PropertyValue> propertyValueList;

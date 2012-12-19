@@ -48,6 +48,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	private ErrorsTag tag;
 
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new ErrorsTag() {
 			protected TagWriter createTagWriter() {

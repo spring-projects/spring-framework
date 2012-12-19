@@ -62,6 +62,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  */
 public class LocalSessionFactoryBeanTests extends TestCase {
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final List invocations = new ArrayList();
@@ -93,6 +94,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheRegionFactory() throws Exception {
 		final RegionFactory regionFactory = new NoCachingRegionFactory(null);
 		final List invocations = new ArrayList();
@@ -124,6 +126,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheProvider() throws Exception {
 		final CacheProvider cacheProvider = new NoCacheProvider();
 		final List invocations = new ArrayList();
@@ -156,6 +159,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithTransactionAwareDataSource() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final List invocations = new ArrayList();
@@ -189,6 +193,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(0));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingResources() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		MockControl tmControl = MockControl.createControl(TransactionManager.class);
@@ -232,6 +237,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals("newSessionFactory", invocations.get(2));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndMappingJarLocations() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
@@ -263,6 +269,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertTrue(invocations.contains("newSessionFactory"));
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithDataSourceAndProperties() throws Exception {
 		final DriverManagerDataSource ds = new DriverManagerDataSource();
 		final Set invocations = new HashSet();
@@ -368,6 +375,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		factoryControl.verify();
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEntityInterceptor() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() {
@@ -394,6 +402,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithNamingStrategy() throws Exception {
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
 			protected Configuration newConfiguration() {
@@ -417,6 +426,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheStrategies() throws Exception {
 		final Properties registeredClassCache = new Properties();
 		final Properties registeredCollectionCache = new Properties();
@@ -452,6 +462,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(collectionCache, registeredCollectionCache);
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithCacheStrategiesAndRegions() throws Exception {
 		final Properties registeredClassCache = new Properties();
 		final Properties registeredCollectionCache = new Properties();
@@ -486,6 +497,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(collectionCache, registeredCollectionCache);
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEventListeners() throws Exception {
 		final Map registeredListeners = new HashMap();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
@@ -510,6 +522,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		assertEquals(listeners, registeredListeners);
 	}
 
+	@SuppressWarnings("serial")
 	public void testLocalSessionFactoryBeanWithEventListenerSet() throws Exception {
 		final Map registeredListeners = new HashMap();
 		LocalSessionFactoryBean sfb = new LocalSessionFactoryBean() {
@@ -576,6 +589,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class FilterTestLocalSessionFactoryBean extends LocalSessionFactoryBean {
 
 		public List registeredFilterDefinitions = new LinkedList();
@@ -605,6 +619,7 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class DummyMergeEventListener implements MergeEventListener {
 
 		public void onMerge(MergeEvent event) throws HibernateException {

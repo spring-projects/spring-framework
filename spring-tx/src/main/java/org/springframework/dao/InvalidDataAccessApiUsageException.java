@@ -25,6 +25,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class InvalidDataAccessApiUsageException extends NonTransientDataAccessException {
 
 	/**

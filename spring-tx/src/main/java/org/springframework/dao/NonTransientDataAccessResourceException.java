@@ -23,6 +23,7 @@ package org.springframework.dao;
  * @since 2.5
  * @see java.sql.SQLNonTransientConnectionException
  */
+@SuppressWarnings("serial")
 public class NonTransientDataAccessResourceException extends NonTransientDataAccessException {
 
 	/**

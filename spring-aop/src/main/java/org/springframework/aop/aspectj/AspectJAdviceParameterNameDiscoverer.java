@@ -790,6 +790,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Thrown in response to an ambiguous binding being detected when
 	 * trying to resolve a method's parameter names.
 	 */
+	@SuppressWarnings("serial")
 	public static class AmbiguousBindingException extends RuntimeException {
 
 		/**

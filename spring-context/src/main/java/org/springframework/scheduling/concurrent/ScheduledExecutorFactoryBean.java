@@ -60,6 +60,7 @@ import org.springframework.util.ObjectUtils;
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ScheduledExecutorService> {
 

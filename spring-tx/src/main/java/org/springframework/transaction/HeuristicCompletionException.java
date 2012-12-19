@@ -24,6 +24,7 @@ package org.springframework.transaction;
  * @author Juergen Hoeller
  * @since 17.03.2003
  */
+@SuppressWarnings("serial")
 public class HeuristicCompletionException extends TransactionException {
 
 	/**

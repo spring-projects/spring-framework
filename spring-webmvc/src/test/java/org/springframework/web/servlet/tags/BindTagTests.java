@@ -976,6 +976,7 @@ public class BindTagTests extends AbstractTagTests {
 	/**
 	 * SPR-4022
 	 */
+	@SuppressWarnings("serial")
 	public void testNestingInFormTag() throws JspException {
 		PageContext pc = createPageContext();
 		TestBean tb = new TestBean();

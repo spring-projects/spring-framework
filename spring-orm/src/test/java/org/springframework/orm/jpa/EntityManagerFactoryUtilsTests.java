@@ -120,6 +120,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 	 * Test method for
 	 * 'org.springframework.orm.jpa.EntityManagerFactoryUtils.convertJpaAccessException(PersistenceException)'
 	 */
+	@SuppressWarnings("serial")
 	public void testConvertJpaPersistenceException() {
 		EntityNotFoundException entityNotFound = new EntityNotFoundException();
 		assertSame(JpaObjectRetrievalFailureException.class,

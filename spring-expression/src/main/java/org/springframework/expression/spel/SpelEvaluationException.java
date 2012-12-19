@@ -25,6 +25,7 @@ import org.springframework.expression.EvaluationException;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class SpelEvaluationException extends EvaluationException {
 
 	private SpelMessage message;

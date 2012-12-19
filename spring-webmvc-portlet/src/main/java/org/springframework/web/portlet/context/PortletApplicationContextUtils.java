@@ -241,6 +241,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current request object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
 
 		public PortletRequest getObject() {
@@ -257,6 +258,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current session object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
 
 		public PortletSession getObject() {
@@ -273,6 +275,7 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current WebRequest object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
 		public WebRequest getObject() {

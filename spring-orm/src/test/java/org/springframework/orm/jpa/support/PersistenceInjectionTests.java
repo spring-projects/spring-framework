@@ -705,6 +705,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
 
 		@Override
@@ -762,6 +763,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 
 	@Repository
+	@SuppressWarnings("serial")
 	public static class DefaultPublicPersistenceContextSetter implements Serializable {
 
 		private EntityManager em;
@@ -780,6 +782,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
 
 		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
@@ -872,6 +875,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class DummyInvocationHandler implements InvocationHandler, Serializable {
 
 		public static boolean closed;

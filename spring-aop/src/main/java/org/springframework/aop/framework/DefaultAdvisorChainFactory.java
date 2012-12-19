@@ -43,6 +43,7 @@ import org.springframework.aop.support.MethodMatchers;
  * @author Adrian Colyer
  * @since 2.0.3
  */
+@SuppressWarnings("serial")
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(

@@ -25,6 +25,7 @@ package org.springframework.aop.framework.adapter;
  * @see org.aopalliance.aop.Advice
  * @see org.springframework.aop.Advisor
  */
+@SuppressWarnings("serial")
 public class UnknownAdviceTypeException extends IllegalArgumentException {
 
 	/**

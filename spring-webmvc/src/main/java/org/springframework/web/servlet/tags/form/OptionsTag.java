@@ -35,6 +35,7 @@ import org.springframework.web.util.TagUtils;
  * @author Scott Andrews
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**

@@ -27,6 +27,7 @@ import org.springframework.core.NestedRuntimeException;
  * @see MultipartResolver#resolveMultipart
  * @see org.springframework.web.multipart.support.MultipartFilter
  */
+@SuppressWarnings("serial")
 public class MultipartException extends NestedRuntimeException {
 
 	/**

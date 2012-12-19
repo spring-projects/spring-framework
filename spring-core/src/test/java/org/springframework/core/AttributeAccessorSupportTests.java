@@ -32,6 +32,7 @@ public class AttributeAccessorSupportTests extends TestCase {
 
 	private AttributeAccessor attributeAccessor;
 
+	@SuppressWarnings("serial")
 	protected void setUp() throws Exception {
 		this.attributeAccessor = new AttributeAccessorSupport() {
 		};

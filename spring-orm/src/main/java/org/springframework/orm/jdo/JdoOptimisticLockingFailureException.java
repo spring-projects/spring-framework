@@ -29,6 +29,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
  * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
+@SuppressWarnings("serial")
 public class JdoOptimisticLockingFailureException extends ObjectOptimisticLockingFailureException {
 
 	public JdoOptimisticLockingFailureException(JDOOptimisticVerificationException ex) {

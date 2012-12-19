@@ -1851,6 +1851,7 @@ public final class BeanWrapperTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TypedReadOnlyMap extends ReadOnlyMap<String, TestBean> {
 
 		public TypedReadOnlyMap() {

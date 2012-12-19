@@ -23,6 +23,7 @@ package org.springframework.web.multipart;
  * @author Juergen Hoeller
  * @since 1.0.1
  */
+@SuppressWarnings("serial")
 public class MaxUploadSizeExceededException extends MultipartException {
 
 	private final long maxUploadSize;

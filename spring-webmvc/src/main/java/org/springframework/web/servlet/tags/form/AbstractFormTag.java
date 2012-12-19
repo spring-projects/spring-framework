@@ -38,6 +38,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**

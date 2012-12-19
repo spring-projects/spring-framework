@@ -707,6 +707,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	/**
 	 * HTTP-specific subclass of UriTemplate, overriding the encode method.
 	 */
+	@SuppressWarnings("serial")
 	private static class HttpUrlTemplate extends UriTemplate {
 
 		public HttpUrlTemplate(String uriTemplate) {

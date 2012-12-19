@@ -32,6 +32,7 @@ import org.springframework.util.ClassUtils;
  * @author Rob Harrop
  * @since 14.03.2003
  */
+@SuppressWarnings("serial")
 public class ProxyFactory extends ProxyCreatorSupport {
 
 	/**

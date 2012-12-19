@@ -47,6 +47,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	private MockHttpServletRequest request;
 
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new FormTag() {
 			protected TagWriter createTagWriter() {

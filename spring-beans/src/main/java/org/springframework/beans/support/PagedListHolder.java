@@ -47,6 +47,7 @@ import org.springframework.util.Assert;
  * @see #getPageList()
  * @see org.springframework.beans.support.MutableSortDefinition
  */
+@SuppressWarnings("serial")
 public class PagedListHolder<E> implements Serializable {
 
 	public static final int DEFAULT_PAGE_SIZE = 10;

@@ -32,6 +32,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Juergen Hoeller
  * @see MethodNameResolver#getHandlerMethodName(javax.servlet.http.HttpServletRequest)
  */
+@SuppressWarnings("serial")
 public class NoSuchRequestHandlingMethodException extends ServletException {
 
 	private String methodName;

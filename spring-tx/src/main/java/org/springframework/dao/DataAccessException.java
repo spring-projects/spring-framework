@@ -35,6 +35,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public abstract class DataAccessException extends NestedRuntimeException {
 
 	/**

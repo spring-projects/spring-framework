@@ -29,6 +29,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
  */
+@SuppressWarnings("serial")
 public class HibernateObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 
 	public HibernateObjectRetrievalFailureException(UnresolvableObjectException ex) {

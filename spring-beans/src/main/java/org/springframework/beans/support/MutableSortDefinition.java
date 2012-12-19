@@ -29,6 +29,7 @@ import org.springframework.util.StringUtils;
  * @since 26.05.2003
  * @see #setToggleAscendingOnProperty
  */
+@SuppressWarnings("serial")
 public class MutableSortDefinition implements SortDefinition, Serializable {
 
 	private String property = "";

@@ -65,6 +65,7 @@ import org.springframework.util.ClassUtils;
  * since Oracle end-of-lifed OC4J in favor of WebLogic
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class OC4JJtaTransactionManager extends JtaTransactionManager {
 
 	private static final String TRANSACTION_UTILITY_CLASS_NAME =

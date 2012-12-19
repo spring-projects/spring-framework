@@ -31,6 +31,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @since 1.2
  * @see javax.resource.cci.ResultSet
  */
+@SuppressWarnings("serial")
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 
 	/**

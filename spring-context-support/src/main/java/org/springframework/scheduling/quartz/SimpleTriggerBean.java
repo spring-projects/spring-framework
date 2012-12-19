@@ -60,6 +60,7 @@ import org.springframework.core.Constants;
  * @see SchedulerFactoryBean#setJobDetails
  * @see CronTriggerBean
  */
+@SuppressWarnings("serial")
 public class SimpleTriggerBean extends SimpleTrigger
 		implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 

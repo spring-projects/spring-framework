@@ -27,6 +27,7 @@ package org.springframework.dao;
  * @since 2.5
  * @see java.sql.SQLRecoverableException
  */
+@SuppressWarnings("serial")
 public class RecoverableDataAccessException extends DataAccessException {
 
 	/**

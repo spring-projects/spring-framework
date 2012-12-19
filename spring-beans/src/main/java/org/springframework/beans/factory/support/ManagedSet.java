@@ -30,6 +30,7 @@ import org.springframework.beans.Mergeable;
  * @author Rob Harrop
  * @since 21.01.2004
  */
+@SuppressWarnings("serial")
 public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMetadataElement {
 
 	private Object source;

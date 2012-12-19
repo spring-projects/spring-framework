@@ -115,6 +115,7 @@ public class TrickyAspectJPointcutExpressionTests {
 
 	}
 
+	@SuppressWarnings("serial")
 	public static class TestException extends RuntimeException {
 
 		public TestException(String string) {

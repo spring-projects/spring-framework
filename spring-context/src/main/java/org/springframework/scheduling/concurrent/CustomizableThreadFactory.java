@@ -32,6 +32,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see #setThreadNamePrefix
  * @see #setThreadPriority
  */
+@SuppressWarnings("serial")
 public class CustomizableThreadFactory extends CustomizableThreadCreator implements ThreadFactory {
 
 	/**

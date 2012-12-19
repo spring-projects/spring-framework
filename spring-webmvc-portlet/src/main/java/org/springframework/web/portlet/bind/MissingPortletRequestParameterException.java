@@ -22,6 +22,7 @@ package org.springframework.web.portlet.bind;
  * @author Juergen Hoeller
  * @since 2.0.2
  */
+@SuppressWarnings("serial")
 public class MissingPortletRequestParameterException extends PortletRequestBindingException {
 
 	private final String parameterName;

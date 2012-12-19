@@ -28,6 +28,7 @@ import org.springframework.core.NestedCheckedException;
  * @author Thomas Risberg
  * @since 1.0.1
  */
+@SuppressWarnings("serial")
 public class MetaDataAccessException extends NestedCheckedException {
 
 	/**

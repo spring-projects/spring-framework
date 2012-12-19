@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see <a href="http://bitworking.org/projects/URI-Templates/">URI Templates</a>
  */
+@SuppressWarnings("serial")
 public class UriTemplate implements Serializable {
 
 	/** Captures URI template variable names. */

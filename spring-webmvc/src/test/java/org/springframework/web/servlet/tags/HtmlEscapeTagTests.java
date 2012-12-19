@@ -30,6 +30,7 @@ import org.springframework.web.util.WebUtils;
  */
 public class HtmlEscapeTagTests extends AbstractTagTests {
 
+	@SuppressWarnings("serial")
 	public void testHtmlEscapeTag() throws JspException {
 		PageContext pc = createPageContext();
 		HtmlEscapeTag tag = new HtmlEscapeTag();
@@ -107,6 +108,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertTrue("Correctly disabled", !tag.getRequestContext().isDefaultHtmlEscape());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBody() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
@@ -124,6 +126,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test text", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithHtmlEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
@@ -142,6 +145,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("test &amp; text", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
@@ -160,6 +164,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		assertEquals("Correct content", "\\' test & text \\\\", result.toString());
 	}
 
+	@SuppressWarnings("serial")
 	public void testEscapeBodyWithHtmlEscapeAndJavaScriptEscape() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();

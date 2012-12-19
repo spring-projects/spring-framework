@@ -64,6 +64,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 	private TestBeanWithRealCountry bean;
 
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new SelectTag() {
 			protected TagWriter createTagWriter() {

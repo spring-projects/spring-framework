@@ -24,6 +24,7 @@ import org.springframework.beans.BeansException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class BeanNotOfRequiredTypeException extends BeansException {
 
 	/** The name of the instance that was of the wrong type */

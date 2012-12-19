@@ -29,6 +29,7 @@ import org.springframework.transaction.support.DelegatingTransactionDefinition;
  * @author Juergen Hoeller
  * @since 1.2
  */
+@SuppressWarnings("serial")
 public abstract class DelegatingTransactionAttribute extends DelegatingTransactionDefinition
 		implements TransactionAttribute, Serializable {
 

@@ -36,6 +36,7 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	private StaticListableBeanFactory beanFactory;
 	private DelegatingPhaseListenerMulticaster delPhaseListener;
 
+	@SuppressWarnings("serial")
 	protected void setUp() {
 		facesContext = new MockFacesContext();
 		beanFactory = new StaticListableBeanFactory();
@@ -80,6 +81,7 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestListener implements PhaseListener {
 
 		boolean beforeCalled = false;

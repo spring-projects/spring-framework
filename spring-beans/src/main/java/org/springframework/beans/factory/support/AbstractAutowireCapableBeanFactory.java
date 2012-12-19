@@ -1643,6 +1643,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	 * Special DependencyDescriptor variant for autowire="byType".
 	 * Always optional; never considering the parameter name for choosing a primary candidate.
 	 */
+	@SuppressWarnings("serial")
 	private static class AutowireByTypeDependencyDescriptor extends DependencyDescriptor {
 
 		public AutowireByTypeDependencyDescriptor(MethodParameter methodParameter, boolean eager) {

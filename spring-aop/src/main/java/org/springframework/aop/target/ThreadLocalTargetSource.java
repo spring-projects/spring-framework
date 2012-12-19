@@ -50,6 +50,8 @@ import org.springframework.core.NamedThreadLocal;
 public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * ThreadLocal holding the target associated with the current
 	 * thread. Unlike most ThreadLocals, which are static, this variable

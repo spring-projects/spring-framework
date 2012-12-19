@@ -240,6 +240,7 @@ public class DefaultConversionTests {
 		conversionService.convert(Integer.valueOf(1), CustomNumber.class);
 	}
 
+	@SuppressWarnings("serial")
 	public static class CustomNumber extends Number {
 
 		@Override

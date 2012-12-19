@@ -28,6 +28,7 @@ import org.springframework.core.style.StylerUtils;
  * @author Juergen Hoeller
  * @since 3.0.5
  */
+@SuppressWarnings("serial")
 public class NoHandlerFoundException extends PortletException {
 
 	/**

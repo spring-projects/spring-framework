@@ -23,6 +23,7 @@ package org.springframework.transaction.interceptor;
  * @author Rod Johnson
  * @since 09.04.2003
  */
+@SuppressWarnings("serial")
 public class NoRollbackRuleAttribute extends RollbackRuleAttribute {
 
 	/**

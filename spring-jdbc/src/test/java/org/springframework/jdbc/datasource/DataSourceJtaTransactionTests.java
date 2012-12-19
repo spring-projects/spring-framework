@@ -651,6 +651,7 @@ public class DataSourceJtaTransactionTests extends TestCase {
 		MockControl conControl = MockControl.createControl(Connection.class);
 		Connection con = (Connection) conControl.getMock();
 
+		@SuppressWarnings("serial")
 		JtaTransactionManager ptm = new JtaTransactionManager(ut) {
 			protected void doRegisterAfterCompletionWithJtaTransaction(
 					JtaTransactionObject txObject, final List synchronizations) {

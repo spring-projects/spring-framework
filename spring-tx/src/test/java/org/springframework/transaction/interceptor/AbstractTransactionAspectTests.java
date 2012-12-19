@@ -381,6 +381,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 	 * @param ex exception to be thrown by the target
 	 * @param shouldRollback whether this should cause a transaction rollback
 	 */
+	@SuppressWarnings("serial")
 	protected void doTestRollbackOnException(
 			final Exception ex, final boolean shouldRollback, boolean rollbackException) throws Exception {
 

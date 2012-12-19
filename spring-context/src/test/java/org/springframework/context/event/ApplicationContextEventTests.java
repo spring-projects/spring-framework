@@ -190,6 +190,7 @@ public class ApplicationContextEventTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {
@@ -198,6 +199,7 @@ public class ApplicationContextEventTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyOtherEvent extends ApplicationEvent {
 
 		public MyOtherEvent(Object source) {

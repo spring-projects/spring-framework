@@ -23,6 +23,7 @@ package org.springframework.beans.factory;
  * @author Juergen Hoeller
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class BeanCurrentlyInCreationException extends BeanCreationException {
 
 	/**

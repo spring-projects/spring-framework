@@ -35,6 +35,7 @@ import org.springframework.aop.support.AbstractPointcutAdvisor;
  * @see #setTransactionInterceptor
  * @see TransactionProxyFactoryBean
  */
+@SuppressWarnings("serial")
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
 	private TransactionInterceptor transactionInterceptor;

@@ -74,6 +74,7 @@ public class MappingJackson2MessageConverterTests {
 				"bar");
 
 		final byte[] bytes = "{\"foo\":\"bar\"}".getBytes();
+		@SuppressWarnings("serial")
 		Capture<byte[]> captured = new Capture<byte[]>() {
 			@Override
 			public void setValue(byte[] value) {

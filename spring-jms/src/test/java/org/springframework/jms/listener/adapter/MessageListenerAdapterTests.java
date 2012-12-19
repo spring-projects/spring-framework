@@ -670,6 +670,7 @@ public class MessageListenerAdapterTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SerializableObject implements Serializable {
 	}
 

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class TransactionalService implements Serializable {
 
 	@Transactional("synch")

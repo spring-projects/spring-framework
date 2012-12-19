@@ -31,6 +31,7 @@ import org.springframework.aop.AfterReturningAdvice;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 class AfterReturningAdviceAdapter implements AdvisorAdapter, Serializable {
 
 	public boolean supportsAdvice(Advice advice) {

@@ -25,6 +25,7 @@ import java.io.Serializable;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class SerializableNopInterceptor extends NopInterceptor implements Serializable {
 
 	/**

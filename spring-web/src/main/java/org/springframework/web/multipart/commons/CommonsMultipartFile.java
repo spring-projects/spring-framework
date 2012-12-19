@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 29.09.2003
  * @see CommonsMultipartResolver
  */
+@SuppressWarnings("serial")
 public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);

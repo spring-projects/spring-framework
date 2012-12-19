@@ -217,6 +217,7 @@ public class MapToMapConverterTests {
 		assertEquals(NoDefaultConstructorMap.class, result.getClass());
 	}
 
+	@SuppressWarnings("serial")
 	public static class NoDefaultConstructorMap<K, V> extends HashMap<K, V> {
 		public NoDefaultConstructorMap(Map<? extends K, ? extends V> m) {
 			super(m);

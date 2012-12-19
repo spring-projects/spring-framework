@@ -397,6 +397,7 @@ public class CommonsMultipartResolverTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MockFileItem implements FileItem {
 
 		private String fieldName;

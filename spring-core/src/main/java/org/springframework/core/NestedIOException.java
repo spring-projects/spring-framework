@@ -35,6 +35,7 @@ import java.io.IOException;
  * @see org.springframework.core.NestedCheckedException
  * @see org.springframework.core.NestedRuntimeException
  */
+@SuppressWarnings("serial")
 public class NestedIOException extends IOException {
 
 	static {

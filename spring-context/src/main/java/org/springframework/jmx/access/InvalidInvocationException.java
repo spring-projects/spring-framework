@@ -27,6 +27,7 @@ import javax.management.JMRuntimeException;
  * @since 1.2
  * @see MBeanClientInterceptor
  */
+@SuppressWarnings("serial")
 public class InvalidInvocationException extends JMRuntimeException {
 
 	/**

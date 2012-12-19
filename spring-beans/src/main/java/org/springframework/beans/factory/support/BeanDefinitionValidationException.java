@@ -25,6 +25,7 @@ import org.springframework.beans.FatalBeanException;
  * @since 21.11.2003
  * @see AbstractBeanDefinition#validate()
  */
+@SuppressWarnings("serial")
 public class BeanDefinitionValidationException extends FatalBeanException {
 
 	/**

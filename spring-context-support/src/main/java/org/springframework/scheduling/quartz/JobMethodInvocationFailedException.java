@@ -28,6 +28,7 @@ import org.springframework.util.MethodInvoker;
  * @since 2.5.3
  * @see MethodInvokingJobDetailFactoryBean
  */
+@SuppressWarnings("serial")
 public class JobMethodInvocationFailedException extends NestedRuntimeException {
 
 	/**

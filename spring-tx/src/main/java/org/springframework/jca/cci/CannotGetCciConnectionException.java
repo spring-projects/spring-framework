@@ -27,6 +27,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * @author Juergen Hoeller
  * @since 1.2
  */
+@SuppressWarnings("serial")
 public class CannotGetCciConnectionException extends DataAccessResourceFailureException {
 
 	/**

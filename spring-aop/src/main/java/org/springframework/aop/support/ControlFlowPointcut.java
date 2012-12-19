@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rob Harrop
  * @see org.springframework.core.ControlFlow
  */
+@SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 
 	private Class clazz;

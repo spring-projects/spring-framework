@@ -25,6 +25,7 @@ package org.springframework.jmx;
  * @since 1.2
  * @see org.springframework.jmx.support.JmxUtils#locateMBeanServer
  */
+@SuppressWarnings("serial")
 public class MBeanServerNotFoundException extends JmxException {
 
 	/**

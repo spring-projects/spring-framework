@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class DependencyDescriptor implements Serializable {
 
 	private transient MethodParameter methodParameter;

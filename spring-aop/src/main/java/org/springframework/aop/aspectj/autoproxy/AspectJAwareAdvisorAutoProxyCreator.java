@@ -43,6 +43,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
 	private static final Comparator DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();

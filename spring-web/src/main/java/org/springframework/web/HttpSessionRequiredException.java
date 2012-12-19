@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class HttpSessionRequiredException extends ServletException {
 
 	/**

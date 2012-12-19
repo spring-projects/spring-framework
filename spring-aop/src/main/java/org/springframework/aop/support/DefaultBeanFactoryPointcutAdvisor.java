@@ -32,6 +32,7 @@ import org.springframework.aop.Pointcut;
  * @see #setPointcut
  * @see #setAdviceBeanName
  */
+@SuppressWarnings("serial")
 public class DefaultBeanFactoryPointcutAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
 	private Pointcut pointcut = Pointcut.TRUE;

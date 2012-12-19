@@ -25,6 +25,7 @@ import org.springframework.dao.OptimisticLockingFailureException;
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
+@SuppressWarnings("serial")
 public class ObjectOptimisticLockingFailureException extends OptimisticLockingFailureException {
 
 	private Object persistentClass;

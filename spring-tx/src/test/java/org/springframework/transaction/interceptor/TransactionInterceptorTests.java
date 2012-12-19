@@ -108,6 +108,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	/**
 	 * We won't use this: we just want to know it's serializable.
 	 */
+	@SuppressWarnings("serial")
 	public static class SerializableTransactionManager implements PlatformTransactionManager, Serializable {
 
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {

@@ -23,6 +23,7 @@ package org.springframework.http.converter;
  * @author Arjen Poutsma
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class HttpMessageNotReadableException extends HttpMessageConversionException {
 
 	/**

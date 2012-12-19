@@ -62,6 +62,7 @@ import org.springframework.core.NamedThreadLocal;
  * @since 1.2
  * @see #getConnection
  */
+@SuppressWarnings("serial")
 public class ConnectionSpecConnectionFactoryAdapter extends DelegatingConnectionFactory {
 
 	private ConnectionSpec connectionSpec;

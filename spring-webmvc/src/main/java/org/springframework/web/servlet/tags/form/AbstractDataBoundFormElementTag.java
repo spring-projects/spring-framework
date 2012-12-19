@@ -43,6 +43,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag implements EditorAwareTag {
 
 	/**

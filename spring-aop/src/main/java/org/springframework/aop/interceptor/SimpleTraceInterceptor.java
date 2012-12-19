@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
  * @since 1.2
  * @see CustomizableTraceInterceptor
  */
+@SuppressWarnings("serial")
 public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**

@@ -23,6 +23,7 @@ package org.springframework.beans;
  * @author Juergen Hoeller
  * @since 1.0.2
  */
+@SuppressWarnings("serial")
 public class InvalidPropertyException extends FatalBeanException {
 
 	private Class beanClass;

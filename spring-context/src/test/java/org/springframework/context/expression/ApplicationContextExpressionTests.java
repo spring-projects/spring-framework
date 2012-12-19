@@ -296,6 +296,7 @@ public class ApplicationContextExpressionTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ValueTestBean implements Serializable {
 
 		@Autowired @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")

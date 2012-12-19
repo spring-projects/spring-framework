@@ -49,6 +49,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		evaluateAndCheckError("new FooBar()",SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
 
+	@SuppressWarnings("serial")
 	static class TestException extends Exception {
 
 	}

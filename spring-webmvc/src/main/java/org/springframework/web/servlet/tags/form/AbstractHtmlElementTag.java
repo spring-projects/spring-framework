@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElementTag implements DynamicAttributes {
 
 	public static final String CLASS_ATTRIBUTE = "class";

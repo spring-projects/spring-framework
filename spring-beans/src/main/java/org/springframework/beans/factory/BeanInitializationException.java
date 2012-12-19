@@ -31,6 +31,7 @@ import org.springframework.beans.FatalBeanException;
  * @see BeanFactoryAware#setBeanFactory
  * @see InitializingBean#afterPropertiesSet
  */
+@SuppressWarnings("serial")
 public class BeanInitializationException extends FatalBeanException {
 
 	/**

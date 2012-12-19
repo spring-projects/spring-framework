@@ -40,6 +40,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @since 2.0
  * @see OptionTag
  */
+@SuppressWarnings("serial")
 public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**

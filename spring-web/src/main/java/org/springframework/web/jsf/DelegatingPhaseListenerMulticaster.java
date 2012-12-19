@@ -59,6 +59,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Colin Sampaleanu
  * @since 1.2.7
  */
+@SuppressWarnings("serial")
 public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 
 	public PhaseId getPhaseId() {

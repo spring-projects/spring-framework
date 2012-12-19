@@ -99,6 +99,7 @@ public abstract class MethodMatchers {
 	/**
 	 * MethodMatcher implementation for a union of two given MethodMatchers.
 	 */
+	@SuppressWarnings("serial")
 	private static class UnionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher mm1;
@@ -163,6 +164,7 @@ public abstract class MethodMatchers {
 	 * MethodMatcher implementation for a union of two given MethodMatchers,
 	 * supporting an associated ClassFilter per MethodMatcher.
 	 */
+	@SuppressWarnings("serial")
 	private static class ClassFilterAwareUnionMethodMatcher extends UnionMethodMatcher {
 
 		private final ClassFilter cf1;
@@ -201,6 +203,7 @@ public abstract class MethodMatchers {
 	/**
 	 * MethodMatcher implementation for an intersection of two given MethodMatchers.
 	 */
+	@SuppressWarnings("serial")
 	private static class IntersectionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher mm1;

@@ -35,6 +35,7 @@ import org.springframework.util.PatternMatchUtils;
  * @since 11.02.2004
  * @see #isMatch
  */
+@SuppressWarnings("serial")
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	private List<String> mappedNames = new LinkedList<String>();

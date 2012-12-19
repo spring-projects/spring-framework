@@ -312,6 +312,7 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {

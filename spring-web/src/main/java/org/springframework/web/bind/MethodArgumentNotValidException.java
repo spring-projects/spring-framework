@@ -26,6 +26,7 @@ import org.springframework.validation.ObjectError;
  * @author Rossen Stoyanchev
  * @since 3.1
  */
+@SuppressWarnings("serial")
 public class MethodArgumentNotValidException extends Exception {
 
 	private final MethodParameter parameter;

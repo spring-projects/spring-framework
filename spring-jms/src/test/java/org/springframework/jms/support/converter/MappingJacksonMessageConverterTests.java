@@ -67,6 +67,7 @@ public class MappingJacksonMessageConverterTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void fromBytesMessage() throws Exception {
 		BytesMessage bytesMessageMock = createMock(BytesMessage.class);
 		Map<String, String> unmarshalled = Collections.singletonMap("foo",

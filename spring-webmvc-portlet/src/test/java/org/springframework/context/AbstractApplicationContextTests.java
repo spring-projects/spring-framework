@@ -147,6 +147,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {

@@ -29,6 +29,7 @@ import java.io.Serializable;
  * @since 2.0.3
  * @see org.springframework.scheduling.concurrent.CustomizableThreadFactory
  */
+@SuppressWarnings("serial")
 public class CustomizableThreadCreator implements Serializable {
 
 	private String threadNamePrefix;

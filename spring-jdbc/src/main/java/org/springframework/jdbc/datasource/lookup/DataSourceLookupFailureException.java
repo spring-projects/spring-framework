@@ -25,6 +25,7 @@ import org.springframework.dao.NonTransientDataAccessException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class DataSourceLookupFailureException extends NonTransientDataAccessException {
 
 	/**

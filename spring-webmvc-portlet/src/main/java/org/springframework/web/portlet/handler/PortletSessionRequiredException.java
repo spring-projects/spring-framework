@@ -25,6 +25,7 @@ import javax.portlet.PortletException;
  * @since 2.0
  * @see org.springframework.web.portlet.handler.PortletContentGenerator
  */
+@SuppressWarnings("serial")
 public class PortletSessionRequiredException extends PortletException {
 
 	/**

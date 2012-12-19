@@ -29,6 +29,7 @@ import org.springframework.orm.ObjectRetrievalFailureException;
  * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
+@SuppressWarnings("serial")
 public class JdoObjectRetrievalFailureException extends ObjectRetrievalFailureException {
 
 	public JdoObjectRetrievalFailureException(JDOObjectNotFoundException ex) {

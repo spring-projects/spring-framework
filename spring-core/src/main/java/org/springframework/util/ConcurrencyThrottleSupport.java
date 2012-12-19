@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * @see org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor
  * @see java.io.Serializable
  */
+@SuppressWarnings("serial")
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**

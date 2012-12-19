@@ -25,6 +25,7 @@ import org.springframework.dao.DataRetrievalFailureException;
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
+@SuppressWarnings("serial")
 public class ObjectRetrievalFailureException extends DataRetrievalFailureException {
 
 	private Object persistentClass;

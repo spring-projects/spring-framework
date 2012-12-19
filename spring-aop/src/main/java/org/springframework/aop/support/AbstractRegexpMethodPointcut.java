@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @since 1.1
  * @see JdkRegexpMethodPointcut
  */
+@SuppressWarnings("serial")
 public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
 		implements Serializable {
 

@@ -25,6 +25,7 @@ package org.springframework.beans;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class NullValueInNestedPathException extends InvalidPropertyException {
 
 	/**

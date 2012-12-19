@@ -27,6 +27,7 @@ package org.springframework.aop.target;
  * @author Juergen Hoeller
  * @since 2.0.3
  */
+@SuppressWarnings("serial")
 public class SimpleBeanTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 	public Object getTarget() throws Exception {

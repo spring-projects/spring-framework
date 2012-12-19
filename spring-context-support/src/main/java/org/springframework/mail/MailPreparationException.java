@@ -25,6 +25,7 @@ package org.springframework.mail;
  * @see org.springframework.ui.velocity.VelocityEngineUtils#mergeTemplateIntoString
  * @see org.springframework.ui.freemarker.FreeMarkerTemplateUtils#processTemplateIntoString
  */
+@SuppressWarnings("serial")
 public class MailPreparationException extends MailException {
 
 	/**

@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 24.03.2003
  */
+@SuppressWarnings("serial")
 public class TransactionSystemException extends TransactionException {
 
 	private Throwable applicationException;

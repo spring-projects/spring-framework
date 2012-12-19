@@ -25,6 +25,7 @@ import org.springframework.aop.support.AbstractGenericPointcutAdvisor;
  * @author Rob Harrop
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
 	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();

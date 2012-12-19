@@ -48,6 +48,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
+@SuppressWarnings("serial")
 public class JobDetailBean extends JobDetail
 		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 

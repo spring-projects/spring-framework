@@ -24,6 +24,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0.3
  */
+@SuppressWarnings("serial")
 public class ExpressionInvocationTargetException extends EvaluationException {
 
 	public ExpressionInvocationTargetException(int position, String message, Throwable cause) {

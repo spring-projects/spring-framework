@@ -40,6 +40,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class NestedPathTag extends TagSupport implements TryCatchFinally {
 
 	/**

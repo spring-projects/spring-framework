@@ -233,6 +233,7 @@ public abstract class JRubyScriptUtils {
 	 * have useful {@link Object#toString()}, {@link Throwable#getMessage()},
 	 * and {@link Throwable#printStackTrace} implementations.
 	 */
+	@SuppressWarnings("serial")
 	public static class JRubyExecutionException extends NestedRuntimeException {
 
 		/**

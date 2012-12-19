@@ -43,6 +43,7 @@ import org.springframework.web.util.JavaScriptUtils;
  * @see org.springframework.web.util.HtmlUtils
  * @see org.springframework.web.util.JavaScriptUtils
  */
+@SuppressWarnings("serial")
 public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 
 	private boolean javaScriptEscape = false;

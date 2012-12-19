@@ -58,6 +58,7 @@ public class HttpSessionMutexListener implements HttpSessionListener {
 	 * Doesn't need to be anything but a plain Object to synchronize on.
 	 * Should be serializable to allow for HttpSession persistence.
 	 */
+	@SuppressWarnings("serial")
 	private static class Mutex implements Serializable {
 	}
 

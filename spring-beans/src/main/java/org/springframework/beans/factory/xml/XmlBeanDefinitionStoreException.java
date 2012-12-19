@@ -31,6 +31,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * @see #getLineNumber()
  * @see org.xml.sax.SAXParseException
  */
+@SuppressWarnings("serial")
 public class XmlBeanDefinitionStoreException extends BeanDefinitionStoreException {
 
 	/**

@@ -27,6 +27,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class UncategorizedSQLException extends UncategorizedDataAccessException {
 
 	/** SQL that led to the problem */

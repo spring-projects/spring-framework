@@ -25,6 +25,7 @@ import test.interceptor.TimestampIntroductionInterceptor;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class TimestampIntroductionAdvisor extends DefaultIntroductionAdvisor {
 
 	/**

@@ -329,6 +329,7 @@ public class AnnotationTransactionAttributeSourceTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestBean1 implements ITestBean, Serializable {
 
 		private String name;

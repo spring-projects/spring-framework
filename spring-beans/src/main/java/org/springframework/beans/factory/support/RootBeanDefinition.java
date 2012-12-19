@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
+@SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	// using a ConcurrentHashMap as a Set

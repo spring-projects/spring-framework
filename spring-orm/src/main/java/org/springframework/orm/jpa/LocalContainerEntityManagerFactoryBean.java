@@ -81,6 +81,8 @@ import org.springframework.util.ClassUtils;
 public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean
 		implements ResourceLoaderAware, LoadTimeWeaverAware {
 
+	private static final long serialVersionUID = 1L;
+
 	private PersistenceUnitManager persistenceUnitManager;
 
 	private final DefaultPersistenceUnitManager internalPersistenceUnitManager =

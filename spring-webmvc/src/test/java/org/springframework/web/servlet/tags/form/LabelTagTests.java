@@ -34,6 +34,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 	private LabelTag tag;
 
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new LabelTag() {
 			protected TagWriter createTagWriter() {

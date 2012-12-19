@@ -28,6 +28,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
  */
+@SuppressWarnings("serial")
 public class HibernateQueryException extends InvalidDataAccessResourceUsageException {
 
 	public HibernateQueryException(QueryException ex) {

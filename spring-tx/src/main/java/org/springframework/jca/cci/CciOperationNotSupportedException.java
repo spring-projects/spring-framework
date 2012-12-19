@@ -26,6 +26,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @author Juergen Hoeller
  * @since 1.2
  */
+@SuppressWarnings("serial")
 public class CciOperationNotSupportedException extends InvalidDataAccessResourceUsageException {
 
 	/**

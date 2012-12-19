@@ -31,6 +31,7 @@ import org.springframework.aop.MethodBeforeAdvice;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 class MethodBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
 	public boolean supportsAdvice(Advice advice) {

@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class LabelTag extends AbstractHtmlElementTag {
 
 	/**

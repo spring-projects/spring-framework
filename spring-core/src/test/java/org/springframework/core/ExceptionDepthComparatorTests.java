@@ -87,18 +87,23 @@ public class ExceptionDepthComparatorTests {
 		return ExceptionDepthComparator.findClosestMatch(Arrays.asList(classes), new TargetException());
 	}
 
+	@SuppressWarnings("serial")
 	public class HighestDepthException extends Throwable {
 	}
 
+	@SuppressWarnings("serial")
 	public class LowestDepthException extends HighestDepthException {
 	}
 
+	@SuppressWarnings("serial")
 	public class TargetException extends LowestDepthException {
 	}
 
+	@SuppressWarnings("serial")
 	public class SameDepthException extends LowestDepthException {
 	}
 
+	@SuppressWarnings("serial")
 	public class NoDepthException extends TargetException {
 	}
 

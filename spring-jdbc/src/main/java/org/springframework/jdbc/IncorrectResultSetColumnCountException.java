@@ -26,6 +26,7 @@ import org.springframework.dao.DataRetrievalFailureException;
  * @since 2.0
  * @see org.springframework.dao.IncorrectResultSizeDataAccessException
  */
+@SuppressWarnings("serial")
 public class IncorrectResultSetColumnCountException extends DataRetrievalFailureException {
 
 	private int expectedCount;

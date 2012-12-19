@@ -29,6 +29,7 @@ import org.springframework.beans.Mergeable;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
 	private Object source;

@@ -56,6 +56,7 @@ import org.springframework.beans.BeansException;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see #postProcessTargetObject
  */
+@SuppressWarnings("serial")
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 	private Object target;

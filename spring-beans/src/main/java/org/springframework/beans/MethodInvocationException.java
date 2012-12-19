@@ -24,6 +24,7 @@ import java.beans.PropertyChangeEvent;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class MethodInvocationException extends PropertyAccessException {
 
 	/**

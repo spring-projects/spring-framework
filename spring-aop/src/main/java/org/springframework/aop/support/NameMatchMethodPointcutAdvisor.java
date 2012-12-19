@@ -29,6 +29,7 @@ import org.springframework.aop.Pointcut;
  * @author Rob Harrop
  * @see NameMatchMethodPointcut
  */
+@SuppressWarnings("serial")
 public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
 	private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();

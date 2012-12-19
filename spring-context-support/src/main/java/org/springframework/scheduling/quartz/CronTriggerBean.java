@@ -61,6 +61,7 @@ import org.springframework.util.Assert;
  * @see SchedulerFactoryBean#setJobDetails
  * @see SimpleTriggerBean
  */
+@SuppressWarnings("serial")
 public class CronTriggerBean extends CronTrigger
 		implements JobDetailAwareTrigger, BeanNameAware, InitializingBean {
 

@@ -46,6 +46,7 @@ import org.springframework.web.util.TagUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**

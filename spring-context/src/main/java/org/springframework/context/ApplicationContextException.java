@@ -23,6 +23,7 @@ import org.springframework.beans.FatalBeanException;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class ApplicationContextException extends FatalBeanException {
 
 	/**

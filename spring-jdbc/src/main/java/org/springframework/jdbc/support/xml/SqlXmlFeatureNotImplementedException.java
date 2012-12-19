@@ -25,6 +25,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * @author Thomas Risberg
  * @since 2.5.5
  */
+@SuppressWarnings("serial")
 public class SqlXmlFeatureNotImplementedException extends InvalidDataAccessApiUsageException {
 
 	/**

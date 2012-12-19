@@ -38,6 +38,7 @@ import org.springframework.util.Assert;
  * @see #setAdviceBeanName
  * @see DefaultBeanFactoryPointcutAdvisor
  */
+@SuppressWarnings("serial")
 public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
 	private String adviceBeanName;

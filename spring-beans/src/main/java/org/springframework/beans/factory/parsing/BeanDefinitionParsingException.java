@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
  * @author Rob Harrop
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class BeanDefinitionParsingException extends BeanDefinitionStoreException {
 
 	/**

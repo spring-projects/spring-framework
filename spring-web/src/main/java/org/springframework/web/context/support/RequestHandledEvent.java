@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationEvent;
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.context.ApplicationContext#publishEvent
  */
+@SuppressWarnings("serial")
 public class RequestHandledEvent extends ApplicationEvent {
 
 	/** Session id that applied to the request, if any */

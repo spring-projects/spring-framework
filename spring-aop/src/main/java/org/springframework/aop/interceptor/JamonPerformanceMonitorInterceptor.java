@@ -35,6 +35,7 @@ import org.apache.commons.logging.Log;
  * @see com.jamonapi.MonitorFactory
  * @see PerformanceMonitorInterceptor
  */
+@SuppressWarnings("serial")
 public class JamonPerformanceMonitorInterceptor extends AbstractMonitoringInterceptor {
 
 	private boolean trackAllInvocations = false;

@@ -22,6 +22,7 @@ package org.springframework.mail;
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class MailParseException extends MailException {
 
 	/**

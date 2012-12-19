@@ -40,6 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
 		implements BeanNameAware, InitializingBean, DisposableBean {
 

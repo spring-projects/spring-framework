@@ -25,6 +25,7 @@ package org.springframework.web.context.support;
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.context.ApplicationContext#publishEvent
  */
+@SuppressWarnings("serial")
 public class ServletRequestHandledEvent extends RequestHandledEvent {
 
 	/** URL that the triggered the request */

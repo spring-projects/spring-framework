@@ -91,6 +91,7 @@ public abstract class Pointcuts {
 	/**
 	 * Pointcut implementation that matches bean property setters.
 	 */
+	@SuppressWarnings("serial")
 	private static class SetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 		public static SetterPointcut INSTANCE = new SetterPointcut();
@@ -110,6 +111,7 @@ public abstract class Pointcuts {
 	/**
 	 * Pointcut implementation that matches bean property getters.
 	 */
+	@SuppressWarnings("serial")
 	private static class GetterPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 		public static GetterPointcut INSTANCE = new GetterPointcut();

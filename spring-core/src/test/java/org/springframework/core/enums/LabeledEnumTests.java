@@ -118,6 +118,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class Other extends StaticLabeledEnum {
 
 		public static final Other THING1 = new Other(1, "Thing1");
@@ -130,6 +131,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class Dog extends StaticLabeledEnum {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
@@ -159,6 +161,7 @@ public class LabeledEnumTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static abstract class ValuedEnum extends StaticLabeledEnum {
 
 		public static final ValuedEnum ONE = new ValuedEnum(1, "one") {

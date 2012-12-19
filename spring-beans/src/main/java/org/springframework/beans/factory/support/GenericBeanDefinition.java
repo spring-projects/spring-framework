@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
+@SuppressWarnings("serial")
 public class GenericBeanDefinition extends AbstractBeanDefinition {
 
 	private String parentName;

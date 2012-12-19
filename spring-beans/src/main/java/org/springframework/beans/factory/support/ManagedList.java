@@ -31,6 +31,7 @@ import org.springframework.beans.Mergeable;
  * @author Juergen Hoeller
  * @since 27.05.2003
  */
+@SuppressWarnings("serial")
 public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetadataElement {
 
 	private Object source;

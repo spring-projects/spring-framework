@@ -100,6 +100,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		return "password";
 	}
 
+	@SuppressWarnings("serial")
 	protected InputTag createTag(final Writer writer) {
 		return new PasswordInputTag() {
 			protected TagWriter createTagWriter() {

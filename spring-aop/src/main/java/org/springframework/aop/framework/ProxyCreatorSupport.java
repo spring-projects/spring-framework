@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @since 2.0.3
  * @see #createAopProxy()
  */
+@SuppressWarnings("serial")
 public class ProxyCreatorSupport extends AdvisedSupport {
 
 	private AopProxyFactory aopProxyFactory;

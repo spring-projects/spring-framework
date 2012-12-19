@@ -38,6 +38,7 @@ import org.hibernate.engine.SessionFactoryImplementor;
  * @see SessionFactoryUtils#doGetSession
  * @see LocalSessionFactoryBean#setExposeTransactionAwareSessionFactory
  */
+@SuppressWarnings("serial")
 public class SpringSessionContext implements CurrentSessionContext {
 
 	private final SessionFactoryImplementor sessionFactory;

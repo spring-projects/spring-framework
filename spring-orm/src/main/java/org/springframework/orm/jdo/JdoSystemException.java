@@ -29,6 +29,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @since 03.06.2003
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
+@SuppressWarnings("serial")
 public class JdoSystemException extends UncategorizedDataAccessException {
 
 	public JdoSystemException(JDOException ex) {

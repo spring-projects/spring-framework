@@ -29,6 +29,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 2.0.3
  */
+@SuppressWarnings("serial")
 public class JndiLookupFailureException extends NestedRuntimeException {
 
 	/**

@@ -181,6 +181,7 @@ public class TransactionSupportTests extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public void testTransactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
 		TestTransactionManager tm = new TestTransactionManager(false, true) {

@@ -386,6 +386,7 @@ public abstract class CollectionUtils {
 	/**
 	 * Adapts a Map to the MultiValueMap contract.
 	 */
+	@SuppressWarnings("serial")
 	private static class MultiValueMapAdapter<K, V> implements MultiValueMap<K, V>, Serializable {
 
 		private final Map<K, List<V>> map;

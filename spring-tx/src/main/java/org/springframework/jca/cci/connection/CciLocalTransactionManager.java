@@ -60,6 +60,7 @@ import org.springframework.transaction.support.ResourceTransactionManager;
  * @see TransactionAwareConnectionFactoryProxy
  * @see org.springframework.jca.cci.core.CciTemplate
  */
+@SuppressWarnings("serial")
 public class CciLocalTransactionManager extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 

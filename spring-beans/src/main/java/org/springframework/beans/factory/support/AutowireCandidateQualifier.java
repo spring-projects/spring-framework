@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * @since 2.5
  * @see org.springframework.beans.factory.annotation.Qualifier
  */
+@SuppressWarnings("serial")
 public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 
 	public static String VALUE_KEY = "value";

@@ -32,6 +32,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @author Juergen Hoeller
  * @see org.springframework.jdbc.core.JdbcTemplate#setIgnoreWarnings
  */
+@SuppressWarnings("serial")
 public class SQLWarningException extends UncategorizedDataAccessException {
 
 	/**

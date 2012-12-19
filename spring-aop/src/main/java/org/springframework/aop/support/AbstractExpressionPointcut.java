@@ -28,6 +28,7 @@ import java.io.Serializable;
  * @see #setLocation
  * @see #setExpression
  */
+@SuppressWarnings("serial")
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut, Serializable {
 
 	private String location;

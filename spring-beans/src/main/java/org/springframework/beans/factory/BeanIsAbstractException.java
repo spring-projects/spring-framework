@@ -24,6 +24,7 @@ package org.springframework.beans.factory;
  * @since 1.1
  * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setAbstract
  */
+@SuppressWarnings("serial")
 public class BeanIsAbstractException extends BeanCreationException {
 
 	/**

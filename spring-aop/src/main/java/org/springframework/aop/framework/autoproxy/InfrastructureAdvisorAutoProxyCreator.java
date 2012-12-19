@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * @author Juergen Hoeller
  * @since 2.0.7
  */
+@SuppressWarnings("serial")
 public class InfrastructureAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
 	private ConfigurableListableBeanFactory beanFactory;

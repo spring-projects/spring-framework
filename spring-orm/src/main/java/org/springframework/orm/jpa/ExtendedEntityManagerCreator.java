@@ -272,6 +272,7 @@ public abstract class ExtendedEntityManagerCreator {
 	/**
 	 * InvocationHandler for extended EntityManagers as defined in the JPA spec.
 	 */
+	@SuppressWarnings("serial")
 	private static class ExtendedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private static final Log logger = LogFactory.getLog(ExtendedEntityManagerInvocationHandler.class);

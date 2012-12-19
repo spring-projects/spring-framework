@@ -22,6 +22,7 @@ package org.springframework.beans;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class FatalBeanException extends BeansException {
 
 	/**

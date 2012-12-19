@@ -25,6 +25,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @author Rod Johnson
  * @since 16.03.2003
  */
+@SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
 	private String qualifier;

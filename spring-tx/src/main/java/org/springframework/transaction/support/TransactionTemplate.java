@@ -59,6 +59,7 @@ import org.springframework.transaction.TransactionSystemException;
  * @see #setTransactionManager
  * @see org.springframework.transaction.PlatformTransactionManager
  */
+@SuppressWarnings("serial")
 public class TransactionTemplate extends DefaultTransactionDefinition
 		implements TransactionOperations, InitializingBean {
 

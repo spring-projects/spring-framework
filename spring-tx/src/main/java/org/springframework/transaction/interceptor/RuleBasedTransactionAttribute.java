@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
  * @since 09.04.2003
  * @see TransactionAttributeEditor
  */
+@SuppressWarnings("serial")
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute implements Serializable {
 
 	/** Prefix for rollback-on-exception rules in description strings */

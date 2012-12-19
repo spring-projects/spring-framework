@@ -99,6 +99,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	/**
 	 * Inner cache class that implements lazy building of LabeledEnum Maps.
 	 */
+	@SuppressWarnings("serial")
 	private class LabeledEnumCache extends CachingMapDecorator<Class, Map<Comparable, LabeledEnum>> {
 
 		public LabeledEnumCache() {

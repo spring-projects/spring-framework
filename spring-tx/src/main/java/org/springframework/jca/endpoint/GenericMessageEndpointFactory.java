@@ -148,6 +148,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	 * directly, leavng it up to the concrete endpoint to apply those -
 	 * and to handle any ResourceExceptions thrown from them.
 	 */
+	@SuppressWarnings("serial")
 	public static class InternalResourceException extends RuntimeException {
 
 		protected InternalResourceException(ResourceException cause) {

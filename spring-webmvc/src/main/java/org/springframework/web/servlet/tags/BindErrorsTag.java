@@ -33,6 +33,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @see BindTag
  * @see org.springframework.validation.Errors
  */
+@SuppressWarnings("serial")
 public class BindErrorsTag extends HtmlEscapingAwareTag {
 
 	public static final String ERRORS_VARIABLE_NAME = "errors";

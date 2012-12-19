@@ -36,6 +36,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see #setSuffix
  * @see #createInvocationTraceName
  */
+@SuppressWarnings("serial")
 public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterceptor {
 
 	private String prefix = "";

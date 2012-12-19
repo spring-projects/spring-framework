@@ -38,6 +38,7 @@ import org.springframework.dao.support.PersistenceExceptionTranslator;
  * @see org.springframework.dao.DataAccessException
  * @see org.springframework.dao.support.PersistenceExceptionTranslator
  */
+@SuppressWarnings("serial")
 public class PersistenceExceptionTranslationAdvisor extends AbstractPointcutAdvisor {
 
 	private final PersistenceExceptionTranslationInterceptor advice;

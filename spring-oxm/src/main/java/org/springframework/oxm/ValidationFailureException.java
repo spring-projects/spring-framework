@@ -22,6 +22,7 @@ package org.springframework.oxm;
  * @author Arjen Poutsma
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class ValidationFailureException extends XmlMappingException {
 
 	/**

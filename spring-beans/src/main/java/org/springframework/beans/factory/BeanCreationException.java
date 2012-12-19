@@ -30,6 +30,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class BeanCreationException extends FatalBeanException {
 
 	private String beanName;

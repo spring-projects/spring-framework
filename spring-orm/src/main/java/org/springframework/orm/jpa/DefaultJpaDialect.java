@@ -41,6 +41,7 @@ import org.springframework.transaction.TransactionException;
  * @see JpaAccessor#setJpaDialect
  * @see JpaTransactionManager#setJpaDialect
  */
+@SuppressWarnings("serial")
 public class DefaultJpaDialect implements JpaDialect, Serializable {
 
 	//-------------------------------------------------------------------------

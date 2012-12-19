@@ -467,6 +467,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Minimal bean reference to the surrounding AbstractEntityManagerFactoryBean.
 	 * Resolved to the actual AbstractEntityManagerFactoryBean instance on deserialization.
 	 */
+	@SuppressWarnings("serial")
 	private static class SerializedEntityManagerFactoryBeanReference implements Serializable {
 
 		private final BeanFactory beanFactory;
@@ -489,6 +490,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * return a proxy EntityManager if necessary from createEntityManager()
 	 * methods.
 	 */
+	@SuppressWarnings("serial")
 	private static class ManagedEntityManagerFactoryInvocationHandler implements InvocationHandler, Serializable {
 
 		private final AbstractEntityManagerFactoryBean entityManagerFactoryBean;

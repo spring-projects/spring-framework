@@ -26,6 +26,7 @@ import org.springframework.jmx.JmxException;
  * @since 1.2
  * @see MBeanClientInterceptor
  */
+@SuppressWarnings("serial")
 public class InvocationFailureException extends JmxException {
 
 	/**

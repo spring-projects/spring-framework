@@ -26,6 +26,7 @@ import org.springframework.dao.DataRetrievalFailureException;
  * @author Juergen Hoeller
  * @since 1.0.2
  */
+@SuppressWarnings("serial")
 public class LobRetrievalFailureException extends DataRetrievalFailureException {
 
 	/**

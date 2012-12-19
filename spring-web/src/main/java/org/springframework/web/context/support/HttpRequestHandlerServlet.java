@@ -46,6 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.DispatcherServlet
  */
+@SuppressWarnings("serial")
 public class HttpRequestHandlerServlet extends HttpServlet {
 
 	private HttpRequestHandler target;

@@ -35,6 +35,7 @@ import org.springframework.web.servlet.support.RequestContext;
  */
 public class ThemeTagTests extends AbstractTagTests {
 
+	@SuppressWarnings("serial")
 	public void testThemeTag() throws JspException {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
