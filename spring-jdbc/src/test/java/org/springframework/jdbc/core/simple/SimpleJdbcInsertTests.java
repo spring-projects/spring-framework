@@ -16,105 +16,71 @@
 
 package org.springframework.jdbc.core.simple;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.HashMap;
+
+import javax.sql.DataSource;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 
 /**
  * Mock object based tests for SimpleJdbcInsert.
  *
  * @author Thomas Risberg
  */
-public class SimpleJdbcInsertTests extends TestCase {
+public class SimpleJdbcInsertTests {
 
-	private MockControl ctrlDataSource;
-	private DataSource mockDataSource;
-	private MockControl ctrlConnection;
-	private Connection mockConnection;
-	private MockControl ctrlDatabaseMetaData;
-	private DatabaseMetaData mockDatabaseMetaData;
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
+	private Connection connection;
+	private DatabaseMetaData databaseMetaData;
+	private DataSource dataSource;
 
-		ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-
-		ctrlConnection = MockControl.createControl(Connection.class);
-		mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.getMetaData();
-		ctrlConnection.setDefaultReturnValue(mockDatabaseMetaData);
-		mockConnection.close();
-		ctrlConnection.setDefaultVoidCallable();
-
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setDefaultReturnValue(mockConnection);
-
+	@Before
+	public void setUp() throws Exception {
+		connection = mock(Connection.class);
+		databaseMetaData = mock(DatabaseMetaData.class);
+		dataSource = mock(DataSource.class);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+		given(dataSource.getConnection()).willReturn(connection);
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		ctrlDatabaseMetaData.verify();
-		ctrlDataSource.verify();
+	@After
+	public void verifyClosed() throws Exception {
+		verify(connection).close();
 	}
 
-	protected void replay() {
-		ctrlDatabaseMetaData.replay();
-		ctrlConnection.replay();
-		ctrlDataSource.replay();
-	}
-
+	@Test
 	public void testNoSuchTable() throws Exception {
-		final String NO_SUCH_TABLE = "x";
-		final String USER = "me";
+		ResultSet resultSet = mock(ResultSet.class);
+		given(resultSet.next()).willReturn(false);
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
+		given(databaseMetaData.getDatabaseProductVersion()).willReturn("1.0");
+		given(databaseMetaData.getUserName()).willReturn("me");
+		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
+		given(databaseMetaData.getTables(null, null, "x", null)).willReturn(resultSet);
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MyDB");
-		mockDatabaseMetaData.supportsGetGeneratedKeys();
-		ctrlDatabaseMetaData.setReturnValue(false);
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MyDB");
-		mockDatabaseMetaData.getDatabaseProductVersion();
-		ctrlDatabaseMetaData.setReturnValue("1.0");
-		mockDatabaseMetaData.getUserName();
-		ctrlDatabaseMetaData.setReturnValue(USER);
-		mockDatabaseMetaData.storesUpperCaseIdentifiers();
-		ctrlDatabaseMetaData.setReturnValue(false);
-		mockDatabaseMetaData.storesLowerCaseIdentifiers();
-		ctrlDatabaseMetaData.setReturnValue(true);
-		mockDatabaseMetaData.getTables(null, null, NO_SUCH_TABLE, null);
-		ctrlDatabaseMetaData.setReturnValue(mockResultSet);
-
-		ctrlResultSet.replay();
-		replay();
-
-		SimpleJdbcInsert insert = new SimpleJdbcInsert(mockDataSource).withTableName(NO_SUCH_TABLE);
+		SimpleJdbcInsert insert = new SimpleJdbcInsert(dataSource).withTableName("x");
+		// Shouldn't succeed in inserting into table which doesn't exist
+		thrown.expect(InvalidDataAccessApiUsageException.class);
 		try {
-			insert.execute(new HashMap());
-			fail("Shouldn't succeed in inserting into table which doesn't exist");
-		} catch (InvalidDataAccessApiUsageException ex) {
-			// OK
+			insert.execute(new HashMap<String, Object>());
 		}
-	}
-
-	public void testInsert() throws Exception {
-		replay();
+		finally {
+			verify(resultSet).close();
+		}
 	}
 }

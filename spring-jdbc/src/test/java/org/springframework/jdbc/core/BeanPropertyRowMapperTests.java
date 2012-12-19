@@ -16,15 +16,19 @@
 
 package org.springframework.jdbc.core;
 
-import java.sql.SQLException;
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.test.ConcretePerson;
 import org.springframework.jdbc.core.test.ExtendedPerson;
 import org.springframework.jdbc.core.test.Person;
 import org.springframework.jdbc.core.test.SpacePerson;
-import org.springframework.beans.TypeMismatchException;
 
 /**
  * @author Thomas Risberg
@@ -32,89 +36,94 @@ import org.springframework.beans.TypeMismatchException;
  */
 public class BeanPropertyRowMapperTests extends AbstractRowMapperTests {
 
-	public void testOverridingClassDefinedForMapping() {
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void testOverridingDifferentClassDefinedForMapping() {
 		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
-		try {
-			mapper.setMappedClass(Long.class);
-			fail("Setting new class should have thrown InvalidDataAccessApiUsageException");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-		}
-		try {
-			mapper.setMappedClass(Person.class);
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			fail("Setting same class should not have thrown InvalidDataAccessApiUsageException");
-		}
+		thrown.expect(InvalidDataAccessApiUsageException.class);
+		mapper.setMappedClass(Long.class);
 	}
 
-	public void testStaticQueryWithRowMapper() throws SQLException {
-		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
-				new BeanPropertyRowMapper(Person.class));
-		assertEquals(1, result.size());
-		Person bean = (Person) result.get(0);
-		verifyPerson(bean);
+	@Test
+	public void testOverridingSameClassDefinedForMapping() {
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<Person>(Person.class);
+		mapper.setMappedClass(Person.class);
 	}
 
-	public void testMappingWithInheritance() throws SQLException {
-		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
-				new BeanPropertyRowMapper(ConcretePerson.class));
+	@Test
+	public void testStaticQueryWithRowMapper() throws Exception {
+		Mock mock = new Mock();
+		List<Person> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper<Person>(Person.class));
 		assertEquals(1, result.size());
-		ConcretePerson bean = (ConcretePerson) result.get(0);
+		verifyPerson(result.get(0));
+		mock.verifyClosed();
+	}
+
+	@Test
+	public void testMappingWithInheritance() throws Exception {
+		Mock mock = new Mock();
+		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper<ConcretePerson>(ConcretePerson.class));
+		assertEquals(1, result.size());
+		verifyConcretePerson(result.get(0));
+		mock.verifyClosed();
+	}
+
+	@Test
+	public void testMappingWithNoUnpopulatedFieldsFound() throws Exception {
+		Mock mock = new Mock();
+		List<ConcretePerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper<ConcretePerson>(ConcretePerson.class, true));
+		assertEquals(1, result.size());
+		verifyConcretePerson(result.get(0));
+		mock.verifyClosed();
+	}
+
+	@Test
+	public void testMappingWithUnpopulatedFieldsNotChecked() throws Exception {
+		Mock mock = new Mock();
+		List<ExtendedPerson> result = mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper<ExtendedPerson>(ExtendedPerson.class));
+		assertEquals(1, result.size());
+		ExtendedPerson bean = result.get(0);
 		verifyConcretePerson(bean);
+		mock.verifyClosed();
 	}
 
-	public void testMappingWithNoUnpopulatedFieldsFound() throws SQLException {
-		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
-				new BeanPropertyRowMapper(ConcretePerson.class, true));
+	@Test
+	public void testMappingWithUnpopulatedFieldsNotAccepted() throws Exception {
+		Mock mock = new Mock();
+		thrown.expect(InvalidDataAccessApiUsageException.class);
+		mock.getJdbcTemplate().query(
+				"select name, age, birth_date, balance from people",
+				new BeanPropertyRowMapper<ExtendedPerson>(ExtendedPerson.class, true));
+	}
+
+	@Test
+	public void testMappingNullValue() throws Exception {
+		BeanPropertyRowMapper<Person> mapper = new BeanPropertyRowMapper<Person>(Person.class);
+		Mock mock = new Mock(MockType.TWO);
+		thrown.expect(TypeMismatchException.class);
+		mock.getJdbcTemplate().query(
+				"select name, null as age, birth_date, balance from people", mapper);
+	}
+
+	@Test
+	public void testQueryWithSpaceInColumnName() throws Exception {
+		Mock mock = new Mock(MockType.THREE);
+		List<SpacePerson> result = mock.getJdbcTemplate().query(
+				"select last_name as \"Last Name\", age, birth_date, balance from people",
+				new BeanPropertyRowMapper<SpacePerson>(SpacePerson.class));
 		assertEquals(1, result.size());
-		ConcretePerson bean = (ConcretePerson) result.get(0);
-		verifyConcretePerson(bean);
+		verifySpacePerson(result.get(0));
+		mock.verifyClosed();
 	}
-
-	public void testMappingWithUnpopulatedFieldsNotChecked() throws SQLException {
-		List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
-				new BeanPropertyRowMapper(ExtendedPerson.class));
-		assertEquals(1, result.size());
-		ExtendedPerson bean = (ExtendedPerson) result.get(0);
-		verifyConcretePerson(bean);
-	}
-
-	public void testMappingWithUnpopulatedFieldsNotAccepted() throws SQLException {
-		try {
-			List result = jdbcTemplate.query("select name, age, birth_date, balance from people",
-					new BeanPropertyRowMapper(ExtendedPerson.class, true));
-			fail("Should have thrown InvalidDataAccessApiUsageException because of missing field");
-		}
-		catch (InvalidDataAccessApiUsageException ex) {
-			// expected
-		}
-	}
-
-	public void testMappingNullValue() throws SQLException {
-		BeanPropertyRowMapper mapper = new BeanPropertyRowMapper(Person.class);
-		try {
-			List result1 = jdbcTemplate2.query("select name, null as age, birth_date, balance from people",
-					mapper);
-			fail("Should have thrown TypeMismatchException because of null value");
-		}
-		catch (TypeMismatchException ex) {
-			// expected
-		}
-		mapper.setPrimitivesDefaultedForNullValue(true);
-		List result2 = jdbcTemplate2.query("select name, null as age, birth_date, balance from people",
-				mapper);
-		assertEquals(1, result2.size());
-		Person bean = (Person) result2.get(0);
-		verifyPersonWithZeroAge(bean);
-	}
-
-	public void testQueryWithSpaceInColumnName() throws SQLException {
-		List result = jdbcTemplate3.query("select last_name as \"Last Name\", age, birth_date, balance from people",
-				new BeanPropertyRowMapper(SpacePerson.class));
-		assertEquals(1, result.size());
-		SpacePerson bean = (SpacePerson) result.get(0);
-		verifySpacePerson(bean);
-	}
-
 }

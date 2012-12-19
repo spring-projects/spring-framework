@@ -16,8 +16,11 @@
 
 package org.springframework.jndi;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -383,11 +386,8 @@ public class JndiObjectFactoryBeanTests {
 	public void testLookupWithExposeAccessContext() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
-		final Context mockCtx = createMock(Context.class);
-		expect(mockCtx.lookup("foo")).andReturn(tb);
-		mockCtx.close();
-		expectLastCall().times(2);
-		replay(mockCtx);
+		final Context mockCtx = mock(Context.class);
+		given(mockCtx.lookup("foo")).willReturn(tb);
 		jof.setJndiTemplate(new JndiTemplate() {
 			@Override
 			protected Context createInitialContext() {
@@ -406,7 +406,7 @@ public class JndiObjectFactoryBeanTests {
 		proxy.equals(proxy);
 		proxy.hashCode();
 		proxy.toString();
-		verify(mockCtx);
+		verify(mockCtx, times(2)).close();
 	}
 
 }

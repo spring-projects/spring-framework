@@ -20,9 +20,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.EasyMock;
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
@@ -50,14 +53,12 @@ public class ApplicationContextEventTests {
 		@SuppressWarnings("unchecked")
 		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
-		listener.onApplicationEvent(evt);
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener);
 
-		replay(listener);
 		smc.multicastEvent(evt);
-		verify(listener);
+		verify(listener).onApplicationEvent(evt);
 	}
 
 	@Test
@@ -91,20 +92,18 @@ public class ApplicationContextEventTests {
 
 	@Test
 	public void testEventPublicationInterceptor() throws Throwable {
-		MethodInvocation invocation = EasyMock.createMock(MethodInvocation.class);
-		ApplicationContext ctx = EasyMock.createMock(ApplicationContext.class);
+		MethodInvocation invocation = mock(MethodInvocation.class);
+		ApplicationContext ctx = mock(ApplicationContext.class);
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);
 		interceptor.setApplicationEventPublisher(ctx);
 		interceptor.afterPropertiesSet();
 
-		expect(invocation.proceed()).andReturn(new Object());
-		expect(invocation.getThis()).andReturn(new Object());
-		ctx.publishEvent(isA(MyEvent.class));
-		replay(invocation, ctx);
+		given(invocation.proceed()).willReturn(new Object());
+		given(invocation.getThis()).willReturn(new Object());
 		interceptor.invoke(invocation);
-		verify(invocation, ctx);
+		verify(ctx).publishEvent(isA(MyEvent.class));
 	}
 
 	@Test

@@ -16,8 +16,9 @@
 
 package org.springframework.context.access;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,10 +33,7 @@ public class ContextBeanFactoryReferenceTests {
 
 	@Test
 	public void testAllOperations() {
-		ConfigurableApplicationContext ctx = createMock(ConfigurableApplicationContext.class);
-
-		ctx.close();
-		replay(ctx);
+		ConfigurableApplicationContext ctx = mock(ConfigurableApplicationContext.class);
 
 		ContextBeanFactoryReference bfr = new ContextBeanFactoryReference(ctx);
 
@@ -49,6 +47,6 @@ public class ContextBeanFactoryReferenceTests {
 			// expected
 		}
 
-		verify(ctx);
+		verify(ctx).close();
 	}
 }

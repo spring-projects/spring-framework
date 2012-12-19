@@ -16,7 +16,7 @@
 
 package org.springframework.aop.scope;
 
-import static org.easymock.EasyMock.*;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -52,14 +52,9 @@ public final class DefaultScopedObjectTests {
 		testBadTargetBeanName("   ");
 	}
 
-
 	private static void testBadTargetBeanName(final String badTargetBeanName) {
-		ConfigurableBeanFactory factory = createMock(ConfigurableBeanFactory.class);
-		replay(factory);
-
+		ConfigurableBeanFactory factory = mock(ConfigurableBeanFactory.class);
 		new DefaultScopedObject(factory, badTargetBeanName);
-
-		verify(factory);
 	}
 
 }

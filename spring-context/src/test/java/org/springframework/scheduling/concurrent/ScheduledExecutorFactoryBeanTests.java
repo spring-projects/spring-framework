@@ -19,20 +19,19 @@ package org.springframework.scheduling.concurrent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 
-import junit.framework.AssertionFailedError;
-
-import org.easymock.MockControl;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.task.NoOpRunnable;
-
-import static org.mockito.Mockito.*;
-
 
 /**
  * @author Rick Evans
@@ -58,11 +57,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	@Test
 	@SuppressWarnings("serial")
 	public void testShutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
-		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
-		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
-		executor.shutdownNow();
-		mockScheduledExecutorService.setReturnValue(null);
-		mockScheduledExecutorService.replay();
+		final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
@@ -76,17 +71,13 @@ public class ScheduledExecutorFactoryBeanTests {
 		factory.afterPropertiesSet();
 		factory.destroy();
 
-		mockScheduledExecutorService.verify();
+		verify(executor).shutdownNow();
 	}
 
 	@Test
 	@SuppressWarnings("serial")
 	public void testShutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
-		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
-		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
-		executor.shutdown();
-		mockScheduledExecutorService.setVoidCallable();
-		mockScheduledExecutorService.replay();
+		final ScheduledExecutorService executor = mock(ScheduledExecutorService.class);
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			@Override
@@ -101,16 +92,12 @@ public class ScheduledExecutorFactoryBeanTests {
 		factory.afterPropertiesSet();
 		factory.destroy();
 
-		mockScheduledExecutorService.verify();
+		verify(executor).shutdown();
 	}
 
 	@Test
 	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		MockControl mockRunnable = MockControl.createControl(Runnable.class);
-		Runnable runnable = (Runnable) mockRunnable.getMock();
-		runnable.run();
-		mockRunnable.setVoidCallable();
-		mockRunnable.replay();
+		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
 		factory.setScheduledExecutorTasks(new ScheduledExecutorTask[]{
@@ -120,18 +107,12 @@ public class ScheduledExecutorFactoryBeanTests {
 		pauseToLetTaskStart(1);
 		factory.destroy();
 
-		mockRunnable.verify();
+		verify(runnable).run();
 	}
 
 	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		MockControl mockRunnable = MockControl.createControl(Runnable.class);
-		Runnable runnable = (Runnable) mockRunnable.getMock();
-		runnable.run();
-		mockRunnable.setVoidCallable();
-		runnable.run();
-		mockRunnable.setVoidCallable();
-		mockRunnable.replay();
+		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -143,18 +124,13 @@ public class ScheduledExecutorFactoryBeanTests {
 		pauseToLetTaskStart(2);
 		factory.destroy();
 
-		mockRunnable.verify();
+		verify(runnable, atLeast(2)).run();
 	}
 
 	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
-		MockControl mockRunnable = MockControl.createControl(Runnable.class);
-		Runnable runnable = (Runnable) mockRunnable.getMock();
-		runnable.run();
-		mockRunnable.setThrowable(new IllegalStateException());
-		runnable.run();
-		mockRunnable.setThrowable(new IllegalStateException());
-		mockRunnable.replay();
+		Runnable runnable = mock(Runnable.class);
+		willThrow(new IllegalStateException()).given(runnable).run();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -167,19 +143,13 @@ public class ScheduledExecutorFactoryBeanTests {
 		pauseToLetTaskStart(2);
 		factory.destroy();
 
-		mockRunnable.verify();
+		verify(runnable, atLeast(2)).run();
 	}
 
 	@Ignore
 	@Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
-		MockControl mockRunnable = MockControl.createControl(Runnable.class);
-		Runnable runnable = (Runnable) mockRunnable.getMock();
-		runnable.run();
-		mockRunnable.setVoidCallable();
-		runnable.run();
-		mockRunnable.setVoidCallable();
-		mockRunnable.replay();
+		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -192,24 +162,15 @@ public class ScheduledExecutorFactoryBeanTests {
 		// invoke destroy before tasks have even been scheduled...
 		factory.destroy();
 
-		try {
-			mockRunnable.verify();
-			fail("Mock must never have been called");
-		}
-		catch (AssertionFailedError expected) {
-		}
+		// Mock must never have been called
+		verify(runnable, never()).run();
 	}
 
 	@Ignore
 	@Test
 	public void testWithInitialDelayRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
-		MockControl mockRunnable = MockControl.createControl(Runnable.class);
-		Runnable runnable = (Runnable) mockRunnable.getMock();
-		runnable.run();
-		mockRunnable.setThrowable(new IllegalStateException());
-		runnable.run();
-		mockRunnable.setThrowable(new IllegalStateException());
-		mockRunnable.replay();
+		Runnable runnable = mock(Runnable.class);
+		willThrow(new IllegalStateException()).given(runnable).run();
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
 		task.setPeriod(500);
@@ -223,12 +184,8 @@ public class ScheduledExecutorFactoryBeanTests {
 		// invoke destroy before tasks have even been scheduled...
 		factory.destroy();
 
-		try {
-			mockRunnable.verify();
-			fail("Mock must never have been called");
-		}
-		catch (AssertionFailedError expected) {
-		}
+		// Mock must never have been called
+		verify(runnable, never()).run();
 	}
 
 	@Test

@@ -16,8 +16,9 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
@@ -60,40 +61,32 @@ public class AroundAdviceBindingTests {
 
 		this.testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
 
-		mockCollaborator = createNiceMock(AroundAdviceBindingCollaborator.class);
+		mockCollaborator = mock(AroundAdviceBindingCollaborator.class);
 		aroundAdviceAspect.setCollaborator(mockCollaborator);
 	}
 
 	@Test
 	public void testOneIntArg() {
-		mockCollaborator.oneIntArg(5);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
 	public void testOneObjectArgBoundToTarget() {
-		mockCollaborator.oneObjectArg(this.testBeanTarget);
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);;
 	}
 
 	@Test
 	public void testOneIntAndOneObjectArgs() {
-		mockCollaborator.oneIntAndOneObject(5, this.testBeanProxy);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntAndOneObject(5, this.testBeanProxy);;
 	}
 
 	@Test
 	public void testJustJoinPoint() {
-		mockCollaborator.justJoinPoint("getAge");
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).justJoinPoint("getAge");;
 	}
 
 }

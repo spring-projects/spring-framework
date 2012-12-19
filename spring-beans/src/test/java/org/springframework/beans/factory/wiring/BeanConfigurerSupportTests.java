@@ -16,8 +16,10 @@
 
 package org.springframework.beans.factory.wiring;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -32,31 +34,24 @@ import test.beans.TestBean;
 public class BeanConfigurerSupportTests extends TestCase {
 
 	public void testSupplyIncompatibleBeanFactoryImplementation() throws Exception {
-		MockControl mock = MockControl.createControl(BeanFactory.class);
-		mock.replay();
 		try {
-			new StubBeanConfigurerSupport().setBeanFactory((BeanFactory) mock.getMock());
+			new StubBeanConfigurerSupport().setBeanFactory(mock(BeanFactory.class));
 			fail("Must have thrown an IllegalArgumentException by this point (incompatible BeanFactory implementation supplied)");
 		}
 		catch (IllegalArgumentException expected) {
 		}
-		mock.verify();
 	}
 
 	public void testConfigureBeanDoesNothingIfBeanWiringInfoResolverResolvesToNull() throws Exception {
 		TestBean beanInstance = new TestBean();
 
-		MockControl mock = MockControl.createControl(BeanWiringInfoResolver.class);
-		BeanWiringInfoResolver resolver = (BeanWiringInfoResolver) mock.getMock();
-		resolver.resolveWiringInfo(beanInstance);
-		mock.setReturnValue(null);
-		mock.replay();
+		BeanWiringInfoResolver resolver = mock(BeanWiringInfoResolver.class);
 
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.setBeanFactory(new DefaultListableBeanFactory());
 		configurer.configureBean(beanInstance);
-		mock.verify();
+		verify(resolver).resolveWiringInfo(beanInstance);
 		assertNull(beanInstance.getName());
 	}
 
@@ -91,19 +86,14 @@ public class BeanConfigurerSupportTests extends TestCase {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("spouse", builder.getBeanDefinition());
 
-		MockControl mock = MockControl.createControl(BeanWiringInfoResolver.class);
-		BeanWiringInfoResolver resolver = (BeanWiringInfoResolver) mock.getMock();
-		resolver.resolveWiringInfo(beanInstance);
-		mock.setReturnValue(new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_NAME, false));
-		mock.replay();
+		BeanWiringInfoResolver resolver = mock(BeanWiringInfoResolver.class);
+		given(resolver.resolveWiringInfo(beanInstance)).willReturn(new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_NAME, false));
 
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.setBeanFactory(factory);
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
 		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
-
-		mock.verify();
 	}
 
 	public void testConfigureBeanPerformsAutowiringByTypeIfAppropriateBeanWiringInfoResolverIsPluggedIn() throws Exception {
@@ -115,19 +105,14 @@ public class BeanConfigurerSupportTests extends TestCase {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("Mmm, I fancy a salad!", builder.getBeanDefinition());
 
-		MockControl mock = MockControl.createControl(BeanWiringInfoResolver.class);
-		BeanWiringInfoResolver resolver = (BeanWiringInfoResolver) mock.getMock();
-		resolver.resolveWiringInfo(beanInstance);
-		mock.setReturnValue(new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_TYPE, false));
-		mock.replay();
+		BeanWiringInfoResolver resolver = mock(BeanWiringInfoResolver.class);
+		given(resolver.resolveWiringInfo(beanInstance)).willReturn(new BeanWiringInfo(BeanWiringInfo.AUTOWIRE_BY_TYPE, false));
 
 		BeanConfigurerSupport configurer = new StubBeanConfigurerSupport();
 		configurer.setBeanFactory(factory);
 		configurer.setBeanWiringInfoResolver(resolver);
 		configurer.configureBean(beanInstance);
 		assertEquals("Bean is evidently not being configured (for some reason)", "David Gavurin", beanInstance.getSpouse().getName());
-
-		mock.verify();
 	}
 
 

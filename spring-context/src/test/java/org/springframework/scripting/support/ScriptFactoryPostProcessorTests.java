@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
+import static org.mockito.Mockito.mock;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -75,15 +75,12 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() throws Exception {
-		MockControl mock = MockControl.createControl(BeanFactory.class);
-		mock.replay();
 		try {
-			new ScriptFactoryPostProcessor().setBeanFactory((BeanFactory) mock.getMock());
+			new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class));
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalStateException expected) {
 		}
-		mock.verify();
 	}
 
 	public void testChangeScriptWithRefreshableBeanFunctionality() throws Exception {

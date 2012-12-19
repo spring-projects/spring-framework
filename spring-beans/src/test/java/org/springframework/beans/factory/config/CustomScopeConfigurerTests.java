@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,24 +45,20 @@ public final class CustomScopeConfigurerTests {
 
 	@Test
 	public void testWithNoScopes() throws Exception {
-		Scope scope = createMock(Scope.class);
-		replay(scope);
+		Scope scope = mock(Scope.class);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.postProcessBeanFactory(factory);
-		verify(scope);
 	}
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeInstance() throws Exception {
-		Scope scope = createMock(Scope.class);
-		replay(scope);
+		Scope scope = mock(Scope.class);
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<String, Object>();
 		scopes.put(FOO_SCOPE, scope);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		verify(scope);
 	}
 
 	@Test

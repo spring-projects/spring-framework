@@ -16,6 +16,12 @@
 
 package org.springframework.jdbc.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,9 +29,7 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.jdbc.support.incrementer.HsqlMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.MySQLMaxValueIncrementer;
 import org.springframework.jdbc.support.incrementer.OracleSequenceMaxValueIncrementer;
@@ -35,50 +39,26 @@ import org.springframework.jdbc.support.incrementer.PostgreSQLSequenceMaxValueIn
  * @author Juergen Hoeller
  * @since 27.02.2004
  */
-public class DataFieldMaxValueIncrementerTests extends TestCase {
+public class DataFieldMaxValueIncrementerTests {
 
+	private DataSource dataSource = mock(DataSource.class);
+	private Connection connection = mock(Connection.class);
+	private Statement statement = mock(Statement.class);
+	private ResultSet resultSet = mock(ResultSet.class);
+
+	@Test
 	public void testHsqlMaxValueIncrementer() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-
-		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.createStatement();
-		conControl.setReturnValue(stmt, 2);
-		stmt.executeUpdate("insert into myseq values(null)");
-		stmtControl.setReturnValue(1, 6);
-		stmt.executeQuery("select max(identity()) from myseq");
-		stmtControl.setReturnValue(rs, 6);
-		rs.next();
-		rsControl.setReturnValue(true, 6);
-		for (long i = 0; i < 6; i++) {
-			rs.getLong(1);
-			rsControl.setReturnValue(i);
-		}
-		rs.close();
-		rsControl.setVoidCallable(6);
-		stmt.executeUpdate("delete from myseq where seq < 2");
-		stmtControl.setReturnValue(1);
-		stmt.executeUpdate("delete from myseq where seq < 5");
-		stmtControl.setReturnValue(1);
-		stmt.close();
-		stmtControl.setVoidCallable(2);
-		con.close();
-		conControl.setVoidCallable(2);
-
-		dsControl.replay();
-		conControl.replay();
-		stmtControl.replay();
-		rsControl.replay();
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeUpdate("insert into myseq values(null)")).willReturn(1);
+		given(statement.executeQuery("select max(identity()) from myseq")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(0L, 1L, 2L, 3L, 4L, 5L);
+		given(statement.executeUpdate("delete from myseq where seq < 2")).willReturn(1);
+		given(statement.executeUpdate("delete from myseq where seq < 5")).willReturn(1);
 
 		HsqlMaxValueIncrementer incrementer = new HsqlMaxValueIncrementer();
-		incrementer.setDataSource(ds);
+		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setColumnName("seq");
 		incrementer.setCacheSize(3);
@@ -90,51 +70,22 @@ public class DataFieldMaxValueIncrementerTests extends TestCase {
 		assertEquals("002", incrementer.nextStringValue());
 		assertEquals(3, incrementer.nextIntValue());
 		assertEquals(4, incrementer.nextLongValue());
-
-		dsControl.verify();
-		conControl.verify();
-		stmtControl.verify();
-		rsControl.verify();
+		verify(resultSet, times(6)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
 	}
 
+	@Test
 	public void testMySQLMaxValueIncrementer() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-
-		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.createStatement();
-		conControl.setReturnValue(stmt, 2);
-		stmt.executeUpdate("update myseq set seq = last_insert_id(seq + 2)");
-		stmtControl.setReturnValue(1, 2);
-		stmt.executeQuery("select last_insert_id()");
-		stmtControl.setReturnValue(rs, 2);
-		rs.next();
-		rsControl.setReturnValue(true, 2);
-		rs.getLong(1);
-		rsControl.setReturnValue(2);
-		rs.getLong(1);
-		rsControl.setReturnValue(4);
-		rs.close();
-		rsControl.setVoidCallable(2);
-		stmt.close();
-		stmtControl.setVoidCallable(2);
-		con.close();
-		conControl.setVoidCallable(2);
-
-		dsControl.replay();
-		conControl.replay();
-		stmtControl.replay();
-		rsControl.replay();
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeUpdate("update myseq set seq = last_insert_id(seq + 2)")).willReturn(1);
+		given(statement.executeQuery("select last_insert_id()")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(2L, 4L);
 
 		MySQLMaxValueIncrementer incrementer = new MySQLMaxValueIncrementer();
-		incrementer.setDataSource(ds);
+		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setColumnName("seq");
 		incrementer.setCacheSize(2);
@@ -146,48 +97,21 @@ public class DataFieldMaxValueIncrementerTests extends TestCase {
 		assertEquals("3", incrementer.nextStringValue());
 		assertEquals(4, incrementer.nextLongValue());
 
-		dsControl.verify();
-		conControl.verify();
-		stmtControl.verify();
-		rsControl.verify();
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
 	}
 
+	@Test
 	public void testPostgreSQLSequenceMaxValueIncrementer() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-
-		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.createStatement();
-		conControl.setReturnValue(stmt, 2);
-		stmt.executeQuery("select nextval('myseq')");
-		stmtControl.setReturnValue(rs, 2);
-		rs.next();
-		rsControl.setReturnValue(true, 2);
-		rs.getLong(1);
-		rsControl.setReturnValue(10);
-		rs.getLong(1);
-		rsControl.setReturnValue(12);
-		rs.close();
-		rsControl.setVoidCallable(2);
-		stmt.close();
-		stmtControl.setVoidCallable(2);
-		con.close();
-		conControl.setVoidCallable(2);
-
-		dsControl.replay();
-		conControl.replay();
-		stmtControl.replay();
-		rsControl.replay();
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select nextval('myseq')")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(10L, 12L);
 
 		PostgreSQLSequenceMaxValueIncrementer incrementer = new PostgreSQLSequenceMaxValueIncrementer();
-		incrementer.setDataSource(ds);
+		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setPaddingLength(5);
 		incrementer.afterPropertiesSet();
@@ -195,48 +119,21 @@ public class DataFieldMaxValueIncrementerTests extends TestCase {
 		assertEquals("00010", incrementer.nextStringValue());
 		assertEquals(12, incrementer.nextIntValue());
 
-		dsControl.verify();
-		conControl.verify();
-		stmtControl.verify();
-		rsControl.verify();
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
 	}
 
+	@Test
 	public void testOracleSequenceMaxValueIncrementer() throws SQLException {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-
-		ds.getConnection();
-		dsControl.setReturnValue(con, 2);
-		con.createStatement();
-		conControl.setReturnValue(stmt, 2);
-		stmt.executeQuery("select myseq.nextval from dual");
-		stmtControl.setReturnValue(rs, 2);
-		rs.next();
-		rsControl.setReturnValue(true, 2);
-		rs.getLong(1);
-		rsControl.setReturnValue(10);
-		rs.getLong(1);
-		rsControl.setReturnValue(12);
-		rs.close();
-		rsControl.setVoidCallable(2);
-		stmt.close();
-		stmtControl.setVoidCallable(2);
-		con.close();
-		conControl.setVoidCallable(2);
-
-		dsControl.replay();
-		conControl.replay();
-		stmtControl.replay();
-		rsControl.replay();
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.createStatement()).willReturn(statement);
+		given(statement.executeQuery("select myseq.nextval from dual")).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getLong(1)).willReturn(10L, 12L);
 
 		OracleSequenceMaxValueIncrementer incrementer = new OracleSequenceMaxValueIncrementer();
-		incrementer.setDataSource(ds);
+		incrementer.setDataSource(dataSource);
 		incrementer.setIncrementerName("myseq");
 		incrementer.setPaddingLength(2);
 		incrementer.afterPropertiesSet();
@@ -244,10 +141,9 @@ public class DataFieldMaxValueIncrementerTests extends TestCase {
 		assertEquals(10, incrementer.nextLongValue());
 		assertEquals("12", incrementer.nextStringValue());
 
-		dsControl.verify();
-		conControl.verify();
-		stmtControl.verify();
-		rsControl.verify();
+		verify(resultSet, times(2)).close();
+		verify(statement, times(2)).close();
+		verify(connection, times(2)).close();
 	}
 
 }

@@ -16,8 +16,11 @@
 
 package org.springframework.ejb.access;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.lang.reflect.Proxy;
 import java.rmi.RemoteException;
@@ -56,14 +59,11 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		final int value = 11;
 		final String jndiName = "foo";
 
-		MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		myEjb.remove();
-		replay(myEjb);
+		MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
 
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andReturn(myEjb);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willReturn(myEjb);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -86,8 +86,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertEquals("Returns expected value", value, mbm.getValue());
-		verify(myEjb);
-		verify(home);
+		verify(myEjb).remove();
 	}
 
 	@Test
@@ -95,9 +94,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		final int value = 11;
 		final String jndiName = "foo";
 
-		final MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		replay(myEjb);
+		final MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -120,7 +118,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertEquals("Returns expected value", value, mbm.getValue());
-		verify(myEjb);
 	}
 
 	@Override
@@ -129,16 +126,13 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		final RemoteException rex = new RemoteException();
 		final String jndiName = "foo";
 
-		MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andThrow(rex);
+		MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willThrow(rex);
 		// TODO might want to control this behaviour...
 		// Do we really want to call remove after a remote exception?
-		myEjb.remove();
-		replay(myEjb);
 
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andReturn(myEjb);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willReturn(myEjb);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -167,8 +161,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteException ex) {
 			assertSame("Threw expected RemoteException", rex, ex);
 		}
-		verify(myEjb);
-		verify(home);
+		verify(myEjb).remove();
 	}
 
 	@Test
@@ -176,9 +169,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		final String jndiName = "foo";
 
 		final CreateException cex = new CreateException();
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andThrow(cex);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willThrow(cex);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -209,8 +201,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteException ex) {
 			// expected
 		}
-
-		verify(home);
 	}
 
 	@Test
@@ -218,9 +208,8 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		final String jndiName = "foo";
 
 		final CreateException cex = new CreateException();
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andThrow(cex);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willThrow(cex);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -251,8 +240,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		catch (RemoteAccessException ex) {
 			assertTrue(ex.getCause() == cex);
 		}
-
-		verify(home);
 	}
 
 	@Test
@@ -261,8 +248,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		// Could actually try to figure out interface from create?
 		final String jndiName = "foo";
 
-		final MyHome home = createMock(MyHome.class);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -292,7 +278,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		}
 
 		// Expect no methods on home
-		verify(home);
+		verifyZeroInteractions(home);
 	}
 
 

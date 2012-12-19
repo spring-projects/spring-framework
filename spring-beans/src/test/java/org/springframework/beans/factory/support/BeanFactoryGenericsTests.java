@@ -30,8 +30,9 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import test.beans.GenericBean;
 import test.beans.GenericIntegerBean;
 import test.beans.GenericSetOfIntegerBean;
@@ -626,10 +627,10 @@ public class BeanFactoryGenericsTests {
 
 	/**
 	 * Tests support for parameterized {@code factory-method} declarations such
-	 * as EasyMock's {@code createMock()} method which has the following signature.
+	 * as Mockito {@code mock()} method which has the following signature.
 	 *
 	 * <pre>{@code
-	 * public static <T> T createMock(Class<T> toMock)
+	 * public static <T> T mock(Class<T> classToMock)
 	 * }</pre>
 	 *
 	 * See SPR-9493
@@ -637,12 +638,12 @@ public class BeanFactoryGenericsTests {
 	 */
 	@Test
 	public void parameterizedFactoryMethod() {
-		RootBeanDefinition rbd = new RootBeanDefinition(EasyMock.class);
-		rbd.setFactoryMethodName("createMock");
+		RootBeanDefinition rbd = new RootBeanDefinition(Mockito.class);
+		rbd.setFactoryMethodName("mock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("easyMock", rbd);
+		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());

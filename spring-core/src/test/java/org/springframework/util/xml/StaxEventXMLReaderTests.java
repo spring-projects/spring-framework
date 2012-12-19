@@ -16,13 +16,15 @@
 
 package org.springframework.util.xml;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.io.InputStream;
 import java.io.StringReader;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
-import org.easymock.MockControl;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.helpers.AttributesImpl;
@@ -41,21 +43,13 @@ public class StaxEventXMLReaderTests extends AbstractStaxXMLReaderTestCase {
 		XMLEventReader eventReader = inputFactory.createXMLEventReader(new StringReader(CONTENT));
 		eventReader.nextTag(); // skip to root
 		StaxEventXMLReader xmlReader = new StaxEventXMLReader(eventReader);
-
-		MockControl mockControl = MockControl.createStrictControl(ContentHandler.class);
-		mockControl.setDefaultMatcher(new SaxArgumentMatcher());
-		ContentHandler contentHandlerMock = (ContentHandler) mockControl.getMock();
-
-		contentHandlerMock.startDocument();
-		contentHandlerMock.startElement("http://springframework.org/spring-ws", "child", "child", new AttributesImpl());
-		contentHandlerMock.endElement("http://springframework.org/spring-ws", "child", "child");
-		contentHandlerMock.endDocument();
-
-		xmlReader.setContentHandler(contentHandlerMock);
-		mockControl.replay();
+		ContentHandler contentHandler = mock(ContentHandler.class);
+		xmlReader.setContentHandler(contentHandler);
 		xmlReader.parse(new InputSource());
-		mockControl.verify();
+		verify(contentHandler).startDocument();
+		verify(contentHandler).startElement("http://springframework.org/spring-ws", "child", "child", new AttributesImpl());
+		verify(contentHandler).endElement("http://springframework.org/spring-ws", "child", "child");
+		verify(contentHandler).endDocument();
 	}
-
 }
 

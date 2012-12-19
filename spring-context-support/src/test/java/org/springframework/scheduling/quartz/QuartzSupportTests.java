@@ -21,6 +21,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -30,7 +33,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.easymock.MockControl;
 import org.junit.Test;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
@@ -127,31 +129,10 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.addJob(jobDetail1, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger1);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
+		given(scheduler.scheduleJob(trigger1)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -175,7 +156,14 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).addJob(jobDetail1, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -220,33 +208,11 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(new SimpleTrigger());
-		if (overwrite) {
-			scheduler.addJob(jobDetail1, true);
-			schedulerControl.setVoidCallable();
-			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
-			schedulerControl.setReturnValue(new Date());
-		}
-		else {
-			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-			schedulerControl.setReturnValue(null);
-		}
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1)).willReturn(new Date());
+		given(scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP)).willReturn(new SimpleTrigger());
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -270,7 +236,18 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		if (overwrite) {
+			verify(scheduler).addJob(jobDetail1, true);
+			verify(scheduler).rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+		}
+		else {
+			verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		}
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -315,37 +292,16 @@ public class QuartzSupportTests {
 		trigger1.setRepeatInterval(20);
 		trigger1.afterPropertiesSet();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(new SchedulerContext());
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(new SimpleTrigger());
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.getContext()).willReturn(new SchedulerContext());
+		given(scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP)).willReturn(new SimpleTrigger());
 		if (overwrite) {
-			scheduler.addJob(jobDetail1, true);
-			schedulerControl.setVoidCallable();
-			scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
-			schedulerControl.setReturnValue(new Date());
+			given(scheduler.rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1)).willReturn(new Date());
 		}
-		else {
-			scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-			schedulerControl.setReturnValue(null);
-		}
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setThrowable(new ObjectAlreadyExistsException(""));
+		given(scheduler.scheduleJob(trigger0)).willThrow(new ObjectAlreadyExistsException(""));
 		if (overwrite) {
-			scheduler.rescheduleJob("myTrigger0", Scheduler.DEFAULT_GROUP, trigger0);
-			schedulerControl.setReturnValue(new Date());
+			given(scheduler.rescheduleJob("myTrigger0", Scheduler.DEFAULT_GROUP, trigger0)).willReturn(new Date());
 		}
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -369,39 +325,31 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		if (overwrite) {
+			verify(scheduler).addJob(jobDetail1, true);
+			verify(scheduler).rescheduleJob("myTrigger1", Scheduler.DEFAULT_GROUP, trigger1);
+		}
+		else {
+			verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		}
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
 	public void testSchedulerFactoryBeanWithListeners() throws Exception {
 		JobFactory jobFactory = new AdaptableJobFactory();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		final Scheduler scheduler = mock(Scheduler.class);
 
 		SchedulerListener schedulerListener = new TestSchedulerListener();
 		JobListener globalJobListener = new TestJobListener();
 		JobListener jobListener = new TestJobListener();
 		TriggerListener globalTriggerListener = new TestTriggerListener();
 		TriggerListener triggerListener = new TestTriggerListener();
-
-		scheduler.setJobFactory(jobFactory);
-		schedulerControl.setVoidCallable();
-		scheduler.addSchedulerListener(schedulerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addGlobalJobListener(globalJobListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addJobListener(jobListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addGlobalTriggerListener(globalTriggerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.addTriggerListener(triggerListener);
-		schedulerControl.setVoidCallable();
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -423,7 +371,14 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).setJobFactory(jobFactory);
+		verify(scheduler).addSchedulerListener(schedulerListener);
+		verify(scheduler).addGlobalJobListener(globalJobListener);
+		verify(scheduler).addJobListener(jobListener);
+		verify(scheduler).addGlobalTriggerListener(globalTriggerListener);
+		verify(scheduler).addTriggerListener(triggerListener);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	/*public void testMethodInvocationWithConcurrency() throws Exception {
@@ -547,31 +502,9 @@ public class QuartzSupportTests {
 		trigger1.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
 		trigger1.setRepeatInterval(20);
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
-		scheduler.setJobFactory(jobFactory);
-		schedulerControl.setVoidCallable();
-		scheduler.getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
-		schedulerControl.setReturnValue(null);
-		scheduler.addJob(jobDetail0, true);
-		schedulerControl.setVoidCallable();
-		scheduler.addJob(jobDetail1, true);
-		schedulerControl.setVoidCallable();
-		scheduler.scheduleJob(trigger0);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.scheduleJob(trigger1);
-		schedulerControl.setReturnValue(new Date());
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		final Scheduler scheduler = mock(Scheduler.class);
+		given(scheduler.scheduleJob(trigger0)).willReturn(new Date());
+		given(scheduler.scheduleJob(trigger1)).willReturn(new Date());
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -590,7 +523,17 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).setJobFactory(jobFactory);
+		verify(scheduler).getJobDetail("myJob0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getJobDetail("myJob1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger0", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).getTrigger("myTrigger1", Scheduler.DEFAULT_GROUP);
+		verify(scheduler).addJob(jobDetail0, true);
+		verify(scheduler).addJob(jobDetail1, true);
+		verify(scheduler).scheduleJob(trigger0);
+		verify(scheduler).scheduleJob(trigger1);
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test
@@ -598,16 +541,9 @@ public class QuartzSupportTests {
 		TestBean tb = new TestBean("tb", 99);
 		StaticApplicationContext ac = new StaticApplicationContext();
 
-		MockControl schedulerControl = MockControl.createControl(Scheduler.class);
-		final Scheduler scheduler = (Scheduler) schedulerControl.getMock();
+		final Scheduler scheduler = mock(Scheduler.class);
 		SchedulerContext schedulerContext = new SchedulerContext();
-		scheduler.getContext();
-		schedulerControl.setReturnValue(schedulerContext, 4);
-		scheduler.start();
-		schedulerControl.setVoidCallable();
-		scheduler.shutdown(false);
-		schedulerControl.setVoidCallable();
-		schedulerControl.replay();
+		given(scheduler.getContext()).willReturn(schedulerContext);
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
 			@Override
@@ -632,7 +568,8 @@ public class QuartzSupportTests {
 			schedulerFactoryBean.destroy();
 		}
 
-		schedulerControl.verify();
+		verify(scheduler).start();
+		verify(scheduler).shutdown(false);
 	}
 
 	@Test

@@ -16,8 +16,10 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +60,7 @@ public final class AfterReturningAdviceBindingTests {
 
 		afterAdviceAspect = (AfterReturningAdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = createNiceMock(AfterReturningAdviceBindingCollaborator.class);
+		mockCollaborator = mock(AfterReturningAdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
@@ -71,106 +73,79 @@ public final class AfterReturningAdviceBindingTests {
 
 	@Test
 	public void testOneIntArg() {
-		mockCollaborator.oneIntArg(5);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntArg(5);
 	}
 
 	@Test
 	public void testOneObjectArg() {
-		mockCollaborator.oneObjectArg(this.testBeanProxy);
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneObjectArg(this.testBeanProxy);
 	}
 
 	@Test
 	public void testOneIntAndOneObjectArgs() {
-		mockCollaborator.oneIntAndOneObject(5,this.testBeanProxy);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(5);
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneIntAndOneObject(5,this.testBeanProxy);
 	}
 
 	@Test
 	public void testNeedsJoinPoint() {
-		mockCollaborator.needsJoinPoint("getAge");
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).needsJoinPoint("getAge");
 	}
 
 	@Test
 	public void testNeedsJoinPointStaticPart() {
-		mockCollaborator.needsJoinPointStaticPart("getAge");
-		replay(mockCollaborator);
 		testBeanProxy.getAge();
-		verify(mockCollaborator);
+		verify(mockCollaborator).needsJoinPointStaticPart("getAge");
 	}
 
 	@Test
 	public void testReturningString() {
-		mockCollaborator.oneString("adrian");
-		replay(mockCollaborator);
 		testBeanProxy.setName("adrian");
 		testBeanProxy.getName();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneString("adrian");
 	}
 
 	@Test
 	public void testReturningObject() {
-		mockCollaborator.oneObjectArg(this.testBeanTarget);
-		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneObjectArg(this.testBeanTarget);
 	}
 
 	@Test
 	public void testReturningBean() {
-		mockCollaborator.oneTestBeanArg(this.testBeanTarget);
-		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneTestBeanArg(this.testBeanTarget);
 	}
 
 	@Test
 	public void testReturningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
 		ITestBean[] spouses = this.testBeanTarget.getSpouses();
-		mockCollaborator.testBeanArrayArg(spouses);
-		replay(mockCollaborator);
 		testBeanProxy.getSpouses();
-		verify(mockCollaborator);
+		verify(mockCollaborator).testBeanArrayArg(spouses);
 	}
 
 	@Test
 	public void testNoInvokeWhenReturningParameterTypeDoesNotMatch() {
-		// we need a strict mock for this...
-		mockCollaborator = createMock(AfterReturningAdviceBindingCollaborator.class);
-		afterAdviceAspect.setCollaborator(mockCollaborator);
-
-		replay(mockCollaborator);
 		testBeanProxy.setSpouse(this.testBeanProxy);
 		testBeanProxy.getSpouse();
-		verify(mockCollaborator);
+		verifyZeroInteractions(mockCollaborator);
 	}
 
 	@Test
 	public void testReturningByType() {
-		mockCollaborator.objectMatchNoArgs();
-		replay(mockCollaborator);
 		testBeanProxy.returnsThis();
-		verify(mockCollaborator);
+		verify(mockCollaborator).objectMatchNoArgs();
 	}
 
 	@Test
 	public void testReturningPrimitive() {
-		mockCollaborator.oneInt(20);
-		replay(mockCollaborator);
 		testBeanProxy.setAge(20);
 		testBeanProxy.haveBirthday();
-		verify(mockCollaborator);
+		verify(mockCollaborator).oneInt(20);
 	}
 
 }
