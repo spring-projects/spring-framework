@@ -83,6 +83,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @deprecated in Spring 3.2 in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping RequestMappingHandlerMapping}
  */
+@Deprecated
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
 	static final String USE_DEFAULT_SUFFIX_PATTERN = DefaultAnnotationHandlerMapping.class.getName() + ".useDefaultSuffixPattern";

@@ -23,6 +23,7 @@ package org.springframework.core.enums;
  * @since 1.2.6
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
+@Deprecated
 @SuppressWarnings("serial")
 public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 

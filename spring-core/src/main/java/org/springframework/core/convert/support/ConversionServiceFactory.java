@@ -64,6 +64,7 @@ public abstract class ConversionServiceFactory {
 	 * Create a new default GenericConversionService instance that can be safely modified.
 	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#DefaultConversionService()}
 	 */
+	@Deprecated
 	public static GenericConversionService createDefaultConversionService() {
 		return new DefaultConversionService();
 	}
@@ -72,6 +73,7 @@ public abstract class ConversionServiceFactory {
 	 * Populate the given GenericConversionService instance with the set of default converters.
 	 * @deprecated in Spring 3.1 in favor of {@link DefaultConversionService#addDefaultConverters(ConverterRegistry)}
 	 */
+	@Deprecated
 	public static void addDefaultConverters(GenericConversionService conversionService) {
 		DefaultConversionService.addDefaultConverters(conversionService);
 	}

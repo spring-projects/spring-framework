@@ -90,6 +90,7 @@ public class BeanDefinitionParserDelegate {
 	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
 
 	/** @deprecated as of Spring 3.1 in favor of {@link #MULTI_VALUE_ATTRIBUTE_DELIMITERS} */
+	@Deprecated
 	public static final String BEAN_NAME_DELIMITERS = MULTI_VALUE_ATTRIBUTE_DELIMITERS;
 
 	/**
@@ -343,6 +344,7 @@ public class BeanDefinitionParserDelegate {
 	 * @deprecated in Spring 3.1 in favor of
 	 * {@link #initDefaults(Element, BeanDefinitionParserDelegate)}
 	 */
+	@Deprecated
 	public void initDefaults(Element root) {
 		initDefaults(root, null);
 	}
