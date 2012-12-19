@@ -229,7 +229,7 @@
  				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
-		<xsd:attribute name="initial-delay" type="xsd:int" use="optional">
+		<xsd:attribute name="initial-delay" type="xsd:string" use="optional">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	Number of milliseconds to delay before the first execution of a 'fixed-rate' or
