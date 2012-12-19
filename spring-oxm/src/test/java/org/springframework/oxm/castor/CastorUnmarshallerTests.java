@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
+
+import static org.hamcrest.CoreMatchers.*;
 
 import static org.junit.Assert.*;
 
@@ -66,7 +68,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	protected void testFlight(Object o) {
 		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, flight.getNumber());
+		assertThat("Number is invalid", flight.getNumber(), equalTo(42L));
 	}
 
 	@Override
@@ -104,10 +106,10 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
 		OrderItem item = order.getOrderItem(0);
 		assertEquals("Invalid items", "1", item.getId());
-		assertEquals("Invalid items", 15, item.getQuantity());
+		assertThat("Invalid items", item.getQuantity(), equalTo(15));
 		item = order.getOrderItem(1);
 		assertEquals("Invalid items", "3", item.getId());
-		assertEquals("Invalid items", 20, item.getQuantity());
+		assertThat("Invalid items", item.getQuantity(), equalTo(20));
 	}
 
 	@Test

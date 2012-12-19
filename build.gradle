@@ -32,8 +32,14 @@ configure(allprojects) {
 
 	group = "org.springframework"
 
-	sourceCompatibility=1.5
-	targetCompatibility=1.5
+	compileJava {
+		sourceCompatibility=1.5
+		targetCompatibility=1.5
+	}
+	compileTestJava {
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
+	}
 
 	[compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
@@ -333,6 +339,14 @@ project("spring-tx") {
 project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on jibx compilation
+		// see http://jira.codehaus.org/browse/JIBX-465
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
@@ -458,6 +472,14 @@ project("spring-web") {
 
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on toplink compilation
+		// TODO: remove this block when we remove toplink
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.hibernate:hibernate-core:3.3.2.GA")
