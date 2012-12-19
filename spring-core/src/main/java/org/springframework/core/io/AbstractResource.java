@@ -194,7 +194,7 @@ public abstract class AbstractResource implements Resource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
+			(obj instanceof Resource && ((Resource) obj).getDescription().equals(getDescription())));
 	}
 
 	/**

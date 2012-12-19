@@ -41,7 +41,7 @@ public class LocalCacheProviderProxy implements CacheProvider {
 		// absolutely needs thread-bound CacheProvider to initialize
 		if (cp == null) {
 			throw new IllegalStateException("No Hibernate CacheProvider found - " +
-			    "'cacheProvider' property must be set on LocalSessionFactoryBean");
+				"'cacheProvider' property must be set on LocalSessionFactoryBean");
 		}
 		this.cacheProvider = cp;
 	}

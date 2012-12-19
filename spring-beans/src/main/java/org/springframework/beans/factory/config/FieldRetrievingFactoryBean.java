@@ -159,7 +159,7 @@ public class FieldRetrievingFactoryBean
 		if (this.targetClass == null && this.targetObject == null) {
 			if (this.targetField != null) {
 				throw new IllegalArgumentException(
-				    "Specify targetClass or targetObject in combination with targetField");
+						"Specify targetClass or targetObject in combination with targetField");
 			}
 
 			// If no other property specified, consider bean name as static field expression.

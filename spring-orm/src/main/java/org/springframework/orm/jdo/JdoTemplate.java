@@ -201,9 +201,9 @@ public class JdoTemplate extends JdoAccessor implements JdoOperations {
 		Assert.notNull(action, "Callback object must not be null");
 
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(
-		    getPersistenceManagerFactory(), isAllowCreate());
+			getPersistenceManagerFactory(), isAllowCreate());
 		boolean existingTransaction =
-		    TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
+			TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory());
 		try {
 			PersistenceManager pmToExpose = (exposeNativePersistenceManager ? pm : createPersistenceManagerProxy(pm));
 			T result = action.doInJdo(pmToExpose);

@@ -659,7 +659,7 @@ public class JpaTransactionManager extends AbstractPlatformTransactionManager
 
 		public void flush() {
 			try {
-			    this.entityManagerHolder.getEntityManager().flush();
+				this.entityManagerHolder.getEntityManager().flush();
 			}
 			catch (RuntimeException ex) {
 				throw DataAccessUtils.translateIfNecessary(ex, getJpaDialect());

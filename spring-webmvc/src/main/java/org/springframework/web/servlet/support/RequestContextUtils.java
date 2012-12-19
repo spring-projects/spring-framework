@@ -55,7 +55,7 @@ public abstract class RequestContextUtils {
 	 * @throws IllegalStateException if no servlet-specific context has been found
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletRequest request)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		return getWebApplicationContext(request, null);
 	}

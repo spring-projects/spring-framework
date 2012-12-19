@@ -463,7 +463,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * @return a read-only map, possibly empty, never <code>null</code>
 	 */
 	public Map<String, String> getParameters() {
-	        return parameters;
+			return parameters;
 	}
 
 	/**

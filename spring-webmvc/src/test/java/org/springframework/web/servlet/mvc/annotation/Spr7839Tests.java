@@ -183,7 +183,7 @@ public class Spr7839Tests {
 
 	public static class JavaBean {
 
-	    private NestedBean nested;
+		private NestedBean nested;
 
 		public NestedBean getNested() {
 			return nested;
@@ -198,25 +198,25 @@ public class Spr7839Tests {
 
 	public static class NestedBean {
 
-	    private String foo;
+		private String foo;
 
-	    private List<NestedBean> list;
+		private List<NestedBean> list;
 
-	    private List<List<NestedBean>> listOfLists;
+		private List<List<NestedBean>> listOfLists;
 
-	    private List<NestedBean>[] arrayOfLists;
+		private List<NestedBean>[] arrayOfLists;
 
-	    private Map<String, NestedBean> map;
+		private Map<String, NestedBean> map;
 
-	    private Map<String, List<Integer>> mapOfLists;
+		private Map<String, List<Integer>> mapOfLists;
 
-	    public NestedBean() {
+		public NestedBean() {
 
-	    }
+		}
 
-	    public NestedBean(String foo) {
-	    	this.foo = foo;
-	    }
+		public NestedBean(String foo) {
+			this.foo = foo;
+		}
 
 		public String getFoo() {
 			return foo;

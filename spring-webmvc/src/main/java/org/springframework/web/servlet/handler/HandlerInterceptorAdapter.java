@@ -35,7 +35,7 @@ public abstract class HandlerInterceptorAdapter implements AsyncHandlerIntercept
 	 * This implementation always returns <code>true</code>.
 	 */
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws Exception {
+		throws Exception {
 		return true;
 	}
 

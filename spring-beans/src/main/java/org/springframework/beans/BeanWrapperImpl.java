@@ -738,7 +738,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else {
-                value = readMethod.invoke(object, (Object[]) null);
+				value = readMethod.invoke(object, (Object[]) null);
 			}
 
 			if (tokens.keys != null) {

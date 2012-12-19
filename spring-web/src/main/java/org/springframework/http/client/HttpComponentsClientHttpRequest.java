@@ -50,13 +50,13 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 	private final HttpUriRequest httpRequest;
 
-    private final HttpContext httpContext;
+	private final HttpContext httpContext;
 
 
-    public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+	public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
-        this.httpContext = httpContext;
+		this.httpContext = httpContext;
 	}
 
 

@@ -192,7 +192,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 
 	@Test
 	public void testVarargsInvocation02() {
-	    // Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
+		// Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(5,'a','b','c').stringscount()", 8, Integer.class);
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(2,'a').stringscount()", 3, Integer.class);
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(4).stringscount()", 4, Integer.class);

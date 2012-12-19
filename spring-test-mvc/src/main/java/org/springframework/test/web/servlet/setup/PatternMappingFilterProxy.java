@@ -62,7 +62,7 @@ final class PatternMappingFilterProxy implements Filter {
 		Assert.notNull(delegate, "A delegate Filter is required");
 		this.delegate = delegate;
 		for(String urlPattern : urlPatterns) {
-		    addUrlPattern(urlPattern);
+			addUrlPattern(urlPattern);
 		}
 	}
 

@@ -49,7 +49,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 		// absolutely needs thread-bound DataSource to initialize
 		if (this.dataSource == null) {
 			throw new HibernateException("No local DataSource found for configuration - " +
-			    "'dataSource' property must be set on LocalSessionFactoryBean");
+				"'dataSource' property must be set on LocalSessionFactoryBean");
 		}
 		this.dataSourceToUse = getDataSourceToUse(this.dataSource);
 	}

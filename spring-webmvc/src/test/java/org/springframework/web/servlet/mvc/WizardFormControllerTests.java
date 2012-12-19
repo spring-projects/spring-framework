@@ -405,21 +405,21 @@ public class WizardFormControllerTests extends TestCase {
 						errors.rejectValue("age", "AGE_REQUIRED", null, "Age is required");
 					}
 					break;
-			  default:
+			default:
 					throw new IllegalArgumentException("Invalid page number");
 			}
 		}
 
 		protected ModelAndView processFinish(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
-		    throws ServletException, IOException {
+			throws ServletException, IOException {
 			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("success", getCommandName(), command);
 		}
 
 		protected ModelAndView processCancel(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
-		    throws ServletException, IOException {
+			throws ServletException, IOException {
 			assertTrue(getCurrentPage(request) == 0 || getCurrentPage(request) == 1);
 			return new ModelAndView("cancel", getCommandName(), command);
 		}

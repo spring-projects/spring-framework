@@ -339,7 +339,7 @@ class BeanDefinitionValueResolver {
 		Object resolved = Array.newInstance(elementType, ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			Array.set(resolved, i,
-			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}
@@ -351,7 +351,7 @@ class BeanDefinitionValueResolver {
 		List<Object> resolved = new ArrayList<Object>(ml.size());
 		for (int i = 0; i < ml.size(); i++) {
 			resolved.add(
-			    resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
+					resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
 		}
 		return resolved;
 	}

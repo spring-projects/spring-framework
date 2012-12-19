@@ -106,7 +106,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager getPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		try {
 			return doGetPersistenceManager(pmf, allowCreate);
@@ -133,7 +133,7 @@ public abstract class PersistenceManagerFactoryUtils {
 	 * @see JdoTransactionManager
 	 */
 	public static PersistenceManager doGetPersistenceManager(PersistenceManagerFactory pmf, boolean allowCreate)
-	    throws JDOException, IllegalStateException {
+		throws JDOException, IllegalStateException {
 
 		Assert.notNull(pmf, "No PersistenceManagerFactory specified");
 
@@ -204,7 +204,7 @@ public abstract class PersistenceManagerFactoryUtils {
 
 		Assert.notNull(query, "No Query object specified");
 		PersistenceManagerHolder pmHolder =
-		    (PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
+			(PersistenceManagerHolder) TransactionSynchronizationManager.getResource(pmf);
 		if (pmHolder != null && pmHolder.hasTimeout()) {
 			jdoDialect.applyQueryTimeout(query, pmHolder.getTimeToLiveInSeconds());
 		}

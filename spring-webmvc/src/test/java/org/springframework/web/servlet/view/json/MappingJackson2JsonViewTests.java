@@ -368,7 +368,7 @@ public class MappingJackson2JsonViewTests {
 		}
 
 		@Override
-	    public JsonSerializer<Object> createSerializer(SerializerProvider prov, JavaType type, BeanProperty property) throws JsonMappingException {
+		public JsonSerializer<Object> createSerializer(SerializerProvider prov, JavaType type, BeanProperty property) throws JsonMappingException {
 			if (type.getRawClass() == TestBeanSimple.class) {
 				return new TestBeanSimpleSerializer();
 			}

@@ -366,7 +366,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 		template.execute(new ProducerCallback() {
 			public Object doInJms(Session session, MessageProducer producer)
-			    throws JMSException {
+				throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
 				return null;
@@ -627,7 +627,7 @@ public class JmsTemplate102Tests extends TestCase {
 			else {
 				template.send("testQueue", new MessageCreator() {
 					public Message createMessage(Session session)
-					    throws JMSException {
+						throws JMSException {
 						return session.createTextMessage("just testing");
 					}
 				});
@@ -690,7 +690,7 @@ public class JmsTemplate102Tests extends TestCase {
 		if (explicitTopic) {
 			template.send(mockTopic, new MessageCreator() {
 				public Message createMessage(Session session)
-				    throws JMSException {
+					throws JMSException {
 					return session.createTextMessage("just testing");
 				}
 			});
@@ -698,7 +698,7 @@ public class JmsTemplate102Tests extends TestCase {
 		else {
 			template.send("testTopic", new MessageCreator() {
 				public Message createMessage(Session session)
-				    throws JMSException {
+					throws JMSException {
 					return session.createTextMessage("just testing");
 				}
 			});

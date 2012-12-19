@@ -648,7 +648,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 
 	public void convertAndSend(
 			String destinationName, final Object message, final MessagePostProcessor postProcessor)
-	    throws JmsException {
+		throws JmsException {
 
 		send(destinationName, new MessageCreator() {
 			public Message createMessage(Session session) throws JMSException {

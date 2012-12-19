@@ -131,14 +131,14 @@ public class TrickyAspectJPointcutExpressionTests {
 	}
 
 	public static interface TestService {
-	    public String sayHello();
+		public String sayHello();
 	}
 
 	@Log
-	public static class TestServiceImpl implements TestService{
-	    public String sayHello() {
-	        throw new TestException("TestServiceImpl");
-	    }
+	public static class TestServiceImpl implements TestService {
+		public String sayHello() {
+			throw new TestException("TestServiceImpl");
+		}
 	}
 
 	public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
@@ -149,12 +149,12 @@ public class TrickyAspectJPointcutExpressionTests {
 
 		public void before(Method method, Object[] objects, Object o) throws Throwable {
 			countBefore++;
-	    }
+		}
 
 		public void afterThrowing(Exception e) throws Throwable {
 			countThrows++;
-	        throw e;
-	    }
+			throw e;
+		}
 
 		public int getCountBefore() {
 			return countBefore;

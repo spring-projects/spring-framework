@@ -434,7 +434,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #initBinder
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-	    throws Exception {
+		throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		prepareBinder(binder);

@@ -94,11 +94,11 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			this.wrappedStatementClass = getClass().getClassLoader().loadClass(prefix + "WrappedStatement");
 			this.wrappedResultSetClass = getClass().getClassLoader().loadClass(prefix + "WrappedResultSet");
 			this.getUnderlyingConnectionMethod =
-			    this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
+				this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
 			this.getUnderlyingStatementMethod =
-			    this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
+				this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
 			this.getUnderlyingResultSetMethod =
-			    this.wrappedResultSetClass.getMethod("getUnderlyingResultSet", (Class[]) null);
+				this.wrappedResultSetClass.getMethod("getUnderlyingResultSet", (Class[]) null);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(

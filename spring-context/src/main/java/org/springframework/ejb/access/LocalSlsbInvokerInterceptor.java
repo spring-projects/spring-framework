@@ -93,7 +93,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		}
 		catch (IllegalAccessException ex) {
 			throw new EjbAccessException("Could not access method [" + invocation.getMethod().getName() +
-			    "] of local EJB [" + getJndiName() + "]", ex);
+				"] of local EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
 			if (ejb instanceof EJBLocalObject) {

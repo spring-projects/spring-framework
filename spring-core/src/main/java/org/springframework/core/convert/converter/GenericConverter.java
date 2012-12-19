@@ -94,23 +94,23 @@ public interface GenericConverter {
 			return this.targetType;
 		}
 
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
 				return true;
 			}
-            if (obj == null || obj.getClass() != ConvertiblePair.class) {
+			if (obj == null || obj.getClass() != ConvertiblePair.class) {
 				return false;
 			}
-            ConvertiblePair other = (ConvertiblePair) obj;
-            return this.sourceType.equals(other.sourceType) && this.targetType.equals(other.targetType);
+			ConvertiblePair other = (ConvertiblePair) obj;
+			return this.sourceType.equals(other.sourceType) && this.targetType.equals(other.targetType);
 
-        }
+		}
 
-        @Override
-        public int hashCode() {
-            return this.sourceType.hashCode() * 31 + this.targetType.hashCode();
-        }
-    }
+		@Override
+		public int hashCode() {
+			return this.sourceType.hashCode() * 31 + this.targetType.hashCode();
+		}
+	}
 
 }

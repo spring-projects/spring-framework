@@ -381,7 +381,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			if (other instanceof SpecialRequestTypePredicate) {
 				return this.getClass().getName().compareTo(other.getClass().getName());
 			}
-            return -1;
+			return -1;
 		}
 	}
 
@@ -413,7 +413,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 			if (other instanceof SpecialRequestTypePredicate) {
 				return this.getClass().getName().compareTo(other.getClass().getName());
 			}
-            return -1;
+			return -1;
 		}
 	}
 

@@ -281,7 +281,7 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 
 	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return (this.persistenceManagerFactory != null ?
-		    this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
+			this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
 	}
 
 	public boolean isSingleton() {

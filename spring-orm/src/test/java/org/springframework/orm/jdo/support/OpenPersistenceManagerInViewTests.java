@@ -154,7 +154,7 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 
 		final FilterChain filterChain2 = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(pmf2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}

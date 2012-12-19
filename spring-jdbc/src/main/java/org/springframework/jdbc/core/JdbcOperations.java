@@ -364,7 +364,7 @@ public interface JdbcOperations {
 	 * @see java.sql.Types
 	 */
 	<T> T query(String sql, Object[] args, int[] argTypes, ResultSetExtractor<T> rse)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -422,7 +422,7 @@ public interface JdbcOperations {
 	 * @throws DataAccessException if the query fails
 	 */
 	void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -437,7 +437,7 @@ public interface JdbcOperations {
 	 * @see java.sql.Types
 	 */
 	void query(String sql, Object[] args, int[] argTypes, RowCallbackHandler rch)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of
@@ -510,7 +510,7 @@ public interface JdbcOperations {
 	 * @see java.sql.Types
 	 */
 	<T> List<T> query(String sql, Object[] args, int[] argTypes, RowMapper<T> rowMapper)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list
@@ -614,7 +614,7 @@ public interface JdbcOperations {
 	 * @see java.sql.Types
 	 */
 	<T> T queryForObject(String sql, Object[] args, int[] argTypes, Class<T> requiredType)
-	    throws DataAccessException;
+			throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a

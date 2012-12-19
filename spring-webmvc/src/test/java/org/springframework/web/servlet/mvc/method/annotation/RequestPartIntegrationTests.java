@@ -107,8 +107,8 @@ public class RequestPartIntegrationTests {
 		converter.setPartConverters(Arrays.<HttpMessageConverter<?>>asList(
 				new ResourceHttpMessageConverter(), new MappingJacksonHttpMessageConverter()));
 
- 		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
- 		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
+		restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		restTemplate.setMessageConverters(Arrays.<HttpMessageConverter<?>>asList(converter));
 	}
 
 	@AfterClass
@@ -174,10 +174,10 @@ public class RequestPartIntegrationTests {
 
 		@RequestMapping(value = "/test", method = RequestMethod.POST, consumes = { "multipart/mixed", "multipart/form-data" })
 		public ResponseEntity<Object> create(@RequestPart("json-data") TestData testData, @RequestPart("file-data") MultipartFile file) {
-	        String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
-	        HttpHeaders headers = new HttpHeaders();
+			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
+			HttpHeaders headers = new HttpHeaders();
 			headers.setLocation(URI.create(url));
-	        return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
+			return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
 		}
 	}
 

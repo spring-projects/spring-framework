@@ -190,8 +190,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for JNDI RMI object [" + getJndiName() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+						"] for JNDI RMI object [" + getJndiName() + "] - " +
+						(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {
@@ -426,7 +426,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see org.springframework.remoting.support.RemoteInvocation
 	 */
 	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "RMI invoker proxy for service URL [" + getJndiName() + "]";

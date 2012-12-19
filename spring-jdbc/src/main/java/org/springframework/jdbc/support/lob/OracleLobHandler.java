@@ -414,7 +414,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		}
 
 		public void setClobAsString(PreparedStatement ps, int paramIndex, final String content)
-		    throws SQLException {
+			throws SQLException {
 
 			if (content != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
@@ -437,7 +437,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, final InputStream asciiStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (asciiStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
@@ -460,7 +460,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, final Reader characterStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (characterStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {

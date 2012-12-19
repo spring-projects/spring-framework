@@ -124,7 +124,7 @@ public class ReflectionHelper {
 				Class paramTypeClazz = paramType.getType();
 				if (paramTypeClazz.isPrimitive()) {
 					paramTypeClazz = Object.class;
-			    }
+				}
 				Class superClass = argType.getClass().getSuperclass();
 				while (superClass != null) {
 					if (paramType.equals(superClass)) {

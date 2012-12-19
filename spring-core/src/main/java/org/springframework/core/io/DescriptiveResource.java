@@ -70,7 +70,7 @@ public class DescriptiveResource extends AbstractResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
+			(obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
 	}
 
 	/**

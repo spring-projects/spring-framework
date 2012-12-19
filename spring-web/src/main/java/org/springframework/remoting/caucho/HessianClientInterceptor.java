@@ -264,7 +264,7 @@ public class HessianClientInterceptor extends UrlBasedRemoteAccessor implements 
 		}
 		else {
 			return new RemoteAccessException(
-			    "Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
+				"Cannot access Hessian remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

@@ -340,7 +340,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		wac.setNamespace(getNamespace());
 		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(
+				StringUtils.tokenizeToStringArray(
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.addBeanFactoryPostProcessor(

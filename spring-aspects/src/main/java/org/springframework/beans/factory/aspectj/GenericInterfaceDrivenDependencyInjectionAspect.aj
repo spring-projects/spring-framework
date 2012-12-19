@@ -41,7 +41,7 @@ package org.springframework.beans.factory.aspectj;
  * @since 3.0.0
  */
 public abstract aspect GenericInterfaceDrivenDependencyInjectionAspect<I> extends AbstractInterfaceDrivenDependencyInjectionAspect {
-    declare parents: I implements ConfigurableObject;
+	declare parents: I implements ConfigurableObject;
 
 	public pointcut inConfigurableBean() : within(I+);
 

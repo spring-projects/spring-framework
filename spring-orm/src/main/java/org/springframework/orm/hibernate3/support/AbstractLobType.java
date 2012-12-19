@@ -76,7 +76,7 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	protected AbstractLobType() {
 		this(LocalSessionFactoryBean.getConfigTimeLobHandler(),
-		    LocalSessionFactoryBean.getConfigTimeTransactionManager());
+			LocalSessionFactoryBean.getConfigTimeTransactionManager());
 	}
 
 	/**
@@ -150,7 +150,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on LocalSessionFactoryBean");
+				"lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		try {
@@ -172,7 +172,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on LocalSessionFactoryBean");
+				"lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
@@ -211,7 +211,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @throws HibernateException in case of any other exceptions
 	 */
 	protected abstract void nullSafeSetInternal(
-	    PreparedStatement ps, int index, Object value, LobCreator lobCreator)
+		PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException, IOException, HibernateException;
 
 }

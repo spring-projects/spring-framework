@@ -411,6 +411,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				CannotBeUnlocked.class);
 		assertFalse("Type pattern must have excluded mixin", proxy instanceof Lockable);
 	}
+
 	/* prereq AspectJ 1.6.7
 	@Test
 	public void testIntroductionBasedOnAnnotationMatch_Spr5307() {
@@ -426,8 +427,10 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		Lockable lockable = (Lockable)proxy;
 		lockable.locked();
 	}
-    */
+	*/
+
 	// TODO: Why does this test fail? It hasn't been run before, so it maybe never actually passed...
+
 	public void XtestIntroductionWithArgumentBinding() {
 		TestBean target = new TestBean();
 
@@ -764,8 +767,8 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 		public void setAge(int a) {}
 
 		@Around(value="setAge(age)",argNames="age")
-		// @ArgNames({"age"})  // AMC needs more work here? ignoring pjp arg... ok??
-		//                     // argNames should be suported in Around as it is in Pointcut
+		// @ArgNames({"age"})	// AMC needs more work here? ignoring pjp arg... ok??
+								// argNames should be suported in Around as it is in Pointcut
 		public void changeReturnType(ProceedingJoinPoint pjp, int age) throws Throwable {
 			pjp.proceed(new Object[] {age*2});
 		}

@@ -435,8 +435,8 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext context = new StandardEvaluationContext();
 
-		context.registerFunction("reverseString",
-		                         StringUtils.class.getDeclaredMethod("reverseString", new Class[] { String.class }));
+		context.registerFunction("reverseString", StringUtils.class.getDeclaredMethod(
+				"reverseString", new Class[] { String.class }));
 
 		String helloWorldReversed = parser.parseExpression("#reverseString('hello world')").getValue(context, String.class);
 		Assert.assertEquals("dlrow olleh",helloWorldReversed);
@@ -456,8 +456,8 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 		parser.parseExpression("Name").setValue(societyContext, "IEEE");
 		societyContext.setVariable("queryName", "Nikola Tesla");
 
-		String expression = "isMember(#queryName)? #queryName + ' is a member of the ' " +
-		             "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
+		String expression = "isMember(#queryName)? #queryName + ' is a member of the ' "
+				+ "+ Name + ' Society' : #queryName + ' is not a member of the ' + Name + ' Society'";
 
 		String queryResultString = parser.parseExpression(expression).getValue(societyContext, String.class);
 		Assert.assertEquals("Nikola Tesla is a member of the IEEE Society",queryResultString);
@@ -487,28 +487,28 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 
 	static class TemplatedParserContext implements ParserContext {
 
-		  public String getExpressionPrefix() {
-		    return "${";
-		  }
+		public String getExpressionPrefix() {
+			return "${";
+		}
 
-		  public String getExpressionSuffix() {
-		    return "}";
-		  }
+		public String getExpressionSuffix() {
+			return "}";
+		}
 
-		  public boolean isTemplate() {
-		    return true;
-		  }
+		public boolean isTemplate() {
+			return true;
+		}
 	}
 
 	static class StringUtils {
 
-		  public static String reverseString(String input) {
-		    StringBuilder backwards = new StringBuilder();
-		    for (int i = 0; i < input.length(); i++) {
-		      backwards.append(input.charAt(input.length() - 1 - i));
-		    }
-		    return backwards.toString();
-		  }
+		public static String reverseString(String input) {
+			StringBuilder backwards = new StringBuilder();
+			for (int i = 0; i < input.length(); i++) {
+				backwards.append(input.charAt(input.length() - 1 - i));
+			}
+			return backwards.toString();
+		}
 	}
 
 }

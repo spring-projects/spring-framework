@@ -250,17 +250,17 @@ public final class BeanUtilsTests {
 	}
 
 	@Test
-    public void testSPR6063() {
-        PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
+	public void testSPR6063() {
+		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
 
-        PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
-        assertEquals(String.class, keyDescr.getPropertyType());
-        for (PropertyDescriptor propertyDescriptor : descrs) {
-            if (propertyDescriptor.getName().equals(keyDescr.getName())) {
-                assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
-            }
-        }
-    }
+		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
+		assertEquals(String.class, keyDescr.getPropertyType());
+		for (PropertyDescriptor propertyDescriptor : descrs) {
+			if (propertyDescriptor.getName().equals(keyDescr.getName())) {
+				assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+			}
+		}
+	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));

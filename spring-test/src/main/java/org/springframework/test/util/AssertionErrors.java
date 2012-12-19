@@ -27,17 +27,17 @@ import org.springframework.util.ObjectUtils;
 public abstract class AssertionErrors {
 
 
-    private AssertionErrors() {
-    }
+	private AssertionErrors() {
+	}
 
 	/**
 	 * Fails a test with the given message.
 	 *
 	 * @param message describes the reason for the failure
 	 */
-    public static void fail(String message) {
-        throw new AssertionError(message);
-    }
+	public static void fail(String message) {
+		throw new AssertionError(message);
+	}
 
 	/**
 	 * Fails a test with the given message passing along expected and actual
@@ -56,9 +56,9 @@ public abstract class AssertionErrors {
 	 * @param expected expected value
 	 * @param actual actual value
 	 */
-    public static void fail(String message, Object expected, Object actual) {
-        throw new AssertionError(message + " expected:<" + expected + "> but was:<" + actual + ">");
-    }
+	public static void fail(String message, Object expected, Object actual) {
+		throw new AssertionError(message + " expected:<" + expected + "> but was:<" + actual + ">");
+	}
 
 	/**
 	 * Assert the given condition is {@code true} and raise an
@@ -67,11 +67,11 @@ public abstract class AssertionErrors {
 	 * @param message the message
 	 * @param condition the condition to test for
 	 */
-    public static void assertTrue(String message, boolean condition) {
-        if (!condition) {
-            fail(message);
-        }
-    }
+	public static void assertTrue(String message, boolean condition) {
+		if (!condition) {
+			fail(message);
+		}
+	}
 
 	/**
 	 * Assert two objects are equal raise an {@link AssertionError} if not.
@@ -84,10 +84,10 @@ public abstract class AssertionErrors {
 	 * @param expected the expected value
 	 * @param actual the actual value
 	 */
-    public static void assertEquals(String message, Object expected, Object actual) {
+	public static void assertEquals(String message, Object expected, Object actual) {
 		if (!ObjectUtils.nullSafeEquals(expected, actual)) {
 			fail(message, expected, actual);
 		}
-    }
+	}
 
 }

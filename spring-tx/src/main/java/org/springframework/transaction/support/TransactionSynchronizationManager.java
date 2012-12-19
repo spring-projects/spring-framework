@@ -284,7 +284,7 @@ public abstract class TransactionSynchronizationManager {
 	 * @see org.springframework.core.Ordered
 	 */
 	public static void registerSynchronization(TransactionSynchronization synchronization)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		Assert.notNull(synchronization, "TransactionSynchronization must not be null");
 		if (!isSynchronizationActive()) {

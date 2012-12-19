@@ -191,7 +191,7 @@ public class ResourceServlet extends HttpServletBean {
 	 */
 	@Override
 	protected final void doGet(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		// determine URL of resource to include
 		String resourceUrl = determineResourceUrl(request);
@@ -247,7 +247,7 @@ public class ResourceServlet extends HttpServletBean {
 	 * @throws IOException if thrown by the RequestDispatcher
 	 */
 	private boolean includeDefaultUrl(HttpServletRequest request, HttpServletResponse response)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		if (this.defaultUrl == null) {
 			return false;
@@ -265,13 +265,13 @@ public class ResourceServlet extends HttpServletBean {
 	 * @throws IOException if thrown by the RequestDispatcher
 	 */
 	private void doInclude(HttpServletRequest request, HttpServletResponse response, String resourceUrl)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		if (this.contentType != null) {
 			response.setContentType(this.contentType);
 		}
 		String[] resourceUrls =
-		    StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
+			StringUtils.tokenizeToStringArray(resourceUrl, RESOURCE_URL_DELIMITERS);
 		for (int i = 0; i < resourceUrls.length; i++) {
 			// check whether URL matches allowed resources
 			if (this.allowedResources != null && !this.pathMatcher.match(this.allowedResources, resourceUrls[i])) {

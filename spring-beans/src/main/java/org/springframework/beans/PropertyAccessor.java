@@ -191,7 +191,7 @@ public interface PropertyAccessor {
 	 * @see #setPropertyValues(PropertyValues, boolean, boolean)
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown)
-	    throws BeansException;
+			throws BeansException;
 
 	/**
 	 * Perform a batch update with full control over behavior.
@@ -213,6 +213,6 @@ public interface PropertyAccessor {
 	 * successfully updated.
 	 */
 	void setPropertyValues(PropertyValues pvs, boolean ignoreUnknown, boolean ignoreInvalid)
-	    throws BeansException;
+			throws BeansException;
 
 }

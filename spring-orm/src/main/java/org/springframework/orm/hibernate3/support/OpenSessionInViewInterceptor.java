@@ -156,7 +156,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		}
 
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
-		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
+			SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
 			// Do not modify the Session: just mark the request accordingly.
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);

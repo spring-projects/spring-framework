@@ -54,6 +54,6 @@ public interface RmiInvocationHandler extends Remote {
 	 * @throws InvocationTargetException if the method invocation resulted in an exception
 	 */
 	public Object invoke(RemoteInvocation invocation)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
+			throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
 
 }

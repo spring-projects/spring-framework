@@ -152,8 +152,8 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for RMI stub [" + getServiceUrl() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+						"] for RMI stub [" + getServiceUrl() + "] - " +
+						(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {

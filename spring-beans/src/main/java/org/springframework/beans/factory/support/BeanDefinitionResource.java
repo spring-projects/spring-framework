@@ -80,7 +80,7 @@ class BeanDefinitionResource extends AbstractResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof BeanDefinitionResource &&
+			(obj instanceof BeanDefinitionResource &&
 						((BeanDefinitionResource) obj).beanDefinition.equals(this.beanDefinition)));
 	}
 

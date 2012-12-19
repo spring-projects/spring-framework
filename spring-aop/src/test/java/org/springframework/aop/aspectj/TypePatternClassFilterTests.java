@@ -80,7 +80,7 @@ public final class TypePatternClassFilterTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testSetTypePatternWithNullArgument() throws Exception {
-	    new TypePatternClassFilter(null);
+		new TypePatternClassFilter(null);
 	}
 
 	@Test(expected=IllegalStateException.class)

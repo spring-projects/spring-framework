@@ -678,8 +678,8 @@ public final class ProxyFactoryBeanTests {
 	public void testFrozenFactoryBean() {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource(FROZEN_CONTEXT, CLASS));
 
-	    Advised advised = (Advised)bf.getBean("frozen");
-	    assertTrue("The proxy should be frozen", advised.isFrozen());
+		Advised advised = (Advised)bf.getBean("frozen");
+		assertTrue("The proxy should be frozen", advised.isFrozen());
 	}
 
 	@Test

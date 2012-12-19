@@ -90,9 +90,9 @@ public final class TigerAspectJExpressionPointcutTests {
 	@Test
 	public void testMatchVarargs() throws SecurityException, NoSuchMethodException {
 		class MyTemplate {
-		    public int queryForInt(String sql, Object... params) {
-		        return 0;
-		    }
+			public int queryForInt(String sql, Object... params) {
+				return 0;
+			}
 		}
 
 		String expression = "execution(int *.*(String, Object...))";
@@ -101,8 +101,8 @@ public final class TigerAspectJExpressionPointcutTests {
 
 		// TODO: the expression above no longer matches Object[]
 		// assertFalse(jdbcVarArgs.matches(
-		//        JdbcTemplate.class.getMethod("queryForInt", String.class, Object[].class),
-		//        JdbcTemplate.class));
+		//	JdbcTemplate.class.getMethod("queryForInt", String.class, Object[].class),
+		//	JdbcTemplate.class));
 
 		assertTrue(jdbcVarArgs.matches(
 				MyTemplate.class.getMethod("queryForInt", String.class, Object[].class),

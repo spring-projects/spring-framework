@@ -26,25 +26,25 @@ import static org.junit.Assert.*;
 /** @author Arjen Poutsma */
 public class UriComponentsTests {
 
-    @Test
-    public void encode() {
-        UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
-        UriComponents encoded = uriComponents.encode();
-        assertEquals("/hotel%20list", encoded.getPath());
-    }
+	@Test
+	public void encode() {
+		UriComponents uriComponents = UriComponentsBuilder.fromPath("/hotel list").build();
+		UriComponents encoded = uriComponents.encode();
+		assertEquals("/hotel%20list", encoded.getPath());
+	}
 
-    @Test
-    public void toUriEncoded() throws URISyntaxException {
-        UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
-        UriComponents encoded = uriComponents.encode();
-        assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), encoded.toUri());
-    }
+	@Test
+	public void toUriEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
+		UriComponents encoded = uriComponents.encode();
+		assertEquals(new URI("http://example.com/hotel%20list/Z%C3%BCrich"), encoded.toUri());
+	}
 
-    @Test
-    public void toUriNotEncoded() throws URISyntaxException {
-        UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
-        assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
-    }
+	@Test
+	public void toUriNotEncoded() throws URISyntaxException {
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
+		assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
+	}
 
 	@Test
 	public void expand() {

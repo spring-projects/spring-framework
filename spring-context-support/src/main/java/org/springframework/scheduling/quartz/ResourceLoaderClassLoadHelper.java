@@ -77,8 +77,8 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> loadClass(String name, Class<T> clazz) throws ClassNotFoundException {
-        return loadClass(name);
-    }
+		return loadClass(name);
+	}
 
 	public URL getResource(String name) {
 		Resource resource = this.resourceLoader.getResource(name);

@@ -117,14 +117,14 @@ public class ButtonTag extends AbstractHtmlElementTag {
 		tagWriter.writeAttribute("value", processFieldValue(getName(), valueToUse, getType()));
 	}
 
-    /**
-     * Return the default value.
-     *
-     * @return The default value if none supplied.
-     */
-    protected String getDefaultValue() {
-        return "Submit";
-    }
+	/**
+	 * Return the default value.
+	 *
+	 * @return The default value if none supplied.
+	 */
+	protected String getDefaultValue() {
+		return "Submit";
+	}
 
 	/**
 	 * Get the value of the '<code>type</code>' attribute. Subclasses

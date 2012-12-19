@@ -58,7 +58,7 @@ public abstract class LobCreatorUtils {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			logger.debug("Registering Spring transaction synchronization for LobCreator");
 			TransactionSynchronizationManager.registerSynchronization(
-			    new SpringLobCreatorSynchronization(lobCreator));
+				new SpringLobCreatorSynchronization(lobCreator));
 		}
 		else {
 			if (jtaTransactionManager != null) {
@@ -77,7 +77,7 @@ public abstract class LobCreatorUtils {
 				}
 			}
 			throw new IllegalStateException("Active Spring transaction synchronization or active " +
-			    "JTA transaction with specified [javax.transaction.TransactionManager] required");
+				"JTA transaction with specified [javax.transaction.TransactionManager] required");
 		}
 	}
 

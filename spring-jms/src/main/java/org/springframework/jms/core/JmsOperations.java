@@ -160,7 +160,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -172,7 +172,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -185,7 +185,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 
 	//-------------------------------------------------------------------------

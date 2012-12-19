@@ -123,7 +123,7 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	protected Object doGetTransaction() {
 		CciLocalTransactionObject txObject = new CciLocalTransactionObject();
 		ConnectionHolder conHolder =
-		    (ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
+			(ConnectionHolder) TransactionSynchronizationManager.getResource(getConnectionFactory());
 		txObject.setConnectionHolder(conHolder);
 		return txObject;
 	}

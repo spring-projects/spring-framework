@@ -98,7 +98,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {

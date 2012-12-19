@@ -158,9 +158,9 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "1");
 		pvs.add("exceptionMappings",
-		    "java.lang.IllegalAccessException=failed-illegalaccess\n" +
-		    "PortletRequestBindingException=failed-binding\n" +
-		    "NoHandlerFoundException=failed-unavailable");
+			"java.lang.IllegalAccessException=failed-illegalaccess\n" +
+			"PortletRequestBindingException=failed-binding\n" +
+			"NoHandlerFoundException=failed-unavailable");
 		pvs.add("defaultErrorView", "failed-default-1");
 		registerSingleton("exceptionResolver", SimpleMappingExceptionResolver.class, pvs);
 
@@ -376,7 +376,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 	public static class MyHandlerInterceptor1 extends HandlerInterceptorAdapter {
 
 		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
-		    throws PortletException {
+			throws PortletException {
 			if (request.getAttribute("test2-remove-never") != null) {
 				throw new PortletException("Wrong interceptor order");
 			}
@@ -412,7 +412,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 	public static class MyHandlerInterceptor2 extends HandlerInterceptorAdapter {
 
 		public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler)
-		    throws PortletException {
+			throws PortletException {
 			if (request.getAttribute("test1-remove-post") == null) {
 				throw new PortletException("Wrong interceptor order");
 			}

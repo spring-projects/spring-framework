@@ -354,7 +354,7 @@ public abstract class SessionFactoryUtils {
 		if (!allowCreate && !isSessionTransactional(session, sessionFactory)) {
 			closeSession(session);
 			throw new IllegalStateException("No Hibernate Session bound to thread, " +
-			    "and configuration does not allow creation of non-transactional one here");
+				"and configuration does not allow creation of non-transactional one here");
 		}
 
 		return session;
@@ -371,8 +371,8 @@ public abstract class SessionFactoryUtils {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 */
 	private static Session getJtaSynchronizedSession(
-	    SessionHolder sessionHolder, SessionFactory sessionFactory,
-	    SQLExceptionTranslator jdbcExceptionTranslator) throws DataAccessResourceFailureException {
+		SessionHolder sessionHolder, SessionFactory sessionFactory,
+		SQLExceptionTranslator jdbcExceptionTranslator) throws DataAccessResourceFailureException {
 
 		// JTA synchronization is only possible with a javax.transaction.TransactionManager.
 		// We'll check the Hibernate SessionFactory: If a TransactionManagerLookup is specified
@@ -612,7 +612,7 @@ public abstract class SessionFactoryUtils {
 	public static void applyTransactionTimeout(Criteria criteria, SessionFactory sessionFactory) {
 		Assert.notNull(criteria, "No Criteria object specified");
 		SessionHolder sessionHolder =
-		    (SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
+			(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
 		if (sessionHolder != null && sessionHolder.hasTimeout()) {
 			criteria.setTimeout(sessionHolder.getTimeToLiveInSeconds());
 		}

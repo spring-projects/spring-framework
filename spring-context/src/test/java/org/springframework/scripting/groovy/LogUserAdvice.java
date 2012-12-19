@@ -13,17 +13,17 @@ public class LogUserAdvice implements MethodBeforeAdvice, ThrowsAdvice {
 
 	public void before(Method method, Object[] objects, Object o) throws Throwable {
 		countBefore++;
-        System.out.println("Method:"+method.getName());
-    }
+		System.out.println("Method:"+method.getName());
+	}
 
 	public void afterThrowing(Exception e) throws Throwable {
 		countThrows++;
-        System.out.println("***********************************************************************************");
-        System.out.println("Exception caught:");
-        System.out.println("***********************************************************************************");
-        e.printStackTrace();
-        throw e;
-    }
+		System.out.println("***********************************************************************************");
+		System.out.println("Exception caught:");
+		System.out.println("***********************************************************************************");
+		e.printStackTrace();
+		throw e;
+	}
 
 	public int getCountBefore() {
 		return countBefore;
