@@ -335,10 +335,11 @@ project("spring-jms") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-oxm"))
 		compile("aopalliance:aopalliance:1.0")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		provided("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.resource:connector-api:1.5")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
 	}
 }
 

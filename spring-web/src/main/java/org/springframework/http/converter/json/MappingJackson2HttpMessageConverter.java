@@ -49,11 +49,12 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Keith Donald
+ * @author Rossen Stoyanchev
  * @since 3.1.2
  * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-	implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 

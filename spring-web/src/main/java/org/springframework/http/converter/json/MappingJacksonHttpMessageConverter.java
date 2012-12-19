@@ -21,7 +21,6 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.JsonEncoding;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
@@ -53,7 +52,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.web.servlet.view.json.MappingJacksonJsonView
  */
 public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
-	implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -112,7 +111,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 	}
 
 	/**
-	 * Whether to use the {@link DefaultPrettyPrinter} when writing JSON.
+	 * Whether to use the {@link org.codehaus.jackson.impl.DefaultPrettyPrinter} when writing JSON.
 	 * This is a shortcut for setting up an {@code ObjectMapper} as follows:
 	 * <pre>
 	 * ObjectMapper mapper = new ObjectMapper();
