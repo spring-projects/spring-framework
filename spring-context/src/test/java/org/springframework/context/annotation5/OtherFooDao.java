@@ -18,10 +18,6 @@ package org.springframework.context.annotation5;
 
 import example.scannable.FooDao;
 
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Repository;
-
 /**
  * @author Juergen Hoeller
  */

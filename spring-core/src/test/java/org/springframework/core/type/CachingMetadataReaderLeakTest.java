@@ -27,7 +27,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 
 /**
  * Unit test checking the behaviour of {@link CachingMetadataReaderFactory under load.

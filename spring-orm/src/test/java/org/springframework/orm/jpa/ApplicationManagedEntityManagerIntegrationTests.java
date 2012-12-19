@@ -23,7 +23,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.TransactionRequiredException;
 
-import org.springframework.aop.support.AopUtils;
 import org.springframework.orm.jpa.domain.Person;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryIntegrationTests;
 import org.springframework.test.annotation.NotTransactional;

@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;

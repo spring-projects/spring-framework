@@ -17,12 +17,6 @@
 package org.springframework.jms.listener.adapter;
 
 import javax.jms.TextMessage;
-import javax.jms.MapMessage;
-import javax.jms.BytesMessage;
-import javax.jms.ObjectMessage;
-
-import java.util.Map;
-import java.io.Serializable;
 
 /**
  * See the MessageListenerAdapterTests class for usage.

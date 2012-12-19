@@ -31,6 +31,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.task.NoOpRunnable;
 
+import static org.mockito.Mockito.*;
+
+
 /**
  * @author Rick Evans
  * @author Juergen Hoeller

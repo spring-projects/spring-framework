@@ -52,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
 

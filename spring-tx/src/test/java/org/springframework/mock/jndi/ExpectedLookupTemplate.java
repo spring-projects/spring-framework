@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.jndi.JndiTemplate;
 
 /**

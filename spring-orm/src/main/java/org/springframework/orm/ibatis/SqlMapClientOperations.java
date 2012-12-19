@@ -19,7 +19,6 @@ package org.springframework.orm.ibatis;
 import java.util.List;
 import java.util.Map;
 
-import com.ibatis.common.util.PaginatedList;
 import com.ibatis.sqlmap.client.event.RowHandler;
 
 import org.springframework.dao.DataAccessException;

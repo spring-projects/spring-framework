@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.io.ClassPathResource;
 
 import test.beans.DummyBean;

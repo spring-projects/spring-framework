@@ -19,8 +19,6 @@ package org.springframework.remoting.support;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.core.JdkVersion;
-
 /**
  * General utilities for handling remote invocations.
  *

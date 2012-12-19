@@ -19,8 +19,8 @@ package org.springframework.aop.config;
 import java.lang.reflect.Method;
 
 import static org.easymock.EasyMock.*;
-import org.junit.After;
 import static org.junit.Assert.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 

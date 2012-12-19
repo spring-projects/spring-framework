@@ -17,12 +17,11 @@
 package org.springframework.scripting.support;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 

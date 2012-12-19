@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.context;
 
-import java.util.Locale;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.TestBean;
@@ -24,10 +23,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Should ideally be eliminated.  Copied when splitting .testsuite up into individual bundles.

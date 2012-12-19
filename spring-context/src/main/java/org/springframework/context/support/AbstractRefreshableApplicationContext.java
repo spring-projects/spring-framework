@@ -24,7 +24,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
-import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 
 /**
  * Base class for {@link org.springframework.context.ApplicationContext}

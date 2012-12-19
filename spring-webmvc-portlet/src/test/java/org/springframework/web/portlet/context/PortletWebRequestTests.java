@@ -30,7 +30,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletRequest;
-import org.springframework.mock.web.portlet.MockPortletResponse;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 import org.springframework.web.multipart.MultipartRequest;
