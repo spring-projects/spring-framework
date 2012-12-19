@@ -50,7 +50,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map m = binder.getBindingResult().getModel();
+		Map<?, ?> m = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", m.size() == 2);
 		FieldAccessBean tb = (FieldAccessBean) m.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -92,7 +92,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map map = binder.getBindingResult().getModel();
+			Map<?, ?> map = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			FieldAccessBean tb = (FieldAccessBean) map.get("person");
 			assertTrue("Same object", tb.equals(rod));
@@ -136,7 +136,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map model = binder.getBindingResult().getModel();
+			Map<?, ?> model = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			FieldAccessBean tb = (FieldAccessBean) model.get("person");
 			assertTrue("Same object", tb.equals(rod));

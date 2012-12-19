@@ -206,7 +206,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean4", new RootBeanDefinition(TestBean.class, false));
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
-		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory() {
+		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
 			public Object getObject() throws BeansException {
 				return new NestedTestBean();
 			}

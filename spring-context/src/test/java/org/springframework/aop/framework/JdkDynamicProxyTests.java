@@ -66,7 +66,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testProxyIsJustInterface() throws Throwable {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.setTarget(raw);
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
@@ -80,7 +80,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		int age = 25;
 		MethodInterceptor mi = createMock(MethodInterceptor.class);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class });
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
@@ -101,7 +101,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 			}
 		};
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] { ITestBean.class, IOther.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class, IOther.class });
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -130,7 +130,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testProxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
 		ProxyCreatorSupport as = new ProxyCreatorSupport();
-		as.setInterfaces(new Class[] {Foo.class});
+		as.setInterfaces(new Class<?>[] {Foo.class});
 		as.setTarget(bean);
 
 		Foo proxy = (Foo) createProxy(as);
@@ -140,7 +140,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	}
 
 	public void testEqualsAndHashCodeDefined() throws Exception {
-		AdvisedSupport as = new AdvisedSupport(new Class[]{Named.class});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{Named.class});
 		as.setTarget(new Person());
 		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
 		Named proxy = (Named) aopProxy.getProxy();

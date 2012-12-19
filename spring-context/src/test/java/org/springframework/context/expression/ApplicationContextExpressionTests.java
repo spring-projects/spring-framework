@@ -57,7 +57,7 @@ public class ApplicationContextExpressionTests {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
 		ac.getBeanFactory().registerScope("myScope", new Scope() {
-			public Object get(String name, ObjectFactory objectFactory) {
+			public Object get(String name, ObjectFactory<?> objectFactory) {
 				return objectFactory.getObject();
 			}
 			public Object remove(String name) {

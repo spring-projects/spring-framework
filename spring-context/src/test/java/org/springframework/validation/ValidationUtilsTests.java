@@ -161,7 +161,7 @@ public class ValidationUtilsTests {
 
 	private static class EmptyValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
@@ -173,7 +173,7 @@ public class ValidationUtilsTests {
 
 	private static class EmptyOrWhitespaceValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 

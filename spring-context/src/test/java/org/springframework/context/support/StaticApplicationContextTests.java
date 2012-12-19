@@ -41,7 +41,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 	/** Run for each test */
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
-		Map m = new HashMap();
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");

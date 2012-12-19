@@ -158,7 +158,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		String objectName = "spring:bean=test,proxy=true";
 
-		Map beans = new HashMap();
+		Map<String, Object> beans = new HashMap<String, Object>();
 		beans.put(objectName, proxy);
 		exporter.setBeans(beans);
 		exporter.afterPropertiesSet();

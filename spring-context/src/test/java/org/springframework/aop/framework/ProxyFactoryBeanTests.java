@@ -539,7 +539,7 @@ public final class ProxyFactoryBeanTests {
 		// 2 globals + 2 explicit
 		assertEquals("Have 2 globals and 2 explicit advisors", 3, pfb.getAdvisors().length);
 
-		ApplicationListener l = (ApplicationListener) factory.getBean("validGlobals");
+		ApplicationListener<?> l = (ApplicationListener<?>) factory.getBean("validGlobals");
 		agi = (AddedGlobalInterface) l;
 		assertTrue(agi.globalsAdded() == -1);
 
@@ -760,7 +760,7 @@ public final class ProxyFactoryBeanTests {
 		}
 
 		public Class<?>[] getInterfaces() {
-			return new Class[] { AddedGlobalInterface.class };
+			return new Class<?>[] { AddedGlobalInterface.class };
 		}
 
 		public boolean isPerInstance() {

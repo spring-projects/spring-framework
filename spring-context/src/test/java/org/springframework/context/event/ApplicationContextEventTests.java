@@ -47,7 +47,8 @@ public class ApplicationContextEventTests {
 
 	@Test
 	public void simpleApplicationEventMulticaster() {
-		ApplicationListener listener = EasyMock.createMock(ApplicationListener.class);
+		@SuppressWarnings("unchecked")
+		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
 		listener.onApplicationEvent(evt);
 
@@ -73,11 +74,12 @@ public class ApplicationContextEventTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void proxiedListeners() {
 		MyOrderedListener1 listener1 = new MyOrderedListener1();
 		MyOrderedListener2 listener2 = new MyOrderedListener2(listener1);
-		ApplicationListener proxy1 = (ApplicationListener) new ProxyFactory(listener1).getProxy();
-		ApplicationListener proxy2 = (ApplicationListener) new ProxyFactory(listener2).getProxy();
+		ApplicationListener<ApplicationEvent> proxy1 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener1).getProxy();
+		ApplicationListener<ApplicationEvent> proxy2 = (ApplicationListener<ApplicationEvent>) new ProxyFactory(listener2).getProxy();
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(proxy1);
@@ -208,7 +210,7 @@ public class ApplicationContextEventTests {
 	}
 
 
-	public static class MyOrderedListener1 implements ApplicationListener, Ordered {
+	public static class MyOrderedListener1 implements ApplicationListener<ApplicationEvent>, Ordered {
 
 		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 
@@ -248,7 +250,7 @@ public class ApplicationContextEventTests {
 	}
 
 
-	public static class MyNonSingletonListener implements ApplicationListener {
+	public static class MyNonSingletonListener implements ApplicationListener<ApplicationEvent> {
 
 		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 

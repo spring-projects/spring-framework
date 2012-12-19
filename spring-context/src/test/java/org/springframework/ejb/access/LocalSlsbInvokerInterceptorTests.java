@@ -90,7 +90,7 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { BusinessMethods.class } );
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
@@ -113,7 +113,7 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { BusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { BusinessMethods.class } );
 		pf.addAdvice(si);
 		BusinessMethods target = (BusinessMethods) pf.getProxy();
 
@@ -133,7 +133,7 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		LocalSlsbInvokerInterceptor si = configuredInterceptor(mockContext, jndiName);
 
-		ProxyFactory pf = new ProxyFactory(new Class[] { LocalInterfaceWithBusinessMethods.class } );
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] { LocalInterfaceWithBusinessMethods.class } );
 		pf.addAdvice(si);
 		LocalInterfaceWithBusinessMethods target = (LocalInterfaceWithBusinessMethods) pf.getProxy();
 

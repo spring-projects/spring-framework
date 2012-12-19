@@ -80,7 +80,7 @@ public class DataBinderTests extends TestCase {
 		assertTrue("changed name correctly", rod.getName().equals("Rod"));
 		assertTrue("changed age correctly", rod.getAge() == 32);
 
-		Map map = binder.getBindingResult().getModel();
+		Map<?, ?> map = binder.getBindingResult().getModel();
 		assertTrue("There is one element in map", map.size() == 2);
 		TestBean tb = (TestBean) map.get("person");
 		assertTrue("Same object", tb.equals(rod));
@@ -190,7 +190,7 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map map = binder.getBindingResult().getModel();
+			Map<?, ?> map = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			TestBean tb = (TestBean) map.get("person");
 			assertTrue("Same object", tb.equals(rod));
@@ -284,7 +284,7 @@ public class DataBinderTests extends TestCase {
 			assertTrue("changed name correctly", rod.getName().equals("Rod"));
 			//assertTrue("changed age correctly", rod.getAge() == 32);
 
-			Map model = binder.getBindingResult().getModel();
+			Map<?, ?> model = binder.getBindingResult().getModel();
 			//assertTrue("There are 3 element in map", m.size() == 1);
 			TestBean tb = (TestBean) model.get("person");
 			assertTrue("Same object", tb.equals(rod));
@@ -1177,8 +1177,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
-		assertEquals("listtest2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
+		assertEquals("listtest2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1200,8 +1200,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
-		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
+		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1223,8 +1223,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", ((TestBean) tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
-		assertEquals("test2", ((TestBean) tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
+		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
+		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1647,7 +1647,7 @@ public class DataBinderTests extends TestCase {
 
 	private static class TestBeanValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
@@ -1674,7 +1674,7 @@ public class DataBinderTests extends TestCase {
 
 	private static class SpouseValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 

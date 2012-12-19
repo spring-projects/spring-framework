@@ -106,6 +106,7 @@ public final class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSunnyDayPath() throws Exception {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
@@ -121,6 +122,7 @@ public final class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhereMethodCannotBeResolved() {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);

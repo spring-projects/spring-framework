@@ -276,7 +276,7 @@ public final class ModelMapTests {
 		ModelMap map = new ModelMap();
 		Object proxy = Proxy.newProxyInstance(
 				getClass().getClassLoader(),
-				new Class[] {Map.class},
+				new Class<?>[] {Map.class},
 				new InvocationHandler() {
 					public Object invoke(Object proxy, Method method, Object[] args) {
 						return "proxy";

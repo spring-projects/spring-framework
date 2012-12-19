@@ -31,20 +31,20 @@ import org.springframework.core.CollectionFactory;
  */
 public class CollectingReaderEventListener implements ReaderEventListener {
 
-	private final List defaults = new LinkedList();
+	private final List<DefaultsDefinition> defaults = new LinkedList<DefaultsDefinition>();
 
-	private final Map componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, ComponentDefinition> componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
 
-	private final Map aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, List<AliasDefinition>> aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
 
-	private final List imports = new LinkedList();
+	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
 
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);
 	}
 
-	public List getDefaults() {
+	public List<DefaultsDefinition> getDefaults() {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
@@ -53,25 +53,25 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	}
 
 	public ComponentDefinition getComponentDefinition(String name) {
-		return (ComponentDefinition) this.componentDefinitions.get(name);
+		return this.componentDefinitions.get(name);
 	}
 
 	public ComponentDefinition[] getComponentDefinitions() {
-		Collection collection = this.componentDefinitions.values();
-		return (ComponentDefinition[]) collection.toArray(new ComponentDefinition[collection.size()]);
+		Collection<ComponentDefinition> collection = this.componentDefinitions.values();
+		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
-		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
+		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
-			aliases = new ArrayList();
+			aliases = new ArrayList<AliasDefinition>();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}
 		aliases.add(aliasDefinition);
 	}
 
-	public List getAliases(String beanName) {
-		List aliases = (List) this.aliasMap.get(beanName);
+	public List<?> getAliases(String beanName) {
+		List<?> aliases = this.aliasMap.get(beanName);
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
@@ -79,7 +79,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		this.imports.add(importDefinition);
 	}
 
-	public List getImports() {
+	public List<ImportDefinition> getImports() {
 		return Collections.unmodifiableList(this.imports);
 	}
 

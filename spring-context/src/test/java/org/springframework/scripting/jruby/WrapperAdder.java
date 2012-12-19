@@ -47,6 +47,6 @@ public interface WrapperAdder {
 
 	String[][] createListOfLists(String one, String second, String third);
 
-	Map toMap(String key, Object value);
+	Map<?, ?> toMap(String key, Object value);
 
 }

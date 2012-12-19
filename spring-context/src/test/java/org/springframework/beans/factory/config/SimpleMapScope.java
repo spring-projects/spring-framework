@@ -31,20 +31,20 @@ import org.springframework.beans.factory.ObjectFactory;
 @SuppressWarnings("serial")
 public class SimpleMapScope implements Scope, Serializable {
 
-	private final Map map = new HashMap();
+	private final Map<String, Object> map = new HashMap<String, Object>();
 
-	private final List callbacks = new LinkedList();
+	private final List<Runnable> callbacks = new LinkedList<Runnable>();
 
 
 	public SimpleMapScope() {
 	}
 
-	public final Map getMap() {
+	public final Map<String, Object> getMap() {
 		return this.map;
 	}
 
 
-	public Object get(String name, ObjectFactory objectFactory) {
+	public Object get(String name, ObjectFactory<?> objectFactory) {
 		synchronized (this.map) {
 			Object scopedObject = this.map.get(name);
 			if (scopedObject == null) {

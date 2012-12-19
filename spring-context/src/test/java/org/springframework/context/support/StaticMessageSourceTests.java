@@ -198,7 +198,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 
-		Map m = new HashMap();
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
@@ -221,7 +221,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		sac.addListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
-		Map usMessages = new HashMap(3);
+		Map<String, String> usMessages = new HashMap<String, String>(3);
 		usMessages.put("message.format.example1", MSG_TXT1_US);
 		usMessages.put("message.format.example2", MSG_TXT2_US);
 		usMessages.put("message.format.example3", MSG_TXT3_US);

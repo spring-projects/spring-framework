@@ -138,13 +138,13 @@ public class EventPublicationInterceptorTests {
 	}
 
 
-	public static class FactoryBeanTestListener extends TestListener implements FactoryBean {
+	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<Object> {
 
 		public Object getObject() throws Exception {
 			return "test";
 		}
 
-		public Class getObjectType() {
+		public Class<String> getObjectType() {
 			return String.class;
 		}
 

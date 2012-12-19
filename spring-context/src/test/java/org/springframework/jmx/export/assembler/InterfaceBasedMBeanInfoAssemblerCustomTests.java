@@ -40,7 +40,7 @@ public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAsse
 
 	protected MBeanInfoAssembler getAssembler() {
 		InterfaceBasedMBeanInfoAssembler assembler = new InterfaceBasedMBeanInfoAssembler();
-		assembler.setManagedInterfaces(new Class[] {ICustomJmxBean.class});
+		assembler.setManagedInterfaces(new Class<?>[] {ICustomJmxBean.class});
 		return assembler;
 	}
 
