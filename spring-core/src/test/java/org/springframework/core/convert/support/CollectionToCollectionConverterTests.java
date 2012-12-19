@@ -71,8 +71,8 @@ public class CollectionToCollectionConverterTests {
 		@SuppressWarnings("unchecked")
 		List<String> result = (List<String>) conversionService.convert(list, sourceType, targetType);
 		assertFalse(list.equals(result));
-		assertEquals((Integer) 9, result.get(0));
-		assertEquals((Integer) 37, result.get(1));
+		assertEquals(9, result.get(0));
+		assertEquals(37, result.get(1));
 	}
 
 	public ArrayList<Integer> scalarListTarget;

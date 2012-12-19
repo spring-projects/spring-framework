@@ -137,7 +137,7 @@ public final class AfterReturningAdviceBindingTests {
 	@Test
 	public void testReturningBeanArray() {
 		this.testBeanTarget.setSpouse(new TestBean());
-		ITestBean[] spouses = (ITestBean[]) this.testBeanTarget.getSpouses();
+		ITestBean[] spouses = this.testBeanTarget.getSpouses();
 		mockCollaborator.testBeanArrayArg(spouses);
 		replay(mockCollaborator);
 		testBeanProxy.getSpouses();

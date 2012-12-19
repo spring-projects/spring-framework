@@ -338,7 +338,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
-		String allowHeader = (String) response.getHeader("Allow");
+		String allowHeader = response.getHeader("Allow");
 		assertNotNull("No Allow header", allowHeader);
 		Set<String> allowedMethods = new HashSet<String>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));

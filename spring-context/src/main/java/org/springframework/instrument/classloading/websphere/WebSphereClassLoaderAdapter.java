@@ -93,7 +93,7 @@ class WebSphereClassLoaderAdapter {
 
 	public ClassLoader getThrowawayClassLoader() {
 		try {
-			ClassLoader loader = (ClassLoader) cloneConstructor.newInstance(getClassLoader());
+			ClassLoader loader = cloneConstructor.newInstance(getClassLoader());
 			// clear out the transformers (copied as well)
 			List<?> list = (List<?>) transformerList.get(loader);
 			list.clear();

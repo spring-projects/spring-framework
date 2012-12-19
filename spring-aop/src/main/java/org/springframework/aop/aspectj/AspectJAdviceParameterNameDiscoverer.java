@@ -700,7 +700,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				// 1 primitive arg, and one candidate...
 				for (int i = 0; i < this.argumentTypes.length; i++) {
 					if (isUnbound(i) && this.argumentTypes[i].isPrimitive()) {
-						bindParameterName(i, (String) varNames.get(0));
+						bindParameterName(i, varNames.get(0));
 						break;
 					}
 				}

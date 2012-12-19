@@ -86,7 +86,7 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 			if (value == null) {
 				throw new IllegalArgumentException("Attribute 'value' is required when binding to non-boolean values");
 			}
-			Object resolvedValue = (value instanceof String ? evaluate("value", (String) value) : value);
+			Object resolvedValue = (value instanceof String ? evaluate("value", value) : value);
 			renderFromValue(resolvedValue, tagWriter);
 		}
 	}

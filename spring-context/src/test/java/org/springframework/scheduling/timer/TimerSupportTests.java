@@ -39,7 +39,7 @@ public class TimerSupportTests extends TestCase {
 		mittfb.setTargetObject(task1);
 		mittfb.setTargetMethod("doSomething");
 		mittfb.afterPropertiesSet();
-		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
+		final TimerTask timerTask1 = mittfb.getObject();
 
 		final TestRunnable timerTask2 = new TestRunnable();
 

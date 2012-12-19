@@ -242,7 +242,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				if (value==null) {
 					return null;
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);
@@ -295,7 +295,7 @@ public class SelectTagTests extends AbstractFormTagTests {
 				if (value==null) {
 					return "";
 				}
-				return ((Country) value).getName();
+				return value.getName();
 			}
 		});
 		getPageContext().getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "testBean", bindingResult);

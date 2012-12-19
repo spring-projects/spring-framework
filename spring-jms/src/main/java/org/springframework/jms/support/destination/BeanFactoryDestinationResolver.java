@@ -73,7 +73,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
-			return (Destination) this.beanFactory.getBean(destinationName, Destination.class);
+			return this.beanFactory.getBean(destinationName, Destination.class);
 		}
 		catch (BeansException ex) {
 			throw new DestinationResolutionException(

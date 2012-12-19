@@ -147,7 +147,7 @@ public class AnnotationMetadataTests {
 			assertThat(specialAttrs.getString("clazz"), is(String.class.getName()));
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
-			assertArrayEquals(new String[]{String.class.getName()}, (String[])nestedAnno.getStringArray("classArray"));
+			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 			assertArrayEquals(new String[]{String.class.getName()}, nestedAnno.getStringArray("classArray"));
 
 			AnnotationAttributes[] nestedAnnoArray = specialAttrs.getAnnotationArray("nestedAnnoArray");

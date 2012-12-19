@@ -1312,7 +1312,7 @@ public class EvaluationTests extends ExpressionTestCase {
 		e = parser.parseExpression("#wibble=#wibble+#wibble");
 		String s = e.getValue(ctx,String.class);
 		assertEquals("hello worldhello world",s);
-		assertEquals("hello worldhello world",(String)ctx.lookupVariable("wibble"));
+		assertEquals("hello worldhello world",ctx.lookupVariable("wibble"));
 
 		ctx.setVariable("wobble", 3);
 		e = parser.parseExpression("#wobble++");

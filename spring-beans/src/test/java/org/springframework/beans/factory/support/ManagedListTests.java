@@ -33,7 +33,7 @@ public class ManagedListTests extends TestCase {
 		ManagedList child = new ManagedList();
 		child.add("three");
 		child.setMergeEnabled(true);
-		List mergedList = (List) child.merge(parent);
+		List mergedList = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 3, mergedList.size());
 	}
 
@@ -72,7 +72,7 @@ public class ManagedListTests extends TestCase {
 		parent.add("two");
 		ManagedList child = new ManagedList();
 		child.setMergeEnabled(true);
-		List mergedList = (List) child.merge(parent);
+		List mergedList = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedList.size());
 	}
 
@@ -84,7 +84,7 @@ public class ManagedListTests extends TestCase {
 		ManagedList child = new ManagedList();
 		child.add("one");
 		child.setMergeEnabled(true);
-		List mergedList = (List) child.merge(parent);
+		List mergedList = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 3, mergedList.size());
 	}
 

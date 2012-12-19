@@ -132,7 +132,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 								logger.debug("Reading [" + targetType + "] as \"" +
 										contentType + "\" using [" + converter + "]");
 							}
-							return (T) genericConverter.read(targetType, contextClass, inputMessage);
+							return genericConverter.read(targetType, contextClass, inputMessage);
 						}
 					}
 					if (targetClass != null) {

@@ -322,7 +322,7 @@ public abstract class GenericCollectionTypeResolver {
 
 		Type resolvedType = type;
 		if (type instanceof TypeVariable && typeVariableMap != null) {
-			Type mappedType = typeVariableMap.get((TypeVariable) type);
+			Type mappedType = typeVariableMap.get(type);
 			if (mappedType != null) {
 				resolvedType = mappedType;
 			}
@@ -383,7 +383,7 @@ public abstract class GenericCollectionTypeResolver {
 		}
 		Type paramType = paramTypes[typeIndex];
 		if (paramType instanceof TypeVariable && typeVariableMap != null) {
-			Type mappedType = typeVariableMap.get((TypeVariable) paramType);
+			Type mappedType = typeVariableMap.get(paramType);
 			if (mappedType != null) {
 				paramType = mappedType;
 			}

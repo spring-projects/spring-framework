@@ -198,7 +198,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().length);
 		CustomSQLErrorCodesTranslation translation =
-				(CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations()[0];
+				sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertEquals(CustomErrorCodeException.class, translation.getExceptionClass());
 		assertEquals(1, translation.getErrorCodes().length);
 	}

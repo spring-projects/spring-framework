@@ -267,7 +267,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		}
 
 		public String getAsText() {
-			return "F" + (Float) getValue();
+			return "F" + getValue();
 		}
 	}
 

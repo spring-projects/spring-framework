@@ -126,7 +126,7 @@ public abstract class HtmlUtils {
 			char character = input.charAt(i);
 			if (characterEntityReferences.isMappedToReference(character)) {
 				escaped.append(HtmlCharacterEntityReferences.HEX_REFERENCE_START);
-				escaped.append(Integer.toString((int) character, 16));
+				escaped.append(Integer.toString(character, 16));
 				escaped.append(HtmlCharacterEntityReferences.REFERENCE_END);
 			}
 			else {

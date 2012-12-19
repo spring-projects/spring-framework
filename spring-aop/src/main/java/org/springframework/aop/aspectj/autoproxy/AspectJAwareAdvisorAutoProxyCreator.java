@@ -77,7 +77,7 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 
 		// sort it
 		List<PartiallyComparableAdvisorHolder> sorted =
-				(List<PartiallyComparableAdvisorHolder>) PartialOrder.sort(partiallyComparableAdvisors);
+				PartialOrder.sort(partiallyComparableAdvisors);
 		if (sorted == null) {
 			// TODO: work harder to give a better error message here.
 			throw new IllegalArgumentException("Advice precedence circularity error");

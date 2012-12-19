@@ -177,7 +177,7 @@ public class DelegatingRequestProcessor extends RequestProcessor {
 		if (!getWebApplicationContext().containsBean(beanName)) {
 			return null;
 		}
-		return (Action) getWebApplicationContext().getBean(beanName, Action.class);
+		return getWebApplicationContext().getBean(beanName, Action.class);
 	}
 
 	/**

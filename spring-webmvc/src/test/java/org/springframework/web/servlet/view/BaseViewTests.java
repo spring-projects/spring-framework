@@ -297,7 +297,7 @@ public class BaseViewTests extends TestCase {
 	private void checkContainsAll(Map expected, Map<String, Object> actual) {
 		Set<String> keys = expected.keySet();
 		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			//System.out.println("Checking model key " + key);
 			assertTrue("Value for model key '" + key + "' must match", actual.get(key) == expected.get(key));
 		}

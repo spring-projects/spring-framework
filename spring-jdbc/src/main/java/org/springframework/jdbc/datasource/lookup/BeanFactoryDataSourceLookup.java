@@ -70,7 +70,7 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
-			return (DataSource) this.beanFactory.getBean(dataSourceName, DataSource.class);
+			return this.beanFactory.getBean(dataSourceName, DataSource.class);
 		}
 		catch (BeansException ex) {
 			throw new DataSourceLookupFailureException(

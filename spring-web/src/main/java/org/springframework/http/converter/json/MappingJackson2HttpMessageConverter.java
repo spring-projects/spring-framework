@@ -129,7 +129,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead((Type) clazz, null, mediaType);
+		return canRead(clazz, null, mediaType);
 	}
 
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {

@@ -48,7 +48,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map actualParams) {
 		super("");
 		this.paramConditions = paramConditions;
-		this.actualParams = (Map<String, String[]>) actualParams;
+		this.actualParams = actualParams;
 	}
 
 
