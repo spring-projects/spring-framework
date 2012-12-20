@@ -55,7 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link ClassLevelTransactionalSpringRunnerTests}, this class omits usage of
  * <code>&#064;NotTransactional</code>.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see ClassLevelTransactionalSpringRunnerTests

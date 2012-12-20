@@ -24,7 +24,7 @@ import org.springframework.test.context.junit4.orm.repository.PersonRepository;
 
 /**
  * Hibernate implementation of the {@link PersonRepository} API.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

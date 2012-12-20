@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ import org.springframework.util.StringUtils;
  * @since 2.0
  */
 public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFactory {
-	
+
 	protected static final ParameterNameDiscoverer ASPECTJ_ANNOTATION_PARAMETER_NAME_DISCOVERER =
 			new AspectJAnnotationParameterNameDiscoverer();
 
@@ -70,11 +70,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * (there <i>should</i> only be one anyway...)
 	 */
 	@SuppressWarnings("unchecked")
-	protected static AspectJAnnotation findAspectJAnnotationOnMethod(Method method) {
+	protected static AspectJAnnotation<?> findAspectJAnnotationOnMethod(Method method) {
 		Class<? extends Annotation>[] classesToLookFor = new Class[] {
 				Before.class, Around.class, After.class, AfterReturning.class, AfterThrowing.class, Pointcut.class};
 		for (Class<? extends Annotation> c : classesToLookFor) {
-			AspectJAnnotation foundAnnotation = findAnnotation(method, c);
+			AspectJAnnotation<?> foundAnnotation = findAnnotation(method, c);
 			if (foundAnnotation != null) {
 				return foundAnnotation;
 			}
@@ -121,7 +121,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 	/**
 	 * We need to detect this as "code-style" AspectJ aspects should not be
-	 * interpreted by Spring AOP. 
+	 * interpreted by Spring AOP.
 	 */
 	private boolean compiledByAjc(Class<?> clazz) {
 		// The AJTypeSystem goes to great lengths to provide a uniform appearance between code-style and
@@ -154,28 +154,28 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		if (ajType.getPerClause().getKind() == PerClauseKind.PERCFLOWBELOW) {
 			throw new AopConfigException(aspectClass.getName() + " uses percflowbelow instantiation model: " +
 					"This is not supported in Spring AOP.");
-		}	
+		}
 	}
 
 	/**
-	 * The pointcut and advice annotations both have an "argNames" member which contains a 
+	 * The pointcut and advice annotations both have an "argNames" member which contains a
 	 * comma-separated list of the argument names. We use this (if non-empty) to build the
 	 * formal parameters for the pointcut.
 	 */
 	protected AspectJExpressionPointcut createPointcutExpression(
-			Method annotatedMethod, Class declarationScope, String[] pointcutParameterNames) {
+			Method annotatedMethod, Class<?> declarationScope, String[] pointcutParameterNames) {
 
 		Class<?> [] pointcutParameterTypes = new Class<?>[0];
 		if (pointcutParameterNames != null) {
 			pointcutParameterTypes = extractPointcutParameterTypes(pointcutParameterNames,annotatedMethod);
 		}
-		
+
 		AspectJExpressionPointcut ajexp =
 				new AspectJExpressionPointcut(declarationScope,pointcutParameterNames,pointcutParameterTypes);
 		ajexp.setLocation(annotatedMethod.toString());
 		return ajexp;
 	}
-	
+
 	/**
 	 * Create the pointcut parameters needed by aspectj based on the given argument names
 	 * and the argument types that are available from the adviceMethod. Needs to take into
@@ -217,8 +217,8 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 
 		private static final String[] EXPRESSION_PROPERTIES = new String[] {"value", "pointcut"};
 
-		private static Map<Class, AspectJAnnotationType> annotationTypes =
-				new HashMap<Class, AspectJAnnotationType>();
+		private static Map<Class<?>, AspectJAnnotationType> annotationTypes =
+				new HashMap<Class<?>, AspectJAnnotationType>();
 
 		static {
 			annotationTypes.put(Pointcut.class,AspectJAnnotationType.AtPointcut);
@@ -252,7 +252,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		}
 
 		private AspectJAnnotationType determineAnnotationType(A annotation) {
-			for (Class type : annotationTypes.keySet()) {
+			for (Class<?> type : annotationTypes.keySet()) {
 				if (type.isInstance(annotation)) {
 					return annotationTypes.get(type);
 				}
@@ -313,7 +313,7 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			if (method.getParameterTypes().length == 0) {
 				return new String[0];
 			}
-			AspectJAnnotation annotation = findAspectJAnnotationOnMethod(method);
+			AspectJAnnotation<?> annotation = findAspectJAnnotationOnMethod(method);
 			if (annotation == null) {
 				return null;
 			}
@@ -326,11 +326,11 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 				return names;
 			}
 			else {
-				return null; 				
+				return null;
 			}
 		}
-		
-		public String[] getParameterNames(Constructor ctor) {
+
+		public String[] getParameterNames(Constructor<?> ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}
 	}

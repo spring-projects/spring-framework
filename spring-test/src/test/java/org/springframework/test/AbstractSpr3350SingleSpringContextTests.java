@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContext;
  * Abstract JUnit 3.8 based unit test which verifies new functionality requested
  * in <a href="http://opensource.atlassian.com/projects/spring/browse/SPR-3550"
  * target="_blank">SPR-3350</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -51,7 +51,7 @@ public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDe
 	 * configured
 	 * {@link #createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
 	 * BeanDefinitionReader}.
-	 * 
+	 *
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#getConfigPath()
 	 */
 	protected abstract String getConfigPath();

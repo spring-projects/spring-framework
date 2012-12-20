@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ import java.util.TreeMap;
  */
 public class CustomMapEditor extends PropertyEditorSupport {
 
-	private final Class mapType;
+	@SuppressWarnings("rawtypes")
+	private final Class<? extends Map> mapType;
 
 	private final boolean nullAsEmptyMap;
 
@@ -48,7 +49,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	public CustomMapEditor(Class mapType) {
+	public CustomMapEditor(@SuppressWarnings("rawtypes") Class<? extends Map> mapType) {
 		this(mapType, false);
 	}
 
@@ -69,7 +70,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	public CustomMapEditor(Class mapType, boolean nullAsEmptyMap) {
+	public CustomMapEditor(@SuppressWarnings("rawtypes") Class<? extends Map> mapType, boolean nullAsEmptyMap) {
 		if (mapType == null) {
 			throw new IllegalArgumentException("Map type is required");
 		}
@@ -104,9 +105,9 @@ public class CustomMapEditor extends PropertyEditorSupport {
 		}
 		else if (value instanceof Map) {
 			// Convert Map elements.
-			Map<?, ?> source = (Map) value;
-			Map target = createMap(this.mapType, source.size());
-			for (Map.Entry entry : source.entrySet()) {
+			Map<?, ?> source = (Map<?, ?>) value;
+			Map<Object, Object> target = createMap(this.mapType, source.size());
+			for (Map.Entry<?, ?> entry : source.entrySet()) {
 				target.put(convertKey(entry.getKey()), convertValue(entry.getValue()));
 			}
 			super.setValue(target);
@@ -123,10 +124,12 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * @param initialCapacity the initial capacity
 	 * @return the new Map instance
 	 */
-	protected Map createMap(Class mapType, int initialCapacity) {
+	@SuppressWarnings({ "cast", "unchecked" })
+	protected Map<Object, Object> createMap(
+		@SuppressWarnings("rawtypes") Class<? extends Map> mapType, int initialCapacity) {
 		if (!mapType.isInterface()) {
 			try {
-				return (Map) mapType.newInstance();
+				return (Map<Object, Object>) mapType.newInstance();
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(
@@ -134,10 +137,10 @@ public class CustomMapEditor extends PropertyEditorSupport {
 			}
 		}
 		else if (SortedMap.class.equals(mapType)) {
-			return new TreeMap();
+			return new TreeMap<Object, Object>();
 		}
 		else {
-			return new LinkedHashMap(initialCapacity);
+			return new LinkedHashMap<Object, Object>(initialCapacity);
 		}
 	}
 

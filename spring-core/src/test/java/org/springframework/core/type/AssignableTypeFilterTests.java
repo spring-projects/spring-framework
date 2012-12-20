@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertFalse(notMatchingFilter.match(metadataReader, metadataReaderFactory));
 		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
 	}
-	
+
 	public void testInterfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
@@ -49,7 +49,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
@@ -59,7 +59,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testInterfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
@@ -73,30 +73,30 @@ public class AssignableTypeFilterTests extends TestCase {
 
 	// We must use a standalone set of types to ensure that no one else is loading them
 	// and interfere with ClassloadingAssertions.assertClassNotLoaded()
-	private static class TestNonInheritingClass {
+	public static class TestNonInheritingClass {
 	}
 
 
-	private static interface TestInterface {
+	public static interface TestInterface {
 	}
 
 
-	private static class TestInterfaceImpl implements TestInterface {
+	public static class TestInterfaceImpl implements TestInterface {
 	}
 
 
-	private static interface SomeDaoLikeInterface {
+	public static interface SomeDaoLikeInterface {
 	}
 
 
-	private static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
+	public static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
 	}
 
-	private static interface JdbcDaoSupport {
+	public static interface JdbcDaoSupport {
 
 	}
 
-	private static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
+	public static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
 
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -295,7 +295,7 @@ public class DefaultLifecycleProcessorTests {
 	@Test
 	public void singleLifecycleShutdown() throws Exception {
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
-		Lifecycle bean = new TestLifecycleBean(null, stoppedBeans); 
+		Lifecycle bean = new TestLifecycleBean(null, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
 		context.getBeanFactory().registerSingleton("bean", bean);
 		context.refresh();
@@ -636,7 +636,7 @@ public class DefaultLifecycleProcessorTests {
 		}
 
 		public void setAutoStartup(boolean autoStartup) {
-			this.autoStartup = autoStartup; 
+			this.autoStartup = autoStartup;
 		}
 
 		public void stop(final Runnable callback) {
@@ -692,17 +692,17 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 
-	public static class DummySmartLifecycleFactoryBean implements FactoryBean, SmartLifecycle {
+	public static class DummySmartLifecycleFactoryBean implements FactoryBean<DummySmartLifecycleBean>, SmartLifecycle {
 
 		public boolean running = false;
 
 		DummySmartLifecycleBean bean = new DummySmartLifecycleBean();
 
-		public Object getObject() throws Exception {
+		public DummySmartLifecycleBean getObject() throws Exception {
 			return this.bean;
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return DummySmartLifecycleBean.class;
 		}
 

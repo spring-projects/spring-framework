@@ -22,7 +22,7 @@ import org.springframework.expression.ParseException;
  * Root exception for Spring EL related exceptions. Rather than holding a hard coded string indicating the problem, it
  * records a message key and the inserts for the message. See {@link SpelMessage} for the list of all possible messages
  * that can occur.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -41,7 +41,7 @@ public class SpelParseException extends ParseException {
 		super(expressionString, position, message.formatMessage(position,inserts));
 		this.position = position;
 		this.message = message;
-		this.inserts = inserts; 
+		this.inserts = inserts;
 	}
 
 	public SpelParseException(int position, SpelMessage message, Object... inserts) {

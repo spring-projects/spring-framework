@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Tests set value expressions.
- * 
+ *
  * @author Keith Donald
  * @author Andy Clement
  */
@@ -43,7 +43,7 @@ public class SetValueTests extends ExpressionTestCase {
 	public void testSetProperty() {
 		setValue("wonNobelPrize", true);
 	}
-	
+
 	@Test
 	public void testSetNestedProperty() {
 		setValue("placeOfBirth.city", "Wien");
@@ -89,17 +89,17 @@ public class SetValueTests extends ExpressionTestCase {
 		setValueExpectError("arrayContainer.bytes[1]", "NaB");
 		setValueExpectError("arrayContainer.chars[1]", "NaC");
 	}
-	
+
 	@Test
 	public void testSetArrayElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
 	}
-	
+
 	@Test
 	public void testSetListElementValue() {
 		setValue("placesLivedList[0]", new PlaceOfBirth("Wien"));
 	}
-	
+
 	@Test
 	public void testSetGenericListElementValueTypeCoersion() {
 		// TODO currently failing since setValue does a getValue and "Wien" string != PlaceOfBirth - check with andy
@@ -110,7 +110,7 @@ public class SetValueTests extends ExpressionTestCase {
 	public void testSetGenericListElementValueTypeCoersionOK() {
 		setValue("booleanList[0]", "true", Boolean.TRUE);
 	}
-	
+
 	@Test
 	public void testSetListElementNestedValue() {
 		setValue("placesLived[0].city", "Wien");
@@ -121,17 +121,17 @@ public class SetValueTests extends ExpressionTestCase {
 		setValueExpectError("placesLived[23]", "Wien");
 		setValueExpectError("placesLivedList[23]", "Wien");
 	}
-	
+
 	@Test
 	public void testSetMapElements() {
 		setValue("testMap['montag']","lundi");
 	}
-	
+
 	@Test
 	public void testIndexingIntoUnsupportedType() {
 		setValueExpectError("'hello'[3]", 'p');
 	}
-	
+
 	@Test
 	public void testSetPropertyTypeCoersion() {
 		setValue("publicBoolean", "true", Boolean.TRUE);
@@ -141,9 +141,9 @@ public class SetValueTests extends ExpressionTestCase {
 	public void testSetPropertyTypeCoersionThroughSetter() {
 		setValue("SomeProperty", "true", Boolean.TRUE);
 	}
-	
+
 	@Test
-	public void testAssign() throws Exception {	
+	public void testAssign() throws Exception {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("publicName='Andy'");
 		Assert.assertFalse(e.isWritable(eContext));
@@ -158,32 +158,32 @@ public class SetValueTests extends ExpressionTestCase {
 		StandardEvaluationContext eContext = TestScenarioCreator.getTestEvaluationContext();
 		Expression e = parse("mapOfStringToBoolean[42]");
 		Assert.assertNull(e.getValue(eContext));
-		
+
 		// Key should be coerced to string representation of 42
 		e.setValue(eContext, "true");
-		
+
 		// All keys should be strings
-		Set ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext,Set.class);
+		Set<?> ks = parse("mapOfStringToBoolean.keySet()").getValue(eContext,Set.class);
 		for (Object o: ks) {
 			Assert.assertEquals(String.class,o.getClass());
 		}
-		
+
 		// All values should be booleans
-		Collection vs = parse("mapOfStringToBoolean.values()").getValue(eContext,Collection.class);
+		Collection<?> vs = parse("mapOfStringToBoolean.values()").getValue(eContext,Collection.class);
 		for (Object o: vs) {
 			Assert.assertEquals(Boolean.class,o.getClass());
 		}
-		
+
 		// One final test check coercion on the key for a map lookup
 		Object o = e.getValue(eContext);
 		Assert.assertEquals(Boolean.TRUE,o);
 	}
-	
+
 
 	private Expression parse(String expressionString) throws Exception {
 		return parser.parseExpression(expressionString);
 	}
-	
+
 	/**
 	 * Call setValue() but expect it to fail.
 	 */

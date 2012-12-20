@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import java.lang.reflect.Modifier;
  */
 public class MethodInvoker {
 
-	private Class targetClass;
+	private Class<?> targetClass;
 
 	private Object targetObject;
 
@@ -61,14 +61,14 @@ public class MethodInvoker {
 	 * @see #setTargetObject
 	 * @see #setTargetMethod
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetClass = targetClass;
 	}
 
 	/**
 	 * Return the target class on which to call the target method.
 	 */
-	public Class getTargetClass() {
+	public Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
@@ -158,7 +158,7 @@ public class MethodInvoker {
 			this.targetMethod = methodName;
 		}
 
-		Class targetClass = getTargetClass();
+		Class<?> targetClass = getTargetClass();
 		String targetMethod = getTargetMethod();
 		if (targetClass == null) {
 			throw new IllegalArgumentException("Either 'targetClass' or 'targetObject' is required");
@@ -168,7 +168,7 @@ public class MethodInvoker {
 		}
 
 		Object[] arguments = getArguments();
-		Class[] argTypes = new Class[arguments.length];
+		Class<?>[] argTypes = new Class[arguments.length];
 		for (int i = 0; i < arguments.length; ++i) {
 			argTypes[i] = (arguments[i] != null ? arguments[i].getClass() : Object.class);
 		}
@@ -194,7 +194,7 @@ public class MethodInvoker {
 	 * @return the resolved Class
 	 * @throws ClassNotFoundException if the class name was invalid
 	 */
-	protected Class resolveClassName(String className) throws ClassNotFoundException {
+	protected Class<?> resolveClassName(String className) throws ClassNotFoundException {
 		return ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -216,7 +216,7 @@ public class MethodInvoker {
 
 		for (Method candidate : candidates) {
 			if (candidate.getName().equals(targetMethod)) {
-				Class[] paramTypes = candidate.getParameterTypes();
+				Class<?>[] paramTypes = candidate.getParameterTypes();
 				if (paramTypes.length == argCount) {
 					int typeDiffWeight = getTypeDifferenceWeight(paramTypes, arguments);
 					if (typeDiffWeight < minTypeDiffWeight) {
@@ -291,15 +291,15 @@ public class MethodInvoker {
 	 * @param args the arguments to match
 	 * @return the accumulated weight for all arguments
 	 */
-	public static int getTypeDifferenceWeight(Class[] paramTypes, Object[] args) {
+	public static int getTypeDifferenceWeight(Class<?>[] paramTypes, Object[] args) {
 		int result = 0;
 		for (int i = 0; i < paramTypes.length; i++) {
 			if (!ClassUtils.isAssignableValue(paramTypes[i], args[i])) {
 				return Integer.MAX_VALUE;
 			}
 			if (args[i] != null) {
-				Class paramType = paramTypes[i];
-				Class superClass = args[i].getClass().getSuperclass();
+				Class<?> paramType = paramTypes[i];
+				Class<?> superClass = args[i].getClass().getSuperclass();
 				while (superClass != null) {
 					if (paramType.equals(superClass)) {
 						result = result + 2;

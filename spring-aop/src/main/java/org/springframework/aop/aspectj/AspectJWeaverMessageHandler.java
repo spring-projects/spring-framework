@@ -27,7 +27,7 @@ import org.aspectj.bridge.IMessageHandler;
  * Implementation of AspectJ's {@link IMessageHandler} interface that
  * routes AspectJ weaving messages through the same logging system as the
  * regular Spring messages.
- * 
+ *
  * <p>Pass the option...
  *
  * <p><code class="code">-XmessageHandlerClass:org.springframework.aop.aspectj.AspectJWeaverMessageHandler</code>
@@ -44,9 +44,9 @@ import org.aspectj.bridge.IMessageHandler;
 public class AspectJWeaverMessageHandler implements IMessageHandler {
 
 	private static final String AJ_ID = "[AspectJ] ";
-	
+
 	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
-	
+
 
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
@@ -56,39 +56,39 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 				LOGGER.debug(makeMessageFor(message));
 				return true;
 			}
-		} 
-		
+		}
+
 		if (LOGGER.isInfoEnabled()) {
 			if ((messageKind == IMessage.INFO) || (messageKind == IMessage.WEAVEINFO)) {
 				LOGGER.info(makeMessageFor(message));
 				return true;
 			}
-		} 
-		
+		}
+
 		if (LOGGER.isWarnEnabled()) {
 			if (messageKind == IMessage.WARNING) {
 				LOGGER.warn(makeMessageFor(message));
 				return true;
 			}
 		}
-		
+
 		if (LOGGER.isErrorEnabled()) {
 			if (messageKind == IMessage.ERROR) {
 				LOGGER.error(makeMessageFor(message));
 				return true;
 			}
 		}
-		
+
 		if (LOGGER.isFatalEnabled()) {
 			if (messageKind == IMessage.ABORT) {
 				LOGGER.fatal(makeMessageFor(message));
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private String makeMessageFor(IMessage aMessage) {
 		return AJ_ID + aMessage.getMessage();
 	}

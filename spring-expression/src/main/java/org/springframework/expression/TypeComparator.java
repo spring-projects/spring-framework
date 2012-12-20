@@ -19,7 +19,7 @@ package org.springframework.expression;
 /**
  * Instances of a type comparator should be able to compare pairs of objects for equality, the specification of the
  * return value is the same as for {@link Comparable}.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

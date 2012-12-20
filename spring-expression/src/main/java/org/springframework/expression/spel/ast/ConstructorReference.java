@@ -44,7 +44,7 @@ import org.springframework.expression.spel.SpelNode;
  * new String('hello world')<br>
  * new int[]{1,2,3,4}<br>
  * new int[3] new int[3]{1,2,3}
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -137,7 +137,7 @@ public class ConstructorReference extends SpelNodeImpl {
 						throw new SpelEvaluationException(getStartPosition(), rootCause,
 								SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM, typename, FormatHelper
 										.formatMethodForMessage("", argumentTypes));
-					}					
+					}
 				}
 
 				// at this point we know it wasn't a user problem so worth a retry if a better candidate can be found

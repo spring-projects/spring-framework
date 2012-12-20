@@ -34,5 +34,5 @@ public class JpaSystemException extends UncategorizedDataAccessException {
 	public JpaSystemException(PersistenceException ex) {
 		super(ex.getMessage(), ex);
 	}
-	
+
 }

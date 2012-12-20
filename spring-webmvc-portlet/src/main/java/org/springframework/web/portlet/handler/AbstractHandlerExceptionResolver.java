@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private Set mappedHandlers;
+	private Set<?> mappedHandlers;
 
-	private Class[] mappedHandlerClasses;
+	private Class<?>[] mappedHandlerClasses;
 
 	private Log warnLogger;
 
@@ -74,7 +74,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * error view will be used as fallback for all exceptions; any further
 	 * HandlerExceptionResolvers in the chain will be ignored in this case.
 	 */
-	public void setMappedHandlers(Set mappedHandlers) {
+	public void setMappedHandlers(Set<?> mappedHandlers) {
 		this.mappedHandlers = mappedHandlers;
 	}
 
@@ -89,7 +89,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * any further HandlerExceptionResolvers in the chain will be ignored in
 	 * this case.
 	 */
-	public void setMappedHandlerClasses(Class[] mappedHandlerClasses) {
+	public void setMappedHandlerClasses(Class<?>[] mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
@@ -166,7 +166,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 				return true;
 			}
 			if (this.mappedHandlerClasses != null) {
-				for (Class mappedClass : this.mappedHandlerClasses) {
+				for (Class<?> mappedClass : this.mappedHandlerClasses) {
 					if (mappedClass.isInstance(handler)) {
 						return true;
 					}

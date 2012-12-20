@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,20 +44,23 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 	private DefaultListableBeanFactory parent;
 
-	private XmlBeanFactory factory;
+	private DefaultListableBeanFactory factory;
 
 	protected void setUp() {
 		parent = new DefaultListableBeanFactory();
-		Map m = new HashMap();
+		Map<Object, Object> m = new HashMap<Object, Object>();
 		m.put("name", "Albert");
-		parent.registerBeanDefinition("father",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
-		m = new HashMap();
+		RootBeanDefinition fatherBeanDefinition = new RootBeanDefinition(TestBean.class);
+		fatherBeanDefinition.setPropertyValues(new MutablePropertyValues(m));
+		parent.registerBeanDefinition("father", fatherBeanDefinition);
+		m = new HashMap<Object, Object>();
 		m.put("name", "Roderick");
-		parent.registerBeanDefinition("rod",
-			new RootBeanDefinition(TestBean.class, new MutablePropertyValues(m)));
+		RootBeanDefinition rodBeanDefinition = new RootBeanDefinition(TestBean.class);
+		rodBeanDefinition.setPropertyValues(new MutablePropertyValues(m));
+		parent.registerBeanDefinition("rod", rodBeanDefinition);
 
-		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);
+		this.factory = new DefaultListableBeanFactory(parent);
+		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(new ClassPathResource("test.xml", getClass()));
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
 			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 				if (bean instanceof TestBean) {
@@ -108,12 +111,12 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 	 * Test that properties with name as well as id creating an alias up front.
 	 */
 	public void testAutoAliasing() throws Exception {
-		List beanNames = Arrays.asList(getListableBeanFactory().getBeanDefinitionNames());
+		List<String> beanNames = Arrays.asList(getListableBeanFactory().getBeanDefinitionNames());
 
 		TestBean tb1 = (TestBean) getBeanFactory().getBean("aliased");
 		TestBean alias1 = (TestBean) getBeanFactory().getBean("myalias");
 		Assert.assertTrue(tb1 == alias1);
-		List tb1Aliases = Arrays.asList(getBeanFactory().getAliases("aliased"));
+		List<String> tb1Aliases = Arrays.asList(getBeanFactory().getAliases("aliased"));
 		Assert.assertEquals(2, tb1Aliases.size());
 		Assert.assertTrue(tb1Aliases.contains("myalias"));
 		Assert.assertTrue(tb1Aliases.contains("youralias"));
@@ -131,7 +134,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		Assert.assertTrue(tb2 == alias3a);
 		Assert.assertTrue(tb2 == alias3b);
 
-		List tb2Aliases = Arrays.asList(getBeanFactory().getAliases("multiAliased"));
+		List<String> tb2Aliases = Arrays.asList(getBeanFactory().getAliases("multiAliased"));
 		Assert.assertEquals(4, tb2Aliases.size());
 		Assert.assertTrue(tb2Aliases.contains("alias1"));
 		Assert.assertTrue(tb2Aliases.contains("alias2"));
@@ -148,7 +151,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		TestBean alias5 = (TestBean) getBeanFactory().getBean("aliasWithoutId3");
 		Assert.assertTrue(tb3 == alias4);
 		Assert.assertTrue(tb3 == alias5);
-		List tb3Aliases = Arrays.asList(getBeanFactory().getAliases("aliasWithoutId1"));
+		List<String> tb3Aliases = Arrays.asList(getBeanFactory().getAliases("aliasWithoutId1"));
 		Assert.assertEquals(2, tb3Aliases.size());
 		Assert.assertTrue(tb3Aliases.contains("aliasWithoutId2"));
 		Assert.assertTrue(tb3Aliases.contains("aliasWithoutId3"));
@@ -159,7 +162,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		TestBean tb4 = (TestBean) getBeanFactory().getBean(TestBean.class.getName() + "#0");
 		Assert.assertEquals(null, tb4.getName());
 
-		Map drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
+		Map<String, DummyReferencer> drs = getListableBeanFactory().getBeansOfType(DummyReferencer.class, false, false);
 		Assert.assertEquals(5, drs.size());
 		Assert.assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#0"));
 		Assert.assertTrue(drs.containsKey(DummyReferencer.class.getName() + "#1"));

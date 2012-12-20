@@ -36,9 +36,8 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Simple PropertyAccessor that uses reflection to access properties for reading and writing.
- * A property can be accessed if it is accessible as a field on the object or through a
- * getter (if being read) or a setter (if being written).
+ * Simple PropertyAccessor that uses reflection to access properties for reading and writing. A property can be accessed
+ * if it is accessible as a field on the object or through a getter (if being read) or a setter (if being written).
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -50,7 +49,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>(64);
 
-	private final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey, TypeDescriptor>(64);
+	protected final Map<CacheKey, Member> writerCache = new ConcurrentHashMap<CacheKey, Member>();
+
+	protected final Map<CacheKey, TypeDescriptor> typeDescriptorCache = new ConcurrentHashMap<CacheKey, TypeDescriptor>();
 
 
 	/**
@@ -86,7 +87,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			Field field = findField(name, type, target);
 			if (field != null) {
 				TypeDescriptor typeDescriptor = new TypeDescriptor(field);
-				this.readerCache.put(cacheKey, new InvokerPair(field, typeDescriptor));
+				this.readerCache.put(cacheKey, new InvokerPair(field,typeDescriptor));
 				this.typeDescriptorCache.put(cacheKey, typeDescriptor);
 				return true;
 			}
@@ -367,6 +368,52 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	}
 
 	/**
+	 * Captures the member (method/field) to call reflectively to access a property value and the type descriptor for the
+	 * value returned by the reflective call.
+	 */
+	private static class InvokerPair {
+
+		final Member member;
+
+		final TypeDescriptor typeDescriptor;
+
+		public InvokerPair(Member member, TypeDescriptor typeDescriptor) {
+			this.member = member;
+			this.typeDescriptor = typeDescriptor;
+		}
+
+	}
+
+	private static class CacheKey {
+
+		private final Class<?> clazz;
+
+		private final String name;
+
+		public CacheKey(Class<?> clazz, String name) {
+			this.clazz = clazz;
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof CacheKey)) {
+				return false;
+			}
+			CacheKey otherKey = (CacheKey) other;
+			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name));
+		}
+
+		@Override
+		public int hashCode() {
+			return this.clazz.hashCode() * 29 + this.name.hashCode();
+		}
+	}
+
+	/**
 	 * Attempt to create an optimized property accessor tailored for a property of a particular name on
 	 * a particular class. The general ReflectivePropertyAccessor will always work but is not optimal
 	 * due to the need to lookup which reflective member (method/field) to use each time read() is called.
@@ -418,61 +465,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return this;
 	}
 
-
 	/**
-	 * Captures the member (method/field) to call reflectively to access a property value
-	 * and the type descriptor for the value returned by the reflective call.
-	 */
-	private static class InvokerPair {
-
-		final Member member;
-
-		final TypeDescriptor typeDescriptor;
-
-		public InvokerPair(Member member, TypeDescriptor typeDescriptor) {
-			this.member = member;
-			this.typeDescriptor = typeDescriptor;
-		}
-	}
-
-
-	private static class CacheKey {
-
-		private final Class clazz;
-
-		private final String name;
-
-		public CacheKey(Class clazz, String name) {
-			this.clazz = clazz;
-			this.name = name;
-		}
-
-		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof CacheKey)) {
-				return false;
-			}
-			CacheKey otherKey = (CacheKey) other;
-			return (this.clazz.equals(otherKey.clazz) && this.name.equals(otherKey.name));
-		}
-
-		@Override
-		public int hashCode() {
-			return this.clazz.hashCode() * 29 + this.name.hashCode();
-		}
-	}
-
-
-	/**
-	 * An optimized form of a PropertyAccessor that will use reflection but only knows
-	 * how to access a particular property on a particular class. This is unlike the
-	 * general ReflectivePropertyResolver which manages a cache of methods/fields that
-	 * may be invoked to access different properties on different classes. This optimal
-	 * accessor exists because looking up the appropriate reflective object by class/name
-	 * on each read is not cheap.
+	 * An optimized form of a PropertyAccessor that will use reflection but only knows how to access a particular property
+	 * on a particular class.  This is unlike the general ReflectivePropertyResolver which manages a cache of methods/fields that
+	 * may be invoked to access different properties on different classes.  This optimal accessor exists because looking up
+	 * the appropriate reflective object by class/name on each read is not cheap.
 	 */
 	private static class OptimalPropertyAccessor implements PropertyAccessor {
 
@@ -486,9 +483,9 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			this.member = target.member;
 			this.typeDescriptor = target.typeDescriptor;
 			if (this.member instanceof Field) {
-				Field field = (Field) this.member;
-				this.needsToBeMadeAccessible = (!Modifier.isPublic(field.getModifiers()) ||
-						!Modifier.isPublic(field.getDeclaringClass().getModifiers())) && !field.isAccessible();
+				Field field = (Field)member;
+				needsToBeMadeAccessible = (!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()))
+				&& !field.isAccessible();
 			}
 			else {
 				Method method = (Method) this.member;
@@ -497,7 +494,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 
-		public Class[] getSpecificTargetClasses() {
+		public Class<?>[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
@@ -537,7 +534,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
 				}
 			}
-			if (this.member instanceof Field) {
+			if (member instanceof Field) {
 				try {
 					if (this.needsToBeMadeAccessible) {
 						ReflectionUtils.makeAccessible((Field) this.member);
@@ -556,7 +553,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
-		public void write(EvaluationContext context, Object target, String name, Object newValue) {
+		public void write(EvaluationContext context, Object target, String name, Object newValue)
+				throws AccessException {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 	}

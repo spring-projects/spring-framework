@@ -26,7 +26,7 @@ import org.springframework.jndi.JndiLocatorSupport;
  *
  * <p>For specific JNDI configuration, it is recommended to configure
  * the "jndiEnvironment"/"jndiTemplate" properties.
- * 
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  * @since 2.0

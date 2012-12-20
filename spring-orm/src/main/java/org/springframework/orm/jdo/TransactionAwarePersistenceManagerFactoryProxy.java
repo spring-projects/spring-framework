@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	public void setTargetPersistenceManagerFactory(PersistenceManagerFactory target) {
 		Assert.notNull(target, "Target PersistenceManagerFactory must not be null");
 		this.target = target;
-		Class[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), target.getClass().getClassLoader());
+		Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(target.getClass(), target.getClass().getClassLoader());
 		this.proxy = (PersistenceManagerFactory) Proxy.newProxyInstance(
 				target.getClass().getClassLoader(), ifcs, new PersistenceManagerFactoryInvocationHandler());
 	}
@@ -157,7 +157,7 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 				PersistenceManagerFactory target = getTargetPersistenceManagerFactory();
 				PersistenceManager pm =
 						PersistenceManagerFactoryUtils.doGetPersistenceManager(target, isAllowCreate());
-				Class[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), pm.getClass().getClassLoader());
+				Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(pm.getClass(), pm.getClass().getClassLoader());
 				return Proxy.newProxyInstance(
 						pm.getClass().getClassLoader(), ifcs, new PersistenceManagerInvocationHandler(pm, target));
 			}

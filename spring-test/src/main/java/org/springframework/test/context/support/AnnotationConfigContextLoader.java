@@ -28,11 +28,11 @@ import org.springframework.util.ObjectUtils;
 /**
  * Concrete implementation of {@link AbstractGenericContextLoader} that loads
  * bean definitions from annotated classes.
- * 
+ *
  * <p>See the Javadoc for
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
  * for a definition of <em>annotated class</em>.
- * 
+ *
  * <p>Note: <code>AnnotationConfigContextLoader</code> supports <em>annotated classes</em>
  * rather than the String-based resource locations defined by the legacy
  * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
@@ -68,7 +68,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * {@link ContextConfigurationAttributes#setClasses(Class[]) set} in the
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
-	 * 
+	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()

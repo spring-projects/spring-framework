@@ -29,7 +29,7 @@ import org.springframework.test.annotation.ProfileValueSourceConfiguration;
  * <em>explicit, custom defined {@link ProfileValueSource}</em>) annotations in
  * conjunction with the {@link SpringJUnit4ClassRunner}.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see EnabledAndIgnoredSpringRunnerTests

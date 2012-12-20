@@ -45,21 +45,7 @@ public abstract class AnnotationBeanUtils {
 	 * @see org.springframework.beans.BeanWrapper
 	 */
 	public static void copyPropertiesToBean(Annotation ann, Object bean, String... excludedProperties) {
-		copyPropertiesToBean(ann, bean, null, excludedProperties);
-	}
-
-	/**
-	 * Copy the properties of the supplied {@link Annotation} to the supplied target bean.
-	 * Any properties defined in <code>excludedProperties</code> will not be copied.
-	 * <p>A specified value resolver may resolve placeholders in property values, for example.
-	 * @param ann the annotation to copy from
-	 * @param bean the bean instance to copy to
-	 * @param valueResolver a resolve to post-process String property values (may be <code>null</code>)
-	 * @param excludedProperties the names of excluded properties, if any
-	 * @see org.springframework.beans.BeanWrapper
-	 */
-	public static void copyPropertiesToBean(Annotation ann, Object bean, StringValueResolver valueResolver, String... excludedProperties) {
-		Set<String> excluded =  new HashSet<String>(Arrays.asList(excludedProperties));
+		Set<String> excluded = new HashSet<String>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {

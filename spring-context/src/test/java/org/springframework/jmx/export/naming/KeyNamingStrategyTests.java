@@ -38,5 +38,5 @@ public class KeyNamingStrategyTests extends AbstractNamingStrategyTests {
 	protected String getCorrectObjectName() {
 		return OBJECT_NAME;
 	}
-	
+
 }

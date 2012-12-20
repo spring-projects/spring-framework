@@ -27,7 +27,7 @@ public class RealLiteral extends Literal {
 	private final TypedValue value;
 
 	public RealLiteral(String payload, int pos, double value) {
-		super(payload, pos); 
+		super(payload, pos);
 		this.value = new TypedValue(value);
 	}
 

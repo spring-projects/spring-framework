@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,9 +68,9 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
 	private String text;
-	
+
 	private String var;
-	
+
 	private String scope = TagUtils.SCOPE_PAGE;
 
 	private boolean javaScriptEscape = false;
@@ -118,7 +118,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 	/**
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
@@ -128,7 +128,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setVar(String var) {
 		this.var = var;
 	}
-	
+
 	/**
 	 * Set the scope to export the variable to.
 	 * Default is SCOPE_PAGE ("page").
@@ -266,7 +266,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 			return (Object[]) arguments;
 		}
 		else if (arguments instanceof Collection) {
-			return ((Collection) arguments).toArray();
+			return ((Collection<?>) arguments).toArray();
 		}
 		else if (arguments != null) {
 			// Assume a single argument object.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,78 +28,89 @@ import static org.junit.Assert.*;
  */
 public class ExceptionDepthComparatorTests {
 
-  @Test
-  public void targetBeforeSameDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(TargetException.class, SameDepthException.class);
-    assertEquals(TargetException.class, foundClass);
-  }
+	@Test
+	public void targetBeforeSameDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(TargetException.class,
+			SameDepthException.class);
+		assertEquals(TargetException.class, foundClass);
+	}
 
-  @Test
-  public void sameDepthBeforeTarget() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(SameDepthException.class, TargetException.class);
-    assertEquals(TargetException.class, foundClass);
-  }
+	@Test
+	public void sameDepthBeforeTarget() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(
+			SameDepthException.class, TargetException.class);
+		assertEquals(TargetException.class, foundClass);
+	}
 
-  @Test
-  public void lowestDepthBeforeTarget() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(LowestDepthException.class, TargetException.class);
-    assertEquals(TargetException.class, foundClass);
-  }
+	@Test
+	public void lowestDepthBeforeTarget() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(
+			LowestDepthException.class, TargetException.class);
+		assertEquals(TargetException.class, foundClass);
+	}
 
-  @Test
-  public void targetBeforeLowestDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(TargetException.class, LowestDepthException.class);
-    assertEquals(TargetException.class, foundClass);
-  }
+	@Test
+	public void targetBeforeLowestDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(TargetException.class,
+			LowestDepthException.class);
+		assertEquals(TargetException.class, foundClass);
+	}
 
-  @Test
-  public void noDepthBeforeTarget() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(NoDepthException.class, TargetException.class);
-    assertEquals(TargetException.class, foundClass);
-  }
+	@Test
+	public void noDepthBeforeTarget() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(NoDepthException.class,
+			TargetException.class);
+		assertEquals(TargetException.class, foundClass);
+	}
 
-  @Test
-  public void noDepthBeforeHighestDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(NoDepthException.class, HighestDepthException.class);
-    assertEquals(HighestDepthException.class, foundClass);
-  }
+	@Test
+	public void noDepthBeforeHighestDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(NoDepthException.class,
+			HighestDepthException.class);
+		assertEquals(HighestDepthException.class, foundClass);
+	}
 
-  @Test
-  public void highestDepthBeforeNoDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(HighestDepthException.class, NoDepthException.class);
-    assertEquals(HighestDepthException.class, foundClass);
-  }
+	@Test
+	public void highestDepthBeforeNoDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(
+			HighestDepthException.class, NoDepthException.class);
+		assertEquals(HighestDepthException.class, foundClass);
+	}
 
-  @Test
-  public void highestDepthBeforeLowestDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(HighestDepthException.class, LowestDepthException.class);
-    assertEquals(LowestDepthException.class, foundClass);
-  }
+	@Test
+	public void highestDepthBeforeLowestDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(
+			HighestDepthException.class, LowestDepthException.class);
+		assertEquals(LowestDepthException.class, foundClass);
+	}
 
-  @Test
-  public void lowestDepthBeforeHighestDepth() throws Exception {
-    Class<? extends Throwable> foundClass = findClosestMatch(LowestDepthException.class, HighestDepthException.class);
-    assertEquals(LowestDepthException.class, foundClass);
-  }
+	@Test
+	public void lowestDepthBeforeHighestDepth() throws Exception {
+		Class<? extends Throwable> foundClass = findClosestMatch(
+			LowestDepthException.class, HighestDepthException.class);
+		assertEquals(LowestDepthException.class, foundClass);
+	}
 
-  private Class<? extends Throwable> findClosestMatch(Class<? extends Throwable>... classes) {
-    return ExceptionDepthComparator.findClosestMatch(Arrays.asList(classes), new TargetException());
-  }
+	@SuppressWarnings("unchecked")
+	private Class<? extends Throwable> findClosestMatch(Class<? extends Throwable> t1,
+		Class<? extends Throwable> t2) {
+		return ExceptionDepthComparator.findClosestMatch(Arrays.asList(t1, t2),
+			new TargetException());
+	}
 
+	public class HighestDepthException extends Throwable {
+	}
 
-  public class HighestDepthException extends Throwable {
-  }
+	public class LowestDepthException extends HighestDepthException {
+	}
 
-  public class LowestDepthException extends HighestDepthException {
-  }
+	public class TargetException extends LowestDepthException {
+	}
 
-  public class TargetException extends LowestDepthException {
-  }
+	public class SameDepthException extends LowestDepthException {
+	}
 
-  public class SameDepthException extends LowestDepthException {
-  }
-
-  public class NoDepthException extends TargetException {
-  }
+	public class NoDepthException extends TargetException {
+	}
 
 }

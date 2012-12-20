@@ -25,7 +25,7 @@ import java.util.Set;
  * that formats <code>Date</code> values set on fields annotated with <code>@DateTimeFormat</code>.
  *
  * @author Keith Donald
- * @since 3.0 
+ * @since 3.0
  * @param <A> the annotation type that should trigger formatting
  */
 public interface AnnotationFormatterFactory<A extends Annotation> {
@@ -52,5 +52,5 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 	 * @return the parser
 	 */
 	Parser<?> getParser(A annotation, Class<?> fieldType);
-	
+
 }

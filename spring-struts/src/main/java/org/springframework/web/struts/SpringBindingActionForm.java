@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.web.struts;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Iterator;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,7 +61,7 @@ import org.springframework.validation.ObjectError;
  * &lt;form-beans&gt;
  *   &lt;form-bean name="actionForm" type="org.springframework.web.struts.SpringBindingActionForm"/&gt;
  * &lt;/form-beans&gt;</pre>
- * 
+ *
  * Example code in a custom Struts <code>Action</code>:
  *
  * <pre>
@@ -162,9 +161,7 @@ public class SpringBindingActionForm extends ActionForm {
 	 */
 	private ActionMessages getActionMessages() {
 		ActionMessages actionMessages = new ActionMessages();
-		Iterator it = this.errors.getAllErrors().iterator();
-		while (it.hasNext()) {
-			ObjectError objectError = (ObjectError) it.next();
+		for (ObjectError objectError : this.errors.getAllErrors()) {
 			String effectiveMessageKey = findEffectiveMessageKey(objectError);
 			if (effectiveMessageKey == null && !defaultActionMessageAvailable) {
 				// Need to specify default code despite it not being resolvable:

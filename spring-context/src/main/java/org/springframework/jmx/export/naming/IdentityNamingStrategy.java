@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	 */
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		String domain = ClassUtils.getPackageName(managedBean.getClass());
-		Hashtable keys = new Hashtable();
+		Hashtable<String, String> keys = new Hashtable<String, String>();
 		keys.put(TYPE_KEY, ClassUtils.getShortName(managedBean.getClass()));
 		keys.put(HASH_CODE_KEY, ObjectUtils.getIdentityHexString(managedBean));
 		return ObjectNameManager.getInstance(domain, keys);

@@ -97,6 +97,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
+	private static final String CHARSET_PREFIX = "charset=";
+
 	private boolean active = true;
 
 	// ---------------------------------------------------------------------

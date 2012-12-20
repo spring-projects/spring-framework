@@ -1257,7 +1257,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected MessageSource getInternalParentMessageSource() {
 		return (getParent() instanceof AbstractApplicationContext) ?
-		    ((AbstractApplicationContext) getParent()).messageSource : getParent();
+			((AbstractApplicationContext) getParent()).messageSource : getParent();
 	}
 
 

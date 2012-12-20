@@ -124,7 +124,7 @@ public class ComponentScanParserTests {
 
 	@Target({ElementType.TYPE, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface CustomAnnotation {	
+	public static @interface CustomAnnotation {
 	}
 
 
@@ -141,7 +141,7 @@ public class ComponentScanParserTests {
 
 
 	@CustomAnnotation
-	public static class CustomAnnotationDependencyBean {	
+	public static class CustomAnnotationDependencyBean {
 	}
 
 

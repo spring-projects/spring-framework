@@ -140,7 +140,7 @@ class TypeConverterDelegate {
 	 * @return the new value, possibly the result of type conversion
 	 * @throws IllegalArgumentException if type conversion failed
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> T convertIfNecessary(String propertyName, Object oldValue, Object newValue,
 			Class<T> requiredType, TypeDescriptor typeDescriptor) throws IllegalArgumentException {
 
@@ -237,6 +237,7 @@ class TypeConverterDelegate {
 						// It's an empty enum identifier: reset the enum value to null.
 						return null;
 					}
+
 					convertedValue = attemptToConvertStringToEnum(requiredType, trimmedValue, convertedValue);
 					standardConversion = true;
 				}
@@ -328,9 +329,9 @@ class TypeConverterDelegate {
 	 * @param requiredType the type to find an editor for
 	 * @return the corresponding editor, or <code>null</code> if none
 	 */
-	private PropertyEditor findDefaultEditor(Class requiredType) {
+	protected PropertyEditor findDefaultEditor(Class<?> requiredType, TypeDescriptor typeDescriptor) {
 		PropertyEditor editor = null;
-		if (requiredType != null) {
+		if (editor == null && requiredType != null) {
 			// No custom editor -> check BeanWrapperImpl's default editors.
 			editor = this.propertyEditorRegistry.getDefaultEditor(requiredType);
 			if (editor == null && !String.class.equals(requiredType)) {
@@ -453,7 +454,8 @@ class TypeConverterDelegate {
 		return editor.getValue();
 	}
 
-	private Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
+	@SuppressWarnings("rawtypes")
+	protected Object convertToTypedArray(Object input, String propertyName, Class<?> componentType) {
 		if (input instanceof Collection) {
 			// Convert Collection elements to array elements.
 			Collection coll = (Collection) input;
@@ -491,8 +493,8 @@ class TypeConverterDelegate {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private Collection convertToTypedCollection(
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Collection convertToTypedCollection(
 			Collection original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Collection.class.isAssignableFrom(requiredType)) {
@@ -573,8 +575,8 @@ class TypeConverterDelegate {
 		return (originalAllowed ? original : convertedCopy);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Map convertToTypedMap(
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Map convertToTypedMap(
 			Map original, String propertyName, Class requiredType, TypeDescriptor typeDescriptor) {
 
 		if (!Map.class.isAssignableFrom(requiredType)) {
@@ -671,7 +673,7 @@ class TypeConverterDelegate {
 				null);
 	}
 
-	private boolean canCreateCopy(Class requiredType) {
+	private boolean canCreateCopy(Class<?> requiredType) {
 		return (!requiredType.isInterface() && !Modifier.isAbstract(requiredType.getModifiers()) &&
 				Modifier.isPublic(requiredType.getModifiers()) && ClassUtils.hasConstructor(requiredType));
 	}

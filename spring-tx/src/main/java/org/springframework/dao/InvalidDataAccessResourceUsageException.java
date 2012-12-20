@@ -24,7 +24,7 @@ package org.springframework.dao;
  * @author Rod Johnson
  */
 public class InvalidDataAccessResourceUsageException extends NonTransientDataAccessException {
-	
+
 	/**
 	 * Constructor for InvalidDataAccessResourceUsageException.
 	 * @param msg the detail message
@@ -32,7 +32,7 @@ public class InvalidDataAccessResourceUsageException extends NonTransientDataAcc
 	public InvalidDataAccessResourceUsageException(String msg) {
 		super(msg);
 	}
-	
+
 	/**
 	 * Constructor for InvalidDataAccessResourceUsageException.
 	 * @param msg the detail message

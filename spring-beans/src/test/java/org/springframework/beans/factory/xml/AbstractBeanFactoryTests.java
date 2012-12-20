@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -156,7 +156,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void testGetSharedInstanceByNonmatchingClass() {
 		try {
-			Object o = getBeanFactory().getBean("rod", BeanFactory.class);
+			getBeanFactory().getBean("rod", BeanFactory.class);
 			fail("Rod bean is not of type BeanFactory; getBeanInstance(rod, BeanFactory.class) should throw BeanNotOfRequiredTypeException");
 		}
 		catch (BeanNotOfRequiredTypeException ex) {
@@ -200,7 +200,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	public void testNotThere() {
 		assertFalse(getBeanFactory().containsBean("Mr Squiggle"));
 		try {
-			Object o = getBeanFactory().getBean("Mr Squiggle");
+			getBeanFactory().getBean("Mr Squiggle");
 			fail("Can't find missing bean");
 		}
 		catch (BeansException ex) {
@@ -224,7 +224,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public void xtestTypeMismatch() {
 		try {
-			Object o = getBeanFactory().getBean("typeMismatch");
+			getBeanFactory().getBean("typeMismatch");
 			fail("Shouldn't succeed with type mismatch");
 		}
 		catch (BeanCreationException wex) {
@@ -278,7 +278,8 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 * @throws Exception
 	 */
 	public void testFactoryIsInitialized() throws Exception {
-		TestBean tb = (TestBean) getBeanFactory().getBean("singletonFactory");
+		Object tb = getBeanFactory().getBean("singletonFactory");
+		assertTrue(tb instanceof TestBean);
 		DummyFactory factory = (DummyFactory) getBeanFactory().getBean("&singletonFactory");
 		assertTrue("Factory was initialized because it implemented InitializingBean", factory.wasInitialized());
 	}

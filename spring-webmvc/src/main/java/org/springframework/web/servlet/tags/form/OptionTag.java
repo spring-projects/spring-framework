@@ -26,9 +26,9 @@ import org.springframework.web.util.TagUtils;
 
 /**
  * JSP tag for rendering an HTML '<code>option</code>' tag.
- * 
+ *
  * <p><b>Must be used nested inside a {@link SelectTag}.</b>
- * 
+ *
  * <p>Provides full support for databinding by marking an
  * '<code>option</code>' as 'selected' if the {@link #setValue value}
  * matches the value bound to the out {@link SelectTag}.
@@ -67,7 +67,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	 * The name of the '<code>value</code>' attribute.
 	 */
 	private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
-	
+
 	/**
 	 * The name of the '<code>disabled</code>' attribute.
 	 */
@@ -87,7 +87,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private Object oldValue;
 
 	private Object oldDisplayValue;
-	
+
 	private String disabled;
 
 
@@ -105,7 +105,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	protected Object getValue() {
 		return this.value;
 	}
-	
+
 	/**
 	 * Set the value of the '<code>disabled</code>' attribute.
 	 * <p>May be a runtime expression.
@@ -121,10 +121,10 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	protected String getDisabled() {
 		return this.disabled;
 	}
-	
+
 	/**
 	 * Is the current HTML tag disabled?
-	 * @return <code>true</code> if this tag is disabled 
+	 * @return <code>true</code> if this tag is disabled
 	 */
 	protected boolean isDisabled() throws JspException {
 		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
@@ -239,7 +239,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private void assertUnderSelectTag() {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
 	}
-	
+
 	private SelectTag getSelectTag() {
 		return (SelectTag) findAncestorWithClass(this, SelectTag.class);
 	}

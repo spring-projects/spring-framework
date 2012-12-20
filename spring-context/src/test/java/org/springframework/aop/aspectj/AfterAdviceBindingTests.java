@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public final class AfterAdviceBindingTests {
 
 	private AdviceBindingCollaborator mockCollaborator;
-	
+
 	private ITestBean testBeanProxy;
-	
+
 	private TestBean testBeanTarget;
 
 	@Before
@@ -48,13 +48,13 @@ public final class AfterAdviceBindingTests {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 		AdviceBindingTestAspect afterAdviceAspect = (AdviceBindingTestAspect) ctx.getBean("testAspect");
-		
+
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		
+
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
-		
+
 		mockCollaborator = createNiceMock(AdviceBindingCollaborator.class);
 		afterAdviceAspect.setCollaborator(mockCollaborator);
 	}
@@ -66,7 +66,7 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneObjectArgBindingProxyWithThis() {
 		mockCollaborator.oneObjectArg(this.testBeanProxy);
@@ -74,7 +74,7 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneObjectArgBindingTarget() {
 		mockCollaborator.oneObjectArg(this.testBeanTarget);
@@ -82,7 +82,7 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.getDoctor();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5,this.testBeanProxy);
@@ -90,7 +90,7 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPoint() {
 		mockCollaborator.needsJoinPoint("getAge");
@@ -98,7 +98,7 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPointStaticPart() {
 		mockCollaborator.needsJoinPointStaticPart("getAge");
@@ -106,5 +106,5 @@ public final class AfterAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 }

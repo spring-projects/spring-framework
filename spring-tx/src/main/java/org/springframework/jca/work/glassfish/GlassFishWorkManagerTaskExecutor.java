@@ -43,7 +43,7 @@ public class GlassFishWorkManagerTaskExecutor extends WorkManagerTaskExecutor {
 
 	public GlassFishWorkManagerTaskExecutor() {
 		try {
-			Class wmf = getClass().getClassLoader().loadClass(WORK_MANAGER_FACTORY_CLASS);
+			Class<?> wmf = getClass().getClassLoader().loadClass(WORK_MANAGER_FACTORY_CLASS);
 			this.getWorkManagerMethod = wmf.getMethod("getWorkManager", new Class[] {String.class});
 		}
 		catch (Exception ex) {

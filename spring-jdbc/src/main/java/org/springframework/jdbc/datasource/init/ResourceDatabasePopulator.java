@@ -119,7 +119,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 	/**
-	 * Flag to indicate that a failed SQL {@code DROP} statement can be ignored.
+	 * Flag to indicate that a failed SQL <code>DROP</code> statement can be ignored.
 	 * <p>This is useful for non-embedded databases whose SQL dialect does not support an
 	 * {@code IF EXISTS} clause in a {@code DROP}. The default is false so that if the
 	 * populator runs accidentally, it will fail fast when the script starts with a {@code DROP}.

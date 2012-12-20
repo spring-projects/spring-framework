@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Simple {@link ProblemReporter} implementation that exhibits fail-fast
  * behavior when errors are encountered.
- * 
+ *
  * <p>The first error encountered results in a {@link BeanDefinitionParsingException}
  * being thrown.
  *

@@ -31,13 +31,13 @@ import java.io.OutputStream;
  * @author Rod Johnson
  */
 public class SerializationTestUtils {
-	
+
 	public static void testSerialization(Object o) throws IOException {
 		OutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
 		oos.writeObject(o);
 	}
-	
+
 	public static boolean isSerializable(Object o) throws IOException {
 		try {
 			testSerialization(o);
@@ -47,7 +47,7 @@ public class SerializationTestUtils {
 			return false;
 		}
 	}
-	
+
 	public static Object serializeAndDeserialize(Object o) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -55,7 +55,7 @@ public class SerializationTestUtils {
 		oos.flush();
 		baos.flush();
 		byte[] bytes = baos.toByteArray();
-		
+
 		ByteArrayInputStream is = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(is);
 		Object o2 = ois.readObject();

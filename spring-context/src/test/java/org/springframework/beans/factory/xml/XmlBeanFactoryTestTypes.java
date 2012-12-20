@@ -222,10 +222,12 @@ class DerivedConstructorDependenciesBean extends ConstructorDependenciesBean {
 		setName(name);
 	}
 
+	@SuppressWarnings("unused")
 	private void init() {
 		this.initialized = true;
 	}
 
+	@SuppressWarnings("unused")
 	private void destroy() {
 		this.destroyed = true;
 	}
@@ -364,8 +366,9 @@ class FactoryMethods {
 		return new FactoryMethods(tb, null, num);
 	}
 
+	@SuppressWarnings("unused")
 	private static List<?> listInstance() {
-		return Collections.EMPTY_LIST;
+		return Collections.emptyList();
 	}
 
 
@@ -401,6 +404,7 @@ class FactoryMethods {
 		return this.tb;
 	}
 
+	@SuppressWarnings("unused")
 	private TestBean privateGetTestBean() {
 		return this.tb;
 	}

@@ -92,6 +92,9 @@ import org.springframework.web.portlet.handler.PortletRequestMethodNotSupportedE
  */
 public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping<PortletMode> {
 
+	private final Map<Class<?>, RequestMapping> cachedMappings = new HashMap<Class<?>, RequestMapping>();
+
+
 	/**
 	 * Calls the <code>registerHandlers</code> method in addition
 	 * to the superclass's initialization.

@@ -46,7 +46,7 @@ import org.springframework.core.io.ResourceLoader;
  * <p>As alternative to a ResourcePatternResolver dependency, consider exposing
  * bean properties of type Resource array, populated via pattern Strings with
  * automatic type conversion by the bean factory.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 10.03.2004

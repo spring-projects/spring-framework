@@ -227,7 +227,7 @@ public abstract class NamedParameterUtils {
 		}
 		return position;
 	}
-	
+
 	/**
 	 * Parse the SQL statement and locate any placeholders or named parameters.
 	 * Named parameters are substituted for a JDBC placeholder and any select list
@@ -248,10 +248,10 @@ public abstract class NamedParameterUtils {
 	public static String substituteNamedParameters(ParsedSql parsedSql, SqlParameterSource paramSource) {
 		String originalSql = parsedSql.getOriginalSql();
 		StringBuilder actualSql = new StringBuilder();
-		List paramNames = parsedSql.getParameterNames();
+		List<String> paramNames = parsedSql.getParameterNames();
 		int lastIndex = 0;
 		for (int i = 0; i < paramNames.size(); i++) {
-			String paramName = (String) paramNames.get(i);
+			String paramName = paramNames.get(i);
 			int[] indexes = parsedSql.getParameterIndexes(i);
 			int startIndex = indexes[0];
 			int endIndex = indexes[1];
@@ -262,7 +262,7 @@ public abstract class NamedParameterUtils {
 					value = ((SqlParameterValue) value).getValue();
 				}
 				if (value instanceof Collection) {
-					Iterator entryIter = ((Collection) value).iterator();
+					Iterator<?> entryIter = ((Collection<?>) value).iterator();
 					int k = 0;
 					while (entryIter.hasNext()) {
 						if (k > 0) {
@@ -482,7 +482,7 @@ public abstract class NamedParameterUtils {
 		public int getStartIndex() {
 			return startIndex;
 		}
-		
+
 		public int getEndIndex() {
 			return endIndex;
 		}

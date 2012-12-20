@@ -174,36 +174,6 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("IllegalArgumentException", this.response.getContentAsString());
 	}
 
-	@Test
-	public void resolveExceptionGlobalHandler() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
-		this.resolver.afterPropertiesSet();
-
-		IllegalAccessException ex = new IllegalAccessException();
-		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
-
-		assertNotNull("Exception was not handled", mav);
-		assertTrue(mav.isEmpty());
-		assertEquals("AnotherTestExceptionResolver: IllegalAccessException", this.response.getContentAsString());
-	}
-
-	@Test
-	public void resolveExceptionGlobalHandlerOrdered() throws Exception {
-		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
-		this.resolver.setApplicationContext(cxt);
-		this.resolver.afterPropertiesSet();
-
-		IllegalStateException ex = new IllegalStateException();
-		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
-		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
-
-		assertNotNull("Exception was not handled", mav);
-		assertTrue(mav.isEmpty());
-		assertEquals("TestExceptionResolver: IllegalStateException", this.response.getContentAsString());
-	}
-
 
 	private void assertMethodProcessorCount(int resolverCount, int handlerCount) {
 		assertEquals(resolverCount, this.resolver.getArgumentResolvers().getResolvers().size());
@@ -251,40 +221,6 @@ public class ExceptionHandlerExceptionResolverTests {
 
 		@ExceptionHandler(value=IOException.class)
 		public void handleException() {
-		}
-	}
-
-	@ControllerAdvice
-	@Order(1)
-	static class TestExceptionResolver {
-
-		@ExceptionHandler
-		@ResponseBody
-		public String handleException(IllegalStateException ex) {
-			return "TestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
-		}
-	}
-
-	@ControllerAdvice
-	@Order(2)
-	static class AnotherTestExceptionResolver {
-
-		@ExceptionHandler({IllegalStateException.class, IllegalAccessException.class})
-		@ResponseBody
-		public String handleException(Exception ex) {
-			return "AnotherTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
-		}
-	}
-
-	@Configuration
-	static class MyConfig {
-
-		@Bean public TestExceptionResolver testExceptionResolver() {
-			return new TestExceptionResolver();
-		}
-
-		@Bean public AnotherTestExceptionResolver anotherTestExceptionResolver() {
-			return new AnotherTestExceptionResolver();
 		}
 	}
 

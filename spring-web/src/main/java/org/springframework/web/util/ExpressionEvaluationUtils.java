@@ -114,7 +114,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * if the passed-in literal value is not an EL expression and not assignable to
 	 * the result class
 	 */
-	public static Object evaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+	public static Object evaluate(String attrName, String attrValue, Class<?> resultClass, PageContext pageContext)
 			throws JspException {
 
 		if (isSpringJspExpressionSupportActive(pageContext) && isExpressionLanguage(attrValue)) {
@@ -216,7 +216,7 @@ public abstract class ExpressionEvaluationUtils {
 	 * @return the result of the evaluation
 	 * @throws JspException in case of parsing errors
 	 */
-	private static Object doEvaluate(String attrName, String attrValue, Class resultClass, PageContext pageContext)
+	private static Object doEvaluate(String attrName, String attrValue, Class<?> resultClass, PageContext pageContext)
 			throws JspException {
 
 		Assert.notNull(attrValue, "Attribute value must not be null");
@@ -274,7 +274,7 @@ public abstract class ExpressionEvaluationUtils {
 		}
 	}
 
-	private static Object evaluateExpression(String exprValue, Class resultClass, PageContext pageContext)
+	private static Object evaluateExpression(String exprValue, Class<?> resultClass, PageContext pageContext)
 			throws ELException {
 
 		return pageContext.getExpressionEvaluator().evaluate(

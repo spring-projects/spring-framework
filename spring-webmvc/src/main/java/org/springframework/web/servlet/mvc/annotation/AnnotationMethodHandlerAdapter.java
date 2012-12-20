@@ -42,6 +42,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.Source;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -200,7 +201,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
 		stringHttpMessageConverter.setWriteAcceptCharset(false);
 		this.messageConverters = new HttpMessageConverter[]{new ByteArrayHttpMessageConverter(), stringHttpMessageConverter,
-				new SourceHttpMessageConverter(), new XmlAwareFormHttpMessageConverter()};
+				new SourceHttpMessageConverter<Source>(), new XmlAwareFormHttpMessageConverter()};
 	}
 
 
@@ -460,7 +461,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * Build a HandlerMethodResolver for the given handler type.
 	 */
 	private ServletHandlerMethodResolver getMethodResolver(Object handler) {
-		Class handlerClass = ClassUtils.getUserClass(handler);
+		Class<?> handlerClass = ClassUtils.getUserClass(handler);
 		ServletHandlerMethodResolver resolver = this.methodResolverCache.get(handlerClass);
 		if (resolver == null) {
 			synchronized (this.methodResolverCache) {
@@ -774,7 +775,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
-		protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
+		protected void raiseMissingParameterException(String paramName, Class<?> paramType) throws Exception {
 			throw new MissingServletRequestParameterException(paramName, paramType.getSimpleName());
 		}
 
@@ -823,7 +824,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@Override
-		protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+		protected Object resolveCookieValue(String cookieName, Class<?> paramType, NativeWebRequest webRequest)
 				throws Exception {
 
 			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -841,7 +842,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 		@Override
 		@SuppressWarnings({"unchecked"})
-		protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
+		protected String resolvePathVariable(String pathVarName, Class<?> paramType, NativeWebRequest webRequest)
 				throws Exception {
 
 			HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
@@ -904,7 +905,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		@SuppressWarnings("unchecked")
-		public ModelAndView getModelAndView(Method handlerMethod, Class handlerType, Object returnValue,
+		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, ServletWebRequest webRequest) throws Exception {
 
 			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
@@ -959,7 +960,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 				return new ModelAndView().addAllObjects(implicitModel);
 			}
 			else if (returnValue instanceof Map) {
-				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map) returnValue);
+				return new ModelAndView().addAllObjects(implicitModel).addAllObjects((Map<String, ?>) returnValue);
 			}
 			else if (returnValue instanceof String) {
 				return new ModelAndView((String) returnValue).addAllObjects(implicitModel);
@@ -1002,7 +1003,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
 			HttpOutputMessage outputMessage = createHttpOutputMessage(webRequest);
 			if (responseEntity instanceof ResponseEntity && outputMessage instanceof ServerHttpResponse) {
-				((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity) responseEntity).getStatusCode());
+				((ServerHttpResponse) outputMessage).setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
 			}
 			HttpHeaders entityHeaders = responseEntity.getHeaders();
 			if (!entityHeaders.isEmpty()) {
@@ -1018,7 +1019,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			}
 		}
 
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		private void writeWithMessageConverters(Object returnValue,
 				HttpInputMessage inputMessage, HttpOutputMessage outputMessage)
 				throws IOException, HttpMediaTypeNotAcceptableException {
@@ -1031,9 +1032,9 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			List<MediaType> allSupportedMediaTypes = new ArrayList<MediaType>();
 			if (getMessageConverters() != null) {
 				for (MediaType acceptedMediaType : acceptedMediaTypes) {
-					for (HttpMessageConverter messageConverter : getMessageConverters()) {
+					for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
 						if (messageConverter.canWrite(returnValueType, acceptedMediaType)) {
-							messageConverter.write(returnValue, acceptedMediaType, outputMessage);
+							((HttpMessageConverter)messageConverter).write(returnValue, acceptedMediaType, outputMessage);
 							if (logger.isDebugEnabled()) {
 								MediaType contentType = outputMessage.getHeaders().getContentType();
 								if (contentType == null) {

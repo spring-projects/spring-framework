@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,12 +52,12 @@ public class LiteralExpression implements Expression {
 	public String getValue(EvaluationContext context) {
 		return this.literalValue;
 	}
-	
+
 	public String getValue(Object rootObject) {
 		return this.literalValue;
 	}
 
-	public Class getValueType(EvaluationContext context) {
+	public Class<?> getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
@@ -87,7 +87,7 @@ public class LiteralExpression implements Expression {
 		return false;
 	}
 
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return String.class;
 	}
 
@@ -105,11 +105,11 @@ public class LiteralExpression implements Expression {
 		return ExpressionUtils.convert(null, value, desiredResultType);
 	}
 
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 

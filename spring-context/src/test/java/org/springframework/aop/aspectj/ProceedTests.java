@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public final class ProceedTests {
 
 
 interface SimpleBean {
-	
+
 	void setName(String name);
 	String getName();
 	void setAge(int age);
@@ -100,7 +100,7 @@ class SimpleBeanImpl implements SimpleBean {
 	private float aFloat;
 	private String name;
 	private String sex;
-	
+
 	public int getAge() {
 		return age;
 	}
@@ -136,30 +136,30 @@ class SimpleBeanImpl implements SimpleBean {
 
 
 class ProceedTestingAspect implements Ordered {
-	
+
 	private String lastBeforeStringValue;
 	private String lastAroundStringValue;
 	private float lastBeforeFloatValue;
 	private int order;
-	
+
 	public void setOrder(int order) { this.order = order; }
 	public int getOrder() { return this.order; }
-	
+
 	public Object capitalize(ProceedingJoinPoint pjp, String value) throws Throwable {
 		return pjp.proceed(new Object[] {value.toUpperCase()});
 	}
-	
+
 	public Object doubleOrQuits(ProceedingJoinPoint pjp) throws Throwable {
 		int value = ((Integer) pjp.getArgs()[0]).intValue();
 		pjp.getArgs()[0] = new Integer(value * 2);
 		return pjp.proceed();
 	}
-	
+
 	public Object addOne(ProceedingJoinPoint pjp, Float value) throws Throwable {
 		float fv = value.floatValue();
 		return pjp.proceed(new Object[] {new Float(fv + 1.0F)});
 	}
-	
+
 	public void captureStringArgument(JoinPoint tjp, String arg) {
 		if (!tjp.getArgs()[0].equals(arg)) {
 			throw new IllegalStateException(
@@ -169,7 +169,7 @@ class ProceedTestingAspect implements Ordered {
 		}
 		this.lastBeforeStringValue = arg;
 	}
-	
+
 	public Object captureStringArgumentInAround(ProceedingJoinPoint pjp, String arg) throws Throwable {
 		if (!pjp.getArgs()[0].equals(arg)) {
 			throw new IllegalStateException(
@@ -179,7 +179,7 @@ class ProceedTestingAspect implements Ordered {
 		this.lastAroundStringValue = arg;
 		return pjp.proceed();
 	}
-	
+
 	public void captureFloatArgument(JoinPoint tjp, float arg) {
 		float tjpArg = ((Float) tjp.getArgs()[0]).floatValue();
 		if (Math.abs(tjpArg - arg) > 0.000001) {
@@ -190,15 +190,15 @@ class ProceedTestingAspect implements Ordered {
 		}
 		this.lastBeforeFloatValue = arg;
 	}
-	
+
 	public String getLastBeforeStringValue() {
 		return this.lastBeforeStringValue;
 	}
-	
+
 	public String getLastAroundStringValue() {
 		return this.lastAroundStringValue;
 	}
-	
+
 	public float getLastBeforeFloatValue() {
 		return this.lastBeforeFloatValue;
 	}

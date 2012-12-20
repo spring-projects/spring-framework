@@ -45,5 +45,5 @@ public class AcceptHeaderLocaleResolver implements LocaleResolver {
 		throw new UnsupportedOperationException(
 				"Cannot change HTTP accept header - use a different locale resolution strategy");
 	}
-	
+
 }

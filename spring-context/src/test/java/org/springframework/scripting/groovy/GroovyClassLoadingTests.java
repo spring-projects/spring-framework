@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ public class GroovyClassLoadingTests extends TestCase {
 		StaticApplicationContext context = new StaticApplicationContext();
 
 		GroovyClassLoader gcl = new GroovyClassLoader();
-		Class class1 = gcl.parseClass("class TestBean { def myMethod() { \"foo\" } }");
-		Class class2 = gcl.parseClass("class TestBean { def myMethod() { \"bar\" } }");
+		Class<?> class1 = gcl.parseClass("class TestBean { def myMethod() { \"foo\" } }");
+		Class<?> class2 = gcl.parseClass("class TestBean { def myMethod() { \"bar\" } }");
 
 		context.registerBeanDefinition("testBean", new RootBeanDefinition(class1));
 		Object testBean1 = context.getBean("testBean");

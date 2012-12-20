@@ -335,14 +335,21 @@ class ConfigurationClassEnhancer {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(fbClass);
 			enhancer.setUseFactory(false);
-			enhancer.setCallbackFilter(CALLBACK_FITLER);
-			// Callback instances must be ordered in the same way as CALLBACK_TYPES and CALLBACK_FILTER
-			Callback[] callbackInstances = new Callback[] {
-					new GetObjectMethodInterceptor(this.beanFactory, beanName),
-					NoOp.INSTANCE
-			};
+			enhancer.setCallbackFilter(new CallbackFilter() {
+				public int accept(Method method) {
+					return method.getName().equals("getObject") ? 0 : 1;
+				}
+			});
+			List<Callback> callbackInstances = new ArrayList<Callback>();
+			callbackInstances.add(new GetObjectMethodInterceptor(this.beanFactory, beanName));
+			callbackInstances.add(NoOp.INSTANCE);
 
-			enhancer.setCallbackTypes(CALLBACK_TYPES);
+			List<Class<? extends Callback>> callbackTypes = new ArrayList<Class<? extends Callback>>();
+			for (Callback callback : callbackInstances) {
+				callbackTypes.add(callback.getClass());
+			}
+
+			enhancer.setCallbackTypes(callbackTypes.toArray(new Class[callbackTypes.size()]));
 			Class<?> fbSubclass = enhancer.createClass();
 			Enhancer.registerCallbacks(fbSubclass, callbackInstances);
 			return fbSubclass.newInstance();

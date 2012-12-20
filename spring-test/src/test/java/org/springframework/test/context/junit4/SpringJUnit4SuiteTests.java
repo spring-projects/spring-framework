@@ -43,15 +43,15 @@ import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTe
 /**
  * JUnit test suite for tests involving {@link SpringJUnit4ClassRunner} and the
  * <em>Spring TestContext Framework</em>.
- * 
+ *
  * <p>This test suite serves a dual purpose of verifying that tests run with
  * {@link SpringJUnit4ClassRunner} can be used in conjunction with JUnit's
  * {@link Suite} runner.
- * 
+ *
  * <p>Note that tests included in this suite will be executed at least twice if
  * run from an automated build process, test runner, etc. that is configured to
  * run tests based on a &quot;*Tests.class&quot; pattern match.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

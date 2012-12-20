@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,18 +43,18 @@ import test.parsing.CollectingReaderEventListener;
 public final class AopNamespaceHandlerEventTests {
 
 	private static final Class<?> CLASS = AopNamespaceHandlerEventTests.class;
-	
+
 	private static final Resource CONTEXT =  qualifiedResource(CLASS, "context.xml");
 	private static final Resource POINTCUT_EVENTS_CONTEXT =  qualifiedResource(CLASS, "pointcutEvents.xml");
 	private static final Resource POINTCUT_REF_CONTEXT = qualifiedResource(CLASS, "pointcutRefEvents.xml");
 	private static final Resource DIRECT_POINTCUT_EVENTS_CONTEXT = qualifiedResource(CLASS, "directPointcutEvents.xml");
-	
+
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 	private XmlBeanDefinitionReader reader;
 
 	private DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-	
+
 
 
 	@Before

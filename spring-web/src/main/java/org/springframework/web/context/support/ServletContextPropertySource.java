@@ -24,7 +24,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * {@link PropertySource} that reads init parameters from a {@link ServletContext} object.
- * 
+ *
  * @author Chris Beams
  * @since 3.1
  * @see ServletConfigPropertySource

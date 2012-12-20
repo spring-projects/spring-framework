@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,15 +328,15 @@ public class SimpleJdbcTemplateTests extends TestCase {
 	}
 
 	public void testQueryForListWithArgs() throws Exception {
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{1, 2, 3}, new LinkedList());
+		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{1, 2, 3}, new LinkedList<Object>());
 	}
 
 	public void testQueryForListWithMap() throws Exception {
-		HashMap args = new HashMap(3);
+		HashMap<String, Integer> args = new HashMap<String, Integer>(3);
 		args.put("1", 1);
 		args.put("2", 2);
 		args.put("3", 3);
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList());
+		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList<Object>());
 	}
 
 	public void testQueryForListWithSqlParameterSource() throws Exception {
@@ -344,24 +344,24 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		args.addValue("1", 1);
 		args.addValue("2", 2);
 		args.addValue("3", 3);
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList());
+		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList<Object>());
 	}
 
 	public void testQueryForMapWithoutArgs() throws Exception {
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{}, new HashMap());
+		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{}, new HashMap<Object, Object>());
 	}
 
 	public void testQueryForMapWithArgs() throws Exception {
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{1, 2, 3}, new HashMap());
+		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{1, 2, 3}, new HashMap<Object, Object>());
 		// TODO test generic type
 	}
 
 	public void testQueryForMapWithMap() throws Exception {
-		HashMap args = new HashMap(3);
+		HashMap<String, Integer> args = new HashMap<String, Integer>(3);
 		args.put("1", 1);
 		args.put("2", 2);
 		args.put("3", 3);
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap());
+		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap<Object, Object>());
 	}
 
 	public void testQueryForMapWithSqlParameterSource() throws Exception {
@@ -369,7 +369,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		args.addValue("1", 1);
 		args.addValue("2", 2);
 		args.addValue("3", 3);
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap());
+		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap<Object, Object>());
 	}
 
 	public void testUpdateWithoutArgs() throws Exception {
@@ -381,7 +381,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 	}
 
 	public void testUpdateWithMap() throws Exception {
-		HashMap args = new HashMap(3);
+		HashMap<String, Integer> args = new HashMap<String, Integer>(3);
 		args.put("1", 1);
 		args.put("2", 2);
 		args.put("3", 3);
@@ -397,9 +397,9 @@ public class SimpleJdbcTemplateTests extends TestCase {
 	}
 
 	private Object testDelegation(String methodName, Object[] typedArgs, Object[] varargs, Object expectedResult) throws Exception {
-		Class[] unifiedTypes;
+		Class<?>[] unifiedTypes;
 		Object[] unifiedArgs;
-		Class[] unifiedTypes2;
+		Class<?>[] unifiedTypes2;
 		Object[] unifiedArgs2;
 		boolean namedParameters = false;
 

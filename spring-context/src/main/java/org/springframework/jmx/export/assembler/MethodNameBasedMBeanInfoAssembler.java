@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class MethodNameBasedMBeanInfoAssembler extends AbstractConfigurableMBean
 	 */
 	public void setMethodMappings(Properties mappings) {
 		this.methodMappings = new HashMap<String, Set<String>>();
-		for (Enumeration en = mappings.keys(); en.hasMoreElements();) {
+		for (Enumeration<?> en = mappings.keys(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] methodNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
 			this.methodMappings.put(beanKey, new HashSet<String>(Arrays.asList(methodNames)));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public abstract class ControlFlowFactory {
 		/**
 		 * Searches for class name match in a StackTraceElement.
 		 */
-		public boolean under(Class clazz) {
+		public boolean under(Class<?> clazz) {
 			Assert.notNull(clazz, "Class must not be null");
 			String className = clazz.getName();
 			for (int i = 0; i < stack.length; i++) {
@@ -76,7 +76,7 @@ public abstract class ControlFlowFactory {
 		 * Searches for class name match plus method name match
 		 * in a StackTraceElement.
 		 */
-		public boolean under(Class clazz, String methodName) {
+		public boolean under(Class<?> clazz, String methodName) {
 			Assert.notNull(clazz, "Class must not be null");
 			Assert.notNull(methodName, "Method name must not be null");
 			String className = clazz.getName();

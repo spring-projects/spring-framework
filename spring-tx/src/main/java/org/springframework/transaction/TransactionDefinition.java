@@ -186,7 +186,7 @@ public interface TransactionDefinition {
 
 	/**
 	 * Use the default timeout of the underlying transaction system,
-	 * or none if timeouts are not supported. 
+	 * or none if timeouts are not supported.
 	 */
 	int TIMEOUT_DEFAULT = -1;
 
@@ -237,7 +237,7 @@ public interface TransactionDefinition {
 	 * it will <i>not necessarily</i> cause failure of write access attempts.
 	 * A transaction manager which cannot interpret the read-only hint will
 	 * <i>not</i> throw an exception when asked for a read-only transaction.
-	 * @return <code>true</code> if the transaction is to be optimized as read-only 
+	 * @return <code>true</code> if the transaction is to be optimized as read-only
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit(boolean)
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#isCurrentTransactionReadOnly()
 	 */

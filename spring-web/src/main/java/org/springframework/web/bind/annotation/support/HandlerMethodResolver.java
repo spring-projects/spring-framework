@@ -152,7 +152,7 @@ public class HandlerMethodResolver {
 		return this.sessionAttributesFound;
 	}
 
-	public boolean isSessionAttribute(String attrName, Class attrType) {
+	public boolean isSessionAttribute(String attrName, Class<?> attrType) {
 		if (this.sessionAttributeNames.contains(attrName) || this.sessionAttributeTypes.contains(attrType)) {
 			this.actualSessionAttributeNames.put(attrName, Boolean.TRUE);
 			return true;

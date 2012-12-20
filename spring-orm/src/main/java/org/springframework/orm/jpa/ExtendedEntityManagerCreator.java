@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * in any managed transaction
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
 	 */
-	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, Map properties) {
+	public static EntityManager createContainerManagedEntityManager(EntityManagerFactory emf, Map<?, ?> properties) {
 		Assert.notNull(emf, "EntityManagerFactory must not be null");
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
@@ -250,7 +250,7 @@ public abstract class ExtendedEntityManagerCreator {
 			Boolean jta, boolean containerManaged) {
 
 		Assert.notNull(rawEm, "EntityManager must not be null");
-		Set<Class> ifcs = new LinkedHashSet<Class>();
+		Set<Class<?>> ifcs = new LinkedHashSet<Class<?>>();
 		if (emIfc != null) {
 			ifcs.add(emIfc);
 		}
@@ -325,7 +325,7 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}

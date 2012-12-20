@@ -77,7 +77,7 @@ public interface WebRequest extends RequestAttributes {
 	 * @since 3.0
 	 */
 	Iterator<String> getParameterNames();
-	
+
 	/**
 	 * Return a immutable Map of the request parameters, with parameter names as map keys
 	 * and parameter values as map values. The map values will be of type String array.
@@ -174,7 +174,7 @@ public interface WebRequest extends RequestAttributes {
 	 * {@link #checkNotModified(long)}, but not both.
 	 * @param eTag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
-	 * with quotes (") if necessary.   
+	 * with quotes (") if necessary.
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified

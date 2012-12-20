@@ -154,4 +154,133 @@ public class InProgressTests extends ExpressionTestCase {
 		evaluate("new java.util.HashSet().addAll({'a','b','c'})", "true", Boolean.class);
 	}
 
+	//
+	// public void testConstructorInvocation02() {
+	// evaluate("new String[3]", "java.lang.String[3]{null,null,null}", String[].class);
+	// }
+	//
+	// public void testConstructorInvocation03() {
+	// evaluateAndCheckError("new String[]", SpelMessages.NO_SIZE_OR_INITIALIZER_FOR_ARRAY_CONSTRUCTION, 4);
+	// }
+	//
+	// public void testConstructorInvocation04() {
+	// evaluateAndCheckError("new String[3]{'abc',3,'def'}", SpelMessages.INCORRECT_ELEMENT_TYPE_FOR_ARRAY, 4);
+	// }
+	// array construction
+	// @Test
+	// public void testArrayConstruction01() {
+	// evaluate("new int[] {1, 2, 3, 4, 5}", "int[5]{1,2,3,4,5}", int[].class);
+	// }
+	// public void testArrayConstruction02() {
+	// evaluate("new String[] {'abc', 'xyz'}", "java.lang.String[2]{abc,xyz}", String[].class);
+	// }
+	//
+	// collection processors
+	// from spring.net: count,sum,max,min,average,sort,orderBy,distinct,nonNull
+	// public void testProcessorsCount01() {
+	// evaluate("new String[] {'abc','def','xyz'}.count()", "3", Integer.class);
+	// }
+	//
+	// public void testProcessorsCount02() {
+	// evaluate("new int[] {1,2,3}.count()", "3", Integer.class);
+	// }
+	//
+	// public void testProcessorsMax01() {
+	// evaluate("new int[] {1,2,3}.max()", "3", Integer.class);
+	// }
+	//
+	// public void testProcessorsMin01() {
+	// evaluate("new int[] {1,2,3}.min()", "1", Integer.class);
+	// }
+	//
+	// public void testProcessorsKeys01() {
+	// evaluate("#{1:'January', 2:'February', 3:'March'}.keySet().sort()", "[1, 2, 3]", ArrayList.class);
+	// }
+	//
+	// public void testProcessorsValues01() {
+	// evaluate("#{1:'January', 2:'February', 3:'March'}.values().sort()", "[February, January, March]",
+	// ArrayList.class);
+	// }
+	//
+	// public void testProcessorsAverage01() {
+	// evaluate("new int[] {1,2,3}.average()", "2", Integer.class);
+	// }
+	//
+	// public void testProcessorsSort01() {
+	// evaluate("new int[] {3,2,1}.sort()", "int[3]{1,2,3}", int[].class);
+	// }
+	//
+	// public void testCollectionProcessorsNonNull01() {
+	// evaluate("{'a','b',null,'d',null}.nonnull()", "[a, b, d]", ArrayList.class);
+	// }
+	//
+	// public void testCollectionProcessorsDistinct01() {
+	// evaluate("{'a','b','a','d','e'}.distinct()", "[a, b, d, e]", ArrayList.class);
+	// }
+	//
+	// public void testProjection03() {
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{#this>5}",
+	// "[false, false, false, false, false, true, true, true, true, true]", ArrayList.class);
+	// }
+	//
+	// public void testProjection04() {
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.!{$index>5?'y':'n'}", "[n, n, n, n, n, n, y, y, y, y]", ArrayList.class);
+	// }
+	// Bean references
+	// public void testReferences01() {
+	// evaluate("@(apple).name", "Apple", String.class, true);
+	// }
+	//
+	// public void testReferences02() {
+	// evaluate("@(fruits:banana).name", "Banana", String.class, true);
+	// }
+	//
+	// public void testReferences03() {
+	// evaluate("@(a.b.c)", null, null);
+	// } // null - no context, a.b.c treated as name
+	//
+	// public void testReferences05() {
+	// evaluate("@(a/b/c:orange).name", "Orange", String.class, true);
+	// }
+	//
+	// public void testReferences06() {
+	// evaluate("@(apple).color.getRGB() == 	T(java.awt.Color).green.getRGB()", "true", Boolean.class);
+	// }
+	//
+	// public void testReferences07() {
+	// evaluate("@(apple).color.getRGB().equals(T(java.awt.Color).green.getRGB())", "true", Boolean.class);
+	// }
+	//
+	// value is not public, it is accessed through getRGB()
+	// public void testStaticRef01() {
+	// evaluate("T(Color).green.value!=0", "true", Boolean.class);
+	// }
+	// Indexer
+	// public void testCutProcessor01() {
+	// evaluate("{1,2,3,4,5}.cut(1,3)", "[2, 3, 4]", ArrayList.class);
+	// }
+	//
+	// public void testCutProcessor02() {
+	// evaluate("{1,2,3,4,5}.cut(3,1)", "[4, 3, 2]", ArrayList.class);
+	// }
+	// Ternary operator
+	// public void testTernaryOperator01() {
+	// evaluate("{1}.#isEven(#this[0]) == 'y'?'it is even':'it is odd'", "it is odd", String.class);
+	// }
+	//
+	// public void testTernaryOperator02() {
+	// evaluate("{2}.#isEven(#this[0]) == 'y'?'it is even':'it is odd'", "it is even", String.class);
+	// }
+	// public void testSelectionUsingIndex() {
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{$index > 5 }", "[7, 8, 9, 10]", ArrayList.class);
+	// }
+	// public void testSelection01() {
+	// inline list creation not supported:
+	// evaluate("{1,2,3,4,5,6,7,8,9,10}.?{#isEven(#this) == 'y'}", "[2, 4, 6, 8, 10]", ArrayList.class);
+	// }
+	//
+	// public void testSelectionUsingIndex() {
+	// evaluate("listOfNumbersUpToTen.?[#index > 5 ]", "[7, 8, 9, 10]", ArrayList.class);
+	// }
+
 }

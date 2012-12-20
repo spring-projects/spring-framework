@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
  * float, Float, double, Double, BigDecimal, <code>java.util.Date</code>, etc.
  *
  * <p>The mapper can be configured to use the primitives default value when mapping null values
- * by setting the {@link #setPrimitivesDefaultedForNullValue 'primitivesDefaultedForNullValue'}
+ * by setting the '{@link #setPrimitivesDefaultedForNullValue primitivesDefaultedForNullValue}'
  * flag to 'true'.
  *
  * <p>To facilitate mapping between columns and fields that don't have matching names,

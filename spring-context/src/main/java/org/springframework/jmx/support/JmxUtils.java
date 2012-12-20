@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,7 +145,7 @@ public abstract class JmxUtils {
 	 * @return the parameter types as classes
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
-	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
+	public static Class<?>[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo) throws ClassNotFoundException {
 		return parameterInfoToTypes(paramInfo, ClassUtils.getDefaultClassLoader());
 	}
 
@@ -157,10 +157,10 @@ public abstract class JmxUtils {
 	 * @return the parameter types as classes
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
 	 */
-	public static Class[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo, ClassLoader classLoader)
+	public static Class<?>[] parameterInfoToTypes(MBeanParameterInfo[] paramInfo, ClassLoader classLoader)
 			throws ClassNotFoundException {
 
-		Class[] types = null;
+		Class<?>[] types = null;
 		if (paramInfo != null && paramInfo.length > 0) {
 			types = new Class[paramInfo.length];
 			for (int x = 0; x < paramInfo.length; x++) {
@@ -178,7 +178,7 @@ public abstract class JmxUtils {
 	 * @return the signature as array of argument types
 	 */
 	public static String[] getMethodSignature(Method method) {
-		Class[] types = method.getParameterTypes();
+		Class<?>[] types = method.getParameterTypes();
 		String[] signature = new String[types.length];
 		for (int x = 0; x < types.length; x++) {
 			signature[x] = types[x].getName();
@@ -282,7 +282,7 @@ public abstract class JmxUtils {
 			return null;
 		}
 		String mbeanInterfaceName = clazz.getName() + MBEAN_SUFFIX;
-		Class[] implementedInterfaces = clazz.getInterfaces();
+		Class<?>[] implementedInterfaces = clazz.getInterfaces();
 		for (Class<?> iface : implementedInterfaces) {
 			if (iface.getName().equals(mbeanInterfaceName)) {
 				return iface;
@@ -302,7 +302,7 @@ public abstract class JmxUtils {
 		if (clazz == null || clazz.getSuperclass() == null) {
 			return null;
 		}
-		Class[] implementedInterfaces = clazz.getInterfaces();
+		Class<?>[] implementedInterfaces = clazz.getInterfaces();
 		for (Class<?> iface : implementedInterfaces) {
 			boolean isMxBean = iface.getName().endsWith(MXBEAN_SUFFIX);
 			if (mxBeanAnnotationAvailable) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class TransactionAttributeSourceEditor extends PropertyEditorSupport {
 
 			// Now we have properties, process each one individually.
 			TransactionAttributeEditor tae = new TransactionAttributeEditor();
-			Enumeration propNames = props.propertyNames();
+			Enumeration<?> propNames = props.propertyNames();
 			while (propNames.hasMoreElements()) {
 				String name = (String) propNames.nextElement();
 				String value = props.getProperty(name);

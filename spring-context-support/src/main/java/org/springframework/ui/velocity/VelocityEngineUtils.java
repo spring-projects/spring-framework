@@ -49,7 +49,7 @@ public abstract class VelocityEngineUtils {
 	 * @deprecated Use {@link #mergeTemplate(VelocityEngine, String, String, Map, Writer)}
 	 * instead, following Velocity 1.6's corresponding deprecation in its own API.
 	 */
-	@Deprecated
+	@SuppressWarnings("rawtypes")
 	public static void mergeTemplate(
 			VelocityEngine velocityEngine, String templateLocation, Map<String, Object> model, Writer writer)
 			throws VelocityException {
@@ -80,6 +80,7 @@ public abstract class VelocityEngineUtils {
 	 * @param writer the Writer to write the result to
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void mergeTemplate(
 			VelocityEngine velocityEngine, String templateLocation, String encoding,
 			Map<String, Object> model, Writer writer) throws VelocityException {
@@ -113,9 +114,10 @@ public abstract class VelocityEngineUtils {
 	 * @deprecated Use {@link #mergeTemplateIntoString(VelocityEngine, String, String, Map)}
 	 * instead, following Velocity 1.6's corresponding deprecation in its own API.
 	 */
-	@Deprecated
-	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
-			Map<String, Object> model) throws VelocityException {
+	@SuppressWarnings("rawtypes")
+	public static String mergeTemplateIntoString(
+			VelocityEngine velocityEngine, String templateLocation, Map model)
+			throws VelocityException {
 
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, model, result);
@@ -134,8 +136,10 @@ public abstract class VelocityEngineUtils {
 	 * @throws VelocityException if the template wasn't found or rendering failed
 	 * @see org.springframework.mail.MailPreparationException
 	 */
-	public static String mergeTemplateIntoString(VelocityEngine velocityEngine, String templateLocation,
-			String encoding, Map<String, Object> model) throws VelocityException {
+	@SuppressWarnings("rawtypes")
+	public static String mergeTemplateIntoString(
+			VelocityEngine velocityEngine, String templateLocation, String encoding, Map model)
+			throws VelocityException {
 
 		StringWriter result = new StringWriter();
 		mergeTemplate(velocityEngine, templateLocation, encoding, model, result);

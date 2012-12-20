@@ -33,11 +33,11 @@ import javax.servlet.ServletResponse;
  * This is useful for filters that require dependency injection, and can therefore be set up in a Spring application
  * context. Typically this composite would be used in conjunction with {@link DelegatingFilterProxy}, so that it can be
  * declared in Spring but applied to a servlet context.
- * 
+ *
  * @since 3.1
- * 
+ *
  * @author Dave Syer
- * 
+ *
  */
 public class CompositeFilter implements Filter {
 
@@ -49,7 +49,7 @@ public class CompositeFilter implements Filter {
 
 	/**
 	 * Clean up all the filters supplied, calling each one's destroy method in turn, but in reverse order.
-	 * 
+	 *
 	 * @see Filter#init(FilterConfig)
 	 */
 	public void destroy() {
@@ -61,7 +61,7 @@ public class CompositeFilter implements Filter {
 
 	/**
 	 * Initialize all the filters, calling each one's init method in turn in the order supplied.
-	 * 
+	 *
 	 * @see Filter#init(FilterConfig)
 	 */
 	public void init(FilterConfig config) throws ServletException {
@@ -74,7 +74,7 @@ public class CompositeFilter implements Filter {
 	 * Forms a temporary chain from the list of delegate filters supplied ({@link #setFilters(List)}) and executes them
 	 * in order. Each filter delegates to the next one in the list, achieving the normal behaviour of a
 	 * {@link FilterChain}, despite the fact that this is a {@link Filter}.
-	 * 
+	 *
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,

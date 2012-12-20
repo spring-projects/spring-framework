@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class ServletWrappingController extends AbstractController
 	implements BeanNameAware, InitializingBean, DisposableBean {
 
-	private Class servletClass;
+	private Class<?> servletClass;
 
 	private String servletName;
 
@@ -103,7 +103,7 @@ public class ServletWrappingController extends AbstractController
 	 * Needs to implement <code>javax.servlet.Servlet</code>.
 	 * @see javax.servlet.Servlet
 	 */
-	public void setServletClass(Class servletClass) {
+	public void setServletClass(Class<?> servletClass) {
 		this.servletClass = servletClass;
 	}
 
@@ -189,6 +189,7 @@ public class ServletWrappingController extends AbstractController
 			return initParameters.getProperty(paramName);
 		}
 
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Enumeration getInitParameterNames() {
 			return initParameters.keys();
 		}

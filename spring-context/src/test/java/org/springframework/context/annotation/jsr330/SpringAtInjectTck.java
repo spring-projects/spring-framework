@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ import org.springframework.context.support.GenericApplicationContext;
  */
 public class SpringAtInjectTck {
 
-	public static Test suite() {
+	@SuppressWarnings("unchecked")
+    public static Test suite() {
 		GenericApplicationContext ac = new GenericApplicationContext();
 		AnnotatedBeanDefinitionReader bdr = new AnnotatedBeanDefinitionReader(ac);
 		bdr.setScopeMetadataResolver(new Jsr330ScopeMetadataResolver());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ public class TypePatternClassFilter implements ClassFilter {
 	}
 
 	/**
-	 * Create a fully configured {@link TypePatternClassFilter} using the  
+	 * Create a fully configured {@link TypePatternClassFilter} using the
 	 * given type pattern.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
 	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * or is recognized as invalid
 	 */
 	public TypePatternClassFilter(String typePattern) {
 		setTypePattern(typePattern);
@@ -73,7 +73,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * <p>These conventions are established by AspectJ, not Spring AOP.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
 	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
 		Assert.notNull(typePattern);
@@ -93,7 +93,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * @return whether the advice should apply to this candidate target class
 	 * @throws IllegalStateException if no {@link #setTypePattern(String)} has been set
 	 */
-	public boolean matches(Class clazz) {
+	public boolean matches(Class<?> clazz) {
 		if (this.aspectJTypePatternMatcher == null) {
 			throw new IllegalStateException("No 'typePattern' has been set via ctor/setter.");
 		}

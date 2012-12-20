@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class SimpleJdbcInsertTests extends TestCase {
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
-		
+
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.supportsGetGeneratedKeys();
@@ -105,7 +105,7 @@ public class SimpleJdbcInsertTests extends TestCase {
 
 		SimpleJdbcInsert insert = new SimpleJdbcInsert(mockDataSource).withTableName(NO_SUCH_TABLE);
 		try {
-			insert.execute(new HashMap());
+			insert.execute(new HashMap<String, Object>());
 			fail("Shouldn't succeed in inserting into table which doesn't exist");
 		} catch (InvalidDataAccessApiUsageException ex) {
 			// OK

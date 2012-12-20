@@ -123,7 +123,7 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 	 * of the target class as well as against the method's declaring class,
 	 * plus the name of the method.
 	 */
-	public boolean matches(Method method, Class targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return ((targetClass != null && matchesPattern(targetClass.getName() + "." + method.getName())) ||
 				matchesPattern(method.getDeclaringClass().getName() + "." + method.getName()));
 	}

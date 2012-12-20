@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,7 +231,7 @@ public class RequestContext {
 			// Ignored
 		}
 	}
-	
+
 	/**
 	 * Determine the fallback locale for this context. <p>The default implementation checks for a JSTL locale attribute
 	 * in request, session or application scope; if not found, returns the <code>HttpServletRequest.getLocale()</code>.
@@ -488,7 +488,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getMessage(String code, List args, String defaultMessage) {
+	public String getMessage(String code, List<?> args, String defaultMessage) {
 		return getMessage(code, (args != null ? args.toArray() : null), defaultMessage, isDefaultHtmlEscape());
 	}
 
@@ -533,7 +533,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getMessage(String code, List args) throws NoSuchMessageException {
+	public String getMessage(String code, List<?> args) throws NoSuchMessageException {
 		return getMessage(code, (args != null ? args.toArray() : null), isDefaultHtmlEscape());
 	}
 
@@ -603,7 +603,7 @@ public class RequestContext {
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
-	public String getThemeMessage(String code, List args, String defaultMessage) {
+	public String getThemeMessage(String code, List<?> args, String defaultMessage) {
 		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), defaultMessage,
 				this.locale);
 	}
@@ -639,7 +639,7 @@ public class RequestContext {
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
-	public String getThemeMessage(String code, List args) throws NoSuchMessageException {
+	public String getThemeMessage(String code, List<?> args) throws NoSuchMessageException {
 		return getTheme().getMessageSource().getMessage(code, (args != null ? args.toArray() : null), this.locale);
 	}
 

@@ -22,7 +22,7 @@ import java.util.Comparator;
  * Comparator that adapts Comparables to the Comparator interface.
  * Mainly for internal use in other Comparators, when supposed
  * to work on Comparables.
- * 
+ *
  * @author Keith Donald
  * @since 1.2.2
  * @see Comparable

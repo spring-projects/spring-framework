@@ -17,7 +17,7 @@ package test.beans;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.
- * 
+ *
  * @author Trevor D. Cook
  * @since 30.09.2003
  */

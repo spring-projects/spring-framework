@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import java.lang.reflect.Method;
  * @author Rod Johnson
  */
 class TrueMethodMatcher implements MethodMatcher, Serializable {
-	
+
 	public static final TrueMethodMatcher INSTANCE = new TrueMethodMatcher();
-	
+
 	/**
 	 * Enforce Singleton pattern.
 	 */
@@ -38,15 +38,15 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 		return false;
 	}
 
-	public boolean matches(Method method, Class targetClass) {
+	public boolean matches(Method method, Class<?> targetClass) {
 		return true;
 	}
 
-	public boolean matches(Method method, Class targetClass, Object[] args) {
+	public boolean matches(Method method, Class<?> targetClass, Object[] args) {
 		// Should never be invoked as isRuntime returns false.
 		throw new UnsupportedOperationException();
 	}
-	
+
 	/**
 	 * Required to support serialization. Replaces with canonical
 	 * instance on deserialization, protecting Singleton pattern.
@@ -55,7 +55,7 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 	private Object readResolve() {
 		return INSTANCE;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MethodMatcher.TRUE";

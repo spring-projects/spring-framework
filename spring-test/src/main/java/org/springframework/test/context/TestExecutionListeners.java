@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * be registered with a {@link TestContextManager}. Typically,
  * <code>&#064;TestExecutionListeners</code> will be used in conjunction with
  * {@link ContextConfiguration &#064;ContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see TestExecutionListener
@@ -47,7 +47,7 @@ public @interface TestExecutionListeners {
 	 * The {@link TestExecutionListener TestExecutionListeners} to register with
 	 * a {@link TestContextManager}.
 	 * </p>
-	 * 
+	 *
 	 * @see org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 	 * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
@@ -78,14 +78,14 @@ public @interface TestExecutionListeners {
 	 * <code>DirtiesContextTestExecutionListener</code>, <strong>and</strong>
 	 * <code>TransactionalTestExecutionListener</code>, in that order.
 	 * </p>
-	 * 
+	 *
 	 * <pre class="code">
 	 * &#064;TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
      *    DirtiesContextTestExecutionListener.class })
 	 * public abstract class AbstractBaseTest {
 	 * 	// ...
 	 * }
-	 * 
+	 *
 	 * &#064;TestExecutionListeners(TransactionalTestExecutionListener.class)
 	 * public class TransactionalTest extends AbstractBaseTest {
 	 * 	// ...

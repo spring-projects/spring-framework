@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #AUTOWIRE_BY_TYPE
 	 * @see #AUTOWIRE_CONSTRUCTOR
 	 */
-	Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
+	<T> T createBean(Class<T> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
 	/**
 	 * Instantiate a new bean instance of the given class with the specified autowire
@@ -213,7 +213,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #applyBeanPostProcessorsBeforeInitialization
 	 * @see #applyBeanPostProcessorsAfterInitialization
 	 */
-	Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
+	<T> T autowire(Class<T> beanClass, int autowireMode, boolean dependencyCheck) throws BeansException;
 
 	/**
 	 * Autowire the bean properties of the given bean instance by name or type.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,11 +100,11 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 	protected void doRetrieveMatchingPortletContextResources(
 			PortletContext portletContext, String fullPattern, String dir, Set<Resource> result) throws IOException {
 
-		Set candidates = portletContext.getResourcePaths(dir);
+		Set<String> candidates = portletContext.getResourcePaths(dir);
 		if (candidates != null) {
 			boolean dirDepthNotFixed = fullPattern.contains("**");
-			for (Iterator it = candidates.iterator(); it.hasNext();) {
-				String currPath = (String) it.next();
+			for (Iterator<String> it = candidates.iterator(); it.hasNext();) {
+				String currPath = it.next();
 				if (currPath.endsWith("/") &&
 						(dirDepthNotFixed ||
 						StringUtils.countOccurrencesOf(currPath, "/") <= StringUtils.countOccurrencesOf(fullPattern, "/"))) {

@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Strategy interface for resolving the scope of bean definitions.
- * 
+ *
  * @author Mark Fisher
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
@@ -40,5 +40,5 @@ public interface ScopeMetadataResolver {
 	 * @return the relevant scope metadata; never <code>null</code>
 	 */
 	ScopeMetadata resolveScopeMetadata(BeanDefinition definition);
-	
+
 }

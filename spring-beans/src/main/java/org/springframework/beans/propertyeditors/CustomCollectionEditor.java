@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ import java.util.TreeSet;
  */
 public class CustomCollectionEditor extends PropertyEditorSupport {
 
-	private final Class collectionType;
+	@SuppressWarnings("rawtypes")
+	private final Class<? extends Collection> collectionType;
 
 	private final boolean nullAsEmptyCollection;
 
@@ -57,7 +58,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	public CustomCollectionEditor(Class collectionType) {
+	public CustomCollectionEditor(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType) {
 		this(collectionType, false);
 	}
 
@@ -79,7 +80,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	public CustomCollectionEditor(Class collectionType, boolean nullAsEmptyCollection) {
+	public CustomCollectionEditor(@SuppressWarnings("rawtypes") Class<? extends Collection> collectionType, boolean nullAsEmptyCollection) {
 		if (collectionType == null) {
 			throw new IllegalArgumentException("Collection type is required");
 		}
@@ -115,8 +116,8 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		}
 		else if (value instanceof Collection) {
 			// Convert Collection elements.
-			Collection source = (Collection) value;
-			Collection target = createCollection(this.collectionType, source.size());
+			Collection<?> source = (Collection<?>) value;
+			Collection<Object> target = createCollection(this.collectionType, source.size());
 			for (Object elem : source) {
 				target.add(convertElement(elem));
 			}
@@ -125,7 +126,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		else if (value.getClass().isArray()) {
 			// Convert array elements to Collection elements.
 			int length = Array.getLength(value);
-			Collection target = createCollection(this.collectionType, length);
+			Collection<Object> target = createCollection(this.collectionType, length);
 			for (int i = 0; i < length; i++) {
 				target.add(convertElement(Array.get(value, i)));
 			}
@@ -133,7 +134,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 		}
 		else {
 			// A plain value: convert it to a Collection with a single element.
-			Collection target = createCollection(this.collectionType, 1);
+			Collection<Object> target = createCollection(this.collectionType, 1);
 			target.add(convertElement(value));
 			super.setValue(target);
 		}
@@ -146,10 +147,11 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * @param initialCapacity the initial capacity
 	 * @return the new Collection instance
 	 */
-	protected Collection createCollection(Class collectionType, int initialCapacity) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected <T extends Collection<?>> T createCollection(Class<T> collectionType, int initialCapacity) {
 		if (!collectionType.isInterface()) {
 			try {
-				return (Collection) collectionType.newInstance();
+				return collectionType.newInstance();
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException(
@@ -157,13 +159,13 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 			}
 		}
 		else if (List.class.equals(collectionType)) {
-			return new ArrayList(initialCapacity);
+			return (T) new ArrayList(initialCapacity);
 		}
 		else if (SortedSet.class.equals(collectionType)) {
-			return new TreeSet();
+			return (T) new TreeSet();
 		}
 		else {
-			return new LinkedHashSet(initialCapacity);
+			return (T) new LinkedHashSet(initialCapacity);
 		}
 	}
 

@@ -35,7 +35,7 @@ import org.springframework.web.servlet.HandlerMapping;
 public class BeanNameUrlHandlerMappingTests extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/servlet/handler/map1.xml";
-	
+
 	private ConfigurableWebApplicationContext wac;
 
 	public void setUp() throws Exception {
@@ -82,7 +82,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		req.setContextPath("/myapp");
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
-		
+
 		req = new MockHttpServletRequest("GET", "/myapp/mypath/welcome.html");
 		req.setContextPath("/myapp");
 		req.setServletPath("/mypath/welcome.html");
@@ -109,7 +109,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 		hec = hm.getHandler(req);
 		assertTrue("Handler is correct bean", hec != null && hec.getHandler() == bean);
 	}
-	
+
 	public void testRequestsWithFullPaths() throws Exception {
 		BeanNameUrlHandlerMapping hm = new BeanNameUrlHandlerMapping();
 		hm.setAlwaysUseFullPath(true);

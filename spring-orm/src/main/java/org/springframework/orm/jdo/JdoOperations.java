@@ -79,7 +79,7 @@ public interface JdoOperations {
 	 * @return a Collection result returned by the action, or <code>null</code>
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
-	Collection executeFind(JdoCallback<?> action) throws DataAccessException;
+	Collection<Object> executeFind(JdoCallback<?> action) throws DataAccessException;
 
 
 	//-------------------------------------------------------------------------
@@ -131,7 +131,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
 	 */
-	void evictAll(Collection entities) throws DataAccessException;
+	void evictAll(Collection<?> entities) throws DataAccessException;
 
 	/**
 	 * Remove all objects from the PersistenceManager cache.
@@ -154,7 +154,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
 	 */
-	void refreshAll(Collection entities) throws DataAccessException;
+	void refreshAll(Collection<?> entities) throws DataAccessException;
 
 	/**
 	 * Re-read the state of all persistent instances.
@@ -199,7 +199,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
 	 */
-	void deletePersistentAll(Collection entities) throws DataAccessException;
+	void deletePersistentAll(Collection<?> entities) throws DataAccessException;
 
 	/**
 	 * Detach a copy of the given persistent instance from the current JDO transaction,
@@ -351,7 +351,7 @@ public interface JdoOperations {
 	 * @see javax.jdo.Query#JDOQL
 	 * @see javax.jdo.Query#SQL
 	 */
-	Collection find(String language, Object queryObject) throws DataAccessException;
+	Collection<Object> find(String language, Object queryObject) throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
@@ -360,7 +360,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(String)
 	 */
-	Collection find(String queryString) throws DataAccessException;
+	Collection<Object> find(String queryString) throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
@@ -370,7 +370,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(String)
 	 */
-	Collection find(String queryString, Object... values) throws DataAccessException;
+	Collection<Object> find(String queryString, Object... values) throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given single-string JDOQL query.
@@ -380,7 +380,7 @@ public interface JdoOperations {
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(String)
 	 */
-	Collection find(String queryString, Map<String, ?> values) throws DataAccessException;
+	Collection<Object> find(String queryString, Map<String, ?> values) throws DataAccessException;
 
 	/**
 	 * Find persistent instances through the given named query.

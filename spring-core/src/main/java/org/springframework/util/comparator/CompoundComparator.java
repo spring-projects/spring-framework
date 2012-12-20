@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  *
  * <p>This facilitates in-memory sorting similar to multi-column sorting in SQL.
  * The order of any single Comparator in the list can also be reversed.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
@@ -59,9 +59,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 	 * @param comparators the comparators to build into a compound comparator
 	 * @see InvertibleComparator
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public CompoundComparator(Comparator... comparators) {
-		Assert.notNull(comparators, "Comparators must not be null");
+	public CompoundComparator(Comparator<T>[] comparators) {
 		this.comparators = new ArrayList<InvertibleComparator<T>>(comparators.length);
 		for (Comparator comparator : comparators) {
 			this.addComparator(comparator);
@@ -183,7 +181,7 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		if (!(obj instanceof CompoundComparator)) {
 			return false;
 		}
-		CompoundComparator<T> other = (CompoundComparator<T>) obj;
+		CompoundComparator<?> other = (CompoundComparator<?>) obj;
 		return this.comparators.equals(other.comparators);
 	}
 

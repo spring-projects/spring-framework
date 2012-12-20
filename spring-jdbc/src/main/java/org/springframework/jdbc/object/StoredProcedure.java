@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public abstract class StoredProcedure extends SqlCall {
 		setDataSource(ds);
 		setSql(name);
 	}
-	
+
 	/**
 	 * Create a new object wrapper for a stored procedure.
 	 * @param jdbcTemplate JdbcTemplate which wraps DataSource
@@ -147,9 +147,9 @@ public abstract class StoredProcedure extends SqlCall {
 	/**
 	 * Execute the stored procedure. Subclasses should define a strongly typed
 	 * execute method (with a meaningful name) that invokes this method, passing in
-	 * a ParameterMapper that will populate the input map.  This allows mapping database 
+	 * a ParameterMapper that will populate the input map.  This allows mapping database
 	 * specific features since the ParameterMapper has access to the Connection object.
-	 * The execute method is also responsible for extracting typed values from the output map. 
+	 * The execute method is also responsible for extracting typed values from the output map.
 	 * Subclass execute methods will often take domain objects as arguments and return values.
 	 * Alternatively, they can return void.
 	 * @param inParamMapper map of input parameters, keyed by name as in parameter

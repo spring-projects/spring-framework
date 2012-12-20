@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public final class DeclarationOrderIndependenceTests {
 	private TopsyTurvyAspect aspect;
 
 	private TopsyTurvyTarget target;
-	
+
 
 	@Before
 	public void setUp() {
@@ -49,12 +49,12 @@ public final class DeclarationOrderIndependenceTests {
 	public void testTargetIsSerializable() {
 		assertTrue("target bean is serializable",this.target instanceof Serializable);
 	}
-	
+
 	@Test
 	public void testTargetIsBeanNameAware() {
 		assertTrue("target bean is bean name aware",this.target instanceof BeanNameAware);
 	}
-	
+
 	@Test
 	public void testBeforeAdviceFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
@@ -62,7 +62,7 @@ public final class DeclarationOrderIndependenceTests {
 		this.target.doSomething();
 		assertTrue("before advice fired",collab.beforeFired);
 	}
-	
+
 	@Test
 	public void testAroundAdviceFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
@@ -70,30 +70,31 @@ public final class DeclarationOrderIndependenceTests {
 		this.target.getX();
 		assertTrue("around advice fired",collab.aroundFired);
 	}
-	
+
 	@Test
 	public void testAfterReturningFiringOk() {
 		AspectCollaborator collab = new AspectCollaborator();
 		this.aspect.setCollaborator(collab);
 		this.target.getX();
-		assertTrue("after returning advice fired",collab.afterReturningFired);		
+		assertTrue("after returning advice fired",collab.afterReturningFired);
 	}
-	
-	
+
+
 	/** public visibility is required */
 	public static class BeanNameAwareMixin implements BeanNameAware {
-	
+
+		@SuppressWarnings("unused")
 		private String beanName;
-		
+
 		/* (non-Javadoc)
 		 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 		 */
 		public void setBeanName(String name) {
 			this.beanName = name;
 		}
-	
+
 	}
-	
+
 	/** public visibility is required */
 	@SuppressWarnings("serial")
 	public static class SerializableMixin implements Serializable {
@@ -103,15 +104,15 @@ public final class DeclarationOrderIndependenceTests {
 
 
 class TopsyTurvyAspect {
-	
+
 	interface Collaborator {
 		void beforeAdviceFired();
 		void afterReturningAdviceFired();
 		void aroundAdviceFired();
 	}
-	
+
 	private Collaborator collaborator;
-	
+
 	public void setCollaborator(Collaborator collaborator) {
 		this.collaborator = collaborator;
 	}
@@ -119,11 +120,11 @@ class TopsyTurvyAspect {
 	public void before() {
 		this.collaborator.beforeAdviceFired();
 	}
-	
+
 	public void afterReturning() {
 		this.collaborator.afterReturningAdviceFired();
 	}
-	
+
 	public Object around(ProceedingJoinPoint pjp) throws Throwable {
 		Object ret = pjp.proceed();
 		this.collaborator.aroundAdviceFired();
@@ -144,21 +145,21 @@ interface TopsyTurvyTarget {
 class TopsyTurvyTargetImpl implements TopsyTurvyTarget {
 
 	private int x = 5;
-	
+
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyTarget#doSomething()
 	 */
 	public void doSomething() {
 		this.x = 10;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyTarget#getX()
 	 */
 	public int getX() {
 		return x;
 	}
-	
+
 }
 
 
@@ -167,7 +168,7 @@ class AspectCollaborator implements TopsyTurvyAspect.Collaborator {
 	public boolean afterReturningFired = false;
 	public boolean aroundFired = false;
 	public boolean beforeFired = false;
-	
+
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyAspect.Collaborator#afterReturningAdviceFired()
 	 */
@@ -188,5 +189,5 @@ class AspectCollaborator implements TopsyTurvyAspect.Collaborator {
 	public void beforeAdviceFired() {
 		this.beforeFired = true;
 	}
-	
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.aop.support.MethodMatchers;
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
 
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(
-			Advised config, Method method, Class targetClass) {
+			Advised config, Method method, Class<?> targetClass) {
 
 		// This is somewhat tricky... we have to process introductions first,
 		// but we need to preserve order in the ultimate list.
@@ -92,7 +92,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	/**
 	 * Determine whether the Advisors contain matching introductions.
 	 */
-	private static boolean hasMatchingIntroductions(Advised config, Class targetClass) {
+	private static boolean hasMatchingIntroductions(Advised config, Class<?> targetClass) {
 		for (int i = 0; i < config.getAdvisors().length; i++) {
 			Advisor advisor = config.getAdvisors()[i];
 			if (advisor instanceof IntroductionAdvisor) {

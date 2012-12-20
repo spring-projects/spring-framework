@@ -67,11 +67,11 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod;
 	}
 
-	
+
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
 	}
-	
+
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
 	}

@@ -106,7 +106,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	private String encoding = DEFAULT_ENCODING;
 
-	private Class[] supportedClasses;
+	private Class<?>[] supportedClasses;
 
 	private ClassLoader classLoader;
 
@@ -181,9 +181,9 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<String, ?> entry : map.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
-			Class type;
+			Class<?> type;
 			if (value instanceof Class) {
-				type = (Class) value;
+				type = (Class<?>) value;
 			}
 			else if (value instanceof String) {
 				String s = (String) value;
@@ -211,7 +211,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 			int idx = field.lastIndexOf('.');
 			if (idx != -1) {
 				String className = field.substring(0, idx);
-				Class clazz = ClassUtils.forName(className, classLoader);
+				Class<?> clazz = ClassUtils.forName(className, classLoader);
 				String fieldName = field.substring(idx + 1);
 				this.getXStream().aliasField(alias, clazz, fieldName);
 			} else {
@@ -224,8 +224,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * Set types to use XML attributes for.
 	 * @see XStream#useAttributeFor(Class)
 	 */
-	public void setUseAttributeForTypes(Class[] types) {
-		for (Class type : types) {
+	public void setUseAttributeForTypes(Class<?>[] types) {
+		for (Class<?> type : types) {
 			this.getXStream().useAttributeFor(type);
 		}
 	}
@@ -242,7 +242,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		for (Map.Entry<?, ?> entry : attributes.entrySet()) {
 			if (entry.getKey() instanceof String) {
 				if (entry.getValue() instanceof Class) {
-					this.getXStream().useAttributeFor((String) entry.getKey(), (Class) entry.getValue());
+					this.getXStream().useAttributeFor((String) entry.getKey(), (Class<?>) entry.getValue());
 				}
 				else {
 					throw new IllegalArgumentException(
@@ -256,7 +256,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 					this.getXStream().useAttributeFor(key, (String) entry.getValue());
 				}
 				else if (entry.getValue() instanceof List) {
-					List list = (List) entry.getValue();
+					List<?> list = (List<?>) entry.getValue();
 
 					for (Object o : list) {
 						if (o instanceof String) {
@@ -353,7 +353,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	 * <p>If this property is empty (the default), all classes are supported.
 	 * @see #supports(Class)
 	 */
-	public void setSupportedClasses(Class[] supportedClasses) {
+	public void setSupportedClasses(Class<?>[] supportedClasses) {
 		this.supportedClasses = supportedClasses;
 	}
 
@@ -375,12 +375,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 
-	public boolean supports(Class clazz) {
+	public boolean supports(Class<?> clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
 			return true;
 		}
 		else {
-			for (Class supportedClass : this.supportedClasses) {
+			for (Class<?> supportedClass : this.supportedClasses) {
 				if (supportedClass.isAssignableFrom(clazz)) {
 					return true;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	public void setCacheMappings(Properties cacheMappings) {
 		this.cacheMappings.clear();
-		Enumeration propNames = cacheMappings.propertyNames();
+		Enumeration<?> propNames = cacheMappings.propertyNames();
 		while (propNames.hasMoreElements()) {
 			String path = (String) propNames.nextElement();
 			this.cacheMappings.put(path, Integer.valueOf(cacheMappings.getProperty(path)));

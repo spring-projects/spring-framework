@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,15 +95,15 @@ public class MockPortletConfig implements PortletConfig {
 		this.portletName = portletName;
 	}
 
-	
+
 	public String getPortletName() {
 		return this.portletName;
 	}
-	
+
 	public PortletContext getPortletContext() {
 		return this.portletContext;
 	}
-	
+
 	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.resourceBundles.put(locale, resourceBundle);

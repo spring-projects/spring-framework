@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import test.beans.TestBean;
  * @since 2.0
  */
 public final class CustomProblemReporterTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(CustomProblemReporterTests.class, "context.xml");
 
 	private CollatingProblemReporter problemReporter;
@@ -64,7 +64,7 @@ public final class CustomProblemReporterTests {
 	}
 
 
-	private static class CollatingProblemReporter implements ProblemReporter {
+	public static class CollatingProblemReporter implements ProblemReporter {
 
 		private List<Problem> errors = new ArrayList<Problem>();
 

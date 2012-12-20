@@ -92,7 +92,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 
 	private String encoding = DEFAULT_ENCODING;
 
-	private Class[] targetClasses;
+	private Class<?>[] targetClasses;
 
 	private String[] targetPackages;
 
@@ -163,7 +163,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * Set the Castor target class. Alternative means of configuring <code>CastorMarshaller<code> for unmarshalling
 	 * multiple classes include use of mapping files, and specifying packages with Castor descriptor classes.
 	 */
-	public void setTargetClass(Class targetClass) {
+	public void setTargetClass(Class<?> targetClass) {
 		this.targetClasses = new Class[]{targetClass};
 	}
 
@@ -171,7 +171,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * Set the Castor target classes. Alternative means of configuring <code>CastorMarshaller<code> for unmarshalling
 	 * multiple classes include use of mapping files, and specifying packages with Castor descriptor classes.
 	 */
-	public void setTargetClasses(Class[] targetClasses) {
+	public void setTargetClasses(Class<?>[] targetClasses) {
 		this.targetClasses = targetClasses;
 	}
 
@@ -181,7 +181,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	public void setTargetPackage(String targetPackage) {
 		this.targetPackages = new String[] {targetPackage};
 	}
-	
+
 	/**
 	 * Set the names of packages with the Castor descriptor classes.
 	 */
@@ -425,7 +425,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	 * @see XMLContext#addMapping(org.exolab.castor.mapping.Mapping)
 	 * @see XMLContext#addClass(Class)
 	 */
-	protected XMLContext createXMLContext(Resource[] mappingLocations, Class[] targetClasses, String[] targetPackages)
+	protected XMLContext createXMLContext(Resource[] mappingLocations, Class<?>[] targetClasses, String[] targetPackages)
 			throws MappingException, ResolverException, IOException {
 
 		XMLContext context = new XMLContext();

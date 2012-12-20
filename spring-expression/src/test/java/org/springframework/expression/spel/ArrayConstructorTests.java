@@ -22,7 +22,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Test construction of arrays.
- * 
+ *
  * @author Andy Clement
  */
 public class ArrayConstructorTests extends ExpressionTestCase {

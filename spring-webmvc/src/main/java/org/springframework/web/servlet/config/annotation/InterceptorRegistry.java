@@ -24,7 +24,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.handler.WebRequestHandlerInterceptorAdapter;
 
 /**
- * Helps with configuring a list of mapped interceptors.
+ * Stores and provides access to a list of interceptors. For each interceptor you can optionally
+ * specify one or more URL patterns it applies to.
  *
  * @author Rossen Stoyanchev
  * @author Keith Donald

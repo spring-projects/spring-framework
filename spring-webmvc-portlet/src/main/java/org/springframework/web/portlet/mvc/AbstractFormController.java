@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -638,7 +638,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			binder.bind(request);
 			onBindOnNewForm(request, command, errors);
 		}
-		
+
 		// Return BindException object that resulted from binding.
 		return errors;
 	}
@@ -690,7 +690,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (!isSessionForm()) {
 			return formBackingObject(request);
 		}
-		
+
 		// Session-form mode: retrieve form object from portlet session attribute.
 		PortletSession session = request.getPortletSession(false);
 		if (session == null) {
@@ -804,7 +804,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @see #showForm(RenderRequest, BindException, String)
 	 * @see #showForm(RenderRequest, RenderResponse, BindException)
 	 */
-	protected final ModelAndView showForm(RenderRequest request, BindException errors, String viewName, Map controlModel)
+	protected final ModelAndView showForm(RenderRequest request, BindException errors, String viewName, Map<String, ?> controlModel)
 			throws Exception {
 
 		// In session form mode, re-expose form object as portlet session attribute.
@@ -820,10 +820,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 		// Fetch errors model as starting point, containing form object under
 		// "commandName", and corresponding Errors instance under internal key.
-		Map model = errors.getModel();
-		
+		Map<String, Object> model = errors.getModel();
+
 		// Merge reference data into model, if any.
-		Map referenceData = referenceData(request, errors.getTarget(), errors);
+		Map<String, ?> referenceData = referenceData(request, errors.getTarget(), errors);
 		if (referenceData != null) {
 			model.putAll(referenceData);
 		}
@@ -849,7 +849,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
-	protected Map referenceData(PortletRequest request, Object command, Errors errors) throws Exception {
+	protected Map<String, ?> referenceData(PortletRequest request, Object command, Errors errors) throws Exception {
 		return null;
 	}
 

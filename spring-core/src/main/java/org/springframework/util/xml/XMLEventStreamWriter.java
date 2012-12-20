@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @since 3.0.5
- * @see StaxUtils#createEventStreamWriter(javax.xml.stream.XMLEventWriter, javax.xml.stream.XMLEventFactory) 
+ * @see StaxUtils#createEventStreamWriter(javax.xml.stream.XMLEventWriter, javax.xml.stream.XMLEventFactory)
  */
 class XMLEventStreamWriter implements XMLStreamWriter {
 
@@ -51,7 +51,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 	public XMLEventStreamWriter(XMLEventWriter eventWriter, XMLEventFactory eventFactory) {
 		Assert.notNull(eventWriter, "'eventWriter' must not be null");
 		Assert.notNull(eventFactory, "'eventFactory' must not be null");
-		
+
 		this.eventWriter = eventWriter;
 		this.eventFactory = eventFactory;
 	}
@@ -199,7 +199,7 @@ class XMLEventStreamWriter implements XMLStreamWriter {
 	private void writeNamespace(Namespace namespace) throws XMLStreamException {
 		int last = endElements.size() - 1;
 		EndElement oldEndElement = endElements.get(last);
-		Iterator oldNamespaces = oldEndElement.getNamespaces();
+		Iterator<?> oldNamespaces = oldEndElement.getNamespaces();
 		List<Namespace> newNamespaces = new ArrayList<Namespace>();
 		while (oldNamespaces.hasNext()) {
 			Namespace oldNamespace = (Namespace) oldNamespaces.next();

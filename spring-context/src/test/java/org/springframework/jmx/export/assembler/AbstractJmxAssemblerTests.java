@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,14 +50,14 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 	}
 
 	public void testRegisterOperations() throws Exception {
-		IJmxTestBean bean = getBean();
+		getBean();
 		MBeanInfo inf = getMBeanInfo();
 		assertEquals("Incorrect number of operations registered",
 				getExpectedOperationCount(), inf.getOperations().length);
 	}
 
 	public void testRegisterAttributes() throws Exception {
-		IJmxTestBean bean = getBean();
+		getBean();
 		MBeanInfo inf = getMBeanInfo();
 		assertEquals("Incorrect number of attributes registered",
 				getExpectedAttributeCount(), inf.getAttributes().length);
@@ -90,9 +90,8 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 
 		for (int x = 0; x < inf.length; x++) {
 			assertNotNull("MBeanOperationInfo should not be null", inf[x]);
-			assertNotNull(
-					"Description for MBeanOperationInfo should not be null",
-					inf[x].getDescription());
+			assertNotNull("Description for MBeanOperationInfo should not be null",
+				inf[x].getDescription());
 		}
 	}
 
@@ -130,13 +129,13 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		ModelMBeanAttributeInfo attr = info.getAttribute(NAME_ATTRIBUTE);
 		Descriptor desc = attr.getDescriptor();
 		assertNotNull("getMethod field should not be null",
-				desc.getFieldValue("getMethod"));
+			desc.getFieldValue("getMethod"));
 		assertNotNull("setMethod field should not be null",
-				desc.getFieldValue("setMethod"));
+			desc.getFieldValue("setMethod"));
 		assertEquals("getMethod field has incorrect value", "getName",
-				desc.getFieldValue("getMethod"));
+			desc.getFieldValue("getMethod"));
 		assertEquals("setMethod field has incorrect value", "setName",
-				desc.getFieldValue("setMethod"));
+			desc.getFieldValue("setMethod"));
 	}
 
 	public void testAttributeHasCorrespondingOperations() throws Exception {
@@ -145,16 +144,16 @@ public abstract class AbstractJmxAssemblerTests extends AbstractJmxTests {
 		ModelMBeanOperationInfo get = info.getOperation("getName");
 		assertNotNull("get operation should not be null", get);
 		assertEquals("get operation should have visibility of four",
-				(Integer) get.getDescriptor().getFieldValue("visibility"),
-				new Integer(4));
-		assertEquals("get operation should have role \"getter\"", "getter", get.getDescriptor().getFieldValue("role"));
+			get.getDescriptor().getFieldValue("visibility"), new Integer(4));
+		assertEquals("get operation should have role \"getter\"", "getter",
+			get.getDescriptor().getFieldValue("role"));
 
 		ModelMBeanOperationInfo set = info.getOperation("setName");
 		assertNotNull("set operation should not be null", set);
 		assertEquals("set operation should have visibility of four",
-				(Integer) set.getDescriptor().getFieldValue("visibility"),
-				new Integer(4));
-		assertEquals("set operation should have role \"setter\"", "setter", set.getDescriptor().getFieldValue("role"));
+			set.getDescriptor().getFieldValue("visibility"), new Integer(4));
+		assertEquals("set operation should have role \"setter\"", "setter",
+			set.getDescriptor().getFieldValue("role"));
 	}
 
 	public void testNotificationMetadata() throws Exception {

@@ -47,7 +47,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		registerSingleton("controller1", TestFormController.class, pvs);
-		
+
 		pvs = new MutablePropertyValues();
 		pvs.add("bindOnNewForm", "true");
 		registerSingleton("controller2", TestFormController.class, pvs);
@@ -65,7 +65,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 		registerSingleton("controller4", TestFormController.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		Map parameterMap = new ManagedMap();		
+		Map parameterMap = new ManagedMap();
 		parameterMap.put("form", new RuntimeBeanReference("controller1"));
 		parameterMap.put("form-bind", new RuntimeBeanReference("controller2"));
 		parameterMap.put("form-session-bind", new RuntimeBeanReference("controller3"));

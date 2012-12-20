@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * Extension of Tomcat's default class loader which adds instrumentation
  * to loaded classes without the need to use a VM-wide agent.
  *
- * <p>To be registered using a 
- * <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a></code> tag 
+ * <p>To be registered using a
+ * <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a></code> tag
  * in Tomcat's <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">Context</a></code>
  * definition in the <code>server.xml</code> file, with the Spring-provided
  * "spring-tomcat-weaver.jar" file deployed into Tomcat's "server/lib" (for Tomcat 5.x) or "lib" (for Tomcat 6.x) directory.
@@ -148,7 +148,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		if (dest == null) {
 			throw new IllegalArgumentException("Destination for field copy cannot be null");
 		}
-		Class targetClass = findCommonAncestor(src.getClass(), dest.getClass());
+		Class<?> targetClass = findCommonAncestor(src.getClass(), dest.getClass());
 
 		// Keep backing up the inheritance hierarchy.
 		do {
@@ -178,8 +178,8 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		while (targetClass != null && targetClass != Object.class);
 	}
 
-	private static Class findCommonAncestor(Class one, Class two) throws IllegalArgumentException {
-		Class ancestor = one;
+	private static Class<?> findCommonAncestor(Class<?> one, Class<?> two) throws IllegalArgumentException {
+		Class<?> ancestor = one;
 		while (ancestor != Object.class || ancestor != null) {
 			if (ancestor.isAssignableFrom(two)) {
 				return ancestor;

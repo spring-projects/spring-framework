@@ -32,7 +32,7 @@ public class SingletonBeanFactoryLocatorTests {
 	public void testBasicFunctionality() {
 		SingletonBeanFactoryLocator facLoc = new SingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
-		
+
 		basicFunctionalityTest(facLoc);
 	}
 
@@ -75,7 +75,7 @@ public class SingletonBeanFactoryLocatorTests {
 		BeanFactoryLocator facLoc = SingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest1(facLoc);
-		
+
 		facLoc = SingletonBeanFactoryLocator.getInstance(
 				"classpath*:/" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest2(facLoc);
@@ -84,7 +84,7 @@ public class SingletonBeanFactoryLocatorTests {
 		facLoc = SingletonBeanFactoryLocator.getInstance(
 				"classpath:" + ClassUtils.addResourcePathToPackagePath(getClass(), "ref1.xml"));
 		getInstanceTest3(facLoc);
-		
+
 	}
 
 	/**
@@ -103,12 +103,12 @@ public class SingletonBeanFactoryLocatorTests {
 		fac = bfr3.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
+
 		BeanFactoryReference bfr4 = facLoc.useBeanFactory("a.qualified.name.which.is.an.alias");
 		fac = bfr4.getFactory();
 		tb = (TestBean) fac.getBean("beans1.bean1");
 		assertTrue(tb.getName().equals("was beans1.bean1"));
-		
+
 		bfr.release();
 		bfr3.release();
 		bfr2.release();
@@ -146,7 +146,7 @@ public class SingletonBeanFactoryLocatorTests {
 		bfr4.release();
 		bfr3.release();
 	}
-	
+
 	/**
 	 * Worker method so subclass can use it too
 	 */

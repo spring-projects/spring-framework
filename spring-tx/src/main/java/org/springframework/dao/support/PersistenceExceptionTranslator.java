@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  * @since 2.0
  */
 public interface PersistenceExceptionTranslator {
-	
+
 	/**
 	 * Translate the given runtime exception thrown by a persistence framework to a
 	 * corresponding exception from Spring's generic DataAccessException hierarchy,

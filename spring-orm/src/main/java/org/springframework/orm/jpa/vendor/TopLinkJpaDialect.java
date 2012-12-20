@@ -54,7 +54,7 @@ import org.springframework.transaction.TransactionException;
  */
 @Deprecated
 public class TopLinkJpaDialect extends DefaultJpaDialect {
-	
+
 	private boolean lazyDatabaseTransaction = false;
 
 

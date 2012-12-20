@@ -30,10 +30,10 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 /**
  * Integration tests that verify support for configuration classes in
  * the Spring TestContext Framework.
- * 
+ *
  * <p>Configuration will be loaded from {@link DefaultConfigClassesInheritedTests.ContextConfiguration}
  * and {@link DefaultConfigClassesBaseTests.ContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

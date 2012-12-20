@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import test.beans.TestBean;
 
 /**
  * Unit tests for {@link BeanUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Chris Beams
@@ -250,24 +250,24 @@ public final class BeanUtilsTests {
 	}
 
 	@Test
-    public void testSPR6063() {
-        PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
-
-        PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
-        assertEquals(String.class, keyDescr.getPropertyType());
-        for (PropertyDescriptor propertyDescriptor : descrs) {
-            if (propertyDescriptor.getName().equals(keyDescr.getName())) {
-                assertEquals(propertyDescriptor.getName() + " has unexpected type", keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
-            }
-        }
-    }
+	public void testSPR6063() {
+		PropertyDescriptor[] descrs = BeanUtils.getPropertyDescriptors(Bean.class);
+		PropertyDescriptor keyDescr = BeanUtils.getPropertyDescriptor(Bean.class, "value");
+		assertEquals(String.class, keyDescr.getPropertyType());
+		for (PropertyDescriptor propertyDescriptor : descrs) {
+			if (propertyDescriptor.getName().equals(keyDescr.getName())) {
+				assertEquals(propertyDescriptor.getName() + " has unexpected type",
+					keyDescr.getPropertyType(), propertyDescriptor.getPropertyType());
+			}
+		}
+	}
 
 	private void assertSignatureEquals(Method desiredMethod, String signature) {
 		assertEquals(desiredMethod, BeanUtils.resolveSignature(signature, MethodSignatureBean.class));
 	}
 
 
-	private static class NameAndSpecialProperty {
+	public static class NameAndSpecialProperty {
 
 		private String name;
 
@@ -291,7 +291,7 @@ public final class BeanUtilsTests {
 	}
 
 
-	private static class ContainerBean {
+	public static class ContainerBean {
 
 		private ContainedBean[] containedBeans;
 
@@ -305,7 +305,7 @@ public final class BeanUtilsTests {
 	}
 
 
-	private static class ContainedBean {
+	public static class ContainedBean {
 
 		private String name;
 
@@ -319,7 +319,7 @@ public final class BeanUtilsTests {
 	}
 
 
-	private static class MethodSignatureBean {
+	public static class MethodSignatureBean {
 
 		public void doSomething() {
 		}
@@ -343,7 +343,7 @@ public final class BeanUtilsTests {
 		}
 	}
 
-	private interface MapEntry<K, V> {
+	public interface MapEntry<K, V> {
 
 		K getKey();
 
@@ -354,7 +354,7 @@ public final class BeanUtilsTests {
 		void setValue(V value);
 	}
 
-	private static class Bean implements MapEntry<String, String> {
+	public static class Bean implements MapEntry<String, String> {
 
 		private String key;
 

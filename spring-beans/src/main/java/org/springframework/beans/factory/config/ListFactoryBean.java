@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,17 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see MapFactoryBean
  */
-public class ListFactoryBean extends AbstractFactoryBean<List> {
+public class ListFactoryBean extends AbstractFactoryBean<List<?>> {
 
-	private List sourceList;
+	private List<?> sourceList;
 
-	private Class targetListClass;
+	private Class<? extends List<?>> targetListClass;
 
 
 	/**
 	 * Set the source List, typically populated via XML "list" elements.
 	 */
-	public void setSourceList(List sourceList) {
+	public void setSourceList(List<?> sourceList) {
 		this.sourceList = sourceList;
 	}
 
@@ -52,36 +52,38 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 	 * <p>Default is a <code>java.util.ArrayList</code>.
 	 * @see java.util.ArrayList
 	 */
-	public void setTargetListClass(Class targetListClass) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void setTargetListClass(Class<? extends List> targetListClass) {
 		if (targetListClass == null) {
 			throw new IllegalArgumentException("'targetListClass' must not be null");
 		}
 		if (!List.class.isAssignableFrom(targetListClass)) {
 			throw new IllegalArgumentException("'targetListClass' must implement [java.util.List]");
 		}
-		this.targetListClass = targetListClass;
+		this.targetListClass = (Class<? extends List<?>>) targetListClass;
 	}
 
 
 	@Override
-	public Class<List> getObjectType() {
+	public Class<?> getObjectType() {
 		return List.class;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected List createInstance() {
+	protected List<?> createInstance() {
 		if (this.sourceList == null) {
 			throw new IllegalArgumentException("'sourceList' is required");
 		}
+		@SuppressWarnings("rawtypes")
 		List result = null;
 		if (this.targetListClass != null) {
-			result = (List) BeanUtils.instantiateClass(this.targetListClass);
+			result = BeanUtils.instantiateClass(this.targetListClass);
 		}
 		else {
-			result = new ArrayList(this.sourceList.size());
+			result = new ArrayList<Object>(this.sourceList.size());
 		}
-		Class valueType = null;
+		Class<?> valueType = null;
 		if (this.targetListClass != null) {
 			valueType = GenericCollectionTypeResolver.getCollectionType(this.targetListClass);
 		}

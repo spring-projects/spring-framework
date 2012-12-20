@@ -64,7 +64,7 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	 * @param modelMBean the target {@link ModelMBean}; must not be <code>null</code>
 	 * @param objectName the {@link ObjectName} of the source {@link ModelMBean}
 	 * @param managedResource the managed resource exposed by the supplied {@link ModelMBean}
-	 * @throws IllegalArgumentException if any of the parameters is <code>null</code> 
+	 * @throws IllegalArgumentException if any of the parameters is <code>null</code>
 	 */
 	public ModelMBeanNotificationPublisher(
 			ModelMBeanNotificationBroadcaster modelMBean, ObjectName objectName, Object managedResource) {

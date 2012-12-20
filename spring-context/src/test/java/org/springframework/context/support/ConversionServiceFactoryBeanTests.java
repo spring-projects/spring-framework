@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ConversionServiceFactoryBeanTests {
 		ConversionService service = factory.getObject();
 		assertTrue(service.canConvert(String.class, Integer.class));
 	}
-	
+
 	@Test
 	public void createDefaultConversionServiceWithSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
@@ -61,6 +61,7 @@ public class ConversionServiceFactoryBeanTests {
 		converters.add(new ConverterFactory<String, Bar>() {
 			public <T extends Bar> Converter<String, T> getConverter(Class<T> targetType) {
 				return new Converter<String, T> () {
+					@SuppressWarnings("unchecked")
 					public T convert(String source) {
 						return (T) new Bar();
 					}
@@ -81,7 +82,7 @@ public class ConversionServiceFactoryBeanTests {
 		assertTrue(service.canConvert(String.class, Integer.class));
 		assertTrue(service.canConvert(String.class, Foo.class));
 		assertTrue(service.canConvert(String.class, Bar.class));
-		assertTrue(service.canConvert(String.class, Baz.class));		
+		assertTrue(service.canConvert(String.class, Baz.class));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -103,7 +104,7 @@ public class ConversionServiceFactoryBeanTests {
 		doTestConversionServiceInApplicationContext("conversionServiceWithResourceOverriding.xml", FileSystemResource.class);
 	}
 
-	private void doTestConversionServiceInApplicationContext(String fileName, Class resourceClass) {
+	private void doTestConversionServiceInApplicationContext(String fileName, Class<?> resourceClass) {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(fileName, getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
 		assertTrue(resourceClass.isInstance(tb.getResource()));
@@ -119,16 +120,17 @@ public class ConversionServiceFactoryBeanTests {
 
 	public static class Foo {
 	}
-	
+
 	public static class Bar {
 	}
-	
+
 	public static class Baz {
 	}
 
 	public static class ComplexConstructorArgument {
 
-		public ComplexConstructorArgument(Map<String, Class> map) {
+		@SuppressWarnings("cast")
+	public ComplexConstructorArgument(Map<String, Class<?>> map) {
 			assertTrue(!map.isEmpty());
 			assertTrue(map.keySet().iterator().next() instanceof String);
 			assertTrue(map.values().iterator().next() instanceof Class);

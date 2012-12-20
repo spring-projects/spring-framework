@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,8 +18,6 @@ package org.springframework.jmx.export.assembler;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Arrays;
-
 import javax.management.Descriptor;
 import javax.management.MBeanInfo;
 import javax.management.MBeanParameterInfo;
@@ -41,9 +39,9 @@ import test.interceptor.NopInterceptor;
  * @author Chris Beams
  */
 public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemblerTests {
-	
+
 	protected static final String QUEUE_SIZE_METRIC = "QueueSize";
-	
+
 	protected static final String CACHE_ENTRIES_METRIC = "CacheEntries";
 
 	public void testDescription() throws Exception {
@@ -159,7 +157,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		String objectName = "spring:bean=test,proxy=true";
 
-		Map beans = new HashMap();
+		Map<String, Object> beans = new HashMap<String, Object>();
 		beans.put(objectName, proxy);
 		exporter.setBeans(beans);
 		exporter.afterPropertiesSet();
@@ -170,7 +168,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 
 		assertTrue("Not included in autodetection", assembler.includeBean(proxy.getClass(), "some bean name"));
 	}
-	
+
 	public void testMetricDescription() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
 		ModelMBeanAttributeInfo metric = inf.getAttribute(QUEUE_SIZE_METRIC);
@@ -180,7 +178,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("The description for the getter operation of the queue size metric is incorrect",
 				"The QueueSize metric", operation.getDescription());
 	}
-	
+
 	public void testMetricDescriptor() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(QUEUE_SIZE_METRIC).getDescriptor();
@@ -192,7 +190,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertEquals("Metric Type should be COUNTER", "COUNTER",desc.getFieldValue("metricType"));
 		assertEquals("Metric Category should be utilization", "utilization",desc.getFieldValue("metricCategory"));
 	}
-	
+
 	public void testMetricDescriptorDefaults() throws Exception {
 		ModelMBeanInfo info = getMBeanInfoFromAssembler();
 		Descriptor desc = info.getAttribute(CACHE_ENTRIES_METRIC).getDescriptor();

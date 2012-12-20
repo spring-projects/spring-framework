@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,16 +105,16 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("baz", checkboxElement3.attribute("value").getValue());
 		assertEquals("baz", spanElement3.getStringValue());
 	}
-	
+
 	public void testWithMultiValueArrayAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 
@@ -257,12 +257,12 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		tag.setItemValue("name");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
-		
+
 		String output = getOutput();
-		
+
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
-		
+
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
@@ -544,15 +544,15 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		this.tag.setItems(allPets);
 		this.tag.setItemValue("name");
 		this.tag.setItemLabel("label");
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
-		
+
 		String output = getOutput();
-		
+
 		// wrap the output so it is valid XML
 		output = "<doc>" + output + "</doc>";
-		
+
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element spanElement1 = (Element) document.getRootElement().elements().get(0);
@@ -687,7 +687,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		assertEquals("disabled", checkboxElement.attribute("disabled").getValue());
 		assertEquals("foo", checkboxElement.attribute("value").getValue());
 	}
-	
+
 	public void testSpanElementCustomizable() throws Exception {
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
@@ -714,8 +714,8 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
 		}
 	}
-	
-	
+
+
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);
@@ -742,7 +742,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		Set someObjects = new HashSet();
 		someObjects.add(new ItemPet("PET1"));
 		someObjects.add(new ItemPet("PET2"));
-		
+
 		this.bean = new TestBean();
 		this.bean.setDate(getDate());
 		this.bean.setName("Rob Harrop");

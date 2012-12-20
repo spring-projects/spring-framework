@@ -29,7 +29,7 @@ import org.springframework.expression.spel.support.BooleanTypedValue;
  * Represents the between operator. The left operand to between must be a single value and the right operand must be a
  * list - this operator returns true if the left operand is between (using the registered comparator) the two elements
  * in the list. The definition of between being inclusive follows the SQL BETWEEN definition.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

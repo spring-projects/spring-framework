@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ public final class JndiDataSourceLookupTests {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
 			@SuppressWarnings("unchecked")
-			protected Object lookup(String jndiName, Class requiredType) {
+			protected <T> T lookup(String jndiName, Class<T> requiredType) {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
-				return expectedDataSource;
+				return (T) expectedDataSource;
 			}
 		};
 		DataSource dataSource = lookup.getDataSource(DATA_SOURCE_NAME);
@@ -49,8 +49,7 @@ public final class JndiDataSourceLookupTests {
 	@Test(expected=DataSourceLookupFailureException.class)
 	public void testNoDataSourceAtJndiLocation() throws Exception {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
-			@SuppressWarnings("unchecked")
-			protected Object lookup(String jndiName, Class requiredType) throws NamingException {
+			protected <T> T lookup(String jndiName, Class<T> requiredType) throws NamingException {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
 				throw new NamingException();
 			}

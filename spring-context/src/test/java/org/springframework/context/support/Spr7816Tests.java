@@ -37,13 +37,13 @@ public class Spr7816Tests {
 		assertEquals(Entrance.class, adapter.getSupportedTypes().get("Entrance"));
 		assertEquals(Dwelling.class, adapter.getSupportedTypes().get("Dwelling"));
 	}
-	
+
 	public static class FilterAdapter {
-		
+
 		private String extensionPrefix;
-		
+
 		private Map<String, Class<? extends DomainEntity>> supportedTypes;
-		
+
 		public FilterAdapter(final String extensionPrefix, final Map<String, Class<? extends DomainEntity>> supportedTypes) {
 			this.extensionPrefix = extensionPrefix;
 			this.supportedTypes = supportedTypes;
@@ -58,17 +58,17 @@ public class Spr7816Tests {
 		}
 
 	}
-	
+
 	public static class Building extends DomainEntity {
 	}
-	
+
 	public static class Entrance extends DomainEntity {
 	}
-	
+
 	public static class Dwelling extends DomainEntity {
 	}
-	
+
 	public abstract static class DomainEntity {
-		
+
 	}
 }

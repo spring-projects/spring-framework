@@ -56,7 +56,7 @@ public class JobDetailFactoryBean
 
 	private String group;
 
-	private Class jobClass;
+	private Class<?> jobClass;
 
 	private JobDataMap jobDataMap = new JobDataMap();
 
@@ -90,6 +90,7 @@ public class JobDetailFactoryBean
 	/**
 	 * Specify the job's implementation class.
 	 */
+	@SuppressWarnings("rawtypes")
 	public void setJobClass(Class jobClass) {
 		this.jobClass = jobClass;
 	}

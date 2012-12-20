@@ -28,7 +28,7 @@ public class IntLiteral extends Literal {
 	private final TypedValue value;
 
 	IntLiteral(String payload, int pos, int value) {
-		super(payload, pos); 
+		super(payload, pos);
 		this.value = new TypedValue(value);
 	}
 

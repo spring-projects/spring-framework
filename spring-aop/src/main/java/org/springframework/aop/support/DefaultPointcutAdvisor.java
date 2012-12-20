@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 	 */
 	public DefaultPointcutAdvisor() {
 	}
-	
+
 	/**
 	 * Create a DefaultPointcutAdvisor that matches all methods.
 	 * <p><code>Pointcut.TRUE</code> will be used as Pointcut.
@@ -55,7 +55,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
 	}
-	
+
 	/**
 	 * Create a DefaultPointcutAdvisor, specifying Pointcut and Advice.
 	 * @param pointcut the Pointcut targeting the Advice

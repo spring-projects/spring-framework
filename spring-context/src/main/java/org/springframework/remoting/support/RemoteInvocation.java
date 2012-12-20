@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class RemoteInvocation implements Serializable {
 
 	private String methodName;
 
-	private Class[] parameterTypes;
+	private Class<?>[] parameterTypes;
 
 	private Object[] arguments;
 
@@ -70,7 +70,7 @@ public class RemoteInvocation implements Serializable {
 	 * @param parameterTypes the parameter types of the method
 	 * @param arguments the arguments for the invocation
 	 */
-	public RemoteInvocation(String methodName, Class[] parameterTypes, Object[] arguments) {
+	public RemoteInvocation(String methodName, Class<?>[] parameterTypes, Object[] arguments) {
 		this.methodName = methodName;
 		this.parameterTypes = parameterTypes;
 		this.arguments = arguments;
@@ -104,14 +104,14 @@ public class RemoteInvocation implements Serializable {
 	/**
 	 * Set the parameter types of the target method.
 	 */
-	public void setParameterTypes(Class[] parameterTypes) {
+	public void setParameterTypes(Class<?>[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
 
 	/**
 	 * Return the parameter types of the target method.
 	 */
-	public Class[] getParameterTypes() {
+	public Class<?>[] getParameterTypes() {
 		return this.parameterTypes;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 
 
 	@Override
-	protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class result = null;
+	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+		Class<?> result = null;
 		if (isEligibleForOverriding(name)) {
 			result = loadClassForOverriding(name);
 		}
@@ -90,8 +90,8 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	 * @return the Class object, or <code>null</code> if no class defined for that name
 	 * @throws ClassNotFoundException if the class for the given name couldn't be loaded
 	 */
-	protected Class loadClassForOverriding(String name) throws ClassNotFoundException {
-		Class result = findLoadedClass(name);
+	protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+		Class<?> result = findLoadedClass(name);
 		if (result == null) {
 			byte[] bytes = loadBytesForClass(name);
 			if (bytes != null) {

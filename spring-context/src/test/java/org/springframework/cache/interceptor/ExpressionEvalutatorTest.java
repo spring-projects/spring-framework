@@ -20,6 +20,7 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import org.junit.Test;
@@ -30,8 +31,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.ReflectionUtils;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class ExpressionEvalutatorTest {
 	private ExpressionEvaluator eval = new ExpressionEvaluator();
@@ -64,7 +63,7 @@ public class ExpressionEvalutatorTest {
 		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, "multipleCaching", Object.class,
 				Object.class);
 		Object[] args = new Object[] { new Object(), new Object() };
-		Collection<Cache> map = Collections.singleton(new ConcurrentMapCache("test"));
+		Collection<Cache> map = Collections.<Cache>singleton(new ConcurrentMapCache("test"));
 
 		EvaluationContext evalCtx = eval.createEvaluationContext(map, method, args, target, target.getClass());
 		Collection<CacheOperation> ops = getOps("multipleCaching");
@@ -78,7 +77,7 @@ public class ExpressionEvalutatorTest {
 		assertEquals(args[1], keyB);
 	}
 
-	private static class AnnotatedClass {
+	public static class AnnotatedClass {
 		@Caching(cacheable = { @Cacheable(value = "test", key = "#a"), @Cacheable(value = "test", key = "#b") })
 		public void multipleCaching(Object a, Object b) {
 		}

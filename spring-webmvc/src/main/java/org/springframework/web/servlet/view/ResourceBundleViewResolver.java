@@ -36,10 +36,10 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 import org.springframework.web.servlet.View;
 
 /**
- * {@link org.springframework.web.servlet.ViewResolver} implementation 
+ * {@link org.springframework.web.servlet.ViewResolver} implementation
  * that uses bean definitions in a {@link ResourceBundle}, specified by
  * the bundle basename.
- * 
+ *
  * <p>The bundle is typically defined in a properties file, located in
  * the class path. The default bundle basename is "views".
  *

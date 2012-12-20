@@ -55,9 +55,19 @@ public class InjectionMetadata {
 	private volatile Set<InjectedElement> checkedElements;
 
 
-	public InjectionMetadata(Class targetClass, Collection<InjectedElement> elements) {
-		this.targetClass = targetClass;
-		this.injectedElements = elements;
+	public InjectionMetadata(Class<?> targetClass, Collection<InjectedElement> elements) {
+		if (!elements.isEmpty()) {
+			this.injectedElements = Collections.synchronizedSet(new LinkedHashSet<InjectedElement>(elements.size()));
+			for (InjectedElement element : elements) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found injected element on class [" + targetClass.getName() + "]: " + element);
+				}
+				this.injectedElements.add(element);
+			}
+		}
+		else {
+			this.injectedElements = Collections.emptySet();
+		}
 	}
 
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
@@ -110,7 +120,7 @@ public class InjectionMetadata {
 			return this.member;
 		}
 
-		protected final Class getResourceType() {
+		protected final Class<?> getResourceType() {
 			if (this.isField) {
 				return ((Field) this.member).getType();
 			}
@@ -122,16 +132,16 @@ public class InjectionMetadata {
 			}
 		}
 
-		protected final void checkResourceType(Class resourceType) {
+		protected final void checkResourceType(Class<?> resourceType) {
 			if (this.isField) {
-				Class fieldType = ((Field) this.member).getType();
+				Class<?> fieldType = ((Field) this.member).getType();
 				if (!(resourceType.isAssignableFrom(fieldType) || fieldType.isAssignableFrom(resourceType))) {
 					throw new IllegalStateException("Specified field type [" + fieldType +
 							"] is incompatible with resource type [" + resourceType.getName() + "]");
 				}
 			}
 			else {
-				Class paramType =
+				Class<?> paramType =
 						(this.pd != null ? this.pd.getPropertyType() : ((Method) this.member).getParameterTypes()[0]);
 				if (!(resourceType.isAssignableFrom(paramType) || paramType.isAssignableFrom(resourceType))) {
 					throw new IllegalStateException("Specified parameter type [" + paramType +

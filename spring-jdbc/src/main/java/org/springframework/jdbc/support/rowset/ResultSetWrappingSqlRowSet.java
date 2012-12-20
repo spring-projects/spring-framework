@@ -71,7 +71,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	private final ResultSet resultSet;
 
 	private final SqlRowSetMetaData rowSetMetaData;
-	
+
 	private final Map<String, Integer> columnLabelMap;
 
 
@@ -109,7 +109,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 		catch (SQLException se) {
 			throw new InvalidResultSetAccessException(se);
 		}
-		
+
 	}
 
 
@@ -128,7 +128,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public final SqlRowSetMetaData getMetaData() {
 		return this.rowSetMetaData;
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#findColumn(String)
 	 */
@@ -161,7 +161,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getBigDecimal(String)
 	 */
@@ -187,7 +187,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public boolean getBoolean(String columnLabel) throws InvalidResultSetAccessException {
 		return getBoolean(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getByte(int)
 	 */
@@ -199,14 +199,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getByte(String)
 	 */
 	public byte getByte(String columnLabel) throws InvalidResultSetAccessException {
 		return getByte(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getDate(int, java.util.Calendar)
 	 */
@@ -218,7 +218,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getDate(int)
 	 */
@@ -236,14 +236,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public Date getDate(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
 		return getDate(findColumn(columnLabel), cal);
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getDate(String)
 	 */
 	public Date getDate(String columnLabel) throws InvalidResultSetAccessException {
 		return getDate(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getDouble(int)
 	 */
@@ -255,14 +255,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getDouble(String)
 	 */
 	public double getDouble(String columnLabel) throws InvalidResultSetAccessException {
 		return getDouble(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getFloat(int)
 	 */
@@ -299,7 +299,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public int getInt(String columnLabel) throws InvalidResultSetAccessException {
 		return getInt(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getLong(int)
 	 */
@@ -311,14 +311,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getLong(String)
 	 */
 	public long getLong(String columnLabel) throws InvalidResultSetAccessException {
 		return getLong(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getObject(int, java.util.Map)
 	 */
@@ -330,7 +330,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getObject(int)
 	 */
@@ -342,21 +342,21 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getObject(String, java.util.Map)
 	 */
 	public Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException {
 		return getObject(findColumn(columnLabel), map);
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getObject(String)
 	 */
 	public Object getObject(String columnLabel) throws InvalidResultSetAccessException {
 		return getObject(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getShort(int)
 	 */
@@ -368,14 +368,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getShort(String)
 	 */
 	public short getShort(String columnLabel) throws InvalidResultSetAccessException {
 		return getShort(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getString(int)
 	 */
@@ -387,14 +387,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getString(String)
 	 */
 	public String getString(String columnLabel) throws InvalidResultSetAccessException {
 		return getString(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getTime(int, java.util.Calendar)
 	 */
@@ -406,7 +406,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getTime(int)
 	 */
@@ -425,14 +425,14 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	public Time getTime(String columnLabel, Calendar cal) throws InvalidResultSetAccessException {
 		return getTime(findColumn(columnLabel), cal);
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getTime(String)
 	 */
 	public Time getTime(String columnLabel) throws InvalidResultSetAccessException {
 		return getTime(findColumn(columnLabel));
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(int, java.util.Calendar)
 	 */
@@ -444,7 +444,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#getTimestamp(int)
 	 */
@@ -473,7 +473,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
 
 	// RowSet navigation methods
-	
+
 	/**
 	 * @see java.sql.ResultSet#absolute(int)
 	 */
@@ -497,7 +497,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#beforeFirst()
 	 */
@@ -509,7 +509,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#first()
 	 */
@@ -557,7 +557,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#isFirst()
 	 */
@@ -569,7 +569,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#isLast()
 	 */
@@ -581,7 +581,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#last()
 	 */
@@ -593,7 +593,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#next()
 	 */
@@ -605,7 +605,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#previous()
 	 */
@@ -617,7 +617,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#relative(int)
 	 */
@@ -629,7 +629,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	/**
 	 * @see java.sql.ResultSet#wasNull()
 	 */

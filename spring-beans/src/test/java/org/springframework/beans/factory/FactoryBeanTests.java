@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -33,23 +34,27 @@ import org.springframework.util.Assert;
 public final class FactoryBeanTests {
 
 	private static final Class<?> CLASS = FactoryBeanTests.class;
-	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml"); 
-	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml"); 
-	
+	private static final Resource RETURNS_NULL_CONTEXT = qualifiedResource(CLASS, "returnsNull.xml");
+	private static final Resource WITH_AUTOWIRING_CONTEXT = qualifiedResource(CLASS, "withAutowiring.xml");
+
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(RETURNS_NULL_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.loadBeanDefinitions(RETURNS_NULL_CONTEXT);
 		Object result = factory.getBean("factoryBean");
 		assertNull(result);
 	}
 
 	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
-		
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
+
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
-		
+
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Beta beta = (Beta) factory.getBean("beta");
 		Gamma gamma = (Gamma) factory.getBean("gamma");
@@ -62,11 +67,13 @@ public final class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
-		
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		reader.loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
+
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
-		
+
 		Beta beta = (Beta) factory.getBean("beta");
 		Alpha alpha = (Alpha) factory.getBean("alpha");
 		Gamma gamma = (Gamma) factory.getBean("gamma");

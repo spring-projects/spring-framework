@@ -22,7 +22,7 @@ import javax.jms.Session;
 
 /**
  * Strategy interface for resolving JMS destinations.
- * 
+ *
  * <p>Used by {@link org.springframework.jms.core.JmsTemplate} for resolving
  * destination names from simple {@link String Strings} to actual
  * {@link Destination} implementation instances.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,28 +38,28 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public final class BeforeAdviceBindingTests {
 
 	private AdviceBindingCollaborator mockCollaborator;
-	
+
 	private ITestBean testBeanProxy;
-	
+
 	private TestBean testBeanTarget;
 
 	protected String getConfigPath() {
 		return "before-advice-tests.xml";
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		testBeanProxy = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(testBeanProxy));
-		
+
 		// we need the real target too, not just the proxy...
 		testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
-		
+
 		AdviceBindingTestAspect beforeAdviceAspect = (AdviceBindingTestAspect) ctx.getBean("testAspect");
-		
+
 		mockCollaborator = createNiceMock(AdviceBindingCollaborator.class);
 		beforeAdviceAspect.setCollaborator(mockCollaborator);
 	}
@@ -72,7 +72,7 @@ public final class BeforeAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneObjectArgBoundToProxyUsingThis() {
 		mockCollaborator.oneObjectArg(this.testBeanProxy);
@@ -80,7 +80,7 @@ public final class BeforeAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5,this.testBeanTarget);
@@ -88,7 +88,7 @@ public final class BeforeAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPoint() {
 		mockCollaborator.needsJoinPoint("getAge");
@@ -96,7 +96,7 @@ public final class BeforeAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testNeedsJoinPointStaticPart() {
 		mockCollaborator.needsJoinPointStaticPart("getAge");
@@ -105,7 +105,7 @@ public final class BeforeAdviceBindingTests {
 		verify(mockCollaborator);
 	}
 
-	
+
 }
 
 

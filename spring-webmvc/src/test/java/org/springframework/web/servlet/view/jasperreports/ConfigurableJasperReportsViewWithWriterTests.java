@@ -28,7 +28,7 @@ public class ConfigurableJasperReportsViewWithWriterTests extends AbstractConfig
 		view.setExporterClass(JRPdfExporter.class);
 		view.setUseWriter(false);
 		view.setContentType("text/html");
-		return view;       
+		return view;
 	}
 
 	protected String getDesiredContentType() {

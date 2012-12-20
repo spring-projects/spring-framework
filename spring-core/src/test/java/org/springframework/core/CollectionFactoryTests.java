@@ -31,6 +31,7 @@ import org.springframework.util.MultiValueMap;
  * @author Juergen Hoeller
  * @author Dave Syer
  */
+@SuppressWarnings({"deprecation", "rawtypes"})
 public class CollectionFactoryTests extends TestCase {
 
 	public void testLinkedSet() {

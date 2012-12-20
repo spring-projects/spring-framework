@@ -202,9 +202,9 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		private final Method method;
 
-		private final Class targetClass;
+		private final Class<?> targetClass;
 
-		public DefaultCacheKey(Method method, Class targetClass) {
+		public DefaultCacheKey(Method method, Class<?> targetClass) {
 			this.method = method;
 			this.targetClass = targetClass;
 		}

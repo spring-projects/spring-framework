@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class RmiSupportTests extends TestCase {
 		doTestRmiProxyFactoryBeanWithException(UnmarshalException.class);
 	}
 
-	private void doTestRmiProxyFactoryBeanWithException(Class exceptionClass) throws Exception {
+	private void doTestRmiProxyFactoryBeanWithException(Class<?> exceptionClass) throws Exception {
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IRemoteBean.class);
 		factory.setServiceUrl("rmi://localhost:1090/test");
@@ -130,7 +130,7 @@ public class RmiSupportTests extends TestCase {
 		doTestRmiProxyFactoryBeanWithExceptionAndRefresh(StubNotFoundException.class);
 	}
 
-	private void doTestRmiProxyFactoryBeanWithExceptionAndRefresh(Class exceptionClass) throws Exception {
+	private void doTestRmiProxyFactoryBeanWithExceptionAndRefresh(Class<?> exceptionClass) throws Exception {
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IRemoteBean.class);
 		factory.setServiceUrl("rmi://localhost:1090/test");
@@ -217,7 +217,7 @@ public class RmiSupportTests extends TestCase {
 	}
 
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndException(
-			Class rmiExceptionClass, Class springExceptionClass) throws Exception {
+			Class<?> rmiExceptionClass, Class<?> springExceptionClass) throws Exception {
 
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IBusinessBean.class);
@@ -272,8 +272,8 @@ public class RmiSupportTests extends TestCase {
 	}
 
 	private void doTestRmiProxyFactoryBeanWithBusinessInterfaceAndExceptionAndRefresh(
-			Class rmiExceptionClass, Class springExceptionClass) throws Exception {
-		
+			Class<?> rmiExceptionClass, Class<?> springExceptionClass) throws Exception {
+
 		CountingRmiProxyFactoryBean factory = new CountingRmiProxyFactoryBean();
 		factory.setServiceInterface(IBusinessBean.class);
 		factory.setServiceUrl("rmi://localhost:1090/test");
@@ -309,7 +309,7 @@ public class RmiSupportTests extends TestCase {
 		try {
 			client.afterPropertiesSet();
 			fail("url isn't set, expected IllegalArgumentException");
-		} 
+		}
 		catch(IllegalArgumentException e){
 			// expected
 		}
@@ -436,8 +436,8 @@ public class RmiSupportTests extends TestCase {
 			if (nam != null && nam.endsWith("Exception")) {
 				RemoteException rex = null;
 				try {
-					Class exClass = Class.forName(nam);
-					Constructor ctor = exClass.getConstructor(new Class[] {String.class});
+					Class<?> exClass = Class.forName(nam);
+					Constructor<?> ctor = exClass.getConstructor(new Class[] {String.class});
 					rex = (RemoteException) ctor.newInstance(new Object[] {"myMessage"});
 				}
 				catch (Exception ex) {

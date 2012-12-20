@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testIsBridgeMethodFor() throws Exception {
-		Map<TypeVariable, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
+		Map<TypeVariable<?>, Type> typeParameterMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		Method bridged = MyBar.class.getDeclaredMethod("someMethod", String.class, Object.class);
 		Method other = MyBar.class.getDeclaredMethod("someMethod", Integer.class, Object.class);
 		Method bridge = MyBar.class.getDeclaredMethod("someMethod", Object.class, Object.class);
@@ -110,7 +110,7 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testCreateTypeVariableMap() throws Exception {
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
+		Map<TypeVariable<?>, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MyBar.class);
 		TypeVariable<?> barT = findTypeVariable(InterBar.class, "T");
 		assertEquals(String.class, typeVariableMap.get(barT));
 
@@ -220,7 +220,7 @@ public class BridgeMethodResolverTests {
 		Method otherMethod = MessageBroadcasterImpl.class.getMethod("receive", NewMessageEvent.class);
 		assertFalse(otherMethod.isBridge());
 
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
+		Map<TypeVariable<?>, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(MessageBroadcasterImpl.class);
 		assertFalse("Match identified incorrectly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, otherMethod, typeVariableMap));
 		assertTrue("Match not found correctly", BridgeMethodResolver.isBridgeMethodFor(bridgeMethod, bridgedMethod, typeVariableMap));
 
@@ -229,7 +229,7 @@ public class BridgeMethodResolverTests {
 
 	@Test
 	public void testSPR2454() throws Exception {
-		Map<TypeVariable, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
+		Map<TypeVariable<?>, Type> typeVariableMap = GenericTypeResolver.getTypeVariableMap(YourHomer.class);
 		TypeVariable<?> variable = findTypeVariable(MyHomer.class, "L");
 		assertEquals(AbstractBounded.class, ((ParameterizedType) typeVariableMap.get(variable)).getRawType());
 	}
@@ -533,7 +533,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
+	private static class SerializableBounded<E extends HashMap<?, ?> & Delayed> extends AbstractBounded<E> {
 
 		public boolean boundedOperation(E myE) {
 			return false;
@@ -547,7 +547,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	private static class StringGenericParameter implements GenericParameter<String> {
+	public static class StringGenericParameter implements GenericParameter<String> {
 
 		public String getFor(Class<String> cls) {
 			return "foo";
@@ -559,7 +559,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	private static class StringList implements List<String> {
+	public static class StringList implements List<String> {
 
 		public int size() {
 			throw new UnsupportedOperationException();
@@ -729,6 +729,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
+	@SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 	public abstract class GenericEventBroadcasterImpl<T extends Event> extends GenericBroadcasterImpl
 					implements EventBroadcaster {
 
@@ -796,6 +797,7 @@ public class BridgeMethodResolverTests {
 	public class MessageBroadcasterImpl extends GenericEventBroadcasterImpl<MessageEvent>
 					implements MessageBroadcaster {
 
+		@SuppressWarnings("unchecked")
 		public MessageBroadcasterImpl() {
 			super(NewMessageEvent.class);
 		}
@@ -882,7 +884,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public class GenericHibernateRepository<T, ID extends Serializable> 
+	public class GenericHibernateRepository<T, ID extends Serializable>
 					implements ConvenientGenericRepository<T, ID> {
 
 		/**
@@ -1099,7 +1101,7 @@ public class BridgeMethodResolverTests {
 	private static class Other<S,E> {
 	}
 
-
+	@SuppressWarnings({ "unused" })
 	private static class MegaMessageProducerImpl extends Other<Long, String> implements MegaMessageProducer {
 
 		public void receive(NewMegaMessageEvent event) {
@@ -1134,7 +1136,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
+	public static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
 		public <T> void doSomething(D domainObject, T value) {
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	private final Object throwsAdvice;
 
 	/** Methods on throws advice, keyed by exception class */
-	private final Map<Class, Method> exceptionHandlerMap = new HashMap<Class, Method>();
+	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<Class<?>, Method>();
 
 
 	/**
@@ -87,13 +87,13 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 				}
 			}
 		}
-		
+
 		if (this.exceptionHandlerMap.isEmpty()) {
 			throw new IllegalArgumentException(
 					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}
-	
+
 	public int getHandlerMethodCount() {
 		return this.exceptionHandlerMap.size();
 	}
@@ -104,7 +104,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 	 * @return a handler for the given exception type
 	 */
 	private Method getExceptionHandler(Throwable exception) {
-		Class exceptionClass = exception.getClass();
+		Class<?> exceptionClass = exception.getClass();
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to find handler for exception of type [" + exceptionClass.getName() + "]");
 		}
@@ -131,7 +131,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			throw ex;
 		}
 	}
-	
+
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
 		if (method.getParameterTypes().length == 1) {

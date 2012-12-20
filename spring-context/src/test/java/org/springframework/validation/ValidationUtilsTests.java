@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.beans.TestBean;
 
 /**
  * Unit tests for {@link ValidationUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Chris Beams
@@ -161,7 +161,7 @@ public class ValidationUtilsTests {
 
 	private static class EmptyValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
@@ -173,7 +173,7 @@ public class ValidationUtilsTests {
 
 	private static class EmptyOrWhitespaceValidator implements Validator {
 
-		public boolean supports(Class clazz) {
+		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 

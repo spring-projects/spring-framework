@@ -58,11 +58,11 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 	public Class<?> getTargetClass() {
 		return this.target.getClass();
 	}
-	
+
 	public Object getTarget() {
 		return this.target;
 	}
-	
+
 	public void releaseTarget(Object target) {
 		// nothing to do
 	}

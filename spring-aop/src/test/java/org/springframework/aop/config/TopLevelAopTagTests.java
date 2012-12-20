@@ -26,12 +26,12 @@ import org.springframework.core.io.Resource;
 
 /**
  * Tests that the &lt;aop:config/&gt; element can be used as a top level element.
- * 
+ *
  * @author Rob Harrop
  * @author Chris Beams
  */
 public final class TopLevelAopTagTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(TopLevelAopTagTests.class, "context.xml");
 
 	@Test

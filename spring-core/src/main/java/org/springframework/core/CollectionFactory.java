@@ -52,13 +52,13 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class CollectionFactory {
 
-	private static Class navigableSetClass = null;
+	private static Class<?> navigableSetClass = null;
 
-	private static Class navigableMapClass = null;
+	private static Class<?> navigableMapClass = null;
 
-	private static final Set<Class> approximableCollectionTypes = new HashSet<Class>(10);
+	private static final Set<Class<?>> approximableCollectionTypes = new HashSet<Class<?>>(10);
 
-	private static final Set<Class> approximableMapTypes = new HashSet<Class>(6);
+	private static final Set<Class<?>> approximableMapTypes = new HashSet<Class<?>>(6);
 
 
 	static {
@@ -139,6 +139,7 @@ public abstract class CollectionFactory {
 	 * @return the new Map instance
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
+	@SuppressWarnings("rawtypes")
 	@Deprecated
 	public static Map createLinkedCaseInsensitiveMapIfPossible(int initialCapacity) {
 		return new LinkedCaseInsensitiveMap(initialCapacity);
@@ -152,6 +153,7 @@ public abstract class CollectionFactory {
 	 * @return the new Map instance
 	 * @deprecated as of Spring 2.5, for usage on JDK 1.4 or higher
 	 */
+	@SuppressWarnings("rawtypes")
 	@Deprecated
 	public static Map createIdentityMapIfPossible(int initialCapacity) {
 		return new IdentityHashMap(initialCapacity);
@@ -165,6 +167,7 @@ public abstract class CollectionFactory {
 	 * @return the new Map instance
 	 * @deprecated as of Spring 3.0, for usage on JDK 1.5 or higher
 	 */
+	@SuppressWarnings("rawtypes")
 	@Deprecated
 	public static Map createConcurrentMapIfPossible(int initialCapacity) {
 		return new ConcurrentHashMap(initialCapacity);
@@ -206,18 +209,18 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashSet
 	 */
 	@SuppressWarnings("unchecked")
-	public static Collection createApproximateCollection(Object collection, int initialCapacity) {
+	public static <T> Collection<T> createApproximateCollection(Object collection, int initialCapacity) {
 		if (collection instanceof LinkedList) {
-			return new LinkedList();
+			return new LinkedList<T>();
 		}
 		else if (collection instanceof List) {
-			return new ArrayList(initialCapacity);
+			return new ArrayList<T>(initialCapacity);
 		}
 		else if (collection instanceof SortedSet) {
-			return new TreeSet(((SortedSet) collection).comparator());
+			return new TreeSet<T>(((SortedSet<T>) collection).comparator());
 		}
 		else {
-			return new LinkedHashSet(initialCapacity);
+			return new LinkedHashSet<T>(initialCapacity);
 		}
 	}
 
@@ -232,16 +235,17 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeSet
 	 * @see java.util.LinkedHashSet
 	 */
-	public static Collection createCollection(Class<?> collectionType, int initialCapacity) {
+	@SuppressWarnings("unchecked")
+	public static <T> Collection<T> createCollection(Class<?> collectionType, int initialCapacity) {
 		if (collectionType.isInterface()) {
 			if (List.class.equals(collectionType)) {
-				return new ArrayList(initialCapacity);
+				return new ArrayList<T>(initialCapacity);
 			}
 			else if (SortedSet.class.equals(collectionType) || collectionType.equals(navigableSetClass)) {
-				return new TreeSet();
+				return new TreeSet<T>();
 			}
 			else if (Set.class.equals(collectionType) || Collection.class.equals(collectionType)) {
-				return new LinkedHashSet(initialCapacity);
+				return new LinkedHashSet<T>(initialCapacity);
 			}
 			else {
 				throw new IllegalArgumentException("Unsupported Collection interface: " + collectionType.getName());
@@ -252,7 +256,7 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Collection type: " + collectionType.getName());
 			}
 			try {
-				return (Collection) collectionType.newInstance();
+				return (Collection<T>) collectionType.newInstance();
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException("Could not instantiate Collection type: " +
@@ -282,12 +286,12 @@ public abstract class CollectionFactory {
 	 * @see java.util.LinkedHashMap
 	 */
 	@SuppressWarnings("unchecked")
-	public static Map createApproximateMap(Object map, int initialCapacity) {
+	public static <K, V> Map<K, V> createApproximateMap(Object map, int initialCapacity) {
 		if (map instanceof SortedMap) {
-			return new TreeMap(((SortedMap) map).comparator());
+			return new TreeMap<K, V>(((SortedMap<K, V>) map).comparator());
 		}
 		else {
-			return new LinkedHashMap(initialCapacity);
+			return new LinkedHashMap<K, V>(initialCapacity);
 		}
 	}
 
@@ -300,13 +304,14 @@ public abstract class CollectionFactory {
 	 * @see java.util.TreeMap
 	 * @see java.util.LinkedHashMap
 	 */
-	public static Map createMap(Class<?> mapType, int initialCapacity) {
+	@SuppressWarnings("unchecked")
+	public static <K, V> Map<K, V> createMap(Class<?> mapType, int initialCapacity) {
 		if (mapType.isInterface()) {
 			if (Map.class.equals(mapType)) {
-				return new LinkedHashMap(initialCapacity);
+				return new LinkedHashMap<K, V>(initialCapacity);
 			}
 			else if (SortedMap.class.equals(mapType) || mapType.equals(navigableMapClass)) {
-				return new TreeMap();
+				return new TreeMap<K, V>();
 			}
 			else if (MultiValueMap.class.equals(mapType)) {
 				return new LinkedMultiValueMap();
@@ -320,7 +325,7 @@ public abstract class CollectionFactory {
 				throw new IllegalArgumentException("Unsupported Map type: " + mapType.getName());
 			}
 			try {
-				return (Map) mapType.newInstance();
+				return (Map<K, V>) mapType.newInstance();
 			}
 			catch (Exception ex) {
 				throw new IllegalArgumentException("Could not instantiate Map type: " +
@@ -333,6 +338,7 @@ public abstract class CollectionFactory {
 	/**
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
+	@SuppressWarnings({ "rawtypes", "deprecation" })
 	@Deprecated
 	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 

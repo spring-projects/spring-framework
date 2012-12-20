@@ -194,10 +194,10 @@ public class TypeDescriptorTests {
 	@Target({ElementType.PARAMETER})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface ParameterAnnotation {
-		int value();
+
 	}
 
-	public void testAnnotatedMethod(@ParameterAnnotation(123) String parameter) {
+	public void testAnnotatedMethod(@ParameterAnnotation String parameter) {
 
 	}
 

@@ -37,7 +37,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 
 /**
  * Unit tests for {@link ContextLoaderUtils}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

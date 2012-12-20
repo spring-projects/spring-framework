@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public abstract class NestedRuntimeException extends RuntimeException {
 	 * @param exType the exception type to look for
 	 * @return whether there is a nested exception of the specified type
 	 */
-	public boolean contains(Class exType) {
+	public boolean contains(Class<?> exType) {
 		if (exType == null) {
 			return false;
 		}

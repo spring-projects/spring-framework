@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 			return Collections.emptyList();
 		}
 	}
-	
+
 
 	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles().toSingleValueMap();
@@ -104,9 +104,9 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	@Override
 	public Enumeration<String> getParameterNames() {
 		Set<String> paramNames = new HashSet<String>();
-		Enumeration paramEnum = super.getParameterNames();
+		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
-			paramNames.add((String) paramEnum.nextElement());
+			paramNames.add(paramEnum.nextElement());
 		}
 		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);
@@ -131,7 +131,6 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, String[]> getParameterMap() {
 		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());

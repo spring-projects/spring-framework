@@ -24,7 +24,6 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.core.env.PropertySource;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.annotation.NumberFormat.Style;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
@@ -159,16 +158,16 @@ public class EvalTagTests extends AbstractTagTests {
 
 
 	public static class Bean {
-		
+
 		public String method() {
 			return "foo";
 		}
-		
+
 		@NumberFormat(style=Style.PERCENT)
 		public BigDecimal getFormattable() {
 			return new BigDecimal(".25");
 		}
-		
+
 		public String html() {
 			return "<p>";
 		}
@@ -176,7 +175,7 @@ public class EvalTagTests extends AbstractTagTests {
 		public String getBean() {
 			return "not the bean object";
 		}
-		
+
 		public Object getNull() {
 			return null;
 		}

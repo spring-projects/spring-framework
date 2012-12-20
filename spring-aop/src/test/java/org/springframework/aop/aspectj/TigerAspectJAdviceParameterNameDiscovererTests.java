@@ -38,37 +38,37 @@ public final class TigerAspectJAdviceParameterNameDiscovererTests
 	public void testAtTarget() {
 		assertParameterNames(getMethod("oneAnnotation"),"@target(a)",new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testAtArgs() {
 		assertParameterNames(getMethod("oneAnnotation"),"@args(a)",new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testAtWithin() {
 		assertParameterNames(getMethod("oneAnnotation"),"@within(a)",new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testAtWithincode() {
 		assertParameterNames(getMethod("oneAnnotation"),"@withincode(a)",new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testAtAnnotation() {
 		assertParameterNames(getMethod("oneAnnotation"),"@annotation(a)",new String[]{"a"});
 	}
-	
+
 	@Test
 	public void testAmbiguousAnnotationTwoVars() {
 		assertException(getMethod("twoAnnotations"),"@annotation(a) && @this(x)",AmbiguousBindingException.class,
 				"Found 2 potential annotation variable(s), and 2 potential argument slots");
 	}
-	
+
 	@Test
 	public void testAmbiguousAnnotationOneVar() {
 		assertException(getMethod("oneAnnotation"),"@annotation(a) && @this(x)",IllegalArgumentException.class,
-		"Found 2 candidate annotation binding variables but only one potential argument binding slot");		
+		"Found 2 candidate annotation binding variables but only one potential argument binding slot");
 	}
 
 	@Test

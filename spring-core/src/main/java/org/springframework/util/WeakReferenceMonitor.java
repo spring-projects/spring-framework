@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class WeakReferenceMonitor {
 	private static final ReferenceQueue<Object> handleQueue = new ReferenceQueue<Object>();
 
 	// All tracked entries (WeakReference => ReleaseListener)
-	private static final Map<Reference, ReleaseListener> trackedEntries = new HashMap<Reference, ReleaseListener>();
+	private static final Map<Reference<?>, ReleaseListener> trackedEntries = new HashMap<Reference<?>, ReleaseListener>();
 
 	// Thread polling handleQueue, lazy initialized
 	private static Thread monitoringThread = null;
@@ -84,7 +84,7 @@ public class WeakReferenceMonitor {
 	 * @param ref reference to tracked handle
 	 * @param entry the associated entry
 	 */
-	private static void addEntry(Reference ref, ReleaseListener entry) {
+	private static void addEntry(Reference<?> ref, ReleaseListener entry) {
 		synchronized (WeakReferenceMonitor.class) {
 			// Add entry, the key is given reference.
 			trackedEntries.put(ref, entry);
@@ -103,7 +103,7 @@ public class WeakReferenceMonitor {
 	 * @param reference the reference that should be removed
 	 * @return entry object associated with given reference
 	 */
-	private static ReleaseListener removeEntry(Reference reference) {
+	private static ReleaseListener removeEntry(Reference<?> reference) {
 		synchronized (WeakReferenceMonitor.class) {
 			return trackedEntries.remove(reference);
 		}
@@ -137,7 +137,7 @@ public class WeakReferenceMonitor {
 			// Check if there are any tracked entries left.
 			while (keepMonitoringThreadAlive()) {
 				try {
-					Reference reference = handleQueue.remove();
+					Reference<?> reference = handleQueue.remove();
 					// Stop tracking this reference.
 					ReleaseListener entry = removeEntry(reference);
 					if (entry != null) {

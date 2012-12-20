@@ -28,7 +28,7 @@ import org.springframework.jmx.support.MetricType;
  * JDK 1.5+ method-level annotation that indicates to expose a given bean
  * property as JMX attribute, with added Descriptor properties to indicate that
  * it is a metric. Only valid when used on a JavaBean getter.
- * 
+ *
  * @author Jennifer Hickey
  * @since 3.0
  * @see org.springframework.jmx.export.metadata.ManagedMetric

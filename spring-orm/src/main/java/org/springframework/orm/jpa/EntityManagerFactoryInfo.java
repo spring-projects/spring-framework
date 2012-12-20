@@ -33,7 +33,7 @@ import javax.sql.DataSource;
  * @since 2.0
  */
 public interface EntityManagerFactoryInfo {
-	
+
 	/**
 	 * Return the raw underlying EntityManagerFactory.
 	 * @return the unadorned EntityManagerFactory (never <code>null</code>)
@@ -59,7 +59,7 @@ public interface EntityManagerFactoryInfo {
 	PersistenceUnitInfo getPersistenceUnitInfo();
 
 	/**
-	 * Return the name of the persistence unit used to create this 
+	 * Return the name of the persistence unit used to create this
 	 * EntityManagerFactory, or <code>null</code> if it is an unnamed default.
 	 * <p>If <code>getPersistenceUnitInfo()</code> returns non-null, the result of
 	 * <code>getPersistenceUnitName()</code> must be equal to the value returned by

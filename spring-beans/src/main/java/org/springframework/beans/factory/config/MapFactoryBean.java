@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,17 +32,17 @@ import org.springframework.core.GenericCollectionTypeResolver;
  * @see SetFactoryBean
  * @see ListFactoryBean
  */
-public class MapFactoryBean extends AbstractFactoryBean<Map> {
+public class MapFactoryBean extends AbstractFactoryBean<Map<?, ?>> {
 
 	private Map<?, ?> sourceMap;
 
-	private Class targetMapClass;
+	private Class<? extends Map<?, ?>> targetMapClass;
 
 
 	/**
 	 * Set the source Map, typically populated via XML "map" elements.
 	 */
-	public void setSourceMap(Map sourceMap) {
+	public void setSourceMap(Map<?, ?> sourceMap) {
 		this.sourceMap = sourceMap;
 	}
 
@@ -52,44 +52,45 @@ public class MapFactoryBean extends AbstractFactoryBean<Map> {
 	 * <p>Default is a linked HashMap, keeping the registration order.
 	 * @see java.util.LinkedHashMap
 	 */
-	public void setTargetMapClass(Class targetMapClass) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void setTargetMapClass(Class<? extends Map> targetMapClass) {
 		if (targetMapClass == null) {
 			throw new IllegalArgumentException("'targetMapClass' must not be null");
 		}
 		if (!Map.class.isAssignableFrom(targetMapClass)) {
 			throw new IllegalArgumentException("'targetMapClass' must implement [java.util.Map]");
 		}
-		this.targetMapClass = targetMapClass;
+		this.targetMapClass = (Class<? extends Map<?, ?>>) targetMapClass;
 	}
 
 
 	@Override
-	public Class<Map> getObjectType() {
+	public Class<?> getObjectType() {
 		return Map.class;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	protected Map createInstance() {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Map<?, ?> createInstance() {
 		if (this.sourceMap == null) {
 			throw new IllegalArgumentException("'sourceMap' is required");
 		}
 		Map result = null;
 		if (this.targetMapClass != null) {
-			result = (Map) BeanUtils.instantiateClass(this.targetMapClass);
+			result = BeanUtils.instantiateClass(this.targetMapClass);
 		}
 		else {
 			result = new LinkedHashMap(this.sourceMap.size());
 		}
-		Class keyType = null;
-		Class valueType = null;
+		Class<?> keyType = null;
+		Class<?> valueType = null;
 		if (this.targetMapClass != null) {
 			keyType = GenericCollectionTypeResolver.getMapKeyType(this.targetMapClass);
 			valueType = GenericCollectionTypeResolver.getMapValueType(this.targetMapClass);
 		}
 		if (keyType != null || valueType != null) {
 			TypeConverter converter = getBeanTypeConverter();
-			for (Map.Entry entry : this.sourceMap.entrySet()) {
+			for (Map.Entry<?,?> entry : this.sourceMap.entrySet()) {
 				Object convertedKey = converter.convertIfNecessary(entry.getKey(), keyType);
 				Object convertedValue = converter.convertIfNecessary(entry.getValue(), valueType);
 				result.put(convertedKey, convertedValue);

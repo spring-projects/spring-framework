@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,22 +40,23 @@ public final class ParseState {
 	/**
 	 * Internal {@link Stack} storage.
 	 */
-	private final Stack state;
+	private final Stack<Entry> state;
 
 
 	/**
 	 * Create a new <code>ParseState</code> with an empty {@link Stack}.
 	 */
 	public ParseState() {
-		this.state = new Stack();
+		this.state = new Stack<Entry>();
 	}
 
 	/**
 	 * Create a new <code>ParseState</code> whose {@link Stack} is a {@link Object#clone clone}
 	 * of that of the passed in <code>ParseState</code>.
 	 */
-	private ParseState(ParseState other) {
-		this.state = (Stack) other.state.clone();
+	@SuppressWarnings("unchecked")
+    private ParseState(ParseState other) {
+		this.state = (Stack<Entry>) other.state.clone();
 	}
 
 
@@ -78,7 +79,7 @@ public final class ParseState {
 	 * <code>null</code> if the {@link Stack} is empty.
 	 */
 	public Entry peek() {
-		return (Entry) (this.state.empty() ? null : this.state.peek());
+		return (this.state.empty() ? null : this.state.peek());
 	}
 
 	/**

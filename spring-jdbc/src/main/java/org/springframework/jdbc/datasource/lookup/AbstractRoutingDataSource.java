@@ -112,7 +112,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
 		}
 		this.resolvedDataSources = new HashMap<Object, DataSource>(this.targetDataSources.size());
-		for (Map.Entry entry : this.targetDataSources.entrySet()) {
+		for (Map.Entry<Object, Object> entry : this.targetDataSources.entrySet()) {
 			Object lookupKey = resolveSpecifiedLookupKey(entry.getKey());
 			DataSource dataSource = resolveSpecifiedDataSource(entry.getValue());
 			this.resolvedDataSources.put(lookupKey, dataSource);

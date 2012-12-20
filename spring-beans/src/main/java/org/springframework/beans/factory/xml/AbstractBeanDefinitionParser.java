@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * parameter is <code>false</code>, because one typically does not want inner beans
 	 * to be registered as top level beans.
 	 * @param definition the bean definition to be registered
-	 * @param registry the registry that the bean is to be registered with 
+	 * @param registry the registry that the bean is to be registered with
 	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
 	 */
 	protected void registerBeanDefinition(BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {

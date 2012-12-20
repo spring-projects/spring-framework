@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import junit.framework.TestCase;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class LabeledEnumTests extends TestCase {
 
 	private byte[] serializeObject(final Object obj) throws IOException {
@@ -103,7 +104,7 @@ public class LabeledEnumTests extends TestCase {
 
 	public void testDoesNotMatchWrongClass() {
 		try {
-			LabeledEnum none = StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
+			StaticLabeledEnumResolver.instance().getLabeledEnumByCode(Dog.class,
 					new Short((short) 1));
 			fail("Should have failed");
 		}
@@ -121,8 +122,8 @@ public class LabeledEnumTests extends TestCase {
 	private static class Other extends StaticLabeledEnum {
 
 		public static final Other THING1 = new Other(1, "Thing1");
+		@SuppressWarnings("unused")
 		public static final Other THING2 = new Other(2, "Thing2");
-
 
 		private Other(int code, String name) {
 			super(code, name);
@@ -141,7 +142,7 @@ public class LabeledEnumTests extends TestCase {
 			// Overriding getType() is no longer necessary as of Spring 2.5;
 			// however, this is left here to provide valid testing for
 			// backwards compatibility.
-			public Class getType() {
+			public Class<?> getType() {
 				return Dog.class;
 			}
 		};

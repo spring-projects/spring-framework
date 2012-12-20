@@ -32,7 +32,7 @@ public class ScopedBeanInterceptorTests extends TestCase {
 
 		ScopedObject scoped = new ScopedObject() {
 			public Object getTargetObject() {
-				return realObject; 
+				return realObject;
 			}
 			public void removeFromScope() {
 				// do nothing

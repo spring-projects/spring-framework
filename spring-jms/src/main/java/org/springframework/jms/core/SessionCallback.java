@@ -22,7 +22,7 @@ import javax.jms.Session;
 /**
  * Callback for executing any number of operations on a provided
  * {@link Session}.
- * 
+ *
  * <p>To be used with the {@link JmsTemplate#execute(SessionCallback)}
  * method, often implemented as an anonymous inner class.
  *
@@ -36,7 +36,7 @@ public interface SessionCallback<T> {
 	 * Execute any number of operations against the supplied JMS
 	 * {@link Session}, possibly returning a result.
 	 * @param session the JMS <code>Session</code>
-	 * @return a result object from working with the <code>Session</code>, if any (so can be <code>null</code>) 
+	 * @return a result object from working with the <code>Session</code>, if any (so can be <code>null</code>)
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	T doInJms(Session session) throws JMSException;

@@ -55,7 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
  * This class specifically tests usage of <code>&#064;Transactional</code>
  * defined at the <strong>class level</strong>.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see MethodLevelTransactionalSpringRunnerTests

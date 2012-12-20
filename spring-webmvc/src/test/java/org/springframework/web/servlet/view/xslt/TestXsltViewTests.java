@@ -46,7 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Unit tests for the {@link AbstractXsltView} class.
- * 
+ *
  * @author Darren Davison
  * @author Rick Evans
  * @author Juergen Hoeller
@@ -325,7 +325,7 @@ public class TestXsltViewTests extends TestCase {
 		wordList.add("hello");
 		wordList.add("world");
 		map.put("wordList", wordList);
-		
+
 		view.render(new ModelAndView("home", map).getModel(), request, response);
 		String text = response.getContentAsString();
 		assertTrue(text.trim().startsWith("<html"));

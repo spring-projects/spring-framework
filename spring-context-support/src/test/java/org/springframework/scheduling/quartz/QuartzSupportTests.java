@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, TestBean> jobData = new HashMap<String, TestBean>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -118,7 +118,7 @@ public class QuartzSupportTests {
 		}
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -159,7 +159,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		Map<String, TestBean> schedulerContext = new HashMap<String, TestBean>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		if (explicitJobDetail) {
@@ -192,7 +192,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, TestBean> jobData = new HashMap<String, TestBean>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -210,7 +210,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -253,7 +253,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		Map<String, TestBean> schedulerContext = new HashMap<String, TestBean>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
@@ -286,7 +286,7 @@ public class QuartzSupportTests {
 		JobDetailBean jobDetail0 = new JobDetailBean();
 		jobDetail0.setJobClass(Job.class);
 		jobDetail0.setBeanName("myJob0");
-		Map jobData = new HashMap();
+		Map<String, TestBean> jobData = new HashMap<String, TestBean>();
 		jobData.put("testBean", tb);
 		jobDetail0.setJobDataAsMap(jobData);
 		jobDetail0.afterPropertiesSet();
@@ -304,7 +304,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -351,7 +351,7 @@ public class QuartzSupportTests {
 			}
 		};
 		schedulerFactoryBean.setJobFactory(null);
-		Map schedulerContext = new HashMap();
+		HashMap<String, TestBean> schedulerContext = new HashMap<String, TestBean>();
 		schedulerContext.put("otherTestBean", tb);
 		schedulerFactoryBean.setSchedulerContextAsMap(schedulerContext);
 		schedulerFactoryBean.setTriggers(new Trigger[] {trigger0, trigger1});
@@ -446,7 +446,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doWait");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger0 = new SimpleTriggerBean();
 		trigger0.setBeanName("myTrigger1");
@@ -532,7 +532,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTrigger trigger1 = new SimpleTrigger();
 		trigger1.setName("myTrigger1");

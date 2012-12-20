@@ -18,7 +18,7 @@ package org.springframework.expression;
 
 /**
  * Supported operations that an {@link OperatorOverloader} can implement for any pair of operands.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

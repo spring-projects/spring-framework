@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
  * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
  * annotated classes, and active bean definition profiles.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see ContextLoader
@@ -137,9 +137,9 @@ abstract class ContextLoaderUtils {
 	 * {@code ContextLoader} class to use; must not be {@code null} or empty
 	 * @return the {@code ContextLoader} class to use for the supplied test class
 	 * @throws IllegalArgumentException if {@code @ContextConfiguration} is not
-	 * <em>present</em> on the supplied test class 
+	 * <em>present</em> on the supplied test class
 	 * @throws IllegalStateException if the default {@code ContextLoader} class
-	 * could not be loaded 
+	 * could not be loaded
 	 */
 	@SuppressWarnings("unchecked")
 	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<?> testClass,

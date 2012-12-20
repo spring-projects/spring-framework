@@ -32,7 +32,7 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * be used at all levels within a test class hierarchy when the
  * <code>loader</code> is explicitly declared via {@link ContextConfiguration
  * &#064;ContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  * @see PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests

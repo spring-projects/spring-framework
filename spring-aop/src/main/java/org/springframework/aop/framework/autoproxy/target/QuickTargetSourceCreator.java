@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.aop.target.ThreadLocalTargetSource;
 
 /**
  * Convenient TargetSourceCreator using bean name prefixes to create one of three
- * well-known TargetSource types: 
+ * well-known TargetSource types:
  * <li>: CommonsPoolTargetSource
  * <li>% ThreadLocalTargetSource
  * <li>! PrototypeTargetSource
@@ -41,7 +41,7 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 
 	@Override
 	protected final AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
-			Class beanClass, String beanName) {
+			Class<?> beanClass, String beanName) {
 
 		if (beanName.startsWith(PREFIX_COMMONS_POOL)) {
 			CommonsPoolTargetSource cpts = new CommonsPoolTargetSource();
@@ -59,5 +59,5 @@ public class QuickTargetSourceCreator extends AbstractBeanFactoryBasedTargetSour
 			return null;
 		}
 	}
-	
+
 }

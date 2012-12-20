@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public interface NamespaceHandler {
 	/**
 	 * Invoked by the {@link DefaultBeanDefinitionDocumentReader} after
 	 * construction but before any custom elements are parsed.
-	 * @see NamespaceHandlerSupport#registerBeanDefinitionParser(String, BeanDefinitionParser) 
+	 * @see NamespaceHandlerSupport#registerBeanDefinitionParser(String, BeanDefinitionParser)
 	 */
 	void init();
 
@@ -66,7 +66,7 @@ public interface NamespaceHandler {
 	 * <strong>not</strong> be used in a nested scenario.
 	 * @param element the element that is to be parsed into one or more <code>BeanDefinitions</code>
 	 * @param parserContext the object encapsulating the current state of the parsing process
-	 * @return the primary <code>BeanDefinition</code> (can be <code>null</code> as explained above) 
+	 * @return the primary <code>BeanDefinition</code> (can be <code>null</code> as explained above)
 	 */
 	BeanDefinition parse(Element element, ParserContext parserContext);
 

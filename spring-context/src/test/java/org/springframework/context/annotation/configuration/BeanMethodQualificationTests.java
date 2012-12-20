@@ -36,9 +36,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests proving that @Qualifier annotations work when used 
+ * Tests proving that @Qualifier annotations work when used
  * with @Configuration classes on @Bean methods.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  */
@@ -62,22 +62,22 @@ public class BeanMethodQualificationTests {
 		assertThat(pojo.testBean.getName(), equalTo("interesting"));
 	}
 
-
 	@Configuration
 	static class StandardConfig {
 		@Bean @Lazy @Qualifier("interesting")
 		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
-		
-		@Bean @Qualifier("boring")
+
+		@Bean
+		@Qualifier("boring")
 		public TestBean testBean2() {
 			return new TestBean("boring");
 		}
 	}
 
-	@Component @Lazy
-	static class StandardPojo {
+	@Component
+	static class Pojo {
 		@Autowired @Qualifier("interesting") TestBean testBean;
 	}
 

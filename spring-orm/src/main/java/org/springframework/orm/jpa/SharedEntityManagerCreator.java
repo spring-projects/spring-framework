@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,11 +74,11 @@ public abstract class SharedEntityManagerCreator {
 	 * <code>createEntityManager</code> call (may be <code>null</code>)
 	 * @return a shareable transaction EntityManager proxy
 	 */
-	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map properties) {
-		Class[] emIfcs;
+	public static EntityManager createSharedEntityManager(EntityManagerFactory emf, Map<?, ?> properties) {
+		Class<?>[] emIfcs;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			EntityManagerFactoryInfo emfInfo = (EntityManagerFactoryInfo) emf;
-			Class emIfc = emfInfo.getEntityManagerInterface();
+			Class<?> emIfc = emfInfo.getEntityManagerInterface();
 			if (emIfc == null) {
 				emIfc = EntityManager.class;
 			}
@@ -106,13 +106,13 @@ public abstract class SharedEntityManagerCreator {
 	 * @return a shareable transactional EntityManager proxy
 	 */
 	public static EntityManager createSharedEntityManager(
-			EntityManagerFactory emf, Map properties, Class... entityManagerInterfaces) {
+			EntityManagerFactory emf, Map<?, ?> properties, Class<?>... entityManagerInterfaces) {
 
 		ClassLoader cl = null;
 		if (emf instanceof EntityManagerFactoryInfo) {
 			cl = ((EntityManagerFactoryInfo) emf).getBeanClassLoader();
 		}
-		Class[] ifcs = new Class[entityManagerInterfaces.length + 1];
+		Class<?>[] ifcs = new Class[entityManagerInterfaces.length + 1];
 		System.arraycopy(entityManagerInterfaces, 0, ifcs, 0, entityManagerInterfaces.length);
 		ifcs[entityManagerInterfaces.length] = EntityManagerProxy.class;
 		return (EntityManager) Proxy.newProxyInstance(
@@ -132,11 +132,11 @@ public abstract class SharedEntityManagerCreator {
 
 		private final EntityManagerFactory targetFactory;
 
-		private final Map properties;
+		private final Map<?, ?> properties;
 
 		private transient volatile ClassLoader proxyClassLoader;
 
-		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map properties) {
+		public SharedEntityManagerInvocationHandler(EntityManagerFactory target, Map<?, ?> properties) {
 			this.targetFactory = target;
 			this.properties = properties;
 			initProxyClassLoader();
@@ -181,7 +181,7 @@ public abstract class SharedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// JPA 2.0: handle unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}
@@ -241,7 +241,7 @@ public abstract class SharedEntityManagerCreator {
 				if (result instanceof Query) {
 					Query query = (Query) result;
 					if (isNewEm) {
-						Class[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
+						Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(query.getClass(), this.proxyClassLoader);
 						result = Proxy.newProxyInstance(this.proxyClassLoader, ifcs,
 								new DeferredQueryInvocationHandler(query, target));
 						isNewEm = false;
@@ -299,7 +299,7 @@ public abstract class SharedEntityManagerCreator {
 			}
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
-				Class targetClass = (Class) args[0];
+				Class<?> targetClass = (Class<?>) args[0];
 				if (targetClass == null || targetClass.isInstance(proxy)) {
 					return proxy;
 				}

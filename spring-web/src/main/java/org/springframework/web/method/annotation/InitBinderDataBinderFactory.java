@@ -38,7 +38,7 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 
 	private final List<InvocableHandlerMethod> binderMethods;
-	
+
 	/**
 	 * Create a new instance.
 	 * @param binderMethods {@code @InitBinder} methods, or {@code null}
@@ -68,8 +68,8 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 	}
 
 	/**
-	 * Return {@code true} if the given {@code @InitBinder} method should be 
-	 * invoked to initialize the given WebDataBinder. 
+	 * Return {@code true} if the given {@code @InitBinder} method should be
+	 * invoked to initialize the given WebDataBinder.
 	 * <p>The default implementation checks if target object name is included
 	 * in the attribute names specified in the {@code @InitBinder} annotation.
 	 */
@@ -78,5 +78,5 @@ public class InitBinderDataBinderFactory extends DefaultDataBinderFactory {
 		Collection<String> names = Arrays.asList(annot.value());
 		return (names.size() == 0 || names.contains(binder.getObjectName()));
 	}
-	
+
 }

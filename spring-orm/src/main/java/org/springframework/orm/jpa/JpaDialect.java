@@ -32,7 +32,7 @@ import org.springframework.transaction.TransactionException;
  * does not offer, such as access to the underlying JDBC Connection. This
  * strategy is mainly intended for standalone usage of a JPA provider; most
  * of its functionality is not relevant when running with JTA transactions.
- * 
+ *
  * <p>Also allows for the provision of value-added methods for portable yet
  * more capable EntityManager and EntityManagerFactory subinterfaces offered
  * by Spring.

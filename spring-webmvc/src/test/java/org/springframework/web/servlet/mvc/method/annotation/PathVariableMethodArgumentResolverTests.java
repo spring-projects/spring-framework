@@ -41,21 +41,21 @@ import org.springframework.web.servlet.mvc.method.annotation.PathVariableMethodA
 
 /**
  * Test fixture with {@link PathVariableMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class PathVariableMethodArgumentResolverTests {
 
 	private PathVariableMethodArgumentResolver resolver;
-	
+
 	private MethodParameter paramNamedString;
 
 	private MethodParameter paramString;
 
 	private ModelAndViewContainer mavContainer;
-	
+
 	private ServletWebRequest webRequest;
-	
+
 	private MockHttpServletRequest request;
 
 	@Before
@@ -70,7 +70,7 @@ public class PathVariableMethodArgumentResolverTests {
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
-	
+
 	@Test
 	public void supportsParameter() {
 		assertTrue("Parameter with @PathVariable annotation", resolver.supportsParameter(paramNamedString));
@@ -85,14 +85,14 @@ public class PathVariableMethodArgumentResolverTests {
 
 		String result = (String) resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		assertEquals("PathVariable not resolved correctly", "value", result);
-		
+
 		@SuppressWarnings("unchecked")
 		Map<String, Object> pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertNotNull(pathVars);
 		assertEquals(1, pathVars.size());
 		assertEquals("value", pathVars.get("name"));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void resolveArgumentWithExistingPathVars() throws Exception {
@@ -106,20 +106,20 @@ public class PathVariableMethodArgumentResolverTests {
 
 		String result = (String) resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		assertEquals("PathVariable not resolved correctly", "value", result);
-		
+
 		pathVars = (Map<String, Object>) request.getAttribute(View.PATH_VARIABLES);
 		assertNotNull(pathVars);
 		assertEquals(2, pathVars.size());
 		assertEquals("value", pathVars.get("name"));
 		assertEquals("oldValue", pathVars.get("oldName"));
 	}
-	
+
 	@Test(expected = ServletRequestBindingException.class)
 	public void handleMissingValue() throws Exception {
 		resolver.resolveArgument(paramNamedString, mavContainer, webRequest, null);
 		fail("Unresolved path variable should lead to exception.");
 	}
-	
+
 	public void handle(@PathVariable(value = "name") String param1, String param2) {
 	}
 

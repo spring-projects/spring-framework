@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import test.beans.TestBean;
  * @author Chris Beams
  */
 public final class SimpleScopeTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(SimpleScopeTests.class, "context.xml");
 
 	private DefaultListableBeanFactory beanFactory;
-	
+
 	@Before
 	public void setUp() {
 		beanFactory = new DefaultListableBeanFactory();
@@ -71,7 +71,7 @@ public final class SimpleScopeTests {
 		XmlBeanDefinitionReader xbdr = new XmlBeanDefinitionReader(beanFactory);
 		xbdr.loadBeanDefinitions(CONTEXT);
 	}
-	
+
 	@Test
 	public void testCanGetScopedObject() {
 		TestBean tb1 = (TestBean) beanFactory.getBean("usesScope");

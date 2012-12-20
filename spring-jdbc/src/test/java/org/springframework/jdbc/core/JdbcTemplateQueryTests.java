@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
 		String sql = "select pass from t_account where first_name='Alef'";
-		
+
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
 

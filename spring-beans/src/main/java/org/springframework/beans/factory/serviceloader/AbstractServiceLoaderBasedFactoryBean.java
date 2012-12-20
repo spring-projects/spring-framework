@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ import org.springframework.util.ClassUtils;
  * @since 2.5
  * @see java.util.ServiceLoader
  */
-public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFactoryBean
+public abstract class AbstractServiceLoaderBasedFactoryBean<T, S> extends AbstractFactoryBean<T>
 		implements BeanClassLoaderAware {
 
-	private Class serviceType;
+	private Class<S> serviceType;
 
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
@@ -42,14 +42,14 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	/**
 	 * Specify the desired service type (typically the service's public API).
 	 */
-	public void setServiceType(Class serviceType) {
+	public void setServiceType(Class<S> serviceType) {
 		this.serviceType = serviceType;
 	}
 
 	/**
 	 * Return the desired service type.
 	 */
-	public Class getServiceType() {
+	public Class<S> getServiceType() {
 		return this.serviceType;
 	}
 
@@ -64,7 +64,7 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	 * @return the object to expose
 	 */
 	@Override
-	protected Object createInstance() {
+	protected T createInstance() {
 		Assert.notNull(getServiceType(), "Property 'serviceType' is required");
 		return getObjectToExpose(ServiceLoader.load(getServiceType(), this.beanClassLoader));
 	}
@@ -75,6 +75,6 @@ public abstract class AbstractServiceLoaderBasedFactoryBean extends AbstractFact
 	 * @param serviceLoader the ServiceLoader for the configured service class
 	 * @return the object to expose
 	 */
-	protected abstract Object getObjectToExpose(ServiceLoader serviceLoader);
+	protected abstract T getObjectToExpose(ServiceLoader<S> serviceLoader);
 
 }

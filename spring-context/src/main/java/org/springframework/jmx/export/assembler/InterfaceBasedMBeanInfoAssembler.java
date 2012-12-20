@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	/**
 	 * Stores the array of interfaces to use for creating the management interface.
 	 */
-	private Class[] managedInterfaces;
+	private Class<?>[] managedInterfaces;
 
 	/**
 	 * Stores the mappings of bean keys to an array of <code>Class</code>es.
@@ -75,7 +75,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	/**
 	 * Stores the mappings of bean keys to an array of <code>Class</code>es.
 	 */
-	private Map<String, Class[]> resolvedInterfaceMappings;
+	private Map<String, Class<?>[]> resolvedInterfaceMappings;
 
 
 	/**
@@ -86,7 +86,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * Each entry <strong>MUST</strong> be an interface.
 	 * @see #setInterfaceMappings
 	 */
-	public void setManagedInterfaces(Class[] managedInterfaces) {
+	public void setManagedInterfaces(Class<?>[] managedInterfaces) {
 		if (managedInterfaces != null) {
 			for (Class<?> ifc : managedInterfaces) {
 				if (!ifc.isInterface()) {
@@ -125,12 +125,12 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @param mappings the specified interface mappings
 	 * @return the resolved interface mappings (with Class objects as values)
 	 */
-	private Map<String, Class[]> resolveInterfaceMappings(Properties mappings) {
-		Map<String, Class[]> resolvedMappings = new HashMap<String, Class[]>(mappings.size());
-		for (Enumeration en = mappings.propertyNames(); en.hasMoreElements();) {
+	private Map<String, Class<?>[]> resolveInterfaceMappings(Properties mappings) {
+		Map<String, Class<?>[]> resolvedMappings = new HashMap<String, Class<?>[]>(mappings.size());
+		for (Enumeration<?> en = mappings.propertyNames(); en.hasMoreElements();) {
 			String beanKey = (String) en.nextElement();
 			String[] classNames = StringUtils.commaDelimitedListToStringArray(mappings.getProperty(beanKey));
-			Class[] classes = resolveClassNames(classNames, beanKey);
+			Class<?>[] classes = resolveClassNames(classNames, beanKey);
 			resolvedMappings.put(beanKey, classes);
 		}
 		return resolvedMappings;
@@ -142,10 +142,10 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * @param beanKey the bean key that the class names are associated with
 	 * @return the resolved Class
 	 */
-	private Class[] resolveClassNames(String[] classNames, String beanKey) {
-		Class[] classes = new Class[classNames.length];
+	private Class<?>[] resolveClassNames(String[] classNames, String beanKey) {
+		Class<?>[] classes = new Class[classNames.length];
 		for (int x = 0; x < classes.length; x++) {
-			Class cls = ClassUtils.resolveClassName(classNames[x].trim(), this.beanClassLoader);
+			Class<?> cls = ClassUtils.resolveClassName(classNames[x].trim(), this.beanClassLoader);
 			if (!cls.isInterface()) {
 				throw new IllegalArgumentException(
 						"Class [" + classNames[x] + "] mapped to bean key [" + beanKey + "] is no interface");
@@ -215,7 +215,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 	 * interface for the given bean.
 	 */
 	private boolean isDeclaredInInterface(Method method, String beanKey) {
-		Class[] ifaces = null;
+		Class<?>[] ifaces = null;
 
 		if (this.resolvedInterfaceMappings != null) {
 			ifaces = this.resolvedInterfaceMappings.get(beanKey);
@@ -229,7 +229,7 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		}
 
 		if (ifaces != null) {
-			for (Class ifc : ifaces) {
+			for (Class<?> ifc : ifaces) {
 				for (Method ifcMethod : ifc.getMethods()) {
 					if (ifcMethod.getName().equals(method.getName()) &&
 							Arrays.equals(ifcMethod.getParameterTypes(), method.getParameterTypes())) {

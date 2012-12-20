@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 	 * is only invoked if the thrown exception is a subtype of the given throwing type.
 	 */
 	private boolean shouldInvokeOnThrowing(Throwable t) {
-		Class throwingType = getDiscoveredThrowingType();
+		Class<?> throwingType = getDiscoveredThrowingType();
 		return throwingType.isAssignableFrom(t.getClass());
 	}
 

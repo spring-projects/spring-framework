@@ -20,7 +20,7 @@ import org.springframework.beans.factory.parsing.ParseState;
 
 /**
  * {@link ParseState} entry representing a pointcut.
- * 
+ *
  * @author Mark Fisher
  * @since 2.0
  */

@@ -31,7 +31,7 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * Integration tests which verify that a subclass of {@link SpringJUnit4ClassRunner}
  * can specify a custom <em>default ContextLoader class name</em> that overrides
  * the standard default class name.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

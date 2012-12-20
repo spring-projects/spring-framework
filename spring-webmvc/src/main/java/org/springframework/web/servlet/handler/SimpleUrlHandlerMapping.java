@@ -54,7 +54,7 @@ import org.springframework.util.CollectionUtils;
  * @see BeanNameUrlHandlerMapping
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
-	
+
 	private final Map<String, Object> urlMap = new HashMap<String, Object>();
 
 

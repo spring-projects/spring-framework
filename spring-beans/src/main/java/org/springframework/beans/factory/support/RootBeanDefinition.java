@@ -104,7 +104,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * Create a new RootBeanDefinition for a singleton.
 	 * @param beanClass the class of the bean to instantiate
 	 */
-	public RootBeanDefinition(Class beanClass) {
+	public RootBeanDefinition(Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
 	}
@@ -116,7 +116,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
 	@Deprecated
-	public RootBeanDefinition(Class beanClass, boolean singleton) {
+	public RootBeanDefinition(Class<?> beanClass, boolean singleton) {
 		super();
 		setBeanClass(beanClass);
 		setSingleton(singleton);
@@ -130,7 +130,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @deprecated as of Spring 3.0, in favor of {@link #setAutowireMode} usage
 	 */
 	@Deprecated
-	public RootBeanDefinition(Class beanClass, int autowireMode) {
+	public RootBeanDefinition(Class<?> beanClass, int autowireMode) {
 		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
@@ -144,7 +144,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param dependencyCheck whether to perform a dependency check for objects
 	 * (not applicable to autowiring a constructor, thus ignored there)
 	 */
-	public RootBeanDefinition(Class beanClass, int autowireMode, boolean dependencyCheck) {
+	public RootBeanDefinition(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 		super();
 		setBeanClass(beanClass);
 		setAutowireMode(autowireMode);
@@ -158,10 +158,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * providing property values.
 	 * @param beanClass the class of the bean to instantiate
 	 * @param pvs the property values to apply
-	 * @deprecated as of Spring 3.0, in favor of {@link #getPropertyValues} usage
+	 * @deprecated as of Spring 3.0, in favor of {@link #setPropertyValues} usage
 	 */
 	@Deprecated
-	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs) {
+	public RootBeanDefinition(Class<?> beanClass, MutablePropertyValues pvs) {
 		super(null, pvs);
 		setBeanClass(beanClass);
 	}
@@ -175,7 +175,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @deprecated since Spring 2.5, in favor of {@link #setScope}
 	 */
 	@Deprecated
-	public RootBeanDefinition(Class beanClass, MutablePropertyValues pvs, boolean singleton) {
+	public RootBeanDefinition(Class<?> beanClass, MutablePropertyValues pvs, boolean singleton) {
 		super(null, pvs);
 		setBeanClass(beanClass);
 		setSingleton(singleton);
@@ -188,7 +188,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	 * @param cargs the constructor argument values to apply
 	 * @param pvs the property values to apply
 	 */
-	public RootBeanDefinition(Class beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
+	public RootBeanDefinition(Class<?> beanClass, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}

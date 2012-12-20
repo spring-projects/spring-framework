@@ -112,6 +112,11 @@ public class BeanDefinitionParserDelegate {
 
 	public static final String AUTOWIRE_CONSTRUCTOR_VALUE = "constructor";
 
+	/**
+	 * @deprecated as of Spring 3.0: If you are using mixed autowiring strategies, use annotation-based autowiring for
+	 *             clearer demarcation of autowiring needs.
+	 */
+	@Deprecated
 	public static final String AUTOWIRE_AUTODETECT_VALUE = "autodetect";
 
 	public static final String DEPENDENCY_CHECK_ALL_ATTRIBUTE_VALUE = "all";
@@ -714,6 +719,7 @@ public class BeanDefinitionParserDelegate {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getAutowireMode(String attValue) {
 		String att = attValue;
 		if (DEFAULT_VALUE.equals(att)) {
@@ -1192,7 +1198,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a list element.
 	 */
-	public List parseListElement(Element collectionEle, BeanDefinition bd) {
+	public List<Object> parseListElement(Element collectionEle, BeanDefinition bd) {
 		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedList<Object> target = new ManagedList<Object>(nl.getLength());
@@ -1206,7 +1212,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a set element.
 	 */
-	public Set parseSetElement(Element collectionEle, BeanDefinition bd) {
+	public Set<Object> parseSetElement(Element collectionEle, BeanDefinition bd) {
 		String defaultElementType = collectionEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 		NodeList nl = collectionEle.getChildNodes();
 		ManagedSet<Object> target = new ManagedSet<Object>(nl.getLength());
@@ -1231,7 +1237,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Parse a map element.
 	 */
-	public Map parseMapElement(Element mapEle, BeanDefinition bd) {
+	public Map<Object, Object> parseMapElement(Element mapEle, BeanDefinition bd) {
 		String defaultKeyType = mapEle.getAttribute(KEY_TYPE_ATTRIBUTE);
 		String defaultValueType = mapEle.getAttribute(VALUE_TYPE_ATTRIBUTE);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 
 	private Object service;
 
-	private Class serviceInterface;
+	private Class<?> serviceInterface;
 
 	private Boolean registerTraceInterceptor;
 
@@ -62,7 +62,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * Set the interface of the service to export.
 	 * The interface must be suitable for the particular service and remoting strategy.
 	 */
-	public void setServiceInterface(Class serviceInterface) {
+	public void setServiceInterface(Class<?> serviceInterface) {
 		if (serviceInterface != null && !serviceInterface.isInterface()) {
 			throw new IllegalArgumentException("'serviceInterface' must be an interface");
 		}
@@ -72,7 +72,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	/**
 	 * Return the interface of the service to export.
 	 */
-	public Class getServiceInterface() {
+	public Class<?> getServiceInterface() {
 		return this.serviceInterface;
 	}
 
@@ -122,7 +122,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 	 * @see #setService
 	 */
 	protected void checkServiceInterface() throws IllegalArgumentException {
-		Class serviceInterface = getServiceInterface();
+		Class<?> serviceInterface = getServiceInterface();
 		Object service = getService();
 		if (serviceInterface == null) {
 			throw new IllegalArgumentException("Property 'serviceInterface' is required");

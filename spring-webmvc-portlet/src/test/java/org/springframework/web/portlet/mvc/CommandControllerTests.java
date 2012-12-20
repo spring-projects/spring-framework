@@ -53,7 +53,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * @author Mark Fisher
  */
 public class CommandControllerTests extends TestCase {
-	
+
 	private static final String ERRORS_KEY = "errors";
 
 	public void testRenderRequestWithNoParams() throws Exception {
@@ -71,7 +71,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testRenderRequestWithParams() throws Exception {
 		TestController tc = new TestController();
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		int age = 30;
@@ -87,10 +87,10 @@ public class CommandControllerTests extends TestCase {
 		assertNotNull(errors);
 		assertEquals("There should be no errors", 0, errors.getErrorCount());
 	}
-	
+
 	public void testRenderRequestWithMismatch() throws Exception {
 		TestController tc = new TestController();
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		request.addParameter("name", name);
@@ -102,11 +102,11 @@ public class CommandControllerTests extends TestCase {
 		assertNotNull(command);
 		assertEquals("Name should be bound", name, command.getName());
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
-		assertEquals("There should be 1 error", 1, errors.getErrorCount());		
+		assertEquals("There should be 1 error", 1, errors.getErrorCount());
 		assertNotNull(errors.getFieldError("age"));
 		assertEquals("typeMismatch", errors.getFieldError("age").getCode());
 	}
-	
+
 	public void testRenderWhenMinimizedReturnsNull() throws Exception {
 		TestController tc = new TestController();
 		assertFalse(tc.isRenderWhenMinimized());
@@ -125,13 +125,13 @@ public class CommandControllerTests extends TestCase {
 		request.setContextPath("test");
 		MockRenderResponse response = new MockRenderResponse();
 		ModelAndView mav = tc.handleRenderRequest(request, response);
-		assertNotNull("ModelAndView should not be null", mav);		
+		assertNotNull("ModelAndView should not be null", mav);
 		assertEquals("test-view", mav.getViewName());
 		assertNotNull(mav.getModel().get(tc.getCommandName()));
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
 		assertEquals("There should be no errors", 0, errors.getErrorCount());
 	}
-	
+
 	public void testRequiresSessionWithoutSession() throws Exception {
 		TestController tc = new TestController();
 		tc.setRequireSession(true);
@@ -151,7 +151,7 @@ public class CommandControllerTests extends TestCase {
 		tc.setRequireSession(true);
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
-		
+
 		// create the session
 		request.getPortletSession(true);
 		try {
@@ -161,7 +161,7 @@ public class CommandControllerTests extends TestCase {
 			fail("Should not have thrown PortletSessionRequiredException");
 		}
 	}
-	
+
 	public void testRenderRequestWithoutCacheSetting() throws Exception {
 		TestController tc = new TestController();
 		MockRenderRequest request = new MockRenderRequest();
@@ -176,17 +176,17 @@ public class CommandControllerTests extends TestCase {
 		tc.setCacheSeconds(-99);
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
-		tc.handleRenderRequest(request, response);		
+		tc.handleRenderRequest(request, response);
 		String cacheProperty = response.getProperty(RenderResponse.EXPIRATION_CACHE);
 		assertNull("Expiration-cache should be null", cacheProperty);
 	}
-	
+
 	public void testRenderRequestWithZeroCacheSetting() throws Exception {
 		TestController tc = new TestController();
 		tc.setCacheSeconds(0);
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
-		tc.handleRenderRequest(request, response);		
+		tc.handleRenderRequest(request, response);
 		String cacheProperty = response.getProperty(RenderResponse.EXPIRATION_CACHE);
 		assertEquals("Expiration-cache should be set to 0 seconds", "0", cacheProperty);
 	}
@@ -196,11 +196,11 @@ public class CommandControllerTests extends TestCase {
 		tc.setCacheSeconds(30);
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
-		tc.handleRenderRequest(request, response);		
+		tc.handleRenderRequest(request, response);
 		String cacheProperty = response.getProperty(RenderResponse.EXPIRATION_CACHE);
 		assertEquals("Expiration-cache should be set to 30 seconds", "30", cacheProperty);
 	}
-	
+
 	public void testActionRequest() throws Exception {
 		TestController tc = new TestController();
 		MockActionRequest request = new MockActionRequest();
@@ -209,14 +209,14 @@ public class CommandControllerTests extends TestCase {
 		TestBean command = (TestBean)request.getPortletSession().getAttribute(tc.getRenderCommandSessionAttributeName());
 		assertTrue(command.isJedi());
 	}
-	
+
 	public void testSuppressBinding() throws Exception {
 		TestController tc = new TestController() {
 			protected boolean suppressBinding(PortletRequest request) {
 				return true;
 			}
 		};
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		int age = 30;
@@ -232,7 +232,7 @@ public class CommandControllerTests extends TestCase {
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
 		assertEquals("There should be no errors", 0, errors.getErrorCount());
 	}
-	
+
 	public void testWithCustomDateEditor() throws Exception {
 		final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		TestController tc = new TestController() {
@@ -240,7 +240,7 @@ public class CommandControllerTests extends TestCase {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 			}
 		};
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		int age = 30;
@@ -265,7 +265,7 @@ public class CommandControllerTests extends TestCase {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 			}
 		};
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		int age = 30;
@@ -278,7 +278,7 @@ public class CommandControllerTests extends TestCase {
 		assertEquals(name, command.getName());
 		assertEquals(age, command.getAge());
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
-		assertEquals("There should be 1 error", 1, errors.getErrorCount());		
+		assertEquals("There should be 1 error", 1, errors.getErrorCount());
 		assertNotNull(errors.getFieldError("date"));
 		assertEquals("typeMismatch", errors.getFieldError("date").getCode());
 		assertEquals(emptyString, errors.getFieldError("date").getRejectedValue());
@@ -291,7 +291,7 @@ public class CommandControllerTests extends TestCase {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 			}
 		};
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		int age = 30;
@@ -304,10 +304,10 @@ public class CommandControllerTests extends TestCase {
 		assertEquals(name, command.getName());
 		assertEquals(age, command.getAge());
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
-		assertEquals("There should be 0 errors", 0, errors.getErrorCount());		
+		assertEquals("There should be 0 errors", 0, errors.getErrorCount());
 		assertNull("date should be null", command.getDate());
 	}
-	
+
 	public void testNestedBindingWithPropertyEditor() throws Exception {
 		TestController tc = new TestController() {
 			protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) {
@@ -318,7 +318,7 @@ public class CommandControllerTests extends TestCase {
 				});
 			}
 		};
-		MockRenderRequest request = new MockRenderRequest();		
+		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
 		String name = "test";
 		String spouseName = "testSpouse";
@@ -338,7 +338,7 @@ public class CommandControllerTests extends TestCase {
 		BindException errors = (BindException)mav.getModel().get(ERRORS_KEY);
 		assertEquals("There should be no errors", 0, errors.getErrorCount());
 	}
-	
+
 	public void testWithValidatorNotSupportingCommandClass() throws Exception {
 		Validator v = new Validator() {
 			public boolean supports(Class c) {
@@ -443,7 +443,7 @@ public class CommandControllerTests extends TestCase {
 		private TestController() {
 			super(TestBean.class, "testBean");
 		}
-		
+
 		protected void handleAction(ActionRequest request, ActionResponse response, Object command, BindException errors) {
 			((TestBean)command).setJedi(true);
 		}

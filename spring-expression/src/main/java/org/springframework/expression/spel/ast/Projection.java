@@ -32,7 +32,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents projection, where a given operation is performed on all elements in some input sequence, returning 
+ * Represents projection, where a given operation is performed on all elements in some input sequence, returning
  * a new sequence of the same size. For example:
  * "{1,2,3,4,5,6,7,8,9,10}.!{#isEven(#this)}" returns "[n, y, n, y, n, y, n, y, n, y]"
  *
@@ -43,7 +43,7 @@ import org.springframework.util.ObjectUtils;
 public class Projection extends SpelNodeImpl {
 
 	private final boolean nullSafe;
-	
+
 	public Projection(boolean nullSafe, int pos, SpelNodeImpl expression) {
 		super(pos, expression);
 		this.nullSafe = nullSafe;
@@ -61,7 +61,7 @@ public class Projection extends SpelNodeImpl {
 		Object operand = op.getValue();
 		boolean operandIsArray = ObjectUtils.isArray(operand);
 		// TypeDescriptor operandTypeDescriptor = op.getTypeDescriptor();
-		
+
 		// When the input is a map, we push a special context object on the stack
 		// before calling the specified operation. This special context object
 		// has two fields 'key' and 'value' that refer to the map entries key
@@ -70,7 +70,7 @@ public class Projection extends SpelNodeImpl {
 		if (operand instanceof Map) {
 			Map<?, ?> mapData = (Map<?, ?>) operand;
 			List<Object> result = new ArrayList<Object>();
-			for (Map.Entry<?,?> entry : mapData.entrySet()) {
+			for (Map.Entry<?, ?> entry : mapData.entrySet()) {
 				try {
 					state.pushActiveContextObject(new TypedValue(entry));
 					result.add(this.children[0].getValueInternal(state).getValue());

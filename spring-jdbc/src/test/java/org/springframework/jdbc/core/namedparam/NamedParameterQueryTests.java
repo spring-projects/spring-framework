@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,10 +113,10 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		List li = template.queryForList(sql, parms);
+		List<Map<String, Object>> li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 2, li.size());
-		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
-		assertEquals("Second row is Integer", 12, ((Integer)((Map)li.get(1)).get("age")).intValue());
+		assertEquals("First row is Integer", 11, li.get(0).get("age"));
+		assertEquals("Second row is Integer", 12, li.get(1).get("age"));
 	}
 
 	public void testQueryForListWithParamMapAndEmptyResult() throws Exception {
@@ -149,7 +149,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		List li = template.queryForList(sql, parms);
+		List<Map<String, Object>> li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 0, li.size());
 	}
 
@@ -192,9 +192,9 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		List li = template.queryForList(sql, parms);
+		List<Map<String, Object>> li = template.queryForList(sql, parms);
 		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer)((Map)li.get(0)).get("age")).intValue());
+		assertEquals("First row is Integer", 11, li.get(0).get("age"));
 	}
 
 	public void testQueryForListWithParamMapAndIntegerElementAndSingleRowAndColumn() throws Exception {
@@ -236,9 +236,9 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		List li = template.queryForList(sql, parms, Integer.class);
+		List<Integer> li = template.queryForList(sql, parms, Integer.class);
 		assertEquals("All rows returned", 1, li.size());
-		assertEquals("First row is Integer", 11, ((Integer) li.get(0)).intValue());
+		assertEquals("First row is Integer", 11, li.get(0).intValue());
 	}
 
 	public void testQueryForMapWithParamMapAndSingleRowAndColumn() throws Exception {
@@ -280,8 +280,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		Map map = template.queryForMap(sql, parms);
-		assertEquals("Row is Integer", 11, ((Integer) map.get("age")).intValue());
+		Map<String, Object> map = template.queryForMap(sql, parms);
+		assertEquals("Row is Integer", 11, map.get("age"));
 	}
 
 	public void testQueryForObjectWithParamMapAndRowMapper() throws Exception {
@@ -316,8 +316,8 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		MapSqlParameterSource parms = new MapSqlParameterSource();
 		parms.addValue("id", new Integer(3));
 
-		Object o = template.queryForObject(sql, parms, new RowMapper() {
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		Object o = template.queryForObject(sql, parms, new RowMapper<Integer>() {
+			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
 		});
@@ -360,7 +360,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
-		Map parms = new HashMap();
+		Map<String, Integer> parms = new HashMap<String, Integer>();
 		parms.put("id", new Integer(3));
 
 		Object o = template.queryForObject(sql, parms, Integer.class);
@@ -498,7 +498,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(mockDataSource);
 
 		MapSqlParameterSource parms = new MapSqlParameterSource();
-		List l1 = new ArrayList();
+		List<Object[]> l1 = new ArrayList<Object[]>();
 		l1.add(new Object[] {new Integer(3), "Rod"});
 		l1.add(new Object[] {new Integer(4), "Juergen"});
 		parms.addValue("multiExpressionList", l1);
@@ -592,7 +592,7 @@ public class NamedParameterQueryTests extends AbstractJdbcTests {
 	}
 
 
-	private static class ParameterBean {
+	public static class ParameterBean {
 
 		private int id;
 

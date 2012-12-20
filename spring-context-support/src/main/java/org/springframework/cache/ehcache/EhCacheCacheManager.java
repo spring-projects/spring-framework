@@ -98,5 +98,4 @@ public class EhCacheCacheManager extends AbstractTransactionSupportingCacheManag
 		}
 		return cache;
 	}
-
 }

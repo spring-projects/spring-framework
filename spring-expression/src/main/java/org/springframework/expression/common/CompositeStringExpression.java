@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.expression.Expression;
  * which will be represented as a CompositeStringExpression of two parts. The first part being a
  * LiteralExpression representing 'Hello ' and the second part being a real expression that will
  * call <code>getName()</code> when invoked.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -60,7 +60,7 @@ public class CompositeStringExpression implements Expression {
 			String value = expression.getValue(String.class);
 			if (value != null) {
 				sb.append(value);
-			}	
+			}
 		}
 		return sb.toString();
 	}
@@ -71,7 +71,7 @@ public class CompositeStringExpression implements Expression {
 			String value = expression.getValue(rootObject, String.class);
 			if (value != null) {
 				sb.append(value);
-			}	
+			}
 		}
 		return sb.toString();
 	}
@@ -93,16 +93,16 @@ public class CompositeStringExpression implements Expression {
 			String value = expression.getValue(context, rootObject, String.class);
 			if (value != null) {
 				sb.append(value);
-			}				
+			}
 		}
 		return sb.toString();
 	}
 
-	public Class getValueType(EvaluationContext context) {
+	public Class<?> getValueType(EvaluationContext context) {
 		return String.class;
 	}
 
-	public Class getValueType() {
+	public Class<?> getValueType() {
 		return String.class;
 	}
 
@@ -131,7 +131,7 @@ public class CompositeStringExpression implements Expression {
 	public boolean isWritable(EvaluationContext context) {
 		return false;
 	}
-	
+
 	public Expression[] getExpressions() {
 		return expressions;
 	}
@@ -148,11 +148,11 @@ public class CompositeStringExpression implements Expression {
 		return ExpressionUtils.convert(context, value, desiredResultType);
 	}
 
-	public Class getValueType(Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 
-	public Class getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
+	public Class<?> getValueType(EvaluationContext context, Object rootObject) throws EvaluationException {
 		return String.class;
 	}
 

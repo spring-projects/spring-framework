@@ -384,8 +384,8 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 	}
 
 	/**
-	 * Handle the case where an {@linkplain RequestPart @RequestPart}, a {@link MultipartFile},
-	 * or a {@code javax.servlet.http.Part} argument is required but is missing.
+	 * Handle the case where an @{@link RequestPart}, a {@link MultipartFile},
+	 * or a {@code javax.servlet.http.Part} argument is required but missing.
 	 * An HTTP 400 error is sent back to the client.
 	 * @param request current HTTP request
 	 * @param response current HTTP response

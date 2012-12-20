@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * <p>This controller is the base for all controllers wishing to populate
  * JavaBeans based on request parameters, validate the content of such
  * JavaBeans using {@link Validator Validators} and use custom editors (in the form of
- * {@link java.beans.PropertyEditor PropertyEditors}) to transform 
+ * {@link java.beans.PropertyEditor PropertyEditors}) to transform
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
@@ -54,7 +54,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * Upon receiving a request, any BaseCommandController will attempt to fill the
  * command object using the request parameters. This is done using the typical
  * and well-known JavaBeans property notation. When a request parameter named
- * <code>'firstName'</code> exists, the framework will attempt to call 
+ * <code>'firstName'</code> exists, the framework will attempt to call
  * <code>setFirstName([value])</code> passing the value of the parameter. Nested properties
  * are of course supported. For instance a parameter named <code>'address.city'</code>
  * will result in a <code>getAddress().setCity([value])</code> call on the
@@ -155,14 +155,14 @@ public abstract class BaseCommandController extends AbstractController {
 	 * session is that we have no way of knowing when we are done re-rendering
 	 * the request and so we don't know when we can remove the objects from
 	 * the session. So we will end up polluting the session with old objects
-	 * when we finally leave the render of this controller and move on to 
+	 * when we finally leave the render of this controller and move on to
 	 * somthing else. To minimize the pollution, we will use a static string
 	 * value as the session attribute name. At least this way we are only ever
 	 * leaving one orphaned set behind. The methods that return these names
 	 * can be overridden if you want to use a different method, but be aware
 	 * of the session pollution that may occur.
 	 */
-	private static final String RENDER_COMMAND_SESSION_ATTRIBUTE = 
+	private static final String RENDER_COMMAND_SESSION_ATTRIBUTE =
 			"org.springframework.web.portlet.mvc.RenderCommand";
 
 	private static final String RENDER_ERRORS_SESSION_ATTRIBUTE =
@@ -172,13 +172,13 @@ public abstract class BaseCommandController extends AbstractController {
 
 
 	private String commandName = DEFAULT_COMMAND_NAME;
-	
-	private Class commandClass;
-	
+
+	private Class<?> commandClass;
+
 	private Validator[] validators;
-	
+
 	private boolean validateOnBinding = true;
-	
+
 	private MessageCodesResolver messageCodesResolver;
 
 	private BindingErrorProcessor bindingErrorProcessor;
@@ -207,14 +207,14 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Set the command class for this controller.
 	 * An instance of this class gets populated and validated on each request.
 	 */
-	public final void setCommandClass(Class commandClass) {
+	public final void setCommandClass(Class<?> commandClass) {
 		this.commandClass = commandClass;
 	}
 
 	/**
 	 * Return the command class for this controller.
 	 */
-	public final Class getCommandClass() {
+	public final Class<?> getCommandClass() {
 		return this.commandClass;
 	}
 
@@ -405,7 +405,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final boolean checkCommand(Object command) {
 		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
-	
+
 
 	/**
 	 * Bind the parameters of the given request to the given command object.
@@ -416,7 +416,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected final PortletRequestDataBinder bindAndValidate(PortletRequest request, Object command)
 			throws Exception {
-				
+
 		PortletRequestDataBinder binder = createBinder(request, command);
 		if (!suppressBinding(request)) {
 			binder.bind(request);
@@ -464,7 +464,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected PortletRequestDataBinder createBinder(PortletRequest request, Object command)
 			throws Exception {
-			
+
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(command, getCommandName());
 		prepareBinder(binder);
 		initBinder(request, binder);
@@ -598,7 +598,7 @@ public abstract class BaseCommandController extends AbstractController {
 		return RENDER_COMMAND_SESSION_ATTRIBUTE;
 	}
 
-	/** 
+	/**
 	 * Return the name of the session attribute that holds
 	 * the render phase command object for this form controller.
 	 * @return the name of the render phase command object session attribute

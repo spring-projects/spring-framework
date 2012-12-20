@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,12 @@ public final class PrototypeBasedTargetSourceTests {
 	public void testSerializability() throws Exception {
 		MutablePropertyValues tsPvs = new MutablePropertyValues();
 		tsPvs.add("targetBeanName", "person");
-		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class, tsPvs);
+		RootBeanDefinition tsBd = new RootBeanDefinition(TestTargetSource.class);
+		tsBd.setPropertyValues(tsPvs);
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class, pvs);
+		RootBeanDefinition bd = new RootBeanDefinition(SerializablePerson.class);
+		bd.setPropertyValues(pvs);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -59,13 +61,14 @@ public final class PrototypeBasedTargetSourceTests {
 		assertNotNull(sts.getTarget());
 	}
 
-	
+
 	private static class TestTargetSource extends AbstractPrototypeBasedTargetSource {
-		
+
 		/**
 		 * Nonserializable test field to check that subclass
 		 * state can't prevent serialization from working
 		 */
+		@SuppressWarnings("unused")
 		private TestBean thisFieldIsNotSerializable = new TestBean();
 
 		public Object getTarget() throws Exception {

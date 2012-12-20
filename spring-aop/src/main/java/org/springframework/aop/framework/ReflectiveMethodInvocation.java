@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 
 	protected Object[] arguments;
 
-	private final Class targetClass;
+	private final Class<?> targetClass;
 
 	/**
 	 * Lazily initialized map of user-specific attributes for this invocation.
@@ -79,7 +79,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * List of MethodInterceptor and InterceptorAndDynamicMethodMatcher
 	 * that need dynamic checks.
 	 */
-	protected final List interceptorsAndDynamicMethodMatchers;
+	protected final List<Object> interceptorsAndDynamicMethodMatchers;
 
 	/**
 	 * Index from 0 of the current interceptor we're invoking.
@@ -103,7 +103,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	protected ReflectiveMethodInvocation(
 			Object proxy, Object target, Method method, Object[] arguments,
-			Class targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
+			Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
 
 		this.proxy = proxy;
 		this.target = target;
@@ -151,7 +151,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		}
 
 		Object interceptorOrInterceptionAdvice =
-		    this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+			this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.

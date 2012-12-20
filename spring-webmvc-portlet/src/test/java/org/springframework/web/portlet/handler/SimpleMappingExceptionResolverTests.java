@@ -33,7 +33,7 @@ import org.springframework.web.portlet.ModelAndView;
  * @author Juergen Hoeller
  */
 public class SimpleMappingExceptionResolverTests extends TestCase {
-	
+
 	private static final String DEFAULT_VIEW = "default-view";
 
 	private SimpleMappingExceptionResolver exceptionResolver;
@@ -51,19 +51,19 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		handler2 = new Object();
 		genericException = new Exception();
 	}
-	
+
 	public void testSetOrder() {
 		exceptionResolver.setOrder(2);
 		assertEquals(2, exceptionResolver.getOrder());
 	}
-	
+
 	public void testDefaultErrorView() {
 		exceptionResolver.setDefaultErrorView(DEFAULT_VIEW);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals(DEFAULT_VIEW, mav.getViewName());
 		assertEquals(genericException, mav.getModel().get(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
 	}
-	
+
 	public void testDefaultErrorViewDifferentHandler() {
 		exceptionResolver.setDefaultErrorView(DEFAULT_VIEW);
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
@@ -90,14 +90,14 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		assertEquals(DEFAULT_VIEW, mav.getViewName());
 		assertNull(mav.getModel().get(SimpleMappingExceptionResolver.DEFAULT_EXCEPTION_ATTRIBUTE));
 	}
-	
+
 	public void testNullExceptionMappings() {
 		exceptionResolver.setExceptionMappings(null);
 		exceptionResolver.setDefaultErrorView(DEFAULT_VIEW);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals(DEFAULT_VIEW, mav.getViewName());
 	}
-	
+
 	public void testDefaultNoRenderWhenMinimized() {
 		exceptionResolver.setDefaultErrorView(DEFAULT_VIEW);
 		request.setWindowState(WindowState.MINIMIZED);
@@ -113,7 +113,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		assertNotNull("ModelAndView should not be null", mav);
 		assertEquals(DEFAULT_VIEW, mav.getViewName());
 	}
-	
+
 	public void testSimpleExceptionMapping() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
@@ -122,7 +122,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
 	}
-	
+
 	public void testExactExceptionMappingWithHandlerSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
@@ -131,7 +131,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
 	}
-	
+
 	public void testExactExceptionMappingWithHandlerClassSpecified() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
@@ -176,7 +176,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertNull("Exception not mapped - ModelAndView should be null", mav);
 	}
-	
+
 	public void testTwoMappings() {
 		Properties props = new Properties();
 		props.setProperty("java.lang.Exception", "error");
@@ -186,7 +186,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
 	}
-	
+
 	public void testTwoMappingsOneShortOneLong() {
 		Properties props = new Properties();
 		props.setProperty("Exception", "error");
@@ -196,7 +196,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, genericException);
 		assertEquals("error", mav.getViewName());
 	}
-	
+
 	public void testTwoMappingsOneShortOneLongThrowOddException() {
 		Exception oddException = new SomeOddException();
 		Properties props = new Properties();
@@ -207,7 +207,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
 		assertEquals("error", mav.getViewName());
 	}
-	
+
 	public void testTwoMappingsThrowOddExceptionUseLongExceptionMapping() {
 		Exception oddException = new SomeOddException();
 		Properties props = new Properties();
@@ -218,7 +218,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
 		assertEquals("another-error", mav.getViewName());
 	}
-	
+
 	public void testThreeMappings() {
 		Exception oddException = new AnotherOddException();
 		Properties props = new Properties();
@@ -230,7 +230,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
 		assertEquals("another-some-error", mav.getViewName());
 	}
-	
+
 	public void testExceptionWithSubstringMatchingParent() {
 		Exception oddException = new SomeOddExceptionChild();
 		Properties props = new Properties();
@@ -240,9 +240,9 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
-		assertEquals("child-error", mav.getViewName());		
+		assertEquals("child-error", mav.getViewName());
 	}
-	
+
 	public void testMostSpecificExceptionInHierarchyWins() {
 		Exception oddException = new NoSubstringMatchesThisException();
 		Properties props = new Properties();
@@ -251,19 +251,19 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 		exceptionResolver.setMappedHandlers(Collections.singleton(handler1));
 		exceptionResolver.setExceptionMappings(props);
 		ModelAndView mav = exceptionResolver.resolveException(request, response, handler1, oddException);
-		assertEquals("parent-error", mav.getViewName());		
+		assertEquals("parent-error", mav.getViewName());
 	}
 
 
 	private static class SomeOddException extends Exception {
 
 	}
-	
+
 
 	private static class SomeOddExceptionChild extends SomeOddException {
 
 	}
-	
+
 
 	private static class NoSubstringMatchesThisException extends SomeOddException {
 
@@ -273,5 +273,5 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	private static class AnotherOddException extends Exception {
 
 	}
-	
+
 }

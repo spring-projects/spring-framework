@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,8 +129,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 		replay();
 
-		SqlQuery query = new MappingSqlQueryWithParameters() {
-			protected Object mapRow(ResultSet rs, int rownum, Object[] params, Map context) throws SQLException {
+		SqlQuery<Integer> query = new MappingSqlQueryWithParameters<Integer>() {
+			protected Integer mapRow(ResultSet rs, int rownum, Object[] params, Map context) throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
 				return new Integer(rs.getInt(1));
@@ -140,10 +140,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		query.setDataSource(mockDataSource);
 		query.setSql(SELECT_ID);
 		query.compile();
-		List list = query.execute();
+		List<Integer> list = query.execute();
 		assertTrue("Found customers", list.size() != 0);
-		for (Iterator itr = list.iterator(); itr.hasNext();) {
-			Integer id = (Integer) itr.next();
+		for (Integer id : list) {
 			assertTrue(
 				"Customer id was assigned correctly",
 				id.intValue() == 1);
@@ -153,8 +152,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	public void testQueryWithoutEnoughParams() {
 		replay();
 
-		MappingSqlQuery query = new MappingSqlQuery() {
-			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+		MappingSqlQuery<Integer> query = new MappingSqlQuery<Integer>() {
+			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
 
@@ -168,7 +167,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		query.compile();
 
 		try {
-			List list = query.execute();
+			query.execute();
 			fail("Shouldn't succeed in running query without enough params");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
@@ -179,8 +178,8 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	public void testQueryWithMissingMapParams() {
 		replay();
 
-		MappingSqlQuery query = new MappingSqlQuery() {
-			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+		MappingSqlQuery<Integer> query = new MappingSqlQuery<Integer>() {
+			protected Integer mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
 		};
@@ -193,9 +192,9 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		query.compile();
 
 		try {
-			Map params = new HashMap();
+			Map<String, String> params = new HashMap<String, String>();
 			params.put(COLUMN_NAMES[0], "Value");
-			List list = query.executeByNamedParam(params);
+			query.executeByNamedParam(params);
 			fail("Shouldn't succeed in running query with missing params");
 		}
 		catch (InvalidDataAccessApiUsageException ex) {
@@ -423,7 +422,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 
 		replay();
 
-		class CustomerQuery extends MappingSqlQuery {
+		class CustomerQuery extends MappingSqlQuery<Customer> {
 
 			public CustomerQuery(DataSource ds) {
 				super(ds, SELECT_ID_FORENAME_WHERE);
@@ -431,7 +430,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
-			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
+			protected Customer mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -439,7 +438,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			}
 
 			public Customer findCustomer(String id) {
-				return (Customer) findObject(id);
+				return findObject(id);
 			}
 		}
 
@@ -969,7 +968,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		Assert.assertEquals("Second customer id was assigned correctly", ((Customer)cust.get(1)).getId(), 2);
 		Assert.assertEquals("Second customer forename was assigned correctly", ((Customer)cust.get(1)).getForename(), "juergen");
 	}
-	
+
 	public void testNamedParameterQueryReusingParameter() throws SQLException {
 		mockResultSet.next();
 		ctrlResultSet.setReturnValue(true);

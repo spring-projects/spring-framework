@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,6 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.namespace.QName;
-
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -56,7 +47,7 @@ public class HttpMessageConverterTests {
 		assertFalse(converter.canRead(MyType.class, new MediaType("foo", "*")));
 		assertFalse(converter.canRead(MyType.class, MediaType.ALL));
 	}
-	
+
 	@Test
 	public void canWrite() {
 		AbstractHttpMessageConverter<MyType> converter = new MyHttpMessageConverter<MyType>(MEDIA_TYPE) {

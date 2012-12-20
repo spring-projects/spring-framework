@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import java.util.Collection;
  * @author Rod Johnson
  * @since 27.05.2003
  */
-public class MixedCollectionBean {
+public class MixedCollectionBean<T> {
 
-	private Collection jumble;
+	private Collection<T> jumble;
 
 
-	public void setJumble(Collection jumble) {
+	public void setJumble(Collection<T> jumble) {
 		this.jumble = jumble;
 	}
 
-	public Collection getJumble() {
+	public Collection<T> getJumble() {
 		return jumble;
 	}
 

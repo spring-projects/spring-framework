@@ -47,12 +47,12 @@ import org.springframework.util.MultiValueMap;
 /**
  * {@link javax.servlet.Filter} that makes form encoded data available through
  * the {@code ServletRequest.getParameter*()} family of methods during HTTP PUT
- * or PATCH requests.
+ * requests.
  *
  * <p>The Servlet spec requires form data to be available for HTTP POST but
- * not for HTTP PUT or PATCH requests. This filter intercepts HTTP PUT and PATCH
- * requests where content type is {@code 'application/x-www-form-urlencoded'},
- * reads form encoded content from the body of the request, and wraps the ServletRequest
+ * not for HTTP PUT requests. This filter intercepts HTTP PUT requests where
+ * content type is {@code 'application/x-www-form-urlencoded'}, reads form
+ * encoded content from the body of the request, and wraps the ServletRequest
  * in order to make the form data available as request parameters just like
  * it is for HTTP POST requests.
  *
@@ -61,7 +61,7 @@ import org.springframework.util.MultiValueMap;
  */
 public class HttpPutFormContentFilter extends OncePerRequestFilter {
 
-	private final FormHttpMessageConverter formConverter = new AllEncompassingFormHttpMessageConverter();
+	private final FormHttpMessageConverter formConverter = new XmlAwareFormHttpMessageConverter();
 
 	/**
 	 * The default character set to use for reading form data.

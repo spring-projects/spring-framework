@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		registerSingleton("standardHandlerAdapter", SimpleControllerHandlerAdapter.class);
 		registerSingleton("portletHandlerAdapter", SimplePortletHandlerAdapter.class);
 		registerSingleton("myHandlerAdapter", MyHandlerAdapter.class);
-		
+
 		registerSingleton("viewController", ViewController.class);
 		registerSingleton("editController", EditController.class);
 		registerSingleton("helpController1", HelpController1.class);
@@ -93,21 +93,21 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		registerSingleton("testController2", TestController2.class);
 		registerSingleton("requestLocaleCheckingController", RequestLocaleCheckingController.class);
 		registerSingleton("localeContextCheckingController", LocaleContextCheckingController.class);
-		
+
 		registerSingleton("exceptionThrowingHandler1", ExceptionThrowingHandler.class);
 		registerSingleton("exceptionThrowingHandler2", ExceptionThrowingHandler.class);
 		registerSingleton("unknownHandler", Object.class);
-		
+
 		registerSingleton("myPortlet", MyPortlet.class);
 		registerSingleton("portletMultipartResolver", MockMultipartResolver.class);
 		registerSingleton("portletPostProcessor", SimplePortletPostProcessor.class);
 		registerSingleton("testListener", TestApplicationListener.class);
-		
+
 		ConstructorArgumentValues cvs = new ConstructorArgumentValues();
 		cvs.addIndexedArgumentValue(0, new MockPortletContext());
 		cvs.addIndexedArgumentValue(1, "complex");
 		registerBeanDefinition("portletConfig", new RootBeanDefinition(MockPortletConfig.class, cvs, null));
-		
+
 		UserRoleAuthorizationInterceptor userRoleInterceptor = new UserRoleAuthorizationInterceptor();
 		userRoleInterceptor.setAuthorizedRoles(new String[] {"role1", "role2"});
 
@@ -129,7 +129,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		pvs.add("portletModeMap", portletModeMap);
 		pvs.add("interceptors", interceptors);
 		registerSingleton("handlerMapping3", PortletModeHandlerMapping.class, pvs);
-		
+
 		pvs = new MutablePropertyValues();
 		Map parameterMap = new ManagedMap();
 		parameterMap.put("test1", new RuntimeBeanReference("testController1"));
@@ -144,7 +144,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		pvs.add("parameterName", "myParam");
 		pvs.add("order", "2");
 		registerSingleton("handlerMapping2", ParameterHandlerMapping.class, pvs);
-		
+
 		pvs = new MutablePropertyValues();
 		Map innerMap = new ManagedMap();
 		innerMap.put("help1", new RuntimeBeanReference("helpController1"));
@@ -178,7 +178,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		addMessage("test", Locale.ENGLISH, "test message");
 		addMessage("test", Locale.CANADA, "Canadian & test message");
 		addMessage("test.args", Locale.ENGLISH, "test {0} and {1}");
-		
+
 		super.refresh();
 	}
 
@@ -214,7 +214,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return new ModelAndView("someViewName", "result", "view was here");
 		}
 	}
-	
+
 
 	public static class EditController implements Controller {
 
@@ -226,7 +226,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return new ModelAndView(request.getParameter("param"));
 		}
 	}
-	
+
 
 	public static class HelpController1 implements Controller {
 
@@ -250,7 +250,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 			return new ModelAndView("help2-view");
 		}
 	}
-	
+
 	public static class RequestLocaleCheckingController implements Controller {
 
 		public void handleActionRequest(ActionRequest request, ActionResponse response) throws PortletException {
@@ -258,8 +258,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 				throw new PortletException("Incorrect Locale in ActionRequest");
 			}
 		}
-		
-		public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) 
+
+		public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response)
 			throws PortletException, IOException {
 			if (!Locale.CANADA.equals(request.getLocale())) {
 				throw new PortletException("Incorrect Locale in RenderRequest");
@@ -277,8 +277,8 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 				throw new PortletException("Incorrect Locale in LocaleContextHolder");
 			}
 		}
-		
-		public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) 
+
+		public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response)
 			throws PortletException, IOException {
 			if (!Locale.CANADA.equals(LocaleContextHolder.getLocale())) {
 				throw new PortletException("Incorrect Locale in LocaleContextHolder");
@@ -304,7 +304,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 		public void render(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 			response.getWriter().write("myPortlet was here");
 		}
-		
+
 		public PortletConfig getPortletConfig() {
 			return this.portletConfig;
 		}
@@ -319,7 +319,7 @@ public class ComplexPortletApplicationContext extends StaticPortletApplicationCo
 
 		public void doSomething(PortletRequest request) throws Exception;
 	}
-	
+
 
 	public static class ExceptionThrowingHandler implements MyHandler {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,16 +110,16 @@ public class InitializeDatabaseIntegrationTests {
 		JdbcTemplate t = new JdbcTemplate(dataSource);
 		assertEquals(1, t.queryForInt("select count(*) from T_TEST"));
 	}
-	
+
 	public static class CacheData implements InitializingBean {
 
 		private JdbcTemplate jdbcTemplate;
 		private List<Map<String,Object>> cache;
-		
+
 		public void setDataSource(DataSource dataSource) {
 			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
-		
+
 		public List<Map<String,Object>> getCachedData() {
 			return cache;
 		}
@@ -127,7 +127,7 @@ public class InitializeDatabaseIntegrationTests {
 		public void afterPropertiesSet() throws Exception {
 			cache = jdbcTemplate.queryForList("SELECT * FROM T_TEST");
 		}
-		
+
 	}
 
 }

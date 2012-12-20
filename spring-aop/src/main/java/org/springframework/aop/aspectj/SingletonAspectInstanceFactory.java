@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @see SimpleAspectInstanceFactory
  */
 public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
-	
+
 	private final Object aspectInstance;
 
 

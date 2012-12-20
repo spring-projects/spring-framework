@@ -103,7 +103,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertEquals(PortletRequestUtils.getLongParameter(request, "param1", 6L), 5L);
 		assertEquals(PortletRequestUtils.getRequiredIntParameter(request, "param1"), 5L);
 		assertEquals(PortletRequestUtils.getLongParameter(request, "param2", 6L), 6L);
-		
+
 		try {
 			PortletRequestUtils.getRequiredLongParameter(request, "param2");
 			fail("Should have thrown PortletRequestBindingException");

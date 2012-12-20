@@ -285,7 +285,7 @@ public class ServletAnnotationControllerTests {
 			}
 		};
 		servlet.init(new MockServletConfig());
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myApp/myPath.do");
 		request.setContextPath("/myApp");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -334,7 +334,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
-		String allowHeader = (String) response.getHeader("Allow");
+		String allowHeader = response.getHeader("Allow");
 		assertNotNull("No Allow header", allowHeader);
 		Set<String> allowedMethods = new HashSet<String>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
@@ -1705,7 +1705,7 @@ public class ServletAnnotationControllerTests {
 		assertEquals("handle", response.getContentAsString());
 
 	}
-	
+
 	@Test
 	public void trailingSlash() throws Exception {
 		initServlet(TrailingSlashController.class);
@@ -2824,7 +2824,7 @@ public class ServletAnnotationControllerTests {
 
 	@XmlRootElement
 	public static class A {
-		
+
 	}
 
 	@XmlRootElement
@@ -3144,7 +3144,7 @@ public class ServletAnnotationControllerTests {
 		public void root(Writer writer) throws IOException {
 			writer.write("root");
 		}
-		
+
 		@RequestMapping(value = "/{templatePath}/", method = RequestMethod.GET)
 		public void templatePath(Writer writer) throws IOException {
 			writer.write("templatePath");
@@ -3256,10 +3256,10 @@ public class ServletAnnotationControllerTests {
 			writer.write("handle2");
 		}
 	}
-	
+
 	@Controller
 	static class HeadersConditionController {
-		
+
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public String home() {
 			return "home";
@@ -3279,5 +3279,5 @@ public class ServletAnnotationControllerTests {
 		public void handle(RedirectAttributes redirectAttrs) {
 		}
 	}
-	
+
 }

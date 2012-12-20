@@ -87,7 +87,7 @@ import org.springframework.util.ClassUtils;
  * shrinking back to the standard number of consumers once the load decreases.
  * Consider adapting the {@link #setIdleTaskExecutionLimit "idleTaskExecutionLimit"}
  * setting to control the lifespan of each new task, to avoid frequent scaling up
- * and down, in particular if the {@code ConnectionFactory} does not pool JMS 
+ * and down, in particular if the {@code ConnectionFactory} does not pool JMS
  * {@code Sessions} and/or the {@code TaskExecutor} does not pool threads (check
  * your configuration!). Note that dynamic scaling only really makes sense for a
  * queue in the first place; for a topic, you will typically stick with the default
@@ -421,7 +421,7 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	}
 
 	/**
-	 * Return the limit for the number of idle consumers. 
+	 * Return the limit for the number of idle consumers.
 	 */
 	public final int getIdleConsumerLimit() {
 		synchronized (this.lifecycleMonitor) {

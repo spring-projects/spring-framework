@@ -96,6 +96,7 @@ public class MapToMapConverterTests {
 		assertEquals((Integer) 37, result.get(2));
 	}
 
+	@SuppressWarnings("rawtypes")
 	public Map notGenericMapSource;
 
 	@Test

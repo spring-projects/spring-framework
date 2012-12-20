@@ -185,7 +185,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 	/**
 	 * Predicate interface for determining a match with a given request.
 	 */
-	protected interface PortletRequestMappingPredicate extends Comparable {
+	protected interface PortletRequestMappingPredicate extends Comparable<Object> {
 
 		/**
 		 * Determine whether the given request matches this predicate.

@@ -59,8 +59,8 @@ import org.springframework.util.StringUtils;
  * JpaTransactionManager through the superclass.
  *
  * <p>When using Xerces, make sure a post 2.0.2 version is available on the classpath
- * to avoid a critical 
- * <a href="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a> 
+ * to avoid a critical
+ * <a href="http://nagoya.apache.org/bugzilla/show_bug.cgi?id=16014"/>bug</a>
  * that leads to StackOverflow. Maven users are likely to encounter this problem since
  * 2.0.2 is used by default.
  *
@@ -83,7 +83,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
-	
+
 	/**
 	 * Map from String defining unique combination of config locations, to ApplicationContext.
 	 * Values are intentionally not strongly typed, to avoid potential class cast exceptions
@@ -139,15 +139,15 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 	@Override
 	public void setDirty() {
-		super.setDirty();		
+		super.setDirty();
 		contextCache.remove(cacheKeys());
 		classLoaderCache.remove(cacheKeys());
-		
+
 		// If we are a shadow loader, we need to invoke
-		// the shadow parent to set it dirty, as 
+		// the shadow parent to set it dirty, as
 		// it is the shadow parent that maintains the cache state,
 		// not the child
-		if (this.shadowParent != null) {			
+		if (this.shadowParent != null) {
 			try {
 				Method m = shadowParent.getClass().getMethod("setDirty", (Class[]) null);
 				m.invoke(shadowParent, (Object[]) null);
@@ -158,11 +158,11 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		}
 	}
 
-	
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void runBare() throws Throwable {
-		
+
 		// getName will return the name of the method being run.
 		if (isDisabledInThisEnvironment(getName())) {
 			// Let superclass log that we didn't run the test.
@@ -178,13 +178,13 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 					+ "Total disabled tests=" + getDisabledTestCount());
 			return;
 		}
-		
+
 		if (!shouldUseShadowLoader()) {
 			super.runBare();
 			return;
 		}
-		
-		String combinationOfContextLocationsForThisTestClass = cacheKeys(); 			
+
+		String combinationOfContextLocationsForThisTestClass = cacheKeys();
 		ClassLoader classLoaderForThisTestClass = getClass().getClassLoader();
 		// save the TCCL
 		ClassLoader initialClassLoader = Thread.currentThread().getContextClassLoader();
@@ -254,7 +254,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				}
 				// create the shadowed test
 				Class shadowedTestClass = shadowingClassLoader.loadClass(getClass().getName());
-				
+
 				// So long as JUnit is excluded from shadowing we
 				// can minimize reflective invocation here
 				TestCase shadowedTestCase = (TestCase) BeanUtils.instantiateClass(shadowedTestClass);
@@ -294,12 +294,12 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	 * class to be loaded eagerly when this test case loads, creating verify errors at runtime.
 	 */
 	protected ClassLoader createShadowingClassLoader(ClassLoader classLoader) {
-		OrmXmlOverridingShadowingClassLoader orxl = new OrmXmlOverridingShadowingClassLoader(classLoader, 
-				getActualOrmXmlLocation());		
+		OrmXmlOverridingShadowingClassLoader orxl = new OrmXmlOverridingShadowingClassLoader(classLoader,
+				getActualOrmXmlLocation());
 		customizeResourceOverridingShadowingClassLoader(orxl);
 		return orxl;
 	}
-	
+
 	/**
 	 * Customize the shadowing class loader.
 	 * @param shadowingClassLoader this parameter is actually of type
@@ -310,7 +310,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 	protected void customizeResourceOverridingShadowingClassLoader(ClassLoader shadowingClassLoader) {
 		// empty
 	}
-	
+
 	/**
 	 * Subclasses can override this to return the real location path for
 	 * orm.xml or null if they do not wish to find any orm.xml
@@ -366,7 +366,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		public ClassLoader getInstrumentableClassLoader() {
 			return this.shadowingClassLoader;
 		}
-		
+
 		public ClassLoader getThrowawayClassLoader() {
 			// Be sure to copy the same resource overrides and same class file transformers:
 			// We want the throwaway class loader to behave like the instrumentable class loader.

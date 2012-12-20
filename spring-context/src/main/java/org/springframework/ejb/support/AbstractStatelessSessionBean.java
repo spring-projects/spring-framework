@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,16 +81,16 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 
 
 	/**
-	 * @see javax.ejb.SessionBean#ejbActivate(). This method always throws an exception, as
-	 * it should not be invoked by the EJB container.
+	 * This method always throws an exception, as it should not be invoked by the EJB container.
+	 * @see javax.ejb.SessionBean#ejbActivate()
 	 */
 	public void ejbActivate() throws EJBException {
 		throw new IllegalStateException("ejbActivate must not be invoked on a stateless session bean");
 	}
 
 	/**
-	 * @see javax.ejb.SessionBean#ejbPassivate(). This method always throws an exception, as
-	 * it should not be invoked by the EJB container.
+	 * This method always throws an exception, as it should not be invoked by the EJB container.
+	 * @see javax.ejb.SessionBean#ejbPassivate()
 	 */
 	public void ejbPassivate() throws EJBException {
 		throw new IllegalStateException("ejbPassivate must not be invoked on a stateless session bean");

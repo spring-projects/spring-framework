@@ -110,7 +110,7 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 		if (!(obj instanceof InvertibleComparator)) {
 			return false;
 		}
-		InvertibleComparator<T> other = (InvertibleComparator<T>) obj;
+		InvertibleComparator<?> other = (InvertibleComparator<?>) obj;
 		return (this.comparator.equals(other.comparator) && this.ascending == other.ascending);
 	}
 

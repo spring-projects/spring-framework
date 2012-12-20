@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
  * @since 1.1
  */
 public interface MethodReplacer {
-	
+
 	/**
 	 * Reimplement the given method.
 	 * @param obj the instance we're reimplementing the method for

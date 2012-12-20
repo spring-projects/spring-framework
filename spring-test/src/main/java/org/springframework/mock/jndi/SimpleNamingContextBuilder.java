@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ import org.springframework.util.ClassUtils;
  * DataSource ds = new DriverManagerDataSource(...);
  * builder.bind("java:comp/env/jdbc/myds", ds);
  * builder.activate();</pre>
- * 
+ *
  * Note that it's impossible to activate multiple builders within the same JVM,
  * due to JNDI restrictions. Thus to configure a fresh builder repeatedly, use
  * the following code to get a reference to either an already activated builder

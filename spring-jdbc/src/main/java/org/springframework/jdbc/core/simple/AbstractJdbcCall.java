@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public abstract class AbstractJdbcCall {
 	private final List<SqlParameter> declaredParameters = new ArrayList<SqlParameter>();
 
 	/** List of RefCursor/ResultSet RowMapper objects */
-	private final Map<String, RowMapper> declaredRowMappers = new LinkedHashMap<String, RowMapper>();
+	private final Map<String, RowMapper<?>> declaredRowMappers = new LinkedHashMap<String, RowMapper<?>>();
 
 	/**
 	 * Has this operation been compiled? Compilation means at
@@ -220,7 +220,7 @@ public abstract class AbstractJdbcCall {
 	 * @param parameterName name of parameter or column
 	 * @param rowMapper the RowMapper implementation to use
 	 */
-	public void addDeclaredRowMapper(String parameterName, RowMapper rowMapper) {
+	public void addDeclaredRowMapper(String parameterName, RowMapper<?> rowMapper) {
 		this.declaredRowMappers.put(parameterName, rowMapper);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Added row mapper for [" + getProcedureName() + "]: " + parameterName);
@@ -232,8 +232,8 @@ public abstract class AbstractJdbcCall {
 	 * @deprecated in favor of {@link #addDeclaredRowMapper(String, org.springframework.jdbc.core.RowMapper)}
 	 */
 	@Deprecated
-	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper rowMapper) {
-		addDeclaredRowMapper(parameterName, (RowMapper) rowMapper);
+	public void addDeclaredRowMapper(String parameterName, ParameterizedRowMapper<?> rowMapper) {
+		addDeclaredRowMapper(parameterName, (RowMapper<?>) rowMapper);
 	}
 
 	/**
@@ -289,7 +289,7 @@ public abstract class AbstractJdbcCall {
 		this.callMetaDataContext.initializeMetaData(getJdbcTemplate().getDataSource());
 
 		// iterate over the declared RowMappers and register the corresponding SqlParameter
-		for (Map.Entry<String, RowMapper> entry : this.declaredRowMappers.entrySet()) {
+		for (Map.Entry<String, RowMapper<?>> entry : this.declaredRowMappers.entrySet()) {
 			SqlParameter resultSetParameter =
 					this.callMetaDataContext.createReturnResultSetParameter(entry.getKey(), entry.getValue());
 			this.declaredParameters.add(resultSetParameter);

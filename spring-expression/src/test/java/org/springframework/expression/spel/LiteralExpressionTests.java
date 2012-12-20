@@ -46,7 +46,7 @@ public class LiteralExpressionTests {
 		Assert.assertFalse(lEx.isWritable(new Rooty()));
 		Assert.assertFalse(lEx.isWritable(new StandardEvaluationContext(), new Rooty()));
 	}
-	
+
 	static class Rooty {}
 
 	@Test

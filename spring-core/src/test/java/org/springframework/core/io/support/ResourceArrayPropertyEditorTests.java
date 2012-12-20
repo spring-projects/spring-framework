@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class ResourceArrayPropertyEditorTests {
 
 	@Test
 	public void testPatternResource() throws Exception {
-		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.  
+		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.
 		// The result depends on the classpath - if test-classes are segregated from classes
 		// and they come first on the classpath (like in Maven) then it breaks, if classes
 		// comes first (like in Spring Build) then it is OK.
@@ -65,6 +65,7 @@ public class ResourceArrayPropertyEditorTests {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test(expected=IllegalArgumentException.class)
 	public void testStrictSystemPropertyReplacement() {
 		PropertyEditor editor = new ResourceArrayPropertyEditor(new PathMatchingResourcePatternResolver(), false);

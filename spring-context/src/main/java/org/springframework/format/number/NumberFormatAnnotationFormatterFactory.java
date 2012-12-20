@@ -76,7 +76,7 @@ public class NumberFormatAnnotationFormatterFactory
 	public Printer<Number> getPrinter(NumberFormat annotation, Class<?> fieldType) {
 		return configureFormatterFrom(annotation);
 	}
-	
+
 	public Parser<Number> getParser(NumberFormat annotation, Class<?> fieldType) {
 		return configureFormatterFrom(annotation);
 	}

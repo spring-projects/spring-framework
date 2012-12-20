@@ -114,10 +114,10 @@ public class GenericConversionService implements ConfigurableConversionService {
 	// implementing ConversionService
 
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
-		Assert.notNull(targetType, "The targetType to convert to cannot be null");
-		return canConvert(sourceType != null ?
-				TypeDescriptor.valueOf(sourceType) : null,
-				TypeDescriptor.valueOf(targetType));
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}
+		return canConvert(sourceType != null ? TypeDescriptor.valueOf(sourceType) : null, TypeDescriptor.valueOf(targetType));
 	}
 
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -150,7 +150,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
-		Assert.notNull(targetType,"The targetType to convert to cannot be null");
+		if (targetType == null) {
+			throw new IllegalArgumentException("The targetType to convert to cannot be null");
+		}
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
@@ -169,7 +171,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 			Object result = ConversionUtils.invokeConverter(converter, source, sourceType, targetType);
 			return handleResult(sourceType, targetType, result);
 		}
-		return handleConverterNotFound(source, sourceType, targetType);
+		else {
+			return handleConverterNotFound(source, sourceType, targetType);
+		}
 	}
 
 	/**
@@ -190,7 +194,21 @@ public class GenericConversionService implements ConfigurableConversionService {
 	}
 
 	public String toString() {
-		return this.converters.toString();
+		List<String> converterStrings = new ArrayList<String>();
+		for (Map<Class<?>, MatchableConverters> targetConverters : this.converters.values()) {
+			for (MatchableConverters matchable : targetConverters.values()) {
+				converterStrings.add(matchable.toString());
+			}
+		}
+		Collections.sort(converterStrings);
+		StringBuilder builder = new StringBuilder();
+		builder.append("ConversionService converters = ").append("\n");
+		for (String converterString : converterStrings) {
+			builder.append("\t");
+			builder.append(converterString);
+			builder.append("\n");
+		}
+		return builder.toString();
 	}
 
 
@@ -226,15 +244,19 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (converter != null) {
 			return (converter != NO_MATCH ? converter : null);
 		}
-
-		converter = this.converters.find(sourceType, targetType);
-		if (converter == null) {
-			converter = getDefaultConverter(sourceType, targetType);
-		}
-
-		if (converter != null) {
-			this.converterCache.put(key, converter);
-			return converter;
+		else {
+			converter = findConverterForClassPair(sourceType, targetType);
+			if (converter == null) {
+				converter = getDefaultConverter(sourceType, targetType);
+			}
+			if (converter != null) {
+				this.converterCache.put(key, converter);
+				return converter;
+			}
+			else {
+				this.converterCache.put(key, NO_MATCH);
+				return null;
+			}
 		}
 
 		this.converterCache.put(key, NO_MATCH);
@@ -261,8 +283,191 @@ public class GenericConversionService implements ConfigurableConversionService {
 		return (args != null ? new GenericConverter.ConvertiblePair(args[0], args[1]) : null);
 	}
 
+	private MatchableConverters getMatchableConverters(Class<?> sourceType, Class<?> targetType) {
+		Map<Class<?>, MatchableConverters> sourceMap = getSourceConverterMap(sourceType);
+		MatchableConverters matchable = sourceMap.get(targetType);
+		if (matchable == null) {
+			matchable = new MatchableConverters();
+			sourceMap.put(targetType, matchable);
+		}
+		return matchable;
+	}
+
 	private void invalidateCache() {
 		this.converterCache.clear();
+	}
+
+	private Map<Class<?>, MatchableConverters> getSourceConverterMap(Class<?> sourceType) {
+		Map<Class<?>, MatchableConverters> sourceMap = converters.get(sourceType);
+		if (sourceMap == null) {
+			sourceMap = new HashMap<Class<?>, MatchableConverters>();
+			this.converters.put(sourceType, sourceMap);
+		}
+		return sourceMap;
+	}
+
+	private GenericConverter findConverterForClassPair(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		Class<?> sourceObjectType = sourceType.getObjectType();
+		if (sourceObjectType.isInterface()) {
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(sourceObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?>[] interfaces = currentClass.getInterfaces();
+				for (Class<?> ifc : interfaces) {
+					classQueue.addFirst(ifc);
+				}
+			}
+			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
+			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);
+		}
+		else if (sourceObjectType.isArray()) {
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(sourceObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+				if (componentType.getSuperclass() != null) {
+					classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
+				}
+				else if (componentType.isInterface()) {
+					classQueue.addFirst(Object[].class);
+				}
+			}
+			return null;
+		}
+		else {
+			HashSet<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(sourceObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(currentClass);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> superClass = currentClass.getSuperclass();
+				if (superClass != null && superClass != Object.class) {
+					classQueue.addFirst(superClass);
+				}
+				for (Class<?> interfaceType : currentClass.getInterfaces()) {
+					addInterfaceHierarchy(interfaceType, interfaces);
+				}
+			}
+			for (Class<?> interfaceType : interfaces) {
+				Map<Class<?>, MatchableConverters> converters = getTargetConvertersForSource(interfaceType);
+				GenericConverter converter = getMatchingConverterForTarget(sourceType, targetType, converters);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			Map<Class<?>, MatchableConverters> objectConverters = getTargetConvertersForSource(Object.class);
+			return getMatchingConverterForTarget(sourceType, targetType, objectConverters);
+		}
+	}
+
+	private Map<Class<?>, MatchableConverters> getTargetConvertersForSource(Class<?> sourceType) {
+		Map<Class<?>, MatchableConverters> converters = this.converters.get(sourceType);
+		if (converters == null) {
+			converters = Collections.emptyMap();
+		}
+		return converters;
+	}
+
+	private GenericConverter getMatchingConverterForTarget(TypeDescriptor sourceType, TypeDescriptor targetType,
+			Map<Class<?>, MatchableConverters> converters) {
+		Class<?> targetObjectType = targetType.getObjectType();
+		if (targetObjectType.isInterface()) {
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(targetObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				MatchableConverters matchable = converters.get(currentClass);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?>[] interfaces = currentClass.getInterfaces();
+				for (Class<?> ifc : interfaces) {
+					classQueue.addFirst(ifc);
+				}
+			}
+			return matchConverter(converters.get(Object.class), sourceType, targetType);
+		}
+		else if (targetObjectType.isArray()) {
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(targetObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				MatchableConverters matchable = converters.get(currentClass);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> componentType = ClassUtils.resolvePrimitiveIfNecessary(currentClass.getComponentType());
+				if (componentType.getSuperclass() != null) {
+					classQueue.addFirst(Array.newInstance(componentType.getSuperclass(), 0).getClass());
+				}
+				else if (componentType.isInterface()) {
+					classQueue.addFirst(Object[].class);
+				}
+			}
+			return null;
+		}
+		else {
+			Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+			LinkedList<Class<?>> classQueue = new LinkedList<Class<?>>();
+			classQueue.addFirst(targetObjectType);
+			while (!classQueue.isEmpty()) {
+				Class<?> currentClass = classQueue.removeLast();
+				MatchableConverters matchable = converters.get(currentClass);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+				Class<?> superClass = currentClass.getSuperclass();
+				if (superClass != null && superClass != Object.class) {
+					classQueue.addFirst(superClass);
+				}
+				for (Class<?> interfaceType : currentClass.getInterfaces()) {
+					addInterfaceHierarchy(interfaceType, interfaces);
+				}
+			}
+			for (Class<?> interfaceType : interfaces) {
+				MatchableConverters matchable = converters.get(interfaceType);
+				GenericConverter converter = matchConverter(matchable, sourceType, targetType);
+				if (converter != null) {
+					return converter;
+				}
+			}
+			return matchConverter(converters.get(Object.class), sourceType, targetType);
+		}
+	}
+
+	private void addInterfaceHierarchy(Class<?> interfaceType, Set<Class<?>> interfaces) {
+		interfaces.add(interfaceType);
+		for (Class<?> inheritedInterface : interfaceType.getInterfaces()) {
+			addInterfaceHierarchy(inheritedInterface, interfaces);
+		}
+	}
+
+	private GenericConverter matchConverter(
+			MatchableConverters matchable, TypeDescriptor sourceFieldType, TypeDescriptor targetFieldType) {
+		if (matchable == null) {
+			return null;
+		}
+		return matchable.matchConverter(sourceFieldType, targetFieldType);
 	}
 
 	private Object handleConverterNotFound(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
@@ -273,7 +478,9 @@ public class GenericConversionService implements ConfigurableConversionService {
 		if (sourceType.isAssignableTo(targetType) && targetType.getObjectType().isInstance(source)) {
 			return source;
 		}
-		throw new ConverterNotFoundException(sourceType, targetType);
+		else {
+			throw new ConverterNotFoundException(sourceType, targetType);
+		}
 	}
 
 	private Object handleResult(TypeDescriptor sourceType, TypeDescriptor targetType, Object result) {
@@ -289,6 +496,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 					new IllegalArgumentException("A null value cannot be assigned to a primitive type"));
 		}
 	}
+
 
 
 	/**
@@ -594,22 +802,28 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class ConvertersForPair {
 
-		private final LinkedList<GenericConverter> converters = new LinkedList<GenericConverter>();
+		private final TypeDescriptor sourceType;
 
-		public void add(GenericConverter converter) {
-			this.converters.addFirst(converter);
+		private final TypeDescriptor targetType;
+
+		public ConverterCacheKey(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			this.sourceType = sourceType;
+			this.targetType = targetType;
 		}
 
-		public GenericConverter getConverter(TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
-			for (GenericConverter converter : this.converters) {
-				if (!(converter instanceof ConditionalGenericConverter)
-						|| ((ConditionalGenericConverter) converter).matches(sourceType,
-								targetType)) {
-					return converter;
-				}
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
 			}
-			return null;
+			if (!(other instanceof ConverterCacheKey)) {
+				return false;
+			}
+			ConverterCacheKey otherKey = (ConverterCacheKey) other;
+			return this.sourceType.equals(otherKey.sourceType) && this.targetType.equals(otherKey.targetType);
+		}
+
+		public int hashCode() {
+			return this.sourceType.hashCode() * 29 + this.targetType.hashCode();
 		}
 
 		public String toString() {

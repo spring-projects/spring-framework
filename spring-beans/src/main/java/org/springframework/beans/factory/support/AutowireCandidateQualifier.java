@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 	 * given type.
 	 * @param type the annotation type
 	 */
-	public AutowireCandidateQualifier(Class type) {
+	public AutowireCandidateQualifier(Class<?> type) {
 		this(type.getName());
 	}
 
@@ -64,7 +64,7 @@ public class AutowireCandidateQualifier extends BeanMetadataAttributeAccessor {
 	 * @param type the annotation type
 	 * @param value the annotation value to match
 	 */
-	public AutowireCandidateQualifier(Class type, Object value) {
+	public AutowireCandidateQualifier(Class<?> type, Object value) {
 		this(type.getName(), value);
 	}
 

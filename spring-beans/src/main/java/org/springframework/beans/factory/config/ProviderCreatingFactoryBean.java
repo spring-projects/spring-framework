@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @see javax.inject.Provider
  * @see ObjectFactoryCreatingFactoryBean
  */
-public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
+public class ProviderCreatingFactoryBean<T> extends AbstractFactoryBean<Provider<T>> {
 
 	private String targetBeanName;
 
@@ -63,20 +63,20 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 
 
 	@Override
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return Provider.class;
 	}
 
 	@Override
-	protected Provider createInstance() {
-		return new TargetBeanProvider(getBeanFactory(), this.targetBeanName);
+	protected Provider<T> createInstance() {
+		return new TargetBeanProvider<T>(getBeanFactory(), this.targetBeanName);
 	}
 
 
 	/**
 	 * Independent inner class - for serialization purposes.
 	 */
-	private static class TargetBeanProvider implements Provider, Serializable {
+	private static class TargetBeanProvider<T> implements Provider<T>, Serializable {
 
 		private final BeanFactory beanFactory;
 
@@ -87,8 +87,9 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 			this.targetBeanName = targetBeanName;
 		}
 
-		public Object get() throws BeansException {
-			return this.beanFactory.getBean(this.targetBeanName);
+		@SuppressWarnings("unchecked")
+		public T get() throws BeansException {
+			return (T) this.beanFactory.getBean(this.targetBeanName);
 		}
 	}
 

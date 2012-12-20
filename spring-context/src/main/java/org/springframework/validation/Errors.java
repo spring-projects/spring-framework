@@ -199,14 +199,14 @@ public interface Errors {
 	/**
 	 * Are there any global errors?
 	 * @return <code>true</code> if there are any global errors
-	 * @see #hasFieldErrors() 
+	 * @see #hasFieldErrors()
 	 */
 	boolean hasGlobalErrors();
 
 	/**
 	 * Return the number of global errors.
 	 * @return the number of global errors
-	 * @see #getFieldErrorCount() 
+	 * @see #getFieldErrorCount()
 	 */
 	int getGlobalErrorCount();
 
@@ -225,14 +225,14 @@ public interface Errors {
 	/**
 	 * Are there any field errors?
 	 * @return <code>true</code> if there are any errors associated with a field
-	 * @see #hasGlobalErrors() 
+	 * @see #hasGlobalErrors()
 	 */
 	boolean hasFieldErrors();
 
 	/**
 	 * Return the number of errors associated with a field.
 	 * @return the number of errors associated with a field
-	 * @see #getGlobalErrorCount() 
+	 * @see #getGlobalErrorCount()
 	 */
 	int getFieldErrorCount();
 

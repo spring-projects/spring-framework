@@ -49,7 +49,7 @@ public enum Database {
 
 	ORACLE,
 
-	POSTGRESQL, 
+	POSTGRESQL,
 
 	SQL_SERVER,
 

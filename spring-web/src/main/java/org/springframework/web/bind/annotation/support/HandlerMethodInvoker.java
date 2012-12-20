@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public class HandlerMethodInvoker {
 
 	private final WebArgumentResolver[] customArgumentResolvers;
 
-	private final HttpMessageConverter[] messageConverters;
+	private final HttpMessageConverter<?>[] messageConverters;
 
 	private final SimpleSessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -125,7 +125,7 @@ public class HandlerMethodInvoker {
 
 	public HandlerMethodInvoker(HandlerMethodResolver methodResolver, WebBindingInitializer bindingInitializer,
 			SessionAttributeStore sessionAttributeStore, ParameterNameDiscoverer parameterNameDiscoverer,
-			WebArgumentResolver[] customArgumentResolvers, HttpMessageConverter[] messageConverters) {
+			WebArgumentResolver[] customArgumentResolvers, HttpMessageConverter<?>[] messageConverters) {
 
 		this.methodResolver = methodResolver;
 		this.bindingInitializer = bindingInitializer;
@@ -161,7 +161,7 @@ public class HandlerMethodInvoker {
 				ReflectionUtils.makeAccessible(attributeMethodToInvoke);
 				Object attrValue = attributeMethodToInvoke.invoke(handler, args);
 				if ("".equals(attrName)) {
-					Class resolvedType = GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
+					Class<?> resolvedType = GenericTypeResolver.resolveReturnType(attributeMethodToInvoke, handler.getClass());
 					attrName = Conventions.getVariableNameForReturnType(attributeMethodToInvoke, resolvedType, attrValue);
 				}
 				if (!implicitModel.containsAttribute(attrName)) {
@@ -236,7 +236,7 @@ public class HandlerMethodInvoker {
 	private Object[] resolveHandlerArguments(Method handlerMethod, Object handler,
 			NativeWebRequest webRequest, ExtendedModelMap implicitModel) throws Exception {
 
-		Class[] paramTypes = handlerMethod.getParameterTypes();
+		Class<?>[] paramTypes = handlerMethod.getParameterTypes();
 		Object[] args = new Object[paramTypes.length];
 
 		for (int i = 0; i < args.length; i++) {
@@ -412,7 +412,7 @@ public class HandlerMethodInvoker {
 	private Object[] resolveInitBinderArguments(Object handler, Method initBinderMethod,
 			WebDataBinder binder, NativeWebRequest webRequest) throws Exception {
 
-		Class[] initBinderParams = initBinderMethod.getParameterTypes();
+		Class<?>[] initBinderParams = initBinderMethod.getParameterTypes();
 		Object[] initBinderArgs = new Object[initBinderParams.length];
 
 		for (int i = 0; i < initBinderArgs.length; i++) {
@@ -449,7 +449,7 @@ public class HandlerMethodInvoker {
 					initBinderArgs[i] = argValue;
 				}
 				else {
-					Class paramType = initBinderParams[i];
+					Class<?> paramType = initBinderParams[i];
 					if (paramType.isInstance(binder)) {
 						initBinderArgs[i] = binder;
 					}
@@ -482,7 +482,7 @@ public class HandlerMethodInvoker {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (Map.class.isAssignableFrom(paramType) && paramName.length() == 0) {
-			return resolveRequestParamMap((Class<? extends Map>) paramType, webRequest);
+			return resolveRequestParamMap((Class<? extends Map<?, ?>>) paramType, webRequest);
 		}
 		if (paramName.length() == 0) {
 			paramName = getRequiredParameterName(methodParam);
@@ -515,7 +515,7 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(paramValue, paramType, methodParam);
 	}
 
-	private Map resolveRequestParamMap(Class<? extends Map> mapType, NativeWebRequest webRequest) {
+	private Map<String, ?> resolveRequestParamMap(Class<? extends Map<?, ?>> mapType, NativeWebRequest webRequest) {
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
 		if (MultiValueMap.class.isAssignableFrom(mapType)) {
 			MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(parameterMap.size());
@@ -544,7 +544,7 @@ public class HandlerMethodInvoker {
 
 		Class<?> paramType = methodParam.getParameterType();
 		if (Map.class.isAssignableFrom(paramType)) {
-			return resolveRequestHeaderMap((Class<? extends Map>) paramType, webRequest);
+			return resolveRequestHeaderMap((Class<? extends Map<?, ?>>) paramType, webRequest);
 		}
 		if (headerName.length() == 0) {
 			headerName = getRequiredParameterName(methodParam);
@@ -568,7 +568,7 @@ public class HandlerMethodInvoker {
 		return binder.convertIfNecessary(headerValue, paramType, methodParam);
 	}
 
-	private Map resolveRequestHeaderMap(Class<? extends Map> mapType, NativeWebRequest webRequest) {
+	private Map<String, ?> resolveRequestHeaderMap(Class<? extends Map<?, ?>> mapType, NativeWebRequest webRequest) {
 		if (MultiValueMap.class.isAssignableFrom(mapType)) {
 			MultiValueMap<String, String> result;
 			if (HttpHeaders.class.isAssignableFrom(mapType)) {
@@ -605,7 +605,7 @@ public class HandlerMethodInvoker {
 		return readWithMessageConverters(methodParam, createHttpInputMessage(webRequest), methodParam.getParameterType());
 	}
 
-	private HttpEntity resolveHttpEntityRequest(MethodParameter methodParam, NativeWebRequest webRequest)
+	private HttpEntity<?> resolveHttpEntityRequest(MethodParameter methodParam, NativeWebRequest webRequest)
 			throws Exception {
 
 		HttpInputMessage inputMessage = createHttpInputMessage(webRequest);
@@ -614,7 +614,8 @@ public class HandlerMethodInvoker {
 		return new HttpEntity<Object>(body, inputMessage.getHeaders());
 	}
 
-	private Object readWithMessageConverters(MethodParameter methodParam, HttpInputMessage inputMessage, Class paramType)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object readWithMessageConverters(MethodParameter methodParam, HttpInputMessage inputMessage, Class<?> paramType)
 			throws Exception {
 
 		MediaType contentType = inputMessage.getHeaders().getContentType();
@@ -638,7 +639,7 @@ public class HandlerMethodInvoker {
 						logger.debug("Reading [" + paramType.getName() + "] as \"" + contentType
 								+"\" using [" + messageConverter + "]");
 					}
-					return messageConverter.read(paramType, inputMessage);
+					return messageConverter.read((Class)paramType, inputMessage);
 				}
 			}
 		}
@@ -664,7 +665,7 @@ public class HandlerMethodInvoker {
 		}
 		throw new IllegalArgumentException(
 				"HttpEntity parameter (" + methodParam.getParameterName() + ") is not parameterized");
-		
+
 	}
 
 	private Object resolveCookieValue(String cookieName, boolean required, String defaultValue,
@@ -694,7 +695,7 @@ public class HandlerMethodInvoker {
 	 * Resolves the given {@link CookieValue @CookieValue} annotation.
 	 * <p>Throws an UnsupportedOperationException by default.
 	 */
-	protected Object resolveCookieValue(String cookieName, Class paramType, NativeWebRequest webRequest)
+	protected Object resolveCookieValue(String cookieName, Class<?> paramType, NativeWebRequest webRequest)
 			throws Exception {
 
 		throw new UnsupportedOperationException("@CookieValue not supported");
@@ -717,7 +718,7 @@ public class HandlerMethodInvoker {
 	 * Resolves the given {@link PathVariable @PathVariable} annotation.
 	 * <p>Throws an UnsupportedOperationException by default.
 	 */
-	protected String resolvePathVariable(String pathVarName, Class paramType, NativeWebRequest webRequest)
+	protected String resolvePathVariable(String pathVarName, Class<?> paramType, NativeWebRequest webRequest)
 			throws Exception {
 
 		throw new UnsupportedOperationException("@PathVariable not supported");
@@ -733,7 +734,7 @@ public class HandlerMethodInvoker {
 		return name;
 	}
 
-	private Object checkValue(String name, Object value, Class paramType) {
+	private Object checkValue(String name, Object value, Class<?> paramType) {
 		if (value == null) {
 			if (boolean.class.equals(paramType)) {
 				return Boolean.FALSE;
@@ -784,15 +785,15 @@ public class HandlerMethodInvoker {
 				!(value instanceof Map) && !BeanUtils.isSimpleValueType(value.getClass()));
 	}
 
-	protected void raiseMissingParameterException(String paramName, Class paramType) throws Exception {
+	protected void raiseMissingParameterException(String paramName, Class<?> paramType) throws Exception {
 		throw new IllegalStateException("Missing parameter '" + paramName + "' of type [" + paramType.getName() + "]");
 	}
 
-	protected void raiseMissingHeaderException(String headerName, Class paramType) throws Exception {
+	protected void raiseMissingHeaderException(String headerName, Class<?> paramType) throws Exception {
 		throw new IllegalStateException("Missing header '" + headerName + "' of type [" + paramType.getName() + "]");
 	}
 
-	protected void raiseMissingCookieException(String cookieName, Class paramType) throws Exception {
+	protected void raiseMissingCookieException(String cookieName, Class<?> paramType) throws Exception {
 		throw new IllegalStateException(
 				"Missing cookie value '" + cookieName + "' of type [" + paramType.getName() + "]");
 	}
@@ -861,7 +862,7 @@ public class HandlerMethodInvoker {
 		}
 
 		// Resolution of standard parameter types...
-		Class paramType = methodParameter.getParameterType();
+		Class<?> paramType = methodParameter.getParameterType();
 		Object value = resolveStandardArgument(paramType, webRequest);
 		if (value != WebArgumentResolver.UNRESOLVED && !ClassUtils.isAssignableValue(paramType, value)) {
 			throw new IllegalStateException("Standard argument type [" + paramType.getName() +
@@ -878,13 +879,13 @@ public class HandlerMethodInvoker {
 		return WebArgumentResolver.UNRESOLVED;
 	}
 
-	protected final void addReturnValueAsModelAttribute(Method handlerMethod, Class handlerType,
+	protected final void addReturnValueAsModelAttribute(Method handlerMethod, Class<?> handlerType,
 			Object returnValue, ExtendedModelMap implicitModel) {
 
 		ModelAttribute attr = AnnotationUtils.findAnnotation(handlerMethod, ModelAttribute.class);
 		String attrName = (attr != null ? attr.value() : "");
 		if ("".equals(attrName)) {
-			Class resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
+			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(handlerMethod, handlerType);
 			attrName = Conventions.getVariableNameForReturnType(handlerMethod, resolvedType, returnValue);
 		}
 		implicitModel.addAttribute(attrName, returnValue);

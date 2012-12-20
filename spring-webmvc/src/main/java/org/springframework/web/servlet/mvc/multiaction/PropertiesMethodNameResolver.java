@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.PathMatcher;
  */
 public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		implements InitializingBean {
-	
+
 	private Properties mappings;
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
@@ -85,7 +85,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		if (methodName != null) {
 			return methodName;
 		}
-		Enumeration propNames = this.mappings.propertyNames();
+		Enumeration<?> propNames = this.mappings.propertyNames();
 		while (propNames.hasMoreElements()) {
 			String registeredPath = (String) propNames.nextElement();
 			if (this.pathMatcher.match(registeredPath, urlPath)) {

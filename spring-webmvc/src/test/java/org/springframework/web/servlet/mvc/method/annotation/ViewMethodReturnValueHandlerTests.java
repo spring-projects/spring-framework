@@ -36,7 +36,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * Test fixture with {@link ViewMethodReturnValueHandler}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ViewMethodReturnValueHandlerTests {
@@ -53,7 +53,7 @@ public class ViewMethodReturnValueHandlerTests {
 		this.mavContainer = new ModelAndViewContainer();
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
-	
+
 	@Test
 	public void supportsReturnType() throws Exception {
 		assertTrue(this.handler.supportsReturnType(createReturnValueParam("view")));
@@ -63,7 +63,7 @@ public class ViewMethodReturnValueHandlerTests {
 	public void returnView() throws Exception {
 		InternalResourceView view = new InternalResourceView("testView");
 		this.handler.handleReturnValue(view, createReturnValueParam("view"), this.mavContainer, this.webRequest);
-		
+
 		assertSame(view, this.mavContainer.getView());
 	}
 
@@ -74,7 +74,7 @@ public class ViewMethodReturnValueHandlerTests {
 		this.mavContainer.setRedirectModel(redirectModel);
 		MethodParameter param = createReturnValueParam("view");
 		this.handler.handleReturnValue(redirectView, param, this.mavContainer, this.webRequest);
-		
+
 		assertSame(redirectView, this.mavContainer.getView());
 		assertSame("Should have switched to the RedirectModel", redirectModel, this.mavContainer.getModel());
 	}
@@ -83,7 +83,7 @@ public class ViewMethodReturnValueHandlerTests {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
-	
+
 	View view() {
 		return null;
 	}

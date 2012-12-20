@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-import org.easymock.EasyMock;
+import org.junit.Before;
 import org.junit.Test;
 import test.beans.GenericBean;
 import test.beans.GenericIntegerBean;
@@ -40,7 +40,7 @@ import test.beans.TestBean;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
@@ -52,6 +52,16 @@ import org.springframework.core.io.UrlResource;
  * @since 20.01.2006
  */
 public class BeanFactoryGenericsTests {
+
+	private DefaultListableBeanFactory bf;
+
+	@Before
+	public void setup() {
+		this.bf = new DefaultListableBeanFactory();
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
+		reader.loadBeanDefinitions(new ClassPathResource("genericBeanTests.xml",
+			getClass()));
+	}
 
 	@Test
 	public void testGenericSetProperty() {
@@ -93,7 +103,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("genericBean");
 
@@ -106,7 +117,7 @@ public class BeanFactoryGenericsTests {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(GenericIntegerBean.class);
 
-		List input = new ArrayList();
+		List<Integer> input = new ArrayList<Integer>();
 		input.add(1);
 		rbd.getPropertyValues().add("testBeanList", input);
 
@@ -125,7 +136,8 @@ public class BeanFactoryGenericsTests {
 	public void testGenericListPropertyWithOptionalAutowiring() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_BY_TYPE);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_BY_TYPE);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
@@ -151,7 +163,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericListOfArraysProperty() throws MalformedURLException {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("listOfArrays");
 
 		assertEquals(1, gb.getListOfArrays().size());
@@ -185,7 +196,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerSingleton("integer1", new Integer(4));
 		bf.registerSingleton("integer2", new Integer(5));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
@@ -197,7 +209,8 @@ public class BeanFactoryGenericsTests {
 	public void testGenericSetConstructorWithOptionalAutowiring() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
@@ -235,7 +248,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
@@ -251,7 +265,8 @@ public class BeanFactoryGenericsTests {
 		bf.registerSingleton("resource1", new UrlResource("http://localhost:8080"));
 		bf.registerSingleton("resource2", new UrlResource("http://localhost:9090"));
 
-		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class, RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+		RootBeanDefinition rbd = new RootBeanDefinition(GenericBean.class);
+		rbd.setAutowireMode(RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
 		bf.registerBeanDefinition("genericBean", rbd);
 		GenericBean<?> gb = (GenericBean<?>) bf.getBean("genericBean");
 
@@ -573,7 +588,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericListBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		List<?> list = (List<?>) bf.getBean("list");
 		assertEquals(1, list.size());
 		assertEquals(new URL("http://localhost:8080"), list.get(0));
@@ -581,7 +595,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericSetBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		Set<?> set = (Set<?>) bf.getBean("set");
 		assertEquals(1, set.size());
 		assertEquals(new URL("http://localhost:8080"), set.iterator().next());
@@ -589,7 +602,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericMapBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		Map<?, ?> map = (Map<?, ?>) bf.getBean("map");
 		assertEquals(1, map.size());
 		assertEquals(new Integer(10), map.keySet().iterator().next());
@@ -598,7 +610,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericallyTypedIntegerBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericIntegerBean gb = (GenericIntegerBean) bf.getBean("integerBean");
 		assertEquals(new Integer(10), gb.getGenericProperty());
 		assertEquals(new Integer(20), gb.getGenericListProperty().get(0));
@@ -607,7 +618,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testGenericallyTypedSetOfIntegerBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		GenericSetOfIntegerBean gb = (GenericSetOfIntegerBean) bf.getBean("setOfIntegerBean");
 		assertEquals(new Integer(10), gb.getGenericProperty().iterator().next());
 		assertEquals(new Integer(20), gb.getGenericListProperty().get(0).iterator().next());
@@ -616,7 +626,6 @@ public class BeanFactoryGenericsTests {
 
 	@Test
 	public void testSetBean() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("genericBeanTests.xml", getClass()));
 		UrlSet us = (UrlSet) bf.getBean("setBean");
 		assertEquals(1, us.size());
 		assertEquals(new URL("http://www.springframework.org"), us.iterator().next());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,8 +18,6 @@ package org.springframework.jmx.export.assembler;
 
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
-
-import org.junit.Ignore;
 
 /**
  * @author Rob Harrop
@@ -57,5 +55,5 @@ public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAsse
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssemblerCustom.xml";
 	}
-	
+
 }

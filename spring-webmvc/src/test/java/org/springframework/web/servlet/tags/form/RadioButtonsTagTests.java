@@ -99,11 +99,11 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("baz", radioButtonElement3.attribute("value").getValue());
 		assertEquals("baz", spanElement3.getStringValue());
 	}
-	
+
 	public void testWithMultiValueArrayAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("stringArray");
 		this.tag.setItems(new Object[] {"foo", "bar", "baz"});
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
@@ -460,12 +460,12 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("Mufty", radioButtonElement5.attribute("value").getValue());
 		assertEquals("MUFTY", spanElement5.getStringValue());
 	}
-	
+
 	public void testWithoutItemsEnumBindTarget() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
-		
+
 		this.tag.setPath("testEnum");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
@@ -474,7 +474,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		
+
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'VALUE_2']");
@@ -482,12 +482,12 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		assertEquals("TestEnum: VALUE_2", rootElement.selectSingleNode("//label[@for = '" + value2.valueOf("@id") + "']").getText());
 		assertEquals(value2, rootElement.selectSingleNode("//input[@checked]"));
 	}
-	
+
 	public void testWithoutItemsEnumBindTargetWithExplicitLabelsAndValues() throws Exception {
 		BeanWithEnum testBean = new BeanWithEnum();
 		testBean.setTestEnum(TestEnum.VALUE_2);
 		getPageContext().getRequest().setAttribute("testBean", testBean);
-		
+
 		this.tag.setPath("testEnum");
 		this.tag.setItemLabel("enumLabel");
 		this.tag.setItemValue("enumValue");
@@ -498,7 +498,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		Element rootElement = document.getRootElement();
-		
+
 		assertEquals(2, rootElement.elements().size());
 		Node value1 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_1']");
 		Node value2 = rootElement.selectSingleNode("//input[@value = 'Value: VALUE_2']");
@@ -569,7 +569,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
 		}
 	}
-	
+
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class BindingAwareModelMap extends ExtendedModelMap {
 
 	@Override
 	public void putAll(Map<? extends String, ?> map) {
-		for (Map.Entry entry : map.entrySet()) {
+		for (Map.Entry<? extends String, ?> entry : map.entrySet()) {
 			removeBindingResultIfNecessary(entry.getKey(), entry.getValue());
 		}
 		super.putAll(map);

@@ -56,7 +56,8 @@ import org.springframework.transaction.annotation.Transactional;
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
  * etc.
- * 
+ * </p>
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

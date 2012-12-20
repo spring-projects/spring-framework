@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ import org.springframework.util.ClassUtils;
  */
 public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryBean<Object>, BeanClassLoaderAware {
 
-	private Class[] proxyInterfaces;
+	private Class<?>[] proxyInterfaces;
 
 	private boolean lookupOnStartup = true;
 
@@ -87,7 +87,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	 * @see #setLookupOnStartup
 	 * @see #setCache
 	 */
-	public void setProxyInterface(Class proxyInterface) {
+	public void setProxyInterface(Class<?> proxyInterface) {
 		this.proxyInterfaces = new Class[] {proxyInterface};
 	}
 
@@ -100,7 +100,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	 * @see #setLookupOnStartup
 	 * @see #setCache
 	 */
-	public void setProxyInterfaces(Class[] proxyInterfaces) {
+	public void setProxyInterfaces(Class<?>[] proxyInterfaces) {
 		this.proxyInterfaces = proxyInterfaces;
 	}
 
@@ -263,7 +263,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	 * @return the merged interface as Class
 	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
-	protected Class createCompositeInterface(Class[] interfaces) {
+	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
 		return ClassUtils.createCompositeInterface(interfaces, this.beanClassLoader);
 	}
 
@@ -290,13 +290,13 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 				proxyFactory.setInterfaces(jof.proxyInterfaces);
 			}
 			else {
-				Class targetClass = targetSource.getTargetClass();
+				Class<?> targetClass = targetSource.getTargetClass();
 				if (targetClass == null) {
 					throw new IllegalStateException(
 							"Cannot deactivate 'lookupOnStartup' without specifying a 'proxyInterface' or 'expectedType'");
 				}
-				Class[] ifcs = ClassUtils.getAllInterfacesForClass(targetClass, jof.beanClassLoader);
-				for (Class ifc : ifcs) {
+				Class<?>[] ifcs = ClassUtils.getAllInterfacesForClass(targetClass, jof.beanClassLoader);
+				for (Class<?> ifc : ifcs) {
 					if (Modifier.isPublic(ifc.getModifiers())) {
 						proxyFactory.addInterface(ifc);
 					}

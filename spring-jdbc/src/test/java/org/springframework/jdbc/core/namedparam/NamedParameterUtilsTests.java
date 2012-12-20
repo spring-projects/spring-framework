@@ -117,7 +117,7 @@ public class NamedParameterUtilsTests {
 	@Test(expected = InvalidDataAccessApiUsageException.class)
 	public void buildValueArrayWithMissingParameterValue() throws Exception {
 		String sql = "select count(0) from foo where id = :id";
-		NamedParameterUtils.buildValueArray(sql, new HashMap());
+		NamedParameterUtils.buildValueArray(sql, new HashMap<String, Object>());
 	}
 
 	@Test
@@ -168,7 +168,7 @@ public class NamedParameterUtilsTests {
 
 		String sql4 = "/*+ HINT */ xxx /* comment :a ? */ :a yyyy :b :c :a zzzzz /* :xx XX*";
 		ParsedSql psql4 = NamedParameterUtils.parseSqlStatement(sql4);
-		Map parameters = Collections.singletonMap("a", "0");
+		Map<String, String> parameters = Collections.singletonMap("a", "0");
 		assertEquals("/*+ HINT */ xxx /* comment :a ? */ ? yyyy ? ? ? zzzzz /* :xx XX*",
 				NamedParameterUtils.substituteNamedParameters(psql4, new MapSqlParameterSource(parameters)));
 	}
@@ -227,7 +227,7 @@ public class NamedParameterUtilsTests {
 		assertEquals(0, parsedSql.getParameterNames().size());
 		String finalSql = NamedParameterUtils.substituteNamedParameters(parsedSql, null);
 		assertEquals(expectedSql, finalSql);
-		
+
 		String expectedSql2 = "select foo from bar where baz = 'b:{p1}z'";
 		String sql2 = "select foo from bar where baz = 'b:{p1}z'";
 

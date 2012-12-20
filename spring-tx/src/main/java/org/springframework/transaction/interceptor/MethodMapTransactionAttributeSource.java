@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.PatternMatchUtils;
 /**
  * Simple {@link TransactionAttributeSource} implementation that
  * allows attributes to be stored per method in a {@link Map}.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 24.04.2003
@@ -126,7 +126,7 @@ public class MethodMapTransactionAttributeSource
 		}
 		String className = name.substring(0, lastDotIndex);
 		String methodName = name.substring(lastDotIndex + 1);
-		Class clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
+		Class<?> clazz = ClassUtils.resolveClassName(className, this.beanClassLoader);
 		addTransactionalMethod(clazz, methodName, attr);
 	}
 

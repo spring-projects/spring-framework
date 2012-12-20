@@ -105,7 +105,7 @@ public class EmbeddedDatabaseBuilder {
 		addScript("data.sql");
 		return this;
 	}
-	
+
 	/**
 	 * Build the embedded database.
 	 * @return the embedded database

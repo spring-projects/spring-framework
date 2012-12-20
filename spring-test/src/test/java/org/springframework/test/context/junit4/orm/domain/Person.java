@@ -18,7 +18,7 @@ package org.springframework.test.context.junit4.orm.domain;
 
 /**
  * Person POJO.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

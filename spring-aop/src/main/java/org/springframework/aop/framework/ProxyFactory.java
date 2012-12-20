@@ -56,7 +56,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * <p>No target, only interfaces. Must add interceptors.
 	 * @param proxyInterfaces the interfaces that the proxy should implement
 	 */
-	public ProxyFactory(Class[] proxyInterfaces) {
+	public ProxyFactory(Class<?>[] proxyInterfaces) {
 		setInterfaces(proxyInterfaces);
 	}
 
@@ -68,7 +68,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param interceptor the interceptor that the proxy should invoke
 	 */
-	public ProxyFactory(Class proxyInterface, Interceptor interceptor) {
+	public ProxyFactory(Class<?> proxyInterface, Interceptor interceptor) {
 		addInterface(proxyInterface);
 		addAdvice(interceptor);
 	}
@@ -79,7 +79,7 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @param proxyInterface the interface that the proxy should implement
 	 * @param targetSource the TargetSource that the proxy should invoke
 	 */
-	public ProxyFactory(Class proxyInterface, TargetSource targetSource) {
+	public ProxyFactory(Class<?> proxyInterface, TargetSource targetSource) {
 		addInterface(proxyInterface);
 		setTargetSource(targetSource);
 	}

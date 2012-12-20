@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link DataSourceLookup} implementation based on a Spring {@link BeanFactory}.
- * 
+ *
  * <p>Will lookup Spring managed beans identified by bean name,
  * expecting them to be of type <code>javax.sql.DataSource</code>.
  *
@@ -53,7 +53,7 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 	 * by a Spring IoC container, as the supplied {@link BeanFactory} will be
 	 * replaced by the {@link BeanFactory} that creates it (c.f. the
 	 * {@link BeanFactoryAware} contract). So only use this constructor if you
-	 * are using this class outside the context of a Spring IoC container. 
+	 * are using this class outside the context of a Spring IoC container.
 	 * @param beanFactory the bean factory to be used to lookup {@link DataSource DataSources}
 	 */
 	public BeanFactoryDataSourceLookup(BeanFactory beanFactory) {
@@ -70,7 +70,7 @@ public class BeanFactoryDataSourceLookup implements DataSourceLookup, BeanFactor
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
-			return (DataSource) this.beanFactory.getBean(dataSourceName, DataSource.class);
+			return this.beanFactory.getBean(dataSourceName, DataSource.class);
 		}
 		catch (BeansException ex) {
 			throw new DataSourceLookupFailureException(

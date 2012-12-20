@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.junit.runner.RunWith;
 import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -50,13 +50,14 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 
 	private CallableStatement mockCallable;
 
-	private BeanFactory bf;
+	private DefaultListableBeanFactory bf;
 
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 		mockCallable = createMock(CallableStatement.class);
-		bf = new XmlBeanFactory(
+		bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.bf).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
 		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
 		testDataSource.setTarget(mockDataSource);
@@ -108,7 +109,7 @@ public class GenericStoredProcedureTests extends AbstractJdbcTests {
 		Map<String, Object> in = new HashMap<String, Object>(2);
 		in.put("amount", amount);
 		in.put("custid", custid);
-		Map out = adder.execute(in);
+		Map<String, Object> out = adder.execute(in);
 		Integer id = (Integer) out.get("newid");
 		assertEquals(4, id.intValue());
 	}

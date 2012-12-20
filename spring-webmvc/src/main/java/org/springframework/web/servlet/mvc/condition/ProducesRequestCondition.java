@@ -60,12 +60,11 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	}
 
 	/**
-	 * Creates a new instance with "produces" and "header" expressions. "Header"
-	 * expressions where the header name is not 'Accept' or have no header value
-	 * defined are ignored. If 0 expressions are provided in total, this condition
-	 * will match to any request.
-	 * @param produces expressions with syntax defined by {@link RequestMapping#produces()}
-	 * @param headers expressions with syntax defined by {@link RequestMapping#headers()}
+	 * Creates a new instance with "produces" and "header" expressions. "Header" expressions
+	 * where the header name is not 'Accept' or have no header value defined are ignored.
+	 * If 0 expressions are provided in total, the condition matches to every request
+	 * @param produces expressions with the syntax described in {@link RequestMapping#produces()}
+	 * @param headers expressions with the syntax described in {@link RequestMapping#headers()}
 	 */
 	public ProducesRequestCondition(String[] produces, String[] headers) {
 		this(produces, headers, null);
@@ -232,6 +231,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			// should never happen
 			throw new IllegalStateException("Cannot compare without having any requested media types");
 		}
+
+		return 0;
 	}
 
 	private List<MediaType> getAcceptedMediaTypes(HttpServletRequest request) throws HttpMediaTypeNotAcceptableException {
@@ -280,17 +281,17 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 	 * with a {@code MediaType_ALL} expression.
 	 */
 	private List<ProduceMediaTypeExpression> getExpressionsToCompare() {
-		return this.expressions.isEmpty() ? MEDIA_TYPE_ALL_LIST : this.expressions;
+		return this.expressions.isEmpty() ? DEFAULT_EXPRESSION_LIST : this.expressions;
 	}
 
-	private final List<ProduceMediaTypeExpression> MEDIA_TYPE_ALL_LIST =
-			Collections.singletonList(new ProduceMediaTypeExpression("*/*"));
+	private static final List<ProduceMediaTypeExpression> DEFAULT_EXPRESSION_LIST =
+		Arrays.asList(new ProduceMediaTypeExpression("*/*"));
 
 
 	/**
 	 * Parses and matches a single media type expression to a request's 'Accept' header.
 	 */
-	class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
+	static class ProduceMediaTypeExpression extends AbstractMediaTypeExpression {
 
 		ProduceMediaTypeExpression(MediaType mediaType, boolean negated) {
 			super(mediaType, negated);

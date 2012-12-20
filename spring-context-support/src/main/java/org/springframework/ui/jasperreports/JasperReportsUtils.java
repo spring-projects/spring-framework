@@ -63,7 +63,7 @@ public abstract class JasperReportsUtils {
 			return (JRDataSource) value;
 		}
 		else if (value instanceof Collection) {
-			return new JRBeanCollectionDataSource((Collection) value);
+			return new JRBeanCollectionDataSource((Collection<?>) value);
 		}
 		else if (value instanceof Object[]) {
 			return new JRBeanArrayDataSource((Object[]) value);
@@ -122,8 +122,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsCsv(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRCsvExporter(), print, writer);
@@ -141,8 +142,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsCsv(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsCsv(JasperReport report, Map parameters, Object reportData, Writer writer,
+			Map exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRCsvExporter exporter = new JRCsvExporter();
@@ -161,8 +163,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsHtml(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRHtmlExporter(), print, writer);
@@ -180,8 +183,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsHtml(JasperReport report, Map<String, Object> parameters, Object reportData,
-			Writer writer, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsHtml(JasperReport report, Map parameters, Object reportData, Writer writer,
+			Map exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRHtmlExporter exporter = new JRHtmlExporter();
@@ -200,8 +204,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsPdf(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsPdf(JasperReport report, Map parameters, Object reportData, OutputStream stream)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRPdfExporter(), print, stream);
@@ -219,8 +224,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsPdf(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsPdf(JasperReport report, Map parameters, Object reportData, OutputStream stream,
+			Map exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRPdfExporter exporter = new JRPdfExporter();
@@ -239,8 +245,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsXls(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsXls(JasperReport report, Map parameters, Object reportData, OutputStream stream)
+			throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		render(new JRXlsExporter(), print, stream);
@@ -258,8 +265,9 @@ public abstract class JasperReportsUtils {
 	 * @throws JRException if rendering failed
 	 * @see #convertReportData
 	 */
-	public static void renderAsXls(JasperReport report, Map<String, Object> parameters, Object reportData,
-			OutputStream stream, Map<JRExporterParameter, Object> exporterParameters) throws JRException {
+	@SuppressWarnings("rawtypes")
+	public static void renderAsXls(JasperReport report, Map parameters, Object reportData, OutputStream stream,
+			Map exporterParameters) throws JRException {
 
 		JasperPrint print = JasperFillManager.fillReport(report, parameters, convertReportData(reportData));
 		JRXlsExporter exporter = new JRXlsExporter();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public abstract class StatementCreatorUtils {
 
 	private static final Log logger = LogFactory.getLog(StatementCreatorUtils.class);
 
-	private static Map<Class, Integer> javaTypeToSqlTypeMap = new HashMap<Class, Integer>(32);
+	private static Map<Class<?>, Integer> javaTypeToSqlTypeMap = new HashMap<Class<?>, Integer>(32);
 
 	static {
 		/* JDBC 3.0 only - not compatible with e.g. MySQL at present
@@ -94,7 +94,7 @@ public abstract class StatementCreatorUtils {
 	 * @param javaType the Java type to translate
 	 * @return the corresponding SQL type, or <code>null</code> if none found
 	 */
-	public static int javaTypeToSqlParameterType(Class javaType) {
+	public static int javaTypeToSqlParameterType(Class<?> javaType) {
 		Integer sqlType = javaTypeToSqlTypeMap.get(javaType);
 		if (sqlType != null) {
 			return sqlType;
@@ -360,7 +360,7 @@ public abstract class StatementCreatorUtils {
 	/**
 	 * Check whether the given value can be treated as a String value.
 	 */
-	private static boolean isStringValue(Class inValueType) {
+	private static boolean isStringValue(Class<?> inValueType) {
 		// Consider any CharSequence (including StringBuffer and StringBuilder) as a String.
 		return (CharSequence.class.isAssignableFrom(inValueType) ||
 				StringWriter.class.isAssignableFrom(inValueType));
@@ -370,7 +370,7 @@ public abstract class StatementCreatorUtils {
 	 * Check whether the given value is a <code>java.util.Date</code>
 	 * (but not one of the JDBC-specific subclasses).
 	 */
-	private static boolean isDateValue(Class inValueType) {
+	private static boolean isDateValue(Class<?> inValueType) {
 		return (java.util.Date.class.isAssignableFrom(inValueType) &&
 				!(java.sql.Date.class.isAssignableFrom(inValueType) ||
 						java.sql.Time.class.isAssignableFrom(inValueType) ||
@@ -397,7 +397,7 @@ public abstract class StatementCreatorUtils {
 	 * @see DisposableSqlTypeValue#cleanup()
 	 * @see org.springframework.jdbc.core.support.SqlLobValue#cleanup()
 	 */
-	public static void cleanupParameters(Collection paramValues) {
+	public static void cleanupParameters(Collection<?> paramValues) {
 		if (paramValues != null) {
 			for (Object inValue : paramValues) {
 				if (inValue instanceof DisposableSqlTypeValue) {

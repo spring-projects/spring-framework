@@ -251,7 +251,6 @@ public class MockPageContext extends PageContext {
 		return Collections.enumeration(this.attributes.keySet());
 	}
 
-	@SuppressWarnings("unchecked")
 	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		switch (scope) {
 			case PAGE_SCOPE:

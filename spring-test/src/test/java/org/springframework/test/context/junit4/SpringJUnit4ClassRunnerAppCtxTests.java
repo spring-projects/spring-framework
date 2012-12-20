@@ -69,11 +69,11 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * dependencies will be injected via {@link Autowired @Autowired},
  * {@link Inject @Inject}, and {@link Resource @Resource} from beans defined in
  * the {@link ApplicationContext} loaded from the default classpath resource:
- * 
+ *
  * <code>&quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
  * .
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
@@ -88,7 +88,7 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * Default resource path for the application context configuration for
 	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
-	 * 
+	 *
 	 * <code>&quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
 	 */
 	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";

@@ -272,6 +272,7 @@ public class ConfigurationClassProcessingTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	static class ConfigWithPostProcessor extends ConfigWithPrototypeBean {
 
 		@Value("${myProp}")
@@ -281,6 +282,7 @@ public class ConfigurationClassProcessingTests {
 		public POBPP beanPostProcessor() {
 			return new POBPP() {
 				String nameSuffix = "-processed-" + myProp;
+
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
@@ -293,6 +295,7 @@ public class ConfigurationClassProcessingTests {
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
 				}
+
 				public int getOrder() {
 					return 0;
 				}

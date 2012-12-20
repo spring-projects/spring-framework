@@ -94,7 +94,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.ObjectFactory
  * @see ServiceLocatorFactoryBean
  */
-public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<ObjectFactory> {
+public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<ObjectFactory<Object>> {
 
 	private String targetBeanName;
 
@@ -118,12 +118,12 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 
 
 	@Override
-	public Class getObjectType() {
+	public Class<?> getObjectType() {
 		return ObjectFactory.class;
 	}
 
 	@Override
-	protected ObjectFactory createInstance() {
+	protected ObjectFactory<Object> createInstance() {
 		return new TargetBeanObjectFactory(getBeanFactory(), this.targetBeanName);
 	}
 
@@ -131,7 +131,7 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 	/**
 	 * Independent inner class - for serialization purposes.
 	 */
-	private static class TargetBeanObjectFactory implements ObjectFactory, Serializable {
+	private static class TargetBeanObjectFactory implements ObjectFactory<Object>, Serializable {
 
 		private final BeanFactory beanFactory;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	/**
 	 * We really are testing the AbstractMessageSource class here.
 	 * The underlying implementation uses a hashMap to cache messageFormats
-	 * once a message has been asked for.  This test is an attempt to
+	 * once a message has been asked for. This test is an attempt to
 	 * make sure the cache is being used properly.
 	 * @see org.springframework.context.support.AbstractMessageSource for more details.
 	 */
@@ -118,7 +118,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		/*
 		 Try with Locale.US
 		 Since the msg has a time value in it, we will use String.indexOf(...)
-		 to just look for a substring without the time.  This is because it is
+		 to just look for a substring without the time. This is because it is
 		 possible that by the time we store a time variable in this method
 		 and the time the ResourceBundleMessageSource resolves the msg the
 		 minutes of the time might not be the same.
@@ -198,14 +198,14 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 
-		Map m = new HashMap();
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
 		parent.registerPrototype("father", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
-		parent.addListener(parentListener);
+		parent.addApplicationListener(parentListener);
 
 		this.sac = new StaticApplicationContext(parent);
 
@@ -218,10 +218,10 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
-		sac.addListener(listener);
+		sac.addApplicationListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
-		Map usMessages = new HashMap(3);
+		Map<String, String> usMessages = new HashMap<String, String>(3);
 		usMessages.put("message.format.example1", MSG_TXT1_US);
 		usMessages.put("message.format.example2", MSG_TXT2_US);
 		usMessages.put("message.format.example3", MSG_TXT3_US);

@@ -40,7 +40,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 ///CLOVER:OFF
 /**
  * Spring Security scenarios from https://wiki.springsource.com/display/SECURITY/Spring+Security+Expression-based+Authorization
- * 
+ *
  * @author Andy Clement
  */
 public class ScenariosForSpringSecurity extends ExpressionTestCase {
@@ -55,7 +55,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			ctx.setRootObject(new Person("Ben"));
 			Boolean value = expr.getValue(ctx,Boolean.class);
 			Assert.assertFalse(value);
-			
+
 			ctx.setRootObject(new Manager("Luke"));
 			value = expr.getValue(ctx,Boolean.class);
 			Assert.assertTrue(value);
@@ -72,7 +72,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
 
 		ctx.addPropertyAccessor(new SecurityPrincipalAccessor());
-		
+
 		// Multiple options for supporting this expression: "p.name == principal.name"
 		// (1) If the right person is the root context object then "name==principal.name" is good enough
 		Expression expr = parser.parseRaw("name == principal.name");
@@ -80,22 +80,22 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
 		Assert.assertTrue(value);
-		
+
 		ctx.setRootObject(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
 		Assert.assertFalse(value);
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
 		expr = parser.parseRaw("p.name == principal.name");
-		
+
 		PersonAccessor pAccessor = new PersonAccessor();
 		ctx.addPropertyAccessor(pAccessor);
 		ctx.setRootObject(null);
-		
+
 		pAccessor.setPerson(new Person("Andy"));
 		value = expr.getValue(ctx,Boolean.class);
 		Assert.assertTrue(value);
-		
+
 		pAccessor.setPerson(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
 		Assert.assertFalse(value);
@@ -105,18 +105,18 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 	public void testScenario03_Arithmetic() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		
+
 		// Might be better with a as a variable although it would work as a property too...
 		// Variable references using a '#'
 		Expression expr = parser.parseRaw("(hasRole('SUPERVISOR') or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 
 		Boolean value = null;
-		
+
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it
 		value = expr.getValue(ctx,Boolean.class);
 		Assert.assertTrue(value);
-		
+
 		ctx.setRootObject(new Manager("Luke"));
 		ctx.setVariable("a",1.043d);
 		value = expr.getValue(ctx,Boolean.class);
@@ -128,7 +128,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 	public void testScenario04_ControllingWhichMethodsRun() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		
+
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it);
 
 		ctx.addMethodResolver(new MyMethodResolver()); // NEEDS TO OVERRIDE THE REFLECTION ONE - SHOW REORDERING MECHANISM
@@ -138,17 +138,17 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		Expression expr = parser.parseRaw("(hasRole(3) or (#a <  1.042)) and hasIpAddress('10.10.0.0/16')");
 
 		Boolean value = null;
-		
+
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		value = expr.getValue(ctx,Boolean.class);
 		Assert.assertTrue(value);
-		
+
 //			ctx.setRootObject(new Manager("Luke"));
 //			ctx.setVariable("a",1.043d);
 //			value = (Boolean)expr.getValue(ctx,Boolean.class);
 //			assertFalse(value);
 	}
-	
+
 
 	static class Person {
 
@@ -236,7 +236,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
-		
+
 
 	}
 

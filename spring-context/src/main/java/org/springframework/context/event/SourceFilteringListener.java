@@ -45,7 +45,7 @@ public class SourceFilteringListener implements SmartApplicationListener {
 	 * @param delegate the delegate listener to invoke with event
 	 * from the specified source
 	 */
-	public SourceFilteringListener(Object source, ApplicationListener delegate) {
+	public SourceFilteringListener(Object source, ApplicationListener<?> delegate) {
 		this.source = source;
 		this.delegate = (delegate instanceof SmartApplicationListener ?
 				(SmartApplicationListener) delegate : new GenericApplicationListenerAdapter(delegate));

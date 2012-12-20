@@ -63,7 +63,7 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	public String getColumnClassName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnClassName(column);
@@ -199,5 +199,5 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 }

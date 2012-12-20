@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 
 
 	@Override
-	protected Class resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
+	protected Class<?> resolveClass(ObjectStreamClass classDesc) throws IOException, ClassNotFoundException {
 		try {
 			if (this.classLoader != null) {
 				// Use the specified ClassLoader to resolve local classes.
@@ -85,13 +85,13 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	}
 
 	@Override
-	protected Class resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
+	protected Class<?> resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException {
 		if (!this.acceptProxyClasses) {
 			throw new NotSerializableException("Not allowed to accept serialized proxy classes");
 		}
 		if (this.classLoader != null) {
 			// Use the specified ClassLoader to resolve local proxy classes.
-			Class[] resolvedInterfaces = new Class[interfaces.length];
+			Class<?>[] resolvedInterfaces = new Class[interfaces.length];
 			for (int i = 0; i < interfaces.length; i++) {
 				try {
 					resolvedInterfaces[i] = ClassUtils.forName(interfaces[i], this.classLoader);
@@ -113,7 +113,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 				return super.resolveProxyClass(interfaces);
 			}
 			catch (ClassNotFoundException ex) {
-				Class[] resolvedInterfaces = new Class[interfaces.length];
+				Class<?>[] resolvedInterfaces = new Class[interfaces.length];
 				for (int i = 0; i < interfaces.length; i++) {
 					resolvedInterfaces[i] = resolveFallbackIfPossible(interfaces[i], ex);
 				}
@@ -131,7 +131,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	 * @param ex the original exception thrown when attempting to load the class
 	 * @return the newly resolved class (never <code>null</code>)
 	 */
-	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
+	protected Class<?> resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException{
 
 		throw ex;

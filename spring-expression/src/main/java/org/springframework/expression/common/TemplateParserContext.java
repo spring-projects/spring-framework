@@ -38,7 +38,7 @@ public class TemplateParserContext implements ParserContext {
 	public TemplateParserContext() {
 		this("#{", "}");
 	}
-	
+
 	/**
 	 * Create a new TemplateParserContext for the given prefix and suffix.
 	 * @param expressionPrefix the expression prefix to use

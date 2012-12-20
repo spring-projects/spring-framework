@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,10 +128,10 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Integer> params = new HashMap<String, Integer>();
 		params.put("perfId", new Integer(1));
 		params.put("priceId", new Integer(1));
-		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback() {
+		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback<Object>() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				assertEquals(mockPreparedStatement, ps);
 				ps.executeUpdate();
@@ -160,10 +160,10 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, SqlParameterValue> params = new HashMap<String, SqlParameterValue>();
 		params.put("perfId", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("priceId", new SqlParameterValue(Types.INTEGER, new Integer(1)));
-		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback() {
+		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback<Object>() {
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				assertEquals(mockPreparedStatement, ps);
 				ps.executeUpdate();
@@ -192,7 +192,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Integer> params = new HashMap<String, Integer>();
 		params.put("perfId", new Integer(1));
 		params.put("priceId", new Integer(1));
 		int rowsAffected = jt.update(UPDATE_NAMED_PARAMETERS, params);
@@ -219,7 +219,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, SqlParameterValue> params = new HashMap<String, SqlParameterValue>();
 		params.put("perfId", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("priceId", new SqlParameterValue(Types.INTEGER, new Integer(1)));
 		int rowsAffected = jt.update(UPDATE_NAMED_PARAMETERS, params);
@@ -255,10 +255,10 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
-		Customer cust = (Customer) jt.query(SELECT_NAMED_PARAMETERS, params, new ResultSetExtractor() {
+		Customer cust = (Customer) jt.query(SELECT_NAMED_PARAMETERS, params, new ResultSetExtractor<Object>() {
 			public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 				rs.next();
 				Customer cust = new Customer();
@@ -302,10 +302,10 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
-		final List customers = new LinkedList();
+		final List<Customer> customers = new LinkedList<Customer>();
 		jt.query(SELECT_NAMED_PARAMETERS, params, new RowCallbackHandler() {
 			public void processRow(ResultSet rs) throws SQLException {
 				Customer cust = new Customer();
@@ -315,7 +315,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 			}
 		});
 		assertEquals(1, customers.size());
-		Customer cust = (Customer) customers.get(0);
+		Customer cust = customers.get(0);
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
@@ -351,11 +351,11 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
-		List customers = jt.query(SELECT_NAMED_PARAMETERS, params, new RowMapper() {
-			public Object mapRow(ResultSet rs, int rownum) throws SQLException {
+		List<Customer> customers = jt.query(SELECT_NAMED_PARAMETERS, params, new RowMapper<Customer>() {
+			public Customer mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -363,7 +363,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 			}
 		});
 		assertEquals(1, customers.size());
-		Customer cust = (Customer) customers.get(0);
+		Customer cust = customers.get(0);
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
 	}
@@ -399,11 +399,11 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		NamedParameterJdbcTemplate jt = new NamedParameterJdbcTemplate(mockDataSource);
-		Map params = new HashMap();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
-		Customer cust = (Customer) jt.queryForObject(SELECT_NAMED_PARAMETERS, params, new RowMapper() {
-			public Object mapRow(ResultSet rs, int rownum) throws SQLException {
+		Customer cust = jt.queryForObject(SELECT_NAMED_PARAMETERS, params, new RowMapper<Customer>() {
+			public Customer mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
 				cust.setForename(rs.getString(COLUMN_NAMES[1]));
@@ -418,7 +418,8 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 
 		final String sqlToUse = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id";
-		final Map[] ids = new Map[2];
+		@SuppressWarnings("unchecked")
+		final Map<String, Integer>[] ids = new Map[2];
 		ids[0] = Collections.singletonMap("id", 100);
 		ids[1] = Collections.singletonMap("id", 200);
 		final int[] rowsAffected = new int[] { 1, 2 };

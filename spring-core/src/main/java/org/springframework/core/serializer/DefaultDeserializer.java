@@ -24,12 +24,12 @@ import org.springframework.core.NestedIOException;
 
 /**
  * Deserializer that reads an input stream using Java Serialization.
- * 
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
  */
-public class DefaultDeserializer implements Deserializer<Object> { 
+public class DefaultDeserializer implements Deserializer<Object> {
 
 	/**
 	 * Reads the input stream and deserializes into an object.

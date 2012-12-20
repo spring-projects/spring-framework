@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public class CodebaseAwareObjectInputStream extends ConfigurableObjectInputStrea
 
 
 	@Override
-	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
+	protected Class<?> resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException {
 
 		// If codebaseUrl is set, try to load the class with the RMIClassLoader.

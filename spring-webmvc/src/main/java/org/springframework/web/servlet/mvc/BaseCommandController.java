@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * JavaBeans based on request parameters, validate the content of such
  * JavaBeans using {@link org.springframework.validation.Validator Validators}
  * and use custom editors (in the form of
- * {@link java.beans.PropertyEditor PropertyEditors}) to transform 
+ * {@link java.beans.PropertyEditor PropertyEditors}) to transform
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
@@ -50,7 +50,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * Upon receiving a request, any BaseCommandController will attempt to fill the
  * command object using the request parameters. This is done using the typical
  * and well-known JavaBeans property notation. When a request parameter named
- * <code>'firstName'</code> exists, the framework will attempt to call 
+ * <code>'firstName'</code> exists, the framework will attempt to call
  * <code>setFirstName([value])</code> passing the value of the parameter. Nested properties
  * are of course supported. For instance a parameter named <code>'address.city'</code>
  * will result in a <code>getAddress().setCity([value])</code> call on the
@@ -142,7 +142,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	private String commandName = DEFAULT_COMMAND_NAME;
 
-	private Class commandClass;
+	private Class<?> commandClass;
 
 	private Validator[] validators;
 
@@ -176,14 +176,14 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Set the command class for this controller.
 	 * An instance of this class gets populated and validated on each request.
 	 */
-	public final void setCommandClass(Class commandClass) {
+	public final void setCommandClass(Class<?> commandClass) {
 		this.commandClass = commandClass;
 	}
 
 	/**
 	 * Return the command class for this controller.
 	 */
-	public final Class getCommandClass() {
+	public final Class<?> getCommandClass() {
 		return this.commandClass;
 	}
 

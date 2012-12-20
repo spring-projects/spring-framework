@@ -20,7 +20,7 @@ package org.springframework.test;
  * JUnit 3.8 based unit test which verifies new functionality requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3264"
  * target="_blank">SPR-3264</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see Spr3264DependencyInjectionSpringContextTests

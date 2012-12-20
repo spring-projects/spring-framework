@@ -45,7 +45,7 @@ public class UriComponentsTests {
         UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/hotel list/Z\u00fcrich").build();
         assertEquals(new URI("http://example.com/hotel%20list/Z\u00fcrich"), uriComponents.toUri());
     }
-	
+
 	@Test
 	public void expand() {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com").path("/{foo} {bar}").build();
@@ -63,7 +63,7 @@ public class UriComponentsTests {
 	public void invalidCharacters() {
 		UriComponentsBuilder.fromPath("/{foo}").build(true);
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void invalidEncodedSequence() {
 		UriComponentsBuilder.fromPath("/fo%2o").build(true);

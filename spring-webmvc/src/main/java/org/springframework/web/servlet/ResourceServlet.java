@@ -29,7 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.support.ServletContextResource;
 
 /**
- * Simple servlet that can expose an internal resource, including a 
+ * Simple servlet that can expose an internal resource, including a
  * default URL if the specified resource is not found. An alternative,
  * for example, to trying and catching exceptions when using JSP include.
  *

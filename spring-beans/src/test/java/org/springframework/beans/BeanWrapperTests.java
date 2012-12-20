@@ -94,14 +94,27 @@ public final class BeanWrapperTests {
 		assertEquals(map, foo.list.get(0));
 	}
 
-	@Test
-	public void testNullNestedTypeDescriptorWithNoConversionService() {
-		Foo foo = new Foo();
-		BeanWrapperImpl wrapper = new BeanWrapperImpl(foo);
-		wrapper.setAutoGrowNestedPaths(true);
-		wrapper.setPropertyValue("listOfMaps[0]['luckyNumber']", "9");
-		assertEquals("9", foo.listOfMaps.get(0).get("luckyNumber"));
-	}
+	static class Foo {
+
+		private List<?> list;
+
+		private List<Map<?, ?>> listOfMaps;
+
+		public List<?> getList() {
+			return list;
+		}
+
+		public void setList(List<?> list) {
+			this.list = list;
+		}
+
+		public List<Map<?, ?>> getListOfMaps() {
+			return listOfMaps;
+		}
+
+		public void setListOfMaps(List<Map<?, ?>> listOfMaps) {
+			this.listOfMaps = listOfMaps;
+		}
 
 	@Test
 	public void testNullNestedTypeDescriptorWithBadConversionService() {
@@ -995,15 +1008,15 @@ public final class BeanWrapperTests {
 		bw.setPropertyValues(pvs);
 		assertEquals(tb5, bean.getArray()[0]);
 		assertEquals(tb4, bean.getArray()[1]);
-		assertEquals(tb3, ((TestBean) bean.getList().get(0)));
-		assertEquals(tb2, ((TestBean) bean.getList().get(1)));
-		assertEquals(tb0, ((TestBean) bean.getList().get(2)));
-		assertEquals(null, ((TestBean) bean.getList().get(3)));
-		assertEquals(tb1, ((TestBean) bean.getList().get(4)));
-		assertEquals(tb1, ((TestBean) bean.getMap().get("key1")));
-		assertEquals(tb0, ((TestBean) bean.getMap().get("key2")));
-		assertEquals(tb4, ((TestBean) bean.getMap().get("key5")));
-		assertEquals(tb5, ((TestBean) bean.getMap().get("key9")));
+		assertEquals(tb3, bean.getList().get(0));
+		assertEquals(tb2, bean.getList().get(1));
+		assertEquals(tb0, bean.getList().get(2));
+		assertEquals(null, bean.getList().get(3));
+		assertEquals(tb1, bean.getList().get(4));
+		assertEquals(tb1, bean.getMap().get("key1"));
+		assertEquals(tb0, bean.getMap().get("key2"));
+		assertEquals(tb4, bean.getMap().get("key5"));
+		assertEquals(tb5, bean.getMap().get("key9"));
 		assertEquals(tb5, bw.getPropertyValue("array[0]"));
 		assertEquals(tb4, bw.getPropertyValue("array[1]"));
 		assertEquals(tb3, bw.getPropertyValue("list[0]"));
@@ -1090,13 +1103,13 @@ public final class BeanWrapperTests {
 		inputMap.put(new Integer(1), "rod");
 		inputMap.put(new Integer(2), "rob");
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("map", new ReadOnlyMap(inputMap));
+		pvs.add("map", new ReadOnlyMap<Object, Object>(inputMap));
 		bw.setPropertyValues(pvs);
 		assertEquals("rod", ((TestBean) bean.getMap().get(new Integer(1))).getName());
 		assertEquals("rob", ((TestBean) bean.getMap().get(new Integer(2))).getName());
 	}
 
-	@SuppressWarnings("unchecked") // must work with raw map in this test
+	@SuppressWarnings({ "unchecked", "rawtypes" }) // must work with raw map in this test
 	@Test
 	public void testRawMapAccessWithNoEditorRegistered() {
 		IndexedTestBean bean = new IndexedTestBean();
@@ -1571,14 +1584,14 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class NoRead {
+	public static class NoRead {
 
 		public void setAge(int age) {
 		}
 	}
 
 
-	private static class EnumTester {
+	public static class EnumTester {
 
 		private Autowire autowire;
 
@@ -1592,7 +1605,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class PropsTester {
+	public static class PropsTester {
 
 		private Properties props;
 
@@ -1620,7 +1633,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class GetterBean {
+	public static class GetterBean {
 
 		private String name;
 
@@ -1637,7 +1650,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class ThrowsException {
+	public static class ThrowsException {
 
 		public void doSomething(Throwable t) throws Throwable {
 			throw t;
@@ -1645,7 +1658,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class PrimitiveArrayBean {
+	public static class PrimitiveArrayBean {
 
 		private int[] array;
 
@@ -1659,7 +1672,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class NumberPropertyBean {
+	public static class NumberPropertyBean {
 
 		private byte myPrimitiveByte;
 		private Byte myByte;
@@ -1777,7 +1790,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class IntelliBean {
+	public static class IntelliBean {
 
 		public void setName(String name) {}
 
@@ -1791,7 +1804,7 @@ public final class BeanWrapperTests {
 	}
 
 
-	private static class Employee extends TestBean {
+	public static class Employee extends TestBean {
 
 		private String co;
 

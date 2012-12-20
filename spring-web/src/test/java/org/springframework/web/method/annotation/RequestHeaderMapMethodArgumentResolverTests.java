@@ -39,7 +39,7 @@ import org.springframework.web.method.annotation.RequestHeaderMapMethodArgumentR
 
 /**
  * Text fixture with {@link RequestHeaderMapMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -62,7 +62,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestHeaderMapMethodArgumentResolver();
-		
+
 		Method method = getClass().getMethod("params", Map.class, MultiValueMap.class, HttpHeaders.class, Map.class);
 		paramMap = new MethodParameter(method, 0);
 		paramMultiValueMap = new MethodParameter(method, 1);
@@ -108,7 +108,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Object result = resolver.resolveArgument(paramMultiValueMap, null, webRequest, null);
-		
+
 		assertTrue(result instanceof MultiValueMap);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -127,7 +127,7 @@ public class RequestHeaderMapMethodArgumentResolverTests {
 		expected.add(name, value2);
 
 		Object result = resolver.resolveArgument(paramHttpHeaders, null, webRequest, null);
-		
+
 		assertTrue(result instanceof HttpHeaders);
 		assertEquals("Invalid result", expected, result);
 	}

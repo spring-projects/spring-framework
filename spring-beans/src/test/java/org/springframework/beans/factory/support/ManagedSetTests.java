@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,25 +27,25 @@ import junit.framework.TestCase;
 public class ManagedSetTests extends TestCase {
 
 	public void testMergeSunnyDay() {
-		ManagedSet parent = new ManagedSet();
+		ManagedSet<String> parent = new ManagedSet<String>();
 		parent.add("one");
 		parent.add("two");
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		child.add("three");
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set<String> mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 3, mergedSet.size());
 	}
 
 	public void testMergeWithNullParent() {
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		child.add("one");
 		child.setMergeEnabled(true);
 		assertSame(child, child.merge(null));
 	}
 
 	public void testMergeNotAllowedWhenMergeNotEnabled() {
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		try {
 			child.merge(null);
 			fail("Must have failed by this point (cannot merge() when the mergeEnabled property is false.");
@@ -55,7 +55,7 @@ public class ManagedSetTests extends TestCase {
 	}
 
 	public void testMergeWithNonCompatibleParentType() {
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		child.add("one");
 		child.setMergeEnabled(true);
 		try {
@@ -67,24 +67,24 @@ public class ManagedSetTests extends TestCase {
 	}
 
 	public void testMergeEmptyChild() {
-		ManagedSet parent = new ManagedSet();
+		ManagedSet<String> parent = new ManagedSet<String>();
 		parent.add("one");
 		parent.add("two");
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set<String> mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
 	}
 
 	public void testMergeChildValuesOverrideTheParents() {
 		// asserts that the set contract is not violated during a merge() operation...
-		ManagedSet parent = new ManagedSet();
+		ManagedSet<String> parent = new ManagedSet<String>();
 		parent.add("one");
 		parent.add("two");
-		ManagedSet child = new ManagedSet();
+		ManagedSet<String> child = new ManagedSet<String>();
 		child.add("one");
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set<String> mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
 	}
 

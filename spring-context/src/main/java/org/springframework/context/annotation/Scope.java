@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
  * When used as a type-level annotation in conjunction with the {@link Component}
  * annotation, indicates the name of a scope to use for instances of the annotated
  * type.
- * 
+ *
  * <p>When used as a method-level annotation in conjunction with the
  * {@link Bean} annotation, indicates the name of a scope to use for
  * the instance returned from the method.

@@ -38,13 +38,13 @@ import java.util.regex.PatternSyntaxException;
  * @since 1.1
  */
 public class JdkRegexpMethodPointcut extends AbstractRegexpMethodPointcut {
-	
-	/** 
+
+	/**
 	 * Compiled form of the patterns.
 	 */
 	private Pattern[] compiledPatterns = new Pattern[0];
 
-	/** 
+	/**
 	 * Compiled form of the exclusion patterns.
 	 */
 	private Pattern[] compiledExclusionPatterns = new Pattern[0];

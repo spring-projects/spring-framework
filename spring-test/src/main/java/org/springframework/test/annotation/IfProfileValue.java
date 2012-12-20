@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * {@link ProfileValueSource} implementation, you can configure a test method to
  * run only on Java VMs from Sun Microsystems as follows:
  * </p>
- * 
+ *
  * <pre class="code">
  * &#064;IfProfileValue(name = &quot;java.vendor&quot;, value = &quot;Sun Microsystems Inc.&quot;)
  * public void testSomething() {
@@ -54,14 +54,14 @@ import java.lang.annotation.Target;
  * (assuming a {@link ProfileValueSource} has been appropriately configured for
  * the &quot;test-groups&quot; name):
  * </p>
- * 
+ *
  * <pre class="code">
  * &#064;IfProfileValue(name = &quot;test-groups&quot;, values = { &quot;unit-tests&quot;, &quot;integration-tests&quot; })
  * public void testWhichRunsForUnitOrIntegrationTestGroups() {
  * 	// ...
  * }
  * </pre>
- * 
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0

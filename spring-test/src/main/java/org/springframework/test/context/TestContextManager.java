@@ -64,7 +64,7 @@ import org.springframework.util.ObjectUtils;
  * <em>after class methods</em> of a particular testing framework (e.g., JUnit
  * 4's {@link org.junit.AfterClass &#064;AfterClass})</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

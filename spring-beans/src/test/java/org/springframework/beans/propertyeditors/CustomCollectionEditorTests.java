@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,10 @@ public final class CustomCollectionEditorTests {
 		new CustomCollectionEditor(null);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test(expected=IllegalArgumentException.class)
 	public void testCtorWithNonCollectionType() throws Exception {
-		new CustomCollectionEditor(String.class);
+		new CustomCollectionEditor((Class)String.class);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -86,7 +87,7 @@ public final class CustomCollectionEditorTests {
 
 
 	@SuppressWarnings("serial")
-	private static final class CollectionTypeWithNoNoArgCtor extends ArrayList<Object> {
+	public static final class CollectionTypeWithNoNoArgCtor extends ArrayList<Object> {
 		public CollectionTypeWithNoNoArgCtor(String anArg) {
 		}
 	}

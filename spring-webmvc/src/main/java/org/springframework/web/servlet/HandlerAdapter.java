@@ -46,7 +46,7 @@ import javax.servlet.http.HttpServletResponse;
  * @see org.springframework.web.servlet.handler.SimpleServletHandlerAdapter
  */
 public interface HandlerAdapter {
-	
+
 	/**
 	 * Given a handler instance, return whether or not this HandlerAdapter can
 	 * support it. Typical HandlerAdapters will base the decision on the handler
@@ -58,8 +58,8 @@ public interface HandlerAdapter {
 	 * @param handler handler object to check
 	 * @return whether or not this object can use the given handler
 	 */
-	boolean supports(Object handler); 
-	
+	boolean supports(Object handler);
+
 	/**
 	 * Use the given handler to handle this request.
 	 * The workflow that is required may vary widely.

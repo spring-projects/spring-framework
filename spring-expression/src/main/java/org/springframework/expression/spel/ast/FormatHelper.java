@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * Utility methods (formatters, etc) used during parsing and evaluation.
- * 
+ *
  * @author Andy Clement
  */
 public class FormatHelper {
@@ -46,7 +46,7 @@ public class FormatHelper {
 				sb.append(formatClassNameForMessage(typeDescriptor.getType()));
 			}
 			else {
-				sb.append(formatClassNameForMessage(null));				
+				sb.append(formatClassNameForMessage(null));
 			}
 		}
 		sb.append(")");
@@ -60,13 +60,13 @@ public class FormatHelper {
 	 * @return a formatted string suitable for message inclusion
 	 */
 	public static String formatClassNameForMessage(Class<?> clazz) {
-		if (clazz == null) { 
+		if (clazz == null) {
 			return "null";
 		}
 		StringBuilder fmtd = new StringBuilder();
 		if (clazz.isArray()) {
 			int dims = 1;
-			Class baseClass = clazz.getComponentType();
+			Class<?> baseClass = clazz.getComponentType();
 			while (baseClass.isArray()) {
 				baseClass = baseClass.getComponentType();
 				dims++;

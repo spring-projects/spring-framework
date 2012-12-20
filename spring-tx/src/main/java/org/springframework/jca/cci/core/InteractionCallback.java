@@ -29,7 +29,7 @@ import org.springframework.dao.DataAccessException;
  * Allows to execute any number of operations on a single Interaction, for
  * example a single execute call or repeated execute calls with varying
  * parameters.
- * 
+ *
  * <p>This is particularly useful for delegating to existing data access code
  * that expects an Interaction to work on and throws ResourceException. For newly
  * written code, it is strongly recommended to use CciTemplate's more specific
@@ -48,7 +48,7 @@ public interface InteractionCallback<T> {
 	 * Gets called by <code>CciTemplate.execute</code> with an active CCI Interaction.
 	 * Does not need to care about activating or closing the Interaction, or
 	 * handling transactions.
-	 * 
+	 *
 	 * <p>If called without a thread-bound CCI transaction (initiated by
 	 * CciLocalTransactionManager), the code will simply get executed on the CCI
 	 * Interaction with its transactional semantics. If CciTemplate is configured

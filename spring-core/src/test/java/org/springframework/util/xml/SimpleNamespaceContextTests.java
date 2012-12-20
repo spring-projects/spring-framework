@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,32 +74,32 @@ public class SimpleNamespaceContextTests {
 	public void multiplePrefixes() {
 		context.bindNamespaceUri("prefix1", "namespace");
 		context.bindNamespaceUri("prefix2", "namespace");
-		Iterator iterator = context.getPrefixes("namespace");
+		Iterator<String> iterator = context.getPrefixes("namespace");
 		assertNotNull("getPrefixes returns null", iterator);
 		assertTrue("iterator is empty", iterator.hasNext());
-		String result = (String) iterator.next();
+		String result = iterator.next();
 		assertTrue("Invalid prefix", result.equals("prefix1") || result.equals("prefix2"));
 		assertTrue("iterator is empty", iterator.hasNext());
-		result = (String) iterator.next();
+		result = iterator.next();
 		assertTrue("Invalid prefix", result.equals("prefix1") || result.equals("prefix2"));
 		assertFalse("iterator contains more than two values", iterator.hasNext());
 	}
 
 	private void assertPrefixes(String namespaceUri, String prefix) {
-		Iterator iterator = context.getPrefixes(namespaceUri);
+		Iterator<String> iterator = context.getPrefixes(namespaceUri);
 		assertNotNull("getPrefixes returns null", iterator);
 		assertTrue("iterator is empty", iterator.hasNext());
-		String result = (String) iterator.next();
+		String result = iterator.next();
 		assertEquals("Invalid prefix", prefix, result);
 		assertFalse("iterator contains multiple values", iterator.hasNext());
 	}
 
 	@Test
 	public void getBoundPrefixes() throws Exception {
-		Iterator iterator = context.getBoundPrefixes();
+		Iterator<String> iterator = context.getBoundPrefixes();
 		assertNotNull("getPrefixes returns null", iterator);
 		assertTrue("iterator is empty", iterator.hasNext());
-		String result = (String) iterator.next();
+		String result = iterator.next();
 		assertEquals("Invalid prefix", "prefix", result);
 		assertFalse("iterator contains multiple values", iterator.hasNext());
 	}

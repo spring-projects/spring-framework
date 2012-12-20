@@ -47,7 +47,7 @@ public abstract class ScopedProxyUtils {
 	 */
 	public static BeanDefinitionHolder createScopedProxy(BeanDefinitionHolder definition,
 			BeanDefinitionRegistry registry, boolean proxyTargetClass) {
-		
+
 		String originalBeanName = definition.getBeanName();
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
 
@@ -87,7 +87,7 @@ public abstract class ScopedProxyUtils {
 		// (potentially an inner bean).
 		return new BeanDefinitionHolder(proxyDefinition, originalBeanName, definition.getAliases());
 	}
-	
+
 	/**
 	 * Generates the bean name that is used within the scoped proxy to reference the target bean.
 	 * @param originalBeanName the original name of bean

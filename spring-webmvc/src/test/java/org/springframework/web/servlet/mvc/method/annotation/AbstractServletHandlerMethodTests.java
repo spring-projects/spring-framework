@@ -81,9 +81,7 @@ public class AbstractServletHandlerMethodTests {
 				}
 
 				Class<?> mappingType = RequestMappingHandlerMapping.class;
-				RootBeanDefinition beanDef = new RootBeanDefinition(mappingType);
-				beanDef.getPropertyValues().add("removeSemicolonContent", "false");
-				wac.registerBeanDefinition("handlerMapping", beanDef);
+				wac.registerBeanDefinition("handlerMapping", new RootBeanDefinition(mappingType));
 
 				Class<?> adapterType = RequestMappingHandlerAdapter.class;
 				wac.registerBeanDefinition("handlerAdapter", new RootBeanDefinition(adapterType));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,12 +55,12 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 	public void testWithCheckedValue() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("sex");
 		this.tag.setValue("M");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 
@@ -74,7 +74,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, dynamicAttribute1, dynamicAttribute1);
 		assertContainsAttribute(output, dynamicAttribute2, dynamicAttribute2);
 	}
-	
+
 	public void testWithCheckedValueAndDynamicAttributes() throws Exception {
 		this.tag.setPath("sex");
 		this.tag.setValue("M");
@@ -237,7 +237,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
 		}
 	}
-	
+
 	private void assertTagOpened(String output) {
 		assertTrue(output.indexOf("<input ") > -1);
 	}
@@ -266,7 +266,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		}
 
 		public String getAsText() {
-			return "F" + (Float) getValue();
+			return "F" + getValue();
 		}
 	}
 

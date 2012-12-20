@@ -39,17 +39,17 @@ public class RollbackRuleTests extends TestCase {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
-	
+
 	public void testFoundImmediatelyWithClass() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
-	
+
 	public void testNotFound() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
 		assertTrue(rr.getDepth(new MyRuntimeException("")) == -1);
 	}
-	
+
 	public void testAncestry() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException

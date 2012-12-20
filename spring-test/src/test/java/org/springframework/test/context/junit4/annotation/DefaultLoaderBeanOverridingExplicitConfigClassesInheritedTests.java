@@ -27,7 +27,7 @@ import org.springframework.test.context.support.DelegatingSmartContextLoader;
  * Integration tests that verify support for configuration classes in
  * the Spring TestContext Framework in conjunction with the
  * {@link DelegatingSmartContextLoader}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

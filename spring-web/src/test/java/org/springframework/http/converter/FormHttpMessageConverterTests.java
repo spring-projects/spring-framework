@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ public class FormHttpMessageConverterTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readForm() throws Exception {
 		String body = "name+1=value+1&name+2=value+2%2B1&name+2=value+2%2B2&name+3";
 		Charset iso88591 = Charset.forName("ISO-8859-1");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
-class AspectJPrecedenceComparator implements Comparator {
+class AspectJPrecedenceComparator implements Comparator<Object> {
 
 	private static final int HIGHER_PRECEDENCE = -1;
 	private static final int SAME_PRECEDENCE = 0;
@@ -106,14 +106,14 @@ class AspectJPrecedenceComparator implements Comparator {
 		boolean oneOrOtherIsAfterAdvice =
 				(AspectJAopUtils.isAfterAdvice(advisor1) || AspectJAopUtils.isAfterAdvice(advisor2));
 		int adviceDeclarationOrderDelta = getAspectDeclarationOrder(advisor1) - getAspectDeclarationOrder(advisor2);
-		
+
 		if (oneOrOtherIsAfterAdvice) {
 			// the advice declared last has higher precedence
 			if (adviceDeclarationOrderDelta < 0) {
 				// advice1 was declared before advice2
 				// so advice1 has lower precedence
 				return LOWER_PRECEDENCE;
-			} 
+			}
 			else if (adviceDeclarationOrderDelta == 0) {
 				return SAME_PRECEDENCE;
 			}
@@ -153,7 +153,7 @@ class AspectJPrecedenceComparator implements Comparator {
 	}
 
 	private int getAspectDeclarationOrder(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo = 
+		AspectJPrecedenceInformation precedenceInfo =
 			AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
 		if (precedenceInfo != null) {
 			return precedenceInfo.getDeclarationOrder();

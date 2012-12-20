@@ -55,7 +55,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class PortletApplicationContextUtils {
-	
+
 	/**
 	 * Find the root WebApplicationContext for this portlet application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
@@ -156,16 +156,16 @@ public abstract class PortletApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_PARAMETERS_BEAN_NAME)) {
 			Map<String, String> parameterMap = new HashMap<String, String>();
 			if (pc != null) {
-				Enumeration paramNameEnum = pc.getInitParameterNames();
+				Enumeration<String> paramNameEnum = pc.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
-					String paramName = (String) paramNameEnum.nextElement();
+					String paramName = paramNameEnum.nextElement();
 					parameterMap.put(paramName, pc.getInitParameter(paramName));
 				}
 			}
 			if (config != null) {
-				Enumeration paramNameEnum = config.getInitParameterNames();
+				Enumeration<String> paramNameEnum = config.getInitParameterNames();
 				while (paramNameEnum.hasMoreElements()) {
-					String paramName = (String) paramNameEnum.nextElement();
+					String paramName = paramNameEnum.nextElement();
 					parameterMap.put(paramName, config.getInitParameter(paramName));
 				}
 			}
@@ -176,9 +176,9 @@ public abstract class PortletApplicationContextUtils {
 		if (!bf.containsBean(WebApplicationContext.CONTEXT_ATTRIBUTES_BEAN_NAME)) {
 			Map<String, Object> attributeMap = new HashMap<String, Object>();
 			if (pc != null) {
-				Enumeration attrNameEnum = pc.getAttributeNames();
+				Enumeration<String> attrNameEnum = pc.getAttributeNames();
 				while (attrNameEnum.hasMoreElements()) {
-					String attrName = (String) attrNameEnum.nextElement();
+					String attrName = attrNameEnum.nextElement();
 					attributeMap.put(attrName, pc.getAttribute(attrName));
 				}
 			}

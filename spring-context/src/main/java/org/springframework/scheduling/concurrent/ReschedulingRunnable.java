@@ -49,7 +49,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 
 	private final ScheduledExecutorService executor;
 
-	private ScheduledFuture currentFuture;
+	private volatile ScheduledFuture<?> currentFuture;
 
 	private Date scheduledExecutionTime;
 
@@ -63,7 +63,7 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	}
 
 
-	public ScheduledFuture schedule() {
+	public ScheduledFuture<?> schedule() {
 		synchronized (this.triggerContextMonitor) {
 			this.scheduledExecutionTime = this.trigger.nextExecutionTime(this.triggerContext);
 			if (this.scheduledExecutionTime == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 			}
 
 			public int run(int performanceId, int type) {
-				Map params = new HashMap();
+				Map<String, Integer> params = new HashMap<String, Integer>();
 				params.put("perfId", new Integer(performanceId));
 				params.put("priceId", new Integer(type));
 				return updateByNamedParam(params);
@@ -272,7 +272,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
-		
+
 		mockPreparedStatement.setString(1, "rod");
 		ctrlPreparedStatement.setVoidCallable();
 		mockPreparedStatement.executeUpdate();
@@ -383,7 +383,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 
 		MaxRowsUpdater pc = new MaxRowsUpdater();
 		try {
-			int rowsAffected = pc.run();
+			pc.run();
 			fail("Shouldn't continue when too many rows affected");
 		}
 		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {
@@ -428,7 +428,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 
 		RequiredRowsUpdater pc = new RequiredRowsUpdater();
 		try {
-			int rowsAffected = pc.run();
+			pc.run();
 			fail("Shouldn't continue when too many rows affected");
 		}
 		catch (JdbcUpdateAffectedIncorrectNumberOfRowsException juaicrex) {

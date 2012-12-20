@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,9 +76,9 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	@Override
 	public Enumeration<String> getParameterNames() {
 		Set<String> paramNames = new HashSet<String>();
-		Enumeration paramEnum = super.getParameterNames();
+		Enumeration<String> paramEnum = super.getParameterNames();
 		while (paramEnum.hasMoreElements()) {
-			paramNames.add((String) paramEnum.nextElement());
+			paramNames.add(paramEnum.nextElement());
 		}
 		paramNames.addAll(getMultipartParameters().keySet());
 		return Collections.enumeration(paramNames);
@@ -103,7 +103,6 @@ public class DefaultMultipartHttpServletRequest extends AbstractMultipartHttpSer
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, String[]> getParameterMap() {
 		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());

@@ -80,7 +80,7 @@ public class UriTemplateTests {
 		URI result = template.expand(uriVariables);
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
 	}
-    
+
     @Test
     public void expandMapEncoded() throws Exception {
         Map<String, String> uriVariables = Collections.singletonMap("hotel", "Z\u00fcrich");
@@ -113,7 +113,7 @@ public class UriTemplateTests {
 		assertFalse("UriTemplate matches", template.matches(""));
 		assertFalse("UriTemplate matches", template.matches(null));
 	}
-	
+
 	@Test
 	public void matchesCustomRegex() throws Exception {
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel:\\d+}");

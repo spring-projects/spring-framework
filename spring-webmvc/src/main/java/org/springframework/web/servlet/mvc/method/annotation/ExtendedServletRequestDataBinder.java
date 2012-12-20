@@ -62,18 +62,7 @@ public class ExtendedServletRequestDataBinder extends ServletRequestDataBinder {
 	@SuppressWarnings("unchecked")
 	protected void addBindValues(MutablePropertyValues mpvs, ServletRequest request) {
 		String attr = HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
-		Map<String, String> uriVars = (Map<String, String>) request.getAttribute(attr);
-		if (uriVars != null) {
-			for (Entry<String, String> entry : uriVars.entrySet()) {
-				if (mpvs.contains(entry.getKey())) {
-					logger.warn("Skipping URI variable '" + entry.getKey()
-							+ "' since the request contains a bind value with the same name.");
-				}
-				else {
-					mpvs.addPropertyValue(entry.getKey(), entry.getValue());
-				}
-			}
-		}
+		mpvs.addPropertyValues((Map<String, String>) request.getAttribute(attr));
 	}
 
 }

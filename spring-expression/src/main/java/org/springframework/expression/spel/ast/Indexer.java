@@ -44,22 +44,18 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 // TODO support correct syntax for multidimensional [][][] and not [,,,]
 public class Indexer extends SpelNodeImpl {
 
-	// These fields are used when the indexer is being used as a property read accessor.
-	// If the name and target type match these cached values then the cachedReadAccessor
-	// is used to read the property. If they do not match, the correct accessor is
-	// discovered and then cached for later use.
-
+	// These fields are used when the indexer is being used as a property read accessor. If the name and
+	// target type match these cached values then the cachedReadAccessor is used to read the property.
+	// If they do not match, the correct accessor is discovered and then cached for later use.
 	private String cachedReadName;
 
 	private Class<?> cachedReadTargetType;
 
 	private PropertyAccessor cachedReadAccessor;
 
-	// These fields are used when the indexer is being used as a property write accessor.
-	// If the name and target type match these cached values then the cachedWriteAccessor
-	// is used to write the property. If they do not match, the correct accessor is
-	// discovered and then cached for later use.
-
+	// These fields are used when the indexer is being used as a property write accessor.  If the name and
+	// target type match these cached values then the cachedWriteAccessor is used to write the property.
+	// If they do not match, the correct accessor is discovered and then cached for later use.
 	private String cachedWriteName;
 
 	private Class<?> cachedWriteTargetType;
@@ -74,40 +70,29 @@ public class Indexer extends SpelNodeImpl {
 
 	@Override
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
-		return getValueRef(state).getValue();
-	}
+		TypedValue context = state.getActiveContextObject();
+		Object targetObject = context.getValue();
+		TypeDescriptor targetObjectTypeDescriptor = context.getTypeDescriptor();
+		TypedValue indexValue = null;
+		Object index = null;
 
-	@Override
-	public void setValue(ExpressionState state, Object newValue) throws EvaluationException {
-		getValueRef(state).setValue(newValue);
-	}
-
-	@Override
-	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
-		return true;
-	}
-
-
-	private class ArrayIndexingValueRef implements ValueRef {
-
-		private final TypeConverter typeConverter;
-
-		private final Object array;
-
-		private final int idx;
-
-		private final TypeDescriptor typeDescriptor;
-
-		ArrayIndexingValueRef(TypeConverter typeConverter, Object array, int idx, TypeDescriptor typeDescriptor) {
-			this.typeConverter = typeConverter;
-			this.array = array;
-			this.idx = idx;
-			this.typeDescriptor = typeDescriptor;
+		// This first part of the if clause prevents a 'double dereference' of the property (SPR-5847)
+		if (targetObject instanceof Map && (children[0] instanceof PropertyOrFieldReference)) {
+			PropertyOrFieldReference reference = (PropertyOrFieldReference)children[0];
+			index = reference.getName();
+			indexValue = new TypedValue(index);
 		}
-
-		public TypedValue getValue() {
-			Object arrayElement = accessArrayElement(this.array, this.idx);
-			return new TypedValue(arrayElement, this.typeDescriptor.elementTypeDescriptor(arrayElement));
+		else {
+			// In case the map key is unqualified, we want it evaluated against the root object so
+			// temporarily push that on whilst evaluating the key
+			try {
+				state.pushActiveContextObject(state.getRootContextObject());
+				indexValue = children[0].getValueInternal(state);
+				index = indexValue.getValue();
+			}
+			finally {
+				state.popActiveContextObject();
+			}
 		}
 
 		public void setValue(Object newValue) {
@@ -152,37 +137,22 @@ public class Indexer extends SpelNodeImpl {
 			this.map.put(this.key, newValue);
 		}
 
-		public boolean isWritable() {
-			return true;
-		}
-	}
-
-
-	private class PropertyIndexingValueRef implements ValueRef {
-
-		private final Object targetObject;
-
-		private final String name;
-
-		private final EvaluationContext eContext;
-
-		private final TypeDescriptor td;
-
-		public PropertyIndexingValueRef(Object targetObject, String value, EvaluationContext evaluationContext,
-				TypeDescriptor targetObjectTypeDescriptor) {
-			this.targetObject = targetObject;
-			this.name = value;
-			this.eContext = evaluationContext;
-			this.td = targetObjectTypeDescriptor;
+		if (targetObject == null) {
+			throw new SpelEvaluationException(getStartPosition(),SpelMessage.CANNOT_INDEX_INTO_NULL_VALUE);
 		}
 
-		public TypedValue getValue() {
-			Class<?> targetObjectRuntimeClass = getObjectClass(targetObject);
-			try {
-				if (cachedReadName != null && cachedReadName.equals(name) && cachedReadTargetType != null &&
-						cachedReadTargetType.equals(targetObjectRuntimeClass)) {
-					// it is OK to use the cached accessor
-					return cachedReadAccessor.read(this.eContext, this.targetObject, this.name);
+		// if the object is something that looks indexable by an integer, attempt to treat the index value as a number
+		if (targetObject instanceof Collection || targetObject.getClass().isArray() || targetObject instanceof String) {
+			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
+			if (targetObject.getClass().isArray()) {
+				Object arrayElement = accessArrayElement(targetObject, idx);
+				return new TypedValue(arrayElement, targetObjectTypeDescriptor.elementTypeDescriptor(arrayElement));
+			} else if (targetObject instanceof Collection) {
+				Collection<?> c = (Collection<?>) targetObject;
+				if (idx >= c.size()) {
+					if (!growCollection(state, targetObjectTypeDescriptor, idx, c)) {
+						throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+					}
 				}
 				List<PropertyAccessor> accessorsToTry =
 						AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass, eContext.getPropertyAccessors());
@@ -209,6 +179,13 @@ public class Indexer extends SpelNodeImpl {
 					this.td.toString());
 		}
 
+		// Try and treat the index value as a property of the context object
+		// TODO could call the conversion service to convert the value to a String
+		if (indexValue.getTypeDescriptor().getType()==String.class) {
+			Class<?> targetObjectRuntimeClass = getObjectClass(targetObject);
+			String name = (String)indexValue.getValue();
+			EvaluationContext eContext = state.getEvaluationContext();
+
 		public void setValue(Object newValue) {
 			Class<?> contextObjectClass = getObjectClass(targetObject);
 			try {
@@ -218,8 +195,9 @@ public class Indexer extends SpelNodeImpl {
 					cachedWriteAccessor.write(this.eContext, this.targetObject, this.name, newValue);
 					return;
 				}
-				List<PropertyAccessor> accessorsToTry =
-						AstUtils.getPropertyAccessorsToTry(contextObjectClass, this.eContext.getPropertyAccessors());
+
+				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(targetObjectRuntimeClass, state);
+
 				if (accessorsToTry != null) {
 					for (PropertyAccessor accessor : accessorsToTry) {
 						if (accessor.canWrite(this.eContext, this.targetObject, this.name)) {
@@ -241,117 +219,16 @@ public class Indexer extends SpelNodeImpl {
 		public boolean isWritable() {
 			return true;
 		}
+
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 	}
 
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private class CollectionIndexingValueRef implements ValueRef {
-
-		private final Collection collection;
-
-		private final int index;
-
-		private final TypeDescriptor collectionEntryTypeDescriptor;
-
-		private final TypeConverter typeConverter;
-
-		private final boolean growCollection;
-
-		CollectionIndexingValueRef(Collection collection, int index, TypeDescriptor collectionEntryTypeDescriptor,
-				TypeConverter typeConverter, boolean growCollection) {
-			this.collection = collection;
-			this.index = index;
-			this.collectionEntryTypeDescriptor = collectionEntryTypeDescriptor;
-			this.typeConverter = typeConverter;
-			this.growCollection = growCollection;
-		}
-
-		public TypedValue getValue() {
-			if (this.index >= this.collection.size()) {
-				if (this.growCollection) {
-					growCollection(this.collectionEntryTypeDescriptor, this.index, this.collection);
-				}
-				else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
-							this.collection.size(), this.index);
-				}
-			}
-			if (this.collection instanceof List) {
-				Object o = ((List) this.collection).get(this.index);
-				return new TypedValue(o, this.collectionEntryTypeDescriptor.elementTypeDescriptor(o));
-			}
-			int pos = 0;
-			for (Object o : this.collection) {
-				if (pos == this.index) {
-					return new TypedValue(o, this.collectionEntryTypeDescriptor.elementTypeDescriptor(o));
-				}
-				pos++;
-			}
-			throw new IllegalStateException("Failed to find indexed element " + this.index + ": " + this.collection);
-		}
-
-		public void setValue(Object newValue) {
-			if (this.index >= this.collection.size()) {
-				if (this.growCollection) {
-					growCollection(this.collectionEntryTypeDescriptor, this.index, this.collection);
-				}
-				else {
-					throw new SpelEvaluationException(getStartPosition(), SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS,
-							this.collection.size(), this.index);
-				}
-			}
-			if (this.collection instanceof List) {
-				List list = (List) this.collection;
-				if (this.collectionEntryTypeDescriptor.getElementTypeDescriptor() != null) {
-					newValue = this.typeConverter.convertValue(newValue, TypeDescriptor.forObject(newValue),
-							this.collectionEntryTypeDescriptor.getElementTypeDescriptor());
-				}
-				list.set(this.index, newValue);
-			}
-			else {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-						this.collectionEntryTypeDescriptor.toString());
-			}
-		}
-
-		public boolean isWritable() {
-			return true;
-		}
+	@Override
+	public boolean isWritable(ExpressionState expressionState) throws SpelEvaluationException {
+		return true;
 	}
 
-
-	private class StringIndexingLValue implements ValueRef {
-
-		private final String target;
-
-		private final int index;
-
-		private final TypeDescriptor td;
-
-		public StringIndexingLValue(String target, int index, TypeDescriptor td) {
-			this.target = target;
-			this.index = index;
-			this.td = td;
-		}
-
-		public TypedValue getValue() {
-			if (this.index >= this.target.length()) {
-				throw new SpelEvaluationException(getStartPosition(), SpelMessage.STRING_INDEX_OUT_OF_BOUNDS,
-						this.target.length(), index);
-			}
-			return new TypedValue(String.valueOf(this.target.charAt(this.index)));
-		}
-
-		public void setValue(Object newValue) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-					this.td.toString());
-		}
-
-		public boolean isWritable() {
-			return true;
-		}
-	}
-
+	@SuppressWarnings("unchecked")
 	@Override
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		TypedValue context = state.getActiveContextObject();
@@ -382,9 +259,13 @@ public class Indexer extends SpelNodeImpl {
 
 		// Indexing into a Map
 		if (targetObject instanceof Map) {
-			Object key = index;
+			Map<Object, Object> map = (Map<Object, Object>) targetObject;
+			Object key = index.getValue();
 			if (targetObjectTypeDescriptor.getMapKeyTypeDescriptor() != null) {
-				key = state.convertValue(key, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+				key = state.convertValue(index, targetObjectTypeDescriptor.getMapKeyTypeDescriptor());
+			}
+			if (targetObjectTypeDescriptor.getMapValueTypeDescriptor() != null) {
+				newValue = state.convertValue(newValue, targetObjectTypeDescriptor.getMapValueTypeDescriptor());
 			}
 			return new MapIndexingValueRef(state.getTypeConverter(), (Map<?, ?>) targetObject, key,
 					targetObjectTypeDescriptor);
@@ -398,12 +279,19 @@ public class Indexer extends SpelNodeImpl {
 		// attempt to treat the index value as a number
 		if (targetObject.getClass().isArray() || targetObject instanceof Collection || targetObject instanceof String) {
 			int idx = (Integer) state.convertValue(index, TypeDescriptor.valueOf(Integer.class));
-			if (targetObject.getClass().isArray()) {
-				return new ArrayIndexingValueRef(state.getTypeConverter(), targetObject, idx, targetObjectTypeDescriptor);
+			Collection<?> c = (Collection<?>) targetObject;
+			if (idx >= c.size()) {
+				if (!growCollection(state, targetObjectTypeDescriptor, idx, c)) {
+					throw new SpelEvaluationException(getStartPosition(),SpelMessage.COLLECTION_INDEX_OUT_OF_BOUNDS, c.size(), idx);
+				}
 			}
-			else if (targetObject instanceof Collection) {
-				return new CollectionIndexingValueRef((Collection<?>) targetObject, idx, targetObjectTypeDescriptor,
-						state.getTypeConverter(), state.getConfiguration().isAutoGrowCollections());
+			if (targetObject instanceof List) {
+				List<Object> list = (List<Object>) targetObject;
+				if (targetObjectTypeDescriptor.getElementTypeDescriptor() != null) {
+					newValue = state.convertValue(newValue, targetObjectTypeDescriptor.getElementTypeDescriptor());
+				}
+				list.set(idx, newValue);
+				return;
 			}
 			else if (targetObject instanceof String) {
 				return new StringIndexingLValue((String) targetObject, idx, targetObjectTypeDescriptor);
@@ -412,32 +300,71 @@ public class Indexer extends SpelNodeImpl {
 
 		// Try and treat the index value as a property of the context object
 		// TODO could call the conversion service to convert the value to a String
+		if (index.getTypeDescriptor().getType() == String.class) {
+			Class<?> contextObjectClass = getObjectClass(contextObject.getValue());
+			String name = (String)index.getValue();
+			EvaluationContext eContext = state.getEvaluationContext();
+			try {
+				if (cachedWriteName!=null && cachedWriteName.equals(name) && cachedWriteTargetType!=null && cachedWriteTargetType.equals(contextObjectClass)) {
+					// it is OK to use the cached accessor
+					cachedWriteAccessor.write(eContext, targetObject, name,newValue);
+					return;
+				}
+
+				List<PropertyAccessor> accessorsToTry = AstUtils.getPropertyAccessorsToTry(contextObjectClass, state);
+				if (accessorsToTry != null) {
+						for (PropertyAccessor accessor : accessorsToTry) {
+							if (accessor.canWrite(eContext, contextObject.getValue(), name)) {
+								this.cachedWriteName = name;
+								this.cachedWriteTargetType = contextObjectClass;
+								this.cachedWriteAccessor = accessor;
+								accessor.write(eContext, contextObject.getValue(), name, newValue);
+								return;
+							}
+						}
+				}
+			} catch (AccessException ae) {
+				throw new SpelEvaluationException(getStartPosition(), ae, SpelMessage.EXCEPTION_DURING_PROPERTY_WRITE,
+						name, ae.getMessage());
+			}
+
+		// Try and treat the index value as a property of the context object
+		// TODO could call the conversion service to convert the value to a String
 		if (indexValue.getTypeDescriptor().getType() == String.class) {
 			return new PropertyIndexingValueRef(targetObject, (String) indexValue.getValue(),
 					state.getEvaluationContext(), targetObjectTypeDescriptor);
 		}
 
-		throw new SpelEvaluationException(getStartPosition(), SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE,
-				targetObjectTypeDescriptor.toString());
+		throw new SpelEvaluationException(getStartPosition(),SpelMessage.INDEXING_NOT_SUPPORTED_FOR_TYPE, targetObjectTypeDescriptor.toString());
 	}
 
 	/**
 	 * Attempt to grow the specified collection so that the specified index is valid.
-	 * @param targetType the type of the elements in the collection
+	 *
+	 * @param state the expression state
+	 * @param elementType the type of the elements in the collection
 	 * @param index the index into the collection that needs to be valid
 	 * @param collection the collection to grow with elements
 	 */
-	private void growCollection(TypeDescriptor targetType, int index, Collection<Object> collection) {
-		if (targetType.getElementTypeDescriptor() == null) {
-			throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
-		}
-		TypeDescriptor elementType = targetType.getElementTypeDescriptor();
-		Object newCollectionElement;
-		try {
-			int newElements = index - collection.size();
-			while (newElements > 0) {
-				collection.add(elementType.getType().newInstance());
-				newElements--;
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private boolean growCollection(ExpressionState state, TypeDescriptor targetType, int index,
+			Collection collection) {
+		if (state.getConfiguration().isAutoGrowCollections()) {
+			if (targetType.getElementTypeDescriptor() == null) {
+				throw new SpelEvaluationException(getStartPosition(), SpelMessage.UNABLE_TO_GROW_COLLECTION_UNKNOWN_ELEMENT_TYPE);
+			}
+			TypeDescriptor elementType = targetType.getElementTypeDescriptor();
+			Object newCollectionElement = null;
+			try {
+				int newElements = index - collection.size();
+				while (newElements>0) {
+					collection.add(elementType.getType().newInstance());
+					newElements--;
+				}
+				newCollectionElement = elementType.getType().newInstance();
+			}
+			catch (Exception ex) {
+				throw new SpelEvaluationException(getStartPosition(), ex, SpelMessage.UNABLE_TO_GROW_COLLECTION);
 			}
 			newCollectionElement = elementType.getType().newInstance();
 		}
@@ -461,8 +388,7 @@ public class Indexer extends SpelNodeImpl {
 		return sb.toString();
 	}
 
-	private void setArrayElement(TypeConverter converter, Object ctx, int idx, Object newValue, Class<?> clazz)
-			throws EvaluationException {
+	private void setArrayElement(ExpressionState state, Object ctx, int idx, Object newValue, Class<?> clazz) throws EvaluationException {
 		Class<?> arrayComponentType = clazz;
 		if (arrayComponentType == Integer.TYPE) {
 			int[] array = (int[]) ctx;
@@ -515,8 +441,7 @@ public class Indexer extends SpelNodeImpl {
 		else {
 			Object[] array = (Object[]) ctx;
 			checkAccess(array.length, idx);
-			array[idx] = converter.convertValue(newValue, TypeDescriptor.forObject(newValue),
-					TypeDescriptor.valueOf(clazz));
+			array[idx] = state.convertValue(newValue, TypeDescriptor.valueOf(clazz));
 		}
 	}
 

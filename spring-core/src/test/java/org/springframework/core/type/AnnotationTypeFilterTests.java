@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,42 +108,42 @@ public class AnnotationTypeFilterTests {
 	// and interfering with ClassloadingAssertions.assertClassNotLoaded()
 
 	@Inherited
-	private static @interface InheritedAnnotation {
+	public static @interface InheritedAnnotation {
 	}
 
 
 	@InheritedAnnotation
-	private static class SomeComponent {
+	public static class SomeComponent {
 	}
 
 
 	@InheritedAnnotation
-	private static interface SomeComponentInterface {
+	public static interface SomeComponentInterface {
 	}
 
 
-	private static class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
+	public static class SomeSubClassOfSomeComponentInterface implements SomeComponentInterface {
 	}
 
 
-	private static class SomeSubClassOfSomeComponent extends SomeComponent {
+	public static class SomeSubClassOfSomeComponent extends SomeComponent {
 	}
 
 
-	private static @interface NonInheritedAnnotation {
+	public static @interface NonInheritedAnnotation {
 	}
 
 
 	@NonInheritedAnnotation
-	private static class SomeClassMarkedWithNonInheritedAnnotation {
+	public static class SomeClassMarkedWithNonInheritedAnnotation {
 	}
 
 
-	private static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
+	public static class SomeSubclassOfSomeClassMarkedWithNonInheritedAnnotation extends SomeClassMarkedWithNonInheritedAnnotation {
 	}
 
 
-	private static class SomeNonCandidateClass {
+	public static class SomeNonCandidateClass {
 	}
 
 }

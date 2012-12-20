@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2010 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -184,9 +184,9 @@ public class JmsNamespaceHandlerTests extends TestCase {
 		assertTrue("Parser should have registered a component named 'listener1'", context.containsComponentDefinition("listener1"));
 		assertTrue("Parser should have registered a component named 'listener2'", context.containsComponentDefinition("listener2"));
 		assertTrue("Parser should have registered a component named 'listener3'", context.containsComponentDefinition("listener3"));
-		assertTrue("Parser should have registered a component named '" + DefaultMessageListenerContainer.class.getName() + "#0'", 
+		assertTrue("Parser should have registered a component named '" + DefaultMessageListenerContainer.class.getName() + "#0'",
 			context.containsComponentDefinition(DefaultMessageListenerContainer.class.getName() + "#0"));
-		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'", 
+		assertTrue("Parser should have registered a component named '" + JmsMessageEndpointManager.class.getName() + "#0'",
 			context.containsComponentDefinition(JmsMessageEndpointManager.class.getName() + "#0"));
 	}
 
@@ -215,14 +215,14 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			this.message = message;
 		}
 	}
-	
+
 
 	/**
 	 * Internal extension that registers a {@link ReaderEventListener} to store
 	 * registered {@link ComponentDefinition}s.
 	 */
 	private static class ToolingTestApplicationContext extends ClassPathXmlApplicationContext {
-		
+
 		private Set<ComponentDefinition> registeredComponents;
 
 		public ToolingTestApplicationContext(String path, Class clazz) {
@@ -234,7 +234,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			beanDefinitionReader.setEventListener(new StoringReaderEventListener(this.registeredComponents));
 			beanDefinitionReader.setSourceExtractor(new PassThroughSourceExtractor());
 		}
-		
+
 		public boolean containsComponentDefinition(String name) {
 			for (ComponentDefinition cd : this.registeredComponents) {
 				if (cd instanceof CompositeComponentDefinition) {
@@ -253,21 +253,21 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			}
 			return false;
 		}
-		
+
 		public Iterator<ComponentDefinition> getRegisteredComponents() {
 			return this.registeredComponents.iterator();
 		}
 	}
-	
+
 
 	private static class StoringReaderEventListener extends EmptyReaderEventListener {
-		
+
 		protected final Set<ComponentDefinition> registeredComponents;
-		
+
 		public StoringReaderEventListener(Set<ComponentDefinition> registeredComponents) {
 			this.registeredComponents = registeredComponents;
 		}
-		
+
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			this.registeredComponents.add(componentDefinition);
 		}

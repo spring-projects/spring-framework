@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,12 +17,11 @@
 package org.springframework.aop.target;
 
 import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static test.util.TestResourceUtils.beanFactoryFromQualifiedResource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 import test.beans.ITestBean;
 import test.beans.SideEffectBean;
@@ -33,26 +32,24 @@ import test.beans.SideEffectBean;
  * @author Chris Beams
  */
 public class ThreadLocalTargetSourceTests {
-	
-	private static final Resource CONTEXT = qualifiedResource(ThreadLocalTargetSourceTests.class, "context.xml");
 
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
-	private XmlBeanFactory beanFactory;
-	
+	private DefaultListableBeanFactory beanFactory;
+
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(CONTEXT);
+		this.beanFactory = beanFactoryFromQualifiedResource(getClass(), "context.xml");
 	}
-	
+
 	/**
 	 * We must simulate container shutdown, which should clear threads.
 	 */
 	protected void tearDown() {
 		this.beanFactory.destroySingletons();
 	}
-	
+
 	/**
 	 * Check we can use two different ThreadLocalTargetSources
 	 * managing objects of different types without them interfering
@@ -64,7 +61,7 @@ public class ThreadLocalTargetSourceTests {
 		assertEquals(INITIAL_COUNT, apartment.getCount() );
 		apartment.doWork();
 		assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
-	
+
 		ITestBean test = (ITestBean) beanFactory.getBean("threadLocal2");
 		assertEquals("Rod", test.getName());
 		assertEquals("Kerry", test.getSpouse().getName());
@@ -76,11 +73,11 @@ public class ThreadLocalTargetSourceTests {
 		assertEquals(INITIAL_COUNT, apartment.getCount() );
 		apartment.doWork();
 		assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
-		
+
 		apartment = (SideEffectBean) beanFactory.getBean("apartment");
 		assertEquals(INITIAL_COUNT + 1, apartment.getCount() );
 	}
-	
+
 	/**
 	 * Relies on introduction.
 	 */
@@ -101,7 +98,7 @@ public class ThreadLocalTargetSourceTests {
 		// Only one thread so only one object can have been bound
 		assertEquals(1, stats.getObjectCount());
 	}
-	
+
 	@Test
 	public void testNewThreadHasOwnInstance() throws InterruptedException {
 		SideEffectBean apartment = (SideEffectBean) beanFactory.getBean("apartment");
@@ -110,7 +107,7 @@ public class ThreadLocalTargetSourceTests {
 		apartment.doWork();
 		apartment.doWork();
 		assertEquals(INITIAL_COUNT + 3, apartment.getCount() );
-	
+
 		class Runner implements Runnable {
 			public SideEffectBean mine;
 			public void run() {
@@ -124,16 +121,16 @@ public class ThreadLocalTargetSourceTests {
 		Thread t = new Thread(r);
 		t.start();
 		t.join();
-		
+
 		assertNotNull(r);
-		
+
 		// Check it didn't affect the other thread's copy
 		assertEquals(INITIAL_COUNT + 3, apartment.getCount() );
-		
-		// When we use other thread's copy in this thread 
+
+		// When we use other thread's copy in this thread
 		// it should behave like ours
 		assertEquals(INITIAL_COUNT + 3, r.mine.getCount() );
-		
+
 		// Bound to two threads
 		assertEquals(2, ((ThreadLocalTargetSourceStats) apartment).getObjectCount());
 	}

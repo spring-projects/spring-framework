@@ -32,7 +32,7 @@ import java.lang.reflect.Method;
  * @since 2.0
  */
 public interface ParameterNameDiscoverer {
-	
+
 	/**
 	 * Return parameter names for this method,
 	 * or <code>null</code> if they cannot be determined.
@@ -41,7 +41,7 @@ public interface ParameterNameDiscoverer {
 	 * or <code>null</code> if they cannot
 	 */
 	String[] getParameterNames(Method method);
-	
+
 	/**
 	 * Return parameter names for this constructor,
 	 * or <code>null</code> if they cannot be determined.

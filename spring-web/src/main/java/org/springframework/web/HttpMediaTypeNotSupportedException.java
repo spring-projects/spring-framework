@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 
 /**
- * Exception thrown when a client POSTs, PUTs, or PATCHes content of a type
+ * Exception thrown when a client POSTs or PUTs content
  * not supported by request handler.
  *
  * @author Arjen Poutsma

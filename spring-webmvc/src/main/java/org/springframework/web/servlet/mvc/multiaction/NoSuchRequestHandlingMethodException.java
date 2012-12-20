@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param method the HTTP request method of the request
 	 * @param parameterMap the request's parameters as map
 	 */
-	public NoSuchRequestHandlingMethodException(String urlPath, String method, Map parameterMap) {
+	public NoSuchRequestHandlingMethodException(String urlPath, String method, Map<?, ?> parameterMap) {
 		super("No matching handler method found for servlet request: path '" + urlPath +
 				"', method '" + method + "', parameters " + StylerUtils.style(parameterMap));
 	}
@@ -61,7 +61,7 @@ public class NoSuchRequestHandlingMethodException extends ServletException {
 	 * @param methodName the name of the handler method that wasn't found
 	 * @param controllerClass the class the handler method was expected to be in
 	 */
-	public NoSuchRequestHandlingMethodException(String methodName, Class controllerClass) {
+	public NoSuchRequestHandlingMethodException(String methodName, Class<?> controllerClass) {
 		super("No request handling method with name '" + methodName +
 				"' in class [" + controllerClass.getName() + "]");
 		this.methodName = methodName;

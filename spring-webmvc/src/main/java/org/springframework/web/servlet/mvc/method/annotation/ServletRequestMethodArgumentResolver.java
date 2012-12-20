@@ -71,12 +71,12 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
 			throws IOException {
-		
+
 		Class<?> paramType = parameter.getParameterType();
 		if (WebRequest.class.isAssignableFrom(paramType)) {
 			return webRequest;
 		}
-		
+
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		if (ServletRequest.class.isAssignableFrom(paramType) || MultipartRequest.class.isAssignableFrom(paramType)) {
 			Object nativeRequest = webRequest.getNativeRequest(paramType);
@@ -107,5 +107,5 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
 		}
 	}
-	
+
 }

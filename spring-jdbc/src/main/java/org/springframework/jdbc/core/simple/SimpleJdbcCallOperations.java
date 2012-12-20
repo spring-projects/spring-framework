@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public interface SimpleJdbcCallOperations {
 	 * @param parameterName the name of the returned results and/or the name of the ref cursor parameter
 	 * @param rowMapper the RowMapper implementation that will map the data returned for each row
 	 * */
-	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper rowMapper);
+	SimpleJdbcCallOperations returningResultSet(String parameterName, RowMapper<?> rowMapper);
 
 	/**
 	 * Used to specify when a ResultSet is returned by the stored procedure and you want it mapped
@@ -103,7 +103,7 @@ public interface SimpleJdbcCallOperations {
 	 * @deprecated in favor of {@link #returningResultSet(String, org.springframework.jdbc.core.RowMapper)}
 	 */
 	@Deprecated
-	SimpleJdbcCallOperations returningResultSet(String parameterName, ParameterizedRowMapper rowMapper);
+	SimpleJdbcCallOperations returningResultSet(String parameterName, ParameterizedRowMapper<?> rowMapper);
 
 	/**
 	 * Turn off any processing of parameter meta data information obtained via JDBC.

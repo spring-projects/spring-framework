@@ -21,7 +21,7 @@ import javax.servlet.jsp.JspException;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
- * An HTML button tag. This tag is provided for completeness if the application 
+ * An HTML button tag. This tag is provided for completeness if the application
  * relies on a {@link RequestDataValueProcessor}.
  *
  * @author Rossen Stoyanchev
@@ -38,7 +38,7 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	private TagWriter tagWriter;
 
 	private String name;
-	
+
 	private String value;
 
 	private String disabled;
@@ -63,21 +63,21 @@ public class ButtonTag extends AbstractHtmlElementTag {
 	public String getValue() {
 		return this.value;
 	}
-	
+
 	/**
 	 * Set the value of the '<code>value</code>' attribute.
 	 */
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
+
 	/**
 	 * Get the value of the '<code>disabled</code>' attribute.
 	 */
 	public String getDisabled() {
 		return this.disabled;
 	}
-	
+
 	/**
 	 * Set the value of the '<code>disabled</code>' attribute.
 	 * May be a runtime expression.

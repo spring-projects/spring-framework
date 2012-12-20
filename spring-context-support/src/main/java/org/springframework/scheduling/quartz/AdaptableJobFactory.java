@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class AdaptableJobFactory implements JobFactory {
 		Method getJobDetail = bundle.getClass().getMethod("getJobDetail");
 		Object jobDetail = ReflectionUtils.invokeMethod(getJobDetail, bundle);
 		Method getJobClass = jobDetail.getClass().getMethod("getJobClass");
-		Class jobClass = (Class) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
+		Class<?> jobClass = (Class<?>) ReflectionUtils.invokeMethod(getJobClass, jobDetail);
 		return jobClass.newInstance();
 	}
 

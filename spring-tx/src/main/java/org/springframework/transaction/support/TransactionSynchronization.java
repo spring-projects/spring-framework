@@ -44,7 +44,7 @@ public interface TransactionSynchronization {
 
 	/** Completion status in case of heuristic mixed completion or system errors */
 	int STATUS_UNKNOWN = 2;
-	
+
 
 	/**
 	 * Suspend this synchronization.

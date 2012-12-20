@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,8 @@ public class ManagedPropertiesTests extends TestCase {
 		ManagedProperties child = new ManagedProperties();
 		child.setProperty("three", "three");
 		child.setMergeEnabled(true);
-		Map mergedMap = (Map) child.merge(parent);
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> mergedMap = (Map<Object, Object>) child.merge(parent);
 		assertEquals("merge() obviously did not work.", 3, mergedMap.size());
 	}
 
@@ -70,7 +71,8 @@ public class ManagedPropertiesTests extends TestCase {
 		parent.setProperty("two", "two");
 		ManagedProperties child = new ManagedProperties();
 		child.setMergeEnabled(true);
-		Map mergedMap = (Map) child.merge(parent);
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> mergedMap = (Map<Object, Object>) child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
 	}
 
@@ -81,7 +83,8 @@ public class ManagedPropertiesTests extends TestCase {
 		ManagedProperties child = new ManagedProperties();
 		child.setProperty("one", "fork");
 		child.setMergeEnabled(true);
-		Map mergedMap = (Map) child.merge(parent);
+		@SuppressWarnings("unchecked")
+		Map<Object, Object> mergedMap = (Map<Object, Object>) child.merge(parent);
 		// child value for 'one' must override parent value...
 		assertEquals("merge() obviously did not work.", 2, mergedMap.size());
 		assertEquals("Parent value not being overridden during merge().", "fork", mergedMap.get("one"));

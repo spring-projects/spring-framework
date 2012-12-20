@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,31 +72,31 @@ public final class MethodInvocationProceedingJoinPointTests {
 		final Object raw = new TestBean();
 		// Will be set by advice during a method call
 		final int newAge = 23;
-		
+
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.setExposeProxy(true);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
 			private int depth;
-			
+
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
 				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
 				// Ensure that these don't cause problems
 				jp.toShortString();
 				jp.toLongString();
-				
+
 				assertSame(target, AbstractAspectJAdvice.currentJoinPoint().getTarget());
 				assertFalse(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getTarget()));
-				
+
 				ITestBean thisProxy = (ITestBean) AbstractAspectJAdvice.currentJoinPoint().getThis();
 				assertTrue(AopUtils.isAopProxy(AbstractAspectJAdvice.currentJoinPoint().getThis()));
-				
+
 				assertNotSame(target, thisProxy);
-				
+
 				// Check getting again doesn't cause a problem
 				assertSame(thisProxy, AbstractAspectJAdvice.currentJoinPoint().getThis());
-				
+
 				// Try reentrant call--will go through this advice.
 				// Be sure to increment depth to avoid infinite recursion
 				if (depth++ == 0) {
@@ -109,10 +109,10 @@ public final class MethodInvocationProceedingJoinPointTests {
 
 				assertSame(AopContext.currentProxy(), thisProxy);
 				assertSame(target, raw);
-				
+
 				assertSame(method.getName(), AbstractAspectJAdvice.currentJoinPoint().getSignature().getName());
 				assertEquals(method.getModifiers(), AbstractAspectJAdvice.currentJoinPoint().getSignature().getModifiers());
-				
+
 				MethodSignature msig = (MethodSignature) AbstractAspectJAdvice.currentJoinPoint().getSignature();
 				assertSame("Return same MethodSignature repeatedly", msig, AbstractAspectJAdvice.currentJoinPoint().getSignature());
 				assertSame("Return same JoinPoint repeatedly", AbstractAspectJAdvice.currentJoinPoint(), AbstractAspectJAdvice.currentJoinPoint());
@@ -137,7 +137,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
-				assertEquals("Same source location must be returned on subsequent requests",  sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
+				assertEquals("Same source location must be returned on subsequent requests", sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
 				assertEquals(TestBean.class, sloc.getWithinType());
 				try {
 					sloc.getLine();
@@ -146,7 +146,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 				catch (UnsupportedOperationException ex) {
 					// Expected
 				}
-				
+
 				try {
 					sloc.getFileName();
 					fail("Can't get file name");
@@ -169,7 +169,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvice(new MethodBeforeAdvice() {
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				StaticPart staticPart = AbstractAspectJAdvice.currentJoinPoint().getStaticPart();
-				assertEquals("Same static part must be returned on subsequent requests",  staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
+				assertEquals("Same static part must be returned on subsequent requests", staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
 				assertEquals(ProceedingJoinPoint.METHOD_EXECUTION, staticPart.getKind());
 				assertSame(AbstractAspectJAdvice.currentJoinPoint().getSignature(), staticPart.getSignature());
 				assertEquals(AbstractAspectJAdvice.currentJoinPoint().getSourceLocation(), staticPart.getSourceLocation());
@@ -191,7 +191,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 				// it serves our purpose here
 				JoinPoint.StaticPart aspectJVersionJp = Factory.makeEncSJP(method);
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
-				
+
 				assertEquals(aspectJVersionJp.getSignature().toLongString(), jp.getSignature().toLongString());
 				assertEquals(aspectJVersionJp.getSignature().toShortString(), jp.getSignature().toShortString());
 				assertEquals(aspectJVersionJp.getSignature().toString(), jp.getSignature().toString());

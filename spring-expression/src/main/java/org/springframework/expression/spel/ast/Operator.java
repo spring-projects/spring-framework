@@ -27,12 +27,12 @@ package org.springframework.expression.spel.ast;
 public abstract class Operator extends SpelNodeImpl {
 
 	String operatorName;
-	
+
 	public Operator(String payload,int pos,SpelNodeImpl... operands) {
 		super(pos, operands);
 		this.operatorName = payload;
 	}
-	
+
 	public SpelNodeImpl getLeftOperand() {
 		return children[0];
 	}
