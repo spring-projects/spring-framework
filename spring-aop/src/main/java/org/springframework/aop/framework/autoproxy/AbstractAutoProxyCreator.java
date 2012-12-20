@@ -268,7 +268,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
-		if (!this.targetSourcedBeans.containsKey(beanName)) {
+		if (beanName == null || !this.targetSourcedBeans.containsKey(beanName)) {
 			if (this.advisedBeans.containsKey(cacheKey)) {
 				return null;
 			}
@@ -281,13 +281,15 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		// Create proxy here if we have a custom TargetSource.
 		// Suppresses unnecessary default instantiation of the target bean:
 		// The TargetSource will handle target instances in a custom fashion.
-		TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
-		if (targetSource != null) {
-			this.targetSourcedBeans.put(beanName, Boolean.TRUE);
-			Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
-			Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
-			this.proxyTypes.put(cacheKey, proxy.getClass());
-			return proxy;
+		if (beanName != null) {
+			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
+			if (targetSource != null) {
+				this.targetSourcedBeans.put(beanName, Boolean.TRUE);
+				Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
+				Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+				this.proxyTypes.put(cacheKey, proxy.getClass());
+				return proxy;
+			}
 		}
 
 		return null;
@@ -341,7 +343,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * @return a proxy wrapping the bean, or the raw bean instance as-is
 	 */
 	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		if (this.targetSourcedBeans.containsKey(beanName)) {
+		if (beanName != null && this.targetSourcedBeans.containsKey(beanName)) {
 			return bean;
 		}
 		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
@@ -368,17 +370,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Return whether the given bean class represents an infrastructure class
 	 * that should never be proxied.
-	 * <p>Default implementation considers Advisors, Advices and
-	 * AbstractAutoProxyCreators as infrastructure classes.
+	 * <p>The default implementation considers Advices, Advisors and
+	 * AopInfrastructureBeans as infrastructure classes.
 	 * @param beanClass the class of the bean
 	 * @return whether the bean represents an infrastructure class
+	 * @see org.aopalliance.aop.Advice
 	 * @see org.springframework.aop.Advisor
-	 * @see org.aopalliance.intercept.MethodInterceptor
+	 * @see org.springframework.aop.framework.AopInfrastructureBean
 	 * @see #shouldSkip
 	 */
 	protected boolean isInfrastructureClass(Class<?> beanClass) {
-		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
-				Advice.class.isAssignableFrom(beanClass) ||
+		boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
+				Advisor.class.isAssignableFrom(beanClass) ||
 				AopInfrastructureBean.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isTraceEnabled()) {
 			logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
