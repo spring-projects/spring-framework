@@ -167,7 +167,7 @@ public class QualifierAnnotationAutowireContextTests {
 		RootBeanDefinition person = new RootBeanDefinition(QualifiedPerson.class, cavs, null);
 		ConstructorArgumentValues cavs2 = new ConstructorArgumentValues();
 		cavs2.addGenericArgumentValue(MARK);
-		RootBeanDefinition person2 = new RootBeanDefinition(Person.class, cavs2, null);
+		RootBeanDefinition person2 = new RootBeanDefinition(DefaultValueQualifiedPerson.class, cavs2, null);
 		context.registerBeanDefinition(JUERGEN, person);
 		context.registerBeanDefinition(MARK, person2);
 		context.registerBeanDefinition("autowired",
@@ -745,13 +745,25 @@ public class QualifierAnnotationAutowireContextTests {
 	}
 
 
+	@TestQualifierWithDefaultValue
+	private static class DefaultValueQualifiedPerson extends Person {
+
+		public DefaultValueQualifiedPerson() {
+			super(null);
+		}
+
+		public DefaultValueQualifiedPerson(String name) {
+			super(name);
+		}
+	}
+
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public static @interface TestQualifier {
 	}
 
 
-	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Qualifier
 	public static @interface TestQualifierWithDefaultValue {
