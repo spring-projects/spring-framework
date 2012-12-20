@@ -371,17 +371,18 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	/**
 	 * Return whether the given bean class represents an infrastructure class
 	 * that should never be proxied.
-	 * <p>Default implementation considers Advisors, Advices and
-	 * AbstractAutoProxyCreators as infrastructure classes.
+	 * <p>The default implementation considers Advices, Advisors and
+	 * AopInfrastructureBeans as infrastructure classes.
 	 * @param beanClass the class of the bean
 	 * @return whether the bean represents an infrastructure class
+	 * @see org.aopalliance.aop.Advice
 	 * @see org.springframework.aop.Advisor
-	 * @see org.aopalliance.intercept.MethodInterceptor
+	 * @see org.springframework.aop.framework.AopInfrastructureBean
 	 * @see #shouldSkip
 	 */
 	protected boolean isInfrastructureClass(Class<?> beanClass) {
-		boolean retVal = Advisor.class.isAssignableFrom(beanClass) ||
-				Advice.class.isAssignableFrom(beanClass) ||
+		boolean retVal = Advice.class.isAssignableFrom(beanClass) ||
+				Advisor.class.isAssignableFrom(beanClass) ||
 				AopInfrastructureBean.class.isAssignableFrom(beanClass);
 		if (retVal && logger.isTraceEnabled()) {
 			logger.trace("Did not attempt to auto-proxy infrastructure class [" + beanClass.getName() + "]");
