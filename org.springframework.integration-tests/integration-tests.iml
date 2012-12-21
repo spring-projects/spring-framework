@@ -431,11 +431,11 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-3.3.1.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.2.GA/com.springsource.org.hibernate-3.3.2.GA.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.1.GA/com.springsource.org.hibernate-sources-3.3.1.GA.jar!/" />
+          <root url="jar://$IVY_CACHE$/org.hibernate/com.springsource.org.hibernate/3.3.2.GA/com.springsource.org.hibernate-sources-3.3.2.GA.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

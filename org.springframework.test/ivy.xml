@@ -33,10 +33,10 @@
 		<dependency org="org.apache.commons" name="com.springsource.org.apache.commons.logging" rev="1.1.1" conf="compile, commons-logging->compile"/>
 		<dependency org="org.apache.taglibs" name="com.springsource.org.apache.taglibs.standard" rev="1.1.2" conf="optional->compile"/>
 		<dependency org="org.aspectj" name="com.springsource.org.aspectj.weaver" rev="${aspectj.version}" conf="optional->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.1.GA" conf="test->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.2.GA" conf="test->compile"/>
 		<dependency org="org.hsqldb" name="com.springsource.org.hsqldb" rev="1.8.0.9" conf="test->compile"/>
 		<dependency org="org.junit" name="com.springsource.org.junit" rev="${junit.version}" conf="optional->compile"/>
-		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.5.3" conf="test->compile"/>
+		<dependency org="org.slf4j" name="com.springsource.slf4j.jcl" rev="1.6.1" conf="test->runtime"/>
 		<dependency org="org.springframework" name="org.springframework.beans" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.context" rev="latest.integration" conf="optional->compile"/>
 		<dependency org="org.springframework" name="org.springframework.core" rev="latest.integration" conf="optional->compile"/>
