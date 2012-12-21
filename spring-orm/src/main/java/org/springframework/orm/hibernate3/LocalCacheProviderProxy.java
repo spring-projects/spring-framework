@@ -30,7 +30,10 @@ import org.hibernate.cache.CacheProvider;
  * @author Juergen Hoeller
  * @since 2.5.1
  * @see LocalSessionFactoryBean#setCacheProvider
+ * @deprecated as of Spring 3.0, following Hibernate 3.3's deprecation
+ * of the CacheProvider SPI
  */
+@Deprecated
 public class LocalCacheProviderProxy implements CacheProvider {
 
 	private final CacheProvider cacheProvider;
