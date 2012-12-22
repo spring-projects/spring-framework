@@ -431,14 +431,6 @@ public class GenericConversionService implements ConfigurableConversionService {
 	 */
 	private static class Converters {
 
-		private static final Set<Class<?>> IGNORED_CLASSES;
-		static {
-			Set<Class<?>> ignored = new HashSet<Class<?>>();
-			ignored.add(Object.class);
-			ignored.add(Object[].class);
-			IGNORED_CLASSES = Collections.unmodifiableSet(ignored);
-		}
-
 		private final Set<GenericConverter> globalConverters =
 				new LinkedHashSet<GenericConverter>();
 
@@ -483,12 +475,13 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 */
 		public GenericConverter find(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			// Search the full type hierarchy
-			List<TypeDescriptor> sourceCandidates = getTypeHierarchy(sourceType);
-			List<TypeDescriptor> targetCandidates = getTypeHierarchy(targetType);
-			for (TypeDescriptor sourceCandidate : sourceCandidates) {
-				for (TypeDescriptor targetCandidate : targetCandidates) {
+			List<Class<?>> sourceCandidates = getClassHierarchy(sourceType.getType());
+			List<Class<?>> targetCandidates = getClassHierarchy(targetType.getType());
+			for (Class<?> sourceCandidate : sourceCandidates) {
+				for (Class<?> targetCandidate : targetCandidates) {
+					ConvertiblePair convertiblePair = new ConvertiblePair(sourceCandidate, targetCandidate);
 					GenericConverter converter = getRegisteredConverter(
-							sourceType, targetType, sourceCandidate, targetCandidate);
+							sourceType, targetType, convertiblePair);
 					if(converter != null) {
 						return converter;
 					}
@@ -497,12 +490,11 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return null;
 		}
 
-		private GenericConverter getRegisteredConverter(TypeDescriptor sourceType, TypeDescriptor targetType,
-				TypeDescriptor sourceCandidate, TypeDescriptor targetCandidate) {
+		private GenericConverter getRegisteredConverter(TypeDescriptor sourceType,
+				TypeDescriptor targetType, ConvertiblePair convertiblePair) {
 
 			// Check specifically registered converters
-			ConvertersForPair convertersForPair = converters.get(new ConvertiblePair(
-				sourceCandidate.getType(), targetCandidate.getType()));
+			ConvertersForPair convertersForPair = converters.get(convertiblePair);
 			GenericConverter converter = convertersForPair == null ? null
 				: convertersForPair.getConverter(sourceType, targetType);
 			if (converter != null) {
@@ -512,7 +504,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			// Check ConditionalGenericConverter that match all types
 			for (GenericConverter globalConverter : this.globalConverters) {
 				if (((ConditionalConverter)globalConverter).matches(
-						sourceCandidate, targetCandidate)) {
+						sourceType, targetType)) {
 					return globalConverter;
 				}
 			}
@@ -526,44 +518,38 @@ public class GenericConversionService implements ConfigurableConversionService {
 		 * @return an ordered list of all classes that the given type extends or
 		 *         implements.
 		 */
-		private List<TypeDescriptor> getTypeHierarchy(TypeDescriptor type) {
-			if(type.isPrimitive()) {
-				type = TypeDescriptor.valueOf(type.getObjectType());
-			}
-			Set<TypeDescriptor> typeHierarchy = new LinkedHashSet<TypeDescriptor>();
-			collectTypeHierarchy(typeHierarchy, type);
-			if(type.isArray()) {
-				typeHierarchy.add(TypeDescriptor.valueOf(Object[].class));
-			}
-			typeHierarchy.add(TypeDescriptor.valueOf(Object.class));
-			return new ArrayList<TypeDescriptor>(typeHierarchy);
-		}
-
-		private void collectTypeHierarchy(Set<TypeDescriptor> typeHierarchy,
-				TypeDescriptor type) {
-			if(type != null && !IGNORED_CLASSES.contains(type.getType())) {
-				if(typeHierarchy.add(type)) {
-					Class<?> superclass = type.getType().getSuperclass();
-					if (type.isArray()) {
-						superclass = ClassUtils.resolvePrimitiveIfNecessary(superclass);
-					}
-					collectTypeHierarchy(typeHierarchy, createRelated(type, superclass));
-
-					for (Class<?> implementsInterface : type.getType().getInterfaces()) {
-						collectTypeHierarchy(typeHierarchy, createRelated(type, implementsInterface));
-					}
+		private List<Class<?>> getClassHierarchy(Class<?> type) {
+			List<Class<?>> hierarchy = new ArrayList<Class<?>>(20);
+			Set<Class<?>> visited = new HashSet<Class<?>>(20);
+			addToClassHierarchy(0, ClassUtils.resolvePrimitiveIfNecessary(type), false, hierarchy, visited);
+			boolean array = type.isArray();
+			int i = 0;
+			while (i < hierarchy.size()) {
+				Class<?> candidate = hierarchy.get(i);
+				candidate = (array ? candidate.getComponentType()
+						: ClassUtils.resolvePrimitiveIfNecessary(candidate));
+				Class<?> superclass = candidate.getSuperclass();
+				if (candidate.getSuperclass() != null && superclass != Object.class) {
+					addToClassHierarchy(i + 1, candidate.getSuperclass(), array, hierarchy, visited);
 				}
+				for (Class<?> implementedInterface : candidate.getInterfaces()) {
+					addToClassHierarchy(hierarchy.size(), implementedInterface, array, hierarchy, visited);
+				}
+				i++;
 			}
+			addToClassHierarchy(hierarchy.size(), Object.class, array, hierarchy, visited);
+			addToClassHierarchy(hierarchy.size(), Object.class, false, hierarchy, visited);
+			return hierarchy;
 		}
 
-		private TypeDescriptor createRelated(TypeDescriptor type, Class<?> relatedType) {
-			if (relatedType == null && type.isArray()) {
-				relatedType = Array.newInstance(relatedType, 0).getClass();
+		private void addToClassHierarchy(int index, Class<?> type, boolean asArray,
+				List<Class<?>> hierarchy, Set<Class<?>> visited) {
+			if(asArray) {
+				type = Array.newInstance(type, 0).getClass();
 			}
-			if(!type.getType().equals(relatedType)) {
-				return type.upcast(relatedType);
+			if(visited.add(type)) {
+				hierarchy.add(index, type);
 			}
-			return null;
 		}
 
 		@Override

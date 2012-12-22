@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +47,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
 
 /**
@@ -696,14 +696,11 @@ public class GenericConversionServiceTests {
 		MyConditionalGenericConverter converter = new MyConditionalGenericConverter();
 		conversionService.addConverter(converter);
 		assertEquals((Integer) 3, conversionService.convert(3, Integer.class));
+		assertThat(converter.getSourceTypes().size(), greaterThan(2));
 		Iterator<TypeDescriptor> iterator = converter.getSourceTypes().iterator();
-		assertEquals(Integer.class, iterator.next().getType());
-		assertEquals(Number.class, iterator.next().getType());
-		TypeDescriptor last = null;
-		while (iterator.hasNext()) {
-			last = iterator.next();
+		while(iterator.hasNext()) {
+			assertEquals(Integer.class, iterator.next().getType());
 		}
-		assertEquals(Object.class, last.getType());
 	}
 
 	@Test
@@ -784,7 +781,7 @@ public class GenericConversionServiceTests {
 	private static class MyConditionalGenericConverter implements GenericConverter,
 			ConditionalConverter {
 
-		private Set<TypeDescriptor> sourceTypes = new LinkedHashSet<TypeDescriptor>();
+		private List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
 
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
@@ -800,7 +797,7 @@ public class GenericConversionServiceTests {
 			return null;
 		}
 
-		public Set<TypeDescriptor> getSourceTypes() {
+		public List<TypeDescriptor> getSourceTypes() {
 			return sourceTypes;
 		}
 	}
