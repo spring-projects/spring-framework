@@ -16,11 +16,7 @@
 
 package org.springframework.core.convert.support;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.math.BigDecimal;
@@ -507,6 +503,21 @@ public class DefaultConversionTests {
 	}
 
 	@Test
+	public void convertCollectionToObjectWithCustomConverter() throws Exception {
+		List<String> source = new ArrayList<String>();
+		source.add("A");
+		source.add("B");
+		conversionService.addConverter(new Converter<List, ListWrapper>() {
+			@Override
+			public ListWrapper convert(List source) {
+				return new ListWrapper(source);
+			}
+		});
+		ListWrapper result = conversionService.convert(source, ListWrapper.class);
+		assertSame(source, result.getList());
+	}
+
+	@Test
 	public void convertObjectToCollection() {
 		List<String> result = (List<String>) conversionService.convert(3L, List.class);
 		assertEquals(1, result.size());
@@ -774,6 +785,19 @@ public class DefaultConversionTests {
 
 		public static TestEntity findTestEntity(Long id) {
 			return new TestEntity(id);
+		}
+	}
+
+	private static class ListWrapper {
+
+		private List<?> list;
+
+		public ListWrapper(List<?> list) {
+			this.list = list;
+		}
+
+		public List<?> getList() {
+			return list;
 		}
 	}
 
