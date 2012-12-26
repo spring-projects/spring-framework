@@ -16,6 +16,14 @@ configure(allprojects) {
 	ext.slf4jVersion    = "1.6.1"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
+	if (rootProject.hasProperty("VERSION_QUALIFIER")) {
+		def qualifier = rootProject.getProperty("VERSION_QUALIFIER")
+		if (qualifier.startsWith("SPR-")) { // topic branch, e.g. SPR-1234
+			// replace 3.2.0.BUILD-SNAPSHOT for 3.2.0.SPR-1234-SNAPSHOT
+			version = version.replace('BUILD', qualifier)
+		}
+	}
+
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "propdeps-eclipse"
