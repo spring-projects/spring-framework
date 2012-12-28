@@ -16,6 +16,11 @@
 
 package org.springframework.jdbc.core;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,9 +30,10 @@ import java.sql.Types;
 import java.util.List;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
-import org.apache.commons.logging.LogFactory;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.beans.TestBean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -38,213 +44,104 @@ import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
  */
 public class RowMapperTests extends TestCase {
 
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+	private Connection connection;
+	private Statement statement;
+	private PreparedStatement preparedStatement;
+	private ResultSet resultSet;
 
-	private MockControl conControl;
-	private Connection con;
-	private MockControl rsControl;
-	private ResultSet rs;
-	private JdbcTemplate jdbcTemplate;
-	private List result;
+	private JdbcTemplate template;
 
-	@Override
-	protected void setUp() throws SQLException {
-		conControl = MockControl.createControl(Connection.class);
-		con = (Connection) conControl.getMock();
-		con.isClosed();
-		conControl.setDefaultReturnValue(false);
+	private List<TestBean> result;
 
-		rsControl = MockControl.createControl(ResultSet.class);
-		rs = (ResultSet) rsControl.getMock();
-		rs.next();
-		rsControl.setReturnValue(true, 1);
-		rs.getString(1);
-		rsControl.setReturnValue("tb1", 1);
-		rs.getInt(2);
-		rsControl.setReturnValue(1, 1);
-		rs.next();
-		rsControl.setReturnValue(true, 1);
-		rs.getString(1);
-		rsControl.setReturnValue("tb2", 1);
-		rs.getInt(2);
-		rsControl.setReturnValue(2, 1);
-		rs.next();
-		rsControl.setReturnValue(false, 1);
-		rs.close();
-		rsControl.setVoidCallable(1);
-		rsControl.replay();
-
-		jdbcTemplate = new JdbcTemplate();
-		jdbcTemplate.setDataSource(new SingleConnectionDataSource(con, false));
-		jdbcTemplate.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
-		jdbcTemplate.afterPropertiesSet();
+	@Before
+	public void setUp() throws SQLException {
+		connection = mock(Connection.class);
+		statement = mock(Statement.class);
+		preparedStatement = mock(PreparedStatement.class);
+		resultSet = mock(ResultSet.class);
+		given(connection.createStatement()).willReturn(statement);
+		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
+		given(statement.executeQuery(anyString())).willReturn(resultSet);
+		given(preparedStatement.executeQuery()).willReturn(resultSet);
+		given(resultSet.next()).willReturn(true, true, false);
+		given(resultSet.getString(1)).willReturn("tb1", "tb2");
+		given(resultSet.getInt(2)).willReturn(1, 2);
+		template = new JdbcTemplate();
+		template.setDataSource(new SingleConnectionDataSource(connection, false));
+		template.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
+		template.afterPropertiesSet();
 	}
 
-	public void testStaticQueryWithRowMapper() throws SQLException {
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-
-		con.createStatement();
-		conControl.setReturnValue(stmt, 1);
-		stmt.executeQuery("some SQL");
-		stmtControl.setReturnValue(rs, 1);
-		if (debugEnabled) {
-			stmt.getWarnings();
-			stmtControl.setReturnValue(null, 1);
-		}
-		stmt.close();
-		stmtControl.setVoidCallable(1);
-
-		conControl.replay();
-		stmtControl.replay();
-
-		result = jdbcTemplate.query("some SQL", new TestRowMapper());
-
-		stmtControl.verify();
-		verify();
+	@After
+	public void verifyClosed() throws Exception {
+		verify(resultSet).close();
+		verify(connection).close();
 	}
 
-	public void testPreparedStatementCreatorWithRowMapper() throws SQLException {
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement ps = (PreparedStatement) psControl.getMock();
-
-		ps.executeQuery();
-		psControl.setReturnValue(rs, 1);
-		if (debugEnabled) {
-			ps.getWarnings();
-			psControl.setReturnValue(null, 1);
-		}
-		ps.close();
-		psControl.setVoidCallable(1);
-
-		conControl.replay();
-		psControl.replay();
-
-		result = jdbcTemplate.query(
-				new PreparedStatementCreator() {
-					@Override
-					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-						return ps;
-					}
-				}, new TestRowMapper());
-
-		psControl.verify();
-		verify();
-	}
-
-	public void testPreparedStatementSetterWithRowMapper() throws SQLException {
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement ps = (PreparedStatement) psControl.getMock();
-
-		con.prepareStatement("some SQL");
-		conControl.setReturnValue(ps, 1);
-		ps.setString(1, "test");
-		psControl.setVoidCallable(1);
-		ps.executeQuery();
-		psControl.setReturnValue(rs, 1);
-		if (debugEnabled) {
-			ps.getWarnings();
-			psControl.setReturnValue(null, 1);
-		}
-		ps.close();
-		psControl.setVoidCallable(1);
-
-		conControl.replay();
-		psControl.replay();
-
-		result = jdbcTemplate.query(
-				"some SQL",
-				new PreparedStatementSetter() {
-					@Override
-					public void setValues(PreparedStatement ps) throws SQLException {
-						ps.setString(1, "test");
-					}
-				}, new TestRowMapper());
-
-		psControl.verify();
-		verify();
-	}
-
-	public void testQueryWithArgsAndRowMapper() throws SQLException {
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement ps = (PreparedStatement) psControl.getMock();
-
-		con.prepareStatement("some SQL");
-		conControl.setReturnValue(ps, 1);
-		ps.setString(1, "test1");
-		ps.setString(2, "test2");
-		psControl.setVoidCallable(1);
-		ps.executeQuery();
-		psControl.setReturnValue(rs, 1);
-		if (debugEnabled) {
-			ps.getWarnings();
-			psControl.setReturnValue(null, 1);
-		}
-		ps.close();
-		psControl.setVoidCallable(1);
-
-		conControl.replay();
-		psControl.replay();
-
-		result = jdbcTemplate.query(
-				"some SQL",
-				new Object[] {"test1", "test2"},
-				new TestRowMapper());
-
-		psControl.verify();
-		verify();
-	}
-
-	public void testQueryWithArgsAndTypesAndRowMapper() throws SQLException {
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement ps = (PreparedStatement) psControl.getMock();
-
-		con.prepareStatement("some SQL");
-		conControl.setReturnValue(ps, 1);
-		ps.setString(1, "test1");
-		ps.setString(2, "test2");
-		psControl.setVoidCallable(1);
-		ps.executeQuery();
-		psControl.setReturnValue(rs, 1);
-		if (debugEnabled) {
-			ps.getWarnings();
-			psControl.setReturnValue(null, 1);
-		}
-		ps.close();
-		psControl.setVoidCallable(1);
-
-		conControl.replay();
-		psControl.replay();
-
-		result = jdbcTemplate.query(
-				"some SQL",
-				new Object[] {"test1", "test2"},
-				new int[] {Types.VARCHAR, Types.VARCHAR},
-				new TestRowMapper());
-
-		psControl.verify();
-		verify();
-	}
-
-	protected void verify() {
-		conControl.verify();
-		rsControl.verify();
-
+	@After
+	public void verifyResults() {
 		assertTrue(result != null);
 		assertEquals(2, result.size());
-		TestBean tb1 = (TestBean) result.get(0);
-		TestBean tb2 = (TestBean) result.get(1);
-		assertEquals("tb1", tb1.getName());
-		assertEquals(1, tb1.getAge());
-		assertEquals("tb2", tb2.getName());
-		assertEquals(2, tb2.getAge());
+		assertEquals("tb1", result.get(0).getName());
+		assertEquals("tb2", result.get(1).getName());
+		assertEquals(1, result.get(0).getAge());
+		assertEquals(2, result.get(1).getAge());
 	}
 
+	@Test
+	public void testStaticQueryWithRowMapper() throws SQLException {
+		result = template.query("some SQL", new TestRowMapper());
+		verify(statement).close();
+	}
 
-	private static class TestRowMapper implements RowMapper {
+	@Test
+	public void testPreparedStatementCreatorWithRowMapper() throws SQLException {
+		result = template.query(new PreparedStatementCreator() {
+			@Override
+			public PreparedStatement createPreparedStatement(Connection con)
+					throws SQLException {
+				return preparedStatement;
+			}
+		}, new TestRowMapper());
+		verify(preparedStatement).close();
+	}
 
+	@Test
+	public void testPreparedStatementSetterWithRowMapper() throws SQLException {
+		result = template.query("some SQL", new PreparedStatementSetter() {
+			@Override
+			public void setValues(PreparedStatement ps) throws SQLException {
+				ps.setString(1, "test");
+			}
+		}, new TestRowMapper());
+		verify(preparedStatement).setString(1, "test");
+		verify(preparedStatement).close();
+	}
+
+	@Test
+	public void testQueryWithArgsAndRowMapper() throws SQLException {
+		result = template.query("some SQL",
+				new Object[] { "test1", "test2" },
+				new TestRowMapper());
+		preparedStatement.setString(1, "test1");
+		preparedStatement.setString(2, "test2");
+		preparedStatement.close();
+	}
+
+	@Test
+	public void testQueryWithArgsAndTypesAndRowMapper() throws SQLException {
+		result = template.query("some SQL",
+				new Object[] { "test1", "test2" },
+				new int[] { Types.VARCHAR, Types.VARCHAR },
+				new TestRowMapper());
+		verify(preparedStatement).setString(1, "test1");
+		verify(preparedStatement).setString(2, "test2");
+		verify(preparedStatement).close();
+	}
+
+	private static class TestRowMapper implements RowMapper<TestBean> {
 		@Override
-		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public TestBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return new TestBean(rs.getString(1), rs.getInt(2));
 		}
 	}

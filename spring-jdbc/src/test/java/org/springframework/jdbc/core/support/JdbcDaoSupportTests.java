@@ -16,26 +16,27 @@
 
 package org.springframework.jdbc.core.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Juergen Hoeller
  * @since 30.07.2003
  */
-public class JdbcDaoSupportTests extends TestCase {
+public class JdbcDaoSupportTests {
 
+	@Test
 	public void testJdbcDaoSupportWithDataSource() throws Exception {
-		MockControl dsControl = MockControl.createControl(DataSource.class);
-		DataSource ds = (DataSource) dsControl.getMock();
-		final List test = new ArrayList();
+		DataSource ds = mock(DataSource.class);
+		final List<String> test = new ArrayList<String>();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {
 			@Override
 			protected void initDao() {
@@ -49,9 +50,10 @@ public class JdbcDaoSupportTests extends TestCase {
 		assertEquals("initDao called", test.size(), 1);
 	}
 
+	@Test
 	public void testJdbcDaoSupportWithJdbcTemplate() throws Exception {
 		JdbcTemplate template = new JdbcTemplate();
-		final List test = new ArrayList();
+		final List<String> test = new ArrayList<String>();
 		JdbcDaoSupport dao = new JdbcDaoSupport() {
 			@Override
 			protected void initDao() {

@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
+import static org.mockito.Mockito.mock;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.factory.BeanFactory;
 
@@ -27,15 +27,12 @@ import org.springframework.beans.factory.BeanFactory;
 public class RefreshableScriptTargetSourceTests extends TestCase {
 
 	public void testCreateWithNullScriptSource() throws Exception {
-		MockControl mockFactory = MockControl.createNiceControl(BeanFactory.class);
-		mockFactory.replay();
 		try {
-			new RefreshableScriptTargetSource((BeanFactory) mockFactory.getMock(), "a.bean", null, null, false);
+			new RefreshableScriptTargetSource(mock(BeanFactory.class), "a.bean", null, null, false);
 			fail("Must have failed when passed a null ScriptSource.");
 		}
 		catch (IllegalArgumentException expected) {
 		}
-		mockFactory.verify();
 	}
 
 }

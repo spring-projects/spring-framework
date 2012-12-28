@@ -16,11 +16,13 @@
 
 package org.springframework.scripting.bsh;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.util.Arrays;
 import java.util.Collection;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -189,14 +191,10 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptThatCompilesButIsJustPlainBad() throws Exception {
-		MockControl mock = MockControl.createControl(ScriptSource.class);
-		ScriptSource script = (ScriptSource) mock.getMock();
-		script.getScriptAsString();
+		ScriptSource script = mock(ScriptSource.class);
 		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
-		mock.setReturnValue(badScript);
-		script.isModified();
-		mock.setReturnValue(true);
-		mock.replay();
+		given(script.getScriptAsString()).willReturn(badScript);
+		given(script.isModified()).willReturn(true);
 		BshScriptFactory factory = new BshScriptFactory(
 				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,
 				new Class<?>[] {Messenger.class});
@@ -207,7 +205,6 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 		catch (BshScriptUtils.BshExecutionException expected) {
 		}
-		mock.verify();
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {

@@ -16,8 +16,10 @@
 
 package org.springframework.ejb.access;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBLocalHome;
@@ -41,15 +43,14 @@ public class LocalSlsbInvokerInterceptorTests {
 	 */
 	@Test
 	public void testPerformsLookup() throws Exception {
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
 
 		configuredInterceptor(mockContext, jndiName);
 
-		verify(mockContext);
+		verify(mockContext).close();
 	}
 
 	@Test
@@ -81,10 +82,8 @@ public class LocalSlsbInvokerInterceptorTests {
 	@Test
 	public void testInvokesMethodOnEjbInstance() throws Exception {
 		Object retVal = new Object();
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		expect(ejb.targetMethod()).andReturn(retVal);
-		ejb.remove();
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
+		given(ejb.targetMethod()).willReturn(retVal);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
@@ -97,17 +96,15 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		assertTrue(target.targetMethod() == retVal);
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
+		verify(ejb).remove();
 	}
 
 	@Test
 	public void testInvokesMethodOnEjbInstanceWithSeparateBusinessMethods() throws Exception {
 		Object retVal = new Object();
-		LocalInterface ejb = createMock(LocalInterface.class);
-		expect(ejb.targetMethod()).andReturn(retVal);
-		ejb.remove();
-		replay(ejb);
+		LocalInterface ejb = mock(LocalInterface.class);
+		given(ejb.targetMethod()).willReturn(retVal);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
@@ -120,14 +117,13 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		assertTrue(target.targetMethod() == retVal);
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
+		verify(ejb).remove();
 	}
 
 	private void testException(Exception expected) throws Exception {
-		LocalInterfaceWithBusinessMethods ejb = createMock(LocalInterfaceWithBusinessMethods.class);
-		expect(ejb.targetMethod()).andThrow(expected);
-		replay(ejb);
+		LocalInterfaceWithBusinessMethods ejb = mock(LocalInterfaceWithBusinessMethods.class);
+		given(ejb.targetMethod()).willThrow(expected);
 
 		String jndiName= "foobar";
 		Context mockContext = mockContext(jndiName, ejb);
@@ -146,8 +142,7 @@ public class LocalSlsbInvokerInterceptorTests {
 			assertTrue(thrown == expected);
 		}
 
-		verify(mockContext);
-		verify(ejb);
+		verify(mockContext).close();
 	}
 
 	@Test
@@ -157,16 +152,10 @@ public class LocalSlsbInvokerInterceptorTests {
 
 	protected Context mockContext(final String jndiName, final Object ejbInstance)
 			throws Exception {
-
-		final SlsbHome mockHome = createMock(SlsbHome.class);
-		expect(mockHome.create()).andReturn((LocalInterface)ejbInstance);
-		replay(mockHome);
-
-		final Context mockCtx = createMock(Context.class);
-
-		expect(mockCtx.lookup("java:comp/env/" + jndiName)).andReturn(mockHome);
-		mockCtx.close();
-		replay(mockCtx);
+		SlsbHome mockHome = mock(SlsbHome.class);
+		given(mockHome.create()).willReturn((LocalInterface)ejbInstance);
+		Context mockCtx = mock(Context.class);
+		given(mockCtx.lookup("java:comp/env/" + jndiName)).willReturn(mockHome);
 		return mockCtx;
 	}
 

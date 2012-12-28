@@ -16,11 +16,9 @@
 
 package org.springframework.aop.framework;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 
@@ -80,18 +78,16 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	public void testInterceptorIsInvokedWithNoTarget() throws Throwable {
 		// Test return value
 		int age = 25;
-		MethodInterceptor mi = createMock(MethodInterceptor.class);
+		MethodInterceptor mi = mock(MethodInterceptor.class);
 
 		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class });
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
-		expect(mi.invoke(null)).andReturn(age);
-		replay(mi);
+		given(mi.invoke(null)).willReturn(age);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("correct return value", tb.getAge() == age);
-		verify(mi);
 	}
 
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {

@@ -16,8 +16,10 @@
 
 package org.springframework.jndi;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import javax.naming.Context;
 import javax.naming.NameNotFoundException;
@@ -36,10 +38,8 @@ public class JndiTemplateTests {
 	public void testLookupSucceeds() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		expect(context.lookup(name)).andReturn(o);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
+		given(context.lookup(name)).willReturn(o);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -50,17 +50,15 @@ public class JndiTemplateTests {
 
 		Object o2 = jt.lookup(name);
 		assertEquals(o, o2);
-		verify(context);
+		verify(context).close();
 	}
 
 	@Test
 	public void testLookupFails() throws Exception {
 		NameNotFoundException ne = new NameNotFoundException();
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		expect(context.lookup(name)).andThrow(ne);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
+		given(context.lookup(name)).willThrow(ne);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -76,16 +74,14 @@ public class JndiTemplateTests {
 		catch (NameNotFoundException ex) {
 			// Ok
 		}
-		verify(context);
+		verify(context).close();
 	}
 
 	@Test
 	public void testLookupReturnsNull() throws Exception {
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		expect(context.lookup(name)).andReturn(null);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
+		given(context.lookup(name)).willReturn(null);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -101,17 +97,15 @@ public class JndiTemplateTests {
 		catch (NameNotFoundException ex) {
 			// Ok
 		}
-		verify(context);
+		verify(context).close();
 	}
 
 	@Test
 	public void testLookupFailsWithTypeMismatch() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		expect(context.lookup(name)).andReturn(o);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
+		given(context.lookup(name)).willReturn(o);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -127,17 +121,14 @@ public class JndiTemplateTests {
 		catch (TypeMismatchNamingException ex) {
 			// Ok
 		}
-		verify(context);
+		verify(context).close();
 	}
 
 	@Test
 	public void testBind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		context.bind(name, o);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -147,17 +138,15 @@ public class JndiTemplateTests {
 		};
 
 		jt.bind(name, o);
-		verify(context);
+		verify(context).bind(name, o);
+		verify(context).close();
 	}
 
 	@Test
 	public void testRebind() throws Exception {
 		Object o = new Object();
 		String name = "foo";
-		final Context context = createMock(Context.class);
-		context.rebind(name, o);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -167,16 +156,15 @@ public class JndiTemplateTests {
 		};
 
 		jt.rebind(name, o);
-		verify(context);
+		verify(context).rebind(name, o);
+		verify(context).close();
+;
 	}
 
 	@Test
 	public void testUnbind() throws Exception {
 		String name = "something";
-		final Context context = createMock(Context.class);
-		context.unbind(name);
-		context.close();
-		replay(context);
+		final Context context = mock(Context.class);
 
 		JndiTemplate jt = new JndiTemplate() {
 			@Override
@@ -186,7 +174,8 @@ public class JndiTemplateTests {
 		};
 
 		jt.unbind(name);
-		verify(context);
+		verify(context).unbind(name);
+		verify(context).close();
 	}
 
 }

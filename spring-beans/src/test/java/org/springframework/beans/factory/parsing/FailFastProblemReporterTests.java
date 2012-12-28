@@ -16,7 +16,10 @@
 
 package org.springframework.beans.factory.parsing;
 
-import static org.easymock.EasyMock.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.apache.commons.logging.Log;
 import org.junit.Test;
@@ -41,15 +44,13 @@ public final class FailFastProblemReporterTests {
 		Problem problem = new Problem("VGER", new Location(new DescriptiveResource("here")),
 				null, new IllegalArgumentException());
 
-		Log log = createMock(Log.class);
-		log.warn(anyObject(), isA(IllegalArgumentException.class));
-		replay(log);
+		Log log = mock(Log.class);
 
 		FailFastProblemReporter reporter = new FailFastProblemReporter();
 		reporter.setLogger(log);
 		reporter.warning(problem);
 
-		verify(log);
+		verify(log).warn(any(), isA(IllegalArgumentException.class));
 	}
 
 }

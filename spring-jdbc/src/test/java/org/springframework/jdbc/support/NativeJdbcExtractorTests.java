@@ -16,6 +16,10 @@
 
 package org.springframework.jdbc.support;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -24,9 +28,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.Test;
 import org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
 
@@ -34,33 +36,23 @@ import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
  * @author Andre Biryukov
  * @author Juergen Hoeller
  */
-public class NativeJdbcExtractorTests extends TestCase {
+public class NativeJdbcExtractorTests {
 
+	@Test
 	public void testSimpleNativeJdbcExtractor() throws SQLException {
 		SimpleNativeJdbcExtractor extractor = new SimpleNativeJdbcExtractor();
 
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl dbmdControl = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData dbmd = (DatabaseMetaData) dbmdControl.getMock();
-		MockControl con2Control = MockControl.createControl(Connection.class);
-		Connection con2 = (Connection) con2Control.getMock();
-		con.getMetaData();
-		conControl.setReturnValue(dbmd, 2);
-		dbmd.getConnection();
-		dbmdControl.setReturnValue(con2, 2);
-		conControl.replay();
-		dbmdControl.replay();
-		con2Control.replay();
+		Connection con = mock(Connection.class);
+		DatabaseMetaData dbmd = mock(DatabaseMetaData.class);
+		Connection con2 = mock(Connection.class);
+		given(con.getMetaData()).willReturn(dbmd);
+		given(dbmd.getConnection()).willReturn(con2);
 
 		Connection nativeCon = extractor.getNativeConnection(con);
 		assertEquals(con2, nativeCon);
 
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		stmt.getConnection();
-		stmtControl.setReturnValue(con);
-		stmtControl.replay();
+		Statement stmt = mock(Statement.class);
+		given(stmt.getConnection()).willReturn(con);
 
 		nativeCon = extractor.getNativeConnectionFromStatement(stmt);
 		assertEquals(con2, nativeCon);
@@ -68,51 +60,29 @@ public class NativeJdbcExtractorTests extends TestCase {
 		Statement nativeStmt = extractor.getNativeStatement(stmt);
 		assertEquals(nativeStmt, stmt);
 
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		psControl.replay();
+		PreparedStatement ps = mock(PreparedStatement.class);
 
 		PreparedStatement nativePs = extractor.getNativePreparedStatement(ps);
 		assertEquals(ps, nativePs);
 
-		MockControl csControl = MockControl.createControl(CallableStatement.class);
-		CallableStatement cs = (CallableStatement) csControl.getMock();
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-		cs.getResultSet();
-		csControl.setReturnValue(rs);
-		csControl.replay();
-		rsControl.replay();
+		CallableStatement cs = mock(CallableStatement.class);
+		ResultSet rs = mock(ResultSet.class);
+		given(cs.getResultSet()).willReturn(rs);
 
 		CallableStatement nativeCs = extractor.getNativeCallableStatement(cs);
 		assertEquals(cs, nativeCs);
 
 		ResultSet nativeRs = extractor.getNativeResultSet(cs.getResultSet());
 		assertEquals(nativeRs, rs);
-
-		conControl.verify();
-		dbmdControl.verify();
-		con2Control.verify();
-		stmtControl.verify();
-		psControl.verify();
-		csControl.verify();
-		rsControl.verify();
 	}
 
 	public void testCommonsDbcpNativeJdbcExtractor() throws SQLException {
 		CommonsDbcpNativeJdbcExtractor extractor = new CommonsDbcpNativeJdbcExtractor();
 		assertFalse(extractor.isNativeConnectionNecessaryForNativeStatements());
 
-		MockControl conControl = MockControl.createControl(Connection.class);
-		Connection con = (Connection) conControl.getMock();
-		MockControl stmtControl = MockControl.createControl(Statement.class);
-		Statement stmt = (Statement) stmtControl.getMock();
-		con.getMetaData();
-		conControl.setReturnValue(null, 2);
-		stmt.getConnection();
-		stmtControl.setReturnValue(con, 1);
-		conControl.replay();
-		stmtControl.replay();
+		Connection con = mock(Connection.class);
+		Statement stmt = mock(Statement.class);
+		given(stmt.getConnection()).willReturn(con);
 
 		Connection nativeConnection = extractor.getNativeConnection(con);
 		assertEquals(con, nativeConnection);
@@ -121,24 +91,14 @@ public class NativeJdbcExtractorTests extends TestCase {
 		assertEquals(con, nativeConnection);
 		assertEquals(stmt, extractor.getNativeStatement(stmt));
 
-		MockControl psControl = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement ps = (PreparedStatement) psControl.getMock();
-		psControl.replay();
+		PreparedStatement ps = mock(PreparedStatement.class);
 		assertEquals(ps, extractor.getNativePreparedStatement(ps));
 
-		MockControl csControl = MockControl.createControl(CallableStatement.class);
-		CallableStatement cs = (CallableStatement) csControl.getMock();
-		csControl.replay();
+		CallableStatement cs = mock(CallableStatement.class);
 		assertEquals(cs, extractor.getNativePreparedStatement(cs));
 
-		MockControl rsControl = MockControl.createControl(ResultSet.class);
-		ResultSet rs = (ResultSet) rsControl.getMock();
-		rsControl.replay();
+		ResultSet rs = mock(ResultSet.class);
 		assertEquals(rs, extractor.getNativeResultSet(rs));
-
-		conControl.verify();
-		stmtControl.verify();
-		psControl.verify();
 	}
 
 }

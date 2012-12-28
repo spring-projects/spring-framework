@@ -16,8 +16,9 @@
 
 package org.springframework.aop.support;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 
@@ -56,17 +57,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(TimeStamped.class);
+		TimeStamped ts = mock(TimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -75,17 +73,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof SubTimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
 
 		SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -94,18 +89,15 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(!(tsp instanceof SubTimeStamped));
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test

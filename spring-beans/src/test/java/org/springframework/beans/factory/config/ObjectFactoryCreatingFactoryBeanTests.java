@@ -19,9 +19,11 @@ package org.springframework.beans.factory.config;
 import java.util.Date;
 import javax.inject.Provider;
 
-import static org.easymock.EasyMock.*;
 import org.junit.After;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import org.junit.Before;
 import org.junit.Test;
 import static test.util.TestResourceUtils.*;
@@ -105,9 +107,8 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		final String targetBeanName = "singleton";
 		final String expectedSingleton = "Alicia Keys";
 
-		BeanFactory beanFactory = createMock(BeanFactory.class);
-		expect(beanFactory.getBean(targetBeanName)).andReturn(expectedSingleton);
-		replay(beanFactory);
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		given(beanFactory.getBean(targetBeanName)).willReturn(expectedSingleton);
 
 		ObjectFactoryCreatingFactoryBean factory = new ObjectFactoryCreatingFactoryBean();
 		factory.setTargetBeanName(targetBeanName);
@@ -116,8 +117,6 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		ObjectFactory<?> objectFactory = factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
 		assertSame(expectedSingleton, actualSingleton);
-
-		verify(beanFactory);
 	}
 
 	@Test

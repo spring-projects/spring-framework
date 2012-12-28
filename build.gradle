@@ -74,7 +74,7 @@ configure(allprojects) {
 	dependencies {
 		testCompile("junit:junit:${junitVersion}")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.easymock:easymock:${easymockVersion}")
+		testCompile("org.mockito:mockito-core:1.9.5")
 	}
 
 	ext.javadocLinks = [
@@ -98,6 +98,16 @@ configure(allprojects) {
 		"http://tiles.apache.org/framework/apidocs",
 		"http://commons.apache.org/dbcp/api-1.2.2",
 	] as String[]
+}
+
+configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
+		"spring-orm-hibernate4", "spring-oxm", "spring-struts", "spring-test",
+		"spring-test-mvc", "spring-tx", "spring-web", "spring-webmvc",
+		"spring-webmvc-portlet", "spring-webmvc-tiles3"]}) {
+	dependencies {
+		testCompile("org.easymock:easymock:${easymockVersion}")
+		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
+	}
 }
 
 configure(subprojects) { subproject ->
@@ -330,7 +340,6 @@ project("spring-tx") {
 		optional("javax.resource:connector-api:1.5")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.ejb:ejb-api:3.0")
-		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
 		testCompile("javax.persistence:persistence-api:1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
@@ -678,7 +687,6 @@ project("spring-test-mvc") {
 		testCompile("javax.activation:activation:1.1")
 		testCompile("javax.mail:mail:1.4")
 		testCompile("javax.xml.bind:jaxb-api:2.2.6")
-		testCompile("org.easymock:easymockclassextension:${easymockVersion}")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
 		testCompile("org.apache.tiles:tiles-api:3.0.1")
 		testCompile("org.apache.tiles:tiles-core:3.0.1") {

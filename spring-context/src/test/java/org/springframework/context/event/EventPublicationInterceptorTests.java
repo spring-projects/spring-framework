@@ -16,8 +16,8 @@
 
 package org.springframework.context.event;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,13 +44,7 @@ public class EventPublicationInterceptorTests {
 
 	@Before
 	public void setUp() {
-		publisher = createMock(ApplicationEventPublisher.class);
-		replay(publisher);
-	}
-
-	@After
-	public void tearDown() {
-		verify(publisher);
+		publisher = mock(ApplicationEventPublisher.class);
 	}
 
 	@Test(expected=IllegalArgumentException.class)

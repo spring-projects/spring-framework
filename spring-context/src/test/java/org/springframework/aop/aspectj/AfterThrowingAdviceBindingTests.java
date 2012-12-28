@@ -16,9 +16,9 @@
 
 package org.springframework.aop.aspectj;
 
-import static org.easymock.EasyMock.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.aspectj.AfterThrowingAdviceBindingTestAspect.AfterThrowingAdviceBindingCollaborator;
@@ -47,65 +47,49 @@ public final class AfterThrowingAdviceBindingTests {
 		testBean = (ITestBean) ctx.getBean("testBean");
 		afterThrowingAdviceAspect = (AfterThrowingAdviceBindingTestAspect) ctx.getBean("testAspect");
 
-		mockCollaborator = createNiceMock(AfterThrowingAdviceBindingCollaborator.class);
+		mockCollaborator = mock(AfterThrowingAdviceBindingCollaborator.class);
 		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
-	}
-
-	@After
-	public void tearDown() {
-		verify(mockCollaborator);
 	}
 
 	@Test(expected=Throwable.class)
 	public void testSimpleAfterThrowing() throws Throwable {
-		mockCollaborator.noArgs();
-		replay(mockCollaborator);
 		this.testBean.exceptional(new Throwable());
+		verify(mockCollaborator).noArgs();
 	}
 
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithBinding() throws Throwable {
 		Throwable t = new Throwable();
-		mockCollaborator.oneThrowable(t);
-		replay(mockCollaborator);
 		this.testBean.exceptional(t);
+		verify(mockCollaborator).oneThrowable(t);
 	}
 
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithNamedTypeRestriction() throws Throwable {
 		Throwable t = new Throwable();
-		// need a strict mock for this test...
-		mockCollaborator = createMock(AfterThrowingAdviceBindingCollaborator.class);
-		afterThrowingAdviceAspect.setCollaborator(mockCollaborator);
-
-		mockCollaborator.noArgs();
-		mockCollaborator.oneThrowable(t);
-		mockCollaborator.noArgsOnThrowableMatch();
-		replay(mockCollaborator);
 		this.testBean.exceptional(t);
+		verify(mockCollaborator).noArgs();
+		verify(mockCollaborator).oneThrowable(t);
+		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithRuntimeExceptionBinding() throws Throwable {
 		RuntimeException ex = new RuntimeException();
-		mockCollaborator.oneRuntimeException(ex);
-		replay(mockCollaborator);
 		this.testBean.exceptional(ex);
+		verify(mockCollaborator).oneRuntimeException(ex);
 	}
 
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithTypeSpecified() throws Throwable {
-		mockCollaborator.noArgsOnThrowableMatch();
-		replay(mockCollaborator);
 		this.testBean.exceptional(new Throwable());
+		verify(mockCollaborator).noArgsOnThrowableMatch();
 	}
 
 	@Test(expected=Throwable.class)
 	public void testAfterThrowingWithRuntimeTypeSpecified() throws Throwable {
-		mockCollaborator.noArgsOnRuntimeExceptionMatch();
-		replay(mockCollaborator);
 		this.testBean.exceptional(new RuntimeException());
-		verify(mockCollaborator);
+		verify(mockCollaborator).noArgsOnRuntimeExceptionMatch();
 	}
 
 }
