@@ -250,6 +250,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		final String spouseName = "innerName";
 
 		TestBean outer = new TestBean() {
+			@Override
 			public void exceptional(Throwable t) throws Throwable {
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
 				assertTrue(ti.hasTransaction());
@@ -257,6 +258,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			}
 		};
 		TestBean inner = new TestBean() {
+			@Override
 			public String getName() {
 				// Assert that we're in the inner proxy
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
@@ -311,6 +313,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		final String spouseName = "innerName";
 
 		TestBean outer = new TestBean() {
+			@Override
 			public void exceptional(Throwable t) throws Throwable {
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
 				assertTrue(ti.hasTransaction());
@@ -319,6 +322,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			}
 		};
 		TestBean inner = new TestBean() {
+			@Override
 			public String getName() {
 				// Assert that we're in the inner proxy
 				TransactionInfo ti = TransactionAspectSupport.currentTransactionInfo();
@@ -386,6 +390,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 			final Exception ex, final boolean shouldRollback, boolean rollbackException) throws Exception {
 
 		TransactionAttribute txatt = new DefaultTransactionAttribute() {
+			@Override
 			public boolean rollbackOn(Throwable t) {
 				assertTrue(t == ex);
 				return shouldRollback;
@@ -461,6 +466,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 
 		final String name = "jenny";
 		TestBean tb = new TestBean() {
+			@Override
 			public String getName() {
 				TransactionStatus txStatus = TransactionInterceptor.currentTransactionStatus();
 				txStatus.setRollbackOnly();
@@ -504,6 +510,7 @@ public abstract class AbstractTransactionAspectTests extends TestCase {
 		ptmControl.replay();
 
 		TestBean tb = new TestBean() {
+			@Override
 			public String getName() {
 				throw new UnsupportedOperationException(
 						"Shouldn't have invoked target method when couldn't create transaction for transactional method");

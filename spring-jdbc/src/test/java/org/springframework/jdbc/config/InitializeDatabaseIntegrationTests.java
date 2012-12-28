@@ -124,6 +124,7 @@ public class InitializeDatabaseIntegrationTests {
 			return cache;
 		}
 
+		@Override
 		public void afterPropertiesSet() throws Exception {
 			cache = jdbcTemplate.queryForList("SELECT * FROM T_TEST");
 		}

@@ -33,6 +33,7 @@ public class CustomScope implements Scope {
 
 	private Map<String, Object> beans = new HashMap<String, Object>();
 
+	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		if (createNewScope) {
 			beans.clear();
@@ -50,18 +51,22 @@ public class CustomScope implements Scope {
 		return beans.get(name);
 	}
 
+	@Override
 	public String getConversationId() {
 		return null;
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		// do nothing
 	}
 
+	@Override
 	public Object remove(String name) {
 		return beans.remove(name);
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}

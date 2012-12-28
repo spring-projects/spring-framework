@@ -31,6 +31,7 @@ public class TagWriterTests extends TestCase {
 	private StringWriter data;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		this.data = new StringWriter();
 		this.writer = new TagWriter(this.data);

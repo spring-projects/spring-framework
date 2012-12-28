@@ -110,6 +110,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		SQLException intVioEx = new SQLException("", "", 6);
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator() {
+			@Override
 			protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
 				assertEquals(TASK, task);
 				assertEquals(SQL, sql);

@@ -39,6 +39,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public class OpenJpaEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
+	@Override
 	protected String[] getConfigLocations() {
 		return OPENJPA_CONFIG_LOCATIONS;
 	}
@@ -62,6 +63,7 @@ public class OpenJpaEntityManagerFactoryIntegrationTests extends AbstractContain
 		TransactionTemplate tt = new TransactionTemplate(transactionManager);
 		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_NESTED);
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				Person tony = new Person();
 				tony.setFirstName("Tony");

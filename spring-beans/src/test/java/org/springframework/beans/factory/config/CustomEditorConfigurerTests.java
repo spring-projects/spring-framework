@@ -53,6 +53,7 @@ public final class CustomEditorConfigurerTests {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
 		cec.setPropertyEditorRegistrars(new PropertyEditorRegistrar[] {
 				new PropertyEditorRegistrar() {
+					@Override
 					public void registerCustomEditors(PropertyEditorRegistry registry) {
 						registry.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
 					}
@@ -189,6 +190,7 @@ public final class CustomEditorConfigurerTests {
 
 	public static class MyTestEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			setValue(new String[] {"test"});
 		}

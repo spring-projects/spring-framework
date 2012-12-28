@@ -38,6 +38,7 @@ public class XmlBasedSpr3350SingleSpringContextTests extends AbstractSpr3350Sing
 	/**
 	 * Returns &quot;XmlBasedSpr3350SingleSpringContextTests-context.xml&quot;.
 	 */
+	@Override
 	protected final String getConfigPath() {
 		return "XmlBasedSpr3350SingleSpringContextTests-context.xml";
 	}

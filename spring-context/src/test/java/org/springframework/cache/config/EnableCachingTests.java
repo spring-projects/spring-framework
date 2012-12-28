@@ -115,6 +115,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Configuration
 	@EnableCaching
 	static class EnableCachingConfig implements CachingConfigurer {
+		@Override
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cm = new SimpleCacheManager();
@@ -135,6 +136,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 			return new AnnotatedClassCacheableService();
 		}
 
+		@Override
 		@Bean
 		public KeyGenerator keyGenerator() {
 			return new SomeKeyGenerator();
@@ -174,9 +176,11 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		@Bean
 		public CacheManager cm2() { return new NoOpCacheManager(); }
 
+		@Override
 		public CacheManager cacheManager() {
 			return cm1();
 		}
+		@Override
 		public KeyGenerator keyGenerator() {
 			return null;
 		}

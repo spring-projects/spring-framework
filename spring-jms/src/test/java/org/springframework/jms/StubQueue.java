@@ -39,6 +39,7 @@ public class StubQueue implements Queue {
 	}
 
 
+	@Override
 	public String getQueueName() {
 		return this.queueName;
 	}

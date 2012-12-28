@@ -53,6 +53,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
+	@Override
 	@Before
 	public void verifyInitialTestData() {
 		clearPersonTable(simpleJdbcTemplate);
@@ -61,6 +62,7 @@ public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests e
 			countRowsInPersonTable(simpleJdbcTemplate));
 	}
 
+	@Override
 	@Test
 	@Transactional
 	@Rollback(false)

@@ -153,6 +153,7 @@ public class CciTemplateTests {
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
 		ct.setOutputRecordCreator(new RecordCreator() {
+			@Override
 			public Record createRecord(RecordFactory recordFactory) {
 				assertTrue(recordFactory instanceof NotSupportedRecordFactory);
 				return outputRecord;

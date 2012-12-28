@@ -219,6 +219,7 @@ public class EnableTransactionManagementIntegrationTests {
 			return new CallCountingTransactionManager();
 		}
 
+		@Override
 		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return txManager1();
 		}
@@ -327,6 +328,7 @@ public class EnableTransactionManagementIntegrationTests {
 		public void setDataSource(DataSource dataSource) {
 		}
 
+		@Override
 		@Transactional
 		public List<Object> findAll() {
 			return Collections.emptyList();
@@ -336,6 +338,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Repository
 	static class DummyFooRepository implements FooRepository {
 
+		@Override
 		@Transactional
 		public List<Object> findAll() {
 			return Collections.emptyList();

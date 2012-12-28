@@ -41,6 +41,7 @@ public class ControllerClassNameHandlerMappingTests extends TestCase {
 
 	private HandlerMapping hm4;
 
+	@Override
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		this.wac = new XmlWebApplicationContext();

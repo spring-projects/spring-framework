@@ -307,6 +307,7 @@ public class DefaultConversionTests {
 	}
 
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 

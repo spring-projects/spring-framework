@@ -57,6 +57,7 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 		this.conversionService = conversionService;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			Object typeConverter = ((ConfigurableBeanFactory) beanFactory).getTypeConverter();
@@ -80,6 +81,7 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 		return delegate.findCustomEditor(targetType, null) != null || delegate.getDefaultEditor(targetType) != null;
 	}
 
+	@Override
 	public boolean canConvert(TypeDescriptor sourceTypeDescriptor, TypeDescriptor targetTypeDescriptor) {
 		if (conversionService.canConvert(sourceTypeDescriptor, targetTypeDescriptor)) {
 			return true;
@@ -90,6 +92,7 @@ class BeanFactoryTypeConverter implements TypeConverter, BeanFactoryAware {
 		return canConvert(sourceType, targetType);
 	}
 
+	@Override
 	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (targetType.getType() == Void.class || targetType.getType() == Void.TYPE) {
 			return null;

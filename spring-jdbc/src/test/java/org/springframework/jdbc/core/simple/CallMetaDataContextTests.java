@@ -31,6 +31,7 @@ public class CallMetaDataContextTests extends TestCase {
 
 	private CallMetaDataContext context = new CallMetaDataContext();
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -51,6 +52,7 @@ public class CallMetaDataContextTests extends TestCase {
 
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ctrlDatabaseMetaData.verify();

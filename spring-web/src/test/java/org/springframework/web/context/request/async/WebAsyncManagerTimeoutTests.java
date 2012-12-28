@@ -104,6 +104,7 @@ public class WebAsyncManagerTimeoutTests {
 		StubCallable callable = new StubCallable();
 		WebAsyncTask<Object> webAsyncTask = new WebAsyncTask<Object>(callable);
 		webAsyncTask.onTimeout(new Callable<Object>() {
+			@Override
 			public Object call() throws Exception {
 				return 7;
 			}
@@ -207,6 +208,7 @@ public class WebAsyncManagerTimeoutTests {
 
 		final DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 		deferredResult.onTimeout(new Runnable() {
+			@Override
 			public void run() {
 				deferredResult.setResult(23);
 			}
@@ -228,6 +230,7 @@ public class WebAsyncManagerTimeoutTests {
 		DeferredResult<Integer> deferredResult = new DeferredResult<Integer>();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				result.setErrorResult(23);
 				return true;
@@ -252,6 +255,7 @@ public class WebAsyncManagerTimeoutTests {
 		final Exception exception = new Exception();
 
 		DeferredResultProcessingInterceptor interceptor = new DeferredResultProcessingInterceptorAdapter() {
+			@Override
 			public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> result) throws Exception {
 				throw exception;
 			}
@@ -270,6 +274,7 @@ public class WebAsyncManagerTimeoutTests {
 
 
 	private final class StubCallable implements Callable<Object> {
+		@Override
 		public Object call() throws Exception {
 			return 21;
 		}

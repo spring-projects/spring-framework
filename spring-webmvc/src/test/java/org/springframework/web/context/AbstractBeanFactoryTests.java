@@ -325,6 +325,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public static class TestBeanEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");

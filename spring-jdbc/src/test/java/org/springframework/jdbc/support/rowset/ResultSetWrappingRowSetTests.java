@@ -39,6 +39,7 @@ public class ResultSetWrappingRowSetTests extends TestCase {
 	private ResultSet rset;
 	private ResultSetWrappingSqlRowSet rowset;
 
+	@Override
 	public void setUp() throws Exception {
 		rsetControl = MockControl.createControl(ResultSet.class);
 		rset = (ResultSet) rsetControl.getMock();

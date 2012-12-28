@@ -79,6 +79,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -118,6 +119,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -157,6 +159,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		final JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -164,8 +167,10 @@ public class JmsTransactionManagerTests extends TestCase {
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				jt.execute(new SessionCallback() {
+					@Override
 					public Object doInJms(Session sess) {
 						assertTrue(sess == session);
 						return null;
@@ -207,6 +212,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		final JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -214,8 +220,10 @@ public class JmsTransactionManagerTests extends TestCase {
 		});
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				jt.execute(new SessionCallback() {
+					@Override
 					public Object doInJms(Session sess) {
 						assertTrue(sess == session);
 						return null;
@@ -270,6 +278,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		final JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -278,8 +287,10 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				jt.execute(new SessionCallback() {
+					@Override
 					public Object doInJms(Session sess) {
 						assertTrue(sess != session);
 						return null;
@@ -288,6 +299,7 @@ public class JmsTransactionManagerTests extends TestCase {
 			}
 		});
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -335,6 +347,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		final JmsTemplate jt = new JmsTemplate(cf);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -343,8 +356,10 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				jt.execute(new SessionCallback() {
+					@Override
 					public Object doInJms(Session sess) {
 						assertTrue(sess != session);
 						return null;
@@ -353,6 +368,7 @@ public class JmsTransactionManagerTests extends TestCase {
 			}
 		});
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -407,6 +423,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		JmsTemplate jt = new JmsTemplate(cf);
 		jt.send(dest, new MessageCreator() {
+			@Override
 			public Message createMessage(Session session) throws JMSException {
 				return message;
 			}
@@ -446,6 +463,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		JmsTemplate jt = new JmsTemplate102(cf, false);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -485,6 +503,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
 		JmsTemplate jt = new JmsTemplate102(cf, true);
 		jt.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session sess) {
 				assertTrue(sess == session);
 				return null;
@@ -497,6 +516,7 @@ public class JmsTransactionManagerTests extends TestCase {
 		cfControl.verify();
 	}
 
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

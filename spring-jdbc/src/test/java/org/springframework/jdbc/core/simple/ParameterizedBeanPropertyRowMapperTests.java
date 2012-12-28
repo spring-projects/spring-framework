@@ -31,6 +31,7 @@ public class ParameterizedBeanPropertyRowMapperTests extends AbstractRowMapperTe
 
 	private SimpleJdbcTemplate simpleJdbcTemplate;
 
+	@Override
 	protected void setUp() throws SQLException {
 		super.setUp();
 		simpleJdbcTemplate = new SimpleJdbcTemplate(jdbcTemplate);

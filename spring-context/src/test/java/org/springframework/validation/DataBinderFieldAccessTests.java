@@ -115,9 +115,11 @@ public class DataBinderFieldAccessTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
 		binder.registerCustomEditor(TestBean.class, "spouse", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text, 0));
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}

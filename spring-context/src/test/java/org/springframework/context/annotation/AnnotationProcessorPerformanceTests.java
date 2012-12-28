@@ -151,6 +151,7 @@ public class AnnotationProcessorPerformanceTests {
 
 	private static class ResourceAnnotatedTestBean extends TestBean {
 
+		@Override
 		@Resource @Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);
@@ -160,6 +161,7 @@ public class AnnotationProcessorPerformanceTests {
 
 	private static class AutowiredAnnotatedTestBean extends TestBean {
 
+		@Override
 		@Autowired @Required
 		public void setSpouse(ITestBean spouse) {
 			super.setSpouse(spouse);

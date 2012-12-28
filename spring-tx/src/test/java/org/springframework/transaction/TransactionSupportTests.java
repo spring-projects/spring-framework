@@ -139,6 +139,7 @@ public class TransactionSupportTests extends TestCase {
 		TestTransactionManager tm = new TestTransactionManager(false, true);
 		TransactionTemplate template = new TransactionTemplate(tm);
 		template.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 			}
 		});
@@ -152,6 +153,7 @@ public class TransactionSupportTests extends TestCase {
 		MockCallbackPreferringTransactionManager ptm = new MockCallbackPreferringTransactionManager();
 		TransactionTemplate template = new TransactionTemplate(ptm);
 		template.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 			}
 		});
@@ -165,6 +167,7 @@ public class TransactionSupportTests extends TestCase {
 		final RuntimeException ex = new RuntimeException("Some application exception");
 		try {
 			template.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					throw ex;
 				}
@@ -185,6 +188,7 @@ public class TransactionSupportTests extends TestCase {
 	public void testTransactionTemplateWithRollbackException() {
 		final TransactionSystemException tex = new TransactionSystemException("system exception");
 		TestTransactionManager tm = new TestTransactionManager(false, true) {
+			@Override
 			protected void doRollback(DefaultTransactionStatus status) {
 				super.doRollback(status);
 				throw tex;
@@ -194,6 +198,7 @@ public class TransactionSupportTests extends TestCase {
 		final RuntimeException ex = new RuntimeException("Some application exception");
 		try {
 			template.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					throw ex;
 				}
@@ -215,6 +220,7 @@ public class TransactionSupportTests extends TestCase {
 		TransactionTemplate template = new TransactionTemplate(tm);
 		try {
 			template.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					throw new Error("Some application error");
 				}
@@ -277,6 +283,7 @@ public class TransactionSupportTests extends TestCase {
 		assertTrue("Correct isolation level set", template.getIsolationLevel() == TransactionDefinition.ISOLATION_REPEATABLE_READ);
 	}
 
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

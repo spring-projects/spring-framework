@@ -121,6 +121,7 @@ public class EnableCachingIntegrationTests {
 	@Repository
 	static class DummyFooRepository implements FooRepository {
 
+		@Override
 		@Cacheable("primary")
 		public List<Object> findAll() {
 			return Collections.emptyList();

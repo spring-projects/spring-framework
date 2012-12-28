@@ -57,6 +57,7 @@ public class Spr3264DependencyInjectionSpringContextTests extends AbstractDepend
 		// Assert changes to AbstractDependencyInjectionSpringContextTests:
 		new AssertThrows(IllegalStateException.class) {
 
+			@Override
 			public void test() throws Exception {
 				Spr3264DependencyInjectionSpringContextTests.super.injectDependencies();
 			}

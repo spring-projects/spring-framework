@@ -43,15 +43,18 @@ public class LifecycleTestBean implements Lifecycle {
 		return stopOrder;
 	}
 
+	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
 
+	@Override
 	public void start() {
 		this.startOrder = ++startCounter;
 		this.running = true;
 	}
 
+	@Override
 	public void stop() {
 		this.stopOrder = ++stopCounter;
 		this.running = false;

@@ -34,6 +34,7 @@ public class TestListener implements ApplicationListener<ApplicationEvent> {
 		eventCount = 0;
 	}
 
+	@Override
 	public void onApplicationEvent(ApplicationEvent e) {
 		++eventCount;
 	}

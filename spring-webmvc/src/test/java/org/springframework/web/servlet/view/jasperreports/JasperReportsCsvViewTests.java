@@ -21,10 +21,12 @@ package org.springframework.web.servlet.view.jasperreports;
  */
 public class JasperReportsCsvViewTests extends AbstractJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsCsvView();
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/csv";
 	}

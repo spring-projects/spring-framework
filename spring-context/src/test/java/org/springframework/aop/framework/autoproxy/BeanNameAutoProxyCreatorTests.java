@@ -205,6 +205,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Override
 	public Object getObject() throws Exception {
 		return new TestBean();
 	}
@@ -212,6 +213,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
+	@Override
 	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
@@ -219,6 +221,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

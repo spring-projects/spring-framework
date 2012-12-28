@@ -44,6 +44,7 @@ public class PropertiesBasedSpr3350SingleSpringContextTests extends AbstractSpr3
 	 *
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
 	 */
+	@Override
 	protected final BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
 		return new PropertiesBeanDefinitionReader(context);
 	}
@@ -52,6 +53,7 @@ public class PropertiesBasedSpr3350SingleSpringContextTests extends AbstractSpr3
 	 * Returns
 	 * &quot;PropertiesBasedSpr3350SingleSpringContextTests-context.properties&quot;.
 	 */
+	@Override
 	protected final String getConfigPath() {
 		return "PropertiesBasedSpr3350SingleSpringContextTests-context.properties";
 	}

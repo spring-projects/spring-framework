@@ -70,6 +70,7 @@ public class ConfigurationClassCglibCallbackDeregistrationTests {
 	@Configuration
 	static class DisposableConfig implements DisposableBean {
 		boolean destroyed = false;
+		@Override
 		public void destroy() throws Exception {
 			this.destroyed = true;
 		}

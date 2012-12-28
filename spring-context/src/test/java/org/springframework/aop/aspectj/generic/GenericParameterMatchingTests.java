@@ -82,9 +82,11 @@ public final class GenericParameterMatchingTests {
 
 	static class GenericImpl<T> implements GenericInterface<T> {
 
+		@Override
 		public void save(T bean) {
 		}
 
+		@Override
 		public void saveAll(Collection<T> beans) {
 		}
 	}

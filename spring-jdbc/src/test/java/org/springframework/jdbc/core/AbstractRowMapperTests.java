@@ -74,6 +74,7 @@ public abstract class AbstractRowMapperTests extends TestCase {
 	protected Statement stmt3;
 	protected JdbcTemplate jdbcTemplate3;
 
+	@Override
 	protected void setUp() throws SQLException {
 		conControl = MockControl.createControl(Connection.class);
 		con = (Connection) conControl.getMock();

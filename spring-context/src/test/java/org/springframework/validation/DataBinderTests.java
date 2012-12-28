@@ -254,17 +254,21 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.registerCustomEditor(String.class, "touchy", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix_" + text);
 			}
+			@Override
 			public String getAsText() {
 				return getValue().toString().substring(7);
 			}
 		});
 		binder.registerCustomEditor(TestBean.class, "spouse", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text, 0));
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -381,9 +385,11 @@ public class DataBinderTests extends TestCase {
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(String.class, new Formatter<String>() {
+			@Override
 			public String parse(String text, Locale locale) throws ParseException {
 				throw new ParseException(text, 0);
 			}
+			@Override
 			public String print(String object, Locale locale) {
 				return object;
 			}
@@ -669,6 +675,7 @@ public class DataBinderTests extends TestCase {
 
 		DataBinder binder = new DataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}
@@ -689,9 +696,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -725,9 +734,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(int.class, "age", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new Integer(99));
 			}
+			@Override
 			public String getAsText() {
 				return "argh";
 			}
@@ -746,9 +757,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -775,6 +788,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (getValue() == null || !text.equalsIgnoreCase(getValue().toString())) {
 					setValue(text);
@@ -1053,6 +1067,7 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class) {
+			@Override
 			protected Object convertElement(Object element) {
 				return new Integer(element.toString());
 			}
@@ -1091,6 +1106,7 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
@@ -1130,6 +1146,7 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
@@ -1166,9 +1183,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1189,9 +1208,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array[0].nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1212,9 +1233,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list[0].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1233,11 +1256,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1283,11 +1308,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "map[key0]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1311,11 +1338,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1339,11 +1368,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1370,6 +1401,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String[].class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(StringUtils.delimitedListToStringArray(text, "-"));
 			}
@@ -1387,6 +1419,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("X" + text);
 			}
@@ -1647,10 +1680,12 @@ public class DataBinderTests extends TestCase {
 
 	private static class TestBeanValidator implements Validator {
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getAge() < 32) {
@@ -1674,10 +1709,12 @@ public class DataBinderTests extends TestCase {
 
 	private static class SpouseValidator implements Validator {
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb == null || "XXX".equals(tb.getName())) {
@@ -1703,6 +1740,7 @@ public class DataBinderTests extends TestCase {
 			return list;
 		}
 
+		@Override
 		public E get(int index) {
 			if (index >= list.size()) {
 				for (int i = list.size(); i < index; i++) {
@@ -1716,50 +1754,62 @@ public class DataBinderTests extends TestCase {
 			}
 		}
 
+		@Override
 		public int size() {
 			return list.size();
 		}
 
+		@Override
 		public boolean add(E o) {
 			return list.add(o);
 		}
 
+		@Override
 		public void add(int index, E element) {
 			list.add(index, element);
 		}
 
+		@Override
 		public boolean addAll(int index, Collection<? extends E> c) {
 			return list.addAll(index, c);
 		}
 
+		@Override
 		public void clear() {
 			list.clear();
 		}
 
+		@Override
 		public int indexOf(Object o) {
 			return list.indexOf(o);
 		}
 
+		@Override
 		public Iterator<E> iterator() {
 			return list.iterator();
 		}
 
+		@Override
 		public int lastIndexOf(Object o) {
 			return list.lastIndexOf(o);
 		}
 
+		@Override
 		public ListIterator<E> listIterator() {
 			return list.listIterator();
 		}
 
+		@Override
 		public ListIterator<E> listIterator(int index) {
 			return list.listIterator(index);
 		}
 
+		@Override
 		public E remove(int index) {
 			return list.remove(index);
 		}
 
+		@Override
 		public E set(int index, E element) {
 			return list.set(index, element);
 		}

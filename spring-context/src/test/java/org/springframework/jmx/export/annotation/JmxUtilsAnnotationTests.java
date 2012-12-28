@@ -54,6 +54,7 @@ public class JmxUtilsAnnotationTests extends TestCase {
 
 	public static class FooNotX implements FooNotMXBean {
 
+		@Override
 		public String getName() {
 			return "Rob Harrop";
 		}
@@ -69,6 +70,7 @@ public class JmxUtilsAnnotationTests extends TestCase {
 
 	public static class FooX implements FooIfc {
 
+		@Override
 		public String getName() {
 			return "Rob Harrop";
 		}

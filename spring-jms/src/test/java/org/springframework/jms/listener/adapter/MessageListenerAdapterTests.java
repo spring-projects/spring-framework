@@ -216,6 +216,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertNotNull("The Throwable passed to the handleListenerException(..) method must never be null.", ex);
 				assertTrue("The Throwable passed to the handleListenerException(..) method must be of type [ListenerExecutionFailedException].",
@@ -320,6 +321,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -382,6 +384,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -427,6 +430,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -488,6 +492,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -522,6 +527,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -546,6 +552,7 @@ public class MessageListenerAdapterTests {
 		mockMessage.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertTrue(ex instanceof IllegalStateException);
 			}
@@ -566,9 +573,11 @@ public class MessageListenerAdapterTests {
 		mockMessage.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter() {
+			@Override
 			protected void handleListenerException(Throwable ex) {
 				assertTrue(ex instanceof javax.jms.IllegalStateException);
 			}
+			@Override
 			protected String getListenerMethodName(Message originalMessage, Object extractedMessage) {
 				return null;
 			}
@@ -596,6 +605,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -654,6 +664,7 @@ public class MessageListenerAdapterTests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter adapter = new MessageListenerAdapter(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}

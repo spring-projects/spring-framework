@@ -94,6 +94,7 @@ public class JdoInterceptorTests extends TestCase {
 			this.persistenceManagerFactory = persistenceManagerFactory;
 		}
 
+		@Override
 		public Object proceed() throws Throwable {
 			if (!TransactionSynchronizationManager.hasResource(this.persistenceManagerFactory)) {
 				throw new IllegalStateException("PersistenceManager not bound");
@@ -101,6 +102,7 @@ public class JdoInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Object[] getArguments() {
 			return null;
 		}
@@ -117,10 +119,12 @@ public class JdoInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Method getMethod() {
 			return null;
 		}
 
+		@Override
 		public AccessibleObject getStaticPart() {
 			return getMethod();
 		}
@@ -136,6 +140,7 @@ public class JdoInterceptorTests extends TestCase {
 			return 0;
 		}
 
+		@Override
 		public Object getThis() {
 			return null;
 		}

@@ -307,6 +307,7 @@ public final class ProxyFactoryBeanTests {
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
 		config.addAdvice(0, new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				throw ex;
 			}
@@ -705,12 +706,14 @@ public final class ProxyFactoryBeanTests {
 
 		public PointcutForVoid() {
 			setAdvice(new MethodInterceptor() {
+				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					methodNames.add(invocation.getMethod().getName());
 					return invocation.proceed();
 				}
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
+				@Override
 				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 					return m.getReturnType() == Void.TYPE;
 				}
@@ -734,10 +737,12 @@ public final class ProxyFactoryBeanTests {
 	 */
 	public static class GlobalAspectInterfaceInterceptor implements IntroductionInterceptor {
 
+		@Override
 		public boolean implementsInterface(Class<?> intf) {
 			return intf.equals(AddedGlobalInterface.class);
 		}
 
+		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			if (mi.getMethod().getDeclaringClass().equals(AddedGlobalInterface.class)) {
 				return new Integer(-1);
@@ -751,22 +756,27 @@ public final class ProxyFactoryBeanTests {
 
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
 
+		@Override
 		public ClassFilter getClassFilter() {
 			return ClassFilter.TRUE;
 		}
 
+		@Override
 		public Advice getAdvice() {
 			return this.gi;
 		}
 
+		@Override
 		public Class<?>[] getInterfaces() {
 			return new Class<?>[] { AddedGlobalInterface.class };
 		}
 
+		@Override
 		public boolean isPerInstance() {
 			return false;
 		}
 
+		@Override
 		public void validateInterfaces() {
 		}
 	}

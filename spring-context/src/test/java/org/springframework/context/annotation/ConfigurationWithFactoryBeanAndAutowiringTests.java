@@ -95,12 +95,15 @@ class DummyBean {
 
 
 class MyFactoryBean implements FactoryBean<String> {
+	@Override
 	public String getObject() throws Exception {
 		return "foo";
 	}
+	@Override
 	public Class<String> getObjectType() {
 		return String.class;
 	}
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -115,15 +118,18 @@ class MyParameterizedFactoryBean<T> implements FactoryBean<T> {
 		this.obj = obj;
 	}
 
+	@Override
 	public T getObject() throws Exception {
 		return obj;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class<T> getObjectType() {
 		return (Class<T>)obj.getClass();
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

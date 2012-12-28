@@ -27,6 +27,7 @@ public class GeneratedNameBean implements BeanNameAware {
 
 	private GeneratedNameBean child;
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}

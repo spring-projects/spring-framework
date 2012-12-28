@@ -32,6 +32,7 @@ public class AttributeAccessorSupportTests extends TestCase {
 
 	private AttributeAccessor attributeAccessor;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void setUp() throws Exception {
 		this.attributeAccessor = new AttributeAccessorSupport() {
@@ -64,6 +65,7 @@ public class AttributeAccessorSupportTests extends TestCase {
 		assertTrue(Arrays.binarySearch(attributeNames, NAME) > -1);
 		assertTrue(Arrays.binarySearch(attributeNames, "abc") > -1);
 	}
+	@Override
 	protected void tearDown() throws Exception {
 		this.attributeAccessor.removeAttribute(NAME);
 	}

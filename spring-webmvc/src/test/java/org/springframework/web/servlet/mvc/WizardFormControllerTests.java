@@ -105,9 +105,11 @@ public class WizardFormControllerTests extends TestCase {
 
 	public void testCustomSessionAttributes() throws Exception {
 		AbstractWizardFormController wizard = new TestWizardController() {
+			@Override
 			protected String getFormSessionAttributeName() {
 				return "myFormAttr";
 			}
+			@Override
 			protected String getPageSessionAttributeName() {
 				return "myPageAttr";
 			}
@@ -140,9 +142,11 @@ public class WizardFormControllerTests extends TestCase {
 
 	public void testCustomRequestDependentSessionAttributes() throws Exception {
 		AbstractWizardFormController wizard = new TestWizardController() {
+			@Override
 			protected String getFormSessionAttributeName(HttpServletRequest request) {
 				return "myFormAttr" + request.getParameter("formAttr");
 			}
+			@Override
 			protected String getPageSessionAttributeName(HttpServletRequest request) {
 				return "myPageAttr" + request.getParameter("pageAttr");
 			}
@@ -383,15 +387,18 @@ public class WizardFormControllerTests extends TestCase {
 			setPages(new String[] {"page0", "page1"});
 		}
 
+		@Override
 		protected Map referenceData(HttpServletRequest request, int page) throws Exception {
 			assertEquals(new Integer(page), request.getAttribute("target"));
 			return super.referenceData(request, page);
 		}
 
+		@Override
 		protected boolean suppressValidation(HttpServletRequest request, Object command) {
 			return (request.getParameter("formChange") != null);
 		}
 
+		@Override
 		protected void validatePage(Object command, Errors errors, int page) {
 			TestBean tb = (TestBean) command;
 			switch (page) {
@@ -410,6 +417,7 @@ public class WizardFormControllerTests extends TestCase {
 			}
 		}
 
+		@Override
 		protected ModelAndView processFinish(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws ServletException, IOException {
@@ -417,6 +425,7 @@ public class WizardFormControllerTests extends TestCase {
 			return new ModelAndView("success", getCommandName(), command);
 		}
 
+		@Override
 		protected ModelAndView processCancel(
 				HttpServletRequest request, HttpServletResponse response, Object command, BindException errors)
 			throws ServletException, IOException {

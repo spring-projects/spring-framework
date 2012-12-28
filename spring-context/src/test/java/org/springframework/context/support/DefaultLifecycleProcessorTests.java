@@ -585,10 +585,12 @@ public class DefaultLifecycleProcessorTests {
 			this.stoppedBeans = stoppedBeans;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public void start() {
 			if (this.startedBeans != null) {
 				this.startedBeans.add(this);
@@ -596,6 +598,7 @@ public class DefaultLifecycleProcessorTests {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			if (this.stoppedBeans != null) {
 				this.stoppedBeans.add(this);
@@ -627,10 +630,12 @@ public class DefaultLifecycleProcessorTests {
 			this.shutdownDelay = shutdownDelay;
 		}
 
+		@Override
 		public int getPhase() {
 			return this.phase;
 		}
 
+		@Override
 		public boolean isAutoStartup() {
 			return this.autoStartup;
 		}
@@ -639,12 +644,14 @@ public class DefaultLifecycleProcessorTests {
 			this.autoStartup = autoStartup;
 		}
 
+		@Override
 		public void stop(final Runnable callback) {
 			// calling stop() before the delay to preserve
 			// invocation order in the 'stoppedBeans' list
 			stop();
 			final int delay = this.shutdownDelay;
 			new Thread(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(delay);
@@ -665,27 +672,33 @@ public class DefaultLifecycleProcessorTests {
 
 		public boolean running = false;
 
+		@Override
 		public boolean isAutoStartup() {
 			return true;
 		}
 
+		@Override
 		public void stop(Runnable callback) {
 			this.running = false;
 			callback.run();
 		}
 
+		@Override
 		public void start() {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			this.running = false;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public int getPhase() {
 			return 0;
 		}
@@ -698,39 +711,48 @@ public class DefaultLifecycleProcessorTests {
 
 		DummySmartLifecycleBean bean = new DummySmartLifecycleBean();
 
+		@Override
 		public Object getObject() throws Exception {
 			return this.bean;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return DummySmartLifecycleBean.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
 
+		@Override
 		public boolean isAutoStartup() {
 			return true;
 		}
 
+		@Override
 		public void stop(Runnable callback) {
 			this.running = false;
 			callback.run();
 		}
 
+		@Override
 		public void start() {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			this.running = false;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public int getPhase() {
 			return 0;
 		}

@@ -49,12 +49,14 @@ public final class SimpleMessageConverter102Tests extends TestCase {
 		messageControl.setVoidCallable(1);
 		message.readBytes(new byte[SimpleMessageConverter102.BUFFER_SIZE]);
 		messageControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] arg0, Object[] arg1) {
 				byte[] one = (byte[]) arg0[0];
 				byte[] two = (byte[]) arg1[0];
 				return Arrays.equals(one, two);
 			}
 
+			@Override
 			public String toString(Object[] arg0) {
 				return "bla";
 			}

@@ -46,10 +46,12 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 		return resolvedParameters;
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.getParameterType().equals(this.parameterType);
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		this.resolvedParameters.add(parameter);

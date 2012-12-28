@@ -282,6 +282,7 @@ public class CommonsMultipartResolverTests {
 
 		final List<MultipartFile> files = new ArrayList<MultipartFile>();
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				MultipartHttpServletRequest request = (MultipartHttpServletRequest) servletRequest;
 				files.addAll(request.getFileMap().values());
@@ -319,6 +320,7 @@ public class CommonsMultipartResolverTests {
 
 		final List<MultipartFile> files = new ArrayList<MultipartFile>();
 		FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest originalRequest, ServletResponse response) {
 				if (originalRequest instanceof MultipartHttpServletRequest) {
 					MultipartHttpServletRequest request = (MultipartHttpServletRequest) originalRequest;
@@ -415,38 +417,47 @@ public class CommonsMultipartResolverTests {
 			this.value = value;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(value.getBytes());
 		}
 
+		@Override
 		public String getContentType() {
 			return contentType;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public boolean isInMemory() {
 			return true;
 		}
 
+		@Override
 		public long getSize() {
 			return value.length();
 		}
 
+		@Override
 		public byte[] get() {
 			return value.getBytes();
 		}
 
+		@Override
 		public String getString(String encoding) throws UnsupportedEncodingException {
 			return new String(get(), encoding);
 		}
 
+		@Override
 		public String getString() {
 			return value;
 		}
 
+		@Override
 		public void write(File file) throws Exception {
 			this.writtenFile = file;
 		}
@@ -455,6 +466,7 @@ public class CommonsMultipartResolverTests {
 			return writtenFile;
 		}
 
+		@Override
 		public void delete() {
 			this.deleted = true;
 		}
@@ -463,22 +475,27 @@ public class CommonsMultipartResolverTests {
 			return deleted;
 		}
 
+		@Override
 		public String getFieldName() {
 			return fieldName;
 		}
 
+		@Override
 		public void setFieldName(String s) {
 			this.fieldName = s;
 		}
 
+		@Override
 		public boolean isFormField() {
 			return (this.name == null);
 		}
 
+		@Override
 		public void setFormField(boolean b) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
 		}

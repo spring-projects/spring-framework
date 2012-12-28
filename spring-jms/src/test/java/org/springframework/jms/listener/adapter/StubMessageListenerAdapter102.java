@@ -35,6 +35,7 @@ public class StubMessageListenerAdapter102 extends MessageListenerAdapter102 {
 		this.wasCalled = true;
 	}
 
+	@Override
 	protected void handleListenerException(Throwable ex) {
 		System.out.println(ex);
 	}

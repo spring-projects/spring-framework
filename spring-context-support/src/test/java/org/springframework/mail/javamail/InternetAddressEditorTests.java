@@ -30,6 +30,7 @@ public class InternetAddressEditorTests extends TestCase {
 
 	private InternetAddressEditor editor;
 
+	@Override
 	protected void setUp() {
 		editor = new InternetAddressEditor();
 	}

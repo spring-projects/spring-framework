@@ -218,6 +218,7 @@ class CountingTestBean extends TestBean {
 
 class SelectivePrototypeTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
+	@Override
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName) {
 		if (!beanName.startsWith("prototype")) {

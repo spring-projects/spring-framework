@@ -528,6 +528,7 @@ public class HibernateInterceptorTests extends TestCase {
 		sessionControl.verify();
 	}
 
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
@@ -542,6 +543,7 @@ public class HibernateInterceptorTests extends TestCase {
 			this.sessionFactory = sessionFactory;
 		}
 
+		@Override
 		public Object proceed() throws Throwable {
 			if (!TransactionSynchronizationManager.hasResource(this.sessionFactory)) {
 				throw new IllegalStateException("Session not bound");
@@ -561,10 +563,12 @@ public class HibernateInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Method getMethod() {
 			return null;
 		}
 
+		@Override
 		public AccessibleObject getStaticPart() {
 			return null;
 		}
@@ -573,6 +577,7 @@ public class HibernateInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Object[] getArguments() {
 			return null;
 		}
@@ -584,6 +589,7 @@ public class HibernateInterceptorTests extends TestCase {
 			return 0;
 		}
 
+		@Override
 		public Object getThis() {
 			return null;
 		}

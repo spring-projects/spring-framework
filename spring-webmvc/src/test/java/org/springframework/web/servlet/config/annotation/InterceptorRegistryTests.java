@@ -161,13 +161,16 @@ public class InterceptorRegistryTests {
 
 		private boolean preHandleInvoked = false;
 
+		@Override
 		public void preHandle(WebRequest request) throws Exception {
 			preHandleInvoked = true;
 		}
 
+		@Override
 		public void postHandle(WebRequest request, ModelMap model) throws Exception {
 		}
 
+		@Override
 		public void afterCompletion(WebRequest request, Exception ex) throws Exception {
 		}
 

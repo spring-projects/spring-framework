@@ -30,6 +30,7 @@ public class MustBeInitialized implements InitializingBean {
 	/**
 	 * @see InitializingBean#afterPropertiesSet()
 	 */
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.inited = true;
 	}

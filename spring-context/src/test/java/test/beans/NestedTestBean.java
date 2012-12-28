@@ -36,6 +36,7 @@ public class NestedTestBean implements INestedTestBean {
 		this.company = ((company != null) ? company : "");
 	}
 
+	@Override
 	public String getCompany() {
 		return company;
 	}

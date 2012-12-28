@@ -233,10 +233,12 @@ public class EisOperationTests {
 			this.callDetector = callDetector;
 		}
 
+		@Override
 		protected Record createInputRecord(RecordFactory recordFactory, Object inputObject) {
 			return this.callDetector.callCreateInputRecord(recordFactory, inputObject);
 		}
 
+		@Override
 		protected Object extractOutputData(Record outputRecord) throws ResourceException {
 			return this.callDetector.callExtractOutputData(outputRecord);
 		}

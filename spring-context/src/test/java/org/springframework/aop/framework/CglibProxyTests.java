@@ -58,6 +58,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	private static final String DEPENDENCY_CHECK_CONTEXT =  CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
 
 
+	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
 		as.setProxyTargetClass(true);
 		Object proxy = as.createAopProxy().getProxy();
@@ -65,11 +66,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		return proxy;
 	}
 
+	@Override
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
 		return new CglibAopProxy(as);
 	}
 
+	@Override
 	protected boolean requiresTarget() {
 		return true;
 	}
@@ -207,10 +210,12 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 		MethodInterceptor advice = new NopInterceptor();
 		Pointcut pointcut = new Pointcut() {
+			@Override
 			public ClassFilter getClassFilter() {
 				return ClassFilter.TRUE;
 			}
 
+			@Override
 			public MethodMatcher getMethodMatcher() {
 				return MethodMatcher.TRUE;
 			}
@@ -492,6 +497,7 @@ class UnsupportedInterceptor implements MethodInterceptor {
 	/**
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 	 */
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}

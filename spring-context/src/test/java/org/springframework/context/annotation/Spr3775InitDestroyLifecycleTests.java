@@ -209,10 +209,12 @@ public class Spr3775InitDestroyLifecycleTests {
 	public static class CustomInitializingDisposableBean extends CustomInitDestroyBean
 			implements InitializingBean, DisposableBean {
 
+		@Override
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
 		}
 
+		@Override
 		public void destroy() throws Exception {
 			this.destroyMethods.add("destroy");
 		}
@@ -254,11 +256,13 @@ public class Spr3775InitDestroyLifecycleTests {
 		final List<String> initMethods = new ArrayList<String>();
 		final List<String> destroyMethods = new ArrayList<String>();
 
+		@Override
 		@PostConstruct
 		public void afterPropertiesSet() throws Exception {
 			this.initMethods.add("afterPropertiesSet");
 		}
 
+		@Override
 		@PreDestroy
 		public void destroy() throws Exception {
 			this.destroyMethods.add("destroy");

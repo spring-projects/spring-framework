@@ -26,6 +26,7 @@ public class TestExceptionListener implements ExceptionListener {
 
 	private int count = 0;
 
+	@Override
 	public void onException(JMSException ex) {
 		this.count++;
 	}

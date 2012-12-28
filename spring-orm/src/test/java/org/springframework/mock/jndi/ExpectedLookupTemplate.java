@@ -70,6 +70,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * return the object provided in the constructor. If the name is
 	 * unexpected, a respective NamingException gets thrown.
 	 */
+	@Override
 	public Object lookup(String name) throws NamingException {
 		Object object = this.jndiObjects.get(name);
 		if (object == null) {

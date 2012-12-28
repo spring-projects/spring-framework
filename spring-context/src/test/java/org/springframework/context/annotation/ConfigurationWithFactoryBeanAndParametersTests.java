@@ -63,14 +63,17 @@ class Bar {
 
 class FooFactoryBean implements FactoryBean<Foo> {
 
+	@Override
 	public Foo getObject() {
 		return new Foo();
 	}
 
+	@Override
 	public Class<Foo> getObjectType() {
 		return Foo.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

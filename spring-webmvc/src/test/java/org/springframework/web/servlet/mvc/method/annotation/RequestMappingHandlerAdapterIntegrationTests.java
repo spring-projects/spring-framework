@@ -394,28 +394,33 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	private static class StubValidator implements Validator {
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
 		}
 
+		@Override
 		public void validate(Object target, Errors errors) {
 			errors.reject("error");
 		}
 	}
 
 	private static class ColorArgumentResolver implements WebArgumentResolver {
+		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
 			return new Color(0);
 		}
 	}
 
 	private static class User implements Principal {
+		@Override
 		public String getName() {
 			return "user";
 		}
 	}
 
 	private static class OtherUser implements Principal {
+		@Override
 		public String getName() {
 			return "other user";
 		}

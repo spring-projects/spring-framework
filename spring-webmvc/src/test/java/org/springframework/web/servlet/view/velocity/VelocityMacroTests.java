@@ -57,12 +57,14 @@ public class VelocityMacroTests extends TestCase {
 	private MockHttpServletResponse response;
 
 
+	@Override
 	public void setUp() throws Exception {
 		wac = new StaticWebApplicationContext();
 		wac.setServletContext(new MockServletContext());
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(TEMPLATE_FILE, expectedTemplate);
 			}
@@ -79,6 +81,7 @@ public class VelocityMacroTests extends TestCase {
 
 	public void testExposeSpringMacroHelpers() throws Exception {
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				assertTrue(context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE) instanceof RequestContext);
 				RequestContext rc = (RequestContext) context.get(VelocityView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
@@ -100,6 +103,7 @@ public class VelocityMacroTests extends TestCase {
 		final String helperTool = "wrongType";
 
 		VelocityView vv = new VelocityView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) {
 				fail();
 			}

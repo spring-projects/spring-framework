@@ -71,10 +71,12 @@ public final class CustomProblemReporterTests {
 		private List<Problem> warnings = new ArrayList<Problem>();
 
 
+		@Override
 		public void fatal(Problem problem) {
 			throw new BeanDefinitionParsingException(problem);
 		}
 
+		@Override
 		public void error(Problem problem) {
 			System.out.println(problem);
 			this.errors.add(problem);
@@ -84,6 +86,7 @@ public final class CustomProblemReporterTests {
 			return this.errors.toArray(new Problem[this.errors.size()]);
 		}
 
+		@Override
 		public void warning(Problem problem) {
 			System.out.println(problem);
 			this.warnings.add(problem);

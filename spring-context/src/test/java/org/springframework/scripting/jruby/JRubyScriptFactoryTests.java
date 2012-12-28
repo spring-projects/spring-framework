@@ -278,6 +278,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 		public int count;
 
+		@Override
 		public String getContent() {
 			this.count++;
 			return "Hello World!";

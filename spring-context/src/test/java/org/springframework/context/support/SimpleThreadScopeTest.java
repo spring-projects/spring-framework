@@ -49,11 +49,13 @@ public class SimpleThreadScopeTest {
 	public void getMultipleInstances() throws Exception {
 		final TestBean[] beans = new TestBean[2];
 		Thread thread1 = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				beans[0] = applicationContext.getBean("threadScopedObject", TestBean.class);
 			}
 		});
 		Thread thread2 = new Thread(new Runnable() {
+			@Override
 			public void run() {
 				beans[1] = applicationContext.getBean("threadScopedObject", TestBean.class);
 			}

@@ -208,6 +208,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithLastModified() throws Exception {
 		class LastModifiedTestController extends TestController implements LastModified {
+			@Override
 			public long getLastModified(HttpServletRequest request) {
 				return 0;
 			}
@@ -223,6 +224,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomCacheForSecondsCall() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				cacheForSeconds(response, 5);
 				return super.handle(request, response, command, errors);
@@ -237,6 +239,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall1() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, 5);
 				return super.handle(request, response, command, errors);
@@ -251,6 +254,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall2() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, 0);
 				return super.handle(request, response, command, errors);
@@ -267,6 +271,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testCachingWithCustomApplyCacheSecondsCall3() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object command, BindException errors) {
 				applyCacheSeconds(response, -1);
 				return super.handle(request, response, command, errors);
@@ -282,6 +287,7 @@ public class CommandControllerTests extends TestCase {
 	public void testCustomDateEditorWithAllowEmpty() throws Exception {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMAN);
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
 			}
@@ -311,6 +317,7 @@ public class CommandControllerTests extends TestCase {
 	public void testCustomDateEditorWithoutAllowEmpty() throws Exception {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.GERMAN);
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(df, false));
 			}
@@ -341,6 +348,7 @@ public class CommandControllerTests extends TestCase {
 		final NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
 			}
@@ -371,6 +379,7 @@ public class CommandControllerTests extends TestCase {
 		final NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, false));
 			}
@@ -463,9 +472,11 @@ public class CommandControllerTests extends TestCase {
 
 	public void testResetEmptyFieldsTurnedOff() throws Exception {
 		TestController mc = new TestController() {
+			@Override
 			protected Object getCommand(HttpServletRequest request) throws Exception {
 				return new TestBean("original", 99);
 			}
+			@Override
 			protected void initBinder(HttpServletRequest request, ServletRequestDataBinder binder) {
 				binder.setFieldMarkerPrefix(null);
 			}
@@ -497,6 +508,7 @@ public class CommandControllerTests extends TestCase {
 			super(TestBean.class, "person");
 		}
 
+		@Override
 		protected ModelAndView handle(HttpServletRequest request,	HttpServletResponse response,	Object command,	BindException errors) {
 			Map m = new HashMap();
 			assertTrue("Command not null", command != null);

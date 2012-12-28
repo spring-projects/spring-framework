@@ -40,6 +40,7 @@ public class ThemeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		ThemeTag tag = new ThemeTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}

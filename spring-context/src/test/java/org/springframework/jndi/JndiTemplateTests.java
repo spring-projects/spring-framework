@@ -42,6 +42,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -62,6 +63,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -86,6 +88,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -111,6 +114,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -136,6 +140,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -155,6 +160,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}
@@ -173,6 +179,7 @@ public class JndiTemplateTests {
 		replay(context);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return context;
 			}

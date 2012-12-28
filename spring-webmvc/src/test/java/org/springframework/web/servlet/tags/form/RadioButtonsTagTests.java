@@ -53,9 +53,11 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -582,6 +584,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -619,6 +622,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			super.setAsText(text);
 			this.allProcessedValues.add(getValue());

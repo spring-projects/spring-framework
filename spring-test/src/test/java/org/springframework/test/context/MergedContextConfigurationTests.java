@@ -369,12 +369,14 @@ public class MergedContextConfigurationTests {
 
 	private static class FooInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 		}
 	}
 
 	private static class BarInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 		}
 	}

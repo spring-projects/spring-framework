@@ -31,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
 	@Resource
 	private WebServiceContext webServiceContext;
 
+	@Override
 	public String getOrder(int id) throws OrderNotFoundException {
 		Assert.notNull(this.webServiceContext, "WebServiceContext has not been injected");
 		if (id == 0) {

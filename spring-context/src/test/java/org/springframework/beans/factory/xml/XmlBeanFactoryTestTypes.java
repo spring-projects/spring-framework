@@ -256,6 +256,7 @@ class DummyBoImpl implements DummyBo {
 		this.dao = dao;
 	}
 
+	@Override
 	public void something() {
 
 	}
@@ -430,6 +431,7 @@ class FixedMethodReplacer implements MethodReplacer {
 
 	public static final String VALUE = "fixedMethodReplacer";
 
+	@Override
 	public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 		return VALUE;
 	}
@@ -513,6 +515,7 @@ abstract class OverrideOneMethod extends MethodReplaceCandidate implements Overr
 
 	protected abstract TestBean protectedOverrideSingleton();
 
+	@Override
 	public TestBean getPrototypeDependency(Object someParam) {
 		return new TestBean();
 	}
@@ -540,6 +543,7 @@ abstract class OverrideOneMethod extends MethodReplaceCandidate implements Overr
 		return "replaceMe:" + someParam;
 	}
 
+	@Override
 	public String replaceMe(String someParam) {
 		return "replaceMe:"  + someParam;
 	}
@@ -595,6 +599,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 		return initMethodDeclared;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -603,6 +608,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.owningFactory = beanFactory;
 	}
@@ -617,6 +623,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 		this.postProcessedBeforeInit = true;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.owningFactory == null) {
 			throw new RuntimeException("Factory didn't call setBeanFactory before afterPropertiesSet on lifecycle bean");
@@ -668,6 +675,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 		}
 	}
 
+	@Override
 	public void destroy() {
 		if (this.destroyed) {
 			throw new IllegalStateException("Already destroyed");
@@ -682,6 +690,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 
 	public static class PostProcessor implements BeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 			if (bean instanceof ProtectedLifecycleBean) {
 				((ProtectedLifecycleBean) bean).postProcessBeforeInit();
@@ -689,6 +698,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 			if (bean instanceof ProtectedLifecycleBean) {
 				((ProtectedLifecycleBean) bean).postProcessAfterInit();
@@ -706,6 +716,7 @@ class ProtectedLifecycleBean implements BeanNameAware, BeanFactoryAware, Initial
 @SuppressWarnings("serial")
 class ReverseMethodReplacer implements MethodReplacer, Serializable {
 
+	@Override
 	public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 		String s = (String) args[0];
 		return new StringBuffer(s).reverse().toString();

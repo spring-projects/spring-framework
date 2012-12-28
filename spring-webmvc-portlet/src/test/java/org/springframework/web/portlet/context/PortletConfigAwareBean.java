@@ -25,6 +25,7 @@ public class PortletConfigAwareBean implements PortletConfigAware {
 
 	private PortletConfig portletConfig;
 
+	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}

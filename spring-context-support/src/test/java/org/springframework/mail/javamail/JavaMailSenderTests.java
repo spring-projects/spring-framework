@@ -170,6 +170,7 @@ public class JavaMailSenderTests extends TestCase {
 		final List<Message> messages = new ArrayList<Message>();
 
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
+			@Override
 			public void prepare(MimeMessage mimeMessage) throws MessagingException {
 				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
 				messages.add(mimeMessage);
@@ -194,12 +195,14 @@ public class JavaMailSenderTests extends TestCase {
 		final List<Message> messages = new ArrayList<Message>();
 
 		MimeMessagePreparator preparator1 = new MimeMessagePreparator() {
+			@Override
 			public void prepare(MimeMessage mimeMessage) throws MessagingException {
 				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("he@mail.org"));
 				messages.add(mimeMessage);
 			}
 		};
 		MimeMessagePreparator preparator2 = new MimeMessagePreparator() {
+			@Override
 			public void prepare(MimeMessage mimeMessage) throws MessagingException {
 				mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("she@mail.org"));
 				messages.add(mimeMessage);
@@ -300,6 +303,7 @@ public class JavaMailSenderTests extends TestCase {
 	public void testJavaMailSenderWithParseExceptionOnMimeMessagePreparator() {
 		MockJavaMailSender sender = new MockJavaMailSender();
 		MimeMessagePreparator preparator = new MimeMessagePreparator() {
+			@Override
 			public void prepare(MimeMessage mimeMessage) throws MessagingException {
 				mimeMessage.setFrom(new InternetAddress(""));
 			}

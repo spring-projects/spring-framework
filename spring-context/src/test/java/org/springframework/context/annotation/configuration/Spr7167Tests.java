@@ -67,6 +67,7 @@ class MyPostProcessor implements BeanFactoryPostProcessor {
 	public MyPostProcessor(Dependency someDependency) {
 	}
 
+	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		AbstractBeanDefinition bd = (AbstractBeanDefinition) beanFactory.getBeanDefinition("someDependency");
 		bd.setDescription("post processed by MyPostProcessor");

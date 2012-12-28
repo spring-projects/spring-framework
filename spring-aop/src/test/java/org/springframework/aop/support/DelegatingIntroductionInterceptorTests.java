@@ -112,8 +112,10 @@ public final class DelegatingIntroductionInterceptorTests {
 	public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
 		final long t = 1001L;
 		class Tester implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -141,8 +143,10 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -206,6 +210,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		String company = "Interface21";
 		target.setCompany(company);
 		TestBean delegate = new TestBean() {
+			@Override
 			public ITestBean getSpouse() {
 				return this;
 			}
@@ -250,6 +255,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -278,6 +284,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.ts = ts;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return ts;
 		}
@@ -292,6 +299,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.t = t;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return t;
 		}

@@ -34,6 +34,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.AppenderSkeleton#append(org.apache.log4j.spi.LoggingEvent)
 	 */
+	@Override
 	protected void append(LoggingEvent evt) {
 		//System.out.println("Adding " + evt.getMessage());
 		loggingStrings.add(evt.getMessage());
@@ -42,6 +43,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.Appender#close()
 	 */
+	@Override
 	public void close() {
 		closeCalled = true;
 	}
@@ -49,6 +51,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.Appender#requiresLayout()
 	 */
+	@Override
 	public boolean requiresLayout() {
 		return false;
 	}

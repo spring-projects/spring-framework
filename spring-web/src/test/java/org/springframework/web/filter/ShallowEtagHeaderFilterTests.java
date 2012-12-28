@@ -58,6 +58,7 @@ public class ShallowEtagHeaderFilterTests {
 		final byte[] responseBody = "Hello World".getBytes("UTF-8");
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
@@ -83,6 +84,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
@@ -109,6 +111,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);

@@ -146,6 +146,7 @@ public class SpringRunnerContextCacheTests {
 
 			java.util.Collections.sort(testMethods, new Comparator<FrameworkMethod>() {
 
+				@Override
 				public int compare(FrameworkMethod method1, FrameworkMethod method2) {
 					return method1.getName().compareTo(method2.getName());
 				}

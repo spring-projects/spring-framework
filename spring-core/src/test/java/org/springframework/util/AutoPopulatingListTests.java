@@ -85,6 +85,7 @@ public class AutoPopulatingListTests extends TestCase {
 
 	private static class MockElementFactory implements AutoPopulatingList.ElementFactory {
 
+		@Override
 		public Object createElement(int index) {
 			TestBean bean = new TestBean();
 			bean.setAge(index);

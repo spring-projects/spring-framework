@@ -136,6 +136,7 @@ public class LabeledEnumTests extends TestCase {
 
 		public static final Dog GOLDEN_RETRIEVER = new Dog(11, null) {
 
+			@Override
 			public String getLabel() {
 				return "Golden Retriever";
 			}
@@ -143,6 +144,7 @@ public class LabeledEnumTests extends TestCase {
 			// Overriding getType() is no longer necessary as of Spring 2.5;
 			// however, this is left here to provide valid testing for
 			// backwards compatibility.
+			@Override
 			public Class getType() {
 				return Dog.class;
 			}
@@ -165,12 +167,14 @@ public class LabeledEnumTests extends TestCase {
 	private static abstract class ValuedEnum extends StaticLabeledEnum {
 
 		public static final ValuedEnum ONE = new ValuedEnum(1, "one") {
+			@Override
 			public int getValue() {
 				return 1;
 			}
 		};
 
 		public static final ValuedEnum TWO = new ValuedEnum(2, "two") {
+			@Override
 			public int getValue() {
 				return 2;
 			}

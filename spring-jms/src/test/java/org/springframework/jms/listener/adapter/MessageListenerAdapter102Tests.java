@@ -169,6 +169,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -230,6 +231,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -291,6 +293,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -337,6 +340,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -399,6 +403,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -434,6 +439,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}

@@ -222,6 +222,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
 			registry.addConverter(new Converter<TestBean, String>() {
+				@Override
 				public String convert(TestBean source) {
 					return "converted";
 				}
@@ -236,9 +237,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public Validator getValidator() {
 			return new Validator() {
+				@Override
 				public void validate(Object target, Errors errors) {
 					errors.reject("invalid");
 				}
+				@Override
 				public boolean supports(Class<?> clazz) {
 					return true;
 				}

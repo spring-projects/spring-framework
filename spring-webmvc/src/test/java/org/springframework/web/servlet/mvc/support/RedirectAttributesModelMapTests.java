@@ -139,6 +139,7 @@ public class RedirectAttributesModelMapTests {
 
 	public static class TestBeanConverter implements Converter<TestBean, String> {
 
+		@Override
 		public String convert(TestBean source) {
 			return "[" + source.getName() + "]";
 		}

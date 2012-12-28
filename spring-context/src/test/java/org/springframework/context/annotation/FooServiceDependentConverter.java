@@ -31,6 +31,7 @@ public class FooServiceDependentConverter implements Converter<String, org.sprin
 		this.fooService = fooService;
 	}
 
+	@Override
 	public org.springframework.beans.TestBean convert(String source) {
 		return new org.springframework.beans.TestBean(source);
 	}

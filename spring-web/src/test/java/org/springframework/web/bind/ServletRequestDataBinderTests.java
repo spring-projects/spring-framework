@@ -44,6 +44,7 @@ public class ServletRequestDataBinderTests {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}
@@ -168,6 +169,7 @@ public class ServletRequestDataBinderTests {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}

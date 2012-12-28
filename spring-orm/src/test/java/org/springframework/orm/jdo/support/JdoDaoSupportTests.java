@@ -40,6 +40,7 @@ public class JdoDaoSupportTests extends TestCase {
 		pmfControl.replay();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -56,6 +57,7 @@ public class JdoDaoSupportTests extends TestCase {
 		JdoTemplate template = new JdoTemplate();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

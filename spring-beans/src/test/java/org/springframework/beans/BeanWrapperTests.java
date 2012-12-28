@@ -329,6 +329,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				super.setValue(value.toString());
 			}
@@ -500,6 +501,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(text.substring(1));
 			}
@@ -559,6 +561,7 @@ public final class BeanWrapperTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof String[]) {
 					setValue(StringUtils.arrayToDelimitedString(((String[]) value), "-"));
@@ -636,6 +639,7 @@ public final class BeanWrapperTests {
 		PropsTester pt = new PropsTester();
 		BeanWrapper bw = new BeanWrapperImpl(pt);
 		bw.registerCustomEditor(int.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) {
 				setValue(new Integer(Integer.parseInt(text) + 1));
 			}
@@ -1022,6 +1026,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1055,6 +1060,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1078,6 +1084,7 @@ public final class BeanWrapperTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (!StringUtils.hasLength(text)) {
 					throw new IllegalArgumentException();
@@ -1191,6 +1198,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1209,6 +1217,7 @@ public final class BeanWrapperTests {
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(int.class, "array[1]", new PropertyEditorSupport() {
+			@Override
 			public void setValue(Object value) {
 				if (value instanceof Integer) {
 					super.setValue(new Integer(((Integer) value).intValue() + 1));
@@ -1821,6 +1830,7 @@ public final class BeanWrapperTests {
 			this.frozen = true;
 		}
 
+		@Override
 		public V put(K key, V value) {
 			if (this.frozen) {
 				throw new UnsupportedOperationException();
@@ -1830,16 +1840,19 @@ public final class BeanWrapperTests {
 			}
 		}
 
+		@Override
 		public Set<Map.Entry<K, V>> entrySet() {
 			this.accessed = true;
 			return super.entrySet();
 		}
 
+		@Override
 		public Set<K> keySet() {
 			this.accessed = true;
 			return super.keySet();
 		}
 
+		@Override
 		public int size() {
 			this.accessed = true;
 			return super.size();

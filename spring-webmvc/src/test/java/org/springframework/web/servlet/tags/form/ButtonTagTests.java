@@ -29,6 +29,7 @@ public class ButtonTagTests extends AbstractFormTagTests {
 
 	private ButtonTag tag;
 
+	@Override
 	protected void onSetUp() {
 		this.tag = createTag(getWriter());
 		this.tag.setParent(getFormTag());
@@ -82,6 +83,7 @@ public class ButtonTagTests extends AbstractFormTagTests {
 	@SuppressWarnings("serial")
 	protected ButtonTag createTag(final Writer writer) {
 		return new ButtonTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);
 			}

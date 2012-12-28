@@ -42,6 +42,7 @@ import org.springframework.beans.TestBean;
 @SuppressWarnings("serial")
 public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
 
+	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
 		assertFalse("Not forcible CGLIB", as.isProxyTargetClass());
 		Object proxy = as.createAopProxy().getProxy();
@@ -49,6 +50,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		return proxy;
 	}
 
+	@Override
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		return new JdkDynamicAopProxy(as);
 	}
@@ -94,6 +96,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
+			@Override
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
 				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
@@ -104,6 +107,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class, IOther.class });
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				// Assert that target matches BEFORE invocation returns
 				assertEquals("Target is correct", expectedTarget, invocation.getThis());
@@ -165,10 +169,12 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 	public static class FooBar implements Foo, Bar {
 
+		@Override
 		public Bar getBarThis() {
 			return this;
 		}
 
+		@Override
 		public Foo getFooThis() {
 			return this;
 		}
@@ -189,6 +195,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 		private final String name = "Rob Harrop";
 
+		@Override
 		public String getName() {
 			return this.name;
 		}

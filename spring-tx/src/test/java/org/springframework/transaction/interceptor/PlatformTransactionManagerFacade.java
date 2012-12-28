@@ -37,14 +37,17 @@ public class PlatformTransactionManagerFacade implements PlatformTransactionMana
 	 */
 	public static PlatformTransactionManager delegate;
 
+	@Override
 	public TransactionStatus getTransaction(TransactionDefinition definition) {
 		return delegate.getTransaction(definition);
 	}
 
+	@Override
 	public void commit(TransactionStatus status) {
 		delegate.commit(status);
 	}
 
+	@Override
 	public void rollback(TransactionStatus status) {
 		delegate.rollback(status);
 	}

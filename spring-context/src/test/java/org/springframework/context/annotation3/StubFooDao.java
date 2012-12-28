@@ -28,6 +28,7 @@ import example.scannable.FooDao;
 @Qualifier("testing")
 public class StubFooDao implements FooDao {
 
+	@Override
 	public String findFoo(int id) {
 		return "bar";
 	}

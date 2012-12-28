@@ -38,6 +38,7 @@ public class BeanNameUrlHandlerMappingTests extends TestCase {
 
 	private ConfigurableWebApplicationContext wac;
 
+	@Override
 	public void setUp() throws Exception {
 		MockServletContext sc = new MockServletContext("");
 		wac = new XmlWebApplicationContext();

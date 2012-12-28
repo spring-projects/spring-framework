@@ -675,19 +675,23 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 			return this.count;
 		}
 
+		@Override
 		public Object getAspectInstance() {
 			++this.count;
 			return new PerTypeWithinAspect();
 		}
 
+		@Override
 		public ClassLoader getAspectClassLoader() {
 			return PerTypeWithinAspect.class.getClassLoader();
 		}
 
+		@Override
 		public AspectMetadata getAspectMetadata() {
 			return new AspectMetadata(PerTypeWithinAspect.class, "perTypeWithin");
 		}
 
+		@Override
 		public int getOrder() {
 			return Ordered.LOWEST_PRECEDENCE;
 		}
@@ -897,14 +901,17 @@ abstract class AbstractMakeModifiable {
 	public static class ModifiableImpl implements MutableModifable {
 		private boolean modified;
 
+		@Override
 		public void acceptChanges() {
 			modified = false;
 		}
 
+		@Override
 		public boolean isModified() {
 			return modified;
 		}
 
+		@Override
 		public void markDirty() {
 			this.modified = true;
 		}
@@ -1020,17 +1027,21 @@ class MakeLockable {
 
 class CannotBeUnlocked implements Lockable, Comparable<Object> {
 
+	@Override
 	public void lock() {
 	}
 
+	@Override
 	public void unlock() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean locked() {
 		return true;
 	}
 
+	@Override
 	public int compareTo(Object arg0) {
 		throw new UnsupportedOperationException();
 	}

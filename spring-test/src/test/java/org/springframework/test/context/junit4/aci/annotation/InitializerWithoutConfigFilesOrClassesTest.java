@@ -53,6 +53,7 @@ public class InitializerWithoutConfigFilesOrClassesTest {
 
 	static class EntireAppInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 			new AnnotatedBeanDefinitionReader(applicationContext).register(GlobalConfig.class);
 		}

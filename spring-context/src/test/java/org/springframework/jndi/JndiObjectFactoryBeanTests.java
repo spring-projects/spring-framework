@@ -233,6 +233,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -259,6 +260,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -287,6 +289,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -386,6 +389,7 @@ public class JndiObjectFactoryBeanTests {
 		expectLastCall().times(2);
 		replay(mockCtx);
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockCtx;
 			}

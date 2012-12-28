@@ -87,9 +87,11 @@ interface DerivedInterface<T> extends BaseInterface<T> {
 
 class DerivedStringParameterizedClass implements DerivedInterface<String> {
 
+	@Override
 	public void genericDerivedInterfaceMethod(String t) {
 	}
 
+	@Override
 	public void genericBaseInterfaceMethod(String t) {
 	}
 }

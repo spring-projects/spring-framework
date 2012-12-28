@@ -189,6 +189,7 @@ public final class CustomizableTraceInterceptorTests {
 			this.log = log;
 		}
 
+		@Override
 		protected Log getLoggerForInvocation(MethodInvocation invocation) {
 			return this.log;
 		}

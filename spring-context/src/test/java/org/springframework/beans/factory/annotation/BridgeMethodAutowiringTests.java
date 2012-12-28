@@ -49,6 +49,7 @@ class UserServiceImpl extends GenericServiceImpl<Foo> {
 
 	protected Foo object;
 
+	@Override
 	@Inject
 	@Named("userObject")
 	public void setObject(Foo object) {

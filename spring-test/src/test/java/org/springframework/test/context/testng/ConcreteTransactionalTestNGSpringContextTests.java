@@ -90,10 +90,12 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}

@@ -300,6 +300,7 @@ public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		scanner.setScopeMetadataResolver(new ScopeMetadataResolver() {
+			@Override
 			public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 				ScopeMetadata metadata = new ScopeMetadata();
 				if (definition instanceof AnnotatedBeanDefinition) {
@@ -345,8 +346,10 @@ public class ClassPathBeanDefinitionScannerJsr330ScopeIntegrationTests {
 
 		private String name = DEFAULT_NAME;
 
+		@Override
 		public String getName() { return this.name; }
 
+		@Override
 		public void setName(String name) { this.name = name; }
 	}
 

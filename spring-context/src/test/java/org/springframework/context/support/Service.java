@@ -40,10 +40,12 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 	private boolean properlyDestroyed = false;
 
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
+	@Override
 	public void setMessageSource(MessageSource messageSource) {
 		if (this.messageSource != null) {
 			throw new IllegalArgumentException("MessageSource should not be set twice");
@@ -64,9 +66,11 @@ public class Service implements ApplicationContextAware, MessageSourceAware, Dis
 	}
 
 
+	@Override
 	public void destroy() {
 		this.properlyDestroyed = true;
 		Thread thread = new Thread() {
+			@Override
 			public void run() {
 				Assert.isTrue(applicationContext.getBean("messageSource") instanceof StaticMessageSource);
 				try {

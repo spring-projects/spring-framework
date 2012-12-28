@@ -25,6 +25,7 @@ public class ServletConfigAwareBean implements ServletConfigAware {
 
 	private ServletConfig servletConfig;
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 	}

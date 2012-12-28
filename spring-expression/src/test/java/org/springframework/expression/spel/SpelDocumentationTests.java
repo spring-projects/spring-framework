@@ -487,14 +487,17 @@ public class SpelDocumentationTests extends ExpressionTestCase {
 
 	static class TemplatedParserContext implements ParserContext {
 
+		@Override
 		public String getExpressionPrefix() {
 			return "${";
 		}
 
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
 
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}

@@ -44,6 +44,7 @@ public class TestVelocityEngine extends VelocityEngine {
 	}
 
 
+	@Override
 	public Template getTemplate(String name) throws ResourceNotFoundException {
 		Template template = (Template) this.templates.get(name);
 		if (template == null) {

@@ -104,6 +104,7 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
+	@Override
 	@Resource
 	public void setDataSource(DataSource dataSource) {
 		super.setDataSource(dataSource);
@@ -119,10 +120,12 @@ public class ConcreteTransactionalJUnit4SpringContextTests extends AbstractTrans
 		this.bar = bar;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}

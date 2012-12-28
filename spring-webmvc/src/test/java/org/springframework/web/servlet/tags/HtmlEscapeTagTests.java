@@ -37,6 +37,7 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		tag.setPageContext(pc);
 		tag.doStartTag();
 		HtmlEscapingAwareTag testTag = new HtmlEscapingAwareTag() {
+			@Override
 			public int doStartTagInternal() throws Exception {
 				return EVAL_BODY_INCLUDE;
 			}
@@ -113,9 +114,11 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "test text";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -131,9 +134,11 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "test & text";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -150,9 +155,11 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "' test & text \\";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}
@@ -169,9 +176,11 @@ public class HtmlEscapeTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer result = new StringBuffer();
 		EscapeBodyTag tag = new EscapeBodyTag() {
+			@Override
 			protected String readBodyContent() {
 				return "' test & text \\";
 			}
+			@Override
 			protected void writeBodyContent(String content) {
 				result.append(content);
 			}

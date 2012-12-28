@@ -57,14 +57,18 @@ public class ApplicationContextExpressionTests {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
 		ac.getBeanFactory().registerScope("myScope", new Scope() {
+			@Override
 			public Object get(String name, ObjectFactory<?> objectFactory) {
 				return objectFactory.getObject();
 			}
+			@Override
 			public Object remove(String name) {
 				return null;
 			}
+			@Override
 			public void registerDestructionCallback(String name, Runnable callback) {
 			}
+			@Override
 			public Object resolveContextualObject(String key) {
 				if (key.equals("mySpecialAttr")) {
 					return "42";
@@ -73,6 +77,7 @@ public class ApplicationContextExpressionTests {
 					return null;
 				}
 			}
+			@Override
 			public String getConversationId() {
 				return null;
 			}

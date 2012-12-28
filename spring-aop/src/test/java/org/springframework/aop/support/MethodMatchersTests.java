@@ -107,6 +107,7 @@ public final class MethodMatchersTests {
 		public StartsWithMatcher(String s) {
 			this.prefix = s;
 		}
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith(prefix);
 		}
@@ -114,12 +115,14 @@ public final class MethodMatchersTests {
 
 
 	private static class TestDynamicMethodMatcherWhichMatches extends DynamicMethodMatcher {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return true;
 		}
 	}
 
 	private static class TestDynamicMethodMatcherWhichDoesNotMatch extends DynamicMethodMatcher {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return false;
 		}

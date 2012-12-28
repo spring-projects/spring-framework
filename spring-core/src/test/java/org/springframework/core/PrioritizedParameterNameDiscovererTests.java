@@ -31,18 +31,22 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 	private static final String[] SOMETHING_ELSE = new String[] { "something", "else" };
 
 	ParameterNameDiscoverer returnsFooBar = new ParameterNameDiscoverer() {
+		@Override
 		public String[] getParameterNames(Method m) {
 			return FOO_BAR;
 		}
+		@Override
 		public String[] getParameterNames(Constructor ctor) {
 			return FOO_BAR;
 		}
 	};
 
 	ParameterNameDiscoverer returnsSomethingElse = new ParameterNameDiscoverer() {
+		@Override
 		public String[] getParameterNames(Method m) {
 			return SOMETHING_ELSE;
 		}
+		@Override
 		public String[] getParameterNames(Constructor ctor) {
 			return SOMETHING_ELSE;
 		}

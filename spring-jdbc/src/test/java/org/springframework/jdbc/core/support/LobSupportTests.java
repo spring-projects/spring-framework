@@ -69,6 +69,7 @@ public class LobSupportTests extends TestCase {
 		AbstractLobCreatingPreparedStatementCallback psc =
 			new AbstractLobCreatingPreparedStatementCallback(handler) {
 
+			@Override
 			protected void setValues(PreparedStatement ps, LobCreator lobCreator)
 					throws SQLException, DataAccessException {
 				svc.b = true;
@@ -155,6 +156,7 @@ public class LobSupportTests extends TestCase {
 
 	private AbstractLobStreamingResultSetExtractor getResultSetExtractor(final boolean ex) {
 		AbstractLobStreamingResultSetExtractor lobRse = new AbstractLobStreamingResultSetExtractor() {
+			@Override
 			protected void streamData(ResultSet rs) throws SQLException, IOException {
 				if (ex) {
 					throw new IOException();

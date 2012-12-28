@@ -65,6 +65,7 @@ public abstract class AbstractEntityManagerFactoryIntegrationTests extends Abstr
 		return null;
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		Provider provider = getProvider();
 		switch (provider) {

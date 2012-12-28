@@ -74,6 +74,7 @@ interface SerializableFoo extends Serializable { void foo(); }
 
 class SubtypeMatchingTestClassA implements NonSerializableFoo {
 
+	@Override
 	public void foo() {}
 
 }
@@ -81,6 +82,7 @@ class SubtypeMatchingTestClassA implements NonSerializableFoo {
 @SuppressWarnings("serial")
 class SubtypeMatchingTestClassB implements SerializableFoo {
 
+	@Override
 	public void foo() {}
 
 }
@@ -89,6 +91,7 @@ interface Bar { void bar(Object o); }
 
 class SubtypeMatchingTestClassC implements Bar {
 
+	@Override
 	public void bar(Object o) {}
 
 }

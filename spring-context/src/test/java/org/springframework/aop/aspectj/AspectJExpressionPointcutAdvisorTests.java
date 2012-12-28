@@ -60,6 +60,7 @@ class CallCountingInterceptor implements MethodInterceptor {
 
 	private int count;
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		count++;
 		return methodInvocation.proceed();

@@ -45,6 +45,7 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 
 	protected MBeanServer server;
 
+	@Override
 	public final void setUp() throws Exception {
 		this.server = MBeanServerFactory.createMBeanServer();
 		try {
@@ -63,6 +64,7 @@ public abstract class AbstractMBeanServerTests extends TestCase {
 		return ctx;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		releaseServer();
 		onTearDown();

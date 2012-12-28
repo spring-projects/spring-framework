@@ -165,6 +165,7 @@ public final class ProxyFactoryTests {
 	@Test
 	public void testAddRepeatedInterface() {
 		TimeStamped tst = new TimeStamped() {
+			@Override
 			public long getTimeStamp() {
 				throw new UnsupportedOperationException("getTimeStamp");
 			}
@@ -181,6 +182,7 @@ public final class ProxyFactoryTests {
 	public void testGetsAllInterfaces() throws Exception {
 		// Extend to get new interface
 		class TestBeanSubclass extends TestBean implements Comparable<Object> {
+			@Override
 			public int compareTo(Object arg0) {
 				throw new UnsupportedOperationException("compareTo");
 			}
@@ -214,6 +216,7 @@ public final class ProxyFactoryTests {
 	@Test
 	public void testInterceptorInclusionMethods() {
 		class MyInterceptor implements MethodInterceptor {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				throw new UnsupportedOperationException();
 			}
@@ -350,6 +353,7 @@ public final class ProxyFactoryTests {
 			this.ts = ts;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return ts;
 		}

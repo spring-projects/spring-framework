@@ -153,6 +153,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}
@@ -168,12 +169,14 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		private final AtomicInteger count = new AtomicInteger(0);
 
+		@Override
 		@Transactional
 		@Scheduled(fixedDelay = 5)
 		public void scheduled() {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}

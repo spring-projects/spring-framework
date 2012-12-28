@@ -116,6 +116,7 @@ public final class RefreshableTargetSourceTests {
 			this.requiresRefresh = requiresRefresh;
 		}
 
+		@Override
 		protected Object freshTarget() {
 			this.callCount++;
 			return new Object();
@@ -125,6 +126,7 @@ public final class RefreshableTargetSourceTests {
 			return this.callCount;
 		}
 
+		@Override
 		protected boolean requiresRefresh() {
 			return this.requiresRefresh;
 		}

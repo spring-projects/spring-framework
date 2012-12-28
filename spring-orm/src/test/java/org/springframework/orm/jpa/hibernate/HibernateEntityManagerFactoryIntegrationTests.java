@@ -45,6 +45,7 @@ public class HibernateEntityManagerFactoryIntegrationTests extends
 		this.sessionFactory = sessionFactory;
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		return HIBERNATE_CONFIG_LOCATIONS;
 	}

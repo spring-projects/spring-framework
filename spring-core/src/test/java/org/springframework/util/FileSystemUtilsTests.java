@@ -73,6 +73,7 @@ public class FileSystemUtilsTests extends TestCase {
 		assertTrue(!src.exists());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		File tmp = new File("./tmp");
 		if (tmp.exists()) {

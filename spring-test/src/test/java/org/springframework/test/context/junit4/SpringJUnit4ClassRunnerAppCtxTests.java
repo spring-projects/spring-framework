@@ -136,14 +136,17 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}
 
+	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}

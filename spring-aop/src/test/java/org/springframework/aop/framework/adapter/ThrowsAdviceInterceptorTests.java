@@ -125,6 +125,7 @@ public final class ThrowsAdviceInterceptorTests {
 
 		@SuppressWarnings("serial")
 		MyThrowsHandler th = new MyThrowsHandler() {
+			@Override
 			public void afterThrowing(RemoteException ex) throws Throwable {
 				super.afterThrowing(ex);
 				throw t;

@@ -158,6 +158,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
 		listenerBean.setNotificationFilter(new NotificationFilter() {
+			@Override
 			public boolean isNotificationEnabled(Notification notification) {
 				if (notification instanceof AttributeChangeNotification) {
 					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
@@ -434,6 +435,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		private Map attributeHandbacks = new HashMap();
 
+		@Override
 		public void handleNotification(Notification notification, Object handback) {
 			if (notification instanceof AttributeChangeNotification) {
 				AttributeChangeNotification attNotification = (AttributeChangeNotification) notification;
@@ -473,6 +475,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 			this.objectName = objectName;
 		}
 
+		@Override
 		public ObjectName getObjectName() throws MalformedObjectNameException {
 			return this.objectName;
 		}

@@ -122,6 +122,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	static class MyTypeLocator extends StandardTypeLocator {
 
+		@Override
 		public Class<?> findType(String typename) throws EvaluationException {
 			if (typename.equals("Spr5899Class")) {
 				return Spr5899Class.class;
@@ -240,23 +241,28 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	static class MapAccessor implements PropertyAccessor {
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (((Map<?,?>) target).containsKey(name));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(((Map<?,?>) target).get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return true;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 			((Map<String, Object>) target).put(name, newValue);
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] {Map.class};
 		}
@@ -546,12 +552,15 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	private static final ParserContext DOLLARSQUARE_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return "$[";
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return "]";
 		}
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}
@@ -626,6 +635,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	static class MyBeanResolver implements BeanResolver {
+		@Override
 		public Object resolve(EvaluationContext context, String beanname) throws AccessException {
 			if (beanname.equals("foo")) {
 				return "custard";
@@ -1100,21 +1110,26 @@ public class SpelReproTests extends ExpressionTestCase {
 			}
 			return null;
 		}
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name)
 				throws AccessException {
 			return getMap(target).containsKey(name);
 		}
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name)
 				throws AccessException {
 			return getMap(target).containsKey(name);
 		}
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[]{ContextObject.class};
 		}
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name)
 				throws AccessException {
 			return new TypedValue(getMap(target).get(name));
 		}
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 			throws AccessException {
 			getMap(target).put(name, (String) newValue);
@@ -1701,6 +1716,7 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	private static class GenericImplementation implements GenericInterface<Integer> {
 
+		@Override
 		public Integer getProperty() {
 			return null;
 		}

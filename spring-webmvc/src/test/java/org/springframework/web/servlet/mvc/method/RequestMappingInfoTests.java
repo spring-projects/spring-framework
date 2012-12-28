@@ -195,6 +195,7 @@ public class RequestMappingInfoTests {
 						new ParamsRequestCondition("foo"), null, null, null, null);
 
 		Comparator<RequestMappingInfo> comparator = new Comparator<RequestMappingInfo>() {
+			@Override
 			public int compare(RequestMappingInfo info, RequestMappingInfo otherInfo) {
 				return info.compareTo(otherInfo, new MockHttpServletRequest());
 			}

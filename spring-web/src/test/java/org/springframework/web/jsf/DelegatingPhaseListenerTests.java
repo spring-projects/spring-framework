@@ -36,12 +36,14 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	private StaticListableBeanFactory beanFactory;
 	private DelegatingPhaseListenerMulticaster delPhaseListener;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void setUp() {
 		facesContext = new MockFacesContext();
 		beanFactory = new StaticListableBeanFactory();
 
 		delPhaseListener = new DelegatingPhaseListenerMulticaster() {
+			@Override
 			protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
 				return beanFactory;
 			}
@@ -87,14 +89,17 @@ public class DelegatingPhaseListenerTests extends TestCase {
 		boolean beforeCalled = false;
 		boolean afterCalled = false;
 
+		@Override
 		public PhaseId getPhaseId() {
 			return PhaseId.ANY_PHASE;
 		}
 
+		@Override
 		public void beforePhase(PhaseEvent arg0) {
 			beforeCalled = true;
 		}
 
+		@Override
 		public void afterPhase(PhaseEvent arg0) {
 			afterCalled = true;
 		}

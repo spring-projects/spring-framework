@@ -114,6 +114,7 @@ public class HandlerMethodAnnotationDetectionTests {
 	}
 
 	class TestPointcut extends StaticMethodMatcherPointcut {
+		@Override
 		public boolean matches(Method method, Class<?> clazz) {
 			return method.getName().equals("hashCode");
 		}
@@ -202,19 +203,23 @@ public class HandlerMethodAnnotationDetectionTests {
 	 */
 	static class AbstractClassController extends MappingAbstractClass {
 
+		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String pattern) {
 			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(pattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
+		@Override
 		public void initModel(@RequestHeader("header1") Date date, Model model) {
 			model.addAttribute("attr1", date);
 		}
 
+		@Override
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
 
+		@Override
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
@@ -251,19 +256,23 @@ public class HandlerMethodAnnotationDetectionTests {
 	 */
 	static class InterfaceController implements MappingInterface {
 
+		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
 			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
+		@Override
 		public void initModel(@RequestHeader("header1") Date date, Model model) {
 			model.addAttribute("attr1", date);
 		}
 
+		@Override
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
 
+		@Override
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
@@ -295,19 +304,23 @@ public class HandlerMethodAnnotationDetectionTests {
 	 */
 	static class ParameterizedAbstractClassController extends MappingParameterizedAbstractClass<String, Date, Date> {
 
+		@Override
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
 			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
+		@Override
 		public void initModel(@RequestHeader("header1") Date date, Model model) {
 			model.addAttribute("attr1", date);
 		}
 
+		@Override
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
 
+		@Override
 		public String handleException(Exception exception) {
 			return exception.getMessage();
 		}
@@ -340,23 +353,27 @@ public class HandlerMethodAnnotationDetectionTests {
 	 */
 	static class ParameterizedInterfaceController implements MappingParameterizedInterface<String, Date, Date> {
 
+		@Override
 		@InitBinder
 		public void initBinder(WebDataBinder dataBinder, @RequestParam("datePattern") String thePattern) {
 			CustomDateEditor dateEditor = new CustomDateEditor(new SimpleDateFormat(thePattern), false);
 			dataBinder.registerCustomEditor(Date.class, dateEditor);
 		}
 
+		@Override
 		@ModelAttribute
 		public void initModel(@RequestHeader("header1") Date date, Model model) {
 			model.addAttribute("attr1", date);
 		}
 
+		@Override
 		@RequestMapping(value="/path1/path2", method=RequestMethod.POST)
 		@ModelAttribute("attr2")
 		public Date handle(@RequestHeader("header2") Date date, Model model) throws Exception {
 			return date;
 		}
 
+		@Override
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public String handleException(Exception exception) {
@@ -412,6 +429,7 @@ public class HandlerMethodAnnotationDetectionTests {
 
 		private static StaticMethodMatcherPointcut getControllerPointcut() {
 			return new StaticMethodMatcherPointcut() {
+				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return ((AnnotationUtils.findAnnotation(targetClass, Controller.class) != null) ||
 							(AnnotationUtils.findAnnotation(targetClass, RequestMapping.class) != null));

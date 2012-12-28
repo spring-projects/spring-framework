@@ -34,9 +34,11 @@ public class LabelTagTests extends AbstractFormTagTests {
 	private LabelTag tag;
 
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new LabelTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -44,6 +46,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected void extendPageContext(MockPageContext pageContext) throws JspException {
 		super.extendPageContext(pageContext);
 
@@ -139,6 +142,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 	}
 
 
+	@Override
 	protected TestBean createTestBean() {
 		TestBean bean = new TestBean();
 		bean.setSpouse(new TestBean("Hoopy"));

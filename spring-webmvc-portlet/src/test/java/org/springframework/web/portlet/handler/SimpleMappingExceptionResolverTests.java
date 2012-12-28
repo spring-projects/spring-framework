@@ -43,6 +43,7 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	private Object handler2;
 	private Exception genericException;
 
+	@Override
 	protected void setUp() {
 		exceptionResolver = new SimpleMappingExceptionResolver();
 		request = new MockRenderRequest();

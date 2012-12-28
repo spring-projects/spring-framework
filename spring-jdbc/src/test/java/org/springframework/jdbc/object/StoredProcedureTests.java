@@ -62,6 +62,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	private MockControl ctrlCallable;
 	private CallableStatement mockCallable;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -69,6 +70,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockCallable = (CallableStatement) ctrlCallable.getMock();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -76,6 +78,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		ctrlCallable.replay();
@@ -255,6 +258,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 
 		class TestJdbcTemplate extends JdbcTemplate {
 			int calls;
+			@Override
 			public Map call(CallableStatementCreator csc, List declaredParameters) throws DataAccessException {
 				calls++;
 				return super.call(csc, declaredParameters);
@@ -934,6 +938,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 
 		private static class RowMapperImpl implements RowMapper {
+			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return rs.getString(2);
 			}
@@ -964,6 +969,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			private TestParameterMapper() {
 			}
 
+			@Override
 			public Map createMap(Connection conn) throws SQLException {
 				Map inParms = new HashMap();
 				String testValue = conn.toString();
@@ -989,6 +995,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		public Map executeTest(final int[] inValue) {
 			Map in = new HashMap(1);
 			in.put("in", new AbstractSqlTypeValue() {
+				@Override
 				public Object createTypeValue(Connection con, int type, String typeName) {
 					//assertEquals(Connection.class, con.getClass());
 					//assertEquals(Types.ARRAY, type);
@@ -1030,6 +1037,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			setDataSource(ds);
 			setSql(SQL);
 			getJdbcTemplate().setExceptionTranslator(new SQLExceptionTranslator() {
+				@Override
 				public DataAccessException translate(
 					String task,
 					String sql,

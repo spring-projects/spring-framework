@@ -23,6 +23,7 @@ import net.sf.jasperreports.engine.export.JRHtmlExporter;
  */
 public class ConfigurableJasperReportsViewWithStreamTests extends AbstractConfigurableJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setExporterClass(JRHtmlExporter.class);
@@ -31,6 +32,7 @@ public class ConfigurableJasperReportsViewWithStreamTests extends AbstractConfig
 		return view;
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "application/pdf";
 	}

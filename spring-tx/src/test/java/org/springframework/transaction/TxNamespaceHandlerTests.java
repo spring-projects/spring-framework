@@ -40,6 +40,7 @@ public class TxNamespaceHandlerTests extends TestCase {
 
 	private Method setAgeMethod;
 
+	@Override
 	public void setUp() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge", new Class[0]);

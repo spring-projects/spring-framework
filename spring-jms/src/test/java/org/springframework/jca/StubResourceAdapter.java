@@ -29,18 +29,23 @@ import javax.transaction.xa.XAResource;
  */
 public class StubResourceAdapter implements ResourceAdapter {
 
+	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
 	}
 
+	@Override
 	public void stop() {
 	}
 
+	@Override
 	public void endpointActivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) throws ResourceException {
 	}
 
+	@Override
 	public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
 	}
 
+	@Override
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
 	}

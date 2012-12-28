@@ -54,17 +54,21 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 	private SelectTag selectTag;
 	private OptionsTag tag;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
 		};
 		selectTag = new SelectTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
+			@Override
 			public String getName() {
 				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
@@ -276,6 +280,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(value2, rootElement.selectSingleNode("option[@selected]"));
 	}
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		TestBean bean = new TestBean();
 		bean.setName("foo");
@@ -295,6 +300,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		request.setAttribute("floats", floats);
 	}
 
+	@Override
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();

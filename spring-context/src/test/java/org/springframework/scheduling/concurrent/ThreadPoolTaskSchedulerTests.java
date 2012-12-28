@@ -239,6 +239,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.latch = new CountDownLatch(expectedRunCount);
 		}
 
+		@Override
 		public void run() {
 			lastThread = Thread.currentThread();
 			if (actualRunCount.incrementAndGet() > expectedRunCount) {
@@ -259,6 +260,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.expectedRunCount = expectedRunCount;
 		}
 
+		@Override
 		public String call() throws Exception {
 			if (actualRunCount.incrementAndGet() > expectedRunCount) {
 				throw new RuntimeException("intentional test failure");
@@ -278,6 +280,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.latch = new CountDownLatch(expectedErrorCount);
 		}
 
+		@Override
 		public void handleError(Throwable t) {
 			this.lastError = t;
 			this.latch.countDown();
@@ -295,6 +298,7 @@ public class ThreadPoolTaskSchedulerTests {
 			this.maxRunCount = maxRunCount;
 		}
 
+		@Override
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 			if (this.actualRunCount.incrementAndGet() > this.maxRunCount) {
 				return null;

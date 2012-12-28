@@ -39,6 +39,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 	protected StaticApplicationContext sac;
 
 	/** Run for each test */
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		Map<String, String> m = new HashMap<String, String>();
@@ -66,6 +67,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 	}
 
 	/** Overridden */
+	@Override
 	public void testCount() {
 		assertCount(15);
 	}

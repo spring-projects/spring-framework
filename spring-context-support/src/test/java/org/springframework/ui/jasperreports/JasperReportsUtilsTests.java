@@ -236,6 +236,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 		private boolean invoked = false;
 
+		@Override
 		public void afterPageExport() {
 			this.invoked = true;
 		}

@@ -32,9 +32,11 @@ public final class LazyCreationTargetSourceTests {
 	@Test
 	public void testCreateLazy() {
 		TargetSource targetSource = new AbstractLazyCreationTargetSource() {
+			@Override
 			protected Object createObject() {
 				return new InitCountingBean();
 			}
+			@Override
 			public Class<?> getTargetClass() {
 				return InitCountingBean.class;
 			}

@@ -81,6 +81,7 @@ public class CciLocalTransactionTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 				CciTemplate ct = new CciTemplate(connectionFactory);
@@ -131,6 +132,7 @@ public class CciLocalTransactionTests {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 					CciTemplate ct = new CciTemplate(connectionFactory);

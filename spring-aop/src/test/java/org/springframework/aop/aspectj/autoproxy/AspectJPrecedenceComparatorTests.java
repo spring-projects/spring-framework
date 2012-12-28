@@ -194,6 +194,7 @@ public final class AspectJPrecedenceComparatorTests {
 
 	private Advisor createSpringAOPAfterAdvice(int order) {
 		AfterReturningAdvice advice = new AfterReturningAdvice() {
+			@Override
 			public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 			}
 		};

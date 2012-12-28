@@ -46,6 +46,7 @@ public class UtilNamespaceHandlerTests extends TestCase {
 
 	private CollectingReaderEventListener listener = new CollectingReaderEventListener();
 
+	@Override
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);

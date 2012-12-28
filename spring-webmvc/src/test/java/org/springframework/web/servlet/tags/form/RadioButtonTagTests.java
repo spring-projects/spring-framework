@@ -43,9 +43,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -251,6 +253,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		return new Float("12.99");
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setSex("M");
@@ -262,10 +265,12 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private static class MyFloatEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(text.substring(1));
 		}
 
+		@Override
 		public String getAsText() {
 			return "F" + getValue();
 		}

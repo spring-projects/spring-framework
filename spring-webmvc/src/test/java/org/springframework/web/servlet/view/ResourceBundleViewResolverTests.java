@@ -46,6 +46,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	private StaticWebApplicationContext wac;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
@@ -170,9 +171,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 			}
 		}
 
+		@Override
 		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) {
 		}
 
+		@Override
 		protected void initApplicationContext() {
 			++initCount;
 		}

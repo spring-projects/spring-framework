@@ -46,6 +46,7 @@ public final class ReflectiveLoadTimeWeaverTests {
 		JustAddTransformerClassLoader classLoader = new JustAddTransformerClassLoader();
 		ReflectiveLoadTimeWeaver weaver = new ReflectiveLoadTimeWeaver(classLoader);
 		weaver.addTransformer(new ClassFileTransformer() {
+			@Override
 			public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
 				return "CAFEDEAD".getBytes();
 			}
@@ -97,6 +98,7 @@ public final class ReflectiveLoadTimeWeaverTests {
 		private int numTimesGetThrowawayClassLoaderCalled = 0;
 
 
+		@Override
 		public int getNumTimesGetThrowawayClassLoaderCalled() {
 			return this.numTimesGetThrowawayClassLoaderCalled;
 		}

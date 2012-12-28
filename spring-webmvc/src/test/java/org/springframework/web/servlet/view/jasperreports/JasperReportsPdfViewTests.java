@@ -21,10 +21,12 @@ package org.springframework.web.servlet.view.jasperreports;
  */
 public class JasperReportsPdfViewTests extends AbstractJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsPdfView();
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "application/pdf";
 	}

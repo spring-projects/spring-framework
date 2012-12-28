@@ -95,6 +95,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	@Test
 	public void principal() throws Exception {
 		Principal principal = new Principal() {
+			@Override
 			public String getName() {
 				return "Foo";
 			}

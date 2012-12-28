@@ -170,28 +170,33 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		int flibbles = 7;
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { String.class };
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!(target instanceof String))
 				throw new RuntimeException("Assertion Failed! target should be String");
 			return (name.equals("flibbles"));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!(target instanceof String))
 				throw new RuntimeException("Assertion Failed! target should be String");
 			return (name.equals("flibbles"));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			return new TypedValue(flibbles);
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			if (!name.equals("flibbles"))

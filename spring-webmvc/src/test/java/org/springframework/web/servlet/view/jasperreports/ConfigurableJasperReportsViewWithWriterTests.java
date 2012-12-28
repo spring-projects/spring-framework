@@ -23,6 +23,7 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
  */
 public class ConfigurableJasperReportsViewWithWriterTests extends AbstractConfigurableJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setExporterClass(JRPdfExporter.class);
@@ -31,6 +32,7 @@ public class ConfigurableJasperReportsViewWithWriterTests extends AbstractConfig
 		return view;
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/html";
 	}

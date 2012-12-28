@@ -33,22 +33,27 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	private static final String OBJECT_NAME = "bean:name=testBean5";
 
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 9;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 4;
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		assembler.setIgnoredMethods(new String[] {"dontExposeMe", "setSuperman"});

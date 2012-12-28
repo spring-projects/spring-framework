@@ -72,6 +72,7 @@ public final class ConcurrentBeanFactoryTests {
 	public void setUp() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(CONTEXT);
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false));
 			}
@@ -125,6 +126,7 @@ public final class ConcurrentBeanFactoryTests {
 
 	private class TestRun extends Thread {
 
+		@Override
 		public void run() {
 			try {
 				for (int i = 0; i < 10000; i++) {

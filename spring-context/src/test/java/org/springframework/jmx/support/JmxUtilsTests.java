@@ -151,28 +151,35 @@ public class JmxUtilsTests extends TestCase {
 			super(IJmxTestBean.class);
 		}
 
+		@Override
 		public int add(int x, int y) {
 			return 0;
 		}
 
+		@Override
 		public long myOperation() {
 			return 0;
 		}
 
+		@Override
 		public int getAge() {
 			return 0;
 		}
 
+		@Override
 		public void setAge(int age) {
 		}
 
+		@Override
 		public void setName(String name) {
 		}
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public void dontExposeMe() {
 		}
 	}
@@ -186,6 +193,7 @@ public class JmxUtilsTests extends TestCase {
 
 	public static class Foo implements FooMBean {
 
+		@Override
 		public String getName() {
 			return "Rob Harrop";
 		}
@@ -200,6 +208,7 @@ public class JmxUtilsTests extends TestCase {
 
 	public static class FooX implements FooMXBean {
 
+		@Override
 		public String getName() {
 			return "Rob Harrop";
 		}

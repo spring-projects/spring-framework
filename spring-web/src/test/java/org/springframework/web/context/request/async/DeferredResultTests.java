@@ -86,6 +86,7 @@ public class DeferredResultTests {
 
 		DeferredResult<String> result = new DeferredResult<String>();
 		result.onCompletion(new Runnable() {
+			@Override
 			public void run() {
 				sb.append("completion event");
 			}
@@ -108,6 +109,7 @@ public class DeferredResultTests {
 		DeferredResult<String> result = new DeferredResult<String>(null, "timeout result");
 		result.setResultHandler(handler);
 		result.onTimeout(new Runnable() {
+			@Override
 			public void run() {
 				sb.append("timeout event");
 			}

@@ -43,6 +43,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	protected StaticApplicationContext sac;
 
 	/** Run for each test */
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		Map<String, String> m = new HashMap<String, String>();
@@ -73,10 +74,12 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	}
 
 	/** Overridden */
+	@Override
 	public void testCount() {
 		assertCount(15);
 	}
 
+	@Override
 	public void testEvents() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
 		super.testEvents();
@@ -88,6 +91,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 
 		private static int counter = 0;
 
+		@Override
 		public void multicastEvent(ApplicationEvent event) {
 			super.multicastEvent(event);
 			counter++;

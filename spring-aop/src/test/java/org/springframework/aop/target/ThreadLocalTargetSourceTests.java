@@ -113,6 +113,7 @@ public class ThreadLocalTargetSourceTests {
 
 		class Runner implements Runnable {
 			public SideEffectBean mine;
+			@Override
 			public void run() {
 				this.mine = (SideEffectBean) beanFactory.getBean("apartment");
 				assertEquals(INITIAL_COUNT, mine.getCount() );

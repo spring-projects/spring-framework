@@ -43,6 +43,7 @@ public class BeanThatListens implements ApplicationListener {
 	}
 
 
+	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		eventCount++;
 		if (beanThatBroadcasts != null) {

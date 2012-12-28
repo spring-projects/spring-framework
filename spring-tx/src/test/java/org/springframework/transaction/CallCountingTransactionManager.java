@@ -32,21 +32,25 @@ public class CallCountingTransactionManager extends AbstractPlatformTransactionM
 	public int rollbacks;
 	public int inflight;
 
+	@Override
 	protected Object doGetTransaction() {
 		return new Object();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		this.lastDefinition = definition;
 		++begun;
 		++inflight;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		++rollbacks;
 		--inflight;

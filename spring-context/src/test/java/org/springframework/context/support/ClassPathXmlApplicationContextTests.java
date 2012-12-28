@@ -320,6 +320,7 @@ public final class ClassPathXmlApplicationContextTests {
 	@Test
 	public void testResourceAndInputStream() throws IOException {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
+			@Override
 			public Resource getResource(String location) {
 				if (TEST_PROPERTIES.equals(location)) {
 					return new ClassPathResource(TEST_PROPERTIES, ClassPathXmlApplicationContextTests.class);

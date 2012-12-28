@@ -96,6 +96,7 @@ public final class DebugInterceptorTests {
 			this.log = log;
 		}
 
+		@Override
 		protected Log getLoggerForInvocation(MethodInvocation invocation) {
 			return log;
 		}

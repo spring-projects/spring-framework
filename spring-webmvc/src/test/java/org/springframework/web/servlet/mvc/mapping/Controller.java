@@ -26,6 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class Controller implements org.springframework.web.servlet.mvc.Controller {
 
+	@Override
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
 		return new ModelAndView("indexView");
 	}

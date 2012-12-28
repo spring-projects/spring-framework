@@ -159,6 +159,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	public void testStringsWithStaticSql() throws Exception {
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
@@ -167,6 +168,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
@@ -175,6 +177,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
@@ -184,8 +187,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 	public void testStringsWithPreparedStatementSetter() throws Exception {
 		final Integer argument = new Integer(99);
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new PreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
 						ps.setObject(1, argument);
 					}
@@ -196,6 +201,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
@@ -205,6 +211,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 	public void testStringsWithPreparedStatementArgs() throws Exception {
 		final Integer argument = new Integer(99);
 		doTestStrings(new JdbcTemplateCallback() {
+			@Override
 			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
 				template.query(sql, new Object[] {argument}, rch);
 			}
@@ -221,6 +228,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		class StringHandler implements RowCallbackHandler {
 			private List list = new LinkedList();
+			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				list.add(rs.getString(1));
 			}
@@ -365,6 +373,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
 		Object result = template.execute(new ConnectionCallback() {
+			@Override
 			public Object doInConnection(Connection con) {
 				assertSame(mockConnection, con);
 				return "test";
@@ -389,6 +398,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		Object result = template.execute(new ConnectionCallback() {
+			@Override
 			public Object doInConnection(Connection con) throws SQLException {
 				PreparedStatement ps = con.prepareStatement("some SQL");
 				ps.close();
@@ -471,6 +481,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) {
 					throw rex;
 				}
@@ -790,10 +801,12 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		BatchPreparedStatementSetter setter =
 			new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i)
 				throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
@@ -854,14 +867,17 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		BatchPreparedStatementSetter setter =
 				new InterruptibleBatchPreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
 						}
 					}
+					@Override
 					public int getBatchSize() {
 						return 1000;
 					}
+					@Override
 					public boolean isBatchExhausted(int i) {
 						return (i >= ids.length);
 					}
@@ -922,6 +938,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		BatchPreparedStatementSetter setter =
 				new AbstractInterruptibleBatchPreparedStatementSetter() {
+					@Override
 					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
@@ -986,6 +1003,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		BatchPreparedStatementSetter setter =
 				new AbstractInterruptibleBatchPreparedStatementSetter() {
+					@Override
 					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
@@ -1039,9 +1057,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
@@ -1099,9 +1119,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
@@ -1242,6 +1264,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		ParameterizedPreparedStatementSetter setter = new ParameterizedPreparedStatementSetter<Integer>() {
+			@Override
 			public void setValues(PreparedStatement ps, Integer argument) throws SQLException {
 				ps.setInt(1, argument.intValue());
 			}
@@ -1470,6 +1493,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		PreparedStatementSetter pss = new PreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setString(1, name);
 			}
@@ -1506,6 +1530,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		replay();
 
 		PreparedStatementSetter pss = new PreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setString(1, name);
 			}
@@ -1591,6 +1616,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		t.setIgnoreWarnings(false);
 		try {
 			t.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					rs.getByte(1);
 				}
@@ -1643,6 +1669,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		template.setIgnoreWarnings(true);
 		template.query(sql, new RowCallbackHandler() {
+			@Override
 			public void processRow(ResultSet rs)
 				throws java.sql.SQLException {
 				rs.getByte(1);
@@ -1689,6 +1716,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					throw sex;
 				}
@@ -1736,6 +1764,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		template.afterPropertiesSet();
 		try {
 			template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					throw sex;
 				}
@@ -1805,6 +1834,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		template.afterPropertiesSet();
 		try {
 			template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs)
 					throws SQLException {
 					throw sex;
@@ -1901,39 +1931,49 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
+			@Override
 			public boolean isNativeConnectionNecessaryForNativeStatements() {
 				return false;
 			}
+			@Override
 			public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 				return false;
 			}
+			@Override
 			public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 				return false;
 			}
+			@Override
 			public Connection getNativeConnection(Connection con) {
 				return con;
 			}
+			@Override
 			public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
 				return stmt.getConnection();
 			}
+			@Override
 			public Statement getNativeStatement(Statement stmt) {
 				assertTrue(stmt == mockStatement);
 				return mockStatement2;
 			}
+			@Override
 			public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
 				assertTrue(ps == mockPreparedStatement);
 				return mockPreparedStatement2;
 			}
+			@Override
 			public CallableStatement getNativeCallableStatement(CallableStatement cs) {
 				assertTrue(cs == mockCallableStatement);
 				return mockCallableStatement2;
 			}
+			@Override
 			public ResultSet getNativeResultSet(ResultSet rs) {
 				return rs;
 			}
 		});
 
 		template.query("my query",	new ResultSetExtractor() {
+			@Override
 			public Object extractData(ResultSet rs2) {
 				assertEquals(mockResultSet, rs2);
 				return null;
@@ -1941,10 +1981,12 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		});
 
 		template.query(new PreparedStatementCreator() {
+			@Override
 			public PreparedStatement createPreparedStatement(Connection conn) {
 				return mockPreparedStatement;
 			}
 		}, new ResultSetExtractor() {
+			@Override
 			public Object extractData(ResultSet rs2) {
 				assertEquals(mockResultSet, rs2);
 				return null;
@@ -1952,6 +1994,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		});
 
 		template.call(new CallableStatementCreator() {
+			@Override
 			public CallableStatement createCallableStatement(Connection con) {
 				return mockCallableStatement;
 			}
@@ -2015,6 +2058,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		try {
 			template.query("my query", new ResultSetExtractor() {
+				@Override
 				public Object extractData(ResultSet rs) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
@@ -2027,6 +2071,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		try {
 			template.query(new PreparedStatementCreator() {
+				@Override
 				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 					return con.prepareStatement("my query");
 				}
@@ -2034,6 +2079,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 					return null;
 				}
 			}, new ResultSetExtractor() {
+				@Override
 				public Object extractData(ResultSet rs2) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
@@ -2084,6 +2130,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		List params = new ArrayList();
 		params.add(new SqlReturnResultSet("", new RowCallbackHandler() {
+			@Override
 			public void processRow(ResultSet rs) {
 				throw new InvalidDataAccessApiUsageException("");
 			}
@@ -2093,6 +2140,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		try {
 			template.call(new CallableStatementCreator() {
+				@Override
 				public CallableStatement createCallableStatement(Connection conn) throws SQLException {
 					return conn.prepareCall("my query");
 				}
@@ -2143,6 +2191,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		params.add(new SqlOutParameter("a", 12));
 
 		Map out = template.call(new CallableStatementCreator() {
+			@Override
 			public CallableStatement createCallableStatement(Connection conn) throws SQLException {
 				return conn.prepareCall("my query");
 			}
@@ -2157,6 +2206,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
+		@Override
 		protected Connection doGetNativeConnection(Connection con) throws SQLException {
 			return con;
 		}
@@ -2179,12 +2229,14 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			this.sql = sql;
 		}
 
+		@Override
 		public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setInt(1, id);
 			return ps;
 		}
 
+		@Override
 		public String getSql() {
 			return sql;
 		}

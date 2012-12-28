@@ -219,14 +219,17 @@ public class CauchoRemotingTests extends TestCase {
 		private String password;
 		private boolean overloadEnabled;
 
+		@Override
 		public void setUser(String user) {
 			this.user = user;
 		}
 
+		@Override
 		public void setPassword(String password) {
 			this.password = password;
 		}
 
+		@Override
 		public void setOverloadEnabled(boolean overloadEnabled) {
 			this.overloadEnabled = overloadEnabled;
 		}
@@ -239,14 +242,17 @@ public class CauchoRemotingTests extends TestCase {
 		private String password;
 		private boolean overloadEnabled;
 
+		@Override
 		public void setUser(String user) {
 			this.user = user;
 		}
 
+		@Override
 		public void setPassword(String password) {
 			this.password = password;
 		}
 
+		@Override
 		public void setOverloadEnabled(boolean overloadEnabled) {
 			this.overloadEnabled = overloadEnabled;
 		}

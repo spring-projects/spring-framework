@@ -43,6 +43,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -58,6 +59,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -74,6 +76,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -91,6 +94,7 @@ public class MessageTagTests extends AbstractTagTests {
 		request.addPreferredLocale(Locale.CANADA);
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -108,6 +112,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -123,6 +128,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -139,6 +145,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -155,6 +162,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -172,6 +180,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -188,6 +197,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -204,6 +214,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -221,6 +232,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -239,6 +251,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -256,6 +269,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -274,6 +288,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -290,6 +305,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -307,6 +323,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -323,6 +340,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -341,6 +359,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}
@@ -357,6 +376,7 @@ public class MessageTagTests extends AbstractTagTests {
 		PageContext pc = createPageContext();
 		final StringBuffer message = new StringBuffer();
 		MessageTag tag = new MessageTag() {
+			@Override
 			protected void writeMessage(String msg) {
 				message.append(msg);
 			}

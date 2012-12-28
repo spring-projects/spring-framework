@@ -216,6 +216,7 @@ public class EnableSchedulingTests {
 			return null;
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler1());
 		}
@@ -318,6 +319,7 @@ public class EnableSchedulingTests {
 			return new ThreadAwareWorker();
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler2());
 		}
@@ -378,6 +380,7 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler2());
 		}
@@ -410,10 +413,12 @@ public class EnableSchedulingTests {
 			return new ThreadPoolTaskScheduler();
 		}
 
+		@Override
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler());
 			taskRegistrar.addFixedRateTask(new IntervalTask(
 					new Runnable() {
+						@Override
 						public void run() {
 							worker().executedByThread = Thread.currentThread().getName();
 						}
@@ -449,11 +454,13 @@ public class EnableSchedulingTests {
 			scheduler.initialize();
 			scheduler.schedule(
 				new Runnable() {
+					@Override
 					public void run() {
 						counter().incrementAndGet();
 					}
 				},
 				new Trigger() {
+					@Override
 					public Date nextExecutionTime(TriggerContext triggerContext) {
 						return new Date(new Date().getTime()+10);
 					}

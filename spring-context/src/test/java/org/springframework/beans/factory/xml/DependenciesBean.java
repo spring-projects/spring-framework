@@ -65,6 +65,7 @@ public final class DependenciesBean implements BeanFactoryAware {
 		return spouse;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

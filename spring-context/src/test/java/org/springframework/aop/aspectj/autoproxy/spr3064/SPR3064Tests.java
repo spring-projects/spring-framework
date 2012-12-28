@@ -81,6 +81,7 @@ interface Service {
 
 class ServiceImpl implements Service {
 
+	@Override
 	@Transaction
 	public void serveMe() {
 	}

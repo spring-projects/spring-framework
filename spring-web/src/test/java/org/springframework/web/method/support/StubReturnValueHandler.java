@@ -38,10 +38,12 @@ public class StubReturnValueHandler implements HandlerMethodReturnValueHandler {
 		return this.returnValue;
 	}
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return returnType.getParameterType().equals(this.returnType);
 	}
 
+	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
 		this.returnValue = returnValue;

@@ -57,6 +57,7 @@ class InterfaceExtendingAspect implements AnInterface {
 		pjp.proceed();
 	}
 
+	@Override
 	public void interfaceMethod() {
 	}
 }

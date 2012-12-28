@@ -148,6 +148,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 
 class TestWebArgumentResolver implements WebArgumentResolver {
 
+	@Override
 	public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
 		return null;
 	}
@@ -156,10 +157,12 @@ class TestWebArgumentResolver implements WebArgumentResolver {
 
 class TestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return false;
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		return null;
@@ -168,10 +171,12 @@ class TestHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver
 
 class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return false;
 	}
 
+	@Override
 	public void handleReturnValue(Object returnValue,
 			MethodParameter returnType, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest) throws Exception {
@@ -181,10 +186,12 @@ class TestHandlerMethodReturnValueHandler implements HandlerMethodReturnValueHan
 
 class TestMessageCodesResolver implements MessageCodesResolver {
 
+	@Override
 	public String[] resolveMessageCodes(String errorCode, String objectName) {
 		return new String[] { "test.foo.bar" };
 	}
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class fieldType) {
 		return new String[] { "test.foo.bar" };

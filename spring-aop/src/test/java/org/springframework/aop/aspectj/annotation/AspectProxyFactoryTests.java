@@ -111,6 +111,7 @@ public final class AspectProxyFactoryTests {
 
 		private int age;
 
+		@Override
 		public int getAge() {
 			return age;
 		}

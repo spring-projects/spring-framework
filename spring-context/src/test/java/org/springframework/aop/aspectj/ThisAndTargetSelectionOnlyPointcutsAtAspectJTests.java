@@ -108,6 +108,7 @@ public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	}
 
 	public static class TestImpl implements TestInterface {
+		@Override
 		public void doIt() {
 		}
 	}
@@ -119,11 +120,13 @@ public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 
 	@TestAnnotation
 	public static class AnnotatedClassTestImpl implements TestInterface {
+		@Override
 		public void doIt() {
 		}
 	}
 
 	public static class AnnotatedMethodTestImpl implements TestInterface {
+		@Override
 		@TestAnnotation
 		public void doIt() {
 		}

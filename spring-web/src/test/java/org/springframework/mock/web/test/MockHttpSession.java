@@ -98,10 +98,12 @@ public class MockHttpSession implements HttpSession {
 		this.id = (id != null ? id : Integer.toString(nextId++));
 	}
 
+	@Override
 	public long getCreationTime() {
 		return this.creationTime;
 	}
 
+	@Override
 	public String getId() {
 		return this.id;
 	}
@@ -111,43 +113,53 @@ public class MockHttpSession implements HttpSession {
 		this.isNew = false;
 	}
 
+	@Override
 	public long getLastAccessedTime() {
 		return this.lastAccessedTime;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
+	@Override
 	public void setMaxInactiveInterval(int interval) {
 		this.maxInactiveInterval = interval;
 	}
 
+	@Override
 	public int getMaxInactiveInterval() {
 		return this.maxInactiveInterval;
 	}
 
+	@Override
 	public HttpSessionContext getSessionContext() {
 		throw new UnsupportedOperationException("getSessionContext");
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Object getValue(String name) {
 		return getAttribute(name);
 	}
 
+	@Override
 	public Enumeration<String> getAttributeNames() {
 		return Collections.enumeration(this.attributes.keySet());
 	}
 
+	@Override
 	public String[] getValueNames() {
 		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
@@ -161,10 +173,12 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	@Override
 	public void putValue(String name, Object value) {
 		setAttribute(name, value);
 	}
 
+	@Override
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		Object value = this.attributes.remove(name);
@@ -173,6 +187,7 @@ public class MockHttpSession implements HttpSession {
 		}
 	}
 
+	@Override
 	public void removeValue(String name) {
 		removeAttribute(name);
 	}
@@ -197,6 +212,7 @@ public class MockHttpSession implements HttpSession {
 	 *
 	 * @throws IllegalStateException if this method is called on an already invalidated session
 	 */
+	@Override
 	public void invalidate() {
 		if (this.invalid) {
 			throw new IllegalStateException("The session has already been invalidated");
@@ -215,6 +231,7 @@ public class MockHttpSession implements HttpSession {
 		this.isNew = value;
 	}
 
+	@Override
 	public boolean isNew() {
 		return this.isNew;
 	}

@@ -61,6 +61,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 	private BeanFactory bf;
 
 
+	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
@@ -72,6 +73,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 		testDataSource.setTarget(mockDataSource);
 	}
 
+	@Override
 	@After
 	public void tearDown() throws Exception {
 		super.tearDown();
@@ -81,6 +83,7 @@ public class GenericSqlQueryTests extends AbstractJdbcTests {
 		}
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		EasyMock.replay(mockPreparedStatement);

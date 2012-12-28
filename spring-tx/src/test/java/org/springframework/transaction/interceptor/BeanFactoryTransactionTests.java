@@ -50,6 +50,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 	private XmlBeanFactory factory;
 
+	@Override
 	public void setUp() {
 		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
 	}
@@ -127,6 +128,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		final TransactionStatus ts = (TransactionStatus) statusControl.getMock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
+			@Override
 			public TransactionStatus getTransaction(TransactionDefinition def) throws TransactionException {
 				if (invoked) {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
@@ -138,9 +140,11 @@ public class BeanFactoryTransactionTests extends TestCase {
 				}
 				return ts;
 			}
+			@Override
 			public void commit(TransactionStatus status) throws TransactionException {
 				assertTrue(status == ts);
 			}
+			@Override
 			public void rollback(TransactionStatus status) throws TransactionException {
 				throw new IllegalStateException("rollback should not get invoked");
 			}
@@ -204,6 +208,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 		int counter = 0;
 
+		@Override
 		public boolean matches(Method method, Class clazz) {
 			counter++;
 			return true;
@@ -215,6 +220,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 		int counter = 0;
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			counter++;
 			return methodInvocation.proceed();

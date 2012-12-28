@@ -37,10 +37,12 @@ public class SerializableNopInterceptor extends NopInterceptor implements Serial
 	 */
 	private int count;
 
+	@Override
 	public int getCount() {
 		return this.count;
 	}
 
+	@Override
 	protected void increment() {
 		++count;
 	}

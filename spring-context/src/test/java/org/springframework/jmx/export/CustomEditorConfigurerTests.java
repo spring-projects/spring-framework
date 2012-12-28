@@ -31,6 +31,7 @@ public class CustomEditorConfigurerTests extends AbstractJmxTests {
 
 	private final SimpleDateFormat df = new SimpleDateFormat("yyyy/MM/dd");
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/customConfigurer.xml";
 	}

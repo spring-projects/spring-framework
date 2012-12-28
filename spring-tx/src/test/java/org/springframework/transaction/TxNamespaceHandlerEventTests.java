@@ -36,6 +36,7 @@ public class TxNamespaceHandlerEventTests extends TestCase {
 	private CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
+	@Override
 	public void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);

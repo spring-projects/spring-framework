@@ -49,11 +49,13 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	protected StaticApplicationContext sac;
 
 	/** Overridden */
+	@Override
 	public void testCount() {
 		// These are only checked for current Ctx (not parent ctx)
 		assertCount(15);
 	}
 
+	@Override
 	public void testMessageSource() throws NoSuchMessageException {
 		// Do nothing here since super is looking for errorCodes we
 		// do NOT have in the Context
@@ -195,6 +197,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	/** Run for each test */
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 

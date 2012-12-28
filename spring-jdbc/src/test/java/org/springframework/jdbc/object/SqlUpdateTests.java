@@ -66,12 +66,14 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 	private ResultSetMetaData mockResultSetMetaData;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
 		mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -79,6 +81,7 @@ public class SqlUpdateTests extends AbstractJdbcTests {
 		}
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		ctrlPreparedStatement.replay();

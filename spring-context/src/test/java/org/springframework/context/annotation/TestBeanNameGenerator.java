@@ -24,6 +24,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
  */
 public class TestBeanNameGenerator extends AnnotationBeanNameGenerator {
 
+	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		String beanName = super.generateBeanName(definition, registry);
 		return "testing." + beanName;

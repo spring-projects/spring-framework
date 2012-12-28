@@ -366,12 +366,14 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 	private static class DummyContainerPersistenceProvider implements PersistenceProvider {
 
+		@Override
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			actualPui = pui;
 			actualProps = map;
 			return mockEmf;
 		}
 
+		@Override
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
 			throw new UnsupportedOperationException();
 		}
@@ -380,23 +382,29 @@ public class LocalContainerEntityManagerFactoryBeanTests extends AbstractEntityM
 
 	private static class NoOpEntityTransaction implements EntityTransaction {
 
+		@Override
 		public void begin() {
 		}
 
+		@Override
 		public void commit() {
 		}
 
+		@Override
 		public void rollback() {
 		}
 
+		@Override
 		public void setRollbackOnly() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean getRollbackOnly() {
 			return false;
 		}
 
+		@Override
 		public boolean isActive() {
 			return false;
 		}

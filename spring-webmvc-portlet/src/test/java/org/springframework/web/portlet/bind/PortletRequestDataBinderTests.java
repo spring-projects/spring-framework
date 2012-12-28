@@ -70,6 +70,7 @@ public class PortletRequestDataBinderTests extends TestCase {
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text));
 			}

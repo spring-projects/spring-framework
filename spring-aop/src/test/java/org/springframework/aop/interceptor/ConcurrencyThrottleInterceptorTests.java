@@ -120,6 +120,7 @@ public final class ConcurrencyThrottleInterceptorTests {
 			this.ex = ex;
 		}
 
+		@Override
 		public void run() {
 			if (this.ex != null) {
 				try {

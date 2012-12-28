@@ -35,6 +35,7 @@ public final class JndiDataSourceLookupTests {
 	public void testSunnyDay() throws Exception {
 		final DataSource expectedDataSource = new StubDataSource();
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
+			@Override
 			@SuppressWarnings("unchecked")
 			protected Object lookup(String jndiName, Class requiredType) {
 				assertEquals(DATA_SOURCE_NAME, jndiName);
@@ -49,6 +50,7 @@ public final class JndiDataSourceLookupTests {
 	@Test(expected=DataSourceLookupFailureException.class)
 	public void testNoDataSourceAtJndiLocation() throws Exception {
 		JndiDataSourceLookup lookup = new JndiDataSourceLookup() {
+			@Override
 			@SuppressWarnings("unchecked")
 			protected Object lookup(String jndiName, Class requiredType) throws NamingException {
 				assertEquals(DATA_SOURCE_NAME, jndiName);

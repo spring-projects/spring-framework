@@ -38,6 +38,7 @@ public class DriverManagerDataSourceTests extends TestCase {
 		ctrlConnection.replay();
 
 		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			@Override
 			protected Connection getConnectionFromDriverManager(String url, Properties props) {
 				assertEquals(jdbcUrl, url);
 				assertEquals(uname, props.getProperty("user"));
@@ -77,6 +78,7 @@ public class DriverManagerDataSourceTests extends TestCase {
 		ctrlConnection.replay();
 
 		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			@Override
 			protected Connection getConnectionFromDriverManager(String url, Properties props) {
 				assertEquals(jdbcUrl, url);
 				assertEquals("uname", props.getProperty("user"));
@@ -117,6 +119,7 @@ public class DriverManagerDataSourceTests extends TestCase {
 		ctrlConnection.replay();
 
 		class TestDriverManagerDataSource extends DriverManagerDataSource {
+			@Override
 			protected Connection getConnectionFromDriverManager(String url, Properties props) {
 				assertEquals(jdbcUrl, url);
 				assertEquals(uname, props.getProperty("user"));

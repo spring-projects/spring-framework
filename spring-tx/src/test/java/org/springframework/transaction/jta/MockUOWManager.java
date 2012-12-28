@@ -48,6 +48,7 @@ public class MockUOWManager implements UOWManager {
 	private final List synchronizations = new LinkedList();
 
 
+	@Override
 	public void runUnderUOW(int type, boolean join, UOWAction action) throws UOWActionException, UOWException {
 		this.type = type;
 		this.joined = join;
@@ -70,6 +71,7 @@ public class MockUOWManager implements UOWManager {
 		}
 	}
 
+	@Override
 	public int getUOWType() {
 		return this.type;
 	}
@@ -78,22 +80,27 @@ public class MockUOWManager implements UOWManager {
 		return this.joined;
 	}
 
+	@Override
 	public long getLocalUOWId() {
 		return 0;
 	}
 
+	@Override
 	public void setUOWTimeout(int uowType, int timeout) {
 		this.timeout = timeout;
 	}
 
+	@Override
 	public int getUOWTimeout() {
 		return this.timeout;
 	}
 
+	@Override
 	public void setRollbackOnly() {
 		this.rollbackOnly = true;
 	}
 
+	@Override
 	public boolean getRollbackOnly() {
 		return this.rollbackOnly;
 	}
@@ -102,18 +109,22 @@ public class MockUOWManager implements UOWManager {
 		this.status = status;
 	}
 
+	@Override
 	public int getUOWStatus() {
 		return this.status;
 	}
 
+	@Override
 	public void putResource(Object key, Object value) {
 		this.resources.put(key, value);
 	}
 
+	@Override
 	public Object getResource(Object key) throws NullPointerException {
 		return this.resources.get(key);
 	}
 
+	@Override
 	public void registerInterposedSynchronization(Synchronization sync) {
 		this.synchronizations.add(sync);
 	}

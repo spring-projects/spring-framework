@@ -53,6 +53,7 @@ public final class SimpleScopeTests {
 				objects.add(new TestBean());
 				objects.add(new TestBean());
 			}
+			@Override
 			public Object get(String name, ObjectFactory<?> objectFactory) {
 				if (index >= objects.size()) {
 					index = 0;

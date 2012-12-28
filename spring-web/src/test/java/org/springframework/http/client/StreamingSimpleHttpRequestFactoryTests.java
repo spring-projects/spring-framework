@@ -47,6 +47,7 @@ public class StreamingSimpleHttpRequestFactoryTests extends AbstractHttpRequestF
 		final String headerName = "MyHeader";
 		final String headerValue = "MyValue";
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 				request.getHeaders().add(headerName, headerValue);

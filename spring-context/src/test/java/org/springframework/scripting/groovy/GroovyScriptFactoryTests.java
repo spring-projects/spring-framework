@@ -478,8 +478,10 @@ public class GroovyScriptFactoryTests {
 
 	public static class TestCustomizer implements GroovyObjectCustomizer {
 
+		@Override
 		public void customize(GroovyObject goo) {
 			DelegatingMetaClass dmc = new DelegatingMetaClass(goo.getMetaClass()) {
+				@Override
 				public Object invokeMethod(Object arg0, String mName, Object[] arg2) {
 					if (mName.indexOf("Missing") != -1) {
 						throw new IllegalStateException("Gotcha");

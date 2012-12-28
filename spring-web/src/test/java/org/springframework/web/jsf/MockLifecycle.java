@@ -27,19 +27,24 @@ import javax.faces.lifecycle.Lifecycle;
  */
 public class MockLifecycle extends Lifecycle {
 
+	@Override
 	public void addPhaseListener(PhaseListener phaseListener) {
 	}
 
+	@Override
 	public void execute(FacesContext facesContext) throws FacesException {
 	}
 
+	@Override
 	public PhaseListener[] getPhaseListeners() {
 		return null;
 	}
 
+	@Override
 	public void removePhaseListener(PhaseListener phaseListener) {
 	}
 
+	@Override
 	public void render(FacesContext facesContext) throws FacesException {
 	}
 

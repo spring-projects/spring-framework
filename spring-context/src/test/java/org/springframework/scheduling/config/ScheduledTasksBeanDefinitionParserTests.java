@@ -123,6 +123,7 @@ public class ScheduledTasksBeanDefinitionParserTests {
 
 	static class TestTrigger implements Trigger {
 
+		@Override
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 			return null;
 		}

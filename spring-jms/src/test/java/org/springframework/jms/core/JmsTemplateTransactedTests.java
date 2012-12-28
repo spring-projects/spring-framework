@@ -22,10 +22,12 @@ package org.springframework.jms.core;
  */
 public class JmsTemplateTransactedTests extends JmsTemplateTests {
 
+	@Override
 	protected boolean useTransactedSession() {
 		return true;
 	}
 
+	@Override
 	protected boolean useTransactedTemplate() {
 		return true;
 	}

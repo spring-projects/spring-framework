@@ -507,6 +507,7 @@ public class BeanWrapperGenericsTests {
 
 		private Map<String, List<List<Integer>>> mapOfListOfListOfInteger;
 
+		@Override
 		public Map<String, Integer> getMapOfInteger() {
 			return mapOfInteger;
 		}
@@ -515,10 +516,12 @@ public class BeanWrapperGenericsTests {
 			this.mapOfInteger = mapOfInteger;
 		}
 
+		@Override
 		public Map<String, List<Integer>> getMapOfListOfInteger() {
 			return mapOfListOfInteger;
 		}
 
+		@Override
 		public void setMapOfListOfInteger(Map<String, List<Integer>> mapOfListOfInteger) {
 			this.mapOfListOfInteger = mapOfListOfInteger;
 		}
@@ -591,6 +594,7 @@ public class BeanWrapperGenericsTests {
 
 		private double version;
 
+		@Override
 		public Double getVersion() {
 			return this.version;
 		}
@@ -613,10 +617,12 @@ public class BeanWrapperGenericsTests {
 
 	  private Long id;
 
+	  @Override
 	  public Long getId() {
 		  return id;
 	  }
 
+	  @Override
 	  public void setId(Long aId) {
 		  this.id = aId;
 	  }

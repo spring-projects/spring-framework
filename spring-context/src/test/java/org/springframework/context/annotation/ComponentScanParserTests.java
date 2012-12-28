@@ -147,6 +147,7 @@ public class ComponentScanParserTests {
 
 	public static class CustomTypeFilter implements TypeFilter {
 
+		@Override
 		public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) {
 			return metadataReader.getClassMetadata().getClassName().contains("Custom");
 		}
