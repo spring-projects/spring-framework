@@ -72,7 +72,6 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlRootElement() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
@@ -81,7 +80,6 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlRootElementSubclass() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
@@ -90,7 +88,6 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlType() throws Exception {
 		byte[] body = "<foo s=\"Hello World\"/>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);

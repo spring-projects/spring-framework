@@ -573,7 +573,6 @@ public abstract class WebUtils {
 	 * @return the value of the parameter, or {@code null}
 	 * if the parameter does not exist in given request
 	 */
-	@SuppressWarnings("unchecked")
 	public static String findParameterValue(ServletRequest request, String name) {
 		return findParameterValue(request.getParameterMap(), name);
 	}

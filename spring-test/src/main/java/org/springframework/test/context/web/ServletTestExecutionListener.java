@@ -126,7 +126,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				RequestContextHolder.setRequestAttributes(servletWebRequest);
 
 				if (wac instanceof ConfigurableApplicationContext) {
-					@SuppressWarnings("resource")
 					ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) wac;
 					ConfigurableListableBeanFactory bf = configurableApplicationContext.getBeanFactory();
 					bf.registerResolvableDependency(MockHttpServletResponse.class, response);
