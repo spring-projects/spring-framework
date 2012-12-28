@@ -57,6 +57,8 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
@@ -964,6 +966,8 @@ public class QuartzSupportTests {
 	// SPR-6038: detect HSQL and stop illegal locks being taken
 	@Test
 	public void testSchedulerWithHsqlDataSource() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
