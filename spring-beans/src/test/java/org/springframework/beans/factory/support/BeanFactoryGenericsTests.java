@@ -391,6 +391,7 @@ public class BeanFactoryGenericsTests {
 	public void testGenericMapWithCollectionValueConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
 			}
@@ -547,6 +548,7 @@ public class BeanFactoryGenericsTests {
 	public void testGenericMapWithCollectionValueFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
 			}

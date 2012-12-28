@@ -46,14 +46,17 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		setTransactionSynchronization(SYNCHRONIZATION_NEVER);
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		return TRANSACTION;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		return existingTransaction;
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (!TRANSACTION.equals(transaction)) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -64,6 +67,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -71,6 +75,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.commit = true;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -78,6 +83,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.rollback = true;
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");

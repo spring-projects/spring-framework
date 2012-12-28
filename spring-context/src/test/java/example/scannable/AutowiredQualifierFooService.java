@@ -45,14 +45,17 @@ public class AutowiredQualifierFooService implements FooService {
 		this.initCalled = true;
 	}
 
+	@Override
 	public String foo(int id) {
 		return this.fooDao.findFoo(id);
 	}
 
+	@Override
 	public Future<String> asyncFoo(int id) {
 		return new AsyncResult<String>(this.fooDao.findFoo(id));
 	}
 
+	@Override
 	public boolean isInitCalled() {
 		return this.initCalled;
 	}

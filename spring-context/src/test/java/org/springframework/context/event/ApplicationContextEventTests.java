@@ -214,10 +214,12 @@ public class ApplicationContextEventTests {
 
 		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			this.seenEvents.add(event);
 		}
 
+		@Override
 		public int getOrder() {
 			return 0;
 		}
@@ -230,6 +232,7 @@ public class ApplicationContextEventTests {
 
 	public static abstract class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
 
+		@Override
 		public int getOrder() {
 			return 1;
 		}
@@ -244,6 +247,7 @@ public class ApplicationContextEventTests {
 			this.otherListener = otherListener;
 		}
 
+		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertTrue(otherListener.seenEvents.contains(event));
 		}
@@ -254,6 +258,7 @@ public class ApplicationContextEventTests {
 
 		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			seenEvents.add(event);
 		}

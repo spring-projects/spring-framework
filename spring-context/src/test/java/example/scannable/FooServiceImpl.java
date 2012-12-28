@@ -74,16 +74,19 @@ public class FooServiceImpl implements FooService {
 		this.initCalled = true;
 	}
 
+	@Override
 	public String foo(int id) {
 		return this.fooDao.findFoo(id);
 	}
 
+	@Override
 	public Future<String> asyncFoo(int id) {
 		System.out.println(Thread.currentThread().getName());
 		Assert.state(ServiceInvocationCounter.getThreadLocalCount() != null, "Thread-local counter not exposed");
 		return new AsyncResult<String>(this.fooDao.findFoo(id));
 	}
 
+	@Override
 	public boolean isInitCalled() {
 		return this.initCalled;
 	}

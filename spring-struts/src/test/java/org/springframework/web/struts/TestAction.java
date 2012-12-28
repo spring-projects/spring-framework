@@ -34,6 +34,7 @@ public class TestAction extends Action implements BeanNameAware {
 
 	private String beanName;
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}

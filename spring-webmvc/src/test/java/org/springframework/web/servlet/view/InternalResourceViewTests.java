@@ -73,6 +73,7 @@ public class InternalResourceViewTests extends TestCase {
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
 		view.setServletContext(new MockServletContext() {
+			@Override
 			public int getMinorVersion() {
 				return 4;
 			}
@@ -118,6 +119,7 @@ public class InternalResourceViewTests extends TestCase {
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
 		view.setServletContext(new MockServletContext() {
+			@Override
 			public int getMinorVersion() {
 				return 4;
 			}

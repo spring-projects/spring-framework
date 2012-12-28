@@ -31,9 +31,11 @@ public class ScopedBeanInterceptorTests extends TestCase {
 		final Object realObject = new Object();
 
 		ScopedObject scoped = new ScopedObject() {
+			@Override
 			public Object getTargetObject() {
 				return realObject;
 			}
+			@Override
 			public void removeFromScope() {
 				// do nothing
 			}
@@ -53,9 +55,11 @@ public class ScopedBeanInterceptorTests extends TestCase {
 		final Object proxy = proxyFactory.getProxy();
 
 		ScopedObject scoped = new ScopedObject() {
+			@Override
 			public Object getTargetObject() {
 				return proxy;
 			}
+			@Override
 			public void removeFromScope() {
 				// do nothing
 			}

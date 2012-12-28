@@ -60,30 +60,37 @@ public class StubMvcResult implements MvcResult {
 		this.response = response;
 	}
 
+	@Override
 	public MockHttpServletRequest getRequest() {
 		return request;
 	}
 
+	@Override
 	public Object getHandler() {
 		return handler;
 	}
 
+	@Override
 	public HandlerInterceptor[] getInterceptors() {
 		return interceptors;
 	}
 
+	@Override
 	public Exception getResolvedException() {
 		return resolvedException;
 	}
 
+	@Override
 	public ModelAndView getModelAndView() {
 		return mav;
 	}
 
+	@Override
 	public FlashMap getFlashMap() {
 		return flashMap;
 	}
 
+	@Override
 	public MockHttpServletResponse getResponse() {
 		return response;
 	}
@@ -120,10 +127,12 @@ public class StubMvcResult implements MvcResult {
 		this.response = response;
 	}
 
+	@Override
 	public Object getAsyncResult() {
 		return null;
 	}
 
+	@Override
 	public Object getAsyncResult(long timeout) {
 		return null;
 	}

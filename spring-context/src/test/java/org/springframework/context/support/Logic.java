@@ -34,6 +34,7 @@ public class Logic implements BeanNameAware {
 	/* (non-Javadoc)
 	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 	 */
+	@Override
 	public void setBeanName(String name) {
 		this.name = name;
 	}

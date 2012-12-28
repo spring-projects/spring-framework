@@ -28,6 +28,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  */
 public class EclipseLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
+	@Override
 	protected String[] getConfigLocations() {
 		return ECLIPSELINK_CONFIG_LOCATIONS;
 	}

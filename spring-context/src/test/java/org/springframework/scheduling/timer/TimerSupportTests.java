@@ -50,27 +50,32 @@ public class TimerSupportTests extends TestCase {
 
 		final List<Boolean> success = new ArrayList<Boolean>(3);
 		final Timer timer = new Timer(true) {
+			@Override
 			public void schedule(TimerTask task, long delay, long period) {
 				if (task == timerTask0 && delay == 0 && period == 10) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
 				if (task == timerTask1 && delay == 10 && period == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void schedule(TimerTask task, long delay) {
 				if (task instanceof DelegatingTimerTask && delay == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void cancel() {
 				success.add(Boolean.TRUE);
 			}
 		};
 
 		TimerFactoryBean timerFactoryBean = new TimerFactoryBean() {
+			@Override
 			protected Timer createTimer(String name, boolean daemon) {
 				return timer;
 			}
@@ -104,6 +109,7 @@ public class TimerSupportTests extends TestCase {
 
 		private int counter = 0;
 
+		@Override
 		public void run() {
 			counter++;
 		}
@@ -114,6 +120,7 @@ public class TimerSupportTests extends TestCase {
 
 		private int counter = 0;
 
+		@Override
 		public void run() {
 			counter++;
 		}

@@ -44,6 +44,7 @@ public class SimpleMapScope implements Scope, Serializable {
 	}
 
 
+	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		synchronized (this.map) {
 			Object scopedObject = this.map.get(name);
@@ -55,16 +56,19 @@ public class SimpleMapScope implements Scope, Serializable {
 		}
 	}
 
+	@Override
 	public Object remove(String name) {
 		synchronized (this.map) {
 			return this.map.remove(name);
 		}
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		this.callbacks.add(callback);
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
@@ -76,6 +80,7 @@ public class SimpleMapScope implements Scope, Serializable {
 		}
 	}
 
+	@Override
 	public String getConversationId() {
 		return null;
 	}

@@ -37,6 +37,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 		MockControl pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		final PersistenceManagerFactory pmf = (PersistenceManagerFactory) pmfControl.getMock();
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				return pmf;
 			}
@@ -73,6 +74,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithInvalidProperty() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				throw new IllegalArgumentException((String) props.get("myKey"));
 			}
@@ -92,6 +94,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithFile() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(Map props) {
 				throw new IllegalArgumentException((String) props.get("myKey"));
 			}
@@ -109,6 +112,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithName() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(String name) {
 				throw new IllegalArgumentException(name);
 			}
@@ -126,6 +130,7 @@ public class LocalPersistenceManagerFactoryTests extends TestCase {
 
 	public void testLocalPersistenceManagerFactoryBeanWithNameAndProperties() throws IOException {
 		LocalPersistenceManagerFactoryBean pmfb = new LocalPersistenceManagerFactoryBean() {
+			@Override
 			protected PersistenceManagerFactory newPersistenceManagerFactory(String name) {
 				throw new IllegalArgumentException(name);
 			}

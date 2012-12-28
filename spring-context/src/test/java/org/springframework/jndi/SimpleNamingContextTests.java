@@ -219,38 +219,47 @@ public class SimpleNamingContextTests {
 
 class StubDataSource implements DataSource {
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		return null;
 	}
 
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return null;
 	}
 
+	@Override
 	public int getLoginTimeout() throws SQLException {
 		return 0;
 	}
 
+	@Override
 	public void setLogWriter(PrintWriter arg0) throws SQLException {
 
 	}
 
+	@Override
 	public void setLoginTimeout(int arg0) throws SQLException {
 
 	}
 
+	@Override
 	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
 		return false;
 	}
 
+	@Override
 	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public Logger getParentLogger() {
 		return null;
 	}

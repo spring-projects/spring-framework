@@ -53,6 +53,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 		return initMethodDeclared;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -61,6 +62,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.owningFactory = beanFactory;
 	}
@@ -75,6 +77,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 		this.postProcessedBeforeInit = true;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.owningFactory == null) {
 			throw new RuntimeException("Factory didn't call setBeanFactory before afterPropertiesSet on lifecycle bean");
@@ -126,6 +129,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 		}
 	}
 
+	@Override
 	public void destroy() {
 		if (this.destroyed) {
 			throw new IllegalStateException("Already destroyed");
@@ -140,6 +144,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 
 	public static class PostProcessor implements BeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 			if (bean instanceof LifecycleBean) {
 				((LifecycleBean) bean).postProcessBeforeInit();
@@ -147,6 +152,7 @@ public class LifecycleBean implements BeanNameAware, BeanFactoryAware, Initializ
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 			if (bean instanceof LifecycleBean) {
 				((LifecycleBean) bean).postProcessAfterInit();

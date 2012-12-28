@@ -85,12 +85,14 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		settings.setProperty("localized_lookup", "false");
 		fcfb.setFreemarkerSettings(settings);
 		fcfb.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
 					throw new IllegalArgumentException(location);
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}

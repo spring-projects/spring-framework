@@ -30,6 +30,7 @@ public class TableMetaDataContextTests extends TestCase {
 
 	private TableMetaDataContext context = new TableMetaDataContext();
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -50,6 +51,7 @@ public class TableMetaDataContextTests extends TestCase {
 
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ctrlDatabaseMetaData.verify();

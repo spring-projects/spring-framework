@@ -75,18 +75,22 @@ public class ImportBeanDefinitionRegistrarTests {
 		static ResourceLoader resourceLoader;
 		static BeanFactory beanFactory;
 
+		@Override
 		public void setBeanClassLoader(ClassLoader classLoader) {
 			SampleRegistrar.classLoader = classLoader;
 		}
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 			SampleRegistrar.beanFactory = beanFactory;
 		}
 
+		@Override
 		public void setResourceLoader(ResourceLoader resourceLoader) {
 			SampleRegistrar.resourceLoader = resourceLoader;
 		}
 
+		@Override
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		}
 	}

@@ -656,6 +656,7 @@ public class EnvironmentIntegrationTests {
 
 		public Environment environment;
 
+		@Override
 		public void setEnvironment(Environment environment) {
 			this.environment = environment;
 		}

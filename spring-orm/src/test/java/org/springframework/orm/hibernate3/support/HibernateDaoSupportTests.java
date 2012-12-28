@@ -37,6 +37,7 @@ public class HibernateDaoSupportTests extends TestCase {
 		sfControl.replay();
 		final List test = new ArrayList();
 		HibernateDaoSupport dao = new HibernateDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -53,6 +54,7 @@ public class HibernateDaoSupportTests extends TestCase {
 		HibernateTemplate template = new HibernateTemplate();
 		final List test = new ArrayList();
 		HibernateDaoSupport dao = new HibernateDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

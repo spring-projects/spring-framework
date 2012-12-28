@@ -53,12 +53,14 @@ public final class ExposeInvocationInterceptorTests {
 
 abstract class ExposedInvocationTestBean extends TestBean {
 
+	@Override
 	public String getName() {
 		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 		assertions(invocation);
 		return super.getName();
 	}
 
+	@Override
 	public void absquatulate() {
 		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 		assertions(invocation);
@@ -70,6 +72,7 @@ abstract class ExposedInvocationTestBean extends TestBean {
 
 
 class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
+	@Override
 	protected void assertions(MethodInvocation invocation) {
 		assertTrue(invocation.getThis() == this);
 		assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),

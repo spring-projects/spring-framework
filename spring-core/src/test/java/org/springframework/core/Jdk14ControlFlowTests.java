@@ -30,6 +30,7 @@ public class Jdk14ControlFlowTests extends AbstractControlFlowTests {
 	public void testThisClassPlease() {
 	}
 
+	@Override
 	protected ControlFlow createControlFlow() {
 		return ControlFlowFactory.createControlFlow();
 	}

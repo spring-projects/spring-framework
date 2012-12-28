@@ -44,6 +44,7 @@ public class JpaTemplateTests extends TestCase {
 
 	private EntityManagerFactory factory;
 
+	@Override
 	protected void setUp() throws Exception {
 		template = new JpaTemplate();
 
@@ -57,6 +58,7 @@ public class JpaTemplateTests extends TestCase {
 
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		template = null;
 		factoryControl = null;
@@ -95,6 +97,7 @@ public class JpaTemplateTests extends TestCase {
 
 		template.execute(new JpaCallback() {
 
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				assertSame(em, manager);
 				return null;
@@ -104,6 +107,7 @@ public class JpaTemplateTests extends TestCase {
 		template.setExposeNativeEntityManager(false);
 		template.execute(new JpaCallback() {
 
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				assertNotSame(em, manager);
 				return null;
@@ -128,6 +132,7 @@ public class JpaTemplateTests extends TestCase {
 		try {
 			template.executeFind(new JpaCallback() {
 
+				@Override
 				public Object doInJpa(EntityManager em) throws PersistenceException {
 					assertSame(em, manager);
 					return new Object();
@@ -161,6 +166,7 @@ public class JpaTemplateTests extends TestCase {
 		factoryControl.replay();
 
 		template.execute(new JpaCallback() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				assertSame(em, manager);
 				return null;
@@ -183,6 +189,7 @@ public class JpaTemplateTests extends TestCase {
 		try {
 			template.execute(new JpaCallback() {
 
+				@Override
 				public Object doInJpa(EntityManager em) throws PersistenceException {
 					assertSame(em, manager);
 					return null;

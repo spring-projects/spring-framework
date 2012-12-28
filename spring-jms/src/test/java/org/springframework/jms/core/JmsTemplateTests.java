@@ -91,6 +91,7 @@ public class JmsTemplateTests extends TestCase {
 	/**
 	 * Create the mock objects for testing.
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		mockJndiControl = MockControl.createControl(Context.class);
 		mockJndiContext = (Context) this.mockJndiControl.getMock();
@@ -131,6 +132,7 @@ public class JmsTemplateTests extends TestCase {
 		JmsTemplate template = new JmsTemplate();
 		JndiDestinationResolver destMan = new JndiDestinationResolver();
 		destMan.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockJndiContext;
 			}
@@ -186,6 +188,7 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
@@ -229,6 +232,7 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
@@ -258,6 +262,7 @@ public class JmsTemplateTests extends TestCase {
 		connectionControl.replay();
 
 		template.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session session) throws JMSException {
 				boolean b = session.getTransacted();
 				return null;
@@ -296,12 +301,14 @@ public class JmsTemplateTests extends TestCase {
 		TransactionSynchronizationManager.initSynchronization();
 		try {
 			template.execute(new SessionCallback() {
+				@Override
 				public Object doInJms(Session session) throws JMSException {
 					boolean b = session.getTransacted();
 					return null;
 				}
 			});
 			template.execute(new SessionCallback() {
+				@Override
 				public Object doInJms(Session session) throws JMSException {
 					boolean b = session.getTransacted();
 					return null;
@@ -472,6 +479,7 @@ public class JmsTemplateTests extends TestCase {
 
 		if (useDefaultDestination) {
 			template.send(new MessageCreator() {
+				@Override
 				public Message createMessage(Session session) throws JMSException {
 					return session.createTextMessage("just testing");
 				}
@@ -480,6 +488,7 @@ public class JmsTemplateTests extends TestCase {
 		else {
 			if (explicitDestination) {
 				template.send(mockQueue, new MessageCreator() {
+					@Override
 					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}
@@ -487,6 +496,7 @@ public class JmsTemplateTests extends TestCase {
 			}
 			else {
 				template.send(destinationName, new MessageCreator() {
+					@Override
 					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}

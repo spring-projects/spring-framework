@@ -42,6 +42,7 @@ public class DelegatingVariableResolverTests extends TestCase {
 		// We need to override the getWebApplicationContext method here:
 		// FacesContext and ExternalContext are hard to mock.
 		DelegatingVariableResolver resolver = new DelegatingVariableResolver(new OriginalVariableResolver()) {
+			@Override
 			protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {
 				return wac;
 			}
@@ -61,6 +62,7 @@ public class DelegatingVariableResolverTests extends TestCase {
 		// We need to override the getWebApplicationContext method here:
 		// FacesContext and ExternalContext are hard to mock.
 		SpringBeanVariableResolver resolver = new SpringBeanVariableResolver(new OriginalVariableResolver()) {
+			@Override
 			protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {
 				return wac;
 			}
@@ -72,6 +74,7 @@ public class DelegatingVariableResolverTests extends TestCase {
 
 	private static class OriginalVariableResolver extends VariableResolver {
 
+		@Override
 		public Object resolveVariable(FacesContext facesContext, String name) throws EvaluationException {
 			if ("var1".equals(name)) {
 				return "val1";

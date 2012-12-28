@@ -270,6 +270,7 @@ public class DataAccessUtilsTests extends TestCase {
 			this.translations.put(in, out);
 		}
 
+		@Override
 		public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 			return (DataAccessException) translations.get(ex);
 		}

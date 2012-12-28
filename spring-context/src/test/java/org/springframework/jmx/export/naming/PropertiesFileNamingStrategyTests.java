@@ -23,6 +23,7 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class PropertiesFileNamingStrategyTests extends PropertiesNamingStrategyTests {
 
+	@Override
 	protected ObjectNamingStrategy getStrategy() throws Exception {
 		KeyNamingStrategy strat = new KeyNamingStrategy();
 		strat.setMappingLocation(new ClassPathResource("jmx-names.properties", getClass()));

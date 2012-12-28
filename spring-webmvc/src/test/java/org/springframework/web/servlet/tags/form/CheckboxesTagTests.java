@@ -59,9 +59,11 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxesTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -426,9 +428,11 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
 		FormattingConversionService cs = new FormattingConversionService();
 		cs.addFormatterForFieldType(String.class, new Formatter<String>() {
+			@Override
 			public String print(String object, Locale locale) {
 				return object;
 			}
+			@Override
 			public String parse(String text, Locale locale) throws ParseException {
 				return text.trim();
 			}
@@ -728,6 +732,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -770,6 +775,7 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			super.setAsText(text);
 			this.allProcessedValues.add(getValue());
@@ -779,10 +785,12 @@ public class CheckboxesTagTests extends AbstractFormTagTests {
 
 	private static class MyLowerCaseEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(text.toLowerCase());
 		}
 
+		@Override
 		public String getAsText() {
 			return ObjectUtils.nullSafeToString(getValue()).toUpperCase();
 		}

@@ -154,6 +154,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -248,6 +249,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -346,6 +348,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -401,6 +404,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -570,6 +574,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -605,6 +610,7 @@ public class QuartzSupportTests {
 		schedulerControl.replay();
 
 		SchedulerFactoryBean schedulerFactoryBean = new SchedulerFactoryBean() {
+			@Override
 			protected Scheduler createScheduler(SchedulerFactory schedulerFactory, String schedulerName) {
 				return scheduler;
 			}
@@ -1040,30 +1046,39 @@ public class QuartzSupportTests {
 
 	private static class TestSchedulerListener implements SchedulerListener {
 
+		@Override
 		public void jobScheduled(Trigger trigger) {
 		}
 
+		@Override
 		public void jobUnscheduled(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void triggerFinalized(Trigger trigger) {
 		}
 
+		@Override
 		public void triggersPaused(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void triggersResumed(String triggerName, String triggerGroup) {
 		}
 
+		@Override
 		public void jobsPaused(String jobName, String jobGroup) {
 		}
 
+		@Override
 		public void jobsResumed(String jobName, String jobGroup) {
 		}
 
+		@Override
 		public void schedulerError(String msg, SchedulerException cause) {
 		}
 
+		@Override
 		public void schedulerShutdown() {
 		}
 	}
@@ -1071,16 +1086,20 @@ public class QuartzSupportTests {
 
 	private static class TestJobListener implements JobListener {
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public void jobToBeExecuted(JobExecutionContext context) {
 		}
 
+		@Override
 		public void jobExecutionVetoed(JobExecutionContext context) {
 		}
 
+		@Override
 		public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
 		}
 	}
@@ -1088,20 +1107,25 @@ public class QuartzSupportTests {
 
 	private static class TestTriggerListener implements TriggerListener {
 
+		@Override
 		public String getName() {
 			return null;
 		}
 
+		@Override
 		public void triggerFired(Trigger trigger, JobExecutionContext context) {
 		}
 
+		@Override
 		public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
 			return false;
 		}
 
+		@Override
 		public void triggerMisfired(Trigger trigger) {
 		}
 
+		@Override
 		public void triggerComplete(Trigger trigger, JobExecutionContext context, int triggerInstructionCode) {
 		}
 	}
@@ -1111,6 +1135,7 @@ public class QuartzSupportTests {
 
 		private int count;
 
+		@Override
 		public void execute(Runnable task) {
 			this.count++;
 			task.run();
@@ -1131,6 +1156,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		public synchronized void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 			count++;
 		}
@@ -1150,6 +1176,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		protected synchronized void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 			count++;
 		}
@@ -1169,6 +1196,7 @@ public class QuartzSupportTests {
 			param = value;
 		}
 
+		@Override
 		public void run() {
 			count++;
 		}

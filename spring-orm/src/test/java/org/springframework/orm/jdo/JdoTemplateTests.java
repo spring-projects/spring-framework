@@ -50,6 +50,7 @@ public class JdoTemplateTests extends TestCase {
 	private MockControl pmControl;
 	private PersistenceManager pm;
 
+	@Override
 	protected void setUp() {
 		pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		pmf = (PersistenceManagerFactory) pmfControl.getMock();
@@ -59,6 +60,7 @@ public class JdoTemplateTests extends TestCase {
 		pmfControl.setReturnValue(null, 1);
 	}
 
+	@Override
 	protected void tearDown() {
 		try {
 			pmfControl.verify();
@@ -75,6 +77,7 @@ public class JdoTemplateTests extends TestCase {
 		jt.setAllowCreate(false);
 		try {
 			jt.execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					return null;
 				}
@@ -96,6 +99,7 @@ public class JdoTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = (List) jt.execute(new JdoCallback() {
+			@Override
 			public Object doInJdo(PersistenceManager pm) {
 				return l;
 			}
@@ -116,6 +120,7 @@ public class JdoTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = (List) jt.execute(new JdoCallback() {
+			@Override
 			public Object doInJdo(PersistenceManager pm) {
 				return l;
 			}
@@ -136,6 +141,7 @@ public class JdoTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = (List) jt.execute(new JdoCallback() {
+			@Override
 			public Object doInJdo(PersistenceManager pm) {
 				return l;
 			}
@@ -620,6 +626,7 @@ public class JdoTemplateTests extends TestCase {
 	public void testTemplateExceptions() {
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOObjectNotFoundException();
 				}
@@ -632,6 +639,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOOptimisticVerificationException();
 				}
@@ -644,6 +652,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDODataStoreException();
 				}
@@ -656,6 +665,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOFatalDataStoreException();
 				}
@@ -668,6 +678,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOUserException();
 				}
@@ -680,6 +691,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOFatalUserException();
 				}
@@ -692,6 +704,7 @@ public class JdoTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw new JDOException();
 				}
@@ -714,6 +727,7 @@ public class JdoTemplateTests extends TestCase {
 			JdoTemplate template = createTemplate();
 			template.setJdoDialect(dialect);
 			template.execute(new JdoCallback() {
+				@Override
 				public Object doInJdo(PersistenceManager pm) {
 					throw ex;
 				}

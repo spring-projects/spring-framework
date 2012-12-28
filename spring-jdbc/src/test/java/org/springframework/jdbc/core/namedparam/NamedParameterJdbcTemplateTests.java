@@ -71,6 +71,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 	private MockControl ctrlResultSet;
 	private ResultSet mockResultSet;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
@@ -79,6 +80,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -87,6 +89,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		}
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		ctrlPreparedStatement.replay();
@@ -132,6 +135,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("perfId", new Integer(1));
 		params.put("priceId", new Integer(1));
 		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback() {
+			@Override
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				assertEquals(mockPreparedStatement, ps);
 				ps.executeUpdate();
@@ -164,6 +168,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("perfId", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("priceId", new SqlParameterValue(Types.INTEGER, new Integer(1)));
 		assertEquals("result", jt.execute(UPDATE_NAMED_PARAMETERS, params, new PreparedStatementCallback() {
+			@Override
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				assertEquals(mockPreparedStatement, ps);
 				ps.executeUpdate();
@@ -259,6 +264,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
 		Customer cust = (Customer) jt.query(SELECT_NAMED_PARAMETERS, params, new ResultSetExtractor() {
+			@Override
 			public Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 				rs.next();
 				Customer cust = new Customer();
@@ -307,6 +313,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("country", "UK");
 		final List customers = new LinkedList();
 		jt.query(SELECT_NAMED_PARAMETERS, params, new RowCallbackHandler() {
+			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -355,6 +362,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
 		List customers = jt.query(SELECT_NAMED_PARAMETERS, params, new RowMapper() {
+			@Override
 			public Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -403,6 +411,7 @@ public class NamedParameterJdbcTemplateTests extends AbstractJdbcTests {
 		params.put("id", new SqlParameterValue(Types.DECIMAL, new Integer(1)));
 		params.put("country", "UK");
 		Customer cust = (Customer) jt.queryForObject(SELECT_NAMED_PARAMETERS, params, new RowMapper() {
+			@Override
 			public Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));

@@ -84,6 +84,7 @@ public final class ArgumentBindingTests {
 
 	public static class TransactionalBean implements ITransactionalBean {
 
+		@Override
 		@Transactional
 		public void doInTransaction() {
 		}

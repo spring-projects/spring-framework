@@ -115,6 +115,7 @@ public final class ConcurrentBeanWrapperTests {
 			this.test = test;
 		}
 
+		@Override
 		public void run() {
 			try {
 				for (int i = 0; i < 100; i++) {

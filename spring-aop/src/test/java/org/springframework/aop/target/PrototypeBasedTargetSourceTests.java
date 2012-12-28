@@ -70,10 +70,12 @@ public final class PrototypeBasedTargetSourceTests {
 		 */
 		private TestBean thisFieldIsNotSerializable = new TestBean();
 
+		@Override
 		public Object getTarget() throws Exception {
 			return newPrototypeInstance();
 		}
 
+		@Override
 		public void releaseTarget(Object target) throws Exception {
 			// Do nothing
 		}

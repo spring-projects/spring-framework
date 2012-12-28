@@ -256,22 +256,27 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.containsKey(name);
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(propertyMap.get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
@@ -295,22 +300,27 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.containsKey(name);
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(propertyMap.get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		}
 

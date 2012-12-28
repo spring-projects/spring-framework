@@ -60,6 +60,7 @@ public class LobTypeTests extends TestCase {
 	private MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
 	private LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
 
+	@Override
 	protected void setUp() throws SQLException {
 		lobHandler.getLobCreator();
 		lobHandlerControl.setReturnValue(lobCreator);
@@ -613,6 +614,7 @@ public class LobTypeTests extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() {
 		try {
 			rsControl.verify();

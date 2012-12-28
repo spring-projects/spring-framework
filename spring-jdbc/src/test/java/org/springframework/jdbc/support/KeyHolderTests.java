@@ -35,6 +35,7 @@ import junit.framework.TestCase;
 public class KeyHolderTests extends TestCase {
 	private KeyHolder kh;
 
+	@Override
 	public void setUp() {
 		kh = new GeneratedKeyHolder();
 	}

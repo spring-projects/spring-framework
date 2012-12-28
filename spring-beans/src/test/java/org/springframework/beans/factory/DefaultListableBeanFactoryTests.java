@@ -836,6 +836,7 @@ public class DefaultListableBeanFactoryTests {
 	public void testCustomEditor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
@@ -853,6 +854,7 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		GenericConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new Converter<String, Float>() {
+			@Override
 			public Float convert(String source) {
 				try {
 					NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
@@ -875,6 +877,7 @@ public class DefaultListableBeanFactoryTests {
 	public void testCustomEditorWithBeanReference() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
@@ -1907,9 +1910,11 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1926,9 +1931,11 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithCloseable.class);
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1946,9 +1953,11 @@ public class DefaultListableBeanFactoryTests {
 		bd.setDestroyMethodName("close");
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -2117,6 +2126,7 @@ public class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", bd);
 		final String nameSetOnField = "nameSetOnField";
 		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessorAdapter() {
+			@Override
 			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 				TestBean tb = (TestBean) bean;
 				try {
@@ -2156,6 +2166,7 @@ public class DefaultListableBeanFactoryTests {
 
 		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
 				new PrivilegedAction() {
+					@Override
 					public Object run() {
 						return lbf.getBean("test");
 					}
@@ -2244,14 +2255,17 @@ public class DefaultListableBeanFactoryTests {
 		public ConstructorDependencyFactoryBean(String dependency) {
 		}
 
+		@Override
 		public Object getObject() {
 			return "test";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -2262,6 +2276,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private static boolean closed;
 
+		@Override
 		public void destroy() {
 			closed = true;
 		}
@@ -2272,6 +2287,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private static boolean closed;
 
+		@Override
 		public void close() {
 			closed = true;
 		}
@@ -2316,14 +2332,17 @@ public class DefaultListableBeanFactoryTests {
 
 	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			throw new IllegalStateException();
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return false;
 		}
@@ -2334,15 +2353,18 @@ public class DefaultListableBeanFactoryTests {
 
 		public boolean initialized = false;
 
+		@Override
 		public Object getObject() throws Exception {
 			this.initialized = true;
 			return "";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -2353,23 +2375,28 @@ public class DefaultListableBeanFactoryTests {
 
 		public boolean initialized = false;
 
+		@Override
 		public Object getObject() throws Exception {
 			this.initialized = true;
 			return "";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
 
+		@Override
 		public boolean isPrototype() {
 			return false;
 		}
 
+		@Override
 		public boolean isEagerInit() {
 			return true;
 		}
@@ -2452,6 +2479,7 @@ public class DefaultListableBeanFactoryTests {
 			this.numberFormat = numberFormat;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
@@ -2470,11 +2498,13 @@ public class DefaultListableBeanFactoryTests {
 			}
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType, Field field) {
 			return convertIfNecessary(value, requiredType);
@@ -2490,6 +2520,7 @@ public class DefaultListableBeanFactoryTests {
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			return this.name;
 		}

@@ -322,18 +322,23 @@ public class RmiSupportTests extends TestCase {
 		final Method setNameMethod = rb.getClass().getDeclaredMethod("setName", new Class<?>[] {String.class});
 
 		MethodInvocation mi = new MethodInvocation() {
+			@Override
 			public Method getMethod() {
 				return setNameMethod;
 			}
+			@Override
 			public Object[] getArguments() {
 				return new Object[] {"bla"};
 			}
+			@Override
 			public Object proceed() throws Throwable {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public Object getThis() {
 				return rb;
 			}
+			@Override
 			public AccessibleObject getStaticPart() {
 				return setNameMethod;
 			}
@@ -363,11 +368,14 @@ public class RmiSupportTests extends TestCase {
 	public void testRmiInvokerWithSpecialLocalMethods() throws Exception {
 		String serviceUrl = "rmi://localhost:1090/test";
 		RmiProxyFactoryBean factory = new RmiProxyFactoryBean() {
+			@Override
 			protected Remote lookupStub() {
 				return new RmiInvocationHandler() {
+					@Override
 					public String getTargetInterfaceName() {
 						return null;
 					}
+					@Override
 					public Object invoke(RemoteInvocation invocation) throws RemoteException {
 						throw new RemoteException();
 					}
@@ -400,6 +408,7 @@ public class RmiSupportTests extends TestCase {
 
 		private int counter = 0;
 
+		@Override
 		protected Remote lookupStub() {
 			counter++;
 			return new RemoteBean();
@@ -432,6 +441,7 @@ public class RmiSupportTests extends TestCase {
 
 		private static String name;
 
+		@Override
 		public void setName(String nam) throws RemoteException {
 			if (nam != null && nam.endsWith("Exception")) {
 				RemoteException rex = null;

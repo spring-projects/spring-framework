@@ -47,6 +47,7 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans2.xml"));
 	}
 
+	@Override
 	@Test
 	public void testBasicFunctionality() {
 		ContextSingletonBeanFactoryLocator facLoc = new ContextSingletonBeanFactoryLocator(
@@ -71,6 +72,7 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	 * 2nd and subsequent calls will actually get back same locator instance. This is not
 	 * really an issue, since the contained bean factories will still be loaded and released.
 	 */
+	@Override
 	@Test
 	public void testGetInstance() {
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.

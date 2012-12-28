@@ -212,6 +212,7 @@ public class ReflectionUtilsTests {
 	public void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
 		ReflectionUtils.doWithMethods(TestBean.class, mc, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method m) {
 				return Modifier.isProtected(m.getModifiers());
 			}
@@ -353,6 +354,7 @@ public class ReflectionUtilsTests {
 
 		private List<Method> methods = new LinkedList<Method>();
 
+		@Override
 		public void doWith(Method m) throws IllegalArgumentException, IllegalAccessException {
 			this.methodNames.add(m.getName());
 			this.methods.add(m);

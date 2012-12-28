@@ -35,10 +35,12 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 public class DefaultJpaDialectTests extends TestCase {
 	JpaDialect dialect;
 
+	@Override
 	protected void setUp() throws Exception {
 		dialect = new DefaultJpaDialect();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		dialect = null;
 	}

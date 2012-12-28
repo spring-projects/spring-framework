@@ -33,6 +33,7 @@ public class ParameterHandlerMappingTests extends TestCase {
 
 	private ConfigurablePortletApplicationContext pac;
 
+	@Override
 	public void setUp() throws Exception {
 		MockPortletContext portletContext = new MockPortletContext();
 		pac = new XmlPortletApplicationContext();

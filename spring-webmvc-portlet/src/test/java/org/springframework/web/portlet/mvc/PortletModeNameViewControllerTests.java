@@ -34,6 +34,7 @@ public class PortletModeNameViewControllerTests extends TestCase {
 
 	private PortletModeNameViewController controller;
 
+	@Override
 	public void setUp() {
 		controller = new PortletModeNameViewController();
 	}

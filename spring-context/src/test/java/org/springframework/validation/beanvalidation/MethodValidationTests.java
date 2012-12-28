@@ -84,6 +84,7 @@ public class MethodValidationTests {
 	@MyStereotype
 	public static class MyValidBean implements MyValidInterface {
 
+		@Override
 		public Object myValidMethod(String arg1, int arg2) {
 			return (arg2 == 0 ? null : "value");
 		}

@@ -137,6 +137,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -145,6 +146,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -161,10 +163,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return postProcessed;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -180,10 +184,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		}
 	}
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
@@ -196,14 +202,17 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.jedi = jedi;
 	}
 
+	@Override
 	public ITestBean getSpouse() {
 		return (spouses != null ? spouses[0] : null);
 	}
 
+	@Override
 	public void setSpouse(ITestBean spouse) {
 		this.spouses = new ITestBean[] {spouse};
 	}
 
+	@Override
 	public ITestBean[] getSpouses() {
 		return spouses;
 	}
@@ -230,10 +239,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.country = country;
 	}
 
+	@Override
 	public String[] getStringArray() {
 		return stringArray;
 	}
 
+	@Override
 	public void setStringArray(String[] stringArray) {
 		this.stringArray = stringArray;
 	}
@@ -302,6 +313,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
+	@Override
 	public INestedTestBean getDoctor() {
 		return doctor;
 	}
@@ -310,6 +322,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.doctor = doctor;
 	}
 
+	@Override
 	public INestedTestBean getLawyer() {
 		return lawyer;
 	}
@@ -342,6 +355,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someBoolean = someBoolean;
 	}
 
+	@Override
 	public IndexedTestBean getNestedIndexedBean() {
 		return nestedIndexedBean;
 	}
@@ -370,18 +384,21 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	/**
 	 * @see org.springframework.beans.ITestBean#exceptional(Throwable)
 	 */
+	@Override
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
 		}
 	}
 
+	@Override
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
 	/**
 	 * @see org.springframework.beans.ITestBean#returnsThis()
 	 */
+	@Override
 	public Object returnsThis() {
 		return this;
 	}
@@ -389,9 +406,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	/**
 	 * @see org.springframework.beans.IOther#absquatulate()
 	 */
+	@Override
 	public void absquatulate() {
 	}
 
+	@Override
 	public int haveBirthday() {
 		return age++;
 	}
@@ -421,6 +440,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return this.age;
 	}
 
+	@Override
 	public int compareTo(Object other) {
 		if (this.name != null && other instanceof TestBean) {
 			return this.name.compareTo(((TestBean) other).getName());

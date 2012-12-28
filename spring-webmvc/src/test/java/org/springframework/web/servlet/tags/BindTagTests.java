@@ -509,6 +509,7 @@ public class BindTagTests extends AbstractTagTests {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, null, new PropertyEditorSupport() {
+			@Override
 			public String getAsText() {
 				return "something";
 			}
@@ -987,6 +988,7 @@ public class BindTagTests extends AbstractTagTests {
 		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		FormTag formTag = new FormTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(new StringWriter());
 			}

@@ -26,6 +26,7 @@ public class BeanThatBroadcasts implements ApplicationContextAware {
 	public int receivedCount;
 
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 		if (applicationContext.getDisplayName().indexOf("listener") != -1) {

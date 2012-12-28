@@ -58,10 +58,12 @@ public class JmsNamespaceHandlerTests extends TestCase {
 	private ToolingTestApplicationContext context;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		this.context = new ToolingTestApplicationContext("jmsNamespaceHandlerTests.xml", getClass());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		this.context.close();
 	}
@@ -211,6 +213,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 		public Message message;
 
+		@Override
 		public void onMessage(Message message) {
 			this.message = message;
 		}
@@ -229,6 +232,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			super(path, clazz);
 		}
 
+		@Override
 		protected void initBeanDefinitionReader(XmlBeanDefinitionReader beanDefinitionReader) {
 			this.registeredComponents = new HashSet<ComponentDefinition>();
 			beanDefinitionReader.setEventListener(new StoringReaderEventListener(this.registeredComponents));
@@ -268,6 +272,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 			this.registeredComponents = registeredComponents;
 		}
 
+		@Override
 		public void componentRegistered(ComponentDefinition componentDefinition) {
 			this.registeredComponents.add(componentDefinition);
 		}
@@ -276,6 +281,7 @@ public class JmsNamespaceHandlerTests extends TestCase {
 
 	static class TestErrorHandler implements ErrorHandler {
 
+		@Override
 		public void handleError(Throwable t) {
 		}
 	}

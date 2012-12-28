@@ -109,10 +109,12 @@ public class ConcreteTransactionalJUnit38SpringContextTests extends AbstractTran
 		return simpleJdbcTemplate.update("DELETE FROM person WHERE name=?", name);
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}

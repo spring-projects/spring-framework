@@ -21,6 +21,7 @@ package org.springframework.aop.support;
  */
 public final class JdkRegexpMethodPointcutTests extends AbstractRegexpMethodPointcutTests {
 
+	@Override
 	protected AbstractRegexpMethodPointcut getRegexpMethodPointcut() {
 		return new JdkRegexpMethodPointcut();
 	}

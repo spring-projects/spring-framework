@@ -21,6 +21,7 @@ public class TestListener implements ApplicationListener {
 		eventCount = 0;
 	}
 
+	@Override
 	public void onApplicationEvent(ApplicationEvent e) {
 		++eventCount;
 	}

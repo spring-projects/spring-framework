@@ -87,6 +87,7 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if (location.equals("file:/mydir") || location.equals("file:/mydir/test")) {
 					return new ByteArrayResource("test".getBytes(), "test");
@@ -98,6 +99,7 @@ public class VelocityConfigurerTests extends TestCase {
 					throw new IllegalArgumentException(ex.toString());
 				}
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}
@@ -133,12 +135,14 @@ public class VelocityConfigurerTests extends TestCase {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
 		vc.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if ("file:/yourdir/test".equals(location)) {
 					return new DescriptiveResource("");
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}

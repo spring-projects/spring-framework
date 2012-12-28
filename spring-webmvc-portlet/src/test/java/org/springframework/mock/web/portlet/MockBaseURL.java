@@ -56,18 +56,21 @@ public abstract class MockBaseURL implements BaseURL {
 	// BaseURL methods
 	//---------------------------------------------------------------------
 
+	@Override
 	public void setParameter(String key, String value) {
 		Assert.notNull(key, "Parameter key must be null");
 		Assert.notNull(value, "Parameter value must not be null");
 		this.parameters.put(key, new String[] {value});
 	}
 
+	@Override
 	public void setParameter(String key, String[] values) {
 		Assert.notNull(key, "Parameter key must be null");
 		Assert.notNull(values, "Parameter values must not be null");
 		this.parameters.put(key, values);
 	}
 
+	@Override
 	public void setParameters(Map<String, String[]> parameters) {
 		Assert.notNull(parameters, "Parameters Map must not be null");
 		this.parameters.clear();
@@ -87,10 +90,12 @@ public abstract class MockBaseURL implements BaseURL {
 		return this.parameters.get(name);
 	}
 
+	@Override
 	public Map<String, String[]> getParameterMap() {
 		return Collections.unmodifiableMap(this.parameters);
 	}
 
+	@Override
 	public void setSecure(boolean secure) throws PortletSecurityException {
 		this.secure = secure;
 	}
@@ -99,14 +104,17 @@ public abstract class MockBaseURL implements BaseURL {
 		return this.secure;
 	}
 
+	@Override
 	public void write(Writer out) throws IOException {
 		out.write(toString());
 	}
 
+	@Override
 	public void write(Writer out, boolean escapeXML) throws IOException {
 		out.write(toString());
 	}
 
+	@Override
 	public void addProperty(String key, String value) {
 		String[] values = this.properties.get(key);
 		if (values != null) {
@@ -117,6 +125,7 @@ public abstract class MockBaseURL implements BaseURL {
 		}
 	}
 
+	@Override
 	public void setProperty(String key, String value) {
 		this.properties.put(key, new String[] {value});
 	}

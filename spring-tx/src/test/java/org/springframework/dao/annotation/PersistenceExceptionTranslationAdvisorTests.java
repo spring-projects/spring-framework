@@ -167,12 +167,14 @@ public class PersistenceExceptionTranslationAdvisorTests extends TestCase {
 			this.runtimeException = rex;
 		}
 
+		@Override
 		public void noThrowsClause() {
 			if (runtimeException != null) {
 				throw runtimeException;
 			}
 		}
 
+		@Override
 		public void throwsPersistenceException() throws PersistenceException {
 			if (runtimeException != null) {
 				throw runtimeException;

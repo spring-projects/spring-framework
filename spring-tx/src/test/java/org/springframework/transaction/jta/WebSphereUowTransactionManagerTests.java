@@ -52,6 +52,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				return "result";
 			}
@@ -87,6 +88,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		TransactionStatus ts = ptm.getTransaction(definition);
 		ptm.commit(ts);
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				return "result";
 			}
@@ -105,6 +107,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		try {
 			ptm.execute(definition, new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					return "result";
 				}
@@ -174,6 +177,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				if (synchMode == WebSphereUowTransactionManager.SYNCHRONIZATION_ALWAYS) {
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -257,6 +261,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				if (synchMode != WebSphereUowTransactionManager.SYNCHRONIZATION_NEVER) {
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -294,6 +299,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -315,6 +321,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 	public void testNewTransactionWithCommitException() {
 		final RollbackException rex = new RollbackException();
 		MockUOWManager manager = new MockUOWManager() {
+			@Override
 			public void runUnderUOW(int type, boolean join, UOWAction action) throws UOWException {
 				throw new UOWException(rex);
 			}
@@ -328,6 +335,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		try {
 			ptm.execute(definition, new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -362,6 +370,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		try {
 			ptm.execute(definition, new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 					assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -395,6 +404,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -425,6 +435,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -452,6 +463,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		try {
 			ptm.execute(definition, new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					return "result";
 				}
@@ -472,6 +484,7 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 
 		try {
 			ptm.execute(definition, new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					return "result";
 				}
@@ -508,11 +521,13 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertEquals("result2", ptm.execute(definition2, new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 						assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -555,11 +570,13 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertEquals("result2", ptm.execute(definition2, new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 						assertEquals(propagationBehavior == TransactionDefinition.PROPAGATION_REQUIRES_NEW,
@@ -600,11 +617,13 @@ public class WebSphereUowTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 
 		assertEquals("result", ptm.execute(definition, new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertEquals("result2", ptm.execute(definition2, new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
 						assertFalse(TransactionSynchronizationManager.isActualTransactionActive());

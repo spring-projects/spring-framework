@@ -309,6 +309,7 @@ public class BaseViewTests extends TestCase {
 	 */
 	private class ConcreteView extends AbstractView {
 		// Do-nothing concrete subclass
+		@Override
 		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			throw new UnsupportedOperationException();
@@ -330,6 +331,7 @@ public class BaseViewTests extends TestCase {
 			this.wac = wac;
 
 		}
+		@Override
 		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 				// do nothing
@@ -338,6 +340,7 @@ public class BaseViewTests extends TestCase {
 		/**
 		 * @see org.springframework.context.support.ApplicationObjectSupport#initApplicationContext()
 		 */
+		@Override
 		protected void initApplicationContext() throws ApplicationContextException {
 			if (inited)
 				throw new RuntimeException("Already initialized");

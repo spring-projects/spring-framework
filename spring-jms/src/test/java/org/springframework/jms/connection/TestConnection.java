@@ -38,44 +38,55 @@ public class TestConnection implements Connection {
 	private int closeCount;
 
 
+	@Override
 	public Session createSession(boolean b, int i) throws JMSException {
 		return null;
 	}
 
+	@Override
 	public String getClientID() throws JMSException {
 		return null;
 	}
 
+	@Override
 	public void setClientID(String paramName) throws JMSException {
 	}
 
+	@Override
 	public ConnectionMetaData getMetaData() throws JMSException {
 		return null;
 	}
 
+	@Override
 	public ExceptionListener getExceptionListener() throws JMSException {
 		return exceptionListener;
 	}
 
+	@Override
 	public void setExceptionListener(ExceptionListener exceptionListener) throws JMSException {
 		this.exceptionListener = exceptionListener;
 	}
 
+	@Override
 	public void start() throws JMSException {
 		this.startCount++;
 	}
 
+	@Override
 	public void stop() throws JMSException {
 	}
 
+	@Override
 	public void close() throws JMSException {
 		this.closeCount++;
 	}
 
+	@Override
 	public ConnectionConsumer createConnectionConsumer(Destination destination, String paramName, ServerSessionPool serverSessionPool, int i) throws JMSException {
 		return null;
 	}
 
+	@Override
 	public ConnectionConsumer createDurableConnectionConsumer(Topic topic, String paramName, String paramName1, ServerSessionPool serverSessionPool, int i) throws JMSException {
 		return null;
 	}

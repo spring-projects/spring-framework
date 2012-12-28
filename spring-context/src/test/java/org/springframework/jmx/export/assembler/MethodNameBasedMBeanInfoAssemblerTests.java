@@ -26,18 +26,22 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 
 	protected static final String OBJECT_NAME = "bean:name=testBean5";
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 5;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 2;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MethodNameBasedMBeanInfoAssembler assembler = new MethodNameBasedMBeanInfoAssembler();
 		assembler.setManagedMethods(new String[] {"add", "myOperation", "getName", "setName", "getAge"});
@@ -52,6 +56,7 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 		assertFalse(attr.isWritable());
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodNameAssembler.xml";
 	}

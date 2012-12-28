@@ -389,14 +389,17 @@ public final class QualifierAnnotationTests {
 	@Qualifier(FACTORY_QUALIFIER)
 	public static class QualifiedFactoryBean implements FactoryBean<Theta> {
 
+		@Override
 		public Theta getObject() {
 			return new Theta() {};
 		}
 
+		@Override
 		public Class<Theta> getObjectType() {
 			return Theta.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

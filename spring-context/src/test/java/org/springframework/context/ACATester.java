@@ -22,6 +22,7 @@ public class ACATester implements ApplicationContextAware {
 
 	private ApplicationContext ac;
 
+	@Override
 	public void setApplicationContext(ApplicationContext ctx) throws ApplicationContextException {
 		// check reinitialization
 		if (this.ac != null) {

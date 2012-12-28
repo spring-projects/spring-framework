@@ -129,23 +129,28 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void destroy() {
 			checkCurrentContext();
 			destroyed = true;
 		}
 
+		@Override
 		public void setBeanName(String name) {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void setBeanClassLoader(ClassLoader classLoader) {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory)
 				throws BeansException {
 			checkCurrentContext();
@@ -164,26 +169,31 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 		}
 
+		@Override
 		public boolean isEagerInit() {
 			checkCurrentContext();
 			return false;
 		}
 
+		@Override
 		public boolean isPrototype() {
 			checkCurrentContext();
 			return true;
 		}
 
+		@Override
 		public Object getObject() throws Exception {
 			checkCurrentContext();
 			return new Object();
 		}
 
+		@Override
 		public Class getObjectType() {
 			checkCurrentContext();
 			return Object.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			checkCurrentContext();
 			return false;
@@ -219,6 +229,7 @@ public class CallbacksSecurityTests {
 
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 
+			@Override
 			public String run() {
 				Subject subject = Subject.getSubject(acc);
 				if (subject == null) {
@@ -246,6 +257,7 @@ public class CallbacksSecurityTests {
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			return this.name;
 		}
@@ -291,6 +303,7 @@ public class CallbacksSecurityTests {
 			private final AccessControlContext acc = new AccessControlContext(
 					new ProtectionDomain[] { empty });
 
+			@Override
 			public AccessControlContext getAccessControlContext() {
 				return acc;
 			}
@@ -320,6 +333,7 @@ public class CallbacksSecurityTests {
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
+				@Override
 				public Object run() throws Exception {
 					method.invoke(bean);
 					return null;
@@ -334,6 +348,7 @@ public class CallbacksSecurityTests {
 			AccessController.doPrivileged(
 					new PrivilegedExceptionAction<Object>() {
 
+						@Override
 						public Object run() throws Exception {
 							return cl.newInstance();
 						}
@@ -444,6 +459,7 @@ public class CallbacksSecurityTests {
 
 		AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
+			@Override
 			public Object run() throws Exception {
 				beanFactory.getBean("working-factory-method");
 				beanFactory.getBean("container-execution");
@@ -478,6 +494,7 @@ public class CallbacksSecurityTests {
 
 		NonPrivilegedBean bean = Subject.doAsPrivileged(
 				subject, new PrivilegedAction<NonPrivilegedBean>() {
+					@Override
 					public NonPrivilegedBean run() {
 						return lbf.getBean("test", NonPrivilegedBean.class);
 					}
@@ -502,6 +519,7 @@ public class CallbacksSecurityTests {
 		// request the beans from non-privileged code
 		Subject.doAsPrivileged(subject, new PrivilegedAction<Object>() {
 
+			@Override
 			public Object run() {
 				// sanity check
 				assertEquals("user1", getCurrentSubjectName());

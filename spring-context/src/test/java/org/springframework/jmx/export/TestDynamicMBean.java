@@ -37,6 +37,7 @@ public class TestDynamicMBean implements DynamicMBean {
 		}
 	}
 
+	@Override
 	public Object getAttribute(String attribute) {
 		if ("Name".equals(attribute)) {
 			return "Rob Harrop";
@@ -44,21 +45,26 @@ public class TestDynamicMBean implements DynamicMBean {
 		return null;
 	}
 
+	@Override
 	public void setAttribute(Attribute attribute) {
 	}
 
+	@Override
 	public AttributeList getAttributes(String[] attributes) {
 		return null;
 	}
 
+	@Override
 	public AttributeList setAttributes(AttributeList attributes) {
 		return null;
 	}
 
+	@Override
 	public Object invoke(String actionName, Object[] params, String[] signature) {
 		return null;
 	}
 
+	@Override
 	public MBeanInfo getMBeanInfo() {
 		MBeanAttributeInfo attr = new MBeanAttributeInfo("name", "java.lang.String", "", true, false, false);
 		return new MBeanInfo(

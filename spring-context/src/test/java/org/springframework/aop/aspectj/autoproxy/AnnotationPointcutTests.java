@@ -55,6 +55,7 @@ public final class AnnotationPointcutTests {
 
 class TestMethodInterceptor implements MethodInterceptor {
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		return "this value";
 	}

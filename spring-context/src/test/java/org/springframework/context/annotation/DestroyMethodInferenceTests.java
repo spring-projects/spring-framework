@@ -140,6 +140,7 @@ public class DestroyMethodInferenceTests {
 
 	static class WithInheritedCloseMethod implements Closeable {
 		boolean closed = false;
+		@Override
 		public void close() throws IOException {
 			closed = true;
 		}

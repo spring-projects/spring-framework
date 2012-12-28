@@ -30,10 +30,12 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 
 	private final ByteArrayOutputStream body = new ByteArrayOutputStream();
 
+	@Override
 	public HttpHeaders getHeaders() {
 		return headers;
 	}
 
+	@Override
 	public OutputStream getBody() throws IOException {
 		return body;
 	}

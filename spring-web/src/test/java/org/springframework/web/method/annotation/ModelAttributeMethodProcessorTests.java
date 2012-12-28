@@ -265,14 +265,17 @@ public class ModelAttributeMethodProcessorTests {
 			return validateInvoked;
 		}
 
+		@Override
 		public void bind(WebRequest request) {
 			bindInvoked = true;
 		}
 
+		@Override
 		public void validate() {
 			validateInvoked = true;
 		}
 
+		@Override
 		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}

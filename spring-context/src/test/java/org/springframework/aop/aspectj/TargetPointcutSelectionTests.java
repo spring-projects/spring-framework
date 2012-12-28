@@ -82,6 +82,7 @@ public final class TargetPointcutSelectionTests {
 	// include the advised method's implementation (instead a base class should include it)
 	public static abstract class AbstractTestImpl implements TestInterface {
 
+		@Override
 		public void interfaceMethod() {
 		}
 	}
@@ -107,6 +108,7 @@ public final class TargetPointcutSelectionTests {
 
 	public static class TestInterceptor extends TestAspect implements MethodInterceptor {
 
+		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			increment();
 			return mi.proceed();

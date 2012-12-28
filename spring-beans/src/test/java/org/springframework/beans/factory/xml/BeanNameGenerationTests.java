@@ -30,6 +30,7 @@ public class BeanNameGenerationTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	public void setUp() {
 		this.beanFactory = new DefaultListableBeanFactory();
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);

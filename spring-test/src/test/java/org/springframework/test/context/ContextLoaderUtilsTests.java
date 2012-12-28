@@ -447,12 +447,14 @@ public class ContextLoaderUtilsTests {
 
 	private static class FooInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 		}
 	}
 
 	private static class BarInitializer implements ApplicationContextInitializer<GenericWebApplicationContext> {
 
+		@Override
 		public void initialize(GenericWebApplicationContext applicationContext) {
 		}
 	}

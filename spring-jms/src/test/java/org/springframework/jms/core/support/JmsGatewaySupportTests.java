@@ -37,6 +37,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		connectionFactoryControl.replay();
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
+			@Override
 			protected void initGateway() {
 				test.add("test");
 			}
@@ -53,6 +54,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		JmsTemplate template = new JmsTemplate();
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
+			@Override
 			protected void initGateway() {
 				test.add("test");
 			}

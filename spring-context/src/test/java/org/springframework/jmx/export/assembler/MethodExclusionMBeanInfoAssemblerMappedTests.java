@@ -44,22 +44,27 @@ public class MethodExclusionMBeanInfoAssemblerMappedTests extends AbstractJmxAss
 		assertTrue("Nick Name should be readable", attr.isReadable());
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 3;
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodExclusionAssemblerMapped.xml";
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() throws Exception {
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		Properties props = new Properties();

@@ -59,10 +59,12 @@ public class ItemPet {
 
 	public static class CustomEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(new ItemPet(text));
 		}
 
+		@Override
 		public String getAsText() {
 			return ((ItemPet) getValue()).getName();
 		}

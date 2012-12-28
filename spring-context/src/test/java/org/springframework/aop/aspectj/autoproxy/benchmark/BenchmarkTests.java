@@ -206,6 +206,7 @@ class MultiplyReturnValueInterceptor implements MethodInterceptor {
 		return this.multiple;
 	}
 
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		++invocations;
 		int result = (Integer) mi.proceed();
@@ -219,6 +220,7 @@ class TraceAfterReturningAdvice implements AfterReturningAdvice {
 
 	public int afterTakesInt;
 
+	@Override
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 		++afterTakesInt;
 	}
@@ -226,6 +228,7 @@ class TraceAfterReturningAdvice implements AfterReturningAdvice {
 	public static Advisor advisor() {
 		return new DefaultPointcutAdvisor(
 			new StaticMethodMatcherPointcut() {
+				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return method.getParameterTypes().length == 1 &&
 						method.getParameterTypes()[0].equals(Integer.class);
@@ -261,6 +264,7 @@ class TraceBeforeAdvice implements MethodBeforeAdvice {
 
 	public int beforeStringReturn;
 
+	@Override
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		++beforeStringReturn;
 	}
@@ -268,6 +272,7 @@ class TraceBeforeAdvice implements MethodBeforeAdvice {
 	public static Advisor advisor() {
 		return new DefaultPointcutAdvisor(
 			new StaticMethodMatcherPointcut() {
+				@Override
 				public boolean matches(Method method, Class<?> targetClass) {
 					return method.getReturnType().equals(String.class);
 				}

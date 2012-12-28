@@ -207,6 +207,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {
+			@Override
 			public Object getObject() throws BeansException {
 				return new NestedTestBean();
 			}
@@ -452,6 +453,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 	public static class InitDestroyBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -459,6 +461,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertTrue(((AnnotatedInitDestroyBean) bean).initCalled);
@@ -466,6 +469,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof AnnotatedInitDestroyBean) {
 				assertFalse(((AnnotatedInitDestroyBean) bean).destroyCalled);
@@ -566,6 +570,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@Resource
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -597,6 +602,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean6;
 		}
 
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -605,6 +611,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();
@@ -627,6 +634,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 		@Resource
 		private BeanFactory beanFactory;
 
+		@Override
 		@EJB
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -650,6 +658,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			return testBean4;
 		}
 
+		@Override
 		@PostConstruct
 		protected void init2() {
 			if (this.testBean3 == null || this.testBean4 == null) {
@@ -658,6 +667,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 			super.init2();
 		}
 
+		@Override
 		@PreDestroy
 		protected void destroy2() {
 			super.destroy2();

@@ -63,6 +63,7 @@ public class ResourceUtilsTests extends TestCase {
 	 */
 	private static class DummyURLStreamHandler extends URLStreamHandler {
 
+		@Override
 		protected URLConnection openConnection(URL url) throws IOException {
 			throw new UnsupportedOperationException();
 		}

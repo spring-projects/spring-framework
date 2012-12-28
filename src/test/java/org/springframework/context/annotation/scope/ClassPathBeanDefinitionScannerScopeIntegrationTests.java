@@ -284,6 +284,7 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(context);
 		scanner.setIncludeAnnotationConfig(false);
 		scanner.setBeanNameGenerator(new BeanNameGenerator() {
+			@Override
 			public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 				return definition.getScope();
 			}
@@ -311,8 +312,10 @@ public class ClassPathBeanDefinitionScannerScopeIntegrationTests {
 
 		private String name = DEFAULT_NAME;
 
+		@Override
 		public String getName() { return this.name; }
 
+		@Override
 		public void setName(String name) { this.name = name; }
 	}
 

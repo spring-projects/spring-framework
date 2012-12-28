@@ -57,6 +57,7 @@ public class SqlLobValueTests extends TestCase {
 	private MockControl lobCreatorControl;
 	private LobCreator creator;
 
+	@Override
 	public void setUp() {
 		//	create preparedstatement
 		psControl = MockControl.createControl(PreparedStatement.class);
@@ -97,11 +98,13 @@ public class SqlLobValueTests extends TestCase {
 		creator.setBlobAsBytes(ps, 1, testString.getBytes());
 		// set a matcher to match the byte array!
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] arg0, Object[] arg1) {
 				byte[] one = (byte[]) arg0[2];
 				byte[] two = (byte[]) arg1[2];
 				return Arrays.equals(one, two);
 			}
+			@Override
 			public String toString(Object[] arg0) {
 				return "bla";
 			}
@@ -149,10 +152,12 @@ public class SqlLobValueTests extends TestCase {
 		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
 		creator.setClobAsAsciiStream(ps, 1, bais, 3);
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] arg0, Object[] arg1) {
 				// for now, match always
 				return true;
 			}
+			@Override
 			public String toString(Object[] arg0) {
 				return null;
 			}
@@ -172,10 +177,12 @@ public class SqlLobValueTests extends TestCase {
 		InputStreamReader reader = new InputStreamReader(bais);
 		creator.setClobAsCharacterStream(ps, 1, reader, 3);
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] arg0, Object[] arg1) {
 				// for now, match always
 				return true;
 			}
+			@Override
 			public String toString(Object[] arg0) {
 				return null;
 			}

@@ -73,6 +73,7 @@ public final class PrototypeTargetTests {
 			constructionCount++;
 		}
 
+		@Override
 		public void doSomething() {
 		}
 	}
@@ -81,6 +82,7 @@ public final class PrototypeTargetTests {
 	public static class TestInterceptor implements MethodInterceptor {
 		private int invocationCount = 0;
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			invocationCount++;
 			return methodInvocation.proceed();

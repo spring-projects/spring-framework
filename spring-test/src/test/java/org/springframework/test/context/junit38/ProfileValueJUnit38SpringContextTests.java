@@ -187,6 +187,7 @@ public class ProfileValueJUnit38SpringContextTests extends TestCase {
 
 	public static class HardCodedProfileValueSource implements ProfileValueSource {
 
+		@Override
 		public String get(final String key) {
 			return (key.equals(NAME) ? VALUE : null);
 		}

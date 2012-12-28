@@ -39,11 +39,13 @@ public class HibernatePersonRepository implements PersonRepository {
 		this.sessionFactory = sessionFactory;
 	}
 
+	@Override
 	public Person save(Person person) {
 		this.sessionFactory.getCurrentSession().save(person);
 		return person;
 	}
 
+	@Override
 	public Person findByName(String name) {
 		return (Person) this.sessionFactory.getCurrentSession().createQuery(
 			"from Person person where person.name = :name").setString("name", name).uniqueResult();

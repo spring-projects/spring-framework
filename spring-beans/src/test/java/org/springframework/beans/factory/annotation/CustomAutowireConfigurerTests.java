@@ -69,6 +69,7 @@ public final class CustomAutowireConfigurerTests {
 
 	public static class CustomResolver implements AutowireCandidateResolver {
 
+		@Override
 		public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 			if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 				return false;
@@ -82,6 +83,7 @@ public final class CustomAutowireConfigurerTests {
 			return false;
 		}
 
+		@Override
 		public Object getSuggestedValue(DependencyDescriptor descriptor) {
 			return null;
 		}

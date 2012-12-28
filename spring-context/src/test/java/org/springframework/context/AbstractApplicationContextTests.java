@@ -39,10 +39,12 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 
 	protected TestListener parentListener = new TestListener();
 
+	@Override
 	protected void setUp() throws Exception {
 		this.applicationContext = createContext();
 	}
 
+	@Override
 	protected BeanFactory getBeanFactory() {
 		return applicationContext;
 	}

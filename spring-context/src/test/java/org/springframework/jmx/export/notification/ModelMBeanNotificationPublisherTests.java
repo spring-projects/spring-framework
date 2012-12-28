@@ -113,10 +113,12 @@ public final class ModelMBeanNotificationPublisherTests {
 			return this.actualNotification;
 		}
 
+		@Override
 		public void sendNotification(Notification notification) throws RuntimeOperationsException {
 			this.actualNotification = notification;
 		}
 
+		@Override
 		public void sendAttributeChangeNotification(AttributeChangeNotification notification) throws RuntimeOperationsException {
 			this.actualNotification = notification;
 		}

@@ -48,6 +48,7 @@ public class HardCodedProfileValueSourceSpringRunnerTests extends EnabledAndIgno
 
 	public static class HardCodedProfileValueSource implements ProfileValueSource {
 
+		@Override
 		public String get(final String key) {
 			return (key.equals(NAME) ? VALUE : null);
 		}

@@ -48,6 +48,7 @@ public class Spr7839Tests {
 		ConfigurableWebBindingInitializer binder = new ConfigurableWebBindingInitializer();
 		GenericConversionService service = new DefaultConversionService();
 		service.addConverter(new Converter<String, NestedBean>() {
+			@Override
 			public NestedBean convert(String source) {
 				return new NestedBean(source);
 			}

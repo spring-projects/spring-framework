@@ -112,6 +112,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -157,6 +158,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -206,6 +208,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -215,6 +218,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 
 		ptm.setJndiTemplate(new ExpectedLookupTemplate("java:comp/UserTransaction", ut2));
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -232,6 +236,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

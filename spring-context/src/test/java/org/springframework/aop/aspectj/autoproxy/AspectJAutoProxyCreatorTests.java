@@ -387,6 +387,7 @@ class PerTargetAspect implements Ordered {
 		++count;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -438,14 +439,17 @@ class DummyAspectWithParameter {
 
 class DummyFactoryBean implements FactoryBean<Object> {
 
+	@Override
 	public Object getObject() throws Exception {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public boolean isSingleton() {
 		throw new UnsupportedOperationException();
 	}
@@ -573,12 +577,14 @@ class TestBeanAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
 	public TestBeanAdvisor() {
 		setAdvice(new MethodBeforeAdvice() {
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				++count;
 			}
 		});
 	}
 
+	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return ITestBean.class.isAssignableFrom(targetClass);
 	}

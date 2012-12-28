@@ -82,16 +82,19 @@ class AtAspectJAnnotationBindingTestAspect {
 
 class ResourceArrayFactoryBean implements FactoryBean<Object> {
 
+	@Override
 	@TestAnnotation("some value")
 	public Object getObject() throws Exception {
 		return new Resource[0];
 	}
 
+	@Override
 	@TestAnnotation("some value")
 	public Class<?> getObjectType() {
 		return Resource[].class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

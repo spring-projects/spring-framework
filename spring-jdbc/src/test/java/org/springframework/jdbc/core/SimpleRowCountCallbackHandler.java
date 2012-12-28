@@ -31,6 +31,7 @@ public class SimpleRowCountCallbackHandler implements RowCallbackHandler {
 	private int count;
 
 
+	@Override
 	public void processRow(ResultSet rs) throws SQLException {
 		count++;
 	}

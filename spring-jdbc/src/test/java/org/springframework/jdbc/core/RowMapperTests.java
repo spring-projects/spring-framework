@@ -47,6 +47,7 @@ public class RowMapperTests extends TestCase {
 	private JdbcTemplate jdbcTemplate;
 	private List result;
 
+	@Override
 	protected void setUp() throws SQLException {
 		conControl = MockControl.createControl(Connection.class);
 		con = (Connection) conControl.getMock();
@@ -121,6 +122,7 @@ public class RowMapperTests extends TestCase {
 
 		result = jdbcTemplate.query(
 				new PreparedStatementCreator() {
+					@Override
 					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 						return ps;
 					}
@@ -153,6 +155,7 @@ public class RowMapperTests extends TestCase {
 		result = jdbcTemplate.query(
 				"some SQL",
 				new PreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
 						ps.setString(1, "test");
 					}
@@ -240,6 +243,7 @@ public class RowMapperTests extends TestCase {
 
 	private static class TestRowMapper implements RowMapper {
 
+		@Override
 		public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return new TestBean(rs.getString(1), rs.getInt(2));
 		}

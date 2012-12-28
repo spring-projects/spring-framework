@@ -182,10 +182,12 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 
 		private final ConversionService service = new DefaultConversionService();
 
+		@Override
 		public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return this.service.canConvert(sourceType, targetType);
 		}
 
+		@Override
 		public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) throws EvaluationException {
 			return this.service.convert(value, sourceType, targetType);
 		}

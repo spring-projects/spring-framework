@@ -33,9 +33,11 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	private TestBean rob;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -110,6 +112,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "12.34f");
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		// set up test data
 		this.rob = new TestBean();

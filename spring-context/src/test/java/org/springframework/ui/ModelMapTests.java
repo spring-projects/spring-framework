@@ -278,6 +278,7 @@ public final class ModelMapTests {
 				getClass().getClassLoader(),
 				new Class<?>[] {Map.class},
 				new InvocationHandler() {
+					@Override
 					public Object invoke(Object proxy, Method method, Object[] args) {
 						return "proxy";
 					}

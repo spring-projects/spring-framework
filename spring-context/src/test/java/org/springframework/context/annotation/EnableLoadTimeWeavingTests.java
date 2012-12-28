@@ -70,6 +70,7 @@ public class EnableLoadTimeWeavingTests {
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.DISABLED)
 	static class EnableLTWConfig_withAjWeavingDisabled implements LoadTimeWeavingConfigurer {
+		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
 			// no expectations -> a class file transformer should NOT be added
@@ -81,6 +82,7 @@ public class EnableLoadTimeWeavingTests {
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.AUTODETECT)
 	static class EnableLTWConfig_withAjWeavingAutodetect implements LoadTimeWeavingConfigurer {
+		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
 			// no expectations -> a class file transformer should NOT be added
@@ -93,6 +95,7 @@ public class EnableLoadTimeWeavingTests {
 	@Configuration
 	@EnableLoadTimeWeaving(aspectjWeaving=AspectJWeaving.ENABLED)
 	static class EnableLTWConfig_withAjWeavingEnabled implements LoadTimeWeavingConfigurer {
+		@Override
 		public LoadTimeWeaver getLoadTimeWeaver() {
 			LoadTimeWeaver mockLTW = createMock(LoadTimeWeaver.class);
 			mockLTW.addTransformer(isA(ClassFileTransformer.class));

@@ -66,6 +66,7 @@ public abstract class AbstractBasicWacTests implements ServletContextAware {
 	protected String foo;
 
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}

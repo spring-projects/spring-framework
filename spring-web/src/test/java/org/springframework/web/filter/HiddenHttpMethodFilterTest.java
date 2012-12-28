@@ -48,6 +48,7 @@ public class HiddenHttpMethodFilterTest {
 
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid method", "DELETE", ((HttpServletRequest) filterRequest).getMethod());
@@ -63,6 +64,7 @@ public class HiddenHttpMethodFilterTest {
 
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid method", "POST", ((HttpServletRequest) filterRequest).getMethod());

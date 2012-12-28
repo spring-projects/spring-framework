@@ -83,6 +83,7 @@ public final class PortletUtilsTests {
 	@Test(expected=FileNotFoundException.class)
 	public void testGetRealPathWithPathThatCannotBeResolvedToFile() throws Exception {
 		PortletUtils.getRealPath(new MockPortletContext() {
+			@Override
 			public String getRealPath(String path) {
 				return null;
 			}
@@ -221,6 +222,7 @@ public final class PortletUtilsTests {
 		request.setParameter("William", "Baskerville");
 		request.setParameter("Adso", "Melk");
 		MockActionResponse response = new MockActionResponse() {
+			@Override
 			public void setRenderParameter(String key, String[] values) {
 				throw new IllegalStateException();
 			}
@@ -243,6 +245,7 @@ public final class PortletUtilsTests {
 	@Test
 	public void testClearAllRenderParametersDoesNotPropagateExceptionIfRedirectAlreadySentAtTimeOfCall() throws Exception {
 		MockActionResponse response = new MockActionResponse() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public void setRenderParameters(Map parameters) {
 				throw new IllegalStateException();

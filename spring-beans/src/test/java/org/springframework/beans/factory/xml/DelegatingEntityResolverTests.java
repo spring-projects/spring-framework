@@ -45,6 +45,7 @@ public final class DelegatingEntityResolverTests {
 
 
 	private static final class NoOpEntityResolver implements EntityResolver {
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			return null;
 		}

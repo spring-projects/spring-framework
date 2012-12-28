@@ -126,6 +126,7 @@ public final class BeanNamePointcutTests {
 
 		private int interceptionCount;
 
+		@Override
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			interceptionCount++;
 		}

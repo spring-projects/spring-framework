@@ -138,6 +138,7 @@ public class ProfileValueAnnotationAwareTransactionalTests extends TestCase {
 
 	public static class HardCodedProfileValueSource implements ProfileValueSource {
 
+		@Override
 		public String get(String key) {
 			return (key.equals(NAME) ? VALUE : null);
 		}

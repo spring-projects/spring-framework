@@ -63,6 +63,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 
 		SimpleRemoteSlsbInvokerInterceptor si = createInterceptor();
 		si.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockCtx;
 			}
@@ -121,6 +122,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 		final NamingException nex = new NamingException();
 		final String jndiName = "foobar";
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				assertTrue(jndiName.equals(name));
 				throw nex;

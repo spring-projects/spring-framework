@@ -80,10 +80,12 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 			return emf;
 		}
 
+		@Override
 		public PersistenceUnitInfo getPersistenceUnitInfo() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getPersistenceUnitName() {
 			return "test";
 		}

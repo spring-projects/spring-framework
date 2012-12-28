@@ -40,6 +40,7 @@ public final class AopUtilsTests {
 	@Test
 	public void testPointcutCanNeverApply() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
+			@Override
 			public boolean matches(Method method, Class<?> clazzy) {
 				return false;
 			}
@@ -58,6 +59,7 @@ public final class AopUtilsTests {
 	@Test
 	public void testPointcutAppliesToOneMethodOnObject() {
 		class TestPointcut extends StaticMethodMatcherPointcut {
+			@Override
 			public boolean matches(Method method, Class<?> clazz) {
 				return method.getName().equals("hashCode");
 			}

@@ -85,14 +85,17 @@ public class Spr6602Tests {
 
 	public static class BarFactory implements FactoryBean<Bar> {
 
+		@Override
 		public Bar getObject() throws Exception {
 			return new Bar();
 		}
 
+		@Override
 		public Class<? extends Bar> getObjectType() {
 			return Bar.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

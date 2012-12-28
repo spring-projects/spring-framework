@@ -134,6 +134,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -242,6 +243,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(dsToUse));
 					assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -291,6 +293,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		final RuntimeException ex = new RuntimeException("Application exception");
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
@@ -359,10 +362,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 			final TransactionTemplate tt = new TransactionTemplate(tm);
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Is existing transaction", !status.isNewTransaction());
 					assertFalse("Is not rollback-only", status.isRollbackOnly());
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -433,9 +438,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			tt2.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertFalse("Is not rollback-only", status.isRollbackOnly());
 					tt2.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							status.setRollbackOnly();
 						}
@@ -489,9 +496,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			tt2.setReadOnly(false);
 
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertFalse("Is not rollback-only", status.isRollbackOnly());
 					tt2.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							status.setRollbackOnly();
 						}
@@ -539,9 +548,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		final TestTransactionSynchronization synch =
 				new TestTransactionSynchronization(ds, TransactionSynchronization.STATUS_COMMITTED) {
+					@Override
 					public void afterCompletion(int status) {
 						super.afterCompletion(status);
 						tt.execute(new TransactionCallbackWithoutResult() {
+							@Override
 							protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							}
 						});
@@ -549,6 +560,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				};
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				TransactionSynchronizationManager.registerSynchronization(synch);
 			}
@@ -599,10 +611,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 			final TransactionTemplate tt = new TransactionTemplate(tm2);
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Is existing transaction", !status.isNewTransaction());
 					assertFalse("Is not rollback-only", status.isRollbackOnly());
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -661,12 +675,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -737,12 +753,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt2.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -807,12 +825,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Is new transaction", status.isNewTransaction());
 					assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 					assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 					assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 					tt2.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							status.setRollbackOnly();
 						}
@@ -858,12 +878,14 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -911,10 +933,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					assertTrue("Is new transaction", status.isNewTransaction());
 					tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NEVER);
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							fail("Should have thrown IllegalTransactionStateException");
 						}
@@ -959,11 +983,13 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 				TransactionTemplate tt2 = new TransactionTemplate(tm);
 				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				tt2.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -1015,6 +1041,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertSame(con1, DataSourceUtils.getConnection(ds));
@@ -1022,6 +1049,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				TransactionTemplate tt2 = new TransactionTemplate(tm);
 				tt2.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 				tt2.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -1079,6 +1107,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		tt.setReadOnly(true);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -1142,6 +1171,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					try {
 						Thread.sleep(1500);
@@ -1207,6 +1237,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertEquals(con, DataSourceUtils.getConnection(ds));
@@ -1260,6 +1291,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertEquals(con, DataSourceUtils.getConnection(ds));
@@ -1275,6 +1307,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				}
 
 				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) {
 						// something transactional
 						assertEquals(con, DataSourceUtils.getConnection(ds));
@@ -1338,6 +1371,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertEquals(con, DataSourceUtils.getConnection(ds));
@@ -1354,6 +1388,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 				}
 
 				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) {
 						// something transactional
 						assertEquals(con, DataSourceUtils.getConnection(ds));
@@ -1406,6 +1441,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
 				}
@@ -1443,6 +1479,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
 				}
@@ -1483,6 +1520,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 					// something transactional
 				}
@@ -1525,6 +1563,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 					status.setRollbackOnly();
 				}
@@ -1550,6 +1589,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
@@ -1573,6 +1613,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
@@ -1594,6 +1635,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
@@ -1655,11 +1697,13 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 				for (int i = 0; i < count; i++) {
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 							assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -1721,10 +1765,12 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				assertTrue("Isn't nested transaction", !status.hasSavepoint());
 				tt.execute(new TransactionCallbackWithoutResult() {
+					@Override
 					protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 						assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 						assertTrue("Synchronization active", TransactionSynchronizationManager.isSynchronizationActive());
@@ -1786,6 +1832,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				Object savepoint = status.createSavepoint();
@@ -1842,6 +1889,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				Object savepoint = status.createSavepoint();
@@ -1883,6 +1931,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 			}
@@ -1919,6 +1968,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) throws RuntimeException {
 				assertTrue("Is new transaction", status.isNewTransaction());
 				status.setRollbackOnly();
@@ -1930,6 +1980,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		dsControl.verify();
 	}
 
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
@@ -1953,15 +2004,19 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			this.status = status;
 		}
 
+		@Override
 		public void suspend() {
 		}
 
+		@Override
 		public void resume() {
 		}
 
+		@Override
 		public void flush() {
 		}
 
+		@Override
 		public void beforeCommit(boolean readOnly) {
 			if (this.status != TransactionSynchronization.STATUS_COMMITTED) {
 				fail("Should never be called");
@@ -1970,11 +2025,13 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			this.beforeCommitCalled = true;
 		}
 
+		@Override
 		public void beforeCompletion() {
 			assertFalse(this.beforeCompletionCalled);
 			this.beforeCompletionCalled = true;
 		}
 
+		@Override
 		public void afterCommit() {
 			if (this.status != TransactionSynchronization.STATUS_COMMITTED) {
 				fail("Should never be called");
@@ -1983,6 +2040,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 			this.afterCommitCalled = true;
 		}
 
+		@Override
 		public void afterCompletion(int status) {
 			assertFalse(this.afterCompletionCalled);
 			this.afterCompletionCalled = true;

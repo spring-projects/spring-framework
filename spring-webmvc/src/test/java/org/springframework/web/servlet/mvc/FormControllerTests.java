@@ -122,6 +122,7 @@ public class FormControllerTests extends TestCase {
 		final Integer someNumber = new Integer(12);
 
 		TestController mc = new TestController() {
+			@Override
 			protected void onBindOnNewForm(HttpServletRequest request, Object command) throws Exception {
 				TestBean testBean = (TestBean)command;
 				testBean.setSomeNumber(new Integer(12));
@@ -370,6 +371,7 @@ public class FormControllerTests extends TestCase {
 		String successView = "s";
 
 		TestController mc = new TestController() {
+			@Override
 			protected ModelAndView handleInvalidSubmit(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 				throw new ServletException("invalid submit");
@@ -438,10 +440,12 @@ public class FormControllerTests extends TestCase {
 	final Float myFloat = new Float("123.45");
 
 		TestController mc = new TestController() {
+			@Override
 			protected boolean isFormChangeRequest(HttpServletRequest request) {
 				return (request.getParameter("formChange") != null);
 			}
 
+			@Override
 			protected void onFormChange(HttpServletRequest request, HttpServletResponse response, Object command) {
 				assertNotNull("Command should not be null", command);
 				assertEquals("Incorrect command class", TestBean.class, command.getClass());
@@ -513,8 +517,10 @@ public class FormControllerTests extends TestCase {
 
 		public static String TOOSHORT = "tooshort";
 
+		@Override
 		public boolean supports(Class clazz) { return true; }
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getName() == null || "".equals(tb.getName()))
@@ -529,8 +535,10 @@ public class FormControllerTests extends TestCase {
 
 		public static String TOOSHORT = "tooshort";
 
+		@Override
 		public boolean supports(Class clazz) { return true; }
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			errors.reject("test", "testmessage");
 		}
@@ -548,12 +556,14 @@ public class FormControllerTests extends TestCase {
 			setCommandName(BEAN_NAME);
 		}
 
+		@Override
 		protected Object formBackingObject(HttpServletRequest request) throws ServletException {
 			TestBean person = new TestBean();
 			person.setAge(DEFAULT_AGE);
 			return person;
 		}
 
+		@Override
 		protected boolean isFormChangeRequest(HttpServletRequest request) {
 			return (request.getParameter("formChange") != null);
 		}
@@ -562,6 +572,7 @@ public class FormControllerTests extends TestCase {
 
 	private static class TestControllerWithCustomOnSubmit extends TestController {
 
+		@Override
 		protected ModelAndView onSubmit(Object command) throws Exception {
 			return new ModelAndView("mySuccess");
 		}
@@ -580,6 +591,7 @@ public class FormControllerTests extends TestCase {
 			setCommandClass(TestBean.class);
 		}
 
+		@Override
 		protected Map referenceData(HttpServletRequest request) {
 			++refDataCount;
 			Map m = new HashMap();
@@ -595,6 +607,7 @@ public class FormControllerTests extends TestCase {
 
 	public static class BooleanBindingFormController extends AbstractFormController {
 
+		@Override
 		protected ModelAndView processFormSubmission
 				(HttpServletRequest req, HttpServletResponse resp, Object command, BindException errors) throws Exception {
 			ModelAndView mav = new ModelAndView();
@@ -602,6 +615,7 @@ public class FormControllerTests extends TestCase {
 			return mav;
 		}
 
+		@Override
 		protected ModelAndView showForm(
 				HttpServletRequest req, HttpServletResponse resp, BindException err) throws Exception {
 			return null;

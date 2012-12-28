@@ -79,6 +79,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		pf.addAdvice(new MethodBeforeAdvice() {
 			private int depth;
 
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				JoinPoint jp = AbstractAspectJAdvice.currentJoinPoint();
 				assertTrue("Method named in toString", jp.toString().contains(method.getName()));
@@ -135,6 +136,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				SourceLocation sloc = AbstractAspectJAdvice.currentJoinPoint().getSourceLocation();
 				assertEquals("Same source location must be returned on subsequent requests",  sloc, AbstractAspectJAdvice.currentJoinPoint().getSourceLocation());
@@ -167,6 +169,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				StaticPart staticPart = AbstractAspectJAdvice.currentJoinPoint().getStaticPart();
 				assertEquals("Same static part must be returned on subsequent requests",  staticPart, AbstractAspectJAdvice.currentJoinPoint().getStaticPart());
@@ -186,6 +189,7 @@ public final class MethodInvocationProceedingJoinPointTests {
 		ProxyFactory pf = new ProxyFactory(raw);
 		pf.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
 		pf.addAdvice(new MethodBeforeAdvice() {
+			@Override
 			public void before(Method method, Object[] args, Object target) throws Throwable {
 				// makeEncSJP, although meant for computing the enclosing join point,
 				// it serves our purpose here

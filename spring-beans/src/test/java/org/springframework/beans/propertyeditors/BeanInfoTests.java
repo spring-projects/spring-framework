@@ -70,6 +70,7 @@ public class BeanInfoTests extends TestCase {
 
 	public static class ValueBeanBeanInfo extends SimpleBeanInfo {
 
+		@Override
 		public PropertyDescriptor[] getPropertyDescriptors() {
 			try {
 				PropertyDescriptor pd = new PropertyDescriptor("value", ValueBean.class);
@@ -96,6 +97,7 @@ public class BeanInfoTests extends TestCase {
 			this.target = target;
 		}
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_15) {
 				Assert.isTrue(this.target instanceof ValueBean, "Target must be available on JDK 1.5+");

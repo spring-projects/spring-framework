@@ -75,6 +75,7 @@ public class ConfigurationClassAndBFPPTests {
 		@Bean
 		public BeanFactoryPostProcessor bfpp() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 					// no-op
 				}
@@ -90,6 +91,7 @@ public class ConfigurationClassAndBFPPTests {
 		@Bean
 		public static final BeanFactoryPostProcessor bfpp() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 					// no-op
 				}

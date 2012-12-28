@@ -254,6 +254,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		Date expectedResult = new Date();
 
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}
@@ -279,6 +280,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		Object arg3 = new Object();
 
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}
@@ -305,6 +307,7 @@ public class SimpleJdbcTemplateTests extends TestCase {
 		Object arg3 = new Object();
 
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}

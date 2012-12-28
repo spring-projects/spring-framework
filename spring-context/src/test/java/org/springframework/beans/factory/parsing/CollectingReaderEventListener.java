@@ -40,6 +40,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 
 
+	@Override
 	public void defaultsRegistered(DefaultsDefinition defaultsDefinition) {
 		this.defaults.add(defaultsDefinition);
 	}
@@ -48,6 +49,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return Collections.unmodifiableList(this.defaults);
 	}
 
+	@Override
 	public void componentRegistered(ComponentDefinition componentDefinition) {
 		this.componentDefinitions.put(componentDefinition.getName(), componentDefinition);
 	}
@@ -61,6 +63,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return collection.toArray(new ComponentDefinition[collection.size()]);
 	}
 
+	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
 		List<AliasDefinition> aliases = this.aliasMap.get(aliasDefinition.getBeanName());
 		if(aliases == null) {
@@ -75,6 +78,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 		return aliases == null ? null : Collections.unmodifiableList(aliases);
 	}
 
+	@Override
 	public void importProcessed(ImportDefinition importDefinition) {
 		this.imports.add(importDefinition);
 	}

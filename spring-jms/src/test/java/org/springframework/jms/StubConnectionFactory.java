@@ -27,10 +27,12 @@ import javax.jms.JMSException;
  */
 public class StubConnectionFactory implements ConnectionFactory {
 
+	@Override
 	public Connection createConnection() throws JMSException {
 		return null;
 	}
 
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		return null;
 	}

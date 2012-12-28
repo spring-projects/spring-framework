@@ -55,6 +55,7 @@ public class LobTypeHandlerTests extends TestCase {
 	private MockControl lobCreatorControl = MockControl.createControl(LobCreator.class);
 	private LobCreator lobCreator = (LobCreator) lobCreatorControl.getMock();
 
+	@Override
 	protected void setUp() throws SQLException {
 		rs.findColumn("column");
 		rsControl.setReturnValue(1);
@@ -170,9 +171,11 @@ public class LobTypeHandlerTests extends TestCase {
 		lobHandlerControl.setReturnValue(new ByteArrayInputStream(baos.toByteArray()), 1);
 		lobCreator.setBlobAsBytes(ps, 1, baos.toByteArray());
 		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
+			@Override
 			public boolean matches(Object[] o1, Object[] o2) {
 				return Arrays.equals((byte[]) o1[2], (byte[]) o2[2]);
 			}
+			@Override
 			public String toString(Object[] objects) {
 				return null;
 			}
@@ -224,6 +227,7 @@ public class LobTypeHandlerTests extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() {
 		try {
 			rsControl.verify();

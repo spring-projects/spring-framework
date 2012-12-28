@@ -371,6 +371,7 @@ public class ServletContextSupportTests {
 		paths.add("/WEB-INF/context2.xml");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			@Override
 			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return paths;
@@ -397,6 +398,7 @@ public class ServletContextSupportTests {
 		dirs.add("/WEB-INF/mydir2/");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			@Override
 			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return dirs;
@@ -433,6 +435,7 @@ public class ServletContextSupportTests {
 		paths.add("/WEB-INF/mydir2/mydir3/");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			@Override
 			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return dirs;
@@ -470,6 +473,7 @@ public class ServletContextSupportTests {
 		paths.add("C:/webroot/someOtherDirThatDoesntContainPath");
 
 		MockServletContext sc = new MockServletContext("classpath:org/springframework/web/context") {
+			@Override
 			public Set<String> getResourcePaths(String path) {
 				if ("/WEB-INF/".equals(path)) {
 					return paths;

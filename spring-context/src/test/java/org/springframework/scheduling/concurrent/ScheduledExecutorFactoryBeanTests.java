@@ -65,6 +65,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockScheduledExecutorService.replay();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
+			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 				return executor;
 			}
@@ -88,6 +89,7 @@ public class ScheduledExecutorFactoryBeanTests {
 		mockScheduledExecutorService.replay();
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
+			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 				return executor;
 			}
@@ -233,6 +235,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public void testSettingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
+			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 				assertNotNull("Bah; the setThreadFactory(..) method must use a default ThreadFactory if a null arg is passed in.");
 				return super.createExecutor(poolSize, threadFactory, rejectedExecutionHandler);
@@ -250,6 +253,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	@SuppressWarnings("serial")
 	public void testSettingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
+			@Override
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 				assertNotNull("Bah; the setRejectedExecutionHandler(..) method must use a default RejectedExecutionHandler if a null arg is passed in.");
 				return super.createExecutor(poolSize, threadFactory, rejectedExecutionHandler);

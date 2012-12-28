@@ -129,6 +129,7 @@ public final class AopProxyUtilsTests {
 	public void testProxiedUserInterfacesWithNoInterface() {
 		Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[0],
 				new InvocationHandler() {
+					@Override
 					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						return null;
 					}

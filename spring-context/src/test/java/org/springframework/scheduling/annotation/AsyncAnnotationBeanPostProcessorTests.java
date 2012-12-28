@@ -116,16 +116,19 @@ public class AsyncAnnotationBeanPostProcessorTests {
 
 		private final CountDownLatch latch = new CountDownLatch(1);
 
+		@Override
 		public Thread getThread() {
 			return this.thread;
 		}
 
+		@Override
 		@Async
 		public void test() {
 			this.thread = Thread.currentThread();
 			this.latch.countDown();
 		}
 
+		@Override
 		public void await(long timeout) {
 			try {
 				this.latch.await(timeout, TimeUnit.MILLISECONDS);

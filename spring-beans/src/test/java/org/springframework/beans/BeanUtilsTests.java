@@ -360,18 +360,22 @@ public final class BeanUtilsTests {
 
 		private String value;
 
+		@Override
 		public String getKey() {
 			return key;
 		}
 
+		@Override
 		public void setKey(String aKey) {
 			key = aKey;
 		}
 
+		@Override
 		public String getValue() {
 			return value;
 		}
 
+		@Override
 		public void setValue(String aValue) {
 			value = aValue;
 		}

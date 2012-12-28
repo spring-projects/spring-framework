@@ -30,6 +30,7 @@ public final class OrderComparatorTests extends TestCase {
 	private Comparator comparator;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		this.comparator = new OrderComparator();
 	}
@@ -64,6 +65,7 @@ public final class OrderComparatorTests extends TestCase {
 			this.order = order;
 		}
 
+		@Override
 		public int getOrder() {
 			return this.order;
 		}

@@ -48,9 +48,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	private ErrorsTag tag;
 
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new ErrorsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -60,6 +62,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		return new TestBean();
 	}
@@ -434,6 +437,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertTrue(output.contains("field error"));
 	}
 
+	@Override
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();

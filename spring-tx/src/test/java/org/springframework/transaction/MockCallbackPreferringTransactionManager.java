@@ -30,6 +30,7 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 	private TransactionStatus status;
 
 
+	@Override
 	public Object execute(TransactionDefinition definition, TransactionCallback callback) throws TransactionException {
 		this.definition = definition;
 		this.status = new SimpleTransactionStatus();
@@ -45,14 +46,17 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 	}
 
 
+	@Override
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void commit(TransactionStatus status) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void rollback(TransactionStatus status) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}

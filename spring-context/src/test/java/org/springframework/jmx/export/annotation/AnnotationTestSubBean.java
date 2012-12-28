@@ -38,17 +38,21 @@ public class AnnotationTestSubBean extends AnnotationTestBean implements IAnnota
 		return super.getAge();
 	}
 
+	@Override
 	public String getColour() {
 		return this.colour;
 	}
 
+	@Override
 	public void setColour(String colour) {
 		this.colour = colour;
 	}
 
+	@Override
 	public void fromInterface() {
 	}
 
+	@Override
 	public int getExpensiveToCalculate() {
 		return Integer.MAX_VALUE;
 	}

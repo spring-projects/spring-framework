@@ -47,6 +47,7 @@ import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
  */
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
+	@Override
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("commandClass", "org.springframework.beans.TestBean");
@@ -75,6 +76,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class LocaleChecker implements Controller, LastModified {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
@@ -89,6 +91,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			return null;
 		}
 
+		@Override
 		public long getLastModified(HttpServletRequest request) {
 			return 98;
 		}
@@ -105,6 +108,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			this.messageSource.addMessage("themetestArgs", Locale.ENGLISH, "theme test message {0}");
 		}
 
+		@Override
 		public Theme getTheme(String themeName) {
 			if (AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(themeName)) {
 				return new SimpleTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME, this.messageSource);

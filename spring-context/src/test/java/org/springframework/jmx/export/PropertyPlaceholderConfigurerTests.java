@@ -26,6 +26,7 @@ import org.springframework.jmx.IJmxTestBean;
  */
 public class PropertyPlaceholderConfigurerTests extends AbstractJmxTests {
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/propertyPlaceholderConfigurer.xml";
 	}

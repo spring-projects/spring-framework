@@ -31,9 +31,11 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -120,6 +122,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertTrue(output.startsWith("<input "));
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setName("Sally Greenwood");

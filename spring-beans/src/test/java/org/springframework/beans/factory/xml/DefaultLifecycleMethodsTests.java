@@ -27,6 +27,7 @@ public class DefaultLifecycleMethodsTests extends TestCase {
 
 	private XmlBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new XmlBeanFactory(new ClassPathResource("defaultLifecycleMethods.xml", getClass()));
 	}

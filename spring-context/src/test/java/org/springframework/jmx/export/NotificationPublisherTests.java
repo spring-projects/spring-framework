@@ -119,6 +119,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 		private Notification lastNotification;
 
+		@Override
 		public void handleNotification(Notification notification, Object handback) {
 			this.lastNotification = notification;
 			this.count++;
@@ -139,6 +140,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 		private NotificationPublisher notificationPublisher;
 
+		@Override
 		public void setNotificationPublisher(NotificationPublisher notificationPublisher) {
 			this.notificationPublisher = notificationPublisher;
 		}
@@ -158,28 +160,34 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 	public static class MyNotificationPublisherMBean extends NotificationBroadcasterSupport implements DynamicMBean {
 
+		@Override
 		public Object getAttribute(String attribute) throws AttributeNotFoundException, MBeanException,
 				ReflectionException {
 			return null;
 		}
 
+		@Override
 		public void setAttribute(Attribute attribute) throws AttributeNotFoundException,
 				InvalidAttributeValueException, MBeanException, ReflectionException {
 		}
 
+		@Override
 		public AttributeList getAttributes(String[] attributes) {
 			return null;
 		}
 
+		@Override
 		public AttributeList setAttributes(AttributeList attributes) {
 			return null;
 		}
 
+		@Override
 		public Object invoke(String actionName, Object params[], String signature[]) throws MBeanException,
 				ReflectionException {
 			return null;
 		}
 
+		@Override
 		public MBeanInfo getMBeanInfo() {
 			return new MBeanInfo(MyNotificationPublisherMBean.class.getName(), "", new MBeanAttributeInfo[0],
 					new MBeanConstructorInfo[0], new MBeanOperationInfo[0], new MBeanNotificationInfo[0]);
@@ -192,6 +200,7 @@ public class NotificationPublisherTests extends AbstractMBeanServerTests {
 
 	public static class MyNotificationPublisherStandardMBean extends NotificationBroadcasterSupport implements MyMBean {
 
+		@Override
 		public void sendNotification() {
 			sendNotification(new Notification("test", this, 1));
 		}

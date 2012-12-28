@@ -28,6 +28,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
  */
 public class TopLinkEntityManagerFactoryIntegrationTests extends AbstractContainerEntityManagerFactoryIntegrationTests {
 
+	@Override
 	protected String[] getConfigLocations() {
 		return TOPLINK_CONFIG_LOCATIONS;
 	}

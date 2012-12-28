@@ -155,10 +155,12 @@ public final class PortletWrappingControllerTests {
 		private PortletConfig portletConfig;
 
 
+		@Override
 		public void init(PortletConfig portletConfig) {
 			this.portletConfig = portletConfig;
 		}
 
+		@Override
 		public void processAction(ActionRequest request, ActionResponse response) throws PortletException {
 			if (request.getParameter("test") != null) {
 				response.setRenderParameter(RESULT_RENDER_PARAMETER_NAME, "myPortlet-action");
@@ -169,6 +171,7 @@ public final class PortletWrappingControllerTests {
 			}
 		}
 
+		@Override
 		public void render(RenderRequest request, RenderResponse response) throws IOException {
 			response.getWriter().write(RENDERED_RESPONSE_CONTENT);
 		}
@@ -177,6 +180,7 @@ public final class PortletWrappingControllerTests {
 			return this.portletConfig;
 		}
 
+		@Override
 		public void destroy() {
 			throw new IllegalStateException("Being destroyed...");
 		}
@@ -185,6 +189,7 @@ public final class PortletWrappingControllerTests {
 
 	private static final class MyApplicationContext extends StaticPortletApplicationContext {
 
+		@Override
 		public void refresh() throws BeansException {
 			MutablePropertyValues pvs = new MutablePropertyValues();
 			pvs.add("portletClass", MyPortlet.class);

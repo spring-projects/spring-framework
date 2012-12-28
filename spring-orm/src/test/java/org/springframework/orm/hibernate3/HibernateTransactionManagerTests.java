@@ -117,6 +117,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
@@ -136,6 +137,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -196,10 +198,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					return ht.executeFind(new HibernateCallback() {
+						@Override
 						public Object doInHibernate(org.hibernate.Session session) {
 							throw new RuntimeException("application exception");
 						}
@@ -258,11 +262,13 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 				ht.execute(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session session) {
 						return null;
 					}
@@ -339,6 +345,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		queryControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
@@ -359,6 +366,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -416,6 +424,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
@@ -429,12 +438,15 @@ public class HibernateTransactionManagerTests extends TestCase {
 		l.add("test");
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						HibernateTemplate ht = new HibernateTemplate(sfProxy);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
+							@Override
 							public Object doInHibernate(org.hibernate.Session session) {
 								return l;
 							}
@@ -486,12 +498,15 @@ public class HibernateTransactionManagerTests extends TestCase {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 							return ht.executeFind(new HibernateCallback() {
+								@Override
 								public Object doInHibernate(org.hibernate.Session session) {
 									throw new RuntimeException("application exception");
 								}
@@ -548,11 +563,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.execute(new HibernateCallback() {
+								@Override
 								public Object doInHibernate(org.hibernate.Session session) {
 									return l;
 								}
@@ -631,16 +649,19 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				final SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertTrue("Has thread session", holder != null);
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						HibernateTemplate ht = new HibernateTemplate(sf);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
+							@Override
 							public Object doInHibernate(org.hibernate.Session session) {
 								assertTrue("Not enclosing session", session != holder.getSession());
 								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -710,6 +731,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				SessionHolder holder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 				assertTrue("Has thread session", holder != null);
@@ -717,6 +739,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 				tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_NOT_SUPPORTED);
 				tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 						assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -724,6 +747,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 						HibernateTemplate ht = new HibernateTemplate(sf);
 						ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 						return ht.executeFind(new HibernateCallback() {
+							@Override
 							public Object doInHibernate(org.hibernate.Session session) {
 								return null;
 							}
@@ -770,6 +794,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		sessionControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
@@ -783,6 +808,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
@@ -791,6 +817,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sfProxy);
 				ht.setFlushMode(HibernateTemplate.FLUSH_EAGER);
 				ht.execute(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session session) {
 						return null;
 					}
@@ -854,6 +881,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.replay();
 
 		LocalSessionFactoryBean lsfb = new LocalSessionFactoryBean() {
+			@Override
 			protected SessionFactory newSessionFactory(Configuration config) throws HibernateException {
 				return sf;
 			}
@@ -873,12 +901,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sfProxy));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 				assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 				ht.execute(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session session) {
 						assertSame(session1, session);
 						return null;
@@ -886,8 +916,10 @@ public class HibernateTransactionManagerTests extends TestCase {
 				});
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sfProxy));
 				tt2.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						return ht.executeFind(new HibernateCallback() {
+							@Override
 							public Object doInHibernate(org.hibernate.Session session) {
 								assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 								assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
@@ -955,10 +987,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				return ht.executeFind(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 						return l;
 					}
@@ -1036,10 +1070,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		for (int i = 0; i < 2; i++) {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				public void doInTransactionWithoutResult(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					ht.execute(new HibernateCallback() {
+						@Override
 						public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 							return null;
 						}
@@ -1113,6 +1149,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -1195,10 +1232,12 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					HibernateTemplate ht = new HibernateTemplate(sf);
 					return ht.executeFind(new HibernateCallback() {
+						@Override
 						public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 							return l;
 						}
@@ -1279,6 +1318,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1287,6 +1327,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				return ht.executeFind(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 						assertEquals(session, sess);
 						return l;
@@ -1370,17 +1411,20 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				public void doInTransactionWithoutResult(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
 					SessionHolder sessionHolder = (SessionHolder) TransactionSynchronizationManager.getResource(sf);
 					assertEquals(tx1, sessionHolder.getTransaction());
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						public void doInTransactionWithoutResult(TransactionStatus status) {
 							status.setRollbackOnly();
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.setExposeNativeSession(true);
 							ht.execute(new HibernateCallback() {
+								@Override
 								public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 									assertEquals(session, sess);
 									return null;
@@ -1402,6 +1446,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Not marked rollback-only", !sessionHolder.isRollbackOnly());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1410,6 +1455,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setExposeNativeSession(true);
 				ht.execute(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 						assertEquals(session, sess);
 						return null;
@@ -1485,15 +1531,18 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				public void doInTransactionWithoutResult(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						public void doInTransactionWithoutResult(TransactionStatus status) {
 							status.setRollbackOnly();
 							HibernateTemplate ht = new HibernateTemplate(sf);
 							ht.setAllowCreate(false);
 							ht.setExposeNativeSession(true);
 							ht.execute(new HibernateCallback() {
+								@Override
 								public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 									assertEquals(session, sess);
 									return null;
@@ -1512,12 +1561,14 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				HibernateTemplate ht = new HibernateTemplate(sf);
 				ht.setAllowCreate(false);
 				ht.setExposeNativeSession(true);
 				ht.execute(new HibernateCallback() {
+					@Override
 					public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 						assertEquals(session, sess);
 						return null;
@@ -1612,6 +1663,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1621,6 +1673,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 				}
 				else {
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1670,6 +1723,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1713,6 +1767,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		TransactionSynchronizationManager.bindResource(sf, new SessionHolder(session));
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1766,6 +1821,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1809,6 +1865,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(sf));
 				assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -1824,6 +1881,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		txControl.verify();
 	}
 
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

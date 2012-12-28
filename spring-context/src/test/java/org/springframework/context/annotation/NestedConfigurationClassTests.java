@@ -132,6 +132,7 @@ public class NestedConfigurationClassTests {
 
 	@Configuration
 	static class S1Config extends L0Config {
+		@Override
 		@Bean
 		public TestBean overrideBean() {
 			return new TestBean("override-s1");

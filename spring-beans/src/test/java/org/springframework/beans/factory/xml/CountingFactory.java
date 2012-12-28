@@ -51,14 +51,17 @@ public class CountingFactory implements FactoryBean {
 	}
 
 
+	@Override
 	public Object getObject() {
 		return "myString";
 	}
 
+	@Override
 	public Class getObjectType() {
 		return String.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

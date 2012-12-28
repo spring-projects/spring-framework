@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.Controller;
  */
 public class WelcomeController implements Controller {
 
+	@Override
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) {
 		return new ModelAndView("welcomeView");
 	}

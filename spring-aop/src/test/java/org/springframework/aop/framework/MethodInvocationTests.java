@@ -42,6 +42,7 @@ public final class MethodInvocationTests {
 		final Object returnValue = new Object();
 		List<Object> is = new LinkedList<Object>();
 		is.add(new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
 			}

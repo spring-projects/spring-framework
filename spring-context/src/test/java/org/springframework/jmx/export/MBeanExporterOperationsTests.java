@@ -67,6 +67,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		MBeanExporter exporter = new MBeanExporter();
 		exporter.setServer(getServer());
 		exporter.setNamingStrategy(new ObjectNamingStrategy() {
+			@Override
 			public ObjectName getObjectName(Object managedBean, String beanKey) {
 				return objectNameTemplate;
 			}
@@ -92,6 +93,7 @@ public class MBeanExporterOperationsTests extends AbstractMBeanServerTests {
 		exporter.setServer(getServer());
 		exporter.setEnsureUniqueRuntimeObjectNames(false);
 		exporter.setNamingStrategy(new ObjectNamingStrategy() {
+			@Override
 			public ObjectName getObjectName(Object managedBean, String beanKey) {
 				return objectNameTemplate;
 			}

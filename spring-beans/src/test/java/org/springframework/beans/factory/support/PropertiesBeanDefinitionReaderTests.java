@@ -30,6 +30,7 @@ public class PropertiesBeanDefinitionReaderTests extends TestCase {
 
 	private PropertiesBeanDefinitionReader reader;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.reader = new PropertiesBeanDefinitionReader(beanFactory);

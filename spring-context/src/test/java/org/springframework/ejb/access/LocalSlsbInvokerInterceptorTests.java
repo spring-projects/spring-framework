@@ -57,6 +57,7 @@ public class LocalSlsbInvokerInterceptorTests {
 		final NamingException nex = new NamingException();
 		final String jndiName= "foobar";
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				assertTrue(jndiName.equals(name));
 				throw nex;
@@ -174,6 +175,7 @@ public class LocalSlsbInvokerInterceptorTests {
 
 		LocalSlsbInvokerInterceptor si = new LocalSlsbInvokerInterceptor();
 		si.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() throws NamingException {
 				return mockCtx;
 			}

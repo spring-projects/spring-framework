@@ -33,6 +33,7 @@ public class ToStringCreatorTests extends TestCase {
 
 	private SomeObject s1, s2, s3;
 
+	@Override
 	protected void setUp() throws Exception {
 		s1 = new SomeObject() {
 			public String toString() {

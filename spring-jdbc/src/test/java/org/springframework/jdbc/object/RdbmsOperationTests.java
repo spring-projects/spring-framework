@@ -213,6 +213,7 @@ public class RdbmsOperationTests extends TestCase {
 
 	private static class TestRdbmsOperation extends RdbmsOperation {
 
+		@Override
 		protected void compileInternal() {
 		}
 	}

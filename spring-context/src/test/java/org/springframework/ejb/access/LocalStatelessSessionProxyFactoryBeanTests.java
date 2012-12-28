@@ -52,6 +52,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -85,6 +86,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		replay(myEjb);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -117,6 +119,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -158,6 +161,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));

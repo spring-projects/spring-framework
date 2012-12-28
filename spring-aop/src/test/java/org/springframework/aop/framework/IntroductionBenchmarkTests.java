@@ -42,6 +42,7 @@ public final class IntroductionBenchmarkTests {
 
 	@SuppressWarnings("serial")
 	public static class SimpleCounterIntroduction extends DelegatingIntroductionInterceptor implements Counter {
+		@Override
 		public int getCount() {
 			return EXPECTED_COMPARE;
 		}

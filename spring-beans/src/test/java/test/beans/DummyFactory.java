@@ -81,6 +81,7 @@ public class DummyFactory
 	 * Return if the bean managed by this factory is a singleton.
 	 * @see FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
@@ -92,6 +93,7 @@ public class DummyFactory
 		this.singleton = singleton;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -100,6 +102,7 @@ public class DummyFactory
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 		this.beanFactory.applyBeanPostProcessorsBeforeInitialization(this.testBean, this.beanName);
@@ -126,6 +129,7 @@ public class DummyFactory
 		return otherTestBean;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (initialized) {
 			throw new RuntimeException("Cannot call afterPropertiesSet twice on the one bean");
@@ -151,6 +155,7 @@ public class DummyFactory
 	 * and prototype mode.
 	 * @see FactoryBean#getObject()
 	 */
+	@Override
 	public Object getObject() throws BeansException {
 		if (isSingleton()) {
 			return this.testBean;
@@ -165,11 +170,13 @@ public class DummyFactory
 		}
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
 
 
+	@Override
 	public void destroy() {
 		if (this.testBean != null) {
 			this.testBean.setName(null);

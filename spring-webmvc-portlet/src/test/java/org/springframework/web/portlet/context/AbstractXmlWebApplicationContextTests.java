@@ -44,6 +44,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 	 * Overridden as we can't trust superclass method
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
+	@Override
 	public void testEvents() throws Exception {
 		TestListener listener = (TestListener) this.applicationContext.getBean("testListener");
 		listener.zeroCounter();
@@ -58,6 +59,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 			this.applicationContext.getBeanDefinitionCount() == 14);
@@ -104,6 +106,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 			constructed = true;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			if (this.initMethodInvoked)
 				fail();
@@ -117,6 +120,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 			this.initMethodInvoked = true;
 		}
 
+		@Override
 		public void destroy() {
 			if (this.customDestroyed)
 				fail();

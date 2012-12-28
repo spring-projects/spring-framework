@@ -47,6 +47,7 @@ public final class BeanNameAutoProxyCreatorInitTests {
 
 class NullChecker implements MethodBeforeAdvice {
 
+	@Override
 	public void before(Method method, Object[] args, Object target) throws Throwable {
 		check(args);
 	}

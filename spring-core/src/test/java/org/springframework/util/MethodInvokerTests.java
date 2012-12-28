@@ -227,6 +227,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Purchaser implements Greetable {
 
+		@Override
 		public String getGreeting() {
 			return "hello";
 		}
@@ -235,6 +236,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Shopper extends Purchaser implements Person {
 
+		@Override
 		public String getGreeting() {
 			return "may I help you?";
 		}
@@ -243,6 +245,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Salesman implements Person {
 
+		@Override
 		public String getGreeting() {
 			return "how are sales?";
 		}
@@ -251,6 +254,7 @@ public class MethodInvokerTests extends TestCase {
 
 	private static class Customer extends Shopper {
 
+		@Override
 		public String getGreeting() {
 			return "good day";
 		}
@@ -265,6 +269,7 @@ public class MethodInvokerTests extends TestCase {
 			this.name = name;
 		}
 
+		@Override
 		public String getGreeting() {
 			return "welcome back " + name ;
 		}
@@ -277,6 +282,7 @@ public class MethodInvokerTests extends TestCase {
 			super(name);
 		}
 
+		@Override
 		public String getGreeting() {
 			return "whassup dude?";
 		}

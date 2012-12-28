@@ -87,6 +87,7 @@ public class AnnotationDrivenTests extends TestCase {
 	@SuppressWarnings("serial")
 	public static class TransactionCheckingInterceptor implements MethodInterceptor, Serializable {
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			if (methodInvocation.getMethod().getName().equals("setSomething")) {
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());

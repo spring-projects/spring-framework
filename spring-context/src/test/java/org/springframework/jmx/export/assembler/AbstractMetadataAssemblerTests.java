@@ -204,12 +204,15 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertNull("Metric Category should not be populated", desc.getFieldValue("metricCategory"));
 	}
 
+	@Override
 	protected abstract String getObjectName();
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 6;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 9;
 	}
@@ -218,6 +221,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		return new JmxTestBean();
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MetadataMBeanInfoAssembler assembler = new MetadataMBeanInfoAssembler();
 		assembler.setAttributeSource(getAttributeSource());

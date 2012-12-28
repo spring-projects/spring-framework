@@ -149,10 +149,12 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 	private static class TestBeanFormatter implements Formatter<TestBean> {
 
+		@Override
 		public String print(TestBean object, Locale locale) {
 			return String.valueOf(object.getSpecialInt());
 		}
 
+		@Override
 		public TestBean parse(String text, Locale locale) throws ParseException {
 			TestBean object = new TestBean();
 			object.setSpecialInt(Integer.parseInt(text));
@@ -169,20 +171,25 @@ public class FormattingConversionServiceFactoryBeanTests {
 			fieldTypes.add(Integer.class);
 		}
 
+		@Override
 		public Set<Class<?>> getFieldTypes() {
 			return fieldTypes;
 		}
 
+		@Override
 		public Printer<?> getPrinter(SpecialInt annotation, Class<?> fieldType) {
 			return new Printer<Integer>() {
+				@Override
 				public String print(Integer object, Locale locale) {
 					return ":" + object.toString();
 				}
 			};
 		}
 
+		@Override
 		public Parser<?> getParser(SpecialInt annotation, Class<?> fieldType) {
 			return new Parser<Integer>() {
+				@Override
 				public Integer parse(String text, Locale locale) throws ParseException {
 					return Integer.parseInt(text.substring(1));
 				}
@@ -192,6 +199,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 
 	private static class TestFormatterRegistrar implements FormatterRegistrar {
 
+		@Override
 		public void registerFormatters(FormatterRegistry registry) {
 			registry.addFormatter(new TestBeanFormatter());
 		}

@@ -27,6 +27,7 @@ import java.sql.SQLException;
  * @author Thomas Risberg
  */
 public class CustomSqlExceptionTranslator implements SQLExceptionTranslator {
+	@Override
 	public DataAccessException translate(String task, String sql, SQLException ex) {
 		if (ex.getErrorCode() == 2) {
 			return new TransientDataAccessResourceException("Custom", ex);

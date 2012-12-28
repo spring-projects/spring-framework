@@ -122,6 +122,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	public void testLookupOrder() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			private int lookups = 0;
+			@Override
 			protected Resource loadResource(String path) {
 				++lookups;
 				if (lookups == 1) {
@@ -148,6 +149,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	 */
 	public void testFindUserDefinedCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
@@ -166,6 +168,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 
 	public void testInvalidUserDefinedCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					// Guaranteed to be on the classpath, but most certainly NOT XML
@@ -186,6 +189,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	 */
 	public void testFindCustomCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("custom-error-codes.xml", SQLErrorCodesFactoryTests.class);
@@ -318,6 +322,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	 */
 	public void testWildCardNameRecognized() throws Exception {
 		class WildcardSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("wildcard-error-codes.xml", SQLErrorCodesFactoryTests.class);

@@ -97,6 +97,7 @@ public class ParamTagTests extends AbstractTagTests {
 
 		private Param param;
 
+		@Override
 		public void addParam(Param param) {
 			this.param = param;
 		}

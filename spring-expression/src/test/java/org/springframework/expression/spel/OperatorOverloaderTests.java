@@ -34,6 +34,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 
 	static class StringAndBooleanAddition implements OperatorOverloader {
 
+		@Override
 		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
 			if (operation==Operation.ADD) {
 				return ((String)leftOperand)+((Boolean)rightOperand).toString();
@@ -42,6 +43,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 			}
 		}
 
+		@Override
 		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
 				throws EvaluationException {
 			if (leftOperand instanceof String && rightOperand instanceof Boolean) {

@@ -326,6 +326,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 
 	public static class TestBeanEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");
@@ -350,6 +351,7 @@ class MustBeInitialized implements InitializingBean {
 	/**
 	 * @see InitializingBean#afterPropertiesSet()
 	 */
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.inited = true;
 	}

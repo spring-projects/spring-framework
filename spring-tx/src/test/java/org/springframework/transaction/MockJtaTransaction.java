@@ -28,10 +28,12 @@ public class MockJtaTransaction implements javax.transaction.Transaction {
 
 	private Synchronization synchronization;
 
+	@Override
 	public int getStatus() {
 		return Status.STATUS_ACTIVE;
 	}
 
+	@Override
 	public void registerSynchronization(Synchronization synchronization) {
 		this.synchronization = synchronization;
 	}
@@ -40,20 +42,25 @@ public class MockJtaTransaction implements javax.transaction.Transaction {
 		return synchronization;
 	}
 
+	@Override
 	public boolean enlistResource(XAResource xaResource) {
 		return false;
 	}
 
+	@Override
 	public boolean delistResource(XAResource xaResource, int i) {
 		return false;
 	}
 
+	@Override
 	public void commit() {
 	}
 
+	@Override
 	public void rollback() {
 	}
 
+	@Override
 	public void setRollbackOnly() {
 	}
 

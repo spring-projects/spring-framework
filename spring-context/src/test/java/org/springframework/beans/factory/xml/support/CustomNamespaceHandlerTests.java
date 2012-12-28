@@ -194,6 +194,7 @@ public class CustomNamespaceHandlerTests {
 			super(CLASS.getClassLoader());
 		}
 
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 			InputSource source = super.resolveEntity(publicId, systemId);
 			if (source == null) {
@@ -216,6 +217,7 @@ public class CustomNamespaceHandlerTests {
  */
 final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
+	@Override
 	public void init() {
 		registerBeanDefinitionParser("testBean", new TestBeanDefinitionParser());
 		registerBeanDefinitionParser("person", new PersonDefinitionParser());
@@ -228,6 +230,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class TestBeanDefinitionParser implements BeanDefinitionParser {
 
+		@Override
 		public BeanDefinition parse(Element element, ParserContext parserContext) {
 			RootBeanDefinition definition = new RootBeanDefinition();
 			definition.setBeanClass(TestBean.class);
@@ -245,10 +248,12 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static final class PersonDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
+		@Override
 		protected Class<?> getBeanClass(Element element) {
 			return TestBean.class;
 		}
 
+		@Override
 		protected void doParse(Element element, BeanDefinitionBuilder builder) {
 			builder.addPropertyValue("name", element.getAttribute("name"));
 			builder.addPropertyValue("age", element.getAttribute("age"));
@@ -257,6 +262,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class PropertyModifyingBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
+		@Override
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 			Element element = (Element) node;
 			BeanDefinition def = definition.getBeanDefinition();
@@ -272,6 +278,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class DebugBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
+		@Override
 		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(DebugInterceptor.class);
 		}
@@ -279,6 +286,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class NopInterceptorBeanDefinitionDecorator extends AbstractInterceptorDrivenBeanDefinitionDecorator {
 
+		@Override
 		protected BeanDefinition createInterceptorDefinition(Node node) {
 			return new RootBeanDefinition(NopInterceptor.class);
 		}
@@ -286,6 +294,7 @@ final class TestNamespaceHandler extends NamespaceHandlerSupport {
 
 	private static class ObjectNameBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
+		@Override
 		public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 			Attr objectNameAttribute = (Attr) node;
 			definition.getBeanDefinition().setAttribute("objectName", objectNameAttribute.getValue());

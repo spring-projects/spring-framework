@@ -98,6 +98,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	public void testRegisterNotificationListenerForNonExistentMBean() throws Exception {
 		Map listeners = new HashMap();
 		NotificationListener dummyListener = new NotificationListener() {
+			@Override
 			public void handleNotification(Notification notification, Object handback) {
 				throw new UnsupportedOperationException();
 			}
@@ -666,6 +667,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private boolean invoked = false;
 
+		@Override
 		public ModelMBeanInfo getMBeanInfo(Object managedResource, String beanKey) throws JMException {
 			invoked = true;
 			return null;
@@ -678,10 +680,12 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private List<ObjectName> unregistered = new ArrayList<ObjectName>();
 
+		@Override
 		public void mbeanRegistered(ObjectName objectName) {
 			registered.add(objectName);
 		}
 
+		@Override
 		public void mbeanUnregistered(ObjectName objectName) {
 			unregistered.add(objectName);
 		}
@@ -703,6 +707,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.objectName = objectName;
 		}
 
+		@Override
 		public ObjectName getObjectName() throws MalformedObjectNameException {
 			return this.objectName;
 		}
@@ -717,6 +722,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private String name;
 
+		@Override
 		public String getName() {
 			return name;
 		}
@@ -730,6 +736,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 
 		private List<Notification> notifications = new ArrayList<Notification>();
 
+		@Override
 		public void handleNotification(Notification notification, Object handback) {
 			this.notifications.add(notification);
 		}
@@ -756,6 +763,7 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 			this.namedBean = namedBean;
 		}
 
+		@Override
 		public boolean includeBean(Class<?> beanClass, String beanName) {
 			return this.namedBean.equals(beanName);
 		}

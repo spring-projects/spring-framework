@@ -39,12 +39,14 @@ public class InputTagTests extends AbstractFormTagTests {
 	private TestBean rob;
 
 
+	@Override
 	protected void onSetUp() {
 		this.tag = createTag(getWriter());
 		this.tag.setParent(getFormTag());
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		// set up test data
 		this.rob = new TestBean();
@@ -388,6 +390,7 @@ public class InputTagTests extends AbstractFormTagTests {
 	@SuppressWarnings("serial")
 	protected InputTag createTag(final Writer writer) {
 		return new InputTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);
 			}

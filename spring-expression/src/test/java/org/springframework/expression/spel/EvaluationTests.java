@@ -608,6 +608,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	static class CustomMethodResolver implements MethodResolver {
 
+		@Override
 		public MethodExecutor resolve(EvaluationContext context,
 				Object targetObject, String name,
 				List<TypeDescriptor> argumentTypes) throws AccessException {
@@ -617,6 +618,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	static class CustomMethodFilter implements MethodFilter {
 
+		@Override
 		public List<Method> filter(List<Method> methods) {
 			return null;
 		}
@@ -1373,6 +1375,7 @@ public class EvaluationTests extends ExpressionTestCase {
 
 	static class MyBeanResolver implements BeanResolver {
 
+		@Override
 		public Object resolve(EvaluationContext context, String beanName)
 				throws AccessException {
 			if (beanName.equals("foo") || beanName.equals("bar")) {

@@ -254,14 +254,17 @@ public class PeriodicTriggerTests {
 			this.completion = completion;
 		}
 
+		@Override
 		public Date lastActualExecutionTime() {
 			return this.actual;
 		}
 
+		@Override
 		public Date lastCompletionTime() {
 			return this.completion;
 		}
 
+		@Override
 		public Date lastScheduledExecutionTime() {
 			return this.scheduled;
 		}

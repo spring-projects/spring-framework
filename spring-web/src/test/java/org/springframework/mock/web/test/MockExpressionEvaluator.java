@@ -53,17 +53,20 @@ public class MockExpressionEvaluator extends ExpressionEvaluator {
 		this.pageContext = pageContext;
 	}
 
+	@Override
 	public Expression parseExpression(
 			final String expression, final Class expectedType, final FunctionMapper functionMapper)
 			throws ELException {
 
 		return new Expression() {
+			@Override
 			public Object evaluate(VariableResolver variableResolver) throws ELException {
 				return doEvaluate(expression, expectedType, functionMapper);
 			}
 		};
 	}
 
+	@Override
 	public Object evaluate(
 			String expression, Class expectedType, VariableResolver variableResolver, FunctionMapper functionMapper)
 			throws ELException {

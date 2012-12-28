@@ -41,6 +41,7 @@ import org.springframework.beans.TestBean;
  */
 public class ClassUtilsTests extends TestCase {
 
+	@Override
 	public void setUp() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;

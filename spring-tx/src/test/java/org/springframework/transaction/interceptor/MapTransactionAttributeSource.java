@@ -40,10 +40,12 @@ public class MapTransactionAttributeSource extends AbstractFallbackTransactionAt
 	}
 
 
+	@Override
 	protected TransactionAttribute findTransactionAttribute(Method method) {
 		return this.attributeMap.get(method);
 	}
 
+	@Override
 	protected TransactionAttribute findTransactionAttribute(Class clazz) {
 		return this.attributeMap.get(clazz);
 	}

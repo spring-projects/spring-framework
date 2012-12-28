@@ -182,10 +182,12 @@ class RequiredTestBean implements BeanNameAware, BeanFactoryAware {
 		this.jobTitle = jobTitle;
 	}
 
+	@Override
 	@Required
 	public void setBeanName(String name) {
 	}
 
+	@Override
 	@Required
 	public void setBeanFactory(BeanFactory beanFactory) {
 	}

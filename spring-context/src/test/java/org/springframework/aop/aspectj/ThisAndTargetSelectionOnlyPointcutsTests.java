@@ -115,6 +115,7 @@ interface TestInterface {
 
 
 class TestImpl implements TestInterface {
+	@Override
 	public void doIt() {
 	}
 }

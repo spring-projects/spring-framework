@@ -43,6 +43,7 @@ public final class SharedBeanRegistryTests {
 		assertSame(tb, beanRegistry.getSingleton("tb"));
 
 		TestBean tb2 = (TestBean) beanRegistry.getSingleton("tb2", new ObjectFactory<Object>() {
+			@Override
 			public Object getObject() throws BeansException {
 				return new TestBean();
 			}

@@ -36,6 +36,7 @@ import org.springframework.core.io.Resource;
  */
 public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 
+	@Override
 	protected void setUp() throws Exception {
 		this.targetClass = Foo.class;
 		this.methods = new String[] {"a", "b", "b2", "b3", "c", "d", "d2", "d3", "e", "e2", "e3"};
@@ -44,6 +45,7 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 			Integer.class, Integer.class, Integer.class, Integer.class, Integer.class};
 	}
 
+	@Override
 	protected Type getType(Method method) {
 		return GenericCollectionTypeResolver.getMapValueReturnType(method);
 	}

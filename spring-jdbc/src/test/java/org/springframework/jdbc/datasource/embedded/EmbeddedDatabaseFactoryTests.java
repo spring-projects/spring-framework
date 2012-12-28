@@ -24,6 +24,7 @@ public class EmbeddedDatabaseFactoryTests {
 
 		private boolean populateCalled;
 
+		@Override
 		public void populate(Connection connection) {
 			this.populateCalled = true;
 		}

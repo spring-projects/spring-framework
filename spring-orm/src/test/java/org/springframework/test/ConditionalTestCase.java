@@ -66,6 +66,7 @@ public abstract class ConditionalTestCase extends TestCase {
 		super(name);
 	}
 
+	@Override
 	public void runBare() throws Throwable {
 		// getName will return the name of the method being run
 		if (isDisabledInThisEnvironment(getName())) {

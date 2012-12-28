@@ -90,6 +90,7 @@ public class EventPublicationInterceptorTests {
 		final TestListener listener = new TestListener();
 
 		class TestContext extends StaticApplicationContext {
+			@Override
 			protected void onRefresh() throws BeansException {
 				addListener(listener);
 			}
@@ -140,14 +141,17 @@ public class EventPublicationInterceptorTests {
 
 	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() throws Exception {
 			return "test";
 		}
 
+		@Override
 		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

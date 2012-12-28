@@ -49,6 +49,7 @@ public class SimpleJdbcCallTests extends TestCase {
 	private MockControl ctrlCallable;
 	private CallableStatement mockCallable;
 
+	@Override
 	protected void setUp() throws Exception {
 		ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
 		mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
@@ -69,6 +70,7 @@ public class SimpleJdbcCallTests extends TestCase {
 		mockCallable = (CallableStatement) ctrlCallable.getMock();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		ctrlDatabaseMetaData.verify();
 		ctrlDataSource.verify();

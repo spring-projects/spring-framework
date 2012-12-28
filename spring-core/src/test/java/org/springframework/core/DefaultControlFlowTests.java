@@ -30,6 +30,7 @@ public class DefaultControlFlowTests extends AbstractControlFlowTests {
 	public void testThisClassPlease() {
 	}
 
+	@Override
 	protected ControlFlow createControlFlow() {
 		return ControlFlowFactory.createControlFlow();
 	}

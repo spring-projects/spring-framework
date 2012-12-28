@@ -48,18 +48,22 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 		assertNotNull(op);
 	}
 
+	@Override
 	protected JmxAttributeSource getAttributeSource() {
 		return new AnnotationJmxAttributeSource();
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected IJmxTestBean createJmxTestBean() {
 		return new AnnotationTestSubBean();
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/annotation/annotations.xml";
 	}

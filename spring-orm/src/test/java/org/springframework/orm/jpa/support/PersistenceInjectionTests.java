@@ -734,14 +734,17 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		@PersistenceContext
 		private EntityManager em;
 
+		@Override
 		public Object getObject() throws Exception {
 			return null;
 		}
 
+		@Override
 		public Class getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -785,6 +788,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	@SuppressWarnings("serial")
 	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
 
+		@Override
 		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
 			super.setEntityManager(em);
@@ -880,6 +884,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		public static boolean closed;
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if ("isOpen".equals(method.getName())) {
 				return true;

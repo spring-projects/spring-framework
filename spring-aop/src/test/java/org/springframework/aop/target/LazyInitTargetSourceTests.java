@@ -83,6 +83,7 @@ public final class LazyInitTargetSourceTests {
 	@SuppressWarnings("serial")
 	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
 
+		@Override
 		protected void postProcessTargetObject(Object targetObject) {
 			((ITestBean) targetObject).setName("Rob Harrop");
 		}

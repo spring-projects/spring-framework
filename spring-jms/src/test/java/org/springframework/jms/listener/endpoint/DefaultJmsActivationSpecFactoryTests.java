@@ -34,6 +34,7 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 
 	private JmsActivationSpecConfig activationSpecConfig;
 
+	@Override
 	protected void setUp() throws Exception {
 		activationSpecConfig = new JmsActivationSpecConfig();
 		activationSpecConfig.setMaxConcurrency(5);

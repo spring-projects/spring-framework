@@ -54,10 +54,12 @@ public class DelegatingServletInputStream extends ServletInputStream {
 	}
 
 
+	@Override
 	public int read() throws IOException {
 		return this.sourceStream.read();
 	}
 
+	@Override
 	public void close() throws IOException {
 		super.close();
 		this.sourceStream.close();

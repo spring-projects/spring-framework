@@ -50,9 +50,11 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -636,6 +638,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -678,6 +681,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			super.setAsText(text);
@@ -689,6 +693,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 		public int count = 0;
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			setValue(new Integer(text.trim()));

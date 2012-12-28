@@ -114,6 +114,7 @@ public class PersistenceExceptionTranslationPostProcessorTests extends TestCase 
 	public static class RepositoryWithoutInterfaceAndOtherwiseAdvised extends StereotypedRepositoryInterfaceImpl
 			implements Additional {
 
+		@Override
 		public void additionalMethod() {
 		}
 	}

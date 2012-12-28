@@ -101,34 +101,42 @@ class SimpleBeanImpl implements SimpleBean {
 	private String name;
 	private String sex;
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public float getMyFloat() {
 		return aFloat;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getSex() {
 		return sex;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
 
+	@Override
 	public void setMyFloat(float f) {
 		this.aFloat = f;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public void setSex(String sex) {
 		this.sex = sex;
 	}
@@ -143,6 +151,7 @@ class ProceedTestingAspect implements Ordered {
 	private int order;
 
 	public void setOrder(int order) { this.order = order; }
+	@Override
 	public int getOrder() { return this.order; }
 
 	public Object capitalize(ProceedingJoinPoint pjp, String value) throws Throwable {

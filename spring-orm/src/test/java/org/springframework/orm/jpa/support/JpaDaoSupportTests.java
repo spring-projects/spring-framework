@@ -38,6 +38,7 @@ public class JpaDaoSupportTests extends TestCase {
 		mockControl.replay();
 		final List test = new ArrayList();
 		JpaDaoSupport dao = new JpaDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -56,6 +57,7 @@ public class JpaDaoSupportTests extends TestCase {
 		mockControl.replay();
 		final List test = new ArrayList();
 		JpaDaoSupport dao = new JpaDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -73,6 +75,7 @@ public class JpaDaoSupportTests extends TestCase {
 		JpaTemplate template = new JpaTemplate();
 		final List test = new ArrayList();
 		JpaDaoSupport dao = new JpaDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

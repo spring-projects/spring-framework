@@ -273,9 +273,11 @@ public class ValidatorFactoryTests {
 
 	public static class NameAddressValidator implements ConstraintValidator<NameAddressValid, ValidPerson> {
 
+		@Override
 		public void initialize(NameAddressValid constraintAnnotation) {
 		}
 
+		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext constraintValidatorContext) {
 			return (value.name == null || !value.address.street.contains(value.name));
 		}

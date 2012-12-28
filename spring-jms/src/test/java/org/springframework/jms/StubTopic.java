@@ -39,6 +39,7 @@ public class StubTopic implements Topic {
 	}
 
 
+	@Override
 	public String getTopicName() {
 		return this.topicName;
 	}

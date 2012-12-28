@@ -49,6 +49,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 	private MockControl ctrlResultSetMetaData;
 	private ResultSetMetaData mockResultSetMetaData;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -62,6 +63,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		mockResultSetMetaData = (ResultSetMetaData) ctrlResultSetMetaData.getMock();
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		ctrlStatement.replay();
@@ -70,6 +72,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		ctrlResultSetMetaData.replay();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -349,6 +352,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		Object o = template.queryForObject(sql, new RowMapper() {
+			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
@@ -852,6 +856,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 
 		Object o = template.queryForObject(sql, new Object[] {new Integer(3)}, new RowMapper() {
+			@Override
 			public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}

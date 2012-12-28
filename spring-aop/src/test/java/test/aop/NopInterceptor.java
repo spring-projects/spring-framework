@@ -31,6 +31,7 @@ public class NopInterceptor implements MethodInterceptor {
 	/**
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(MethodInvocation)
 	 */
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		increment();
 		return invocation.proceed();

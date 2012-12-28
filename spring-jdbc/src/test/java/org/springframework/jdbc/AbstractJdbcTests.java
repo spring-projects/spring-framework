@@ -45,6 +45,7 @@ public abstract class AbstractJdbcTests extends TestCase {
 	 */
 	private boolean shouldVerify;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.shouldVerify = false;
 		super.setUp();
@@ -68,6 +69,7 @@ public abstract class AbstractJdbcTests extends TestCase {
 		this.shouldVerify = true;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 

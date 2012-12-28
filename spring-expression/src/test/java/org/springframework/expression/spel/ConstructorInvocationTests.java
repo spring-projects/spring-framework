@@ -173,6 +173,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 
 	static class DummyConstructorResolver implements ConstructorResolver {
 
+		@Override
 		public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 				throws AccessException {
 			throw new UnsupportedOperationException("Auto-generated method stub");

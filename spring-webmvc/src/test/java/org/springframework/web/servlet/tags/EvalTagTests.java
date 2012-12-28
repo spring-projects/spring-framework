@@ -40,6 +40,7 @@ public class EvalTagTests extends AbstractTagTests {
 
 	private MockPageContext context;
 
+	@Override
 	protected void setUp() throws Exception {
 		context = createPageContext();
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();

@@ -167,20 +167,24 @@ public class FormHttpMessageConverterTests {
 			this.outputMessage = outputMessage;
 		}
 
+		@Override
 		public String getCharacterEncoding() {
 			MediaType contentType = outputMessage.getHeaders().getContentType();
 			return contentType != null && contentType.getCharSet() != null ? contentType.getCharSet().name() : null;
 		}
 
+		@Override
 		public String getContentType() {
 			MediaType contentType = outputMessage.getHeaders().getContentType();
 			return contentType != null ? contentType.toString() : null;
 		}
 
+		@Override
 		public int getContentLength() {
 			return outputMessage.getBodyAsBytes().length;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(outputMessage.getBodyAsBytes());
 		}

@@ -38,10 +38,12 @@ import org.springframework.remoting.RemoteAccessException;
  */
 public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRemoteSlsbInvokerInterceptorTests {
 
+	@Override
 	protected SimpleRemoteSlsbInvokerInterceptor createInterceptor() {
 		return new SimpleRemoteStatelessSessionProxyFactoryBean();
 	}
 
+	@Override
 	protected Object configuredProxy(SimpleRemoteSlsbInvokerInterceptor si, Class<?> ifc) throws NamingException {
 		SimpleRemoteStatelessSessionProxyFactoryBean fb = (SimpleRemoteStatelessSessionProxyFactoryBean) si;
 		fb.setBusinessInterface(ifc);
@@ -64,6 +66,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -97,6 +100,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(myEjb);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -119,6 +123,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		verify(myEjb);
 	}
 
+	@Override
 	@Test
 	public void testRemoteException() throws Exception {
 		final RemoteException rex = new RemoteException();
@@ -136,6 +141,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -175,6 +181,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -216,6 +223,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -257,6 +265,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 		replay(home);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals(jndiName));

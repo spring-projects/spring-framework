@@ -42,6 +42,7 @@ public class EventPublicationTests extends TestCase {
 	private final CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
+	@Override
 	protected void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);

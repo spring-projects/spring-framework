@@ -80,10 +80,12 @@ public class LocalEntityManagerFactoryBeanTests extends AbstractEntityManagerFac
 
 	protected static class DummyPersistenceProvider implements PersistenceProvider {
 
+		@Override
 		public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo pui, Map map) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public EntityManagerFactory createEntityManagerFactory(String emfName, Map properties) {
 			actualName = emfName;
 			actualProps = properties;

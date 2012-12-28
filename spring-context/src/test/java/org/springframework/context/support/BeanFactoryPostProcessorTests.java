@@ -104,6 +104,7 @@ public class BeanFactoryPostProcessorTests {
 
 		public boolean wasCalled = false;
 
+		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 			wasCalled = true;
 		}

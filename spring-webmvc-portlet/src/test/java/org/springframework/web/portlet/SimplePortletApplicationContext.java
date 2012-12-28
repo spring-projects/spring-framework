@@ -44,6 +44,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 	private String renderCommandSessionAttributeName;
 	private String formSessionAttributeName;
 
+	@Override
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		registerSingleton("controller1", TestFormController.class, pvs);
@@ -98,17 +99,20 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 			this.setFormView("form");
 		}
 
+		@Override
 		public void doSubmitAction(Object command) {
 			TestBean testBean = (TestBean) command;
 			testBean.setAge(testBean.getAge() + 10);
 		}
 
+		@Override
 		public ModelAndView showForm(RenderRequest request, RenderResponse response, BindException errors) throws Exception {
 			TestBean testBean = (TestBean) errors.getModel().get(getCommandName());
 			this.writeResponse(response, testBean, false);
 			return null;
 		}
 
+		@Override
 		public ModelAndView onSubmitRender(RenderRequest request, RenderResponse response, Object command, BindException errors)
 				throws IOException {
 			TestBean testBean = (TestBean) command;
@@ -128,6 +132,7 @@ public class SimplePortletApplicationContext extends StaticPortletApplicationCon
 			response.getWriter().write((finished ? "finished" : "") + (testBean.getAge() + 5));
 		}
 
+		@Override
 		public void handleEventRequest(EventRequest request, EventResponse response) throws Exception {
 			response.setRenderParameter("event", request.getEvent().getName());
 		}

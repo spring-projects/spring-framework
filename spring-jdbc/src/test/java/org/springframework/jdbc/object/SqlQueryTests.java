@@ -82,6 +82,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 	private ResultSet mockResultSet;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
@@ -90,6 +91,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		mockResultSet = (ResultSet) ctrlResultSet.getMock();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (shouldVerify()) {
@@ -98,6 +100,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		}
 	}
 
+	@Override
 	protected void replay() {
 		super.replay();
 		ctrlPreparedStatement.replay();
@@ -130,6 +133,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		SqlQuery query = new MappingSqlQueryWithParameters() {
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum, Object[] params, Map context) throws SQLException {
 				assertTrue("params were null", params == null);
 				assertTrue("context was null", context == null);
@@ -154,6 +158,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		MappingSqlQuery query = new MappingSqlQuery() {
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
@@ -180,6 +185,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 		replay();
 
 		MappingSqlQuery query = new MappingSqlQuery() {
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				return new Integer(rs.getInt(1));
 			}
@@ -374,6 +380,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -431,6 +438,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -522,6 +530,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -587,6 +596,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -654,6 +664,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -712,6 +723,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -767,6 +779,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -797,6 +810,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -876,6 +890,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -943,6 +958,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -1016,6 +1032,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -1057,6 +1074,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 				Customer cust = new Customer();
 				cust.setId(rs.getInt(COLUMN_NAMES[0]));
@@ -1128,6 +1146,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 				compile();
 			}
 
+			@Override
 			protected Object updateRow(ResultSet rs, int rownum, Map context) throws SQLException {
 				rs.updateString(2, "" + context.get(new Integer(rs.getInt(COLUMN_NAMES[0]))));
 				return null;
@@ -1148,6 +1167,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			compile();
 		}
 
+		@Override
 		protected Object mapRow(ResultSet rs, int rownum) throws SQLException {
 			return rs.getString(1);
 		}

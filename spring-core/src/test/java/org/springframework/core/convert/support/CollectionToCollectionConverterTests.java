@@ -223,50 +223,62 @@ public class CollectionToCollectionConverterTests {
 
 	public static abstract class BaseResource implements Resource {
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return null;
 		}
 
+		@Override
 		public boolean exists() {
 			return false;
 		}
 
+		@Override
 		public boolean isReadable() {
 			return false;
 		}
 
+		@Override
 		public boolean isOpen() {
 			return false;
 		}
 
+		@Override
 		public URL getURL() throws IOException {
 			return null;
 		}
 
+		@Override
 		public URI getURI() throws IOException {
 			return null;
 		}
 
+		@Override
 		public File getFile() throws IOException {
 			return null;
 		}
 
+		@Override
 		public long contentLength() throws IOException {
 			return 0;
 		}
 
+		@Override
 		public long lastModified() throws IOException {
 			return 0;
 		}
 
+		@Override
 		public Resource createRelative(String relativePath) throws IOException {
 			return null;
 		}
 
+		@Override
 		public String getFilename() {
 			return null;
 		}
 
+		@Override
 		public String getDescription() {
 			return null;
 		}

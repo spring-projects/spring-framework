@@ -41,10 +41,12 @@ public class StandardPersonService implements PersonService {
 		this.personRepository = personRepository;
 	}
 
+	@Override
 	public Person findByName(String name) {
 		return this.personRepository.findByName(name);
 	}
 
+	@Override
 	@Transactional(readOnly = false)
 	public Person save(Person person) {
 		return this.personRepository.save(person);

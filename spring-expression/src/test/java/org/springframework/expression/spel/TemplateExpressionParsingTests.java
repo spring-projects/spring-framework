@@ -36,24 +36,30 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class TemplateExpressionParsingTests extends ExpressionTestCase {
 
 	public static final ParserContext DEFAULT_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return "${";
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}
 	};
 
 	public static final ParserContext HASH_DELIMITED_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return "#{";
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}

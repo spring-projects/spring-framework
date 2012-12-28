@@ -51,14 +51,17 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private SelectTag parentTag;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
 		};
 		this.parentTag = new SelectTag() {
+			@Override
 			public String getName() {
 				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
@@ -239,6 +242,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testWithPropertyEditor() throws Exception {
 		String selectName = "testBean.stringArray";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
+			@Override
 			public PropertyEditor getEditor() {
 				return new StringArrayPropertyEditor();
 			}
@@ -268,6 +272,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		testBeanEditor.setValue(new TestBean("Sally"));
 		String selectName = "testBean.spouse";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
+			@Override
 			public PropertyEditor getEditor() {
 				return testBeanEditor;
 			}
@@ -332,6 +337,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		floatEditor.setValue(new Float("12.34"));
 		String selectName = "testBean.someNumber";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
+			@Override
 			public PropertyEditor getEditor() {
 				return floatEditor;
 			}
@@ -357,6 +363,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		final PropertyEditor floatEditor = new SimpleFloatEditor();
 		String selectName = "testBean.someNumber";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
+			@Override
 			public PropertyEditor getEditor() {
 				return floatEditor;
 			}
@@ -443,6 +450,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 	public void testAsBodyTagWithEditor() throws Exception {
 		String selectName = "testBean.stringArray";
 		BindStatus bindStatus = new BindStatus(getRequestContext(), selectName, false) {
+			@Override
 			public PropertyEditor getEditor() {
 				return new RulesVariantEditor();
 			}
@@ -499,6 +507,7 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 		assertTrue(output.endsWith("</option>"));
 	}
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		TestBean bean = new TestBean();
 		bean.setName("foo");
@@ -520,10 +529,12 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private static class TestBeanPropertyEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(new TestBean(text + "k", 123));
 		}
 
+		@Override
 		public String getAsText() {
 			return ((TestBean) getValue()).getName();
 		}
@@ -589,10 +600,12 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	public class RulesVariantEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(RulesVariant.fromId(text));
 		}
 
+		@Override
 		public String getAsText() {
 			RulesVariant rulesVariant = (RulesVariant) getValue();
 			return rulesVariant.toId();
@@ -602,11 +615,13 @@ public class OptionTagTests extends AbstractHtmlElementTagTests {
 
 	private static class FriendEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(new TestBean(text));
 		}
 
 
+		@Override
 		public String getAsText() {
 			return ((TestBean) getValue()).getName();
 		}

@@ -77,14 +77,17 @@ public final class FactoryBeanTests {
 
 	public static class NullReturningFactoryBean implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			return null;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -103,6 +106,7 @@ public final class FactoryBeanTests {
 			return beta;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			Assert.notNull(beta, "'beta' property is required");
 		}
@@ -131,6 +135,7 @@ public final class FactoryBeanTests {
 			return name;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			Assert.notNull(gamma, "'gamma' property is required");
 		}
@@ -149,14 +154,17 @@ public final class FactoryBeanTests {
 			this.beta = beta;
 		}
 
+		@Override
 		public Object getObject() {
 			return this.beta;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

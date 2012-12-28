@@ -54,6 +54,7 @@ public abstract class AbstractSpr3350SingleSpringContextTests extends AbstractDe
 	 *
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#getConfigPath()
 	 */
+	@Override
 	protected abstract String getConfigPath();
 
 	/**

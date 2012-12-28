@@ -63,6 +63,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container = (SimpleMessageListenerContainer) getContainer();
 	}
 
+	@Override
 	protected AbstractMessageListenerContainer getContainer() {
 		return new SimpleMessageListenerContainer();
 	}
@@ -234,6 +235,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener() {
+			@Override
 			public void onMessage(Message message, Session sess) {
 				try {
 					// Check correct Session passed into SessionAwareMessageListener.
@@ -301,6 +303,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(listener);
 		this.container.setTaskExecutor(new TaskExecutor() {
+			@Override
 			public void execute(Runnable task) {
 				listener.executorInvoked = true;
 				assertFalse(listener.listenerInvoked);
@@ -364,6 +367,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener() {
+			@Override
 			public void onMessage(Message message, Session session) throws JMSException {
 				throw theException;
 			}
@@ -430,6 +434,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new SessionAwareMessageListener() {
+			@Override
 			public void onMessage(Message message, Session session) throws JMSException {
 				throw theException;
 			}
@@ -491,6 +496,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new MessageListener() {
+			@Override
 			public void onMessage(Message message) {
 				throw new UnsupportedOperationException();
 			}
@@ -555,6 +561,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 		this.container.setConnectionFactory(connectionFactory);
 		this.container.setDestinationName(DESTINATION_NAME);
 		this.container.setMessageListener(new MessageListener() {
+			@Override
 			public void onMessage(Message message) {
 				throw new UnsupportedOperationException();
 			}
@@ -644,6 +651,7 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 
 		public boolean listenerInvoked = false;
 
+		@Override
 		public void onMessage(Message message) {
 			this.listenerInvoked = true;
 		}
@@ -658,30 +666,37 @@ public class SimpleMessageListenerContainerTests extends AbstractMessageListener
 			this.messageListener.onMessage(message);
 		}
 
+		@Override
 		public String getMessageSelector() throws JMSException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public MessageListener getMessageListener() throws JMSException {
 			return this.messageListener;
 		}
 
+		@Override
 		public void setMessageListener(MessageListener messageListener) throws JMSException {
 			this.messageListener = messageListener;
 		}
 
+		@Override
 		public Message receive() throws JMSException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Message receive(long l) throws JMSException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Message receiveNoWait() throws JMSException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void close() throws JMSException {
 			throw new UnsupportedOperationException();
 		}

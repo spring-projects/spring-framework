@@ -86,6 +86,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				setField(person, "id", null, long.class);
 			}
@@ -94,6 +95,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				setField(person, "age", null, int.class);
 			}
@@ -102,6 +104,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling setField() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				setField(person, "likesPets", null, boolean.class);
 			}
@@ -187,6 +190,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				invokeSetterMethod(person, "id", null, long.class);
 			}
@@ -195,6 +199,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				invokeSetterMethod(person, "age", null, int.class);
 			}
@@ -203,6 +208,7 @@ public class ReflectionTestUtilsTests {
 		new AssertThrows(IllegalArgumentException.class,
 			"Calling invokeSetterMethod() with NULL for a primitive type should throw an IllegalArgumentException.") {
 
+			@Override
 			public void test() throws Exception {
 				invokeSetterMethod(person, "likesPets", null, boolean.class);
 			}

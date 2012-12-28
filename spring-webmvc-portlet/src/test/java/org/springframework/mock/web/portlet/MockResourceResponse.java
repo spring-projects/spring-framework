@@ -29,6 +29,7 @@ public class MockResourceResponse extends MockMimeResponse implements ResourceRe
 	private int contentLength = 0;
 
 
+	@Override
 	public void setContentLength(int len) {
 		this.contentLength = len;
 	}

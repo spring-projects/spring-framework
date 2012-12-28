@@ -35,11 +35,13 @@ public class StatementCreatorUtilsTests extends TestCase {
 	private MockControl psControl;
 	private PreparedStatement ps;
 
+	@Override
 	protected void setUp() {
 		psControl = MockControl.createControl(PreparedStatement.class);
 		ps = (PreparedStatement) psControl.getMock();
 	}
 
+	@Override
 	protected void tearDown() {
 		psControl.verify();
 	}

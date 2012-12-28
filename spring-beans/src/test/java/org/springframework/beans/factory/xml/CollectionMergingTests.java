@@ -40,6 +40,7 @@ public class CollectionMergingTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		BeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);

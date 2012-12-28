@@ -56,6 +56,7 @@ public class ExecutorBeanDefinitionParserTests {
 		assertEquals(60, getKeepAliveSeconds(executor));
 		assertEquals(false, getAllowCoreThreadTimeOut(executor));
 		FutureTask<String> task = new FutureTask<String>(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "foo";
 			}

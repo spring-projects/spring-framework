@@ -207,6 +207,7 @@ class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 	/**
 	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
 	 */
+	@Override
 	public boolean matches(Method m, Class<?> targetClass) {
 		return false;
 	}
@@ -249,10 +250,12 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 		return (CountingBeforeAdvice) getAdvice();
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		setAdvice(new TxCountingBeforeAdvice());
 	}
 
+	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return method.getName().startsWith("setAge");
 	}
@@ -260,6 +263,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 	private class TxCountingBeforeAdvice extends CountingBeforeAdvice {
 
+		@Override
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			// do transaction checks
 			if (requireTransactionContext) {
@@ -323,21 +327,25 @@ class CallCountingTransactionManager extends AbstractPlatformTransactionManager 
 	public int rollbacks;
 	public int inflight;
 
+	@Override
 	protected Object doGetTransaction() {
 		return new Object();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		this.lastDefinition = definition;
 		++begun;
 		++inflight;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		++rollbacks;
 		--inflight;

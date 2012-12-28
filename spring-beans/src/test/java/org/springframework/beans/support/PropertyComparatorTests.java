@@ -104,6 +104,7 @@ public class PropertyComparatorTests {
 
 		private String lastName;
 
+		@Override
 		public int compareTo(Object o) {
 			return nickName.compareTo(((Dog)o).nickName);
 		}

@@ -187,6 +187,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"MANAGER"};}
 	}
 
@@ -197,6 +198,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"TELLER"};}
 	}
 
@@ -207,6 +209,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"SUPERVISOR"};}
 	}
 
@@ -217,22 +220,27 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			public String name = "Andy";
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return name.equals("principal");
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(new Principal());
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
@@ -247,22 +255,27 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		void setPerson(Person p) { this.activePerson = p; }
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return name.equals("p");
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(activePerson);
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
@@ -280,6 +293,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 				this.tc = typeConverter;
 			}
 
+			@Override
 			public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
 					throws AccessException {
 				try {
@@ -303,6 +317,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			}
 		}
 
+		@Override
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, List<TypeDescriptor> arguments)
 				throws AccessException {
 			if (name.equals("hasRole")) {

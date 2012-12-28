@@ -99,6 +99,7 @@ public class CachingMapDecoratorTests extends TestCase {
 
 		private boolean createCalled;
 
+		@Override
 		protected String create(String key) {
 			createCalled = true;
 			return (key != null ? "expensive value to cache" : null);

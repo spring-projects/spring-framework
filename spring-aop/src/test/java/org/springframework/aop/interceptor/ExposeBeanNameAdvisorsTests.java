@@ -38,6 +38,7 @@ public final class ExposeBeanNameAdvisorsTests {
 			this.beanName = beanName;
 		}
 
+		@Override
 		public int getAge() {
 			assertEquals(beanName, ExposeBeanNameAdvisors.getBeanName());
 			return super.getAge();

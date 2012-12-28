@@ -41,11 +41,13 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 	private ConfigurableApplicationContext context;
 
+	@Override
 	public void setUp() {
 		this.context = new ClassPathXmlApplicationContext(
 				"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 	}
 
+	@Override
 	protected void tearDown() {
 		this.context.close();
 	}

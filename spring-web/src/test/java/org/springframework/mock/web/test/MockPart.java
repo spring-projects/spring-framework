@@ -90,22 +90,27 @@ public class MockPart implements Part {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
 
+	@Override
 	public long getSize() {
 		return this.content.length;
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return new ByteArrayInputStream(this.content);
 	}
 
+	@Override
 	public String getHeader(String name) {
 		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
 			return this.contentType;
@@ -115,6 +120,7 @@ public class MockPart implements Part {
 		}
 	}
 
+	@Override
 	public Collection<String> getHeaders(String name) {
 		if (CONTENT_TYPE.equalsIgnoreCase(name)) {
 			return Collections.singleton(this.contentType);
@@ -124,14 +130,17 @@ public class MockPart implements Part {
 		}
 	}
 
+	@Override
 	public Collection<String> getHeaderNames() {
 		return Collections.singleton(CONTENT_TYPE);
 	}
 
+	@Override
 	public void write(String fileName) throws IOException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void delete() throws IOException {
 		throw new UnsupportedOperationException();
 	}

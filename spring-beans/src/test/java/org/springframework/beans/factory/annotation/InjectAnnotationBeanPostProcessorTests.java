@@ -609,6 +609,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 		public ExtendedResourceInjectionBean() {
 		}
 
+		@Override
 		@Inject @Required
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -662,6 +663,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -708,6 +710,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -779,6 +782,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1074,14 +1078,17 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 	public static class StringFactoryBean implements FactoryBean<String> {
 
+		@Override
 		public String getObject() throws Exception {
 			return "";
 		}
 
+		@Override
 		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

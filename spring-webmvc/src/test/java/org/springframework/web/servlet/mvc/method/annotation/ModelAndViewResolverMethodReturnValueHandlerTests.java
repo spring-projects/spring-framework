@@ -124,6 +124,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 			this.returnValueType = returnValueType;
 		}
 
+		@Override
 		@SuppressWarnings("rawtypes")
 		public ModelAndView resolveModelAndView(Method method, Class handlerType, Object returnValue,
 				ExtendedModelMap model, NativeWebRequest request) {
