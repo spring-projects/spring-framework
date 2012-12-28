@@ -81,6 +81,7 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher forwardedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				assertEquals("Forwarded URL", expectedUrl, result.getResponse().getForwardedUrl());
 			}
@@ -92,6 +93,7 @@ public abstract class MockMvcResultMatchers {
 	 */
 	public static ResultMatcher redirectedUrl(final String expectedUrl) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) {
 				assertEquals("Redirected URL", expectedUrl, result.getResponse().getRedirectedUrl());
 			}

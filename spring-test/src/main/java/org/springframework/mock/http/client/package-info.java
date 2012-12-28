@@ -16,8 +16,8 @@
 
 /**
  * Mock implementations of client-side HTTP abstractions.
- * This package contains the <code>MockClientHttpRequest</code> and
- * <code>MockClientHttpResponse</code>.
+ * This package contains the {@code MockClientHttpRequest} and
+ * {@code MockClientHttpResponse}.
  */
 package org.springframework.mock.http.client;
 

@@ -1511,6 +1511,7 @@ public final class XmlBeanFactoryTests {
 
 		public Object lastArg;
 
+		@Override
 		public Object reimplement(Object obj, Method method, Object[] args) throws Throwable {
 			assertEquals(1, args.length);
 			assertEquals("doSomething", method.getName());
@@ -1558,6 +1559,7 @@ public final class XmlBeanFactoryTests {
 			constructed = true;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			if (this.initMethodInvoked) {
 				fail();
@@ -1579,6 +1581,7 @@ public final class XmlBeanFactoryTests {
 			this.initMethodInvoked = true;
 		}
 
+		@Override
 		public void destroy() {
 			if (this.customDestroyed) {
 				fail();
@@ -1611,6 +1614,7 @@ public final class XmlBeanFactoryTests {
 			prepared = true;
 		}
 
+		@Override
 		public void destroy() {
 			destroyed = true;
 		}
@@ -1627,6 +1631,7 @@ public final class XmlBeanFactoryTests {
 			prepared = true;
 		}
 
+		@Override
 		public void destroy() {
 			destroyed = true;
 		}
@@ -1654,12 +1659,14 @@ public final class XmlBeanFactoryTests {
 		public void setInTheMiddleBean(InTheMiddleBean bean) {
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			if (!(PreparingBean1.prepared && PreparingBean2.prepared)) {
 				throw new IllegalStateException("Need prepared PreparingBeans!");
 			}
 		}
 
+		@Override
 		public void destroy() {
 			if (PreparingBean1.destroyed || PreparingBean2.destroyed) {
 				throw new IllegalStateException("Should not be destroyed after PreparingBeans");
@@ -1692,6 +1699,7 @@ public final class XmlBeanFactoryTests {
 			this.dependingBean = dependingBean;
 		}
 
+		@Override
 		public void destroy() {
 			if (this.dependingBean.destroyed) {
 				throw new IllegalStateException("Should not be destroyed after DependingBean");
@@ -1794,10 +1802,12 @@ public final class XmlBeanFactoryTests {
 
 	public static class WrappingPostProcessor implements BeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			ProxyFactory pf = new ProxyFactory(bean);
 			return pf.getProxy();

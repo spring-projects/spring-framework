@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * Bean post-processor that applies initialization and destruction callbacks
  * to beans that implement the Portlet interface.
  *
- * <p>After initialization of the bean instance, the Portlet <code>init</code>
+ * <p>After initialization of the bean instance, the Portlet {@code init}
  * method will be called with a PortletConfig that contains the bean name
  * of the Portlet and the PortletContext that it is running in.
  *
- * <p>Before destruction of the bean instance, the Portlet <code>destroy</code>
+ * <p>Before destruction of the bean instance, the Portlet {@code destroy}
  * will be called.
  *
  * <p><b>Note that this post-processor does not support Portlet initialization
@@ -82,7 +82,7 @@ public class SimplePortletPostProcessor
 
 	/**
 	 * Set whether to use the shared PortletConfig object passed in
-	 * through <code>setPortletConfig</code>, if available.
+	 * through {@code setPortletConfig}, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
 	 * a mock PortletConfig object with the bean name as portlet name,
 	 * holding the current PortletContext.
@@ -92,19 +92,23 @@ public class SimplePortletPostProcessor
 		this.useSharedPortletConfig = useSharedPortletConfig;
 	}
 
+	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
 
+	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Portlet) {
 			PortletConfig config = this.portletConfig;
@@ -121,6 +125,7 @@ public class SimplePortletPostProcessor
 		return bean;
 	}
 
+	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Portlet) {
 			((Portlet) bean).destroy();
@@ -146,46 +151,57 @@ public class SimplePortletPostProcessor
 			this.portletConfig = portletConfig;
 		}
 
+		@Override
 		public String getPortletName() {
 			return this.portletName;
 		}
 
+		@Override
 		public PortletContext getPortletContext() {
 			return this.portletContext;
 		}
 
+		@Override
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
+		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
+		@Override
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (this.portletConfig != null ? this.portletConfig.getResourceBundle(locale) : null);
 		}
 
+		@Override
 		public Enumeration<String> getPublicRenderParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
+		@Override
 		public String getDefaultNamespace() {
 			return XMLConstants.NULL_NS_URI;
 		}
 
+		@Override
 		public Enumeration<QName> getPublishingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
+		@Override
 		public Enumeration<QName> getProcessingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
+		@Override
 		public Enumeration<Locale> getSupportedLocales() {
 			return Collections.enumeration(new HashSet<Locale>());
 		}
 
+		@Override
 		public Map<String, String[]> getContainerRuntimeOptions() {
 			return (this.portletConfig != null ? this.portletConfig.getContainerRuntimeOptions() : null);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.Mergeable;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ManagedProperties extends Properties implements Mergeable, BeanMetadataElement {
 
 	private Object source;
@@ -37,13 +38,14 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -56,11 +58,13 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 		this.mergeEnabled = mergeEnabled;
 	}
 
+	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
 	}
 
 
+	@Override
 	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");

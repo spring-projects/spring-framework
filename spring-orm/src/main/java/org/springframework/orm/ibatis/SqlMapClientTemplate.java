@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * Helper class that simplifies data access via the iBATIS
  * {@link com.ibatis.sqlmap.client.SqlMapClient} API, converting checked
  * SQLExceptions into unchecked DataAccessExceptions, following the
- * <code>org.springframework.dao</code> exception hierarchy.
+ * {@code org.springframework.dao} exception hierarchy.
  * Uses the same {@link org.springframework.jdbc.support.SQLExceptionTranslator}
  * mechanism as {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
@@ -61,7 +61,7 @@ import org.springframework.util.Assert;
  * 		 executor.update("insertSomethingElse", "myOtherParamValue");
  * 		 executor.executeBatch();
  * 		 return null;
- * 	 }
+ *      }
  * });</pre>
  *
  * The template needs a SqlMapClient to work on, passed in via the "sqlMapClient"
@@ -152,7 +152,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	/**
 	 * Execute the given data access action on a SqlMapExecutor.
 	 * @param action callback object that specifies the data access action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public <T> T execute(SqlMapClientCallback<T> action) throws DataAccessException {
@@ -261,73 +261,87 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	}
 
 
+	@Override
 	public Object queryForObject(String statementName) throws DataAccessException {
 		return queryForObject(statementName, null);
 	}
 
+	@Override
 	public Object queryForObject(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Object>() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForObject(statementName, parameterObject);
 			}
 		});
 	}
 
+	@Override
 	public Object queryForObject(
 			final String statementName, final Object parameterObject, final Object resultObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Object>() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForObject(statementName, parameterObject, resultObject);
 			}
 		});
 	}
 
+	@Override
 	public List queryForList(String statementName) throws DataAccessException {
 		return queryForList(statementName, null);
 	}
 
+	@Override
 	public List queryForList(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<List>() {
+			@Override
 			public List doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject);
 			}
 		});
 	}
 
+	@Override
 	public List queryForList(String statementName, int skipResults, int maxResults)
 			throws DataAccessException {
 
 		return queryForList(statementName, null, skipResults, maxResults);
 	}
 
+	@Override
 	public List queryForList(
 			final String statementName, final Object parameterObject, final int skipResults, final int maxResults)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<List>() {
+			@Override
 			public List doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForList(statementName, parameterObject, skipResults, maxResults);
 			}
 		});
 	}
 
+	@Override
 	public void queryWithRowHandler(String statementName, RowHandler rowHandler)
 			throws DataAccessException {
 
 		queryWithRowHandler(statementName, null, rowHandler);
 	}
 
+	@Override
 	public void queryWithRowHandler(
 			final String statementName, final Object parameterObject, final RowHandler rowHandler)
 			throws DataAccessException {
 
 		execute(new SqlMapClientCallback<Object>() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				executor.queryWithRowHandler(statementName, parameterObject, rowHandler);
 				return null;
@@ -335,56 +349,67 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		});
 	}
 
+	@Override
 	public Map queryForMap(
 			final String statementName, final Object parameterObject, final String keyProperty)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Map>() {
+			@Override
 			public Map doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForMap(statementName, parameterObject, keyProperty);
 			}
 		});
 	}
 
+	@Override
 	public Map queryForMap(
 			final String statementName, final Object parameterObject, final String keyProperty, final String valueProperty)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Map>() {
+			@Override
 			public Map doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.queryForMap(statementName, parameterObject, keyProperty, valueProperty);
 			}
 		});
 	}
 
+	@Override
 	public Object insert(String statementName) throws DataAccessException {
 		return insert(statementName, null);
 	}
 
+	@Override
 	public Object insert(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Object>() {
+			@Override
 			public Object doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.insert(statementName, parameterObject);
 			}
 		});
 	}
 
+	@Override
 	public int update(String statementName) throws DataAccessException {
 		return update(statementName, null);
 	}
 
+	@Override
 	public int update(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Integer>() {
+			@Override
 			public Integer doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.update(statementName, parameterObject);
 			}
 		});
 	}
 
+	@Override
 	public void update(String statementName, Object parameterObject, int requiredRowsAffected)
 			throws DataAccessException {
 
@@ -395,20 +420,24 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 		}
 	}
 
+	@Override
 	public int delete(String statementName) throws DataAccessException {
 		return delete(statementName, null);
 	}
 
+	@Override
 	public int delete(final String statementName, final Object parameterObject)
 			throws DataAccessException {
 
 		return execute(new SqlMapClientCallback<Integer>() {
+			@Override
 			public Integer doInSqlMapClient(SqlMapExecutor executor) throws SQLException {
 				return executor.delete(statementName, parameterObject);
 			}
 		});
 	}
 
+	@Override
 	public void delete(String statementName, Object parameterObject, int requiredRowsAffected)
 			throws DataAccessException {
 

@@ -8,20 +8,24 @@ import org.springframework.context.ApplicationListener;
  * @author Juergen Hoeller
  * @since 06.10.2004
  */
-public class FactoryBeanAndApplicationListener implements FactoryBean, ApplicationListener {
+public class FactoryBeanAndApplicationListener implements FactoryBean<String>, ApplicationListener<ApplicationEvent> {
 
-	public Object getObject() throws Exception {
+	@Override
+	public String getObject() throws Exception {
 		return "";
 	}
 
-	public Class getObjectType() {
+	@Override
+	public Class<String> getObjectType() {
 		return String.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
+	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
- * 
+ *
  * <p>If you want control over interceptor chaining, use an AOP ProxyFactoryBean
  * with SimpleRemoteSlsbInvokerInterceptor rather than rely on this class.
  *
@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * bound at the target location yet. The best solution is to set the lookupHomeOnStartup
  * property to false, in which case the home will be fetched on first access to the EJB.
  * (This flag is only true by default for backwards compatibility reasons).
- * 
+ *
  * <p>This proxy factory is typically used with an RMI business interface, which serves
  * as super-interface of the EJB component interface. Alternatively, this factory
  * can also proxy a remote SLSB with a matching non-RMI business interface, i.e. an
@@ -91,6 +91,7 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 		return this.businessInterface;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -105,14 +106,17 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.businessInterface;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

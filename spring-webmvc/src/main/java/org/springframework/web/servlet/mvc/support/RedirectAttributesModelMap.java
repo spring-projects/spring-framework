@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import org.springframework.validation.DataBinder;
 
 /**
  * A {@link ModelMap} implementation of {@link RedirectAttributes} that formats
- * values as Strings using a {@link DataBinder}. Also provides a place to store 
- * flash attributes so they can survive a redirect without the need to be 
+ * values as Strings using a {@link DataBinder}. Also provides a place to store
+ * flash attributes so they can survive a redirect without the need to be
  * embedded in the redirect URL.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */
@@ -45,9 +45,9 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	public RedirectAttributesModelMap(DataBinder dataBinder) {
 		this.dataBinder = dataBinder;
 	}
-	
+
 	/**
-	 * Default constructor without a DataBinder. 
+	 * Default constructor without a DataBinder.
 	 * Attribute values are converted to String via {@link #toString()}.
 	 */
 	public RedirectAttributesModelMap() {
@@ -57,6 +57,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	/**
 	 * Return the attributes candidate for flash storage or an empty Map.
 	 */
+	@Override
 	public Map<String, ?> getFlashAttributes() {
 		return this.flashAttributes;
 	}
@@ -65,6 +66,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
+	@Override
 	public RedirectAttributesModelMap addAttribute(String attributeName, Object attributeValue) {
 		super.addAttribute(attributeName, formatValue(attributeValue));
 		return this;
@@ -81,6 +83,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
+	@Override
 	public RedirectAttributesModelMap addAttribute(Object attributeValue) {
 		super.addAttribute(attributeValue);
 		return this;
@@ -90,6 +93,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being added.
 	 */
+	@Override
 	public RedirectAttributesModelMap addAllAttributes(Collection<?> attributeValues) {
 		super.addAllAttributes(attributeValues);
 		return this;
@@ -99,6 +103,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being added.
 	 */
+	@Override
 	public RedirectAttributesModelMap addAllAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
@@ -112,6 +117,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being merged.
 	 */
+	@Override
 	public RedirectAttributesModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
@@ -123,6 +129,7 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		return this;
 	}
 
+	@Override
 	public Map<String, Object> asMap() {
 		return this;
 	}
@@ -149,11 +156,13 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		}
 	}
 
+	@Override
 	public RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeName, attributeValue);
 		return this;
 	}
-	
+
+	@Override
 	public RedirectAttributes addFlashAttribute(Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeValue);
 		return this;

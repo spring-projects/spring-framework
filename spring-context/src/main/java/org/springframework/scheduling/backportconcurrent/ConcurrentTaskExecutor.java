@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
  * Adapter that takes a JSR-166 backport
- * <code>edu.emory.mathcs.backport.java.util.concurrent.Executor</code> and
+ * {@code edu.emory.mathcs.backport.java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
  *
  * <p><b>NOTE:</b> This class implements Spring's
@@ -102,6 +102,7 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 	 * Delegates to the specified JSR-166 backport concurrent executor.
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.Executor#execute(Runnable)
 	 */
+	@Override
 	public void execute(Runnable task) {
 		try {
 			this.concurrentExecutor.execute(task);
@@ -112,16 +113,19 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -131,6 +135,7 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor, Executor 
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}

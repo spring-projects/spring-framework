@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  * ApplicationContext-specific implementation of BeanFactoryReference,
  * wrapping a newly created ApplicationContext, closing it on release.
  *
- * <p>As per BeanFactoryReference contract, <code>release</code> may be called
+ * <p>As per BeanFactoryReference contract, {@code release} may be called
  * more than once, with subsequent calls not doing anything. However, calling
- * <code>getFactory</code> after a <code>release</code> call will cause an exception.
+ * {@code getFactory} after a {@code release} call will cause an exception.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu
@@ -48,6 +48,7 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 	}
 
 
+	@Override
 	public BeanFactory getFactory() {
 		if (this.applicationContext == null) {
 			throw new IllegalStateException(
@@ -56,10 +57,11 @@ public class ContextBeanFactoryReference implements BeanFactoryReference {
 		return this.applicationContext;
 	}
 
+	@Override
 	public void release() {
 		if (this.applicationContext != null) {
 			ApplicationContext savedCtx;
-			
+
 			// We don't actually guarantee thread-safety, but it's not a lot of extra work.
 			synchronized (this) {
 				savedCtx = this.applicationContext;

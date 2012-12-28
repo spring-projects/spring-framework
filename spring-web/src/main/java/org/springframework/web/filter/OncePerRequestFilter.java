@@ -76,13 +76,14 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 
 	/**
-	 * This <code>doFilter</code> implementation stores a request attribute for
+	 * This {@code doFilter} implementation stores a request attribute for
 	 * "already filtered", proceeding without filtering again if the
 	 * attribute is already there.
 	 * @see #getAlreadyFilteredAttributeName
 	 * @see #shouldNotFilter
 	 * @see #doFilterInternal
 	 */
+	@Override
 	public final void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
@@ -166,8 +167,8 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 
 	/**
 	 * Can be overridden in subclasses for custom filtering control,
-	 * returning <code>true</code> to avoid filtering of the given request.
-	 * <p>The default implementation always returns <code>false</code>.
+	 * returning {@code true} to avoid filtering of the given request.
+	 * <p>The default implementation always returns {@code false}.
 	 * @param request current HTTP request
 	 * @return whether the given request should <i>not</i> be filtered
 	 * @throws ServletException in case of errors
@@ -208,7 +209,7 @@ public abstract class OncePerRequestFilter extends GenericFilterBean {
 	}
 
 	/**
-	 * Same contract as for <code>doFilter</code>, but guaranteed to be
+	 * Same contract as for {@code doFilter}, but guaranteed to be
 	 * just invoked once per request within a single request thread.
 	 * See {@link #shouldNotFilterAsyncDispatch()} for details.
 	 * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the

@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public class XmlBasedSpr3350SingleSpringContextTests extends AbstractSpr3350Sing
 	/**
 	 * Returns &quot;XmlBasedSpr3350SingleSpringContextTests-context.xml&quot;.
 	 */
+	@Override
 	protected final String getConfigPath() {
 		return "XmlBasedSpr3350SingleSpringContextTests-context.xml";
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,41 +40,42 @@ import org.springframework.web.util.UriUtils;
 /**
  * JSP tag for creating URLs. Modeled after the JSTL c:url tag with backwards
  * compatibility in mind.
- * 
+ *
  * <p>Enhancements to the JSTL functionality include:
  * <ul>
  * <li>URL encoded template URI variables</li>
  * <li>HTML/XML escaping of URLs</li>
  * <li>JavaScript escaping of URLs</li>
  * </ul>
- * 
+ *
  * <p>Template URI variables are indicated in the {@link #setValue(String) 'value'}
  * attribute and marked by braces '{variableName}'. The braces and attribute name are
- * replaced by the URL encoded value of a parameter defined with the spring:param tag 
- * in the body of the url tag. If no parameter is available the literal value is 
- * passed through. Params matched to template variables will not be added to the query 
+ * replaced by the URL encoded value of a parameter defined with the spring:param tag
+ * in the body of the url tag. If no parameter is available the literal value is
+ * passed through. Params matched to template variables will not be added to the query
  * string.
- * 
- * <p>Use of the spring:param tag for URI template variables is strongly recommended 
- * over direct EL substitution as the values are URL encoded.  Failure to properly 
+ *
+ * <p>Use of the spring:param tag for URI template variables is strongly recommended
+ * over direct EL substitution as the values are URL encoded.  Failure to properly
  * encode URL can leave an application vulnerable to XSS and other injection attacks.
- * 
- * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(String) 
- * 'htmlEscape'} attribute to 'true'.  Detects an HTML escaping setting, either on 
- * this tag instance, the page level, or the <code>web.xml</code> level. The default 
+ *
+ * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(String)
+ * 'htmlEscape'} attribute to 'true'.  Detects an HTML escaping setting, either on
+ * this tag instance, the page level, or the {@code web.xml} level. The default
  * is 'false'.  When setting the URL value into a variable, escaping is not recommended.
- * 
+ *
  * <p>Example usage:
  * <pre>&lt;spring:url value="/url/path/{variableName}"&gt;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:
- * <code>/currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl</code>
- * 
+ * {@code /currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl}
+ *
  * @author Scott Andrews
  * @since 3.0
  * @see ParamTag
  */
+@SuppressWarnings("serial")
 public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 
 	private static final String URL_TEMPLATE_DELIMITER_PREFIX = "{";
@@ -156,6 +157,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
 	}
 
+	@Override
 	public void addParam(Param param) {
 		this.params.add(param);
 	}
@@ -171,13 +173,13 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 	@Override
 	public int doEndTag() throws JspException {
 		String url = createUrl();
-		
+
 		RequestDataValueProcessor processor = getRequestContext().getRequestDataValueProcessor();
 		ServletRequest request = this.pageContext.getRequest();
 		if ((processor != null) && (request instanceof HttpServletRequest)) {
 			url = processor.processUrl((HttpServletRequest) request, url);
 		}
-		
+
 		if (this.var == null) {
 			// print the url to the writer
 			try {
@@ -229,7 +231,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		// HTML and/or JavaScript escape, if demanded.
 		urlStr = isHtmlEscape() ? HtmlUtils.htmlEscape(urlStr) : urlStr;
 		urlStr = this.javaScriptEscape ? JavaScriptUtils.javaScriptEscape(urlStr) : urlStr;
-		
+
 		return urlStr;
 	}
 

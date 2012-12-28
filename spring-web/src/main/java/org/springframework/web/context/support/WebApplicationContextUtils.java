@@ -51,7 +51,7 @@ import org.springframework.web.context.request.WebRequest;
 /**
  * Convenience methods for retrieving the root
  * {@link org.springframework.web.context.WebApplicationContext} for a given
- * <code>ServletContext</code>. This is e.g. useful for accessing a Spring
+ * {@code ServletContext}. This is e.g. useful for accessing a Spring
  * context from within custom web views or Struts actions.
  *
  * <p>Note that there are more convenient ways of accessing the root context for
@@ -98,7 +98,7 @@ public abstract class WebApplicationContextUtils {
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param sc ServletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc) {
@@ -109,7 +109,7 @@ public abstract class WebApplicationContextUtils {
 	 * Find a custom WebApplicationContext for this web application.
 	 * @param sc ServletContext to find the web application context for
 	 * @param attrName the name of the ServletContext attribute to look for
-	 * @return the desired WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the desired WebApplicationContext for this web app, or {@code null} if none
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletContext sc, String attrName) {
 		Assert.notNull(sc, "ServletContext must not be null");
@@ -292,6 +292,7 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<ServletRequest>, Serializable {
 
+		@Override
 		public ServletRequest getObject() {
 			return currentRequestAttributes().getRequest();
 		}
@@ -309,6 +310,7 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<HttpSession>, Serializable {
 
+		@Override
 		public HttpSession getObject() {
 			return currentRequestAttributes().getRequest().getSession();
 		}
@@ -326,6 +328,7 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
+		@Override
 		public WebRequest getObject() {
 			return new ServletWebRequest(currentRequestAttributes().getRequest());
 		}
@@ -344,6 +347,7 @@ public abstract class WebApplicationContextUtils {
 
 		public static void registerFacesDependencies(ConfigurableListableBeanFactory beanFactory) {
 			beanFactory.registerResolvableDependency(FacesContext.class, new ObjectFactory<FacesContext>() {
+				@Override
 				public FacesContext getObject() {
 					return FacesContext.getCurrentInstance();
 				}
@@ -353,6 +357,7 @@ public abstract class WebApplicationContextUtils {
 				}
 			});
 			beanFactory.registerResolvableDependency(ExternalContext.class, new ObjectFactory<ExternalContext>() {
+				@Override
 				public ExternalContext getObject() {
 					return FacesContext.getCurrentInstance().getExternalContext();
 				}

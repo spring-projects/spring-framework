@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.ObjectUtils;
  * @see GenericBeanDefinition
  * @see RootBeanDefinition
  */
+@SuppressWarnings("serial")
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	private String parentName;
@@ -131,10 +132,12 @@ public class ChildBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	@Override
 	public void setParentName(String parentName) {
 		this.parentName = parentName;
 	}
 
+	@Override
 	public String getParentName() {
 		return this.parentName;
 	}

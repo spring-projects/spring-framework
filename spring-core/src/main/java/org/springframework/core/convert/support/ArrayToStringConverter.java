@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,17 @@ final class ArrayToStringConverter implements ConditionalGenericConverter {
 		this.helperConverter = new CollectionToStringConverter(conversionService);
 	}
 
+	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object[].class, String.class));
 	}
 
+	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.helperConverter.matches(sourceType, targetType);
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.helperConverter.convert(Arrays.asList(ObjectUtils.toObjectArray(source)), sourceType, targetType);
 	}

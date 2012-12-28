@@ -30,14 +30,17 @@ public class AnnotationTestBeanFactory implements FactoryBean<FactoryCreatedAnno
 		this.instance.setName("FACTORY");
 	}
 
+	@Override
 	public FactoryCreatedAnnotationTestBean getObject() throws Exception {
 		return this.instance;
 	}
 
+	@Override
 	public Class<? extends IJmxTestBean> getObjectType() {
 		return FactoryCreatedAnnotationTestBean.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

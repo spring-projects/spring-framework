@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return order;
 	}
@@ -86,6 +87,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	 * Pre-initialize the factory from the XML file.
 	 * Only effective if caching is enabled.
 	 */
+	@Override
 	public void afterPropertiesSet() throws BeansException {
 		if (isCache()) {
 			initFactory();
@@ -106,7 +108,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	protected View loadView(String viewName, Locale locale) throws BeansException {
 		BeanFactory factory = initFactory();
 		try {
-			return (View) factory.getBean(viewName, View.class);
+			return factory.getBean(viewName, View.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// to allow for ViewResolver chaining
@@ -152,6 +154,7 @@ public class XmlViewResolver extends AbstractCachingViewResolver
 	/**
 	 * Close the view bean factory on context shutdown.
 	 */
+	@Override
 	public void destroy() throws BeansException {
 		if (this.cachedFactory != null) {
 			this.cachedFactory.close();

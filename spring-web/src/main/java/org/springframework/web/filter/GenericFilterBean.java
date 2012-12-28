@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Simple base implementation of {@link javax.servlet.Filter} which treats
- * its config parameters (<code>init-param</code> entries within the
- * <code>filter</code> tag in <code>web.xml</code>) as bean properties.
+ * its config parameters ({@code init-param} entries within the
+ * {@code filter} tag in {@code web.xml}) as bean properties.
  *
  * <p>A handy superclass for any type of filter. Type conversion of config
  * parameters is automatic, with the corresponding setter method getting
@@ -103,6 +103,7 @@ public abstract class GenericFilterBean implements
 	 * @see org.springframework.beans.factory.BeanNameAware
 	 * @see #getFilterName()
 	 */
+	@Override
 	public final void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -116,6 +117,7 @@ public abstract class GenericFilterBean implements
 	 * used, this {@code Environment} can be essentially ignored.
 	 * @see #init(FilterConfig)
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
@@ -127,18 +129,20 @@ public abstract class GenericFilterBean implements
 	 * @see org.springframework.web.context.ServletContextAware
 	 * @see #getServletContext()
 	 */
+	@Override
 	public final void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
 	/**
-	 * Calls the <code>initFilterBean()</code> method that might
+	 * Calls the {@code initFilterBean()} method that might
 	 * contain custom initialization of a subclass.
 	 * <p>Only relevant in case of initialization as bean, where the
-	 * standard <code>init(FilterConfig)</code> method won't be called.
+	 * standard {@code init(FilterConfig)} method won't be called.
 	 * @see #initFilterBean()
 	 * @see #init(javax.servlet.FilterConfig)
 	 */
+	@Override
 	public void afterPropertiesSet() throws ServletException {
 		initFilterBean();
 	}
@@ -166,6 +170,7 @@ public abstract class GenericFilterBean implements
 	 * properties are missing), or if subclass initialization fails.
 	 * @see #initFilterBean
 	 */
+	@Override
 	public final void init(FilterConfig filterConfig) throws ServletException {
 		Assert.notNull(filterConfig, "FilterConfig must not be null");
 		if (logger.isDebugEnabled()) {
@@ -185,7 +190,7 @@ public abstract class GenericFilterBean implements
 		}
 		catch (BeansException ex) {
 			String msg = "Failed to set bean properties on filter '" +
-			    filterConfig.getFilterName() + "': " + ex.getMessage();
+				filterConfig.getFilterName() + "': " + ex.getMessage();
 			logger.error(msg, ex);
 			throw new NestedServletException(msg, ex);
 		}
@@ -212,10 +217,10 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the FilterConfig of this filter available, if any.
-	 * Analogous to GenericServlet's <code>getServletConfig()</code>.
-	 * <p>Public to resemble the <code>getFilterConfig()</code> method
+	 * Analogous to GenericServlet's {@code getServletConfig()}.
+	 * <p>Public to resemble the {@code getFilterConfig()} method
 	 * of the Servlet Filter version that shipped with WebLogic 6.1.
-	 * @return the FilterConfig instance, or <code>null</code> if none available
+	 * @return the FilterConfig instance, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletConfig()
 	 */
 	public final FilterConfig getFilterConfig() {
@@ -224,11 +229,11 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the name of this filter available to subclasses.
-	 * Analogous to GenericServlet's <code>getServletName()</code>.
+	 * Analogous to GenericServlet's {@code getServletName()}.
 	 * <p>Takes the FilterConfig's filter name by default.
 	 * If initialized as bean in a Spring application context,
 	 * it falls back to the bean name as defined in the bean factory.
-	 * @return the filter name, or <code>null</code> if none available
+	 * @return the filter name, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletName()
 	 * @see javax.servlet.FilterConfig#getFilterName()
 	 * @see #setBeanName
@@ -239,11 +244,11 @@ public abstract class GenericFilterBean implements
 
 	/**
 	 * Make the ServletContext of this filter available to subclasses.
-	 * Analogous to GenericServlet's <code>getServletContext()</code>.
+	 * Analogous to GenericServlet's {@code getServletContext()}.
 	 * <p>Takes the FilterConfig's ServletContext by default.
 	 * If initialized as bean in a Spring application context,
 	 * it falls back to the ServletContext that the bean factory runs in.
-	 * @return the ServletContext instance, or <code>null</code> if none available
+	 * @return the ServletContext instance, or {@code null} if none available
 	 * @see javax.servlet.GenericServlet#getServletContext()
 	 * @see javax.servlet.FilterConfig#getServletContext()
 	 * @see #setServletContext
@@ -274,6 +279,7 @@ public abstract class GenericFilterBean implements
 	 * as well as filter bean destruction in a Spring application context.
 	 * <p>This default implementation is empty.
 	 */
+	@Override
 	public void destroy() {
 	}
 
@@ -310,9 +316,9 @@ public abstract class GenericFilterBean implements
 			// Fail if we are still missing properties.
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new ServletException(
-				    "Initialization from FilterConfig for filter '" + config.getFilterName() +
-				    "' failed; the following required properties were missing: " +
-				    StringUtils.collectionToDelimitedString(missingProps, ", "));
+					"Initialization from FilterConfig for filter '" + config.getFilterName() +
+					"' failed; the following required properties were missing: " +
+					StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

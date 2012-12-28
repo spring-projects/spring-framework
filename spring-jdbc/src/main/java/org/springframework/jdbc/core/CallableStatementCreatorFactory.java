@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class CallableStatementCreatorFactory { 
+public class CallableStatementCreatorFactory {
 
 	/** The SQL call string, which won't change when the parameters change. */
 	private final String callString;
 
-	/** List of SqlParameter objects. May not be <code>null</code>. */
+	/** List of SqlParameter objects. May not be {@code null}. */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -110,7 +110,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
-	 * @param params list of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be {@code null})
 	 */
 	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
 		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<String, Object>());
@@ -150,6 +150,7 @@ public class CallableStatementCreatorFactory {
 			this.inParameters = inParams;
 		}
 
+		@Override
 		public CallableStatement createCallableStatement(Connection con) throws SQLException {
 			// If we were given a ParameterMapper, we must let the mapper do its thing to create the Map.
 			if (this.inParameterMapper != null) {
@@ -218,10 +219,12 @@ public class CallableStatementCreatorFactory {
 			return cs;
 		}
 
+		@Override
 		public String getSql() {
 			return callString;
 		}
 
+		@Override
 		public void cleanupParameters() {
 			if (this.inParameters != null) {
 				StatementCreatorUtils.cleanupParameters(this.inParameters.values());

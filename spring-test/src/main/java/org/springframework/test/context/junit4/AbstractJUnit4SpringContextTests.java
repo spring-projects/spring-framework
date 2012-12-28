@@ -51,7 +51,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, etc.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see ContextConfiguration
@@ -80,6 +80,7 @@ public abstract class AbstractJUnit4SpringContextTests implements ApplicationCon
 	 * Set the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
 	 */
+	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see javax.xml.rpc.Service
  * @see org.springframework.jndi.JndiObjectFactoryBean
  * @see JaxRpcPortProxyFactoryBean
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
@@ -44,19 +44,23 @@ public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
 	private Service service;
 
 
+	@Override
 	public void afterPropertiesSet() throws ServiceException {
 		this.service = createJaxRpcService();
 	}
 
 
+	@Override
 	public Service getObject() throws Exception {
 		return this.service;
 	}
 
+	@Override
 	public Class<? extends Service> getObjectType() {
 		return (this.service != null ? this.service.getClass() : Service.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

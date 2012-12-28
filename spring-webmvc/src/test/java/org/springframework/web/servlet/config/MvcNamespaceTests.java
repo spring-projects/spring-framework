@@ -30,8 +30,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
@@ -518,10 +516,12 @@ public class MvcNamespaceTests {
 
 		boolean validatorInvoked;
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
 		}
 
+		@Override
 		public void validate(Object target, Errors errors) {
 			this.validatorInvoked = true;
 		}

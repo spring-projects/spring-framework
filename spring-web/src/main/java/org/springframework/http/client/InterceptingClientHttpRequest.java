@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,12 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 		this.uri = uri;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return method;
 	}
 
+	@Override
 	public URI getURI() {
 		return uri;
 	}
@@ -63,7 +65,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	@Override
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		RequestExecution requestExecution = new RequestExecution();
-		
+
 		return requestExecution.execute(this, bufferedOutput);
 	}
 
@@ -75,6 +77,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			this.iterator = interceptors.iterator();
 		}
 
+		@Override
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
 			if (iterator.hasNext()) {
 				ClientHttpRequestInterceptor nextInterceptor = iterator.next();

@@ -52,9 +52,9 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
  * @since 3.1
  */
 public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
-	
+
 	private final List<ModelAndViewResolver> mavResolvers;
-	
+
 	private final ModelAttributeMethodProcessor modelAttributeProcessor = new ModelAttributeMethodProcessor(true);
 
 	/**
@@ -67,10 +67,12 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 	/**
 	 * Always returns {@code true}. See class-level note.
 	 */
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return true;
 	}
 
+	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest request)
@@ -94,7 +96,7 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 		}
 
 		// No suitable ModelAndViewResolver..
-		
+
 		if (this.modelAttributeProcessor.supportsReturnType(returnType)) {
 			this.modelAttributeProcessor.handleReturnValue(returnValue, returnType, mavContainer, request);
 		}

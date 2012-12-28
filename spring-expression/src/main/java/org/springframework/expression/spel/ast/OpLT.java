@@ -31,7 +31,7 @@ public class OpLT extends Operator {
 	public OpLT(int pos, SpelNodeImpl... operands) {
 		super("<", pos, operands);
 	}
-	
+
 	@Override
 	public BooleanTypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		Object left = getLeftOperand().getValueInternal(state).getValue();

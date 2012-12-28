@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,10 +71,10 @@ import test.beans.SideEffectBean;
  * @author Chris Beams
  */
 public final class ProxyFactoryBeanTests {
-	
+
 	private static final Class<?> CLASS = ProxyFactoryBeanTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String CONTEXT = CLASSNAME + "-context.xml";
 	private static final String SERIALIZATION_CONTEXT = CLASSNAME + "-serialization.xml";
 	private static final String AUTOWIRING_CONTEXT = CLASSNAME + "-autowiring.xml";
@@ -86,7 +86,7 @@ public final class ProxyFactoryBeanTests {
 	private static final String PROTOTYPE_CONTEXT = CLASSNAME + "-prototype.xml";
 	private static final String THROWS_ADVICE_CONTEXT = CLASSNAME + "-throws-advice.xml";
 	private static final String INNER_BEAN_TARGET_CONTEXT = CLASSNAME + "-inner-bean-target.xml";
-	
+
 	private BeanFactory factory;
 
 	@Before
@@ -243,7 +243,7 @@ public final class ProxyFactoryBeanTests {
 	 * be a prototype
 	 */
 	private Object testPrototypeInstancesAreIndependent(String beanName) {
-		// Initial count value set in bean factory XML 
+		// Initial count value set in bean factory XML
 		int INITIAL_COUNT = 10;
 
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource(PROTOTYPE_CONTEXT, CLASS));
@@ -301,24 +301,25 @@ public final class ProxyFactoryBeanTests {
 		assertTrue("Has correct object type", ITestBean.class.isAssignableFrom(factory.getType("test1")));
 
 		ITestBean tb = (ITestBean) factory.getBean("test1");
-		// no exception 
+		// no exception
 		tb.hashCode();
 
 		final Exception ex = new UnsupportedOperationException("invoke");
 		// Add evil interceptor to head of list
 		config.addAdvice(0, new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				throw ex;
 			}
 		});
 		assertEquals("Have correct advisor count", 2, config.getAdvisors().length);
 
-		tb = (ITestBean) factory.getBean("test1"); 
+		tb = (ITestBean) factory.getBean("test1");
 		try {
 			// Will fail now
 			tb.toString();
 			fail("Evil interceptor added programmatically should fail all method calls");
-		} 
+		}
 		catch (Exception thrown) {
 			assertTrue(thrown == ex);
 		}
@@ -539,7 +540,7 @@ public final class ProxyFactoryBeanTests {
 		// 2 globals + 2 explicit
 		assertEquals("Have 2 globals and 2 explicit advisors", 3, pfb.getAdvisors().length);
 
-		ApplicationListener l = (ApplicationListener) factory.getBean("validGlobals");
+		ApplicationListener<?> l = (ApplicationListener<?>) factory.getBean("validGlobals");
 		agi = (AddedGlobalInterface) l;
 		assertTrue(agi.globalsAdded() == -1);
 
@@ -570,7 +571,7 @@ public final class ProxyFactoryBeanTests {
 
 		// Remove offending interceptor...
 		assertTrue(((Advised) p).removeAdvice(nop));
-		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));	
+		assertTrue("Serializable again because offending interceptor was removed", SerializationTestUtils.isSerializable(p));
 	}
 
 	@Test
@@ -678,8 +679,8 @@ public final class ProxyFactoryBeanTests {
 	public void testFrozenFactoryBean() {
 		BeanFactory bf = new XmlBeanFactory(new ClassPathResource(FROZEN_CONTEXT, CLASS));
 
-	    Advised advised = (Advised)bf.getBean("frozen");
-	    assertTrue("The proxy should be frozen", advised.isFrozen());
+		Advised advised = (Advised)bf.getBean("frozen");
+		assertTrue("The proxy should be frozen", advised.isFrozen());
 	}
 
 	@Test
@@ -705,12 +706,14 @@ public final class ProxyFactoryBeanTests {
 
 		public PointcutForVoid() {
 			setAdvice(new MethodInterceptor() {
+				@Override
 				public Object invoke(MethodInvocation invocation) throws Throwable {
 					methodNames.add(invocation.getMethod().getName());
 					return invocation.proceed();
 				}
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
+				@Override
 				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 					return m.getReturnType() == Void.TYPE;
 				}
@@ -728,16 +731,18 @@ public final class ProxyFactoryBeanTests {
 
 
 	/**
-	 * Use as a global interceptor. Checks that 
+	 * Use as a global interceptor. Checks that
 	 * global interceptors can add aspect interfaces.
 	 * NB: Add only via global interceptors in XML file.
 	 */
 	public static class GlobalAspectInterfaceInterceptor implements IntroductionInterceptor {
 
+		@Override
 		public boolean implementsInterface(Class<?> intf) {
 			return intf.equals(AddedGlobalInterface.class);
 		}
 
+		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			if (mi.getMethod().getDeclaringClass().equals(AddedGlobalInterface.class)) {
 				return new Integer(-1);
@@ -751,22 +756,27 @@ public final class ProxyFactoryBeanTests {
 
 		private IntroductionInterceptor gi = new GlobalAspectInterfaceInterceptor();
 
+		@Override
 		public ClassFilter getClassFilter() {
 			return ClassFilter.TRUE;
 		}
 
+		@Override
 		public Advice getAdvice() {
 			return this.gi;
 		}
 
+		@Override
 		public Class<?>[] getInterfaces() {
-			return new Class[] { AddedGlobalInterface.class };
+			return new Class<?>[] { AddedGlobalInterface.class };
 		}
 
+		@Override
 		public boolean isPerInstance() {
 			return false;
 		}
 
+		@Override
 		public void validateInterfaces() {
 		}
 	}

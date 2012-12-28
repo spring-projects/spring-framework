@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import org.springframework.util.PathMatcher;
 
 /**
  * The most flexible out-of-the-box implementation of the {@link MethodNameResolver}
- * interface. Uses <code>java.util.Properties</code> to define the mapping
+ * interface. Uses {@code java.util.Properties} to define the mapping
  * between the URL of incoming requests and the corresponding method name.
  * Such properties can be held in an XML document.
  *
  * <p>Properties format is
- * <code>
+ * {@code
  * /welcome.html=displayGenresPage
- * </code>
+ * }
  * Note that method overloading isn't allowed, so there's no need to
  * specify arguments.
  *
@@ -48,7 +48,7 @@ import org.springframework.util.PathMatcher;
  */
 public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		implements InitializingBean {
-	
+
 	private Properties mappings;
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
@@ -72,6 +72,7 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		this.pathMatcher = pathMatcher;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.mappings == null || this.mappings.isEmpty()) {
 			throw new IllegalArgumentException("'mappings' property is required");

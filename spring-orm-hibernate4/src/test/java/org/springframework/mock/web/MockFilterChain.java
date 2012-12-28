@@ -116,6 +116,7 @@ public class MockFilterChain implements FilterChain {
 	 * Invoke registered {@link javax.servlet.Filter}s and/or {@link javax.servlet.Servlet} also saving the
 	 * request and response.
 	 */
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
@@ -159,15 +160,18 @@ public class MockFilterChain implements FilterChain {
 			this.delegateServlet = servlet;
 		}
 
+		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
 
 			this.delegateServlet.service(request, response);
 		}
 
+		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 		}
 
+		@Override
 		public void destroy() {
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	/**
-	 * Initialize the underlying <code>org.apache.commons.fileupload.servlet.ServletFileUpload</code>
+	 * Initialize the underlying {@code org.apache.commons.fileupload.servlet.ServletFileUpload}
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @param fileItemFactory the Commons FileItemFactory to use
 	 * @return the new ServletFileUpload instance
@@ -111,6 +111,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return new ServletFileUpload(fileItemFactory);
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		if (!isUploadTempDirSpecified()) {
 			getFileItemFactory().setRepository(WebUtils.getTempDir(servletContext));
@@ -118,10 +119,12 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	}
 
 
+	@Override
 	public boolean isMultipart(HttpServletRequest request) {
 		return (request != null && ServletFileUpload.isMultipartContent(request));
 	}
 
+	@Override
 	public MultipartHttpServletRequest resolveMultipart(final HttpServletRequest request) throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
@@ -170,7 +173,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding
 	 * @see #setDefaultEncoding
 	 */
@@ -182,6 +185,7 @@ public class CommonsMultipartResolver extends CommonsFileUploadSupport
 		return encoding;
 	}
 
+	@Override
 	public void cleanupMultipart(MultipartHttpServletRequest request) {
 		if (request != null) {
 			try {

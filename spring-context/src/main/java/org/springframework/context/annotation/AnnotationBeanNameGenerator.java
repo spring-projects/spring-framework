@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.stereotype.Component @Component} as a
  * meta-annotation. For example, Spring's stereotype annotations (such as
  * {@link org.springframework.stereotype.Repository @Repository}) are
- * themselves annotated with 
+ * themselves annotated with
  * {@link org.springframework.stereotype.Component @Component}.
  *
  * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
@@ -64,6 +64,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
 
 
+	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		if (definition instanceof AnnotatedBeanDefinition) {
 			String beanName = determineBeanNameFromAnnotation((AnnotatedBeanDefinition) definition);
@@ -79,7 +80,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	/**
 	 * Derive a bean name from one of the annotations on the class.
 	 * @param annotatedDef the annotation-aware bean definition
-	 * @return the bean name, or <code>null</code> if none is found
+	 * @return the bean name, or {@code null} if none is found
 	 */
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata amd = annotatedDef.getMetadata();
@@ -103,7 +104,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Check whether the given annotation is a stereotype that is allowed
-	 * to suggest a component name through its annotation <code>value()</code>.
+	 * to suggest a component name through its annotation {@code value()}.
 	 * @param annotationType the name of the annotation class to check
 	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
 	 * @param attributes the map of attributes for the given annotation
@@ -124,7 +125,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * <p>The default implementation delegates to {@link #buildDefaultBeanName(BeanDefinition)}.
 	 * @param definition the bean definition to build a bean name for
 	 * @param registry the registry that the given bean definition is being registered with
-	 * @return the default bean name (never <code>null</code>)
+	 * @return the default bean name (never {@code null})
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		return buildDefaultBeanName(definition);
@@ -138,7 +139,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	 * "outerClassName.innerClassName", which because of the period in the
 	 * name may be an issue if you are autowiring by name.
 	 * @param definition the bean definition to build a bean name for
-	 * @return the default bean name (never <code>null</code>)
+	 * @return the default bean name (never {@code null})
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition) {
 		String shortClassName = ClassUtils.getShortName(definition.getBeanClassName());

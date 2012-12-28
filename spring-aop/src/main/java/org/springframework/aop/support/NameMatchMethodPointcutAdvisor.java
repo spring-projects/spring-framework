@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.aop.Pointcut;
  * @author Rob Harrop
  * @see NameMatchMethodPointcut
  */
+@SuppressWarnings("serial")
 public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
 	private final NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
@@ -53,7 +54,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 
 	/**
 	 * Convenience method when we have only a single method name to match.
-	 * Use either this method or <code>setMappedNames</code>, not both.
+	 * Use either this method or {@code setMappedNames}, not both.
 	 * @see #setMappedNames
 	 * @see NameMatchMethodPointcut#setMappedName
 	 */
@@ -84,6 +85,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 	}
 
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

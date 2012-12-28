@@ -215,6 +215,7 @@ public class ExtendedBeanInfoTests {
 	@Test
 	public void cornerSpr9453() throws IntrospectionException {
 		final class Bean implements Spr9453<Class<?>> {
+			@Override
 			public Class<?> getProp() {
 				return null;
 			}
@@ -604,7 +605,9 @@ public class ExtendedBeanInfoTests {
 			public Number setFoo(String foo) { return null; }
 		}
 		class C extends B {
+			@Override
 			public String getFoo() { return null; }
+			@Override
 			public Integer setFoo(String foo) { return null; }
 		}
 
@@ -876,6 +879,7 @@ public class ExtendedBeanInfoTests {
 	}
 
 	interface TextBookOperations extends BookOperations {
+		@Override
 		TextBook getBook();
 	}
 
@@ -885,6 +889,7 @@ public class ExtendedBeanInfoTests {
 	}
 
 	class LawLibrary extends Library implements TextBookOperations {
+		@Override
 		public LawBook getBook() { return null; }
 	}
 

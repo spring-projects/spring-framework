@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link FactoryBean} which returns a value which is the result of a static or instance
- * method invocation. For most use cases it is better to just use the container's 
+ * method invocation. For most use cases it is better to just use the container's
  * built-in factory method support for the same purpose, since that is smarter at
  * converting arguments. This factory bean is still useful though when you need to
  * call a method which doesn't return any value (for example, a static class method
@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
  * all properties have been set, as per the InitializingBean contract.
- * 
+ *
  * <p>An example (in an XML based bean factory definition) of a bean definition
  * which uses this class to call a static factory method:
  *
@@ -82,7 +82,7 @@ import org.springframework.util.ClassUtils;
  *     &lt;/list>
  *   &lt;/property>
  * &lt;/bean></pre>
- * 
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 21.11.2003
@@ -110,10 +110,12 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		this.singleton = singleton;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -123,6 +125,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -145,6 +148,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		prepare();
 		if (this.singleton) {
@@ -178,6 +182,7 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 	 * to "true", otherwise returns the value returned from invoking the
 	 * specified method on the fly.
 	 */
+	@Override
 	public Object getObject() throws Exception {
 		if (this.singleton) {
 			if (!this.initialized) {
@@ -194,8 +199,9 @@ public class MethodInvokingFactoryBean extends ArgumentConvertingMethodInvoker
 
 	/**
 	 * Return the type of object that this FactoryBean creates,
-	 * or <code>null</code> if not known in advance.
+	 * or {@code null} if not known in advance.
 	 */
+	@Override
 	public Class<?> getObjectType() {
 		if (!isPrepared()) {
 			// Not fully initialized yet -> return null to indicate "not known yet".

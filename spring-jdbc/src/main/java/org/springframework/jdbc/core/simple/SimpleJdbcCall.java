@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * <p>The meta data processing is based on the DatabaseMetaData provided by
  * the JDBC driver. Since we rely on the JDBC driver this "auto-detection"
  * can only be used for databases that are known to provide accurate meta data.
- * These currently include Derby, MySQL, Microsoft SQL Server, Oracle, DB2, 
+ * These currently include Derby, MySQL, Microsoft SQL Server, Oracle, DB2,
  * Sybase and PostgreSQL. For any other databases you are required to declare all
  * parameters explicitly. You can of course declare all parameters explicitly even
  * if the database provides the necessary meta data. In that case your declared
@@ -62,7 +62,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
 	 * JdbcTemplate.
-	 * @param dataSource the <code>DataSource</code> to use
+	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcCall(DataSource dataSource) {
@@ -71,7 +71,7 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 
 	/**
 	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the <code>JdbcTemplate</code> to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcCall(JdbcTemplate jdbcTemplate) {
@@ -79,33 +79,39 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	}
 
 
+	@Override
 	public SimpleJdbcCall withProcedureName(String procedureName) {
 		setProcedureName(procedureName);
 		setFunction(false);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withFunctionName(String functionName) {
 		setProcedureName(functionName);
 		setFunction(true);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withSchemaName(String schemaName) {
 		setSchemaName(schemaName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withCatalogName(String catalogName) {
 		setCatalogName(catalogName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withReturnValue() {
 		setReturnValueRequired(true);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall declareParameters(SqlParameter... sqlParameters) {
 		for (SqlParameter sqlParameter : sqlParameters) {
 			if (sqlParameter != null) {
@@ -115,11 +121,13 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall useInParameterNames(String... inParameterNames) {
 		setInParameterNames(new HashSet<String>(Arrays.asList(inParameterNames)));
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall returningResultSet(String parameterName, RowMapper rowMapper) {
 		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;
@@ -128,55 +136,66 @@ public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOp
 	/**
 	 * @deprecated in favor of {@link #returningResultSet(String, org.springframework.jdbc.core.RowMapper)}
 	 */
+   @Override
    @Deprecated
 	public SimpleJdbcCall returningResultSet(String parameterName, ParameterizedRowMapper rowMapper) {
 		addDeclaredRowMapper(parameterName, rowMapper);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcCall withoutProcedureColumnMetaDataAccess() {
 		setAccessCallParameterMetaData(false);
 		return this;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Object... args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeFunction(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, Object... args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, Map<String, ?> args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T executeObject(Class<T> returnType, SqlParameterSource args) {
 		return (T) doExecute(args).get(getScalarOutParameterName());
 	}
 
+	@Override
 	public Map<String, Object> execute(Object... args) {
 		return doExecute(args);
 	}
 
+	@Override
 	public Map<String, Object> execute(Map<String, ?> args) {
 		return doExecute(args);
 	}
 
+	@Override
 	public Map<String, Object> execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
 	}

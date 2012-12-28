@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.apache.xmlbeans.XmlOptions;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * {@link FactoryBean} that configures an XMLBeans <code>XmlOptions</code> object
+ * {@link FactoryBean} that configures an XMLBeans {@code XmlOptions} object
  * and provides it as a bean reference.
  *
  * <p>Typical usage will be to set XMLBeans options on this bean, and refer to it
@@ -41,10 +41,10 @@ public class XmlOptionsFactoryBean implements FactoryBean<XmlOptions> {
 
 
 	/**
-	 * Set options on the underlying <code>XmlOptions</code> object.
+	 * Set options on the underlying {@code XmlOptions} object.
 	 * <p>The keys of the supplied map should be one of the String constants
-	 * defined in <code>XmlOptions</code>, the values vary per option.
-	 * @see XmlOptions#put(Object,Object)
+	 * defined in {@code XmlOptions}, the values vary per option.
+	 * @see XmlOptions#put(Object, Object)
 	 * @see XmlOptions#SAVE_PRETTY_PRINT
 	 * @see XmlOptions#LOAD_STRIP_COMMENTS
 	 */
@@ -58,14 +58,17 @@ public class XmlOptionsFactoryBean implements FactoryBean<XmlOptions> {
 	}
 
 
+	@Override
 	public XmlOptions getObject() {
 		return this.xmlOptions;
 	}
 
+	@Override
 	public Class<? extends XmlOptions> getObjectType() {
 		return XmlOptions.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

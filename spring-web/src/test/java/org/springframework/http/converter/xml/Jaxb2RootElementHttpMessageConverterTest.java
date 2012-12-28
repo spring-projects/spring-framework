@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 		AopProxy proxy = proxyFactory.createAopProxy(advisedSupport);
 		rootElementCglib = (RootElement) proxy.getProxy();
 	}
-	
+
 	@Test
 	public void canRead() throws Exception {
 		assertTrue("Converter does not support reading @XmlRootElement", converter.canRead(RootElement.class, null));
@@ -72,29 +72,26 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlRootElement() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		RootElement result = (RootElement) converter.read((Class) RootElement.class, inputMessage);
-		assertEquals("Invalid result", "Hello World", result.type.s);
-	}
-	
-	@Test
-	@SuppressWarnings("unchecked")
-	public void readXmlRootElementSubclass() throws Exception {
-		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
-		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		RootElementSubclass result = (RootElementSubclass) converter.read((Class) RootElementSubclass.class, inputMessage);
+		RootElement result = (RootElement) converter.read(RootElement.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.type.s);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	public void readXmlRootElementSubclass() throws Exception {
+		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+		RootElementSubclass result = (RootElementSubclass) converter.read(RootElementSubclass.class, inputMessage);
+		assertEquals("Invalid result", "Hello World", result.type.s);
+	}
+
+	@Test
 	public void readXmlType() throws Exception {
 		byte[] body = "<foo s=\"Hello World\"/>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		Type result = (Type) converter.read((Class) Type.class, inputMessage);
+		Type result = (Type) converter.read(Type.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.s);
 	}
 

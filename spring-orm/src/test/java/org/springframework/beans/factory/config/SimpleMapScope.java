@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.ObjectFactory;
 /**
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class SimpleMapScope implements Scope, Serializable {
 
 	private final Map map = new HashMap();
@@ -43,6 +44,7 @@ public class SimpleMapScope implements Scope, Serializable {
 	}
 
 
+	@Override
 	public Object get(String name, ObjectFactory objectFactory) {
 		synchronized (this.map) {
 			Object scopedObject = this.map.get(name);
@@ -54,16 +56,19 @@ public class SimpleMapScope implements Scope, Serializable {
 		}
 	}
 
+	@Override
 	public Object remove(String name) {
 		synchronized (this.map) {
 			return this.map.remove(name);
 		}
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		this.callbacks.add(callback);
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
@@ -75,6 +80,7 @@ public class SimpleMapScope implements Scope, Serializable {
 		}
 	}
 
+	@Override
 	public String getConversationId() {
 		return null;
 	}

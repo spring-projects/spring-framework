@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 
+	@Override
 	public void storeAttribute(WebRequest request, String attributeName, Object attributeValue) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -54,6 +55,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 		request.setAttribute(storeAttributeName, attributeValue, WebRequest.SCOPE_SESSION);
 	}
 
+	@Override
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -61,6 +63,7 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 		return request.getAttribute(storeAttributeName, WebRequest.SCOPE_SESSION);
 	}
 
+	@Override
 	public void cleanupAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

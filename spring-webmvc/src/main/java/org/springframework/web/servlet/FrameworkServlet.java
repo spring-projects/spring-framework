@@ -538,13 +538,13 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	}
 
 	/**
-	 * Retrieve a <code>WebApplicationContext</code> from the <code>ServletContext</code>
+	 * Retrieve a {@code WebApplicationContext} from the {@code ServletContext}
 	 * attribute with the {@link #setContextAttribute configured name}. The
-	 * <code>WebApplicationContext</code> must have already been loaded and stored in the
-	 * <code>ServletContext</code> before this servlet gets initialized (or invoked).
+	 * {@code WebApplicationContext} must have already been loaded and stored in the
+	 * {@code ServletContext} before this servlet gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
-	 * <code>WebApplicationContext</code> retrieval strategy.
-	 * @return the WebApplicationContext for this servlet, or <code>null</code> if not found
+	 * {@code WebApplicationContext} retrieval strategy.
+	 * @return the WebApplicationContext for this servlet, or {@code null} if not found
 	 * @see #getContextAttribute()
 	 */
 	protected WebApplicationContext findWebApplicationContext() {
@@ -571,7 +571,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * created context (for triggering its {@link #onRefresh callback}, and to call
 	 * {@link org.springframework.context.ConfigurableApplicationContext#refresh()}
 	 * before returning the context instance.
-	 * @param parent the parent ApplicationContext to use, or <code>null</code> if none
+	 * @param parent the parent ApplicationContext to use, or {@code null} if none
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 */
@@ -652,7 +652,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * {@link org.springframework.web.context.support.XmlWebApplicationContext}
 	 * or a {@link #setContextClass custom context class}, if set.
 	 * Delegates to #createWebApplicationContext(ApplicationContext).
-	 * @param parent the parent WebApplicationContext to use, or <code>null</code> if none
+	 * @param parent the parent WebApplicationContext to use, or {@code null} if none
 	 * @return the WebApplicationContext for this servlet
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
 	 * @see #createWebApplicationContext(ApplicationContext)
@@ -701,7 +701,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Post-process the given WebApplicationContext before it is refreshed
 	 * and activated as context for this servlet.
-	 * <p>The default implementation is empty. <code>refresh()</code> will
+	 * <p>The default implementation is empty. {@code refresh()} will
 	 * be called automatically after this method returns.
 	 * <p>Note that this method is designed to allow subclasses to modify the application
 	 * context, while {@link #initWebApplicationContext} is designed to allow
@@ -718,7 +718,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	/**
 	 * Return the ServletContext attribute name for this servlet's WebApplicationContext.
 	 * <p>The default implementation returns
-	 * <code>SERVLET_CONTEXT_PREFIX + servlet name</code>.
+	 * {@code SERVLET_CONTEXT_PREFIX + servlet name}.
 	 * @see #SERVLET_CONTEXT_PREFIX
 	 * @see #getServletName
 	 */
@@ -799,8 +799,8 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * Delegate GET requests to processRequest/doService.
-	 * <p>Will also be invoked by HttpServlet's default implementation of <code>doHead</code>,
-	 * with a <code>NoBodyResponse</code> that just captures the content length.
+	 * <p>Will also be invoked by HttpServlet's default implementation of {@code doHead},
+	 * with a {@code NoBodyResponse} that just captures the content length.
 	 * @see #doService
 	 * @see #doHead
 	 */
@@ -1010,7 +1010,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * <p>The default implementation takes the name of the UserPrincipal, if any.
 	 * Can be overridden in subclasses.
 	 * @param request current HTTP request
-	 * @return the username, or <code>null</code> if none found
+	 * @return the username, or {@code null} if none found
 	 * @see javax.servlet.http.HttpServletRequest#getUserPrincipal()
 	 */
 	protected String getUsernameForRequest(HttpServletRequest request) {
@@ -1022,7 +1022,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 * Subclasses must implement this method to do the work of request handling,
 	 * receiving a centralized callback for GET, POST, PUT and DELETE.
 	 * <p>The contract is essentially the same as that for the commonly overridden
-	 * <code>doGet</code> or <code>doPost</code> methods of HttpServlet.
+	 * {@code doGet} or {@code doPost} methods of HttpServlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
 	 * @param request current HTTP request
@@ -1050,10 +1050,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
 	/**
 	 * ApplicationListener endpoint that receives events from this servlet's WebApplicationContext
-	 * only, delegating to <code>onApplicationEvent</code> on the FrameworkServlet instance.
+	 * only, delegating to {@code onApplicationEvent} on the FrameworkServlet instance.
 	 */
 	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);
 		}

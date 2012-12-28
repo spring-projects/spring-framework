@@ -245,8 +245,8 @@ public abstract class AbstractHttpRequestFactoryTestCase {
 	@SuppressWarnings("serial")
 	private static class EchoServlet extends HttpServlet {
 
-        @Override
-        protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		@Override
+		protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			echo(req, resp);
 		}
 

@@ -96,10 +96,12 @@ interface SimpleBeforeAdvice extends BeforeAdvice {
 @SuppressWarnings("serial")
 class SimpleBeforeAdviceAdapter implements AdvisorAdapter, Serializable {
 
+	@Override
 	public boolean supportsAdvice(Advice advice) {
 		return (advice instanceof SimpleBeforeAdvice);
 	}
 
+	@Override
 	public MethodInterceptor getInterceptor(Advisor advisor) {
 		SimpleBeforeAdvice advice = (SimpleBeforeAdvice) advisor.getAdvice();
 		return new SimpleBeforeAdviceInterceptor(advice) ;
@@ -112,6 +114,7 @@ class SimpleBeforeAdviceImpl implements SimpleBeforeAdvice {
 
 	private int invocationCounter;
 
+	@Override
 	public void before() throws Throwable {
 		++invocationCounter;
 	}
@@ -131,6 +134,7 @@ final class SimpleBeforeAdviceInterceptor implements MethodInterceptor {
 		this.advice = advice;
 	}
 
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		advice.before();
 		return mi.proceed();

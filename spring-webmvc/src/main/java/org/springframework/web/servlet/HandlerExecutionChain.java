@@ -108,7 +108,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Return the array of interceptors to apply (in the given order).
-	 * @return the array of HandlerInterceptors instances (may be <code>null</code>)
+	 * @return the array of HandlerInterceptors instances (may be {@code null})
 	 */
 	public HandlerInterceptor[] getInterceptors() {
 		if (this.interceptors == null && this.interceptorList != null) {
@@ -119,7 +119,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Apply preHandle methods of registered interceptors.
-	 * @return <code>true</code> if the execution chain should proceed with the
+	 * @return {@code true} if the execution chain should proceed with the
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
 	 */
@@ -193,7 +193,7 @@ public class HandlerExecutionChain {
 	}
 
 	/**
-	 * Delegates to the handler's <code>toString()</code>.
+	 * Delegates to the handler's {@code toString()}.
 	 */
 	@Override
 	public String toString() {

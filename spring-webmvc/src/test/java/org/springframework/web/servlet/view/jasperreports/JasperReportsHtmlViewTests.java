@@ -30,10 +30,12 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		return new JasperReportsHtmlView();
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/html";
 	}

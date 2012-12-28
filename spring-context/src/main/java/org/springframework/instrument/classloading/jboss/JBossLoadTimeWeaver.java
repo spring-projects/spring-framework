@@ -56,8 +56,8 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Create a new instance of the {@link JBossLoadTimeWeaver} class using
 	 * the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
-	 * (must not be <code>null</code>)
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
+	 * (must not be {@code null})
 	 */
 	public JBossLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
@@ -72,14 +72,17 @@ public class JBossLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.adapter.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.adapter.getInstrumentableClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}

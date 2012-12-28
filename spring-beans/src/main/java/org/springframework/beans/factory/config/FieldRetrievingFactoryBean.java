@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} which retrieves a static or non-static field value.
- * 
+ *
  * <p>Typically used for retrieving public static final constants. Usage example:
  *
  * <pre class="code">// standard definition for exposing a static field, specifying the "staticField" property
@@ -42,10 +42,10 @@ import org.springframework.util.StringUtils;
  * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
  *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
  * </pre>
- * 
+ *
  * <p>If you are using Spring 2.0, you can also use the following style of configuration for
  * public static fields.
- * 
+ *
  * <pre class="code">&lt;util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;</pre>
  *
  * @author Juergen Hoeller
@@ -142,15 +142,18 @@ public class FieldRetrievingFactoryBean
 	 * nor "targetField" have been specified.
 	 * This allows for concise bean definitions with just an id/name.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
 		if (this.targetClass != null && this.targetObject != null) {
 			throw new IllegalArgumentException("Specify either targetClass or targetObject, not both");
@@ -159,7 +162,7 @@ public class FieldRetrievingFactoryBean
 		if (this.targetClass == null && this.targetObject == null) {
 			if (this.targetField != null) {
 				throw new IllegalArgumentException(
-				    "Specify targetClass or targetObject in combination with targetField");
+						"Specify targetClass or targetObject in combination with targetField");
 			}
 
 			// If no other property specified, consider bean name as static field expression.
@@ -191,6 +194,7 @@ public class FieldRetrievingFactoryBean
 	}
 
 
+	@Override
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -206,10 +210,12 @@ public class FieldRetrievingFactoryBean
 		}
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return false;
 	}

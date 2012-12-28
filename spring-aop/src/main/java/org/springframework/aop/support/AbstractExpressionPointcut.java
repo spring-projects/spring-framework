@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.io.Serializable;
  * @see #setLocation
  * @see #setExpression
  */
+@SuppressWarnings("serial")
 public abstract class AbstractExpressionPointcut implements ExpressionPointcut, Serializable {
 
 	private String location;
@@ -46,7 +47,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * Return location information about the pointcut expression
 	 * if available. This is useful in debugging.
 	 * @return location information as a human-readable String,
-	 * or <code>null</code> if none is available
+	 * or {@code null} if none is available
 	 */
 	public String getLocation() {
 		return this.location;
@@ -82,6 +83,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	/**
 	 * Return this pointcut's expression.
 	 */
+	@Override
 	public String getExpression() {
 		return this.expression;
 	}

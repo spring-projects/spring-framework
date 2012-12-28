@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * bound at the target location yet. The best solution is to set the lookupHomeOnStartup
  * property to false, in which case the home will be fetched on first access to the EJB.
  * (This flag is only true by default for backwards compatibility reasons).
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see AbstractSlsbInvokerInterceptor#setLookupHomeOnStartup
@@ -93,7 +93,7 @@ public class LocalSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor 
 		}
 		catch (IllegalAccessException ex) {
 			throw new EjbAccessException("Could not access method [" + invocation.getMethod().getName() +
-			    "] of local EJB [" + getJndiName() + "]", ex);
+				"] of local EJB [" + getJndiName() + "]", ex);
 		}
 		finally {
 			if (ejb instanceof EJBLocalObject) {

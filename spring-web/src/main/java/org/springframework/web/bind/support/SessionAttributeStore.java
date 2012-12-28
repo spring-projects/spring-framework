@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ public interface SessionAttributeStore {
 	 * Retrieve the specified attribute from the backend session.
 	 * <p>This will typically be called with the expectation that the
 	 * attribute is already present, with an exception to be thrown
-	 * if this method returns <code>null</code>.
+	 * if this method returns {@code null}.
 	 * @param request the current request
 	 * @param attributeName the name of the attribute
-	 * @return the current attribute value, or <code>null</code> if none
+	 * @return the current attribute value, or {@code null} if none
 	 */
 	Object retrieveAttribute(WebRequest request, String attributeName);
 

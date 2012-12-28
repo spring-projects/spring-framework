@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,8 +74,8 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * <p>Default is "false", i.e. managing an independent TimerManager instance.
 	 * This is what the CommonJ specification suggests that application servers
 	 * are supposed to offer via JNDI lookups, typically declared as a
-	 * <code>resource-ref</code> of type <code>commonj.timers.TimerManager</code>
-	 * in <code>web.xml<code>, with <code>res-sharing-scope</code> set to 'Unshareable'.
+	 * {@code resource-ref} of type {@code commonj.timers.TimerManager}
+	 * in {@code web.xml}, with {@code res-sharing-scope} set to 'Unshareable'.
 	 * <p>Switch this flag to "true" if you are obtaining a shared TimerManager,
 	 * typically through specifying the JNDI location of a TimerManager that
 	 * has been explicitly declared as 'Shareable'. Note that WebLogic's
@@ -95,6 +95,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		if (this.timerManager == null) {
 			if (this.timerManagerName == null) {
@@ -117,6 +118,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Resumes the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#resume()
 	 */
+	@Override
 	public void start() {
 		if (!this.shared) {
 			this.timerManager.resume();
@@ -127,6 +129,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Suspends the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#suspend()
 	 */
+	@Override
 	public void stop() {
 		if (!this.shared) {
 			this.timerManager.suspend();
@@ -139,6 +142,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * @see commonj.timers.TimerManager#isSuspending()
 	 * @see commonj.timers.TimerManager#isStopping()
 	 */
+	@Override
 	public boolean isRunning() {
 		return (!this.timerManager.isSuspending() && !this.timerManager.isStopping());
 	}
@@ -152,6 +156,7 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * Stops the underlying TimerManager (if not shared).
 	 * @see commonj.timers.TimerManager#stop()
 	 */
+	@Override
 	public void destroy() {
 		// Stop the entire TimerManager, if necessary.
 		if (!this.shared) {

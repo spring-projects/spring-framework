@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 /**
  * A context that holds user-specific Joda Time settings such as the user's Chronology (calendar system) and time zone.
- * A <code>null</code> property value indicate the user has not specified a setting.
+ * A {@code null} property value indicate the user has not specified a setting.
  *
  * @author Keith Donald
  * @since 3.0
@@ -67,7 +67,7 @@ public class JodaTimeContext {
 
 
 	/**
-	 * Gets the Formatter with the this context's settings applied to the base <code>formatter</code>.
+	 * Gets the Formatter with the this context's settings applied to the base {@code formatter}.
 	 * @param formatter the base formatter that establishes default formatting rules, generally context independent
 	 * @return the context DateTimeFormatter
 	 */

@@ -55,14 +55,14 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class PortletApplicationContextUtils {
-	
+
 	/**
 	 * Find the root WebApplicationContext for this portlet application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * (typed to ApplicationContext to avoid a Servlet API dependency; can usually
 	 * be casted to WebApplicationContext, but there shouldn't be a need to)
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
@@ -98,7 +98,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {
@@ -241,8 +241,10 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current request object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<PortletRequest>, Serializable {
 
+		@Override
 		public PortletRequest getObject() {
 			return currentRequestAttributes().getRequest();
 		}
@@ -257,8 +259,10 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current session object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<PortletSession>, Serializable {
 
+		@Override
 		public PortletSession getObject() {
 			return currentRequestAttributes().getRequest().getPortletSession();
 		}
@@ -273,8 +277,10 @@ public abstract class PortletApplicationContextUtils {
 	/**
 	 * Factory that exposes the current WebRequest object on demand.
 	 */
+	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
+		@Override
 		public WebRequest getObject() {
 			return new PortletWebRequest(currentRequestAttributes().getRequest());
 		}

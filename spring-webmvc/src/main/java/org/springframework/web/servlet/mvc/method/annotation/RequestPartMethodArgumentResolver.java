@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	 * 	<li>Of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}.
 	 * </ul>
 	 */
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(RequestPart.class)) {
 			return true;
@@ -107,6 +108,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 

@@ -87,7 +87,7 @@ public class DispatcherServletInitializerTests {
 
 		@Override
 		public ServletRegistration.Dynamic addServlet(String servletName,
-		                                              Servlet servlet) {
+													  Servlet servlet) {
 			servlets.put(servletName, servlet);
 			MockServletRegistration registration = new MockServletRegistration();
 			registrations.put(servletName, registration);

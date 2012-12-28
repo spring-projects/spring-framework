@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,12 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
+	@Override
 	public boolean isBeforeAdvice() {
 		return false;
 	}
 
+	@Override
 	public boolean isAfterAdvice() {
 		return true;
 	}
@@ -53,6 +55,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		setReturningNameNoCheck(name);
 	}
 
+	@Override
 	public void afterReturning(Object returnValue, Method method, Object[] args, Object target) throws Throwable {
 		if (shouldInvokeOnReturnValueOf(method, returnValue)) {
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);

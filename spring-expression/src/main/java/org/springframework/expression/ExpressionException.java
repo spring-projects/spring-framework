@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class ExpressionException extends RuntimeException {
 
 	protected String expressionString;
@@ -38,7 +39,7 @@ public class ExpressionException extends RuntimeException {
 		this.position = -1;
 		this.expressionString = expressionString;
 	}
-	
+
 	/**
 	 * Creates a new expression exception.
 	 * @param expressionString the expression string
@@ -66,7 +67,7 @@ public class ExpressionException extends RuntimeException {
 	 * @param position the position in the expression string where the problem occurred
 	 * @param message a descriptive message
 	 * @param cause the underlying cause of this exception
-	 */ 
+	 */
 	public ExpressionException(int position, String message, Throwable cause) {
 		super(message,cause);
 		this.position = position;
@@ -75,7 +76,7 @@ public class ExpressionException extends RuntimeException {
 	/**
 	 * Creates a new expression exception.
 	 * @param message a descriptive message
-	 */ 
+	 */
 	public ExpressionException(String message) {
 		super(message);
 	}
@@ -99,11 +100,11 @@ public class ExpressionException extends RuntimeException {
 		output.append(getMessage());
 		return output.toString();
 	}
-	
+
 	public final String getExpressionString() {
 		return this.expressionString;
 	}
-	
+
 	public final int getPosition() {
 		return position;
 	}

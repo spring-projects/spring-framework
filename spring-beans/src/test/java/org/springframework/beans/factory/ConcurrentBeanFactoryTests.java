@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public final class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
 	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
-	
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
 	private static final Date DATE_1, DATE_2;
 
@@ -72,6 +72,7 @@ public final class ConcurrentBeanFactoryTests {
 	public void setUp() throws Exception {
 		XmlBeanFactory factory = new XmlBeanFactory(CONTEXT);
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Date.class, new CustomDateEditor((DateFormat) DATE_FORMAT.clone(), false));
 			}
@@ -125,6 +126,7 @@ public final class ConcurrentBeanFactoryTests {
 
 	private class TestRun extends Thread {
 
+		@Override
 		public void run() {
 			try {
 				for (int i = 0; i < 10000; i++) {

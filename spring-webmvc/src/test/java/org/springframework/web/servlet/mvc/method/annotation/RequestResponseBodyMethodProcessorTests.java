@@ -33,7 +33,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
@@ -260,10 +259,12 @@ public class RequestResponseBodyMethodProcessorTests {
 		private Long id;
 		private String name;
 
+		@Override
 		public Long getId() {
 			return id;
 		}
 
+		@Override
 		public void setId(Long id) {
 			this.id = id;
 		}
@@ -278,6 +279,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	}
 
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();

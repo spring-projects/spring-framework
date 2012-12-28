@@ -128,7 +128,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
-    public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
+	@Override
+	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		return new HttpComponentsClientHttpRequest(getHttpClient(), httpRequest, createHttpContext(httpMethod, uri));
@@ -172,22 +173,23 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	protected void postProcessHttpRequest(HttpUriRequest request) {
 	}
 
-    /**
-     * Template methods that creates a {@link HttpContext} for the given HTTP method and URI.
-     * <p>The default implementation returns {@code null}.
-     * @param httpMethod the HTTP method
-     * @param uri the URI
-     * @return the http context
-     */
-    protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
-        return null;
-    }
+	/**
+	 * Template methods that creates a {@link HttpContext} for the given HTTP method and URI.
+	 * <p>The default implementation returns {@code null}.
+	 * @param httpMethod the HTTP method
+	 * @param uri the URI
+	 * @return the http context
+	 */
+	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
+		return null;
+	}
 
 	/**
 	 * Shutdown hook that closes the underlying
 	 * {@link org.apache.http.conn.ClientConnectionManager ClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
+	@Override
 	public void destroy() {
 		getHttpClient().getConnectionManager().shutdown();
 	}

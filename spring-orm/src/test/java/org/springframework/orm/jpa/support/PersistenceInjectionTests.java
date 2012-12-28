@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	public void testPublicPersistenceUnitSetterWithOverriding() {
 		EntityManagerFactory mockEmf2 =
-				(EntityManagerFactory) MockControl.createControl(EntityManagerFactory.class).getMock();
+				MockControl.createControl(EntityManagerFactory.class).getMock();
 
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
@@ -274,7 +274,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 	public void testPublicPersistenceUnitSetterWithUnitIdentifiedThroughBeanName() {
 		EntityManagerFactory mockEmf2 =
-				(EntityManagerFactory) MockControl.createControl(EntityManagerFactory.class).getMock();
+				MockControl.createControl(EntityManagerFactory.class).getMock();
 
 		GenericApplicationContext gac = new GenericApplicationContext();
 		gac.getDefaultListableBeanFactory().registerSingleton("entityManagerFactory", mockEmf);
@@ -329,7 +329,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	@Ignore
 	public void ignoreTestPersistenceUnitsFromJndi() {
 		mockEmf.createEntityManager();
-		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm = MockControl.createControl(EntityManager.class).getMock();
 		emfMc.setReturnValue(mockEm, 1);
 		emfMc.replay();
 
@@ -428,9 +428,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPersistenceContextsFromJndi() {
-		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
-		Object mockEm2 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
-		Object mockEm3 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm = MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm2 = MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm3 = MockControl.createControl(EntityManager.class).getMock();
 
 		Map<String, String> persistenceContexts = new HashMap<String, String>();
 		persistenceContexts.put("", "pc1");
@@ -467,9 +467,9 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testPersistenceContextsFromJndiWithDefaultUnit() {
-		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
-		Object mockEm2 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
-		Object mockEm3 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm = MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm2 = MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm3 = MockControl.createControl(EntityManager.class).getMock();
 
 		Map<String, String> persistenceContexts = new HashMap<String, String>();
 		persistenceContexts.put("System", "pc1");
@@ -507,8 +507,8 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	public void testSinglePersistenceContextFromJndi() {
-		Object mockEm = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
-		Object mockEm2 = (EntityManager) MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm = MockControl.createControl(EntityManager.class).getMock();
+		Object mockEm2 = MockControl.createControl(EntityManager.class).getMock();
 
 		Map<String, String> persistenceContexts = new HashMap<String, String>();
 		persistenceContexts.put("System", "pc1");
@@ -705,6 +705,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MockPersistenceAnnotationBeanPostProcessor extends PersistenceAnnotationBeanPostProcessor {
 
 		@Override
@@ -733,14 +734,17 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		@PersistenceContext
 		private EntityManager em;
 
+		@Override
 		public Object getObject() throws Exception {
 			return null;
 		}
 
+		@Override
 		public Class getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -762,6 +766,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 
 	@Repository
+	@SuppressWarnings("serial")
 	public static class DefaultPublicPersistenceContextSetter implements Serializable {
 
 		private EntityManager em;
@@ -780,8 +785,10 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
 
+		@Override
 		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
 			super.setEntityManager(em);
@@ -872,10 +879,12 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class DummyInvocationHandler implements InvocationHandler, Serializable {
 
 		public static boolean closed;
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if ("isOpen".equals(method.getName())) {
 				return true;

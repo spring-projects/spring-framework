@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,15 +50,18 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	private final LabeledEnumCache labeledEnumCache = new LabeledEnumCache();
 
 
+	@Override
 	public Set<LabeledEnum> getLabeledEnumSet(Class type) throws IllegalArgumentException {
 		return new TreeSet<LabeledEnum>(getLabeledEnumMap(type).values());
 	}
 
+	@Override
 	public Map<Comparable, LabeledEnum> getLabeledEnumMap(Class type) throws IllegalArgumentException {
 		Assert.notNull(type, "No type specified");
 		return this.labeledEnumCache.get(type);
 	}
 
+	@Override
 	public LabeledEnum getLabeledEnumByCode(Class type, Comparable code) throws IllegalArgumentException {
 		Assert.notNull(code, "No enum code specified");
 		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
@@ -72,6 +75,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 		return codedEnum;
 	}
 
+	@Override
 	public LabeledEnum getLabeledEnumByLabel(Class type, String label) throws IllegalArgumentException {
 		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
 		for (LabeledEnum value : typeEnums.values()) {
@@ -99,6 +103,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	/**
 	 * Inner cache class that implements lazy building of LabeledEnum Maps.
 	 */
+	@SuppressWarnings("serial")
 	private class LabeledEnumCache extends CachingMapDecorator<Class, Map<Comparable, LabeledEnum>> {
 
 		public LabeledEnumCache() {

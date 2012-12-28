@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>label</code>' element
+ * Databinding-aware JSP tag for rendering an HTML '{@code label}' element
  * that defines text that is associated with a single form element.
  *
  * <p>The {@link #setFor(String) 'for'} attribute is required.
@@ -34,15 +34,16 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class LabelTag extends AbstractHtmlElementTag {
 
 	/**
-	 * The HTML '<code>label</code>' tag.
+	 * The HTML '{@code label}' tag.
 	 */
 	private static final String LABEL_TAG = "label";
 
 	/**
-	 * The name of the '<code>for</code>' attribute.
+	 * The name of the '{@code for}' attribute.
 	 */
 	private static final String FOR_ATTRIBUTE = "for";
 
@@ -54,15 +55,15 @@ public class LabelTag extends AbstractHtmlElementTag {
 	private TagWriter tagWriter;
 
 	/**
-	 * The value of the '<code>for</code>' attribute.
+	 * The value of the '{@code for}' attribute.
 	 */
 	private String forId;
 
 
 	/**
-	 * Set the value of the '<code>for</code>' attribute.
+	 * Set the value of the '{@code for}' attribute.
 	 * <p>Defaults to the value of {@link #getPath}; may be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied value is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied value is {@code null}
 	 */
 	public void setFor(String forId) {
 		Assert.notNull(forId, "'forId' must not be null");
@@ -70,7 +71,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>id</code>' attribute.
+	 * Get the value of the '{@code id}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	public String getFor() {
@@ -79,7 +80,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 
 
 	/**
-	 * Writes the opening '<code>label</code>' tag and forces a block tag so
+	 * Writes the opening '{@code label}' tag and forces a block tag so
 	 * that body content is written correctly.
 	 * @return {@link javax.servlet.jsp.tagext.Tag#EVAL_BODY_INCLUDE}
 	 */
@@ -94,10 +95,10 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Overrides {@link #getName()} to always return <code>null</code>,
-	 * because the '<code>name</code>' attribute is not supported by the
-	 * '<code>label</code>' tag.
-	 * @return the value for the HTML '<code>name</code>' attribute
+	 * Overrides {@link #getName()} to always return {@code null},
+	 * because the '{@code name}' attribute is not supported by the
+	 * '{@code label}' tag.
+	 * @return the value for the HTML '{@code name}' attribute
 	 */
 	@Override
 	protected String getName() throws JspException {
@@ -106,7 +107,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Determine the '<code>for</code>' attribute value for this tag,
+	 * Determine the '{@code for}' attribute value for this tag,
 	 * autogenerating one if none specified.
 	 * @see #getFor()
 	 * @see #autogenerateFor()
@@ -121,7 +122,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Autogenerate the '<code>for</code>' attribute value for this tag.
+	 * Autogenerate the '{@code for}' attribute value for this tag.
 	 * <p>The default implementation delegates to {@link #getPropertyPath()},
 	 * deleting invalid characters (such as "[" or "]").
 	 */
@@ -130,7 +131,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Close the '<code>label</code>' tag.
+	 * Close the '{@code label}' tag.
 	 */
 	@Override
 	public int doEndTag() throws JspException {

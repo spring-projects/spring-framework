@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,7 +236,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	/**
 	 * Expose helpers unique to each rendering operation. This is necessary so that
 	 * different rendering operations can't overwrite each other's formats etc.
-	 * <p>Called by <code>renderMergedTemplateModel</code>. The default implementation
+	 * <p>Called by {@code renderMergedTemplateModel}. The default implementation
 	 * is empty. This method can be overridden to add custom helpers to the model.
 	 * @param model The model that will be passed to the template at merge time
 	 * @param request current HTTP request
@@ -250,8 +250,8 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Render the FreeMarker view to the given response, using the given model
 	 * map which contains the complete template model to use.
 	 * <p>The default implementation renders the template specified by the "url"
-	 * bean property, retrieved via <code>getTemplate</code>. It delegates to the
-	 * <code>processTemplate</code> method to merge the template instance with
+	 * bean property, retrieved via {@code getTemplate}. It delegates to the
+	 * {@code processTemplate} method to merge the template instance with
 	 * the given template model.
 	 * <p>Adds the standard Freemarker hash models to the model: request parameters,
 	 * request, session and application (ServletContext), as well as the JSP tag
@@ -371,6 +371,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Simple adapter class that extends {@link GenericServlet}.
 	 * Needed for JSP access in FreeMarker.
 	 */
+	@SuppressWarnings("serial")
 	private static class GenericServletAdapter extends GenericServlet {
 
 		@Override
@@ -386,18 +387,22 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	private class DelegatingServletConfig implements ServletConfig {
 
+		@Override
 		public String getServletName() {
 			return FreeMarkerView.this.getBeanName();
 		}
 
+		@Override
 		public ServletContext getServletContext() {
 			return FreeMarkerView.this.getServletContext();
 		}
 
+		@Override
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
+		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}

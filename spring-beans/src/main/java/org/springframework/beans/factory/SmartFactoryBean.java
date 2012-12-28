@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package org.springframework.beans.factory;
  * Extension of the {@link FactoryBean} interface. Implementations may
  * indicate whether they always return independent instances, for the
  * case where their {@link #isSingleton()} implementation returning
- * <code>false</code> does not clearly indicate independent instances.
+ * {@code false} does not clearly indicate independent instances.
  *
  * <p>Plain {@link FactoryBean} implementations which do not implement
  * this extended interface are simply assumed to always return independent
  * instances if their {@link #isSingleton()} implementation returns
- * <code>false</code>; the exposed object is only accessed on demand.
+ * {@code false}; the exposed object is only accessed on demand.
  *
  * <p><b>NOTE:</b> This interface is a special purpose interface, mainly for
  * internal use within the framework and within collaborating frameworks.
@@ -47,7 +47,7 @@ public interface SmartFactoryBean<T> extends FactoryBean<T> {
 	 * be provided by the owning {@link BeanFactory}; usually, it has to be
 	 * defined as singleton there.
 	 * <p>This method is supposed to strictly check for independent instances;
-	 * it should not return <code>true</code> for scoped objects or other
+	 * it should not return {@code true} for scoped objects or other
 	 * kinds of non-singleton, non-independent objects. For this reason,
 	 * this is not simply the inverted form of {@link #isSingleton()}.
 	 * @return whether the exposed object is a prototype
@@ -62,7 +62,7 @@ public interface SmartFactoryBean<T> extends FactoryBean<T> {
 	 * of its singleton object (if any)?
 	 * <p>A standard FactoryBean is not expected to initialize eagerly:
 	 * Its {@link #getObject()} will only be called for actual access, even
-	 * in case of a singleton object. Returning <code>true</code> from this
+	 * in case of a singleton object. Returning {@code true} from this
 	 * method suggests that {@link #getObject()} should be called eagerly,
 	 * also applying post-processors eagerly. This may make sense in case
 	 * of a {@link #isSingleton() singleton} object, in particular if

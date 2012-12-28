@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,8 +88,9 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	}
 
 
+	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
-		// Work out the target class: may be <code>null</code>.
+		// Work out the target class: may be {@code null}.
 		// The TransactionAttributeSource should be passed the target class
 		// as well as the method, which may be from an interface.
 		Class<?> targetClass = (invocation.getThis() != null ? AopUtils.getTargetClass(invocation.getThis()) : null);
@@ -126,6 +127,7 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 			try {
 				Object result = ((CallbackPreferringPlatformTransactionManager) tm).execute(txAttr,
 						new TransactionCallback<Object>() {
+							@Override
 							public Object doInTransaction(TransactionStatus status) {
 								TransactionInfo txInfo = prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 								try {

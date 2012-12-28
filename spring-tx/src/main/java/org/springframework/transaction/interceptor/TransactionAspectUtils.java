@@ -43,6 +43,7 @@ public abstract class TransactionAspectUtils {
 	 * @deprecated as of Spring 3.1.2 in favor of
 	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
+	@Deprecated
 	public static PlatformTransactionManager getTransactionManager(BeanFactory beanFactory, String qualifier) {
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, PlatformTransactionManager.class, qualifier);
 	}
@@ -56,6 +57,7 @@ public abstract class TransactionAspectUtils {
 	 * @deprecated as of Spring 3.1.2 in favor of
 	 * {@link BeanFactoryAnnotationUtils#qualifiedBeanOfType(BeanFactory, Class, String)}
 	 */
+	@Deprecated
 	public static PlatformTransactionManager getTransactionManager(ConfigurableListableBeanFactory bf, String qualifier) {
 		return BeanFactoryAnnotationUtils.qualifiedBeanOfType(bf, PlatformTransactionManager.class, qualifier);
 	}

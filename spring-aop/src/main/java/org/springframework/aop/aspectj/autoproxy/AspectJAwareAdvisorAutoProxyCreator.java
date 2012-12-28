@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.util.ClassUtils;
  * @author Ramnivas Laddad
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator {
 
 	private static final Comparator DEFAULT_PRECEDENCE_COMPARATOR = new AspectJPrecedenceComparator();
@@ -72,22 +73,22 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 		for (Advisor element : advisors) {
 			partiallyComparableAdvisors.add(
 					new PartiallyComparableAdvisorHolder(element, DEFAULT_PRECEDENCE_COMPARATOR));
-		}		
-		
+		}
+
 		// sort it
 		List<PartiallyComparableAdvisorHolder> sorted =
-				(List<PartiallyComparableAdvisorHolder>) PartialOrder.sort(partiallyComparableAdvisors);
+				PartialOrder.sort(partiallyComparableAdvisors);
 		if (sorted == null) {
 			// TODO: work harder to give a better error message here.
 			throw new IllegalArgumentException("Advice precedence circularity error");
 		}
-		
+
 		// extract results again
 		List<Advisor> result = new LinkedList<Advisor>();
 		for (PartiallyComparableAdvisorHolder pcAdvisor : sorted) {
 			result.add(pcAdvisor.getAdvisor());
 		}
-		
+
 		return result;
 	}
 
@@ -130,11 +131,13 @@ public class AspectJAwareAdvisorAutoProxyCreator extends AbstractAdvisorAutoProx
 			this.comparator = comparator;
 		}
 
+		@Override
 		public int compareTo(Object obj) {
 			Advisor otherAdvisor = ((PartiallyComparableAdvisorHolder) obj).advisor;
 			return this.comparator.compare(this.advisor, otherAdvisor);
 		}
 
+		@Override
 		public int fallbackCompareTo(Object obj) {
 			return 0;
 		}

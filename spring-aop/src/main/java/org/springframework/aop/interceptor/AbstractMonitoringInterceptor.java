@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,13 @@ import org.aopalliance.intercept.MethodInvocation;
 
 /**
  * Base class for monitoring interceptors, such as performance monitors.
- * Provides <code>prefix</code> and <code>suffix</code> properties
+ * Provides {@code prefix} and {@code suffix} properties
  * that help to classify/group performance monitoring results.
  *
- * <p>Subclasses should call the <code>createInvocationTraceName(MethodInvocation)</code>
+ * <p>Subclasses should call the {@code createInvocationTraceName(MethodInvocation)}
  * method to create a name for the given trace that includes information about the
  * method invocation under trace along with the prefix and suffix added as appropriate.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 1.2.7
@@ -36,6 +36,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see #setSuffix
  * @see #createInvocationTraceName
  */
+@SuppressWarnings("serial")
 public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterceptor {
 
 	private String prefix = "";
@@ -87,7 +88,7 @@ public abstract class AbstractMonitoringInterceptor extends AbstractTraceInterce
 
 
 	/**
-	 * Create a <code>String</code> name for the given <code>MethodInvocation</code>
+	 * Create a {@code String} name for the given {@code MethodInvocation}
 	 * that can be used for trace/logging purposes. This name is made up of the
 	 * configured prefix, followed by the fully-qualified name of the method being
 	 * invoked, followed by the configured suffix.

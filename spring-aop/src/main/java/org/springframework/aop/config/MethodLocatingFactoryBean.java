@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 		this.methodName = methodName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!StringUtils.hasText(this.targetBeanName)) {
 			throw new IllegalArgumentException("Property 'targetBeanName' is required");
@@ -78,14 +79,17 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 	}
 
 
+	@Override
 	public Method getObject() throws Exception {
 		return this.method;
 	}
 
+	@Override
 	public Class<Method> getObjectType() {
 		return Method.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	/**
 	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
 	 * JdbcTemplate.
-	 * @param dataSource the <code>DataSource</code> to use
+	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(DataSource dataSource) {
@@ -62,7 +62,7 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 
 	/**
 	 * Alternative Constructor that takes one parameter with the JdbcTemplate to be used.
-	 * @param jdbcTemplate the <code>JdbcTemplate</code> to use
+	 * @param jdbcTemplate the {@code JdbcTemplate} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
 	public SimpleJdbcInsert(JdbcTemplate jdbcTemplate) {
@@ -70,74 +70,90 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 
+	@Override
 	public SimpleJdbcInsert withTableName(String tableName) {
 		setTableName(tableName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsert withSchemaName(String schemaName) {
 		setSchemaName(schemaName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsert withCatalogName(String catalogName) {
 		setCatalogName(catalogName);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsert usingColumns(String... columnNames) {
 		setColumnNames(Arrays.asList(columnNames));
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsert usingGeneratedKeyColumns(String... columnNames) {
 		setGeneratedKeyNames(columnNames);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
 		setAccessTableColumnMetaData(false);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
 		return this;
 	}
 
+	@Override
 	public SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor) {
 		setNativeJdbcExtractor(nativeJdbcExtractor);
 		return this;
 	}
 
+	@Override
 	public int execute(Map<String, Object> args) {
 		return doExecute(args);
 	}
 
+	@Override
 	public int execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
 	}
 
+	@Override
 	public Number executeAndReturnKey(Map<String, Object> args) {
 		return doExecuteAndReturnKey(args);
 	}
 
+	@Override
 	public Number executeAndReturnKey(SqlParameterSource parameterSource) {
 		return doExecuteAndReturnKey(parameterSource);
 	}
 
+	@Override
 	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
 		return doExecuteAndReturnKeyHolder(args);
 	}
 
+	@Override
 	public KeyHolder executeAndReturnKeyHolder(SqlParameterSource parameterSource) {
 		return doExecuteAndReturnKeyHolder(parameterSource);
 	}
 
+	@Override
 	public int[] executeBatch(Map<String, Object>[] batch) {
 		return doExecuteBatch(batch);
 	}
 
+	@Override
 	public int[] executeBatch(SqlParameterSource[] batch) {
 		return doExecuteBatch(batch);
 	}

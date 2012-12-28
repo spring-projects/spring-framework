@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,7 +130,7 @@ public class RequestContext {
 	 * request attributes. It will typically be used within JSPs or custom tags. <p>If a ServletContext is specified,
 	 * the RequestContext will also work with the root WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
-	 * @param servletContext the servlet context of the web application (can be <code>null</code>; necessary for
+	 * @param servletContext the servlet context of the web application (can be {@code null}; necessary for
 	 * fallback to root WebApplicationContext)
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
@@ -145,7 +145,7 @@ public class RequestContext {
 	 * within a DispatcherServlet request.</b> Pass in a ServletContext to be able to fallback to the root
 	 * WebApplicationContext.
 	 * @param request current HTTP request
-	 * @param model the model attributes for the current view (can be <code>null</code>, using the request attributes
+	 * @param model the model attributes for the current view (can be {@code null}, using the request attributes
 	 * for Errors retrieval)
 	 * @see org.springframework.web.servlet.DispatcherServlet
 	 * @see #RequestContext(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, javax.servlet.ServletContext, Map)
@@ -160,9 +160,9 @@ public class RequestContext {
 	 * specified, the RequestContext will also work with a root WebApplicationContext (outside a DispatcherServlet).
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param servletContext the servlet context of the web application (can be <code>null</code>; necessary for
+	 * @param servletContext the servlet context of the web application (can be {@code null}; necessary for
 	 * fallback to root WebApplicationContext)
-	 * @param model the model attributes for the current view (can be <code>null</code>, using the request attributes
+	 * @param model the model attributes for the current view (can be {@code null}, using the request attributes
 	 * for Errors retrieval)
 	 * @see org.springframework.web.context.WebApplicationContext
 	 * @see org.springframework.web.servlet.DispatcherServlet
@@ -181,12 +181,12 @@ public class RequestContext {
 
 	/**
 	 * Initialize this context with the given request, using the given model attributes for Errors retrieval.
-	 * <p>Delegates to <code>getFallbackLocale</code> and <code>getFallbackTheme</code> for determining the fallback
+	 * <p>Delegates to {@code getFallbackLocale} and {@code getFallbackTheme} for determining the fallback
 	 * locale and theme, respectively, if no LocaleResolver and/or ThemeResolver can be found in the request.
 	 * @param request current HTTP request
-	 * @param servletContext the servlet context of the web application (can be <code>null</code>; necessary for
+	 * @param servletContext the servlet context of the web application (can be {@code null}; necessary for
 	 * fallback to root WebApplicationContext)
-	 * @param model the model attributes for the current view (can be <code>null</code>, using the request attributes
+	 * @param model the model attributes for the current view (can be {@code null}, using the request attributes
 	 * for Errors retrieval)
 	 * @see #getFallbackLocale
 	 * @see #getFallbackTheme
@@ -231,11 +231,11 @@ public class RequestContext {
 			// Ignored
 		}
 	}
-	
+
 	/**
 	 * Determine the fallback locale for this context. <p>The default implementation checks for a JSTL locale attribute
-	 * in request, session or application scope; if not found, returns the <code>HttpServletRequest.getLocale()</code>.
-	 * @return the fallback locale (never <code>null</code>)
+	 * in request, session or application scope; if not found, returns the {@code HttpServletRequest.getLocale()}.
+	 * @return the fallback locale (never {@code null})
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
 	protected Locale getFallbackLocale() {
@@ -251,7 +251,7 @@ public class RequestContext {
 	/**
 	 * Determine the fallback theme for this context. <p>The default implementation returns the default theme (with name
 	 * "theme").
-	 * @return the fallback theme (never <code>null</code>)
+	 * @return the fallback theme (never {@code null})
 	 */
 	protected Theme getFallbackTheme() {
 		ThemeSource themeSource = RequestContextUtils.getThemeSource(getRequest());
@@ -295,21 +295,21 @@ public class RequestContext {
 
 	/**
 	 * Return the model Map that this RequestContext encapsulates, if any.
-	 * @return the populated model Map, or <code>null</code> if none available
+	 * @return the populated model Map, or {@code null} if none available
 	 */
 	public final Map<String, Object> getModel() {
 		return this.model;
 	}
 
 	/**
-	 * Return the current Locale (never <code>null</code>).
+	 * Return the current Locale (never {@code null}).
 	 */
 	public final Locale getLocale() {
 		return this.locale;
 	}
 
 	/**
-	 * Return the current theme (never <code>null</code>). <p>Resolved lazily for more efficiency when theme support is
+	 * Return the current theme (never {@code null}). <p>Resolved lazily for more efficiency when theme support is
 	 * not being used.
 	 */
 	public final Theme getTheme() {
@@ -334,7 +334,7 @@ public class RequestContext {
 	}
 
 	/**
-	 * Is default HTML escaping active? Falls back to <code>false</code> in case of no explicit default given.
+	 * Is default HTML escaping active? Falls back to {@code false} in case of no explicit default given.
 	 */
 	public boolean isDefaultHtmlEscape() {
 		return (this.defaultHtmlEscape != null && this.defaultHtmlEscape.booleanValue());
@@ -399,9 +399,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return a context-aware URl for the given relative URL with placeholders (named keys with braces <code>{}</code>).
-	 * For example, send in a relative URL <code>foo/{bar}?spam={spam}</code> and a parameter map
-	 * <code>{bar=baz,spam=nuts}</code> and the result will be <code>[contextpath]/foo/baz?spam=nuts</code>.
+	 * Return a context-aware URl for the given relative URL with placeholders (named keys with braces {@code {}}).
+	 * For example, send in a relative URL {@code foo/{bar}?spam={spam}} and a parameter map
+	 * {@code {bar=baz,spam=nuts}} and the result will be {@code [contextpath]/foo/baz?spam=nuts}.
 	 *
 	 * @param relativeUrl the relative URL part
 	 * @param params a map of parameters to insert as placeholders in the url
@@ -473,7 +473,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
@@ -484,7 +484,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
-	 * @param args arguments for the message as a List, or <code>null</code> if none
+	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
@@ -495,7 +495,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
@@ -518,7 +518,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -529,7 +529,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code, using the "defaultHtmlEscape" setting.
 	 * @param code code of the message
-	 * @param args arguments for the message as a List, or <code>null</code> if none
+	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -540,7 +540,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the message for the given code.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @param htmlEscape HTML escape the message?
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -587,7 +587,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
 	 * typically denote theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
@@ -599,7 +599,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
 	 * typically denote theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
-	 * @param args arguments for the message as a List, or <code>null</code> if none
+	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
 	 */
@@ -623,7 +623,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
 	 * typically denote theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
-	 * @param args arguments for the message, or <code>null</code> if none
+	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -635,7 +635,7 @@ public class RequestContext {
 	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
 	 * typically denote theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
-	 * @param args arguments for the message as a List, or <code>null</code> if none
+	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
 	 */
@@ -657,7 +657,7 @@ public class RequestContext {
 	/**
 	 * Retrieve the Errors instance for the given bind object, using the "defaultHtmlEscape" setting.
 	 * @param name name of the bind object
-	 * @return the Errors instance, or <code>null</code> if not found
+	 * @return the Errors instance, or {@code null} if not found
 	 */
 	public Errors getErrors(String name) {
 		return getErrors(name, isDefaultHtmlEscape());
@@ -667,7 +667,7 @@ public class RequestContext {
 	 * Retrieve the Errors instance for the given bind object.
 	 * @param name name of the bind object
 	 * @param htmlEscape create an Errors instance with automatic HTML escaping?
-	 * @return the Errors instance, or <code>null</code> if not found
+	 * @return the Errors instance, or {@code null} if not found
 	 */
 	public Errors getErrors(String name, boolean htmlEscape) {
 		if (this.errorsMap == null) {

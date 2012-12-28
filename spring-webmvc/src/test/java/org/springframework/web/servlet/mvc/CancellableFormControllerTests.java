@@ -183,6 +183,7 @@ public class CancellableFormControllerTests extends TestCase {
 	final String reason = "Because I wanted to";
 
 		TestController ctl = new TestController() {
+			@Override
 			protected ModelAndView onCancel(HttpServletRequest request, HttpServletResponse response, Object command) {
 				return new ModelAndView(getCancelView(), "reason", reason);
 			}
@@ -221,9 +222,11 @@ public class CancellableFormControllerTests extends TestCase {
 
 		private boolean invoked = false;
 
+		@Override
 		public boolean supports(Class clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
+		@Override
 		public void validate(Object target, Errors errors) {
 			this.invoked = true;
 			TestBean tb = (TestBean) target;

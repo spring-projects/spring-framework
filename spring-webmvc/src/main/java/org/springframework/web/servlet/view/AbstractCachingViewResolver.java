@@ -49,6 +49,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	private boolean cacheUnresolved = true;
 
 	/** Map from view key to View instance */
+	@SuppressWarnings("serial")
 	private final Map<Object, View> viewCache =
 			new LinkedHashMap<Object, View>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
@@ -115,6 +116,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	}
 
 
+	@Override
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
 			return createView(viewName, locale);
@@ -160,7 +162,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 */
 	public void removeFromCache(String viewName, Locale locale) {
 		if (!isCache()) {
-			logger.warn("View caching is SWITCHED OFF -- removal not necessary");			
+			logger.warn("View caching is SWITCHED OFF -- removal not necessary");
 		}
 		else {
 			Object cacheKey = getCacheKey(viewName, locale);
@@ -173,7 +175,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 				if (logger.isDebugEnabled()) {
 					logger.debug("No cached instance for view '" + cacheKey + "' was found");
 				}
-			} 
+			}
 			else {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Cache for view " + cacheKey + " has been cleared");
@@ -198,11 +200,11 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * Create the actual View object.
 	 * <p>The default implementation delegates to {@link #loadView}.
 	 * This can be overridden to resolve certain view names in a special fashion,
-	 * before delegating to the actual <code>loadView</code> implementation
+	 * before delegating to the actual {@code loadView} implementation
 	 * provided by the subclass.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
-	 * @return the View instance, or <code>null</code> if not found
+	 * @return the View instance, or {@code null} if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #loadView
@@ -219,7 +221,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 * A subclass that does not may simply ignore the locale parameter.
 	 * @param viewName the name of the view to retrieve
 	 * @param locale the Locale to retrieve the view for
-	 * @return the View instance, or <code>null</code> if not found
+	 * @return the View instance, or {@code null} if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view couldn't be resolved
 	 * @see #resolveViewName

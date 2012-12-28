@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import org.springframework.core.ErrorCoded;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
 	private transient PropertyChangeEvent propertyChangeEvent;
-	
+
 
 	/**
 	 * Create a new PropertyAccessException.
@@ -55,7 +56,7 @@ public abstract class PropertyAccessException extends BeansException implements 
 
 	/**
 	 * Return the PropertyChangeEvent that resulted in the problem.
-	 * <p>May be <code>null</code>; only available if an actual bean property
+	 * <p>May be {@code null}; only available if an actual bean property
 	 * was affected.
 	 */
 	public PropertyChangeEvent getPropertyChangeEvent() {

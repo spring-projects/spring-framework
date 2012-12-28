@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * <p>This is intended for the (arguably unnatural, but still common) case
  * where character data is stored in a binary LOB. This requires encoding
  * and decoding the characters within this UserType; see the javadoc of the
- * <code>getCharacterEncoding()</code> method.
+ * {@code getCharacterEncoding()} method.
  *
  * <p>Can also be defined in generic Hibernate mappings, as DefaultLobCreator will
  * work with most JDBC-compliant database drivers. In this case, the field type
@@ -60,16 +60,18 @@ public class BlobStringType extends AbstractLobType {
 
 	/**
 	 * Constructor used for testing: takes an explicit LobHandler
-	 * and an explicit JTA TransactionManager (can be <code>null</code>).
+	 * and an explicit JTA TransactionManager (can be {@code null}).
 	 */
 	protected BlobStringType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		super(lobHandler, jtaTransactionManager);
 	}
 
+	@Override
 	public int[] sqlTypes() {
 		return new int[] {Types.BLOB};
 	}
 
+	@Override
 	public Class returnedClass() {
 		return String.class;
 	}
@@ -108,13 +110,13 @@ public class BlobStringType extends AbstractLobType {
 	/**
 	 * Determine the character encoding to apply to the BLOB's bytes
 	 * to turn them into a String.
-	 * <p>Default is <code>null</code>, indicating to use the platform
+	 * <p>Default is {@code null}, indicating to use the platform
 	 * default encoding. To be overridden in subclasses for a specific
 	 * encoding such as "ISO-8859-1" or "UTF-8".
-	 * @return the character encoding to use, or <code>null</code>
+	 * @return the character encoding to use, or {@code null}
 	 * to use the platform default encoding
-	 * @see java.lang.String#String(byte[], String)
-	 * @see java.lang.String#getBytes(String)
+	 * @see String#String(byte[], String)
+	 * @see String#getBytes(String)
 	 */
 	protected String getCharacterEncoding() {
 		return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.web.util.TagUtils;
  * @author Juergen Hoeller
  * @since 3.0.1
  */
+@SuppressWarnings("serial")
 public class EvalTag extends HtmlEscapingAwareTag {
 
 	/**
@@ -147,7 +148,7 @@ public class EvalTag extends HtmlEscapingAwareTag {
 		}
 		return context;
 	}
-	
+
 	private ConversionService getConversionService(PageContext pageContext) {
 		return (ConversionService) pageContext.getRequest().getAttribute(ConversionService.class.getName());
 	}
@@ -164,15 +165,18 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			this.variableResolver = pageContext.getVariableResolver();
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (target == null &&
 					(resolveImplicitVariable(name) != null || this.pageContext.findAttribute(name) != null));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			Object implicitVar = resolveImplicitVariable(name);
 			if (implicitVar != null) {
@@ -181,14 +185,16 @@ public class EvalTag extends HtmlEscapingAwareTag {
 			return new TypedValue(this.pageContext.findAttribute(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException();
 		}
-		
+
 		private Object resolveImplicitVariable(String name) throws AccessException {
 			if (this.variableResolver == null) {
 				return null;

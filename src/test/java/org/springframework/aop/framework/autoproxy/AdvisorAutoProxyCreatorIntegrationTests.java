@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import test.interceptor.NopInterceptor;
 /**
  * Integration tests for auto proxy creation by advisor recognition working in
  * conjunction with transaction managment resources.
- * 
+ *
  * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests;
  *
  * @author Rod Johnson
@@ -54,7 +54,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorIntegrationTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String DEFAULT_CONTEXT = CLASSNAME + "-context.xml";
 
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
@@ -66,7 +66,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 	protected BeanFactory getBeanFactory() throws IOException {
 		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
-	
+
 	@Test
 	public void testDefaultExclusionPrefix() throws Exception {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
@@ -100,7 +100,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		test.getName();
 		assertEquals(1, counter.getCalls());
 	}
-	
+
 	@Test
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -157,7 +157,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		assertEquals(0, txMan.commits);
-		// Should NOT roll back on ServletException 
+		// Should NOT roll back on ServletException
 		try {
 			rb.echoException(new ServletException());
 		}
@@ -190,23 +190,24 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 @SuppressWarnings("serial")
 class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
-	
+
 	public NeverMatchAdvisor() {
 		super(new NopInterceptor());
 	}
-	
+
 	/**
 	 * This method is solely to allow us to create a mixture of dependencies in
 	 * the bean definitions. The dependencies don't have any meaning, and don't
 	 * <b>do</b> anything.
 	 */
 	public void setDependencies(List<?> l) {
-		
+
 	}
 
 	/**
 	 * @see org.springframework.aop.MethodMatcher#matches(java.lang.reflect.Method, java.lang.Class)
 	 */
+	@Override
 	public boolean matches(Method m, Class<?> targetClass) {
 		return false;
 	}
@@ -215,11 +216,11 @@ class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
 
 class NoSetters {
-	
+
 	public void A() {
-		
+
 	}
-	
+
 	public int getB() {
 		return -1;
 	}
@@ -249,10 +250,12 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 		return (CountingBeforeAdvice) getAdvice();
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		setAdvice(new TxCountingBeforeAdvice());
 	}
 
+	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return method.getName().startsWith("setAge");
 	}
@@ -260,6 +263,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 	private class TxCountingBeforeAdvice extends CountingBeforeAdvice {
 
+		@Override
 		public void before(Method method, Object[] args, Object target) throws Throwable {
 			// do transaction checks
 			if (requireTransactionContext) {
@@ -282,7 +286,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 
 class Rollback {
-	
+
 	/**
 	 * Inherits transaction attribute.
 	 * Illustrates programmatic rollback.
@@ -293,7 +297,7 @@ class Rollback {
 			setRollbackOnly();
 		}
 	}
-	
+
 	/**
 	 * Extracted in a protected method to facilitate testing
 	 */
@@ -323,26 +327,30 @@ class CallCountingTransactionManager extends AbstractPlatformTransactionManager 
 	public int rollbacks;
 	public int inflight;
 
+	@Override
 	protected Object doGetTransaction() {
 		return new Object();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		this.lastDefinition = definition;
 		++begun;
 		++inflight;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		++rollbacks;
 		--inflight;
 	}
-	
+
 	public void clear() {
 		begun = commits = rollbacks = inflight = 0;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
-	 * <p>Returns <code>null</code> if the DataSource has not been initialized or the database
+	 * <p>Returns {@code null} if the DataSource has not been initialized or the database
 	 * has been shut down. Subclasses may call to access the DataSource instance directly.
 	 */
 	protected final DataSource getDataSource() {
@@ -172,44 +172,54 @@ public class EmbeddedDatabaseFactory {
 			this.dataSource = dataSource;
 		}
 
+		@Override
 		public Connection getConnection() throws SQLException {
 			return this.dataSource.getConnection();
 		}
 
+		@Override
 		public Connection getConnection(String username, String password) throws SQLException {
 			return this.dataSource.getConnection(username, password);
 		}
 
+		@Override
 		public PrintWriter getLogWriter() throws SQLException {
 			return this.dataSource.getLogWriter();
 		}
 
+		@Override
 		public void setLogWriter(PrintWriter out) throws SQLException {
 			this.dataSource.setLogWriter(out);
 		}
 
+		@Override
 		public int getLoginTimeout() throws SQLException {
 			return this.dataSource.getLoginTimeout();
 		}
 
+		@Override
 		public void setLoginTimeout(int seconds) throws SQLException {
 			this.dataSource.setLoginTimeout(seconds);
 		}
 
+		@Override
 		public <T> T unwrap(Class<T> iface) throws SQLException {
 			return this.dataSource.unwrap(iface);
 		}
 
+		@Override
 		public boolean isWrapperFor(Class<?> iface) throws SQLException {
 			return this.dataSource.isWrapperFor(iface);
 		}
 
 		// getParentLogger() is required for JDBC 4.1 compatibility
+		@Override
 		@SuppressWarnings("unused")
 		public Logger getParentLogger() {
 			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		}
 
+		@Override
 		public void shutdown() {
 			shutdownDatabase();
 		}

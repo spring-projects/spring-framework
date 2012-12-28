@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 		this.locations = locations;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notEmpty(locations, "Locations list must not be empty");
 	}
@@ -104,6 +105,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * of the resource will be written to the response with caching headers
 	 * set to expire one year in the future.
 	 */
+	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
@@ -196,7 +198,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	/**
 	 * Determine an appropriate media type for the given resource.
 	 * @param resource the resource to check
-	 * @return the corresponding media type, or <code>null</code> if none found
+	 * @return the corresponding media type, or {@code null} if none found
 	 */
 	protected MediaType getMediaType(Resource resource) {
 		MediaType mediaType = null;
@@ -217,8 +219,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * Set headers on the given servlet response.
 	 * Called for GET requests as well as HEAD requests.
 	 * @param response current servlet response
-	 * @param resource the identified resource (never <code>null</code>)
-	 * @param mediaType the resource's media type (never <code>null</code>)
+	 * @param resource the identified resource (never {@code null})
+	 * @param mediaType the resource's media type (never {@code null})
 	 * @throws IOException in case of errors while setting the headers
 	 */
 	protected void setHeaders(HttpServletResponse response, Resource resource, MediaType mediaType) throws IOException {
@@ -237,7 +239,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 	 * Write the actual content out to the given servlet response,
 	 * streaming the resource's content.
 	 * @param response current servlet response
-	 * @param resource the identified resource (never <code>null</code>)
+	 * @param resource the identified resource (never {@code null})
 	 * @throws IOException in case of errors while writing the content
 	 */
 	protected void writeContent(HttpServletResponse response, Resource resource) throws IOException {

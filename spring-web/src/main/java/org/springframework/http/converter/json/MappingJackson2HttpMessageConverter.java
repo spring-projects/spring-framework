@@ -49,11 +49,12 @@ import org.springframework.util.Assert;
  *
  * @author Arjen Poutsma
  * @author Keith Donald
+ * @author Rossen Stoyanchev
  * @since 3.1.2
  * @see org.springframework.web.servlet.view.json.MappingJackson2JsonView
  */
 public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
-	implements GenericHttpMessageConverter<Object> {
+		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -128,9 +129,10 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead((Type) clazz, null, mediaType);
+		return canRead(clazz, null, mediaType);
 	}
 
+	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
@@ -155,6 +157,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@Override
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -227,7 +230,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractHttpMessageConv
 	/**
 	 * Determine the JSON encoding to use for the given content type.
 	 * @param contentType the media type as requested by the caller
-	 * @return the JSON encoding to use (never <code>null</code>)
+	 * @return the JSON encoding to use (never {@code null})
 	 */
 	protected JsonEncoding getJsonEncoding(MediaType contentType) {
 		if (contentType != null && contentType.getCharSet() != null) {

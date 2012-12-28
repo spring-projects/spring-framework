@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,16 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 /**
  * Resolves method arguments annotated with {@code @RequestHeader} except for
- * {@link Map} arguments. See {@link RequestHeaderMapMethodArgumentResolver} for 
+ * {@link Map} arguments. See {@link RequestHeaderMapMethodArgumentResolver} for
  * details on {@link Map} arguments annotated with {@code @RequestHeader}.
- * 
- * <p>An {@code @RequestHeader} is a named value resolved from a request header.
- * It has a required flag and a default value to fall back on when the request 
- * header does not exist. 
  *
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved 
+ * <p>An {@code @RequestHeader} is a named value resolved from a request header.
+ * It has a required flag and a default value to fall back on when the request
+ * header does not exist.
+ *
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved
  * request header values that don't yet match the method parameter type.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -44,7 +44,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...} 
+	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to have expressions
 	 */
@@ -52,6 +52,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 		super(beanFactory);
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestHeader.class)
 				&& !Map.class.isAssignableFrom(parameter.getParameterType());

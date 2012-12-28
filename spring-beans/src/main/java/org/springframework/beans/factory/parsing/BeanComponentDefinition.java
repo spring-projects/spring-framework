@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * Create a new BeanComponentDefinition for the given bean.
 	 * @param beanDefinition the BeanDefinition
 	 * @param beanName the name of the bean
-	 * @param aliases alias names for the bean, or <code>null</code> if none
+	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, String[] aliases) {
 		super(beanDefinition, beanName, aliases);
@@ -94,22 +94,27 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	}
 
 
+	@Override
 	public String getName() {
 		return getBeanName();
 	}
 
+	@Override
 	public String getDescription() {
 		return getShortDescription();
 	}
 
+	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[] {getBeanDefinition()};
 	}
 
+	@Override
 	public BeanDefinition[] getInnerBeanDefinitions() {
 		return this.innerBeanDefinitions;
 	}
 
+	@Override
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}

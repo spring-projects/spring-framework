@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
  * Meta data interface for Spring's SqlRowSet,
- * analogous to <code>javax.sql.ResultSetMetaData</code>
+ * analogous to {@code javax.sql.ResultSetMetaData}
  *
  * <p>The main difference to the standard JDBC RowSetMetaData is that an SQLException
  * is never thrown here. This allows a SqlRowSetMetaData to be used without having
  * to deal with checked exceptions. A SqlRowSetMetaData will throw Spring's
- * <code>org.springframework.jdbc.InvalidResultSetAccessException</code>
+ * {@code org.springframework.jdbc.InvalidResultSetAccessException}
  * instead (when appropriate).
  *
  * @author Thomas Risberg

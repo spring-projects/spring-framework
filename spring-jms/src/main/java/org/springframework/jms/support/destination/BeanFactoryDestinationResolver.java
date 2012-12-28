@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * {@link DestinationResolver} implementation based on a Spring {@link BeanFactory}.
  *
  * <p>Will lookup Spring managed beans identified by bean name,
- * expecting them to be of type <code>javax.jms.Destination</code>.
+ * expecting them to be of type {@code javax.jms.Destination}.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -42,7 +42,7 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 
 	/**
 	 * Create a new instance of the {@link BeanFactoryDestinationResolver} class.
-	 * <p>The BeanFactory to access must be set via <code>setBeanFactory</code>.
+	 * <p>The BeanFactory to access must be set via {@code setBeanFactory}.
 	 * @see #setBeanFactory
 	 */
 	public BeanFactoryDestinationResolver() {
@@ -63,17 +63,19 @@ public class BeanFactoryDestinationResolver implements DestinationResolver, Bean
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
+	@Override
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
 		Assert.state(this.beanFactory != null, "BeanFactory is required");
 		try {
-			return (Destination) this.beanFactory.getBean(destinationName, Destination.class);
+			return this.beanFactory.getBean(destinationName, Destination.class);
 		}
 		catch (BeansException ex) {
 			throw new DestinationResolutionException(

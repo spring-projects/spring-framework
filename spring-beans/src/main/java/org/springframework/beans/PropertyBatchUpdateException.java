@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 18 April 2001
  */
+@SuppressWarnings("serial")
 public class PropertyBatchUpdateException extends BeansException {
 
 	/** List of PropertyAccessException objects */
@@ -61,14 +62,14 @@ public class PropertyBatchUpdateException extends BeansException {
 
 	/**
 	 * Return an array of the propertyAccessExceptions stored in this object.
-	 * <p>Will return the empty array (not <code>null</code>) if there were no errors.
+	 * <p>Will return the empty array (not {@code null}) if there were no errors.
 	 */
 	public final PropertyAccessException[] getPropertyAccessExceptions() {
 		return this.propertyAccessExceptions;
 	}
 
 	/**
-	 * Return the exception for this field, or <code>null</code> if there isn't any.
+	 * Return the exception for this field, or {@code null} if there isn't any.
 	 */
 	public PropertyAccessException getPropertyAccessException(String propertyName) {
 		for (PropertyAccessException pae : this.propertyAccessExceptions) {

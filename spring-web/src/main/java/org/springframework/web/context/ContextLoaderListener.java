@@ -25,7 +25,7 @@ import javax.servlet.ServletContextListener;
  *
  * <p>This listener should be registered after
  * {@link org.springframework.web.util.Log4jConfigListener}
- * in <code>web.xml</code>, if the latter is used.
+ * in {@code web.xml}, if the latter is used.
  *
  * <p>As of Spring 3.1, {@code ContextLoaderListener} supports injecting the root web
  * application context via the {@link #ContextLoaderListener(WebApplicationContext)}
@@ -104,6 +104,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Initialize the root web application context.
 	 */
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		this.contextLoader = createContextLoader();
 		if (this.contextLoader == null) {
@@ -138,6 +139,7 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Close the root web application context.
 	 */
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		if (this.contextLoader != null) {
 			this.contextLoader.closeWebApplicationContext(event.getServletContext());

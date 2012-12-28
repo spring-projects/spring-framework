@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 		// absolutely needs thread-bound RegionFactory to initialize
 		if (rf == null) {
 			throw new IllegalStateException("No Hibernate RegionFactory found - " +
-			    "'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
+				"'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
 		}
 		this.regionFactory = rf;
 	}
@@ -70,14 +70,17 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 	}
 
 
+	@Override
 	public void start(Settings settings, Properties properties) throws CacheException {
 		this.regionFactory.start(settings, properties);
 	}
 
+	@Override
 	public void stop() {
 		this.regionFactory.stop();
 	}
 
+	@Override
 	public boolean isMinimalPutsEnabledByDefault() {
 		return this.regionFactory.isMinimalPutsEnabledByDefault();
 	}
@@ -92,28 +95,33 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 		}
 	}
 
+	@Override
 	public long nextTimestamp() {
 		return this.regionFactory.nextTimestamp();
 	}
 
+	@Override
 	public EntityRegion buildEntityRegion(String regionName, Properties properties, CacheDataDescription metadata)
 			throws CacheException {
 
 		return this.regionFactory.buildEntityRegion(regionName, properties, metadata);
 	}
 
+	@Override
 	public CollectionRegion buildCollectionRegion(String regionName, Properties properties,
 			CacheDataDescription metadata) throws CacheException {
 
 		return this.regionFactory.buildCollectionRegion(regionName, properties, metadata);
 	}
 
+	@Override
 	public QueryResultsRegion buildQueryResultsRegion(String regionName, Properties properties)
 			throws CacheException {
 
 		return this.regionFactory.buildQueryResultsRegion(regionName, properties);
 	}
 
+	@Override
 	public TimestampsRegion buildTimestampsRegion(String regionName, Properties properties)
 			throws CacheException {
 

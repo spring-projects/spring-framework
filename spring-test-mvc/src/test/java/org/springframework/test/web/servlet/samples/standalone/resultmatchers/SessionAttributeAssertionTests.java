@@ -54,14 +54,14 @@ public class SessionAttributeAssertionTests {
 	@Test
 	public void testSessionAttributeEqualTo() throws Exception {
 		this.mockMvc.perform(get("/"))
-            .andExpect(request().sessionAttribute("locale", Locale.UK))
-	        .andExpect(request().sessionAttribute("locale", equalTo(Locale.UK)));
+			.andExpect(request().sessionAttribute("locale", Locale.UK))
+			.andExpect(request().sessionAttribute("locale", equalTo(Locale.UK)));
 	}
 
 	@Test
 	public void testSessionAttributeMatcher() throws Exception {
 		this.mockMvc.perform(get("/"))
-	        .andExpect(request().sessionAttribute("locale", notNullValue()));
+			.andExpect(request().sessionAttribute("locale", notNullValue()));
 	}
 
 

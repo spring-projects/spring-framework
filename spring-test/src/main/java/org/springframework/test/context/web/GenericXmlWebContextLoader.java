@@ -39,8 +39,9 @@ public class GenericXmlWebContextLoader extends AbstractGenericWebContextLoader 
 	}
 
 	/**
-	 * Returns &quot;<code>-context.xml</code>&quot;.
+	 * Returns &quot;{@code -context.xml}&quot;.
 	 */
+	@Override
 	protected String getResourceSuffix() {
 		return "-context.xml";
 	}

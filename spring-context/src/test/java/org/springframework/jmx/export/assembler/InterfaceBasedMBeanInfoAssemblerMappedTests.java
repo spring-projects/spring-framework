@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.util.Properties;
 import javax.management.MBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
-
-import org.junit.Ignore;
 
 /**
  * @author Rob Harrop
@@ -62,7 +60,7 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 	public void ignoreTestWithFallThrough() throws Exception {
 		InterfaceBasedMBeanInfoAssembler assembler =
 				getWithMapping("foobar", "org.springframework.jmx.export.assembler.ICustomJmxBean");
-		assembler.setManagedInterfaces(new Class[] {IAdditionalTestMethods.class});
+		assembler.setManagedInterfaces(new Class<?>[] {IAdditionalTestMethods.class});
 
 		ModelMBeanInfo inf = assembler.getMBeanInfo(getBean(), getObjectName());
 		MBeanAttributeInfo attr = inf.getAttribute("NickName");
@@ -77,24 +75,29 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertNickName(attr);
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 3;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() throws Exception {
 		return getWithMapping(
 				"org.springframework.jmx.export.assembler.IAdditionalTestMethods, " +
 				"org.springframework.jmx.export.assembler.ICustomJmxBean");
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssemblerMapped.xml";
 	}

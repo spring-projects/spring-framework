@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 		return this.savepointAllowed;
 	}
 
+	@Override
 	public void flush() {
 		// no-op
 	}
@@ -100,6 +101,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 * This implementation creates a JDBC 3.0 Savepoint and returns it.
 	 * @see java.sql.Connection#setSavepoint
 	 */
+	@Override
 	public Object createSavepoint() throws TransactionException {
 		ConnectionHolder conHolder = getConnectionHolderForSavepoint();
 		try {
@@ -124,6 +126,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 * This implementation rolls back to the given JDBC 3.0 Savepoint.
 	 * @see java.sql.Connection#rollback(java.sql.Savepoint)
 	 */
+	@Override
 	public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 		try {
 			getConnectionHolderForSavepoint().getConnection().rollback((Savepoint) savepoint);
@@ -137,6 +140,7 @@ public abstract class JdbcTransactionObjectSupport implements SavepointManager, 
 	 * This implementation releases the given JDBC 3.0 Savepoint.
 	 * @see java.sql.Connection#releaseSavepoint
 	 */
+	@Override
 	public void releaseSavepoint(Object savepoint) throws TransactionException {
 		try {
 			getConnectionHolderForSavepoint().getConnection().releaseSavepoint((Savepoint) savepoint);

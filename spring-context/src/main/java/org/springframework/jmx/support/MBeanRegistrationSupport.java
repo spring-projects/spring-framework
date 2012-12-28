@@ -100,12 +100,12 @@ public class MBeanRegistrationSupport {
 	private static final Constants constants = new Constants(MBeanRegistrationSupport.class);
 
 	/**
-	 * <code>Log</code> instance for this class.
+	 * {@code Log} instance for this class.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * The <code>MBeanServer</code> instance being used to register beans.
+	 * The {@code MBeanServer} instance being used to register beans.
 	 */
 	protected MBeanServer server;
 
@@ -122,16 +122,16 @@ public class MBeanRegistrationSupport {
 
 
 	/**
-	 * Specify the <code>MBeanServer</code> instance with which all beans should
-	 * be registered. The <code>MBeanExporter</code> will attempt to locate an
-	 * existing <code>MBeanServer</code> if none is supplied.
+	 * Specify the {@code MBeanServer} instance with which all beans should
+	 * be registered. The {@code MBeanExporter} will attempt to locate an
+	 * existing {@code MBeanServer} if none is supplied.
 	 */
 	public void setServer(MBeanServer server) {
 		this.server = server;
 	}
 
 	/**
-	 * Return the <code>MBeanServer</code> that the beans will be registered with.
+	 * Return the {@code MBeanServer} that the beans will be registered with.
 	 */
 	public final MBeanServer getServer() {
 		return this.server;

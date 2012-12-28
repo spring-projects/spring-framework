@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		}
 	}
 
+	@Override
 	public Object findTemplateSource(String name) throws IOException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking for FreeMarker template with name [" + name + "]");
@@ -71,6 +72,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		return (resource.exists() ? resource : null);
 	}
 
+	@Override
 	public Reader getReader(Object templateSource, String encoding) throws IOException {
 		Resource resource = (Resource) templateSource;
 		try {
@@ -85,6 +87,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 	}
 
 
+	@Override
 	public long getLastModified(Object templateSource) {
 		Resource resource = (Resource) templateSource;
 		try {
@@ -99,6 +102,7 @@ public class SpringTemplateLoader implements TemplateLoader {
 		}
 	}
 
+	@Override
 	public void closeTemplateSource(Object templateSource) throws IOException {
 	}
 

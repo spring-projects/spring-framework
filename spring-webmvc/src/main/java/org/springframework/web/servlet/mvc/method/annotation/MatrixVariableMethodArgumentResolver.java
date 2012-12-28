@@ -47,6 +47,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		super(null);
 	}
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(MatrixVariable.class)) {
 			return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,12 @@ import org.springframework.context.ApplicationContextAware;
  * Convenience subclass of Quartz's {@link org.quartz.JobDetail} class,
  * making bean-style usage easier.
  *
- * <p><code>JobDetail</code> itself is already a JavaBean but lacks
+ * <p>{@code JobDetail} itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
  * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
+ * Use Quartz 2.0's native {@code JobDetailImpl} class or the new Quartz 2.0
  * builder API instead. Alternatively, switch to Spring's {@link JobDetailFactoryBean}
  * which largely is a drop-in replacement for this class and its properties and
  * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.
@@ -48,6 +48,7 @@ import org.springframework.context.ApplicationContextAware;
  * @see org.springframework.beans.factory.BeanNameAware
  * @see org.quartz.Scheduler#DEFAULT_GROUP
  */
+@SuppressWarnings("serial")
 public class JobDetailBean extends JobDetail
 		implements BeanNameAware, ApplicationContextAware, InitializingBean {
 
@@ -114,10 +115,12 @@ public class JobDetailBean extends JobDetail
 		}
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -143,6 +146,7 @@ public class JobDetailBean extends JobDetail
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getName() == null) {
 			setName(this.beanName);

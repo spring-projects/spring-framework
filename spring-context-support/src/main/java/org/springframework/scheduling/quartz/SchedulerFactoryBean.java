@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>For dynamic registration of jobs at runtime, use a bean reference to
  * this SchedulerFactoryBean to get direct access to the Quartz Scheduler
- * (<code>org.quartz.Scheduler</code>). This allows you to create new jobs
+ * ({@code org.quartz.Scheduler}). This allows you to create new jobs
  * and triggers, and also to control and monitor the entire Scheduler.
  *
  * <p>Note that Quartz instantiates a new Job for each execution, in
@@ -201,7 +201,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	/**
 	 * Set the Quartz SchedulerFactory implementation to use.
 	 * <p>Default is StdSchedulerFactory, reading in the standard
-	 * <code>quartz.properties</code> from <code>quartz.jar</code>.
+	 * {@code quartz.properties} from {@code quartz.jar}.
 	 * To use custom Quartz properties, specify the "configLocation"
 	 * or "quartzProperties" bean property on this FactoryBean.
 	 * @see org.quartz.impl.StdSchedulerFactory
@@ -369,6 +369,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * the scheduler will start after the context is refreshed and after the
 	 * start delay, if any.
 	 */
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -387,6 +388,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	/**
 	 * Return the phase in which this scheduler will be started and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
@@ -426,12 +428,14 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	}
 
 
+	@Override
 	public void setBeanName(String name) {
 		if (this.schedulerName == null) {
 			this.schedulerName = name;
 		}
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -441,6 +445,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	// Implementation of InitializingBean interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.dataSource == null && this.nonTransactionalDataSource != null) {
 			this.dataSource = this.nonTransactionalDataSource;
@@ -571,7 +576,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	/**
 	 * Create the Scheduler instance for the given factory and scheduler name.
 	 * Called by {@link #afterPropertiesSet}.
-	 * <p>The default implementation invokes SchedulerFactory's <code>getScheduler</code>
+	 * <p>The default implementation invokes SchedulerFactory's {@code getScheduler}
 	 * method. Can be overridden for custom Scheduler creation.
 	 * @param schedulerFactory the factory to create the Scheduler with
 	 * @param schedulerName the name of the scheduler to create
@@ -689,14 +694,17 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		return this.scheduler;
 	}
 
+	@Override
 	public Scheduler getObject() {
 		return this.scheduler;
 	}
 
+	@Override
 	public Class<? extends Scheduler> getObjectType() {
 		return (this.scheduler != null) ? this.scheduler.getClass() : Scheduler.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -706,6 +714,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	// Implementation of Lifecycle interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void start() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -717,6 +726,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 	}
 
+	@Override
 	public void stop() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -728,11 +738,13 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 		}
 	}
 
+	@Override
 	public void stop(Runnable callback) throws SchedulingException {
 		stop();
 		callback.run();
 	}
 
+	@Override
 	public boolean isRunning() throws SchedulingException {
 		if (this.scheduler != null) {
 			try {
@@ -754,6 +766,7 @@ public class SchedulerFactoryBean extends SchedulerAccessor implements FactoryBe
 	 * Shut down the Quartz scheduler on bean factory shutdown,
 	 * stopping all scheduled jobs.
 	 */
+	@Override
 	public void destroy() throws SchedulerException {
 		logger.info("Shutting down Quartz Scheduler");
 		this.scheduler.shutdown(this.waitForJobsToCompleteOnShutdown);

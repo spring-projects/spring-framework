@@ -77,6 +77,7 @@ public class PersistenceExceptionTranslationPostProcessor extends AbstractAdvisi
 		this.repositoryAnnotationType = repositoryAnnotationType;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new IllegalArgumentException(

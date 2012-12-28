@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
- * 
+ *
  * @author Andy Clement
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
@@ -35,7 +35,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
-	
+
 	@Test
 	public void testVariableAccess_WellKnownVariables() {
 		evaluate("#this.getName()","Nikola Tesla",String.class);

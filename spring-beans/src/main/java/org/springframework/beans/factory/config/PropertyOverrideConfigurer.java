@@ -52,7 +52,7 @@ import org.springframework.beans.factory.BeanInitializationException;
  * the same bean property, the <i>last</i> one will win (due to the overriding mechanism).
  *
  * <p>Property values can be converted after reading them in, through overriding
- * the <code>convertPropertyValue</code> method. For example, encrypted values
+ * the {@code convertPropertyValue} method. For example, encrypted values
  * can be detected and decrypted accordingly before processing them.
  *
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,9 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * Return the SQL type for the given parameter, if registered.
 	 * @param paramName the name of the parameter
 	 * @return the SQL type of the parameter,
-	 * or <code>TYPE_UNKNOWN</code> if not registered
+	 * or {@code TYPE_UNKNOWN} if not registered
 	 */
+	@Override
 	public int getSqlType(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		Integer sqlType = this.sqlTypes.get(paramName);
@@ -74,8 +75,9 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * Return the type name for the given parameter, if registered.
 	 * @param paramName the name of the parameter
 	 * @return the type name of the parameter,
-	 * or <code>null</code> if not registered
+	 * or {@code null} if not registered
 	 */
+	@Override
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		return this.typeNames.get(paramName);

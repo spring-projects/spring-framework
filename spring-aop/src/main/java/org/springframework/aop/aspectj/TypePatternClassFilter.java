@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ public class TypePatternClassFilter implements ClassFilter {
 	}
 
 	/**
-	 * Create a fully configured {@link TypePatternClassFilter} using the  
+	 * Create a fully configured {@link TypePatternClassFilter} using the
 	 * given type pattern.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
+	 * or is recognized as invalid
 	 */
 	public TypePatternClassFilter(String typePattern) {
 		setTypePattern(typePattern);
@@ -68,12 +68,12 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * <code class="code">
 	 * org.springframework.beans.ITestBean+
 	 * </code>
-	 * This will match the <code>ITestBean</code> interface and any class
+	 * This will match the {@code ITestBean} interface and any class
 	 * that implements it.
 	 * <p>These conventions are established by AspectJ, not Spring AOP.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
-	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * @throws IllegalArgumentException if the supplied {@code typePattern} is {@code null}
+	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
 		Assert.notNull(typePattern);
@@ -93,6 +93,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * @return whether the advice should apply to this candidate target class
 	 * @throws IllegalStateException if no {@link #setTypePattern(String)} has been set
 	 */
+	@Override
 	public boolean matches(Class clazz) {
 		if (this.aspectJTypePatternMatcher == null) {
 			throw new IllegalStateException("No 'typePattern' has been set via ctor/setter.");
@@ -102,9 +103,9 @@ public class TypePatternClassFilter implements ClassFilter {
 
 	/**
 	 * If a type pattern has been specified in XML, the user cannot
-	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
-	 * We also allow <code>and</code> between two sub-expressions.
-	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 * write {@code and} as "&&" (though &amp;&amp; will work).
+	 * We also allow {@code and} between two sub-expressions.
+	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		pcExpr = StringUtils.replace(pcExpr," and "," && ");

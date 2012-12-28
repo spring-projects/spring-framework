@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.util.JavaScriptUtils;
  * @see org.springframework.web.util.HtmlUtils
  * @see org.springframework.web.util.JavaScriptUtils
  */
+@SuppressWarnings("serial")
 public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 
 	private boolean javaScriptEscape = false;
@@ -66,10 +67,12 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 		return EVAL_BODY_BUFFERED;
 	}
 
+	@Override
 	public void doInitBody() {
 		// do nothing
 	}
 
+	@Override
 	public void setBodyContent(BodyContent bodyContent) {
 		this.bodyContent = bodyContent;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.io.Serializable;
  * @since 2.0.3
  * @see org.springframework.scheduling.concurrent.CustomizableThreadFactory
  */
+@SuppressWarnings("serial")
 public class CustomizableThreadCreator implements Serializable {
 
 	private String threadNamePrefix;
@@ -131,7 +132,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	/**
 	 * Return the thread group that threads should be created in
-	 * (or <code>null</code>) for the default group.
+	 * (or {@code null}) for the default group.
 	 */
 	public ThreadGroup getThreadGroup() {
 		return this.threadGroup;
@@ -170,7 +171,7 @@ public class CustomizableThreadCreator implements Serializable {
 
 	/**
 	 * Build the default thread name prefix for this factory.
-	 * @return the default thread name prefix (never <code>null</code>)
+	 * @return the default thread name prefix (never {@code null})
 	 */
 	protected String getDefaultThreadNamePrefix() {
 		return ClassUtils.getShortName(getClass()) + "-";

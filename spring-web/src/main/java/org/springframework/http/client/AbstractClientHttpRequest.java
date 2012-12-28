@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,18 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	private boolean executed = false;
 
 
+	@Override
 	public final HttpHeaders getHeaders() {
 		return (this.executed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
+	@Override
 	public final OutputStream getBody() throws IOException {
 		checkExecuted();
 		return getBodyInternal(this.headers);
 	}
 
+	@Override
 	public final ClientHttpResponse execute() throws IOException {
 		checkExecuted();
 		ClientHttpResponse result = executeInternal(this.headers);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,8 +52,8 @@ import org.springframework.util.Assert;
  *
  * <p>Note that when using the JMS 1.0.2 API, this ConnectionFactory will switch
  * into queue/topic mode according to the JMS API methods used at runtime:
- * <code>createQueueConnection</code> and <code>createTopicConnection</code> will
- * lead to queue/topic mode, respectively; generic <code>createConnection</code>
+ * {@code createQueueConnection} and {@code createTopicConnection} will
+ * lead to queue/topic mode, respectively; generic {@code createConnection}
  * calls will lead to a JMS 1.1 connection which is able to serve both modes.
  *
  * <p>Useful for testing and standalone environments in order to keep using the
@@ -212,6 +212,7 @@ public class SingleConnectionFactory
 	/**
 	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
@@ -219,6 +220,7 @@ public class SingleConnectionFactory
 	}
 
 
+	@Override
 	public Connection createConnection() throws JMSException {
 		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
@@ -228,11 +230,13 @@ public class SingleConnectionFactory
 		}
 	}
 
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -246,11 +250,13 @@ public class SingleConnectionFactory
 		return ((QueueConnection) con);
 	}
 
+	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
+	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -264,6 +270,7 @@ public class SingleConnectionFactory
 		return ((TopicConnection) con);
 	}
 
+	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
@@ -297,6 +304,7 @@ public class SingleConnectionFactory
 	/**
 	 * Exception listener callback that renews the underlying single Connection.
 	 */
+	@Override
 	public void onException(JMSException ex) {
 		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
@@ -308,6 +316,7 @@ public class SingleConnectionFactory
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
+	@Override
 	public void destroy() {
 		resetConnection();
 	}
@@ -367,14 +376,14 @@ public class SingleConnectionFactory
 
 	/**
 	 * Template method for obtaining a (potentially cached) Session.
-	 * <p>The default implementation always returns <code>null</code>.
+	 * <p>The default implementation always returns {@code null}.
 	 * Subclasses may override this for exposing specific Session handles,
 	 * possibly delegating to {@link #createSession} for the creation of raw
 	 * Session objects that will then get wrapped and returned from here.
 	 * @param con the JMS Connection to operate on
 	 * @param mode the Session acknowledgement mode
-	 * (<code>Session.TRANSACTED</code> or one of the common modes)
-	 * @return the Session to use, or <code>null</code> to indicate
+	 * ({@code Session.TRANSACTED} or one of the common modes)
+	 * @return the Session to use, or {@code null} to indicate
 	 * creation of a raw standard Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
@@ -387,7 +396,7 @@ public class SingleConnectionFactory
 	 * adaptign to JMS 1.0.2 style queue/topic mode if necessary.
 	 * @param con the JMS Connection to operate on
 	 * @param mode the Session acknowledgement mode
-	 * (<code>Session.TRANSACTED</code> or one of the common modes)
+	 * ({@code Session.TRANSACTED} or one of the common modes)
 	 * @return the newly created Session
 	 * @throws JMSException if thrown by the JMS API
 	 */
@@ -469,6 +478,7 @@ public class SingleConnectionFactory
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

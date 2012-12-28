@@ -38,7 +38,7 @@ import org.springframework.web.method.annotation.AbstractCookieValueMethodArgume
 
 /**
  * Test fixture with {@link org.springframework.web.method.annotation.AbstractCookieValueMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -59,7 +59,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new TestCookieValueMethodArgumentResolver();
-		
+
 		Method method = getClass().getMethod("params", Cookie.class, String.class, String.class);
 		paramNamedCookie = new MethodParameter(method, 0);
 		paramNamedDefaultValueString = new MethodParameter(method, 1);
@@ -79,7 +79,7 @@ public class CookieValueMethodArgumentResolverTests {
 	@Test
 	public void resolveCookieDefaultValue() throws Exception {
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
-		
+
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
@@ -101,7 +101,7 @@ public class CookieValueMethodArgumentResolverTests {
 			return null;
 		}
 	}
-	
+
 	public void params(@CookieValue("name") Cookie param1,
 					   @CookieValue(value = "name", defaultValue = "bar") String param2,
 					   String param3) {

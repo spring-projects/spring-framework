@@ -47,17 +47,13 @@ future pull requests as well, simply so the Spring Framework team knows
 immediately that this process is complete.
 
 
-## Create your branch from `master`
+## Create your branch from `3.2.x`
 
-At any given time, Spring Framework's `master` branch represents the version
-currently under development. For example, if 3.1.1 was the latest Spring
-Framework release, `master` represents 3.2.0 development, and the `3.1.x`
-branch represents 3.1.2 development.
-
-Create your topic branch to be submitted as a pull request from `master`. The
-Spring team will consider your pull request for backporting to maintenance
-versions (e.g. 3.1.2) on a case-by-case basis; you don't need to worry about
-submitting anything for backporting.
+If your pull request addresses a bug or improvement, please create your branch
+Spring Framework's `3.2.x` branch. `master` is reserved for work on new features
+for the next major version of the framework. Rest assured that if your pull
+request is accepted and merged into `3.2.x`, these changes will also eventually
+be merged into `master`.
 
 
 ## Use short branch names

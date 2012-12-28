@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Cache of original SQL String to ParsedSql representation */
+	@SuppressWarnings("serial")
 	private final Map<String, ParsedSql> parsedSqlCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
@@ -104,6 +105,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	 * Expose the classic Spring JdbcTemplate to allow invocation of
 	 * less commonly used methods.
 	 */
+	@Override
 	public JdbcOperations getJdbcOperations() {
 		return this.classicJdbcTemplate;
 	}
@@ -124,54 +126,63 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	}
 
 
+	@Override
 	public <T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return getJdbcOperations().execute(getPreparedStatementCreator(sql, paramSource), action);
 	}
 
+	@Override
 	public <T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(sql, new MapSqlParameterSource(paramMap), action);
 	}
 
+	@Override
 	public <T> T query(String sql, SqlParameterSource paramSource, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rse);
 	}
 
+	@Override
 	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rse);
 	}
 
+	@Override
 	public void query(String sql, SqlParameterSource paramSource, RowCallbackHandler rch)
 			throws DataAccessException {
 
 		getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rch);
 	}
 
+	@Override
 	public void query(String sql, Map<String, ?> paramMap, RowCallbackHandler rch)
 			throws DataAccessException {
 
 		query(sql, new MapSqlParameterSource(paramMap), rch);
 	}
 
+	@Override
 	public <T> List<T> query(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return getJdbcOperations().query(getPreparedStatementCreator(sql, paramSource), rowMapper);
 	}
 
+	@Override
 	public <T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		return query(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
@@ -179,97 +190,116 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return DataAccessUtils.requiredSingleResult(results);
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T>rowMapper)
 			throws DataAccessException {
 
 		return queryForObject(sql, new MapSqlParameterSource(paramMap), rowMapper);
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, SqlParameterSource paramSource, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramSource, new SingleColumnRowMapper<T>(requiredType));
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, Class<T> requiredType)
 			throws DataAccessException {
 
 		return queryForObject(sql, paramMap, new SingleColumnRowMapper<T>(requiredType));
 	}
 
+	@Override
 	public Map<String, Object> queryForMap(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		return queryForObject(sql, paramSource, new ColumnMapRowMapper());
 	}
 
+	@Override
 	public Map<String, Object> queryForMap(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForObject(sql, paramMap, new ColumnMapRowMapper());
 	}
 
+	@Override
 	public long queryForLong(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		Number number = queryForObject(sql, paramSource, Long.class);
 		return (number != null ? number.longValue() : 0);
 	}
 
+	@Override
 	public long queryForLong(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForLong(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Override
 	public int queryForInt(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		Number number = queryForObject(sql, paramSource, Integer.class);
 		return (number != null ? number.intValue() : 0);
 	}
 
+	@Override
 	public int queryForInt(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForInt(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Override
 	public <T> List<T> queryForList(String sql, SqlParameterSource paramSource, Class<T> elementType)
 			throws DataAccessException {
 
 		return query(sql, paramSource, new SingleColumnRowMapper<T>(elementType));
 	}
 
+	@Override
 	public <T> List<T> queryForList(String sql, Map<String, ?> paramMap, Class<T> elementType)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap), elementType);
 	}
 
+	@Override
 	public List<Map<String, Object>> queryForList(String sql, SqlParameterSource paramSource)
 			throws DataAccessException {
 
 		return query(sql, paramSource, new ColumnMapRowMapper());
 	}
 
+	@Override
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> paramMap)
 			throws DataAccessException {
 
 		return queryForList(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Override
 	public SqlRowSet queryForRowSet(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		return getJdbcOperations().query(
 				getPreparedStatementCreator(sql, paramSource), new SqlRowSetResultSetExtractor());
 	}
 
+	@Override
 	public SqlRowSet queryForRowSet(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return queryForRowSet(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Override
 	public int update(String sql, SqlParameterSource paramSource) throws DataAccessException {
 		return getJdbcOperations().update(getPreparedStatementCreator(sql, paramSource));
 	}
 
+	@Override
 	public int update(String sql, Map<String, ?> paramMap) throws DataAccessException {
 		return update(sql, new MapSqlParameterSource(paramMap));
 	}
 
+	@Override
 	public int update(String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder)
 			throws DataAccessException {
 
 		return update(sql, paramSource, generatedKeyHolder, null);
 	}
 
+	@Override
 	public int update(
 			String sql, SqlParameterSource paramSource, KeyHolder generatedKeyHolder, String[] keyColumnNames)
 			throws DataAccessException {
@@ -288,6 +318,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return getJdbcOperations().update(pscf.newPreparedStatementCreator(params), generatedKeyHolder);
 	}
 
+	@Override
 	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
 		SqlParameterSource[] batchArgs = new SqlParameterSource[batchValues.length];
 		int i = 0;
@@ -298,6 +329,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 		return batchUpdate(sql, batchArgs);
 	}
 
+	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
 		ParsedSql parsedSql = this.getParsedSql(sql);
 		return NamedParameterBatchUpdateUtils.executeBatchUpdateWithNamedParameters(parsedSql, batchArgs, getJdbcOperations());
@@ -305,7 +337,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
-	 * <p>Note: Not used for the <code>update</code> variant with generated key handling.
+	 * <p>Note: Not used for the {@code update} variant with generated key handling.
 	 * @param sql SQL to execute
 	 * @param paramSource container of arguments to bind
 	 * @return the corresponding PreparedStatementCreator

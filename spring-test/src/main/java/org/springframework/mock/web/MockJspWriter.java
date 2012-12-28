@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,7 @@ public class MockJspWriter extends JspWriter {
 	}
 
 
+	@Override
 	public void clear() throws IOException {
 		if (this.response.isCommitted()) {
 			throw new IOException("Response already committed");
@@ -89,101 +90,126 @@ public class MockJspWriter extends JspWriter {
 		this.response.resetBuffer();
 	}
 
+	@Override
 	public void clearBuffer() throws IOException {
 	}
 
+	@Override
 	public void flush() throws IOException {
 		this.response.flushBuffer();
 	}
 
+	@Override
 	public void close() throws IOException {
 		flush();
 	}
 
+	@Override
 	public int getRemaining() {
 		return Integer.MAX_VALUE;
 	}
 
+	@Override
 	public void newLine() throws IOException {
 		getTargetWriter().println();
 	}
 
+	@Override
 	public void write(char value[], int offset, int length) throws IOException {
 		getTargetWriter().write(value, offset, length);
 	}
 
+	@Override
 	public void print(boolean value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(char value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(char[] value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(double value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(float value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(int value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(long value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(Object value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void print(String value) throws IOException {
 		getTargetWriter().print(value);
 	}
 
+	@Override
 	public void println() throws IOException {
 		getTargetWriter().println();
 	}
 
+	@Override
 	public void println(boolean value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(char value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(char[] value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(double value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(float value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(int value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(long value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(Object value) throws IOException {
 		getTargetWriter().println(value);
 	}
 
+	@Override
 	public void println(String value) throws IOException {
 		getTargetWriter().println(value);
 	}

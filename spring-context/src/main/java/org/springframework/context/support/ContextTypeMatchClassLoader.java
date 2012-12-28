@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Special variant of an overriding ClassLoader, used for temporary type
  * matching in {@link AbstractApplicationContext}. Redefines classes from
- * a cached byte array for every <code>loadClass</code> call in order to
+ * a cached byte array for every {@code loadClass} call in order to
  * pick up recently loaded types in the parent ClassLoader.
  *
  * @author Juergen Hoeller
@@ -63,6 +63,7 @@ class ContextTypeMatchClassLoader extends DecoratingClassLoader implements Smart
 		return new ContextOverridingClassLoader(getParent()).loadClass(name);
 	}
 
+	@Override
 	public boolean isClassReloadable(Class clazz) {
 		return (clazz.getClassLoader() instanceof ContextOverridingClassLoader);
 	}

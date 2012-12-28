@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.resourceID = resourceID;
 	}
 
+	@Override
 	public String getResourceID() {
 		return this.resourceID;
 	}
@@ -105,10 +106,12 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.cacheability = cacheLevel;
 	}
 
+	@Override
 	public String getCacheability() {
 		return this.cacheability;
 	}
 
+	@Override
 	public String getETag() {
 		return getProperty(RenderRequest.ETAG);
 	}
@@ -121,6 +124,7 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.privateRenderParameterMap.put(key, values);
 	}
 
+	@Override
 	public Map<String, String[]> getPrivateRenderParameterMap() {
 		return Collections.unmodifiableMap(this.privateRenderParameterMap);
 	}

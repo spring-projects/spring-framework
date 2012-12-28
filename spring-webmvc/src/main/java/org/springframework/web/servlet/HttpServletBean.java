@@ -35,7 +35,6 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.Resource;
@@ -49,8 +48,8 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
 
 /**
  * Simple extension of {@link javax.servlet.http.HttpServlet} which treats
- * its config parameters (<code>init-param</code> entries within the
- * <code>servlet</code> tag in <code>web.xml</code>) as bean properties.
+ * its config parameters ({@code init-param} entries within the
+ * {@code servlet} tag in {@code web.xml}) as bean properties.
  *
  * <p>A handy superclass for any type of servlet. Type conversion of config
  * parameters is automatic, with the corresponding setter method getting
@@ -59,7 +58,7 @@ import org.springframework.web.context.support.ServletContextResourceLoader;
  * setter will simply be ignored.
  *
  * <p>This servlet leaves request handling to subclasses, inheriting the default
- * behavior of HttpServlet (<code>doGet</code>, <code>doPost</code>, etc).
+ * behavior of HttpServlet ({@code doGet}, {@code doPost}, etc).
  *
  * <p>This generic servlet base class has no dependency on the Spring
  * {@link org.springframework.context.ApplicationContext} concept. Simple
@@ -86,7 +85,7 @@ public abstract class HttpServletBean extends HttpServlet
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
@@ -155,7 +154,7 @@ public abstract class HttpServletBean extends HttpServlet
 
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */
@@ -165,7 +164,7 @@ public abstract class HttpServletBean extends HttpServlet
 	}
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * ServletConfig set yet.
 	 * @see #getServletConfig()
 	 */
@@ -190,6 +189,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * @throws IllegalArgumentException if environment is not assignable to
 	 * {@code ConfigurableWebEnvironment}.
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableWebEnvironment.class, environment);
 		this.environment = (ConfigurableWebEnvironment)environment;
@@ -200,6 +200,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * <p>If {@code null}, a new environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
+	@Override
 	public ConfigurableWebEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = this.createEnvironment();
@@ -229,8 +230,8 @@ public abstract class HttpServletBean extends HttpServlet
 		 * @throws ServletException if any required properties are missing
 		 */
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
-		    throws ServletException {
-			
+			throws ServletException {
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 
@@ -247,9 +248,9 @@ public abstract class HttpServletBean extends HttpServlet
 			// Fail if we are still missing properties.
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new ServletException(
-				    "Initialization from ServletConfig for servlet '" + config.getServletName() +
-				    "' failed; the following required properties were missing: " +
-				    StringUtils.collectionToDelimitedString(missingProps, ", "));
+					"Initialization from ServletConfig for servlet '" + config.getServletName() +
+					"' failed; the following required properties were missing: " +
+					StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

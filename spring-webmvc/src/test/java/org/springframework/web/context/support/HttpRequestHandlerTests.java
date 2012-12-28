@@ -48,6 +48,7 @@ public class HttpRequestHandlerTests {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.getBeanFactory().registerSingleton("myHandler", new HttpRequestHandler() {
+			@Override
 			public void handleRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
 				assertSame(request, req);
 				assertSame(response, res);

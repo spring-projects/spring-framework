@@ -118,6 +118,7 @@ public class JsonPathRequestMatchers {
 	 */
 	private abstract static class AbstractJsonPathRequestMatcher implements RequestMatcher {
 
+		@Override
 		public final void match(ClientHttpRequest request) throws IOException, AssertionError {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;

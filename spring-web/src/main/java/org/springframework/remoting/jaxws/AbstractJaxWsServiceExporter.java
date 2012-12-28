@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	/**
 	 * Obtains all web service beans and publishes them as JAX-WS endpoints.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ListableBeanFactory)) {
 			throw new IllegalStateException(getClass().getSimpleName() + " requires a ListableBeanFactory");
@@ -121,6 +122,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	 * Immediately publish all endpoints when fully configured.
 	 * @see #publishEndpoints()
 	 */
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		publishEndpoints();
 	}
@@ -201,6 +203,7 @@ public abstract class AbstractJaxWsServiceExporter implements BeanFactoryAware, 
 	/**
 	 * Stops all published endpoints, taking the web services offline.
 	 */
+	@Override
 	public void destroy() {
 		for (Endpoint endpoint : this.publishedEndpoints) {
 			endpoint.stop();

@@ -99,7 +99,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> interface for JAXB 2.0.
+ * Implementation of the {@code Marshaller} interface for JAXB 2.0.
  *
  * <p>The typical usage will be to set either the "contextPath" or the "classesToBeBound"
  * property on this bean, possibly customize the marshaller and unmarshaller by setting
@@ -132,7 +132,7 @@ public class Jaxb2Marshaller
 	private String contextPath;
 
 	private Class<?>[] classesToBeBound;
-	
+
 	private String[] packagesToScan;
 
 	private Map<String, ?> jaxbContextProperties;
@@ -235,18 +235,18 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the <code>JAXBContext</code> properties. These implementation-specific
-	 * properties will be set on the underlying <code>JAXBContext</code>.
+	 * Set the {@code JAXBContext} properties. These implementation-specific
+	 * properties will be set on the underlying {@code JAXBContext}.
 	 */
 	public void setJaxbContextProperties(Map<String, ?> jaxbContextProperties) {
 		this.jaxbContextProperties = jaxbContextProperties;
 	}
 
 	/**
-	 * Set the JAXB <code>Marshaller</code> properties. These properties will be set on the
-	 * underlying JAXB <code>Marshaller</code>, and allow for features such as indentation.
+	 * Set the JAXB {@code Marshaller} properties. These properties will be set on the
+	 * underlying JAXB {@code Marshaller}, and allow for features such as indentation.
 	 * @param properties the properties
-	 * @see javax.xml.bind.Marshaller#setProperty(String,Object)
+	 * @see javax.xml.bind.Marshaller#setProperty(String, Object)
 	 * @see javax.xml.bind.Marshaller#JAXB_ENCODING
 	 * @see javax.xml.bind.Marshaller#JAXB_FORMATTED_OUTPUT
 	 * @see javax.xml.bind.Marshaller#JAXB_NO_NAMESPACE_SCHEMA_LOCATION
@@ -257,24 +257,24 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the JAXB <code>Unmarshaller</code> properties. These properties will be set on the
-	 * underlying JAXB <code>Unmarshaller</code>.
+	 * Set the JAXB {@code Unmarshaller} properties. These properties will be set on the
+	 * underlying JAXB {@code Unmarshaller}.
 	 * @param properties the properties
-	 * @see javax.xml.bind.Unmarshaller#setProperty(String,Object)
+	 * @see javax.xml.bind.Unmarshaller#setProperty(String, Object)
 	 */
 	public void setUnmarshallerProperties(Map<String, ?> properties) {
 		this.unmarshallerProperties = properties;
 	}
 
 	/**
-	 * Specify the <code>Marshaller.Listener</code> to be registered with the JAXB <code>Marshaller</code>.
+	 * Specify the {@code Marshaller.Listener} to be registered with the JAXB {@code Marshaller}.
 	 */
 	public void setMarshallerListener(Marshaller.Listener marshallerListener) {
 		this.marshallerListener = marshallerListener;
 	}
 
 	/**
-	 * Set the <code>Unmarshaller.Listener</code> to be registered with the JAXB <code>Unmarshaller</code>.
+	 * Set the {@code Unmarshaller.Listener} to be registered with the JAXB {@code Unmarshaller}.
 	 */
 	public void setUnmarshallerListener(Unmarshaller.Listener unmarshallerListener) {
 		this.unmarshallerListener = unmarshallerListener;
@@ -289,8 +289,8 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Specify the <code>XmlAdapter</code>s to be registered with the JAXB <code>Marshaller</code>
-	 * and <code>Unmarshaller</code>
+	 * Specify the {@code XmlAdapter}s to be registered with the JAXB {@code Marshaller}
+	 * and {@code Unmarshaller}
 	 */
 	public void setAdapters(XmlAdapter<?, ?>[] adapters) {
 		this.adapters = adapters;
@@ -311,7 +311,7 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Set the schema language. Default is the W3C XML Schema: <code>http://www.w3.org/2001/XMLSchema"</code>.
+	 * Set the schema language. Default is the W3C XML Schema: {@code http://www.w3.org/2001/XMLSchema"}.
 	 * @see XMLConstants#W3C_XML_SCHEMA_NS_URI
 	 * @see XMLConstants#RELAXNG_NS_URI
 	 */
@@ -331,7 +331,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Specify whether MTOM support should be enabled or not.
-	 * Default is <code>false</code>: marshalling using XOP/MTOM not being enabled.
+	 * Default is {@code false}: marshalling using XOP/MTOM not being enabled.
 	 */
 	public void setMtomEnabled(boolean mtomEnabled) {
 		this.mtomEnabled = mtomEnabled;
@@ -376,14 +376,17 @@ public class Jaxb2Marshaller
 		this.checkForXmlRootElement = checkForXmlRootElement;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		boolean hasContextPath = StringUtils.hasLength(this.contextPath);
 		boolean hasClassesToBeBound = !ObjectUtils.isEmpty(this.classesToBeBound);
@@ -513,6 +516,7 @@ public class Jaxb2Marshaller
 	}
 
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		if (this.supportJaxbElementClass && JAXBElement.class.isAssignableFrom(clazz)) {
 			return true;
@@ -520,6 +524,7 @@ public class Jaxb2Marshaller
 		return supportsInternal(clazz, this.checkForXmlRootElement);
 	}
 
+	@Override
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
@@ -609,10 +614,12 @@ public class Jaxb2Marshaller
 
 	// Marshalling
 
+	@Override
 	public void marshal(Object graph, Result result) throws XmlMappingException {
 		marshal(graph, result, null);
 	}
 
+	@Override
 	public void marshal(Object graph, Result result, MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Marshaller marshaller = createMarshaller();
@@ -663,7 +670,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
+	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setMarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
 	 * schemas}, {@link #setMarshallerListener(javax.xml.bind.Marshaller.Listener) listener}, and
@@ -694,10 +701,12 @@ public class Jaxb2Marshaller
 
 	// Unmarshalling
 
+	@Override
 	public Object unmarshal(Source source) throws XmlMappingException {
 		return unmarshal(source, null);
 	}
 
+	@Override
 	public Object unmarshal(Source source, MimeContainer mimeContainer) throws XmlMappingException {
 		try {
 			Unmarshaller unmarshaller = createUnmarshaller();
@@ -749,7 +758,7 @@ public class Jaxb2Marshaller
 
 	/**
 	 * Template method that can be overridden by concrete JAXB marshallers for custom initialization behavior.
-	 * Gets called after creation of JAXB <code>Marshaller</code>, and after the respective properties have been set.
+	 * Gets called after creation of JAXB {@code Marshaller}, and after the respective properties have been set.
 	 * <p>The default implementation sets the {@link #setUnmarshallerProperties(Map) defined properties}, the {@link
 	 * #setValidationEventHandler(ValidationEventHandler) validation event handler}, the {@link #setSchemas(Resource[])
 	 * schemas}, {@link #setUnmarshallerListener(javax.xml.bind.Unmarshaller.Listener) listener}, and
@@ -778,10 +787,10 @@ public class Jaxb2Marshaller
 	}
 
 	/**
-	 * Convert the given <code>JAXBException</code> to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
-	 * @param ex <code>JAXBException</code> that occured
-	 * @return the corresponding <code>XmlMappingException</code>
+	 * Convert the given {@code JAXBException} to an appropriate exception from the
+	 * {@code org.springframework.oxm} hierarchy.
+	 * @param ex {@code JAXBException} that occured
+	 * @return the corresponding {@code XmlMappingException}
 	 */
 	protected XmlMappingException convertJaxbException(JAXBException ex) {
 		if (ex instanceof ValidationException) {
@@ -915,18 +924,22 @@ public class Jaxb2Marshaller
 			this.length = length;
 		}
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(this.data, this.offset, this.length);
 		}
 
+		@Override
 		public OutputStream getOutputStream() throws IOException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String getContentType() {
 			return this.contentType;
 		}
 
+		@Override
 		public String getName() {
 			return "ByteArrayDataSource";
 		}

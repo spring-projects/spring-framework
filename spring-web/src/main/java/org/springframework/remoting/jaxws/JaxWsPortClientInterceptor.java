@@ -299,6 +299,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * {@link #setWebServiceFeatures}, and also for building a client
 	 * proxy in the {@link JaxWsPortProxyFactoryBean} subclass.
 	 */
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -311,6 +312,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.lookupServiceOnStartup) {
 			prepare();
@@ -403,7 +405,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	 * @param service the Service object to obtain the port from
 	 * @param portQName the name of the desired port, if specified
 	 * @return the corresponding port object as returned from
-	 * <code>Service.getPort(...)</code>
+	 * {@code Service.getPort(...)}
 	 */
 	protected Object getPortStub(Service service, QName portQName) {
 		if (this.webServiceFeatures != null) {
@@ -474,6 +476,7 @@ public class JaxWsPortClientInterceptor extends LocalJaxWsServiceFactory
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-WS proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";

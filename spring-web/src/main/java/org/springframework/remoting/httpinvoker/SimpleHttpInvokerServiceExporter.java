@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializin
 	 * @see #invokeAndCreateResult(org.springframework.remoting.support.RemoteInvocation, Object)
 	 * @see #writeRemoteInvocationResult(com.sun.net.httpserver.HttpExchange, org.springframework.remoting.support.RemoteInvocationResult)
 	 */
+	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
 			RemoteInvocation invocation = readRemoteInvocation(exchange);

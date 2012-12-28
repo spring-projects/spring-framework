@@ -66,6 +66,7 @@ public class MethodReference extends SpelNodeImpl {
 			this.arguments = arguments;
 		}
 
+		@Override
 		public TypedValue getValue() {
 			MethodExecutor executorToUse = cachedExecutor;
 			if (executorToUse != null) {
@@ -103,10 +104,12 @@ public class MethodReference extends SpelNodeImpl {
 			}
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			throw new IllegalAccessError();
 		}
 
+		@Override
 		public boolean isWritable() {
 			return false;
 		}

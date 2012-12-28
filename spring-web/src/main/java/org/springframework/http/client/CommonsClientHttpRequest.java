@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,10 +56,12 @@ final class CommonsClientHttpRequest extends AbstractBufferingClientHttpRequest 
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.httpMethod.getName());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return URI.create(this.httpMethod.getURI().getEscapedURI());

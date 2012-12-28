@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,18 +59,22 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * Return the type of the current target object.
 	 * <p>The returned type should usually be constant across all target objects.
 	 */
+	@Override
 	public synchronized Class<?> getTargetClass() {
 		return this.target.getClass();
 	}
 
+	@Override
 	public final boolean isStatic() {
 		return false;
 	}
 
+	@Override
 	public synchronized Object getTarget() {
 		return this.target;
 	}
 
+	@Override
 	public void releaseTarget(Object target) {
 		// nothing to do
 	}

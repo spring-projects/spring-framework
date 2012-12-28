@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,12 @@ public @interface CookieValue {
 
 	/**
 	 * Whether the header is required.
-	 * <p>Default is <code>true</code>, leading to an exception being thrown
+	 * <p>Default is {@code true}, leading to an exception being thrown
 	 * in case the header is missing in the request. Switch this to
-	 * <code>false</code> if you prefer a <code>null</value> in case of the
+	 * {@code false} if you prefer a {@code null} in case of the
 	 * missing header.
 	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitly sets this flag to <code>false</code>.
+	 * which implicitly sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 

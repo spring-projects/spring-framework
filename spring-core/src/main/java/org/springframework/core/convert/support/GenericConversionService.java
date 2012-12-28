@@ -79,6 +79,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	// implementing ConverterRegistry
 
+	@Override
 	public void addConverter(Converter<?, ?> converter) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converter, Converter.class);
 		Assert.notNull(typeInfo, "Unable to the determine sourceType <S> and targetType " +
@@ -86,16 +87,19 @@ public class GenericConversionService implements ConfigurableConversionService {
 		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
+	@Override
 	public void addConverter(Class<?> sourceType, Class<?> targetType, Converter<?, ?> converter) {
 		GenericConverter.ConvertiblePair typeInfo = new GenericConverter.ConvertiblePair(sourceType, targetType);
 		addConverter(new ConverterAdapter(typeInfo, converter));
 	}
 
+	@Override
 	public void addConverter(GenericConverter converter) {
 		this.converters.add(converter);
 		invalidateCache();
 	}
 
+	@Override
 	public void addConverterFactory(ConverterFactory<?, ?> converterFactory) {
 		GenericConverter.ConvertiblePair typeInfo = getRequiredTypeInfo(converterFactory, ConverterFactory.class);
 		if (typeInfo == null) {
@@ -106,6 +110,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 		addConverter(new ConverterFactoryAdapter(typeInfo, converterFactory));
 	}
 
+	@Override
 	public void removeConvertible(Class<?> sourceType, Class<?> targetType) {
 		this.converters.remove(sourceType, targetType);
 		invalidateCache();
@@ -113,6 +118,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	// implementing ConversionService
 
+	@Override
 	public boolean canConvert(Class<?> sourceType, Class<?> targetType) {
 		Assert.notNull(targetType, "The targetType to convert to cannot be null");
 		return canConvert(sourceType != null ?
@@ -120,6 +126,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 				TypeDescriptor.valueOf(targetType));
 	}
 
+	@Override
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType,"The targetType to convert to cannot be null");
 		if (sourceType == null) {
@@ -148,12 +155,14 @@ public class GenericConversionService implements ConfigurableConversionService {
 		return (converter == NO_OP_CONVERTER);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T convert(Object source, Class<T> targetType) {
 		Assert.notNull(targetType,"The targetType to convert to cannot be null");
 		return (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Assert.notNull(targetType,"The targetType to convert to cannot be null");
 		if (sourceType == null) {
@@ -198,7 +207,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Template method to convert a null source.
-	 * <p>Default implementation returns <code>null</code>.
+	 * <p>Default implementation returns {@code null}.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
@@ -244,7 +253,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	/**
 	 * Return the default converter if no converter is found for the given sourceType/targetType pair.
 	 * Returns a NO_OP Converter if the sourceType is assignable to the targetType.
-	 * Returns <code>null</code> otherwise, indicating no suitable converter could be found.
+	 * Returns {@code null} otherwise, indicating no suitable converter could be found.
 	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to
@@ -308,10 +317,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 
+		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(this.typeInfo);
 		}
 
+		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if(!this.typeInfo.getTargetType().equals(targetType.getObjectType())) {
 				return false;
@@ -322,6 +333,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return true;
 		}
 
+		@Override
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return convertNullSource(sourceType, targetType);
@@ -354,10 +366,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 
+		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(this.typeInfo);
 		}
 
+		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			boolean matches = true;
 			if (this.converterFactory instanceof ConditionalConverter) {
@@ -372,6 +386,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 			return matches;
 		}
 
+		@Override
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
 				return convertNullSource(sourceType, targetType);
@@ -617,10 +632,12 @@ public class GenericConversionService implements ConfigurableConversionService {
 		}
 
 
+		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}
 
+		@Override
 		public Object convert(Object source, TypeDescriptor sourceType,
 				TypeDescriptor targetType) {
 			return source;

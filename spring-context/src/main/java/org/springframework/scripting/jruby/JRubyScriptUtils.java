@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ public abstract class JRubyScriptUtils {
 
 	/**
 	 * Find the first {@link ClassNode} under the supplied {@link Node}.
-	 * @return the found <code>ClassNode</code>, or <code>null</code>
+	 * @return the found {@code ClassNode}, or {@code null}
 	 * if no {@link ClassNode} is found
 	 */
 	private static ClassNode findClassNode(Node node) {
@@ -161,6 +161,7 @@ public abstract class JRubyScriptUtils {
 			this.ruby = ruby;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				return (isProxyForSameRubyObject(args[0]));
@@ -229,16 +230,17 @@ public abstract class JRubyScriptUtils {
 	/**
 	 * Exception thrown in response to a JRuby {@link RaiseException}
 	 * being thrown from a JRuby method invocation.
-	 * <p>Introduced because the <code>RaiseException</code> class does not
+	 * <p>Introduced because the {@code RaiseException} class does not
 	 * have useful {@link Object#toString()}, {@link Throwable#getMessage()},
 	 * and {@link Throwable#printStackTrace} implementations.
 	 */
+	@SuppressWarnings("serial")
 	public static class JRubyExecutionException extends NestedRuntimeException {
 
 		/**
-		 * Create a new <code>JRubyException</code>,
-		 * wrapping the given JRuby <code>RaiseException</code>.
-		 * @param ex the cause (must not be <code>null</code>)
+		 * Create a new {@code JRubyException},
+		 * wrapping the given JRuby {@code RaiseException}.
+		 * @param ex the cause (must not be {@code null})
 		 */
 		public JRubyExecutionException(RaiseException ex) {
 			super(buildMessage(ex), ex);

@@ -52,7 +52,6 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertFalse;
 import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLAssert.fail;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
 
@@ -163,7 +162,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		marshaller.afterPropertiesSet();
 		testSupports();
 	}
-	
+
 	@Test
 	public void supportsPackagesToScan() throws Exception {
 		marshaller = new Jaxb2Marshaller();
@@ -207,6 +206,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private void testSupportsPrimitives() {
 		final Primitives primitives = new Primitives();
 		ReflectionUtils.doWithMethods(Primitives.class, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
 				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(9) + ">",
@@ -221,6 +221,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method method) {
 				return method.getName().startsWith("primitive");
 			}
@@ -230,6 +231,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private void testSupportsStandardClasses() throws Exception {
 		final StandardClasses standardClasses = new StandardClasses();
 		ReflectionUtils.doWithMethods(StandardClasses.class, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Type returnType = method.getGenericReturnType();
 				assertTrue("Jaxb2Marshaller does not support JAXBElement<" + method.getName().substring(13) + ">",
@@ -244,6 +246,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 				}
 			}
 		}, new ReflectionUtils.MethodFilter() {
+			@Override
 			public boolean matches(Method method) {
 				return method.getName().startsWith("standardClass");
 			}
@@ -261,7 +264,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		assertFalse("Jaxb2Marshaller supports DummyType class", marshaller.supports(DummyType.class));
 		assertFalse("Jaxb2Marshaller supports DummyType type", marshaller.supports((Type)DummyType.class));
 	}
-	
+
 
 	@Test
 	public void marshalAttachments() throws Exception {
@@ -307,5 +310,5 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	private JAXBElement<DummyType> createDummyType() {
 		return null;
 	}
-	
+
 }

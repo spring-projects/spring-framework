@@ -39,8 +39,8 @@ import org.springframework.util.Assert;
  * annotation. This annotation can be used at the method and type level in
  * implementation classes as well as in service interfaces.
  *
- * <p>This advisor detects the EJB 3.1 <code>javax.ejb.Asynchronous</code>
- * annotation as well, treating it exactly like Spring's own <code>Async</code>.
+ * <p>This advisor detects the EJB 3.1 {@code javax.ejb.Asynchronous}
+ * annotation as well, treating it exactly like Spring's own {@code Async}.
  * Furthermore, a custom async annotation type may get specified through the
  * {@link #setAsyncAnnotationType "asyncAnnotationType"} property.
  *
@@ -91,6 +91,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		delegateBeanFactory(beanFactory);
@@ -113,7 +114,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Set the 'async' annotation type.
 	 * <p>The default async annotation type is the {@link Async} annotation, as well
-	 * as the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation (if present).
+	 * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation (if present).
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a method is to
 	 * be executed asynchronously.
@@ -127,10 +128,12 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	}
 
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
@@ -143,7 +146,7 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Calculate a pointcut for the given async annotation types, if any.
 	 * @param asyncAnnotationTypes the async annotation types to introspect
-	 * @return the applicable Pointcut object, or <code>null</code> if none
+	 * @return the applicable Pointcut object, or {@code null} if none
 	 */
 	protected Pointcut buildPointcut(Set<Class<? extends Annotation>> asyncAnnotationTypes) {
 		ComposablePointcut result = null;

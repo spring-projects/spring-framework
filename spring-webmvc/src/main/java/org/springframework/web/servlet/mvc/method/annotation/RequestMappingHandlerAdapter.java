@@ -47,7 +47,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -418,11 +417,11 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	}
 
 	/**
-	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
+	 * Cache content produced by {@code @SessionAttributes} annotated handlers
 	 * for the given number of seconds. Default is 0, preventing caching completely.
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
-	 * handlers (but not to <code>@SessionAttributes</code> annotated handlers),
-	 * this setting will apply to <code>@SessionAttributes</code> handlers only.
+	 * handlers (but not to {@code @SessionAttributes} annotated handlers),
+	 * this setting will apply to {@code @SessionAttributes} handlers only.
 	 * @see #setCacheSeconds
 	 * @see org.springframework.web.bind.annotation.SessionAttributes
 	 */
@@ -433,13 +432,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleRequestInternal</code>
+	 * <p>More specifically, the execution of the {@code handleRequestInternal}
 	 * method will get synchronized if this flag is "true". The best available
 	 * session mutex will be used for the synchronization; ideally, this will
 	 * be a mutex exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the HttpSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
@@ -466,6 +465,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * <p>A {@link ConfigurableBeanFactory} is expected for resolving
 	 * expressions in method argument default values.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -479,6 +479,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		return this.beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -864,6 +865,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter INIT_BINDER_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 		}
@@ -874,6 +876,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
 
+		@Override
 		public boolean matches(Method method) {
 			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));

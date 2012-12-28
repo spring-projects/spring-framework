@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,9 +81,9 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 	 * @param rowNum row number (from 0) we're up to
 	 * @param parameters to the query (passed to the execute() method).
 	 * Subclasses are rarely interested in these.
-	 * It can be <code>null</code> if there are no parameters.
+	 * It can be {@code null} if there are no parameters.
 	 * @param context passed to the execute() method.
-	 * It can be <code>null</code> if no contextual information is need.
+	 * It can be {@code null} if no contextual information is need.
 	 * @return an object of the result type
 	 * @throws SQLException if there's an error extracting data.
 	 * Subclasses can simply not catch SQLExceptions, relying on the
@@ -95,7 +95,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 
 	/**
 	 * Implementation of RowMapper that calls the enclosing
-	 * class's <code>mapRow</code> method for each row.
+	 * class's {@code mapRow} method for each row.
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 
@@ -111,6 +111,7 @@ public abstract class MappingSqlQueryWithParameters<T> extends SqlQuery<T> {
 			this.context = context;
 		}
 
+		@Override
 		public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 			return MappingSqlQueryWithParameters.this.mapRow(rs, rowNum, this.params, this.context);
 		}

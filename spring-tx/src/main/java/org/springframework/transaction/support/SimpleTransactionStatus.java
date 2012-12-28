@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.transaction.support;
 /**
  * A simple {@link org.springframework.transaction.TransactionStatus}
  * implementation.
- * 
+ *
  * <p>Derives from {@link AbstractTransactionStatus} and adds an explicit
  * {@link #isNewTransaction() "newTransaction"} flag.
  *
@@ -27,7 +27,7 @@ package org.springframework.transaction.support;
  * {@link org.springframework.transaction.PlatformTransactionManager}
  * implementations. It is mainly provided as a start for custom transaction
  * manager implementations and as a static mock for testing transactional
- * code (either as part of a mock <code>PlatformTransactionManager</code> or
+ * code (either as part of a mock {@code PlatformTransactionManager} or
  * as argument passed into a {@link TransactionCallback} to be tested).
  *
  * @author Juergen Hoeller
@@ -57,6 +57,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 	}
 
 
+	@Override
 	public boolean isNewTransaction() {
 		return this.newTransaction;
 	}

@@ -47,6 +47,7 @@ public class AnnotationMethodMatcher extends StaticMethodMatcher {
 	}
 
 
+	@Override
 	public boolean matches(Method method, Class targetClass) {
 		if (method.isAnnotationPresent(this.annotationType)) {
 			return true;

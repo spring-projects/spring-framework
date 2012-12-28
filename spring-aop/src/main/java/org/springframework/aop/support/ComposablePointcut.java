@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.springframework.util.ObjectUtils;
  * Convenient class for building up pointcuts. All methods return
  * ComposablePointcut, so we can use a concise idiom like:
  *
- * <code>
+ * {@code
  * Pointcut pc = new ComposablePointcut().union(classFilter).intersection(methodMatcher).intersection(pointcut);
- * </code>
+ * }
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -49,8 +49,8 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 
 	/**
-	 * Create a default ComposablePointcut, with <code>ClassFilter.TRUE</code>
-	 * and <code>MethodMatcher.TRUE</code>.
+	 * Create a default ComposablePointcut, with {@code ClassFilter.TRUE}
+	 * and {@code MethodMatcher.TRUE}.
 	 */
 	public ComposablePointcut() {
 		this.classFilter = ClassFilter.TRUE;
@@ -69,7 +69,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 	/**
 	 * Create a ComposablePointcut for the given ClassFilter,
-	 * with <code>MethodMatcher.TRUE</code>.
+	 * with {@code MethodMatcher.TRUE}.
 	 * @param classFilter the ClassFilter to use
 	 */
 	public ComposablePointcut(ClassFilter classFilter) {
@@ -80,7 +80,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 
 	/**
 	 * Create a ComposablePointcut for the given MethodMatcher,
-	 * with <code>ClassFilter.TRUE</code>.
+	 * with {@code ClassFilter.TRUE}.
 	 * @param methodMatcher the MethodMatcher to use
 	 */
 	public ComposablePointcut(MethodMatcher methodMatcher) {
@@ -170,10 +170,12 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 
+	@Override
 	public ClassFilter getClassFilter() {
 		return this.classFilter;
 	}
 
+	@Override
 	public MethodMatcher getMethodMatcher() {
 		return this.methodMatcher;
 	}

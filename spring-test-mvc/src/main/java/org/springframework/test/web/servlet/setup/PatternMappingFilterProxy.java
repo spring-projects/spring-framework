@@ -62,7 +62,7 @@ final class PatternMappingFilterProxy implements Filter {
 		Assert.notNull(delegate, "A delegate Filter is required");
 		this.delegate = delegate;
 		for(String urlPattern : urlPatterns) {
-		    addUrlPattern(urlPattern);
+			addUrlPattern(urlPattern);
 		}
 	}
 
@@ -84,6 +84,7 @@ final class PatternMappingFilterProxy implements Filter {
 		}
 	}
 
+	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
 			throws IOException, ServletException {
 
@@ -119,10 +120,12 @@ final class PatternMappingFilterProxy implements Filter {
 		return false;
 	}
 
+	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.delegate.init(filterConfig);
 	}
 
+	@Override
 	public void destroy() {
 		this.delegate.destroy();
 	}

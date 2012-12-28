@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@ import org.springframework.web.util.WebUtils;
  * @since 16.12.2003
  * @see #init
  * @see #getWebApplicationContext
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public abstract class ServletEndpointSupport implements ServiceLifecycle {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	private ServletEndpointContext servletEndpointContext;
 
 	private WebApplicationContext webApplicationContext;
@@ -77,6 +77,7 @@ public abstract class ServletEndpointSupport implements ServiceLifecycle {
 	 * @throws ServiceException if the context is not a ServletEndpointContext
 	 * @see #onInit
 	 */
+	@Override
 	public final void init(Object context) throws ServiceException {
 		if (!(context instanceof ServletEndpointContext)) {
 			throw new ServiceException("ServletEndpointSupport needs ServletEndpointContext, not [" + context + "]");
@@ -145,6 +146,7 @@ public abstract class ServletEndpointSupport implements ServiceLifecycle {
 	 * This implementation of destroy is empty.
 	 * Can be overridden in subclasses.
 	 */
+	@Override
 	public void destroy() {
 	}
 

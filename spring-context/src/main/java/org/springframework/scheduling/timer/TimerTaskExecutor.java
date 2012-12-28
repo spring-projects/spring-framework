@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 2.0
  * @see java.util.Timer
- * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
- * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
+ * @deprecated as of Spring 3.0, in favor of the {@code scheduling.concurrent}
+ * package which is based on Java 5's {@code java.util.concurrent.ExecutorService}
  */
 @Deprecated
 public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware, InitializingBean, DisposableBean {
@@ -96,11 +96,13 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 		this.delay = delay;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.timer == null) {
 			logger.info("Initializing Timer");
@@ -110,7 +112,7 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	}
 
 	/**
-	 * Create a new {@link Timer} instance. Called by <code>afterPropertiesSet</code>
+	 * Create a new {@link Timer} instance. Called by {@code afterPropertiesSet}
 	 * if no {@link Timer} has been specified explicitly.
 	 * <p>The default implementation creates a plain non-daemon {@link Timer}.
 	 * If overridden, subclasses must take care to ensure that a non-null
@@ -141,21 +143,25 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	 * wrapping it in a {@link DelegatingTimerTask}.
 	 * @param task the task to be executed
 	 */
+	@Override
 	public void execute(Runnable task) {
 		getTimer().schedule(new DelegatingTimerTask(task), this.delay);
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		long actualDelay = (startTimeout < this.delay ? startTimeout : this.delay);
 		getTimer().schedule(new DelegatingTimerTask(task), actualDelay);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -165,6 +171,7 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -174,6 +181,7 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	 * Cancel the {@link Timer} on bean factory shutdown, stopping all scheduled tasks.
 	 * @see java.util.Timer#cancel()
 	 */
+	@Override
 	public void destroy() {
 		if (this.timerInternal) {
 			logger.info("Cancelling Timer");

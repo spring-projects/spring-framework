@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,6 +183,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 	 * Prepares the thread context if necessar, and delegates to
 	 * {@link #invokeInContext}.
 	 */
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Context ctx = (this.exposeAccessContext ? getJndiTemplate().getContext() : null);
 		try {
@@ -205,7 +206,7 @@ public abstract class AbstractSlsbInvokerInterceptor extends JndiObjectLocator
 
 
 	/**
-	 * Invokes the <code>create()</code> method on the cached EJB home object.
+	 * Invokes the {@code create()} method on the cached EJB home object.
 	 * @return a new EJBObject or EJBLocalObject
 	 * @throws NamingException if thrown by JNDI
 	 * @throws InvocationTargetException if thrown by the create method

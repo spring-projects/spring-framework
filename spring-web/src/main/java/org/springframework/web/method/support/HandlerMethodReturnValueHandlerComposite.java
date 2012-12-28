@@ -51,6 +51,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	 * Whether the given {@linkplain MethodParameter method return type} is supported by any registered
 	 * {@link HandlerMethodReturnValueHandler}.
 	 */
+	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return getReturnValueHandler(returnType) != null;
 	}
@@ -59,6 +60,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	 * Iterate over registered {@link HandlerMethodReturnValueHandler}s and invoke the one that supports it.
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodReturnValueHandler} is found.
 	 */
+	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

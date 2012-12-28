@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.core.convert.converter.ConverterFactory;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
 
+	@Override
 	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToEnum(targetType);
 	}
@@ -40,6 +41,7 @@ final class StringToEnumConverterFactory implements ConverterFactory<String, Enu
 			this.enumType = enumType;
 		}
 
+		@Override
 		public T convert(String source) {
 			if (source.length() == 0) {
 				// It's an empty enum identifier: reset the enum value to null.

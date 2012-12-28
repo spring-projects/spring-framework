@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		return this.registry;
 	}
 
+	@Override
 	public final BeanDefinitionRegistry getRegistry() {
 		return this.registry;
 	}
@@ -112,7 +113,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * will be capable of resolving resource patterns to Resource arrays.
 	 * <p>Default is PathMatchingResourcePatternResolver, also capable of
 	 * resource pattern resolving through the ResourcePatternResolver interface.
-	 * <p>Setting this to <code>null</code> suggests that absolute resource loading
+	 * <p>Setting this to {@code null} suggests that absolute resource loading
 	 * is not available for this bean definition reader.
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
@@ -121,21 +122,23 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Override
 	public ResourceLoader getResourceLoader() {
 		return this.resourceLoader;
 	}
 
 	/**
 	 * Set the ClassLoader to use for bean classes.
-	 * <p>Default is <code>null</code>, which suggests to not load bean classes
+	 * <p>Default is {@code null}, which suggests to not load bean classes
 	 * eagerly but rather to just register bean definitions with class names,
 	 * with the corresponding Classes to be resolved later (or never).
-	 * @see java.lang.Thread#getContextClassLoader()
+	 * @see Thread#getContextClassLoader()
 	 */
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
@@ -149,6 +152,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.environment = environment;
 	}
 
+	@Override
 	public Environment getEnvironment() {
 		return this.environment;
 	}
@@ -162,11 +166,13 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		this.beanNameGenerator = (beanNameGenerator != null ? beanNameGenerator : new DefaultBeanNameGenerator());
 	}
 
+	@Override
 	public BeanNameGenerator getBeanNameGenerator() {
 		return this.beanNameGenerator;
 	}
 
 
+	@Override
 	public int loadBeanDefinitions(Resource... resources) throws BeanDefinitionStoreException {
 		Assert.notNull(resources, "Resource array must not be null");
 		int counter = 0;
@@ -176,6 +182,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		return counter;
 	}
 
+	@Override
 	public int loadBeanDefinitions(String location) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(location, null);
 	}
@@ -187,7 +194,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 	 * @param location the resource location, to be loaded with the ResourceLoader
 	 * (or ResourcePatternResolver) of this bean definition reader
 	 * @param actualResources a Set to be filled with the actual Resource objects
-	 * that have been resolved during the loading process. May be <code>null</code>
+	 * that have been resolved during the loading process. May be {@code null}
 	 * to indicate that the caller is not interested in those Resource objects.
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
@@ -236,6 +243,7 @@ public abstract class AbstractBeanDefinitionReader implements EnvironmentCapable
 		}
 	}
 
+	@Override
 	public int loadBeanDefinitions(String... locations) throws BeanDefinitionStoreException {
 		Assert.notNull(locations, "Location array must not be null");
 		int counter = 0;

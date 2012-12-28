@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  *
  * <p>The main intent of this factory is usage in combination with Spring's
  * {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor},
- * configured as "resourceFactory" for resolving <code>@Resource</code>
+ * configured as "resourceFactory" for resolving {@code @Resource}
  * annotations as JNDI objects without intermediate bean definitions.
  * It may be used for similar lookup scenarios as well, of course,
  * in particular if BeanFactory-style type checking is required.
@@ -100,10 +100,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 	//---------------------------------------------------------------------
 
 
+	@Override
 	public Object getBean(String name) throws BeansException {
 		return getBean(name, Object.class);
 	}
 
+	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		try {
 			if (isSingleton(name)) {
@@ -124,10 +126,12 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
+	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		return getBean(requiredType.getSimpleName(), requiredType);
 	}
 
+	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
@@ -136,6 +140,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		return getBean(name);
 	}
 
+	@Override
 	public boolean containsBean(String name) {
 		if (this.singletonObjects.containsKey(name) || this.resourceTypes.containsKey(name)) {
 			return true;
@@ -149,19 +154,23 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
+	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		return this.shareableResources.contains(name);
 	}
 
+	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		return !this.shareableResources.contains(name);
 	}
 
+	@Override
 	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
 		Class type = getType(name);
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
+	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		try {
 			return doGetType(name);
@@ -174,6 +183,7 @@ public class SimpleJndiBeanFactory extends JndiLocatorSupport implements BeanFac
 		}
 	}
 
+	@Override
 	public String[] getAliases(String name) {
 		return new String[0];
 	}

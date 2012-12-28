@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.Assert;
  * It executes core CCI workflow, leaving application code to provide parameters
  * to CCI and extract results. This class executes EIS queries or updates,
  * catching ResourceExceptions and translating them to the generic exception
- * hierarchy defined in the <code>org.springframework.dao</code> package.
+ * hierarchy defined in the {@code org.springframework.dao} package.
  *
  * <p>Code using this class can pass in and receive {@link javax.resource.cci.Record}
  * instances, or alternatively implement callback interfaces for creating input
@@ -101,7 +101,7 @@ public class CciTemplate implements CciOperations {
 	 * Note: This will trigger eager initialization of the exception translator.
 	 * @param connectionFactory JCA ConnectionFactory to obtain Connections from
 	 * @param connectionSpec the CCI ConnectionSpec to obtain Connections for
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public CciTemplate(ConnectionFactory connectionFactory, ConnectionSpec connectionSpec) {
 		setConnectionFactory(connectionFactory);
@@ -142,10 +142,10 @@ public class CciTemplate implements CciOperations {
 	/**
 	 * Set a RecordCreator that should be used for creating default output Records.
 	 * <p>Default is none: When no explicit output Record gets passed into an
-	 * <code>execute</code> method, CCI's <code>Interaction.execute</code> variant
+	 * {@code execute} method, CCI's {@code Interaction.execute} variant
 	 * that returns an output Record will be called.
 	 * <p>Specify a RecordCreator here if you always need to call CCI's
-	 * <code>Interaction.execute</code> variant with a passed-in output Record.
+	 * {@code Interaction.execute} variant with a passed-in output Record.
 	 * Unless there is an explicitly specified output Record, CciTemplate will
 	 * then invoke this RecordCreator to create a default output Record instance.
 	 * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, Record)
@@ -187,6 +187,7 @@ public class CciTemplate implements CciOperations {
 	}
 
 
+	@Override
 	public <T> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		Connection con = ConnectionFactoryUtils.getConnection(getConnectionFactory(), getConnectionSpec());
@@ -207,9 +208,11 @@ public class CciTemplate implements CciOperations {
 		}
 	}
 
+	@Override
 	public <T> T execute(final InteractionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 		return execute(new ConnectionCallback<T>() {
+			@Override
 			public T doInConnection(Connection connection, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 				Interaction interaction = connection.createInteraction();
@@ -223,24 +226,29 @@ public class CciTemplate implements CciOperations {
 		});
 	}
 
+	@Override
 	public Record execute(InteractionSpec spec, Record inputRecord) throws DataAccessException {
 		return doExecute(spec, inputRecord, null, new SimpleRecordExtractor());
 	}
 
+	@Override
 	public void execute(InteractionSpec spec, Record inputRecord, Record outputRecord) throws DataAccessException {
 		doExecute(spec, inputRecord, outputRecord, null);
 	}
 
+	@Override
 	public Record execute(InteractionSpec spec, RecordCreator inputCreator) throws DataAccessException {
 		return doExecute(spec, createRecord(inputCreator), null, new SimpleRecordExtractor());
 	}
 
+	@Override
 	public <T> T execute(InteractionSpec spec, Record inputRecord, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
 		return doExecute(spec, inputRecord, null, outputExtractor);
 	}
 
+	@Override
 	public <T> T execute(InteractionSpec spec, RecordCreator inputCreator, RecordExtractor<T> outputExtractor)
 			throws DataAccessException {
 
@@ -253,7 +261,7 @@ public class CciTemplate implements CciOperations {
 	 * @param spec the CCI InteractionSpec instance that defines
 	 * the interaction (connector-specific)
 	 * @param inputRecord the input record
-	 * @param outputRecord output record (can be <code>null</code>)
+	 * @param outputRecord output record (can be {@code null})
 	 * @param outputExtractor object to convert the output record to a result object
 	 * @return the output data extracted with the RecordExtractor object
 	 * @throws DataAccessException if there is any problem
@@ -263,6 +271,7 @@ public class CciTemplate implements CciOperations {
 			final RecordExtractor<T> outputExtractor) throws DataAccessException {
 
 		return execute(new InteractionCallback<T>() {
+			@Override
 			public T doInInteraction(Interaction interaction, ConnectionFactory connectionFactory)
 					throws ResourceException, SQLException, DataAccessException {
 				Record outputRecordToUse = outputRecord;
@@ -421,6 +430,7 @@ public class CciTemplate implements CciOperations {
 
 	private static class SimpleRecordExtractor implements RecordExtractor<Record> {
 
+		@Override
 		public Record extractData(Record record) {
 			return record;
 		}

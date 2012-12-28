@@ -36,22 +36,22 @@ import org.springframework.expression.TypedValue;
  * expressions but it gives a place to hold local variables and for component expressions in a compound expression to
  * communicate state. This is in contrast to the EvaluationContext, which is shared amongst expression evaluations, and
  * any changes to it will be seen by other expressions or any code that chooses to ask questions of the context.
- * 
+ *
  * <p>It also acts as a place for to define common utility routines that the various Ast nodes might need.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
 public class ExpressionState {
 
 	private final EvaluationContext relatedContext;
-	
-	private Stack<VariableScope> variableScopes; 
+
+	private Stack<VariableScope> variableScopes;
 
 	private Stack<TypedValue> contextObjects;
-	
+
 	private final TypedValue rootObject;
-	
+
 	private SpelParserConfiguration configuration;
 
 
@@ -59,30 +59,30 @@ public class ExpressionState {
 		this.relatedContext = context;
 		this.rootObject = context.getRootObject();
 	}
-	
+
 	public ExpressionState(EvaluationContext context, SpelParserConfiguration configuration) {
 		this.relatedContext = context;
 		this.configuration = configuration;
 		this.rootObject = context.getRootObject();
 	}
-	
+
 	public ExpressionState(EvaluationContext context, TypedValue rootObject) {
 		this.relatedContext = context;
 		this.rootObject = rootObject;
 	}
-	
+
 	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
 		this.relatedContext = context;
 		this.configuration = configuration;
 		this.rootObject = rootObject;
 	}
-	
+
 
 	private void ensureVariableScopesInitialized() {
 		if (this.variableScopes == null) {
 			this.variableScopes = new Stack<VariableScope>();
 			// top level empty variable scope
-			this.variableScopes.add(new VariableScope()); 
+			this.variableScopes.add(new VariableScope());
 		}
 	}
 
@@ -93,7 +93,7 @@ public class ExpressionState {
 		if (this.contextObjects==null || this.contextObjects.isEmpty()) {
 			return this.rootObject;
 		}
-		
+
 		return this.contextObjects.peek();
 	}
 
@@ -140,7 +140,7 @@ public class ExpressionState {
 	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value, TypeDescriptor.forObject(value), targetTypeDescriptor);
 	}
-	
+
 	public TypeConverter getTypeConverter() {
 		return this.relatedContext.getTypeConverter();
 	}
@@ -153,7 +153,7 @@ public class ExpressionState {
 	/*
 	 * A new scope is entered when a function is invoked
 	 */
-	
+
 	public void enterScope(Map<String, Object> argMap) {
 		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(argMap));
@@ -226,7 +226,7 @@ public class ExpressionState {
 				this.vars.putAll(arguments);
 			}
 		}
-		
+
 		public VariableScope(String name, Object value) {
 			this.vars.put(name,value);
 		}

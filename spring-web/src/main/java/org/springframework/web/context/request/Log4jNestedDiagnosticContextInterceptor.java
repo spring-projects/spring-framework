@@ -58,13 +58,14 @@ public class Log4jNestedDiagnosticContextInterceptor implements AsyncWebRequestI
 	/**
 	 * Adds a message the Log4J NDC before the request is processed.
 	 */
+	@Override
 	public void preHandle(WebRequest request) throws Exception {
 		NDC.push(getNestedDiagnosticContextMessage(request));
 	}
 
 	/**
 	 * Determine the message to be pushed onto the Log4J nested diagnostic context.
-	 * <p>Default is the request object's <code>getDescription</code> result.
+	 * <p>Default is the request object's {@code getDescription} result.
 	 * @param request current HTTP request
 	 * @return the message to be pushed onto the Log4J NDC
 	 * @see WebRequest#getDescription
@@ -74,12 +75,14 @@ public class Log4jNestedDiagnosticContextInterceptor implements AsyncWebRequestI
 		return request.getDescription(isIncludeClientInfo());
 	}
 
+	@Override
 	public void postHandle(WebRequest request, ModelMap model) throws Exception {
 	}
 
 	/**
 	 * Removes the log message from the Log4J NDC after the request is processed.
 	 */
+	@Override
 	public void afterCompletion(WebRequest request, Exception ex) throws Exception {
 		NDC.pop();
 		if (NDC.getDepth() == 0) {
@@ -91,6 +94,7 @@ public class Log4jNestedDiagnosticContextInterceptor implements AsyncWebRequestI
 	 * Removes the log message from the Log4J NDC when the processing thread is
 	 * exited after the start of asynchronous request handling.
 	 */
+	@Override
 	public void afterConcurrentHandlingStarted(WebRequest request) {
 		NDC.pop();
 		if (NDC.getDepth() == 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
+	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -136,6 +137,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -161,6 +163,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (isRequestActive()) {
@@ -187,6 +190,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -211,6 +215,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			registerRequestDestructionCallback(name, callback);
@@ -220,6 +225,7 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return this.request;
@@ -232,17 +238,19 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
+	@Override
 	public String getSessionId() {
 		return getSession(true).getId();
 	}
 
+	@Override
 	public Object getSessionMutex() {
 		return PortletUtils.getSessionMutex(getSession(true));
 	}
 
 
 	/**
-	 * Update all accessed session attributes through <code>session.setAttribute</code>
+	 * Update all accessed session attributes through {@code session.setAttribute}
 	 * calls, explicitly indicating to the container that they might have been modified.
 	 */
 	@Override

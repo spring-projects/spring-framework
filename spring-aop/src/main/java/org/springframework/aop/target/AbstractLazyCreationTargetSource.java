@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.aop.TargetSource;
  * lazily create a user-managed object.
  *
  * <p>Creation of the lazy target object is controlled by the user by implementing
- * the {@link #createObject()} method. This <code>TargetSource</code> will invoke
+ * the {@link #createObject()} method. This {@code TargetSource} will invoke
  * this method the first time the proxy is accessed.
  *
  * <p>Useful when you need to pass a reference to some dependency to an object
@@ -57,17 +57,19 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	}
 
 	/**
-	 * This default implementation returns <code>null</code> if the
-	 * target is <code>null</code> (it is hasn't yet been initialized),
+	 * This default implementation returns {@code null} if the
+	 * target is {@code null} (it is hasn't yet been initialized),
 	 * or the target class if the target has already been initialized.
 	 * <p>Subclasses may wish to override this method in order to provide
-	 * a meaningful value when the target is still <code>null</code>.
+	 * a meaningful value when the target is still {@code null}.
 	 * @see #isInitialized()
 	 */
+	@Override
 	public synchronized Class<?> getTargetClass() {
 		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
 	}
 
+	@Override
 	public boolean isStatic() {
 		return false;
 	}
@@ -77,6 +79,7 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	 * creating it on-the-fly if it doesn't exist already.
 	 * @see #createObject()
 	 */
+	@Override
 	public synchronized Object getTarget() throws Exception {
 		if (this.lazyTarget == null) {
 			logger.debug("Initializing lazy target object");
@@ -85,6 +88,7 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 		return this.lazyTarget;
 	}
 
+	@Override
 	public void releaseTarget(Object target) throws Exception {
 		// nothing to do
 	}

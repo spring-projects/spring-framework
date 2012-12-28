@@ -40,7 +40,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Implementation of {@link ParameterNameDiscoverer} that uses the LocalVariableTable
  * information in the method attributes to discover parameter names. Returns
- * <code>null</code> if the class file was compiled without debug information.
+ * {@code null} if the class file was compiled without debug information.
  *
  * <p>Uses ObjectWeb's ASM library for analyzing class files. Each discoverer instance
  * caches the ASM discovered information for each introspected Class, in a thread-safe
@@ -64,6 +64,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
 
 
+	@Override
 	public String[] getParameterNames(Method method) {
 		Class<?> declaringClass = method.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
@@ -78,6 +79,7 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		return null;
 	}
 
+	@Override
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);

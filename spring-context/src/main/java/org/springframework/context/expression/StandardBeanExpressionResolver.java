@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  * Standard implementation of the
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.
- * 
+ *
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.expression.ExpressionParser
@@ -66,12 +66,15 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 			new ConcurrentHashMap<BeanExpressionContext, StandardEvaluationContext>(8);
 
 	private final ParserContext beanExpressionParserContext = new ParserContext() {
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}
+		@Override
 		public String getExpressionPrefix() {
 			return expressionPrefix;
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return expressionSuffix;
 		}
@@ -109,6 +112,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
 	}
 
 
+	@Override
 	public Object evaluate(String value, BeanExpressionContext evalContext) throws BeansException {
 		if (!StringUtils.hasLength(value)) {
 			return value;

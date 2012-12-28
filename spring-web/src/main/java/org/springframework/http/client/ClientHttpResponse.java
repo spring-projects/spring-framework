@@ -25,8 +25,8 @@ import org.springframework.http.HttpStatus;
 /**
  * Represents a client-side HTTP response. Obtained via an calling of the {@link ClientHttpRequest#execute()}.
  *
- * <p>A <code>ClientHttpResponse</code> must be {@linkplain #close() closed}, typically in a
- * <code>finally</code> block.
+ * <p>A {@code ClientHttpResponse} must be {@linkplain #close() closed}, typically in a
+ * {@code finally} block.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -57,6 +57,7 @@ public interface ClientHttpResponse extends HttpInputMessage, Closeable {
 	/**
 	 * Closes this response, freeing any resources created.
 	 */
+	@Override
 	void close();
 
 }

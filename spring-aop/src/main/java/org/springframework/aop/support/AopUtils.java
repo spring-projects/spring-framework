@@ -109,7 +109,7 @@ public abstract class AopUtils {
 	 * <p>Returns the target class for an AOP proxy and the plain class else.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback;
-	 * never <code>null</code>)
+	 * never {@code null})
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
 	 * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass(Object)
 	 */
@@ -161,17 +161,17 @@ public abstract class AopUtils {
 	/**
 	 * Given a method, which may come from an interface, and a target class used
 	 * in the current AOP invocation, find the corresponding target method if there
-	 * is one. E.g. the method may be <code>IFoo.bar()</code> and the target class
-	 * may be <code>DefaultFoo</code>. In this case, the method may be
-	 * <code>DefaultFoo.bar()</code>. This enables attributes on that method to be found.
+	 * is one. E.g. the method may be {@code IFoo.bar()} and the target class
+	 * may be {@code DefaultFoo}. In this case, the method may be
+	 * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
 	 * <p><b>NOTE:</b> In contrast to {@link org.springframework.util.ClassUtils#getMostSpecificMethod},
 	 * this method resolves Java 5 bridge methods in order to retrieve attributes
 	 * from the <i>original</i> method definition.
 	 * @param method the method to be invoked, which may come from an interface
 	 * @param targetClass the target class for the current invocation.
-	 * May be <code>null</code> or may not even implement the method.
+	 * May be {@code null} or may not even implement the method.
 	 * @return the specific target method, or the original method if the
-	 * <code>targetClass</code> doesn't implement it or is <code>null</code>
+	 * {@code targetClass} doesn't implement it or is {@code null}
 	 * @see org.springframework.util.ClassUtils#getMostSpecificMethod
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
@@ -268,7 +268,7 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Determine the sublist of the <code>candidateAdvisors</code> list
+	 * Determine the sublist of the {@code candidateAdvisors} list
 	 * that is applicable to the given class.
 	 * @param candidateAdvisors the Advisors to evaluate
 	 * @param clazz the target class

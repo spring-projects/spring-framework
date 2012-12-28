@@ -187,8 +187,8 @@ public abstract class CollectionFactory {
 	 * Determine whether the given collection type is an approximable type,
 	 * i.e. a type that {@link #createApproximateCollection} can approximate.
 	 * @param collectionType the collection type to check
-	 * @return <code>true</code> if the type is approximable,
-	 * <code>false</code> if it is not
+	 * @return {@code true} if the type is approximable,
+	 * {@code false} if it is not
 	 */
 	public static boolean isApproximableCollectionType(Class<?> collectionType) {
 		return (collectionType != null && approximableCollectionTypes.contains(collectionType));
@@ -265,8 +265,8 @@ public abstract class CollectionFactory {
 	 * Determine whether the given map type is an approximable type,
 	 * i.e. a type that {@link #createApproximateMap} can approximate.
 	 * @param mapType the map type to check
-	 * @return <code>true</code> if the type is approximable,
-	 * <code>false</code> if it is not
+	 * @return {@code true} if the type is approximable,
+	 * {@code false} if it is not
 	 */
 	public static boolean isApproximableMapType(Class<?> mapType) {
 		return (mapType != null && approximableMapTypes.contains(mapType));
@@ -334,6 +334,7 @@ public abstract class CollectionFactory {
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
 	@Deprecated
+	@SuppressWarnings("serial")
 	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 
 		private JdkConcurrentHashMap(int initialCapacity) {

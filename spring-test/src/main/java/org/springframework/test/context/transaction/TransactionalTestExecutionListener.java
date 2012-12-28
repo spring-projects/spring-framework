@@ -153,6 +153,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (transactionAttribute != null) {
 			transactionAttribute = new DelegatingTransactionAttribute(transactionAttribute) {
 
+				@Override
 				public String getName() {
 					return testMethod.getName();
 				}
@@ -305,12 +306,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Get the {@link PlatformTransactionManager transaction manager} to use
 	 * for the supplied {@link TestContext test context} and {@code qualifier}.
 	 * <p>Delegates to {@link #getTransactionManager(TestContext)} if the
-	 * supplied {@code qualifier} is <code>null</code> or empty.
+	 * supplied {@code qualifier} is {@code null} or empty.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
 	 * @param qualifier the qualifier for selecting between multiple bean matches;
-	 * may be <code>null</code> or empty
-	 * @return the transaction manager to use, or <code>null</code> if not found
+	 * may be {@code null} or empty
+	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext)
 	 */
@@ -342,7 +343,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * for the supplied {@link TestContext test context}.
 	 * @param testContext the test context for which the transaction manager
 	 * should be retrieved
-	 * @return the transaction manager to use, or <code>null</code> if not found
+	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving the transaction manager
 	 * @see #getTransactionManager(TestContext, String)
 	 */
@@ -453,7 +454,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Gets all methods in the supplied {@link Class class} and its superclasses
-	 * which are annotated with the supplied <code>annotationType</code> but
+	 * which are annotated with the supplied {@code annotationType} but
 	 * which are not <em>shadowed</em> by methods overridden in subclasses.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#getAnnotatedMethods(Class)}
@@ -480,11 +481,11 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Determines if the supplied {@link Method method} is <em>shadowed</em>
 	 * by a method in supplied {@link List list} of previous methods.
 	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,List)}.
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, List)}.
 	 * @param method the method to check for shadowing
 	 * @param previousMethods the list of methods which have previously been processed
-	 * @return <code>true</code> if the supplied method is shadowed by a
-	 * method in the <code>previousMethods</code> list
+	 * @return {@code true} if the supplied method is shadowed by a
+	 * method in the {@code previousMethods} list
 	 */
 	private boolean isShadowed(Method method, List<Method> previousMethods) {
 		for (Method each : previousMethods) {
@@ -499,10 +500,10 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * Determines if the supplied {@link Method current method} is
 	 * <em>shadowed</em> by a {@link Method previous method}.
 	 * <p>Note: This code has been borrowed from
-	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method,Method)}.
+	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
 	 * @param current the current method
 	 * @param previous the previous method
-	 * @return <code>true</code> if the previous method shadows the current one
+	 * @return {@code true} if the previous method shadows the current one
 	 */
 	private boolean isShadowed(Method current, Method previous) {
 		if (!previous.getName().equals(current.getName())) {

@@ -102,6 +102,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * 		even if not with @{@link RequestParam}.
 	 * </ul>
 	 */
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {

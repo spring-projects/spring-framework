@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,17 +39,17 @@ public class RollbackRuleTests extends TestCase {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
-	
+
 	public void testFoundImmediatelyWithClass() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(Exception.class);
 		assertTrue(rr.getDepth(new Exception()) == 0);
 	}
-	
+
 	public void testNotFound() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.io.IOException.class.getName());
 		assertTrue(rr.getDepth(new MyRuntimeException("")) == -1);
 	}
-	
+
 	public void testAncestry() {
 		RollbackRuleAttribute rr = new RollbackRuleAttribute(java.lang.Exception.class.getName());
 		// Exception -> Runtime -> NestedRuntime -> MyRuntimeException

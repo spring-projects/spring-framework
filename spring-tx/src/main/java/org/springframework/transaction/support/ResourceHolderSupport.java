@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,15 +177,18 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	/**
 	 * Reset this resource holder - transactional state as well as reference count.
 	 */
+	@Override
 	public void reset() {
 		clear();
 		this.referenceCount = 0;
 	}
 
+	@Override
 	public void unbound() {
 		this.isVoid = true;
 	}
 
+	@Override
 	public boolean isVoid() {
 		return this.isVoid;
 	}

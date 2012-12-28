@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,32 @@
 
 package org.springframework.jdbc.core.simple;
 
-import java.lang.reflect.Method;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-import org.apache.commons.logging.LogFactory;
-import org.easymock.MockControl;
-import org.easymock.internal.ArrayMatcher;
-
-import org.springframework.jdbc.core.BatchUpdateTestHelper;
+import org.junit.Before;
+import org.junit.Test;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -49,564 +54,321 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * @author Juergen Hoeller
  * @author Thomas Risberg
  */
-public class SimpleJdbcTemplateTests extends TestCase {
+public class SimpleJdbcTemplateTests {
 
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+	private static final String SQL = "sql";
 
+	private static final Object[] ARGS_ARRAY = { 24.7, "foo", new Object() };
+	private static final Map<String, Object> ARGS_MAP;
+	private static final MapSqlParameterSource ARGS_SOURCE;
 
+	static {
+		ARGS_MAP = new HashMap<String, Object>(3);
+		ARGS_SOURCE = new MapSqlParameterSource();
+		for (int i = 0; i < ARGS_ARRAY.length; i++) {
+			ARGS_MAP.put(String.valueOf(i), ARGS_ARRAY[i]);
+			ARGS_SOURCE.addValue(String.valueOf(i), ARGS_ARRAY[i]);
+		}
+	}
+
+	private JdbcOperations operations;
+	private NamedParameterJdbcOperations namedParameterOperations;
+	private SimpleJdbcTemplate template;
+	private SimpleJdbcTemplate namedParameterTemplate;
+
+	@Before
+	public void setup() {
+		this.operations = mock(JdbcOperations.class);
+		this.namedParameterOperations = mock(NamedParameterJdbcOperations.class);
+		this.template = new SimpleJdbcTemplate(operations);
+		this.namedParameterTemplate = new SimpleJdbcTemplate(namedParameterOperations);
+	}
+
+	@Test
 	public void testQueryForIntWithoutArgs() {
-		String sql = "SELECT COUNT(0) FROM BAR";
-		int expectedResult = 666;
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForInt(sql);
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-
-		assertSame(jo, jth.getJdbcOperations());
-
-		int result = jth.queryForInt(sql);
-		assertEquals(expectedResult, result);
-
-		mc.verify();
+		given(operations.queryForInt(SQL)).willReturn(666);
+		int result = template.queryForInt(SQL);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testQueryForIntWithArgs() {
-		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=? AND XY=?";
-		int expectedResult = 666;
-		int arg1 = 24;
-		String arg2 = "foo";
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForInt(sql, new Object[]{arg1, arg2});
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		int result = jth.queryForInt(sql, arg1, arg2);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForInt(SQL, new Object[] { 24, "foo" })).willReturn(666);
+		int result = template.queryForInt(SQL, 24, "foo");
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testQueryForIntWithMap() {
-		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=:id AND XY=:xy";
-		int expectedResult = 666;
-		int arg1 = 24;
-		String arg2 = "foo";
-
-		MockControl mc = MockControl.createControl(NamedParameterJdbcOperations.class);
-		NamedParameterJdbcOperations npjo = (NamedParameterJdbcOperations) mc.getMock();
 		Map<String, Object> args = new HashMap<String, Object>(2);
-		args.put("id", arg1);
-		args.put("xy", arg2);
-		npjo.queryForInt(sql, args);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(npjo);
-		int result = jth.queryForInt(sql, args);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		args.put("id", 24);
+		args.put("xy", "foo");
+		given(namedParameterOperations.queryForInt(SQL, args)).willReturn(666);
+		int result = namedParameterTemplate.queryForInt(SQL, args);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testQueryForIntWitSqlParameterSource() {
-		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=:id AND XY=:xy";
-		int expectedResult = 666;
-		int arg1 = 24;
-		String arg2 = "foo";
-
-		MockControl mc = MockControl.createControl(NamedParameterJdbcOperations.class);
-		NamedParameterJdbcOperations npjo = (NamedParameterJdbcOperations) mc.getMock();
-		SqlParameterSource args = new MapSqlParameterSource().addValue("id", arg1).addValue("xy", arg2);
-		npjo.queryForInt(sql, args);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(npjo);
-		int result = jth.queryForInt(sql, args);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		SqlParameterSource args = new MapSqlParameterSource().addValue("id", 24).addValue("xy", "foo");
+		given(namedParameterOperations.queryForInt(SQL, args)).willReturn(666);
+		int result = namedParameterTemplate.queryForInt(SQL, args);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testQueryForLongWithoutArgs() {
-		String sql = "SELECT COUNT(0) FROM BAR";
-		long expectedResult = 666;
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForLong(sql);
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		long result = jth.queryForLong(sql);
-		assertEquals(expectedResult, result);
-
-		mc.verify();
+		given(operations.queryForLong(SQL)).willReturn((long) 666);
+		long result = template.queryForLong(SQL);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testQueryForLongWithArgs() {
-		String sql = "SELECT COUNT(0) FROM BAR WHERE ID=? AND XY=?";
 		long expectedResult = 666;
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForLong(sql, new Object[]{arg1, arg2, arg3});
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		long result = jth.queryForLong(sql, arg1, arg2, arg3);
+		given(operations.queryForLong(SQL, ARGS_ARRAY)).willReturn(expectedResult);
+		long result = template.queryForLong(SQL, ARGS_ARRAY);
 		assertEquals(expectedResult, result);
-		mc.verify();
 	}
 
+	@Test
 	public void testQueryForObjectWithoutArgs() throws Exception {
-		String sql = "SELECT SYSDATE FROM DUAL";
 		Date expectedResult = new Date();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, Date.class);
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, Date.class);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, Date.class)).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, Date.class);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithArgs() throws Exception {
-		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
 		Date expectedResult = new Date();
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, Date.class);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, Date.class, arg1, arg2, arg3);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, ARGS_ARRAY, Date.class)
+				).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, Date.class,ARGS_ARRAY);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithArgArray() throws Exception {
-		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
 		Date expectedResult = new Date();
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, Date.class);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Object args = new Object[] {arg1, arg2, arg3};
-		Date result = jth.queryForObject(sql, Date.class, args);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, ARGS_ARRAY, Date.class)
+				).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, Date.class, ARGS_ARRAY);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithMap() throws Exception {
-		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
 		Date expectedResult = new Date();
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, Date.class);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, Date.class, arg1, arg2, arg3);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, ARGS_ARRAY, Date.class)
+				).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, Date.class, ARGS_ARRAY);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithRowMapperAndWithoutArgs() throws Exception {
-		String sql = "SELECT SYSDATE FROM DUAL";
 		Date expectedResult = new Date();
-
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}
 		};
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, rm);
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, rm);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, rm)).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, rm);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithRowMapperAndArgs() throws Exception {
-		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
 		Date expectedResult = new Date();
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}
 		};
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, rm);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, rm, arg1, arg2, arg3);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(SQL, ARGS_ARRAY, rm)
+				).willReturn(expectedResult);
+		Date result = template.queryForObject(SQL, rm, ARGS_ARRAY);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForObjectWithRowMapperAndMap() throws Exception {
 		String sql = "SELECT SOMEDATE FROM BAR WHERE ID=? AND XY=?";
 		Date expectedResult = new Date();
-		double arg1 = 24.7;
-		String arg2 = "foo";
-		Object arg3 = new Object();
-
 		ParameterizedRowMapper<Date> rm = new ParameterizedRowMapper<Date>() {
+			@Override
 			public Date mapRow(ResultSet rs, int rowNum) {
 				return new Date();
 			}
 		};
-
-		MockControl mc = MockControl.createControl(JdbcOperations.class);
-		JdbcOperations jo = (JdbcOperations) mc.getMock();
-		jo.queryForObject(sql, new Object[]{arg1, arg2, arg3}, rm);
-		mc.setDefaultMatcher(new ArrayMatcher());
-		mc.setReturnValue(expectedResult);
-		mc.replay();
-
-		SimpleJdbcTemplate jth = new SimpleJdbcTemplate(jo);
-		Date result = jth.queryForObject(sql, rm, arg1, arg2, arg3);
-		assertEquals(expectedResult, result);
-		mc.verify();
+		given(operations.queryForObject(sql, ARGS_ARRAY, rm)
+				).willReturn(expectedResult);
+		Date result = template.queryForObject(sql, rm, ARGS_ARRAY);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForListWithoutArgs() throws Exception {
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{}, Collections.singletonList(new Object()));
+		List<Map<String, Object>> expectedResult = mockListMapResult();
+		given(operations.queryForList(SQL)).willReturn(expectedResult);
+		List<Map<String, Object>> result = template.queryForList(SQL);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForListWithArgs() throws Exception {
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{1, 2, 3}, new LinkedList());
+		List<Map<String, Object>> expectedResult = mockListMapResult();
+		given(operations.queryForList(SQL, 1, 2, 3)).willReturn(expectedResult);
+		List<Map<String, Object>> result = template.queryForList(SQL, 1,2,3);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForListWithMap() throws Exception {
-		HashMap args = new HashMap(3);
-		args.put("1", 1);
-		args.put("2", 2);
-		args.put("3", 3);
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList());
+		List<Map<String, Object>> expectedResult = mockListMapResult();
+		given(namedParameterOperations.queryForList(SQL, ARGS_MAP)).willReturn(expectedResult);
+		List<Map<String, Object>> result = namedParameterTemplate.queryForList(SQL, ARGS_MAP);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForListWithSqlParameterSource() throws Exception {
-		MapSqlParameterSource args = new MapSqlParameterSource();
-		args.addValue("1", 1);
-		args.addValue("2", 2);
-		args.addValue("3", 3);
-		testDelegation("queryForList", new Object[]{"sql"}, new Object[]{args}, new LinkedList());
+		List<Map<String, Object>> expectedResult = mockListMapResult();
+		given(namedParameterOperations.queryForList(SQL, ARGS_SOURCE)).willReturn(expectedResult);
+		List<Map<String, Object>> result = namedParameterTemplate.queryForList(SQL, ARGS_SOURCE);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForMapWithoutArgs() throws Exception {
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{}, new HashMap());
+		Map<String, Object> expectedResult = new HashMap<String, Object>();
+		given(operations.queryForMap(SQL)).willReturn(expectedResult);
+		 Map<String, Object> result = template.queryForMap(SQL);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForMapWithArgs() throws Exception {
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{1, 2, 3}, new HashMap());
-		// TODO test generic type
+		Map<String, Object> expectedResult = new HashMap<String, Object>();
+		given(operations.queryForMap(SQL, 1, 2, 3)).willReturn(expectedResult);
+		Map<String, Object> result = template.queryForMap(SQL, 1,2,3);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForMapWithMap() throws Exception {
-		HashMap args = new HashMap(3);
-		args.put("1", 1);
-		args.put("2", 2);
-		args.put("3", 3);
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap());
+		Map<String, Object> expectedResult = new HashMap<String, Object>();
+		given(namedParameterOperations.queryForMap(SQL, ARGS_MAP)).willReturn(expectedResult);
+		Map<String, Object> result = namedParameterTemplate.queryForMap(SQL, ARGS_MAP);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testQueryForMapWithSqlParameterSource() throws Exception {
-		MapSqlParameterSource args = new MapSqlParameterSource();
-		args.addValue("1", 1);
-		args.addValue("2", 2);
-		args.addValue("3", 3);
-		testDelegation("queryForMap", new Object[]{"sql"}, new Object[]{args}, new HashMap());
+		Map<String, Object> expectedResult = new HashMap<String, Object>();
+		given(namedParameterOperations.queryForMap(SQL, ARGS_SOURCE)).willReturn(expectedResult);
+		Map<String, Object> result = namedParameterTemplate.queryForMap(SQL, ARGS_SOURCE);
+		assertSame(expectedResult, result);
 	}
 
+	@Test
 	public void testUpdateWithoutArgs() throws Exception {
-		testDelegation("update", new Object[]{"sql"}, new Object[]{}, 666);
+		given(operations.update(SQL)).willReturn(666);
+		int result = template.update(SQL);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testUpdateWithArgs() throws Exception {
-		testDelegation("update", new Object[]{"sql"}, new Object[]{1, 2, 3}, 666);
+		given(operations.update(SQL, 1, 2, 3)).willReturn(666);
+		int result = template.update(SQL, 1, 2, 3);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testUpdateWithMap() throws Exception {
-		HashMap args = new HashMap(3);
-		args.put("1", 1);
-		args.put("2", 2);
-		args.put("3", 3);
-		testDelegation("update", new Object[]{"sql"}, new Object[]{args}, 666);
+		given(namedParameterOperations.update(SQL, ARGS_MAP)).willReturn(666);
+		int result = namedParameterTemplate.update(SQL, ARGS_MAP);
+		assertEquals(666, result);
 	}
 
+	@Test
 	public void testUpdateWithSqlParameterSource() throws Exception {
-		MapSqlParameterSource args = new MapSqlParameterSource();
-		args.addValue("1", 1);
-		args.addValue("2", 2);
-		args.addValue("3", 3);
-		testDelegation("update", new Object[]{"sql"}, new Object[]{args}, 666);
+		given(namedParameterOperations.update(SQL, ARGS_SOURCE)).willReturn(666);
+		int result = namedParameterTemplate.update(SQL, ARGS_SOURCE);
+		assertEquals(666, result);
 	}
 
-	private Object testDelegation(String methodName, Object[] typedArgs, Object[] varargs, Object expectedResult) throws Exception {
-		Class[] unifiedTypes;
-		Object[] unifiedArgs;
-		Class[] unifiedTypes2;
-		Object[] unifiedArgs2;
-		boolean namedParameters = false;
-
-		if (varargs != null && varargs.length > 0) {
-			// Allow for Map
-			if (varargs[0].getClass().equals(HashMap.class)) {
-				unifiedTypes = new Class[typedArgs.length + 1];
-				unifiedArgs = new Object[typedArgs.length + 1];
-				for (int i = 0; i < typedArgs.length; i++) {
-					unifiedTypes[i] = typedArgs[i].getClass();
-					unifiedArgs[i] = typedArgs[i];
-				}
-				unifiedTypes[unifiedTypes.length - 1] = Map.class;
-				unifiedArgs[unifiedArgs.length - 1] = varargs[0];
-				unifiedTypes2 = unifiedTypes;
-				unifiedArgs2 = unifiedArgs;
-				namedParameters = true;
-			}
-			else if (varargs[0].getClass().equals(MapSqlParameterSource.class)) {
-				unifiedTypes = new Class[typedArgs.length + 1];
-				unifiedArgs = new Object[typedArgs.length + 1];
-				for (int i = 0; i < typedArgs.length; i++) {
-					unifiedTypes[i] = typedArgs[i].getClass();
-					unifiedArgs[i] = typedArgs[i];
-				}
-				unifiedTypes[unifiedTypes.length - 1] = SqlParameterSource.class;
-				unifiedArgs[unifiedArgs.length - 1] = varargs[0];
-				unifiedTypes2 = unifiedTypes;
-				unifiedArgs2 = unifiedArgs;
-				namedParameters = true;
-			}
-			else {
-				// Allow for varargs.length
-				unifiedTypes = new Class[typedArgs.length + 1];
-				unifiedArgs = new Object[typedArgs.length + 1];
-				for (int i = 0; i < unifiedTypes.length - 1; i++) {
-					unifiedTypes[i] = typedArgs[i].getClass();
-					unifiedArgs[i] = typedArgs[i];
-				}
-				unifiedTypes[unifiedTypes.length - 1] = Object[].class;
-				unifiedArgs[unifiedTypes.length - 1] = varargs;
-			}
-
-			unifiedTypes2 = unifiedTypes;
-			unifiedArgs2 = unifiedArgs;
-		}
-		else {
-			unifiedTypes = new Class[typedArgs.length];
-			unifiedTypes2 = new Class[typedArgs.length + 1];
-			unifiedArgs = new Object[typedArgs.length];
-			unifiedArgs2 = new Object[typedArgs.length + 1];
-			for (int i = 0; i < typedArgs.length; i++) {
-				unifiedTypes[i] = unifiedTypes2[i] = typedArgs[i].getClass();
-				unifiedArgs[i] = unifiedArgs2[i] = typedArgs[i];
-			}
-			unifiedTypes2[unifiedTypes2.length - 1] = Object[].class;
-			unifiedArgs2[unifiedArgs2.length - 1] = new Object[]{};
-		}
-
-		MockControl mc;
-		JdbcOperations jo = null;
-		NamedParameterJdbcOperations npjo = null;
-		Method joMethod = null;
-		SimpleJdbcTemplate jth = null;
-
-		if (namedParameters) {
-			mc = MockControl.createControl(NamedParameterJdbcOperations.class);
-			npjo = (NamedParameterJdbcOperations) mc.getMock();
-			joMethod = NamedParameterJdbcOperations.class.getMethod(methodName, unifiedTypes);
-			joMethod.invoke(npjo, unifiedArgs);
-			jth = new SimpleJdbcTemplate(npjo);
-		}
-		else {
-			mc = MockControl.createControl(JdbcOperations.class);
-			jo = (JdbcOperations) mc.getMock();
-			joMethod = JdbcOperations.class.getMethod(methodName, unifiedTypes);
-			joMethod.invoke(jo, unifiedArgs);
-			jth = new SimpleJdbcTemplate(jo);
-		}
-
-		mc.setDefaultMatcher(new ArrayMatcher());
-
-		if (joMethod.getReturnType().isPrimitive()) {
-			// TODO bit of a hack with autoboxing passing up Integer when the return
-			// type is an int
-			mc.setReturnValue(((Integer) expectedResult).intValue());
-		}
-		else {
-			mc.setReturnValue(expectedResult);
-		}
-		mc.replay();
-
-		Method jthMethod = SimpleJdbcTemplate.class.getMethod(methodName, unifiedTypes2);
-		Object result = jthMethod.invoke(jth, unifiedArgs2);
-
-		assertEquals(expectedResult, result);
-
-		mc.verify();
-
-		return result;
-	}
-
+	@Test
 	public void testBatchUpdateWithSqlParameterSource() throws Exception {
-
-		final String sqlToUse = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id";
+		PreparedStatement preparedStatement = setupBatchOperation();
 		final SqlParameterSource[] ids = new SqlParameterSource[2];
 		ids[0] = new MapSqlParameterSource("id", 100);
 		ids[1] = new MapSqlParameterSource("id", 200);
-		final int[] rowsAffected = new int[] { 1, 2 };
-
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sqlToUse, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
-				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
-				mockDatabaseMetaData);
-
-		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-		SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(template);
-
-		int[] actualRowsAffected = simpleJdbcTemplate.batchUpdate(sql, ids);
-
+		int[] actualRowsAffected = template.batchUpdate("UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = :id", ids);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
-
-		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+		assertEquals(1, actualRowsAffected[0]);
+		assertEquals(2, actualRowsAffected[1]);
+		verify(preparedStatement).setObject(1, 100);
+		verify(preparedStatement).setObject(1, 200);
+		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
-
-		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
-		ids.add(new Object[] {100});
-		ids.add(new Object[] {200});
-		final int[] rowsAffected = new int[] { 1, 2 };
-
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
-				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
-				mockDatabaseMetaData);
-
-		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-		SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(template);
-
-		int[] actualRowsAffected = simpleJdbcTemplate.batchUpdate(sql, ids);
-
+		PreparedStatement preparedStatement = setupBatchOperation();
+		List<Object[]> ids = new ArrayList<Object[]>();
+		ids.add(new Object[] { 100 });
+		ids.add(new Object[] { 200 });
+		int[] actualRowsAffected = template.batchUpdate(SQL, ids);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
-
-		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+		assertEquals(1, actualRowsAffected[0]);
+		assertEquals(2, actualRowsAffected[1]);
+		verify(preparedStatement).setObject(1, 100);
+		verify(preparedStatement).setObject(1, 200);
+		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
-
-		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Object[]> ids = new ArrayList<Object[]>();
-		ids.add(new Object[] {100});
-		ids.add(new Object[] {200});
-		final int[] sqlTypes = new int[] {Types.NUMERIC};
-		final int[] rowsAffected = new int[] { 1, 2 };
-
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, sqlTypes, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
-				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
-				mockDatabaseMetaData);
-
-		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-		SimpleJdbcTemplate simpleJdbcTemplate = new SimpleJdbcTemplate(template);
-
-		int[] actualRowsAffected = simpleJdbcTemplate.batchUpdate(sql, ids, sqlTypes);
-
+		int[] sqlTypes = new int[] { Types.NUMERIC };
+		PreparedStatement preparedStatement = setupBatchOperation();
+		List<Object[]> ids = new ArrayList<Object[]>();
+		ids.add(new Object[] { 100 });
+		ids.add(new Object[] { 200 });
+		int[] actualRowsAffected = template.batchUpdate(SQL, ids, sqlTypes);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
-		assertEquals(rowsAffected[0], actualRowsAffected[0]);
-		assertEquals(rowsAffected[1], actualRowsAffected[1]);
-
-		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+		assertEquals(1, actualRowsAffected[0]);
+		assertEquals(2, actualRowsAffected[1]);
+		verify(preparedStatement).setObject(1, 100, Types.NUMERIC);
+		verify(preparedStatement).setObject(1, 200, Types.NUMERIC);
+		verify(preparedStatement, times(2)).addBatch();
+		verify(preparedStatement).close();
 	}
 
+	private PreparedStatement setupBatchOperation() throws SQLException {
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		PreparedStatement preparedStatement = mock(PreparedStatement.class);
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		given(preparedStatement.getConnection()).willReturn(connection);
+		given(preparedStatement.executeBatch()).willReturn(new int[] { 1, 2 });
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MySQL");
+		given(databaseMetaData.supportsBatchUpdates()).willReturn(true);
+		given(connection.prepareStatement(anyString())).willReturn(preparedStatement);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
+		template = new SimpleJdbcTemplate(new JdbcTemplate(dataSource, false));
+		return preparedStatement;
+	}
+
+	private List<Map<String, Object>> mockListMapResult() {
+		return new LinkedList<Map<String, Object>>();
+	}
 }

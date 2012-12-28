@@ -90,6 +90,7 @@ public class BeanDefinitionParserDelegate {
 	public static final String MULTI_VALUE_ATTRIBUTE_DELIMITERS = ",; ";
 
 	/** @deprecated as of Spring 3.1 in favor of {@link #MULTI_VALUE_ATTRIBUTE_DELIMITERS} */
+	@Deprecated
 	public static final String BEAN_NAME_DELIMITERS = MULTI_VALUE_ATTRIBUTE_DELIMITERS;
 
 	/**
@@ -343,6 +344,7 @@ public class BeanDefinitionParserDelegate {
 	 * @deprecated in Spring 3.1 in favor of
 	 * {@link #initDefaults(Element, BeanDefinitionParserDelegate)}
 	 */
+	@Deprecated
 	public void initDefaults(Element root) {
 		initDefaults(root, null);
 	}
@@ -406,7 +408,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Return the defaults definition object, or <code>null</code> if the
+	 * Return the defaults definition object, or {@code null} if the
 	 * defaults have been initialized yet.
 	 */
 	public DocumentDefaultsDefinition getDefaults() {
@@ -415,7 +417,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Return the default settings for bean definitions as indicated within
-	 * the attributes of the top-level <code>&lt;beans/&gt;</code> element.
+	 * the attributes of the top-level {@code &lt;beans/&gt;} element.
 	 */
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
@@ -429,7 +431,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Return any patterns provided in the 'default-autowire-candidates'
-	 * attribute of the top-level <code>&lt;beans/&gt;</code> element.
+	 * attribute of the top-level {@code &lt;beans/&gt;} element.
 	 */
 	public String[] getAutowireCandidatePatterns() {
 		String candidatePattern = this.defaults.getAutowireCandidates();
@@ -438,7 +440,7 @@ public class BeanDefinitionParserDelegate {
 
 
 	/**
-	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
+	 * Parses the supplied {@code &lt;bean&gt;} element. May return {@code null}
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
@@ -447,7 +449,7 @@ public class BeanDefinitionParserDelegate {
 	}
 
 	/**
-	 * Parses the supplied <code>&lt;bean&gt;</code> element. May return <code>null</code>
+	 * Parses the supplied {@code &lt;bean&gt;} element. May return {@code null}
 	 * if there were errors during parse. Errors are reported to the
 	 * {@link org.springframework.beans.factory.parsing.ProblemReporter}.
 	 */
@@ -534,7 +536,7 @@ public class BeanDefinitionParserDelegate {
 
 	/**
 	 * Parse the bean definition itself, without regard to name or aliases. May return
-	 * <code>null</code> if problems occurred during the parsing of the bean definition.
+	 * {@code null} if problems occurred during the parsing of the bean definition.
 	 */
 	public AbstractBeanDefinition parseBeanDefinitionElement(
 			Element ele, String beanName, BeanDefinition containingBean) {
@@ -1035,7 +1037,7 @@ public class BeanDefinitionParserDelegate {
 	 * constructor-arg element.
 	 * @param ele subelement of property element; we don't know which yet
 	 * @param defaultValueType the default type (class name) for any
-	 * <code>&lt;value&gt;</code> tag that might be created
+	 * {@code &lt;value&gt;} tag that might be created
 	 */
 	public Object parsePropertySubElement(Element ele, BeanDefinition bd, String defaultValueType) {
 		if (!isDefaultNamespace(ele)) {
@@ -1513,7 +1515,7 @@ public class BeanDefinitionParserDelegate {
 	/**
 	 * Ges the local name for the supplied {@link Node}. The default implementation calls {@link Node#getLocalName}.
 	 * Subclasses may override the default implementation to provide a different mechanism for getting the local name.
-	 * @param node the <code>Node</code>
+	 * @param node the {@code Node}
 	 */
 	public String getLocalName(Node node) {
 		return node.getLocalName();

@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link AutowiredAnnotationBeanPostProcessor}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Mark Fisher
  * @author Sam Brannen
@@ -989,6 +989,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 		public ExtendedResourceInjectionBean() {
 		}
 
+		@Override
 		@Autowired @Required
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1068,6 +1069,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Autowired(required = false)
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1114,6 +1116,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Autowired(required = false)
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1185,6 +1188,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@Autowired
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1346,6 +1350,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryInjectionBean implements Serializable {
 
 		@Autowired
@@ -1446,14 +1451,17 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 
 	public static class StringFactoryBean implements FactoryBean<String> {
 
+		@Override
 		public String getObject() throws Exception {
 			return "";
 		}
 
+		@Override
 		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

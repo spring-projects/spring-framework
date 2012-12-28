@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Adapter to use the Servlet interface with the generic DispatcherServlet.
- * Calls the Servlet's <code>service</code> method to handle a request.
+ * Calls the Servlet's {@code service} method to handle a request.
  *
  * <p>Last-modified checking is not explicitly supported: This is typically
  * handled by the Servlet implementation itself (usually deriving from
@@ -53,17 +53,20 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class SimpleServletHandlerAdapter implements HandlerAdapter {
 
+	@Override
 	public boolean supports(Object handler) {
 		return (handler instanceof Servlet);
 	}
 
+	@Override
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		
+
 		((Servlet) handler).service(request, response);
 		return null;
 	}
 
+	@Override
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		return -1;
 	}

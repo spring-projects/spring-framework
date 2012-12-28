@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * ceo.$0(ref)=secretary          // inject 'secretary' bean as 0th constructor arg
  * ceo.$1=1000000                 // inject value '1000000' at 1st constructor arg
  * </pre>
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -88,42 +88,42 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	public static final String SEPARATOR = ".";
 
 	/**
-	 * Special key to distinguish <code>owner.(class)=com.myapp.MyClass</code>-
+	 * Special key to distinguish {@code owner.(class)=com.myapp.MyClass}-
 	 */
 	public static final String CLASS_KEY = "(class)";
 
 	/**
-	 * Special key to distinguish <code>owner.(parent)=parentBeanName</code>.
+	 * Special key to distinguish {@code owner.(parent)=parentBeanName}.
 	 */
 	public static final String PARENT_KEY = "(parent)";
 
 	/**
-	 * Special key to distinguish <code>owner.(scope)=prototype</code>.
+	 * Special key to distinguish {@code owner.(scope)=prototype}.
 	 * Default is "true".
 	 */
 	public static final String SCOPE_KEY = "(scope)";
 
 	/**
-	 * Special key to distinguish <code>owner.(singleton)=false</code>.
+	 * Special key to distinguish {@code owner.(singleton)=false}.
 	 * Default is "true".
 	 */
 	public static final String SINGLETON_KEY = "(singleton)";
 
 	/**
-	 * Special key to distinguish <code>owner.(abstract)=true</code>
+	 * Special key to distinguish {@code owner.(abstract)=true}
 	 * Default is "false".
 	 */
 	public static final String ABSTRACT_KEY = "(abstract)";
 
 	/**
-	 * Special key to distinguish <code>owner.(lazy-init)=true</code>
+	 * Special key to distinguish {@code owner.(lazy-init)=true}
 	 * Default is "false".
 	 */
 	public static final String LAZY_INIT_KEY = "(lazy-init)";
 
 	/**
 	 * Property suffix for references to other beans in the current
-	 * BeanFactory: e.g. <code>owner.dog(ref)=fido</code>.
+	 * BeanFactory: e.g. {@code owner.dog(ref)=fido}.
 	 * Whether this is a reference to a singleton or a prototype
 	 * will depend on the definition of the target bean.
 	 */
@@ -204,6 +204,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
 	 */
+	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource), null);
 	}
@@ -212,7 +213,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * Load bean definitions from the specified properties file.
 	 * @param resource the resource descriptor for the properties file
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or <code>null</code>)
+	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -236,7 +237,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @param encodedResource the resource descriptor for the properties file,
 	 * allowing to specify an encoding to use for parsing the file
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or <code>null</code>)
+	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -282,7 +283,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * standard Java internationalization support.
 	 * @param rb the ResourceBundle to load from
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or <code>null</code>)
+	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -319,7 +320,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be Strings. Class keys must be Strings.
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or <code>null</code>)
+	 * (can be empty or {@code null})
 	 * @return the number of bean definitions found
 	 * @throws BeansException in case of loading or parsing errors
 	 */
@@ -334,7 +335,7 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * will be strings if coming from a Properties file etc. Property names
 	 * (keys) <b>must</b> be strings. Class keys must be Strings.
 	 * @param prefix a filter within the keys in the map: e.g. 'beans.'
-	 * (can be empty or <code>null</code>)
+	 * (can be empty or {@code null})
 	 * @param resourceDescription description of the resource that the
 	 * Map came from (for logging purposes)
 	 * @return the number of bean definitions found

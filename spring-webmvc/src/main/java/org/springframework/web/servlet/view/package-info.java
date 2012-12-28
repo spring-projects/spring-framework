@@ -3,7 +3,7 @@
  *
  * Provides standard View and ViewResolver implementations,
  * including abstract base classes for custom implementations.
- * 
+ *
  * <p>Application developers don't usually need to implement views,
  * as the framework provides standard views for JSPs, Velocity,
  * XSLT, etc. However, the ability to implement custom views easily

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.util.ClassUtils;
 public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, BeanClassLoaderAware {
 
 	private final String scriptSourceLocator;
-	
+
 	private final GroovyObjectCustomizer groovyObjectCustomizer;
 
 	private GroovyClassLoader groovyClassLoader;
@@ -90,7 +90,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param groovyObjectCustomizer a customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
@@ -99,12 +99,14 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (beanFactory instanceof ConfigurableListableBeanFactory) {
 			((ConfigurableListableBeanFactory) beanFactory).ignoreDependencyType(MetaClass.class);
 		}
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.groovyClassLoader = new GroovyClassLoader(classLoader);
 	}
@@ -122,6 +124,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	}
 
 
+	@Override
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
 	}
@@ -129,8 +132,9 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	/**
 	 * Groovy scripts determine their interfaces themselves,
 	 * hence we don't need to explicitly expose interfaces here.
-	 * @return <code>null</code> always
+	 * @return {@code null} always
 	 */
+	@Override
 	public Class[] getScriptInterfaces() {
 		return null;
 	}
@@ -139,6 +143,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * Groovy scripts do not need a config interface,
 	 * since they expose their setters as public methods.
 	 */
+	@Override
 	public boolean requiresConfigInterface() {
 		return false;
 	}
@@ -148,6 +153,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * Loads and parses the Groovy script via the GroovyClassLoader.
 	 * @see groovy.lang.GroovyClassLoader
 	 */
+	@Override
 	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
@@ -189,6 +195,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 		}
 	}
 
+	@Override
 	public Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
@@ -218,6 +225,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 		}
 	}
 
+	@Override
 	public boolean requiresScriptedObjectRefresh(ScriptSource scriptSource) {
 		synchronized (this.scriptClassMonitor) {
 			return (scriptSource.isModified() || this.wasModifiedForTypeCheck);

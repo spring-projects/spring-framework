@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 
 	/**
 	 * Set the host of the registry for the exported RMI service,
-	 * i.e. <code>rmi://HOST:port/name</code>
+	 * i.e. {@code rmi://HOST:port/name}
 	 * <p>Default is localhost.
 	 */
 	public void setHost(String host) {
@@ -97,8 +97,8 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 
 	/**
 	 * Set the port of the registry for the exported RMI service,
-	 * i.e. <code>rmi://host:PORT/name</code>
-	 * <p>Default is <code>Registry.REGISTRY_PORT</code> (1099).
+	 * i.e. {@code rmi://host:PORT/name}
+	 * <p>Default is {@code Registry.REGISTRY_PORT} (1099).
 	 */
 	public void setPort(int port) {
 		this.port = port;
@@ -113,7 +113,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 
 	/**
 	 * Set a custom RMI client socket factory to use for the RMI registry.
-	 * <p>If the given object also implements <code>java.rmi.server.RMIServerSocketFactory</code>,
+	 * <p>If the given object also implements {@code java.rmi.server.RMIServerSocketFactory},
 	 * it will automatically be registered as server socket factory too.
 	 * @see #setServerSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
@@ -127,7 +127,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	/**
 	 * Set a custom RMI server socket factory to use for the RMI registry.
 	 * <p>Only needs to be specified when the client socket factory does not
-	 * implement <code>java.rmi.server.RMIServerSocketFactory</code> already.
+	 * implement {@code java.rmi.server.RMIServerSocketFactory} already.
 	 * @see #setClientSocketFactory
 	 * @see java.rmi.server.RMIClientSocketFactory
 	 * @see java.rmi.server.RMIServerSocketFactory
@@ -149,6 +149,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		// Check socket factories for registry.
 		if (this.clientSocketFactory instanceof RMIServerSocketFactory) {
@@ -272,7 +273,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	/**
 	 * Test the given RMI registry, calling some operation on it to
 	 * check whether it is still active.
-	 * <p>Default implementation calls <code>Registry.list()</code>.
+	 * <p>Default implementation calls {@code Registry.list()}.
 	 * @param registry the RMI registry to test
 	 * @throws RemoteException if thrown by registry methods
 	 * @see java.rmi.registry.Registry#list()
@@ -282,14 +283,17 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
+	@Override
 	public Registry getObject() throws Exception {
 		return this.registry;
 	}
 
+	@Override
 	public Class<? extends Registry> getObjectType() {
 		return (this.registry != null ? this.registry.getClass() : Registry.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -299,6 +303,7 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	 * Unexport the RMI registry on bean factory shutdown,
 	 * provided that this bean actually created a registry.
 	 */
+	@Override
 	public void destroy() throws RemoteException {
 		if (this.created) {
 			logger.info("Unexporting RMI registry");

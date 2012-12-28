@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,25 +46,31 @@ public class SpringTransactionFactory implements TransactionFactory {
 	 * However, for Spring's resource management (in particular for
 	 * HibernateTransactionManager), "on_close" is the better default.
 	 */
+	@Override
 	public ConnectionReleaseMode getDefaultReleaseMode() {
 		return ConnectionReleaseMode.ON_CLOSE;
 	}
 
+	@Override
 	public Transaction createTransaction(JDBCContext jdbcContext, Context transactionContext) {
 		return new JDBCTransaction(jdbcContext, transactionContext);
 	}
 
+	@Override
 	public void configure(Properties props) {
 	}
 
+	@Override
 	public boolean isTransactionManagerRequired() {
 		return false;
 	}
 
+	@Override
 	public boolean areCallbacksLocalToHibernateTransactions() {
 		return true;
 	}
 
+	@Override
 	public boolean isTransactionInProgress(
 			JDBCContext jdbcContext, Context transactionContext, Transaction transaction) {
 

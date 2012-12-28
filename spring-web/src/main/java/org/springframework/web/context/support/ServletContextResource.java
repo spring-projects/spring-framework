@@ -38,7 +38,7 @@ import org.springframework.web.util.WebUtils;
  * relative paths within the web application root directory.
  *
  * <p>Always supports stream access and URL access, but only allows
- * <code>java.io.File</code> access when the web application archive
+ * {@code java.io.File} access when the web application archive
  * is expanded.
  *
  * @author Juergen Hoeller
@@ -93,7 +93,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 
 
 	/**
-	 * This implementation checks <code>ServletContext.getResource</code>.
+	 * This implementation checks {@code ServletContext.getResource}.
 	 * @see javax.servlet.ServletContext#getResource(String)
 	 */
 	@Override
@@ -108,8 +108,8 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,
-	 * which returns <code>null</code> in case of a non-readable resource (e.g. a directory).
+	 * This implementation delegates to {@code ServletContext.getResourceAsStream},
+	 * which returns {@code null} in case of a non-readable resource (e.g. a directory).
 	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
 	 */
 	@Override
@@ -130,10 +130,11 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>ServletContext.getResourceAsStream</code>,
+	 * This implementation delegates to {@code ServletContext.getResourceAsStream},
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		InputStream is = this.servletContext.getResourceAsStream(this.path);
 		if (is == null) {
@@ -143,7 +144,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>ServletContext.getResource</code>,
+	 * This implementation delegates to {@code ServletContext.getResource},
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.servlet.ServletContext#getResource(String)
 	 */
@@ -159,7 +160,7 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 
 	/**
 	 * This implementation resolves "file:" URLs or alternatively delegates to
-	 * <code>ServletContext.getRealPath</code>, throwing a FileNotFoundException
+	 * {@code ServletContext.getRealPath}, throwing a FileNotFoundException
 	 * if not found or not resolvable.
 	 * @see javax.servlet.ServletContext#getResource(String)
 	 * @see javax.servlet.ServletContext#getRealPath(String)
@@ -202,10 +203,12 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * This implementation returns a description that includes the ServletContext
 	 * resource location.
 	 */
+	@Override
 	public String getDescription() {
 		return "ServletContext resource [" + this.path + "]";
 	}
 
+	@Override
 	public String getPathWithinContext() {
 		return this.path;
 	}

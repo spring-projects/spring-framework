@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The associated destruction mechanism relies on a
  * {@link org.springframework.web.context.ContextCleanupListener} being registered in
- * <code>web.xml</code>. Note that {@link org.springframework.web.context.ContextLoaderListener}
+ * {@code web.xml}. Note that {@link org.springframework.web.context.ContextLoaderListener}
  * includes ContextCleanupListener's functionality.
  *
  * <p>This scope is registered as default scope with key
@@ -62,6 +62,7 @@ public class ServletContextScope implements Scope, DisposableBean {
 	}
 
 
+	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject == null) {
@@ -71,6 +72,7 @@ public class ServletContextScope implements Scope, DisposableBean {
 		return scopedObject;
 	}
 
+	@Override
 	public Object remove(String name) {
 		Object scopedObject = this.servletContext.getAttribute(name);
 		if (scopedObject != null) {
@@ -83,14 +85,17 @@ public class ServletContextScope implements Scope, DisposableBean {
 		}
 	}
 
+	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		this.destructionCallbacks.put(name, callback);
 	}
 
+	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
+	@Override
 	public String getConversationId() {
 		return null;
 	}
@@ -101,6 +106,7 @@ public class ServletContextScope implements Scope, DisposableBean {
 	 * To be called on ServletContext shutdown.
 	 * @see org.springframework.web.context.ContextCleanupListener
 	 */
+	@Override
 	public void destroy() {
 		for (Runnable runnable : this.destructionCallbacks.values()) {
 			runnable.run();

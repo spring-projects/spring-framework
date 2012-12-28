@@ -44,6 +44,7 @@ public class NullPrimitiveTests {
 	public void testNullPrimitiveWithJdkProxy() {
 
 		class SimpleFoo implements Foo {
+			@Override
 			public int getValue() {
 				return 100;
 			}
@@ -52,6 +53,7 @@ public class NullPrimitiveTests {
 		SimpleFoo target = new SimpleFoo();
 		ProxyFactory factory = new ProxyFactory(target);
 		factory.addAdvice(new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return null;
 			}
@@ -76,6 +78,7 @@ public class NullPrimitiveTests {
 		Bar target = new Bar();
 		ProxyFactory factory = new ProxyFactory(target);
 		factory.addAdvice(new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return null;
 			}

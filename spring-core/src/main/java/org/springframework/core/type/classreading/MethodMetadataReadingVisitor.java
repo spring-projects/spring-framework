@@ -70,30 +70,37 @@ final class MethodMetadataReadingVisitor extends MethodVisitor implements Method
 		return new AnnotationAttributesReadingVisitor(className, this.attributeMap, null, this.classLoader);
 	}
 
+	@Override
 	public String getMethodName() {
 		return this.name;
 	}
 
+	@Override
 	public boolean isStatic() {
 		return ((this.access & Opcodes.ACC_STATIC) != 0);
 	}
 
+	@Override
 	public boolean isFinal() {
 		return ((this.access & Opcodes.ACC_FINAL) != 0);
 	}
 
+	@Override
 	public boolean isOverridable() {
 		return (!isStatic() && !isFinal() && ((this.access & Opcodes.ACC_PRIVATE) == 0));
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		return this.attributeMap.containsKey(annotationType);
 	}
 
+	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
 		return this.attributeMap.get(annotationType);
 	}
 
+	@Override
 	public String getDeclaringClassName() {
 		return this.declaringClassName;
 	}

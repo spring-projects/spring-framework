@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * @since 3.0
  */
 public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> implements ResourceLoaderAware {
-	
+
 	private final List<String> locations;
 
 	private ResourcePatternResolver resourcePatternResolver;
@@ -59,6 +59,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 	}
 
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
@@ -76,6 +77,7 @@ public class SortedResourcesFactoryBean extends AbstractFactoryBean<Resource[]> 
 			List<Resource> resources = new ArrayList<Resource>(
 					Arrays.asList(this.resourcePatternResolver.getResources(location)));
 			Collections.sort(resources, new Comparator<Resource>() {
+				@Override
 				public int compare(Resource r1, Resource r2) {
 					try {
 						return r1.getURL().toString().compareTo(r2.getURL().toString());

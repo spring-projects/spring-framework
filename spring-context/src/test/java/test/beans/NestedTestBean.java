@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package test.beans;
 
 /**
  * Simple nested test bean used for testing bean factories, AOP framework etc.
- * 
+ *
  * @author Trevor D. Cook
  * @since 30.09.2003
  */
@@ -36,6 +36,7 @@ public class NestedTestBean implements INestedTestBean {
 		this.company = ((company != null) ? company : "");
 	}
 
+	@Override
 	public String getCompany() {
 		return company;
 	}

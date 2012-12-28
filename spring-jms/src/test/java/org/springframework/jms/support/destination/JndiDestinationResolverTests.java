@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public class JndiDestinationResolverTests {
 		mockDestinationResolver.replay();
 
 		JndiDestinationResolver resolver = new JndiDestinationResolver() {
+			@Override
 			protected Object lookup(String jndiName, Class requiredClass) throws NamingException {
 				throw new NamingException();
 			}
@@ -114,6 +115,7 @@ public class JndiDestinationResolverTests {
 		mockDestinationResolver.replay();
 
 		final JndiDestinationResolver resolver = new JndiDestinationResolver() {
+			@Override
 			protected Object lookup(String jndiName, Class requiredClass) throws NamingException {
 				throw new NamingException();
 			}
@@ -134,6 +136,7 @@ public class JndiDestinationResolverTests {
 
 		private boolean called;
 
+		@Override
 		protected Object lookup(String jndiName, Class requiredType) throws NamingException {
 			if (called) {
 				fail("Must not be delegating to lookup(..), must be resolving from cache.");
@@ -152,6 +155,7 @@ public class JndiDestinationResolverTests {
 			return this.callCount;
 		}
 
+		@Override
 		protected Object lookup(String jndiName, Class requiredType) throws NamingException {
 			++this.callCount;
 			return DESTINATION;

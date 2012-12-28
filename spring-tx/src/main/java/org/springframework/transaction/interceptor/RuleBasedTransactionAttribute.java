@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
  * @since 09.04.2003
  * @see TransactionAttributeEditor
  */
+@SuppressWarnings("serial")
 public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute implements Serializable {
 
 	/** Prefix for rollback-on-exception rules in description strings */
@@ -97,8 +98,8 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 
 
 	/**
-	 * Set the list of <code>RollbackRuleAttribute</code> objects
-	 * (and/or <code>NoRollbackRuleAttribute</code> objects) to apply.
+	 * Set the list of {@code RollbackRuleAttribute} objects
+	 * (and/or {@code NoRollbackRuleAttribute} objects) to apply.
 	 * @see RollbackRuleAttribute
 	 * @see NoRollbackRuleAttribute
 	 */
@@ -107,8 +108,8 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 	}
 
 	/**
-	 * Return the list of <code>RollbackRuleAttribute</code> objects
-	 * (never <code>null</code>).
+	 * Return the list of {@code RollbackRuleAttribute} objects
+	 * (never {@code null}).
 	 */
 	public List<RollbackRuleAttribute> getRollbackRules() {
 		if (this.rollbackRules == null) {
@@ -152,7 +153,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 			logger.trace("No relevant rollback rule found: applying default rules");
 			return super.rollbackOn(ex);
 		}
-			
+
 		return !(winner instanceof NoRollbackRuleAttribute);
 	}
 

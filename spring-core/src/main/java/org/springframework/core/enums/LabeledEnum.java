@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.comparator.NullSafeComparator;
  *
  * <ul>
  * <li>A type that identifies the enum's class.
- * For example: <code>com.mycompany.util.FileFormat</code>.</li>
+ * For example: {@code com.mycompany.util.FileFormat}.</li>
  *
  * <li>A code that uniquely identifies the enum within the context of its type.
  * For example: &quot;CSV&quot;. Different classes of codes are possible
@@ -64,9 +64,10 @@ public interface LabeledEnum extends Comparable, Serializable {
 	// Constants for standard enum ordering (Comparator implementations)
 
 	/**
-	 * Shared Comparator instance that sorts enumerations by <code>CODE_ORDER</code>.
+	 * Shared Comparator instance that sorts enumerations by {@code CODE_ORDER}.
 	 */
 	Comparator CODE_ORDER = new Comparator() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			Comparable c1 = ((LabeledEnum) o1).getCode();
 			Comparable c2 = ((LabeledEnum) o2).getCode();
@@ -75,9 +76,10 @@ public interface LabeledEnum extends Comparable, Serializable {
 	};
 
 	/**
-	 * Shared Comparator instance that sorts enumerations by <code>LABEL_ORDER</code>.
+	 * Shared Comparator instance that sorts enumerations by {@code LABEL_ORDER}.
 	 */
 	Comparator LABEL_ORDER = new Comparator() {
+		@Override
 		public int compare(Object o1, Object o2) {
 			LabeledEnum e1 = (LabeledEnum) o1;
 			LabeledEnum e2 = (LabeledEnum) o2;
@@ -87,8 +89,8 @@ public interface LabeledEnum extends Comparable, Serializable {
 	};
 
 	/**
-	 * Shared Comparator instance that sorts enumerations by <code>LABEL_ORDER</code>,
-	 * then <code>CODE_ORDER</code>.
+	 * Shared Comparator instance that sorts enumerations by {@code LABEL_ORDER},
+	 * then {@code CODE_ORDER}.
 	 */
 	Comparator DEFAULT_ORDER =
 			new CompoundComparator(new Comparator[] { LABEL_ORDER, CODE_ORDER });

@@ -53,6 +53,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 	private MockPageContext pageContext;
 
 
+	@Override
 	protected final void setUp() throws Exception {
 		// set up a writer for the tag content to be written to
 		this.writer = new StringWriter();
@@ -104,7 +105,7 @@ public abstract class AbstractHtmlElementTagTests extends AbstractTagTests {
 		RequestDataValueProcessor mockProcessor = createMock(RequestDataValueProcessor.class);
 		ServletRequest request = getPageContext().getRequest();
 		StaticWebApplicationContext wac = (StaticWebApplicationContext) RequestContextUtils.getWebApplicationContext(request);
-		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);		
+		wac.getBean(RequestDataValueProcessorWrapper.class).setRequestDataValueProcessor(mockProcessor);
 		return mockProcessor;
 	}
 

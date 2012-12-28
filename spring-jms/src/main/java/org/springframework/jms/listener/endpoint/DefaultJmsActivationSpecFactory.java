@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 	 * "ActiveMQActivationSpec" in the same package, or a class named
 	 * "ActivationSpecImpl" in the same package as the ResourceAdapter class.
 	 */
+	@Override
 	protected Class determineActivationSpecClass(ResourceAdapter adapter) {
 		String adapterClassName = adapter.getClass().getName();
 
@@ -131,6 +132,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 	 * "maxMessagesPerSessions"/"maxMessages", respectively
 	 * (following ActiveMQ's and JORAM's naming conventions).
 	 */
+	@Override
 	protected void populateActivationSpecProperties(BeanWrapper bw, JmsActivationSpecConfig config) {
 		super.populateActivationSpecProperties(bw, config);
 		if (config.getMaxConcurrency() > 0) {
@@ -164,10 +166,11 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 	}
 
 	/**
-	 * This implementation maps <code>SESSION_TRANSACTED</code> onto an
+	 * This implementation maps {@code SESSION_TRANSACTED} onto an
 	 * ActivationSpec property named "useRAManagedTransaction", if available
 	 * (following ActiveMQ's naming conventions).
 	 */
+	@Override
 	protected void applyAcknowledgeMode(BeanWrapper bw, int ackMode) {
 		if (ackMode == Session.SESSION_TRANSACTED && bw.isWritableProperty("useRAManagedTransaction")) {
 			// ActiveMQ

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,16 @@ import java.util.WeakHashMap;
  * expensive values in a target Map. Supports caching weak or strong keys.
  *
  * <p>This class is an abstract template. Caching Map implementations
- * should subclass and override the <code>create(key)</code> method which
+ * should subclass and override the {@code create(key)} method which
  * encapsulates expensive creation of a new object.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2
  * @deprecated as of Spring 3.2, to be removed along with LabeledEnum support
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 
 	private static Object NULL_VALUE = new Object();
@@ -116,18 +117,22 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 	}
 
 
+	@Override
 	public int size() {
 		return this.targetMap.size();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return this.targetMap.isEmpty();
 	}
 
+	@Override
 	public boolean containsKey(Object key) {
 		return this.targetMap.containsKey(key);
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		Object valueToCheck = (value != null ? value : NULL_VALUE);
 		if (this.synchronize) {
@@ -152,6 +157,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 		return false;
 	}
 
+	@Override
 	public V remove(Object key) {
 		return unwrapReturnValue(this.targetMap.remove(key));
 	}
@@ -165,14 +171,17 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 		return (returnValue == NULL_VALUE ? null : (V) returnValue);
 	}
 
+	@Override
 	public void putAll(Map<? extends K, ? extends V> map) {
 		this.targetMap.putAll(map);
 	}
 
+	@Override
 	public void clear() {
 		this.targetMap.clear();
 	}
 
+	@Override
 	public Set<K> keySet() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
@@ -184,6 +193,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 		}
 	}
 
+	@Override
 	public Collection<V> values() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
@@ -212,6 +222,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 		return values;
 	}
 
+	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
 		if (this.synchronize) {
 			synchronized (this.targetMap) {
@@ -247,6 +258,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 	 * reference.
 	 * @see #useWeakValue(Object, Object)
 	 */
+	@Override
 	public V put(K key, V value) {
 		Object newValue = value;
 		if (value == null) {
@@ -263,8 +275,8 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 	 * the given key-value pair.
 	 * @param key the candidate key
 	 * @param value the candidate value
-	 * @return <code>true</code> in order to use a weak reference;
-	 * <code>false</code> otherwise.
+	 * @return {@code true} in order to use a weak reference;
+	 * {@code false} otherwise.
 	 */
 	protected boolean useWeakValue(K key, V value) {
 		return this.weak;
@@ -279,6 +291,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 	 * Consider overriding this method to synchronize it, if desired.
 	 * @see #create(Object)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public V get(Object key) {
 		Object value = this.targetMap.get(key);
@@ -295,7 +308,7 @@ public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializab
 
 	/**
 	 * Create a value to cache for the given key.
-	 * Called by <code>get</code> if there is no value cached already.
+	 * Called by {@code get} if there is no value cached already.
 	 * @param key the cache key
 	 * @see #get(Object)
 	 */

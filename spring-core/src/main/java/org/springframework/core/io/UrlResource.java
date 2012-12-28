@@ -30,7 +30,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link Resource} implementation for <code>java.net.URL</code> locators.
+ * {@link Resource} implementation for {@code java.net.URL} locators.
  * Obviously supports resolution as URL, and also as File in case of
  * the "file:" protocol.
  *
@@ -112,12 +112,13 @@ public class UrlResource extends AbstractFileResolvingResource {
 
 	/**
 	 * This implementation opens an InputStream for the given URL.
-	 * It sets the "UseCaches" flag to <code>false</code>,
+	 * It sets the "UseCaches" flag to {@code false},
 	 * mainly to avoid jar file locking on Windows.
 	 * @see java.net.URL#openConnection()
 	 * @see java.net.URLConnection#setUseCaches(boolean)
 	 * @see java.net.URLConnection#getInputStream()
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		ResourceUtils.useCachesIfNecessary(con);
@@ -196,6 +197,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation returns a description that includes the URL.
 	 */
+	@Override
 	public String getDescription() {
 		return "URL [" + this.url + "]";
 	}
@@ -207,7 +209,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
+			(obj instanceof UrlResource && this.cleanedUrl.equals(((UrlResource) obj).cleanedUrl)));
 	}
 
 	/**

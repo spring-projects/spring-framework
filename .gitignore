@@ -10,7 +10,7 @@ integration-repo
 ivy-cache
 jxl.log
 jmx.log
-spring-jdbc/derby.log
+derby.log
 spring-test/test-output/
 .gradle
 build
@@ -19,8 +19,10 @@ build
 argfile*
 pom.xml
 
-# IDEA metadata and output dirs
+# IDEA artifacts and output dirs
 *.iml
 *.ipr
 *.iws
 out
+test-output
+atlassian-ide-plugin.xml

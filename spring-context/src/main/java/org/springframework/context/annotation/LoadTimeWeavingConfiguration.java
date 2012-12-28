@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 
 	private ClassLoader beanClassLoader;
 
+	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableLTW = MetadataUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
 		Assert.notNull(this.enableLTW,
@@ -59,6 +60,7 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 				importMetadata.getClassName());
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}

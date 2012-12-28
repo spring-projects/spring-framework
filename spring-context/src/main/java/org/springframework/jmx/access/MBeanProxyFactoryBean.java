@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Attempting to invoke or access any method or property on the proxy
  * interface that does not correspond to the management interface will lead
- * to an <code>InvalidInvocationException</code>.
+ * to an {@code InvalidInvocationException}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -72,7 +72,7 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	}
 
 	/**
-	 * Checks that the <code>proxyInterface</code> has been specified and then
+	 * Checks that the {@code proxyInterface} has been specified and then
 	 * generates the proxy for the target MBean.
 	 */
 	@Override
@@ -94,14 +94,17 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.mbeanProxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.proxyInterface;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

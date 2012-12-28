@@ -23,7 +23,7 @@ public class GroovyAspectIntegrationTests {
 
 	@Test
 	public void testJavaBean() {
-		
+
 		context = new GenericXmlApplicationContext(getClass(), getClass().getSimpleName()+"-java-context.xml");
 
 		TestService bean = context.getBean("javaBean", TestService.class);

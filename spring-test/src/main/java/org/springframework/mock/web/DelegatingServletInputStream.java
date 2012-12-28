@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	/**
 	 * Create a DelegatingServletInputStream for the given source stream.
-	 * @param sourceStream the source stream (never <code>null</code>)
+	 * @param sourceStream the source stream (never {@code null})
 	 */
 	public DelegatingServletInputStream(InputStream sourceStream) {
 		Assert.notNull(sourceStream, "Source InputStream must not be null");
@@ -47,17 +47,19 @@ public class DelegatingServletInputStream extends ServletInputStream {
 	}
 
 	/**
-	 * Return the underlying source stream (never <code>null</code>).
+	 * Return the underlying source stream (never {@code null}).
 	 */
 	public final InputStream getSourceStream() {
 		return this.sourceStream;
 	}
 
 
+	@Override
 	public int read() throws IOException {
 		return this.sourceStream.read();
 	}
 
+	@Override
 	public void close() throws IOException {
 		super.close();
 		this.sourceStream.close();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * using this FactoryBean to link it in and expose it under a different name.
  * Effectively, this corresponds to an alias for the target bean.
  *
- * <p><b>NOTE:</b> For XML bean definition files, an <code>&lt;alias&gt;</code>
+ * <p><b>NOTE:</b> For XML bean definition files, an {@code &lt;alias&gt;}
  * tag is available that effectively achieves the same.
  *
  * <p>A special capability of this FactoryBean is enabled through its configuration
@@ -65,6 +65,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		this.targetBeanName = targetBeanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (this.targetBeanName == null) {
@@ -76,6 +77,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 	}
 
 
+	@Override
 	public Object getObject() throws BeansException {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -83,6 +85,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.getBean(this.targetBeanName);
 	}
 
+	@Override
 	public Class getObjectType() {
 		if (this.beanFactory == null) {
 			return null;
@@ -90,6 +93,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.getType(this.targetBeanName);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -97,6 +101,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.isSingleton(this.targetBeanName);
 	}
 
+	@Override
 	public boolean isPrototype() {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -104,6 +109,7 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.isPrototype(this.targetBeanName);
 	}
 
+	@Override
 	public boolean isEagerInit() {
 		return false;
 	}

@@ -56,13 +56,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	/**
 	 * Specify the order value for this HandlerMapping bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public final void setOrder(int order) {
 	  this.order = order;
 	}
 
+	@Override
 	public final int getOrder() {
 	  return this.order;
 	}
@@ -70,7 +71,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	/**
 	 * Set the default handler for this handler mapping.
 	 * This handler will be returned if no specific mapping was found.
-	 * <p>Default is <code>null</code>, indicating no default handler.
+	 * <p>Default is {@code null}, indicating no default handler.
 	 */
 	public void setDefaultHandler(Object defaultHandler) {
 		this.defaultHandler = defaultHandler;
@@ -78,7 +79,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	/**
 	 * Return the default handler for this handler mapping,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 */
 	public Object getDefaultHandler() {
 		return this.defaultHandler;
@@ -88,7 +89,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * Set the interceptors to apply for all handlers mapped by this handler mapping.
 	 * <p>Supported interceptor types are HandlerInterceptor and WebRequestInterceptor.
 	 * Each given WebRequestInterceptor will be wrapped in a WebRequestHandlerInterceptorAdapter.
-	 * @param interceptors array of handler interceptors, or <code>null</code> if none
+	 * @param interceptors array of handler interceptors, or {@code null} if none
 	 * @see #adaptInterceptor
 	 * @see org.springframework.web.portlet.HandlerInterceptor
 	 * @see org.springframework.web.context.request.WebRequestInterceptor
@@ -135,7 +136,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * <p>Will be invoked before {@link #initInterceptors()} adapts the specified
 	 * interceptors into {@link HandlerInterceptor} instances.
 	 * <p>The default implementation is empty.
-	 * @param interceptors the configured interceptor List (never <code>null</code>),
+	 * @param interceptors the configured interceptor List (never {@code null}),
 	 * allowing to add further interceptors before as well as after the existing
 	 * interceptors
 	 */
@@ -187,7 +188,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 
 	/**
 	 * Return the adapted interceptors as HandlerInterceptor array.
-	 * @return the array of HandlerInterceptors, or <code>null</code> if none
+	 * @return the array of HandlerInterceptors, or {@code null} if none
 	 */
 	protected final HandlerInterceptor[] getAdaptedInterceptors() {
 		return this.adaptedInterceptors;
@@ -201,6 +202,7 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
+	@Override
 	public final HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
@@ -218,14 +220,14 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	}
 
 	/**
-	 * Look up a handler for the given request, returning <code>null</code> if no
+	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
-	 * a <code>null</code> return value will lead to the default handler, if one is set.
+	 * a {@code null} return value will lead to the default handler, if one is set.
 	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
 	 * combining a handler object with dynamically determined interceptors.
 	 * Statically specified interceptors will get merged into such an existing chain.
 	 * @param request current portlet request
-	 * @return the corresponding handler instance, or <code>null</code> if none found
+	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
 	 * @see #getHandler
 	 */
@@ -239,11 +241,11 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a pre-built
 	 * HandlerExecutionChain. This method should handle those two cases explicitly,
 	 * either building a new HandlerExecutionChain or extending the existing chain.
-	 * <p>For simply adding an interceptor, consider calling <code>super.getHandlerExecutionChain</code>
+	 * <p>For simply adding an interceptor, consider calling {@code super.getHandlerExecutionChain}
 	 * and invoking {@link HandlerExecutionChain#addInterceptor} on the returned chain object.
-	 * @param handler the resolved handler instance (never <code>null</code>)
+	 * @param handler the resolved handler instance (never {@code null})
 	 * @param request current portlet request
-	 * @return the HandlerExecutionChain (never <code>null</code>)
+	 * @return the HandlerExecutionChain (never {@code null})
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, PortletRequest request) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ public abstract class ClassFilters {
 	/**
 	 * ClassFilter implementation for a union of the given ClassFilters.
 	 */
+	@SuppressWarnings("serial")
 	private static class UnionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;
@@ -95,6 +96,7 @@ public abstract class ClassFilters {
 			this.filters = filters;
 		}
 
+		@Override
 		public boolean matches(Class clazz) {
 			for (int i = 0; i < this.filters.length; i++) {
 				if (this.filters[i].matches(clazz)) {
@@ -120,6 +122,7 @@ public abstract class ClassFilters {
 	/**
 	 * ClassFilter implementation for an intersection of the given ClassFilters.
 	 */
+	@SuppressWarnings("serial")
 	private static class IntersectionClassFilter implements ClassFilter, Serializable {
 
 		private ClassFilter[] filters;
@@ -128,6 +131,7 @@ public abstract class ClassFilters {
 			this.filters = filters;
 		}
 
+		@Override
 		public boolean matches(Class clazz) {
 			for (int i = 0; i < this.filters.length; i++) {
 				if (!this.filters[i].matches(clazz)) {

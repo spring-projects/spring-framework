@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * Generic Converter that attempts to convert a source Object to a target type
  * by delegating to methods on the target type.
  *
- * <p>Calls the static <code>valueOf(sourceType)</code> method on the target type
+ * <p>Calls the static {@code valueOf(sourceType)} method on the target type
  * to perform the conversion, if such a method exists. Else calls the target type's
  * Constructor that accepts a single sourceType argument, if such a Constructor exists.
  * Else throws a ConversionFailedException.
@@ -43,10 +43,12 @@ import org.springframework.util.ReflectionUtils;
  */
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
+	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
 	}
 
+	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (sourceType.getType().equals(targetType.getType())) {
 			// no conversion required
@@ -55,6 +57,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return hasValueOfMethodOrConstructor(targetType.getType(), sourceType.getType());
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;

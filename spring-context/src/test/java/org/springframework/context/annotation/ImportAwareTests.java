@@ -124,6 +124,7 @@ public class ImportAwareTests {
 
 		AnnotationMetadata importMetadata;
 
+		@Override
 		public void setImportMetadata(AnnotationMetadata importMetadata) {
 			this.importMetadata = importMetadata;
 		}
@@ -142,14 +143,17 @@ public class ImportAwareTests {
 
 	static class BPP implements BeanFactoryAware, BeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		}
 	}
@@ -175,6 +179,7 @@ public class ImportAwareTests {
 
 		static boolean called;
 
+		@Override
 		public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata,
 				BeanDefinitionRegistry registry) {
 			BeanDefinition beanDefinition = new GenericBeanDefinition();

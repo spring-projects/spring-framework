@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.expression.TypeConverter;
 
 /**
  * A constructor resolver that uses reflection to locate the constructor that should be invoked
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -49,6 +49,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 	 * registered type converter.
 	 * </ol>
 	 */
+	@Override
 	public ConstructorExecutor resolve(EvaluationContext context, String typename, List<TypeDescriptor> argumentTypes)
 			throws AccessException {
 
@@ -58,6 +59,7 @@ public class ReflectiveConstructorResolver implements ConstructorResolver {
 			Constructor[] ctors = type.getConstructors();
 
 			Arrays.sort(ctors, new Comparator<Constructor>() {
+				@Override
 				public int compare(Constructor c1, Constructor c2) {
 					int c1pl = c1.getParameterTypes().length;
 					int c2pl = c2.getParameterTypes().length;

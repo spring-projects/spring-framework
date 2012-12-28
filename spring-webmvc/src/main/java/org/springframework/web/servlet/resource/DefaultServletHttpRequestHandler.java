@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	 * attempts to locate the default Servlet using the known common
 	 * container-specific names.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		if (!StringUtils.hasText(this.defaultServletName)) {
@@ -109,6 +110,7 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	}
 
 
+	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

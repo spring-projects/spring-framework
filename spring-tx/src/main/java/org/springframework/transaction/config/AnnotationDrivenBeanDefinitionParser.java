@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.transaction.interceptor.TransactionInterceptor;
  * <p>By default, all proxies are created as JDK proxies. This may cause some
  * problems if you are injecting objects as concrete classes rather than
  * interfaces. To overcome this restriction you can set the
- * '<code>proxy-target-class</code>' attribute to '<code>true</code>', which
+ * '{@code proxy-target-class}' attribute to '{@code true}', which
  * will result in class-based proxies being created.
  *
  * @author Juergen Hoeller
@@ -73,6 +73,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary register an AutoProxyCreator}
 	 * with the container as necessary.
 	 */
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {

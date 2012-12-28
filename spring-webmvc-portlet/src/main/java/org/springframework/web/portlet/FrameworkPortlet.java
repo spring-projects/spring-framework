@@ -362,7 +362,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	/**
 	 * Post-process the given Portlet ApplicationContext before it is refreshed
 	 * and activated as context for this portlet.
-	 * <p>The default implementation is empty. <code>refresh()</code> will
+	 * <p>The default implementation is empty. {@code refresh()} will
 	 * be called automatically after this method returns.
 	 * @param pac the configured Portlet ApplicationContext (not refreshed yet)
 	 * @see #createPortletApplicationContext
@@ -421,6 +421,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * triggering a refresh of this servlet's context-dependent state.
 	 * @param event the incoming ApplicationContext event
 	 */
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.refreshEventReceived = true;
 		onRefresh(event.getApplicationContext());
@@ -488,7 +489,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	/**
 	 * Process this request, publishing an event regardless of the outcome.
 	 * The actual event handling is performed by the abstract
-	 * <code>doActionService()</code> and <code>doRenderService()</code> template methods.
+	 * {@code doActionService()} and {@code doRenderService()} template methods.
 	 * @see #doActionService
 	 * @see #doRenderService
 	 */
@@ -591,7 +592,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 	 * If that does not exist, then it checks the USER_INFO map.
 	 * Can be overridden in subclasses.
 	 * @param request current portlet request
-	 * @return the username, or <code>null</code> if none found
+	 * @return the username, or {@code null} if none found
 	 * @see javax.portlet.PortletRequest#getUserPrincipal()
 	 * @see javax.portlet.PortletRequest#getRemoteUser()
 	 * @see javax.portlet.PortletRequest#USER_INFO
@@ -609,7 +610,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		if (userName != null) {
 			return userName;
 		}
-		
+
 		// Try the Portlet USER_INFO map.
 		Map userInfo = (Map) request.getAttribute(PortletRequest.USER_INFO);
 		if (userInfo != null) {
@@ -620,7 +621,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 				}
 			}
 		}
-		
+
 		// Nothing worked...
 		return null;
 	}
@@ -628,7 +629,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 	/**
 	 * Subclasses must implement this method to do the work of action request handling.
-	 * <p>The contract is essentially the same as that for the <code>processAction</code>
+	 * <p>The contract is essentially the same as that for the {@code processAction}
 	 * method of GenericPortlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
@@ -642,7 +643,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 	/**
 	 * Subclasses must implement this method to do the work of render request handling.
-	 * <p>The contract is essentially the same as that for the <code>doDispatch</code>
+	 * <p>The contract is essentially the same as that for the {@code doDispatch}
 	 * method of GenericPortlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
@@ -656,7 +657,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 	/**
 	 * Subclasses must implement this method to do the work of resource request handling.
-	 * <p>The contract is essentially the same as that for the <code>serveResource</code>
+	 * <p>The contract is essentially the same as that for the {@code serveResource}
 	 * method of GenericPortlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.
@@ -670,7 +671,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 
 	/**
 	 * Subclasses must implement this method to do the work of event request handling.
-	 * <p>The contract is essentially the same as that for the <code>processEvent</code>
+	 * <p>The contract is essentially the same as that for the {@code processEvent}
 	 * method of GenericPortlet.
 	 * <p>This class intercepts calls to ensure that exception handling and
 	 * event publication takes place.

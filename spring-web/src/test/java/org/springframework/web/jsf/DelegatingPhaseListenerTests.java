@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,14 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	private StaticListableBeanFactory beanFactory;
 	private DelegatingPhaseListenerMulticaster delPhaseListener;
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void setUp() {
 		facesContext = new MockFacesContext();
 		beanFactory = new StaticListableBeanFactory();
 
 		delPhaseListener = new DelegatingPhaseListenerMulticaster() {
+			@Override
 			protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
 				return beanFactory;
 			}
@@ -80,19 +83,23 @@ public class DelegatingPhaseListenerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestListener implements PhaseListener {
 
 		boolean beforeCalled = false;
 		boolean afterCalled = false;
 
+		@Override
 		public PhaseId getPhaseId() {
 			return PhaseId.ANY_PHASE;
 		}
 
+		@Override
 		public void beforePhase(PhaseEvent arg0) {
 			beforeCalled = true;
 		}
 
+		@Override
 		public void afterPhase(PhaseEvent arg0) {
 			afterCalled = true;
 		}

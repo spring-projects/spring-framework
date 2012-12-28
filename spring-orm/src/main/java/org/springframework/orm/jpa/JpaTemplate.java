@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  * Helper class that allows for writing JPA data access code in the same style
  * as with Spring's well-known JdoTemplate and HibernateTemplate classes.
  * Automatically converts PersistenceExceptions into Spring DataAccessExceptions,
- * following the <code>org.springframework.dao</code> exception hierarchy.
+ * following the {@code org.springframework.dao} exception hierarchy.
  *
  * <p>The central method is of this template is "execute", supporting JPA access code
  * implementing the {@link JpaCallback} interface. It provides JPA EntityManager
@@ -86,7 +86,7 @@ import org.springframework.util.ClassUtils;
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  * Note that this class did not get upgraded to JPA 2.0 and never will.
  */
 @Deprecated
@@ -123,7 +123,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	/**
 	 * Set whether to expose the native JPA EntityManager to JpaCallback
 	 * code. Default is "false": a EntityManager proxy will be returned,
-	 * suppressing <code>close</code> calls and automatically applying transaction
+	 * suppressing {@code close} calls and automatically applying transaction
 	 * timeouts (if any).
 	 * <p>As there is often a need to cast to a provider-specific EntityManager
 	 * class in DAOs that use the JPA 1.0 API, for JPA 2.0 previews and other
@@ -146,10 +146,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 
+	@Override
 	public <T> T execute(JpaCallback<T> action) throws DataAccessException {
 		return execute(action, isExposeNativeEntityManager());
 	}
 
+	@Override
 	public List executeFind(JpaCallback<?> action) throws DataAccessException {
 		Object result = execute(action, isExposeNativeEntityManager());
 		if (!(result instanceof List)) {
@@ -165,7 +167,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	 * @param action callback object that specifies the JPA action
 	 * @param exposeNativeEntityManager whether to expose the native
 	 * JPA entity manager to callback code
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of JPA errors
 	 */
 	public <T> T execute(JpaCallback<T> action, boolean exposeNativeEntityManager) throws DataAccessException {
@@ -229,32 +231,40 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience methods for load, save, delete
 	//-------------------------------------------------------------------------
 
+	@Override
 	public <T> T find(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.find(entityClass, id);
 			}
 		}, true);
 	}
 
+	@Override
 	public <T> T getReference(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.getReference(entityClass, id);
 			}
 		}, true);
 	}
 
+	@Override
 	public boolean contains(final Object entity) throws DataAccessException {
 		return execute(new JpaCallback<Boolean>() {
+			@Override
 			public Boolean doInJpa(EntityManager em) throws PersistenceException {
 				return em.contains(entity);
 			}
 		}, true);
 	}
 
+	@Override
 	public void refresh(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.refresh(entity);
 				return null;
@@ -262,8 +272,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public void persist(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.persist(entity);
 				return null;
@@ -271,16 +283,20 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public <T> T merge(final T entity) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.merge(entity);
 			}
 		}, true);
 	}
 
+	@Override
 	public void remove(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.remove(entity);
 				return null;
@@ -288,8 +304,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public void flush() throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.flush();
 				return null;
@@ -302,12 +320,15 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience finder methods
 	//-------------------------------------------------------------------------
 
+	@Override
 	public List find(String queryString) throws DataAccessException {
 		return find(queryString, (Object[]) null);
 	}
 
+	@Override
 	public List find(final String queryString, final Object... values) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -321,8 +342,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedParams(final String queryString, final Map<String, ?> params) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -336,12 +359,15 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedQuery(String queryName) throws DataAccessException {
 		return findByNamedQuery(queryName, (Object[]) null);
 	}
 
+	@Override
 	public List findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -355,10 +381,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ?> params)
 			throws DataAccessException {
 
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -408,6 +436,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface (or provider-specific extension) coming in...
 

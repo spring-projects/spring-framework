@@ -639,25 +639,30 @@ final class HierarchicalUriComponents extends UriComponents {
 			this.path = path;
 		}
 
+		@Override
 		public String getPath() {
 			return path;
 		}
 
+		@Override
 		public List<String> getPathSegments() {
 			String delimiter = new String(new char[]{PATH_DELIMITER});
 			String[] pathSegments = StringUtils.tokenizeToStringArray(path, delimiter);
 			return Collections.unmodifiableList(Arrays.asList(pathSegments));
 		}
 
+		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
 			return new FullPathComponent(encodedPath);
 		}
 
+		@Override
 		public void verify() {
 			verifyUriComponent(this.path, Type.PATH);
 		}
 
+		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			String expandedPath = expandUriComponent(getPath(), uriVariables);
 			return new FullPathComponent(expandedPath);
@@ -686,6 +691,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			this.pathSegments = Collections.unmodifiableList(pathSegments);
 		}
 
+		@Override
 		public String getPath() {
 			StringBuilder pathBuilder = new StringBuilder();
 			pathBuilder.append(PATH_DELIMITER);
@@ -699,10 +705,12 @@ final class HierarchicalUriComponents extends UriComponents {
 			return pathBuilder.toString();
 		}
 
+		@Override
 		public List<String> getPathSegments() {
 			return this.pathSegments;
 		}
 
+		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			List<String> pathSegments = getPathSegments();
 			List<String> encodedPathSegments = new ArrayList<String>(pathSegments.size());
@@ -713,12 +721,14 @@ final class HierarchicalUriComponents extends UriComponents {
 			return new PathSegmentComponent(encodedPathSegments);
 		}
 
+		@Override
 		public void verify() {
 			for (String pathSegment : getPathSegments()) {
 				verifyUriComponent(pathSegment, Type.PATH_SEGMENT);
 			}
 		}
 
+		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<String> pathSegments = getPathSegments();
 			List<String> expandedPathSegments = new ArrayList<String>(pathSegments.size());
@@ -753,6 +763,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			this.pathComponents = pathComponents;
 		}
 
+		@Override
 		public String getPath() {
 			StringBuilder pathBuilder = new StringBuilder();
 			for (PathComponent pathComponent : this.pathComponents) {
@@ -761,6 +772,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return pathBuilder.toString();
 		}
 
+		@Override
 		public List<String> getPathSegments() {
 			List<String> result = new ArrayList<String>();
 			for (PathComponent pathComponent : this.pathComponents) {
@@ -769,6 +781,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return result;
 		}
 
+		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			List<PathComponent> encodedComponents = new ArrayList<PathComponent>(pathComponents.size());
 			for (PathComponent pathComponent : pathComponents) {
@@ -777,12 +790,14 @@ final class HierarchicalUriComponents extends UriComponents {
 			return new PathComponentComposite(encodedComponents);
 		}
 
+		@Override
 		public void verify() {
 			for (PathComponent pathComponent : pathComponents) {
 				pathComponent.verify();
 			}
 		}
 
+		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			List<PathComponent> expandedComponents = new ArrayList<PathComponent>(this.pathComponents.size());
 			for (PathComponent pathComponent : this.pathComponents) {
@@ -799,21 +814,26 @@ final class HierarchicalUriComponents extends UriComponents {
 	 */
 	final static PathComponent NULL_PATH_COMPONENT = new PathComponent() {
 
+		@Override
 		public String getPath() {
 			return null;
 		}
 
+		@Override
 		public List<String> getPathSegments() {
 			return Collections.emptyList();
 		}
 
+		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			return this;
 		}
 
+		@Override
 		public void verify() {
 		}
 
+		@Override
 		public PathComponent expand(UriTemplateVariables uriVariables) {
 			return this;
 		}

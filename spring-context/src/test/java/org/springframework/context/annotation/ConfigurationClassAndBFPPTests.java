@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ public class ConfigurationClassAndBFPPTests {
 		@Bean
 		public BeanFactoryPostProcessor bfpp() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 					// no-op
 				}
@@ -90,6 +91,7 @@ public class ConfigurationClassAndBFPPTests {
 		@Bean
 		public static final BeanFactoryPostProcessor bfpp() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 					// no-op
 				}
@@ -99,14 +101,11 @@ public class ConfigurationClassAndBFPPTests {
 
 
 	@Test
-	@SuppressWarnings("static-access")
 	public void staticBeanMethodsDoNotRespectScoping() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(ConfigWithStaticBeanMethod.class);
 		ctx.refresh();
-
-		ConfigWithStaticBeanMethod config = ctx.getBean(ConfigWithStaticBeanMethod.class);
-		assertThat(config.testBean(), not(sameInstance(config.testBean())));
+		assertThat(ConfigWithStaticBeanMethod.testBean(), not(sameInstance(ConfigWithStaticBeanMethod.testBean())));
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ public abstract class ConnectionFactoryUtils {
 	 * This is essentially a more sophisticated version of
 	 * {@link org.springframework.jms.support.JmsUtils#closeConnection}.
 	 * @param con the Connection to release
-	 * (if this is <code>null</code>, the call will be ignored)
+	 * (if this is {@code null}, the call will be ignored)
 	 * @param cf the ConnectionFactory that the Connection was obtained from
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param started whether the Connection might have been started by the application
 	 * @see SmartConnectionFactory#shouldStop
 	 * @see org.springframework.jms.support.JmsUtils#closeConnection
@@ -122,13 +122,13 @@ public abstract class ConnectionFactoryUtils {
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
 	 * @param cf the ConnectionFactory to obtain a Session for
 	 * @param existingCon the existing JMS Connection to obtain a Session for
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
 	 * that is synchronized with a Spring-managed transaction (where the main transaction
 	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
 	 * transaction committing right after the main transaction. If not allowed, the given
 	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
-	 * @return the transactional Session, or <code>null</code> if none found
+	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
 	public static Session getTransactionalSession(
@@ -136,18 +136,23 @@ public abstract class ConnectionFactoryUtils {
 			throws JMSException {
 
 		return doGetTransactionalSession(cf, new ResourceFactory() {
+			@Override
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(Session.class, existingCon);
 			}
+			@Override
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection());
 			}
+			@Override
 			public Connection createConnection() throws JMSException {
 				return cf.createConnection();
 			}
+			@Override
 			public Session createSession(Connection con) throws JMSException {
 				return con.createSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
 			}
+			@Override
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
@@ -159,13 +164,13 @@ public abstract class ConnectionFactoryUtils {
 	 * <p>Mainly intended for use with the JMS 1.0.2 API.
 	 * @param cf the ConnectionFactory to obtain a Session for
 	 * @param existingCon the existing JMS Connection to obtain a Session for
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
 	 * that is synchronized with a Spring-managed transaction (where the main transaction
 	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
 	 * transaction committing right after the main transaction. If not allowed, the given
 	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
-	 * @return the transactional Session, or <code>null</code> if none found
+	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
 	public static QueueSession getTransactionalQueueSession(
@@ -173,18 +178,23 @@ public abstract class ConnectionFactoryUtils {
 			throws JMSException {
 
 		return (QueueSession) doGetTransactionalSession(cf, new ResourceFactory() {
+			@Override
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(QueueSession.class, existingCon);
 			}
+			@Override
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(QueueConnection.class));
 			}
+			@Override
 			public Connection createConnection() throws JMSException {
 				return cf.createQueueConnection();
 			}
+			@Override
 			public Session createSession(Connection con) throws JMSException {
 				return ((QueueConnection) con).createQueueSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
 			}
+			@Override
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
@@ -196,13 +206,13 @@ public abstract class ConnectionFactoryUtils {
 	 * <p>Mainly intended for use with the JMS 1.0.2 API.
 	 * @param cf the ConnectionFactory to obtain a Session for
 	 * @param existingCon the existing JMS Connection to obtain a Session for
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param synchedLocalTransactionAllowed whether to allow for a local JMS transaction
 	 * that is synchronized with a Spring-managed transaction (where the main transaction
 	 * might be a JDBC-based one for a specific DataSource, for example), with the JMS
 	 * transaction committing right after the main transaction. If not allowed, the given
 	 * ConnectionFactory needs to handle transaction enlistment underneath the covers.
-	 * @return the transactional Session, or <code>null</code> if none found
+	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
 	public static TopicSession getTransactionalTopicSession(
@@ -210,18 +220,23 @@ public abstract class ConnectionFactoryUtils {
 			throws JMSException {
 
 		return (TopicSession) doGetTransactionalSession(cf, new ResourceFactory() {
+			@Override
 			public Session getSession(JmsResourceHolder holder) {
 				return holder.getSession(TopicSession.class, existingCon);
 			}
+			@Override
 			public Connection getConnection(JmsResourceHolder holder) {
 				return (existingCon != null ? existingCon : holder.getConnection(TopicConnection.class));
 			}
+			@Override
 			public Connection createConnection() throws JMSException {
 				return cf.createTopicConnection();
 			}
+			@Override
 			public Session createSession(Connection con) throws JMSException {
 				return ((TopicConnection) con).createTopicSession(synchedLocalTransactionAllowed, Session.AUTO_ACKNOWLEDGE);
 			}
+			@Override
 			public boolean isSynchedLocalTransactionAllowed() {
 				return synchedLocalTransactionAllowed;
 			}
@@ -230,13 +245,13 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Obtain a JMS Session that is synchronized with the current transaction, if any.
-	 * <p>This <code>doGetTransactionalSession</code> variant always starts the underlying
+	 * <p>This {@code doGetTransactionalSession} variant always starts the underlying
 	 * JMS Connection, assuming that the Session will be used for receiving messages.
 	 * @param connectionFactory the JMS ConnectionFactory to bind for
 	 * (used as TransactionSynchronizationManager key)
 	 * @param resourceFactory the ResourceFactory to use for extracting or creating
 	 * JMS resources
-	 * @return the transactional Session, or <code>null</code> if none found
+	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 * @see #doGetTransactionalSession(javax.jms.ConnectionFactory, ResourceFactory, boolean)
 	 */
@@ -254,8 +269,8 @@ public abstract class ConnectionFactoryUtils {
 	 * JMS resources
 	 * @param startConnection whether the underlying JMS Connection approach should be
 	 * started in order to allow for receiving messages. Note that a reused Connection
-	 * may already have been started before, even if this flag is <code>false</code>.
-	 * @return the transactional Session, or <code>null</code> if none found
+	 * may already have been started before, even if this flag is {@code false}.
+	 * @return the transactional Session, or {@code null} if none found
 	 * @throws JMSException in case of JMS failure
 	 */
 	public static Session doGetTransactionalSession(
@@ -335,7 +350,7 @@ public abstract class ConnectionFactoryUtils {
 
 	/**
 	 * Callback interface for resource creation.
-	 * Serving as argument for the <code>doGetTransactionalSession</code> method.
+	 * Serving as argument for the {@code doGetTransactionalSession} method.
 	 */
 	public interface ResourceFactory {
 
@@ -343,7 +358,7 @@ public abstract class ConnectionFactoryUtils {
 		 * Fetch an appropriate Session from the given JmsResourceHolder.
 		 * @param holder the JmsResourceHolder
 		 * @return an appropriate Session fetched from the holder,
-		 * or <code>null</code> if none found
+		 * or {@code null} if none found
 		 */
 		Session getSession(JmsResourceHolder holder);
 
@@ -351,7 +366,7 @@ public abstract class ConnectionFactoryUtils {
 		 * Fetch an appropriate Connection from the given JmsResourceHolder.
 		 * @param holder the JmsResourceHolder
 		 * @return an appropriate Connection fetched from the holder,
-		 * or <code>null</code> if none found
+		 * or {@code null} if none found
 		 */
 		Connection getConnection(JmsResourceHolder holder);
 
@@ -395,10 +410,12 @@ public abstract class ConnectionFactoryUtils {
 			this.transacted = transacted;
 		}
 
+		@Override
 		protected boolean shouldReleaseBeforeCompletion() {
 			return !this.transacted;
 		}
 
+		@Override
 		protected void processResourceAfterCommit(JmsResourceHolder resourceHolder) {
 			try {
 				resourceHolder.commitAll();
@@ -408,6 +425,7 @@ public abstract class ConnectionFactoryUtils {
 			}
 		}
 
+		@Override
 		protected void releaseResource(JmsResourceHolder resourceHolder, Object resourceKey) {
 			resourceHolder.closeAll();
 		}

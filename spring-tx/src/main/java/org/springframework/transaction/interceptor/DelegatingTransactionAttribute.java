@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.transaction.support.DelegatingTransactionDefinition;
  * @author Juergen Hoeller
  * @since 1.2
  */
+@SuppressWarnings("serial")
 public abstract class DelegatingTransactionAttribute extends DelegatingTransactionDefinition
 		implements TransactionAttribute, Serializable {
 
@@ -45,10 +46,12 @@ public abstract class DelegatingTransactionAttribute extends DelegatingTransacti
 	}
 
 
+	@Override
 	public String getQualifier() {
 		return this.targetAttribute.getQualifier();
 	}
 
+	@Override
 	public boolean rollbackOn(Throwable ex) {
 		return this.targetAttribute.rollbackOn(ex);
 	}

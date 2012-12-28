@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  */
 public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactoryLocatorTests {
-	
+
 	private static final Class<?> CLASS = ContextSingletonBeanFactoryLocatorTests.class;
 	private static final String CONTEXT = CLASS.getSimpleName() + "-context.xml";
-	
+
 
 	@Test
 	public void testBaseBeanFactoryDefs() {
@@ -47,11 +47,12 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans2.xml"));
 	}
 
+	@Override
 	@Test
 	public void testBasicFunctionality() {
 		ContextSingletonBeanFactoryLocator facLoc = new ContextSingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
-		
+
 		basicFunctionalityTest(facLoc);
 
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
@@ -71,13 +72,14 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	 * 2nd and subsequent calls will actually get back same locator instance. This is not
 	 * really an issue, since the contained bean factories will still be loaded and released.
 	 */
+	@Override
 	@Test
 	public void testGetInstance() {
 		// Try with and without 'classpath*:' prefix, and with 'classpath:' prefix.
 		BeanFactoryLocator facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest1(facLoc);
-		
+
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest2(facLoc);

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2006 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,7 @@ import java.sql.SQLException;
  * <p>A usage example with JdbcTemplate:
  *
  * <pre class="code">JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);  // reusable object
- * 
+ *
  * RowCountCallbackHandler countCallback = new RowCountCallbackHandler();  // not reusable
  * jdbcTemplate.query("select * from user", countCallback);
  * int rowCount = countCallback.getRowCount();</pre>
@@ -55,7 +55,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * as returned by ResultSetMetaData object.
 	 */
 	private int[] columnTypes;
-	
+
 	/**
 	 * Indexed from 0. Column name as returned by ResultSetMetaData object.
 	 */
@@ -66,9 +66,10 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * Implementation of ResultSetCallbackHandler.
 	 * Work out column size if this is the first row, otherwise just count rows.
 	 * <p>Subclasses can perform custom extraction or processing
-	 * by overriding the <code>processRow(ResultSet, int)</code> method.
+	 * by overriding the {@code processRow(ResultSet, int)} method.
 	 * @see #processRow(java.sql.ResultSet, int)
 	 */
+	@Override
 	public final void processRow(ResultSet rs) throws SQLException {
 		if (this.rowCount == 0) {
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -84,7 +85,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 		processRow(rs, this.rowCount++);
 	}
 
-	/** 
+	/**
 	 * Subclasses may override this to perform custom extraction
 	 * or processing. This class's implementation does nothing.
 	 * @param rs ResultSet to extract data from. This method is
@@ -104,8 +105,8 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	public final int[] getColumnTypes() {
 		return columnTypes;
 	}
-	
-	/** 
+
+	/**
 	 * Return the names of the columns.
 	 * Valid after processRow is invoked the first time.
 	 * @return the names of the columns.
@@ -115,7 +116,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 		return columnNames;
 	}
 
-	/** 
+	/**
 	 * Return the row count of this ResultSet
 	 * Only valid after processing is complete
 	 * @return the number of rows in this ResultSet
@@ -124,7 +125,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 		return rowCount;
 	}
 
-	/** 
+	/**
 	 * Return the number of columns in this result set.
 	 * Valid once we've seen the first row,
 	 * so subclasses can use it during processing

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,11 +69,11 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
  * dependencies will be injected via {@link Autowired @Autowired},
  * {@link Inject @Inject}, and {@link Resource @Resource} from beans defined in
  * the {@link ApplicationContext} loaded from the default classpath resource:
- * 
- * <code>&quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+ *
+ * {@code &quot;/org/springframework/test/context/junit/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
  * .
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
@@ -88,8 +88,8 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 	/**
 	 * Default resource path for the application context configuration for
 	 * {@link SpringJUnit4ClassRunnerAppCtxTests}:
-	 * 
-	 * <code>&quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;</code>
+	 *
+	 * {@code &quot;/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml&quot;}
 	 */
 	public static final String DEFAULT_CONTEXT_RESOURCE_PATH = "/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml";
 
@@ -136,14 +136,17 @@ public class SpringJUnit4ClassRunnerAppCtxTests implements ApplicationContextAwa
 
 	// ------------------------------------------------------------------------|
 
+	@Override
 	public final void afterPropertiesSet() throws Exception {
 		this.beanInitialized = true;
 	}
 
+	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
 
+	@Override
 	public final void setBeanName(final String beanName) {
 		this.beanName = beanName;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Chris Beams
  */
 public final class ThisAndTargetSelectionOnlyPointcutsTests {
-	
+
 	private TestInterface testBean;
-	
+
 	private Counter thisAsClassCounter;
 	private Counter thisAsInterfaceCounter;
 	private Counter targetAsClassCounter;
@@ -37,28 +37,28 @@ public final class ThisAndTargetSelectionOnlyPointcutsTests {
 	private Counter thisAsClassAndTargetAsClassCounter;
 	private Counter thisAsInterfaceAndTargetAsInterfaceCounter;
 	private Counter thisAsInterfaceAndTargetAsClassCounter;
-	
+
 	@Before
 	public void setUp() {
 		ClassPathXmlApplicationContext ctx =
 			new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
 		testBean = (TestInterface) ctx.getBean("testBean");
-		
+
 		thisAsClassCounter = (Counter) ctx.getBean("thisAsClassCounter");
 		thisAsInterfaceCounter = (Counter) ctx.getBean("thisAsInterfaceCounter");
 		targetAsClassCounter = (Counter) ctx.getBean("targetAsClassCounter");
 		targetAsInterfaceCounter = (Counter) ctx.getBean("targetAsInterfaceCounter");
-		
+
 		thisAsClassAndTargetAsClassCounter = (Counter) ctx.getBean("thisAsClassAndTargetAsClassCounter");
 		thisAsInterfaceAndTargetAsInterfaceCounter = (Counter) ctx.getBean("thisAsInterfaceAndTargetAsInterfaceCounter");
 		thisAsInterfaceAndTargetAsClassCounter = (Counter) ctx.getBean("thisAsInterfaceAndTargetAsClassCounter");
-		
+
 		thisAsClassCounter.reset();
 		thisAsInterfaceCounter.reset();
 		targetAsClassCounter.reset();
 		targetAsInterfaceCounter.reset();
-		
+
 		thisAsClassAndTargetAsClassCounter.reset();
 		thisAsInterfaceAndTargetAsInterfaceCounter.reset();
 		thisAsInterfaceAndTargetAsClassCounter.reset();
@@ -105,7 +105,7 @@ public final class ThisAndTargetSelectionOnlyPointcutsTests {
 		testBean.doIt();
 		assertEquals(1, thisAsInterfaceAndTargetAsInterfaceCounter.getCount());
 	}
-	
+
 }
 
 
@@ -115,6 +115,7 @@ interface TestInterface {
 
 
 class TestImpl implements TestInterface {
+	@Override
 	public void doIt() {
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.util.ObjectUtils;
  * @see #setPatterns
  * @see JdkRegexpMethodPointcut
  */
+@SuppressWarnings("serial")
 public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor {
 
 	private String[] patterns;
@@ -115,6 +116,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	/**
 	 * Initialize the singleton Pointcut held within this Advisor.
 	 */
+	@Override
 	public Pointcut getPointcut() {
 		synchronized (this.pointcutMonitor) {
 			if (this.pointcut == null) {
@@ -128,7 +130,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	/**
 	 * Create the actual pointcut: By default, a {@link JdkRegexpMethodPointcut}
 	 * will be used.
-	 * @return the Pointcut instance (never <code>null</code>)
+	 * @return the Pointcut instance (never {@code null})
 	 */
 	protected AbstractRegexpMethodPointcut createPointcut() {
 		return new JdkRegexpMethodPointcut();

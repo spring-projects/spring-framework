@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import test.beans.ITestBean;
  * @since 07.01.2005
  */
 public final class LazyInitTargetSourceTests {
-	
+
 	private static final Class<?> CLASS = LazyInitTargetSourceTests.class;
-	
+
 	private static final Resource SINGLETON_CONTEXT = qualifiedResource(CLASS, "singleton.xml");
 	private static final Resource CUSTOM_TARGET_CONTEXT = qualifiedResource(CLASS, "customTarget.xml");
 	private static final Resource FACTORY_BEAN_CONTEXT = qualifiedResource(CLASS, "factoryBean.xml");
@@ -80,8 +80,10 @@ public final class LazyInitTargetSourceTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
 
+		@Override
 		protected void postProcessTargetObject(Object targetObject) {
 			((ITestBean) targetObject).setName("Rob Harrop");
 		}

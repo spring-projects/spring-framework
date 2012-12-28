@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.portlet.context;
 
-import java.util.Locale;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.TestBean;
@@ -24,16 +23,14 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
-import org.springframework.web.context.support.XmlWebApplicationContext;
 
 /**
  * Should ideally be eliminated.  Copied when splitting .testsuite up into individual bundles.
- * 
+ *
  * @see org.springframework.web.context.XmlWebApplicationContextTests
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -47,12 +44,13 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 	 * Overridden as we can't trust superclass method
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
+	@Override
 	public void testEvents() throws Exception {
 		TestListener listener = (TestListener) this.applicationContext.getBean("testListener");
 		listener.zeroCounter();
 		TestListener parentListener = (TestListener) this.applicationContext.getParent().getBean("parentListener");
 		parentListener.zeroCounter();
-		
+
 		parentListener.zeroCounter();
 		assertTrue("0 events before publication", listener.getEventCount() == 0);
 		assertTrue("0 parent events before publication", parentListener.getEventCount() == 0);
@@ -61,6 +59,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 			this.applicationContext.getBeanDefinitionCount() == 14);
@@ -107,6 +106,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 			constructed = true;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			if (this.initMethodInvoked)
 				fail();
@@ -120,6 +120,7 @@ public abstract class AbstractXmlWebApplicationContextTests extends AbstractAppl
 			this.initMethodInvoked = true;
 		}
 
+		@Override
 		public void destroy() {
 			if (this.customDestroyed)
 				fail();

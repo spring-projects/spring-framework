@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 		return this.acceptGzipEncoding;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -125,6 +126,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	}
 
 
+	@Override
 	public final RemoteInvocationResult executeRequest(
 			HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws Exception {
 
@@ -150,10 +152,10 @@ public abstract class AbstractHttpInvokerRequestExecutor
 
 	/**
 	 * Serialize the given RemoteInvocation to the given OutputStream.
-	 * <p>The default implementation gives <code>decorateOutputStream</code> a chance
+	 * <p>The default implementation gives {@code decorateOutputStream} a chance
 	 * to decorate the stream first (for example, for custom encryption or compression).
-	 * Creates an <code>ObjectOutputStream</code> for the final stream and calls
-	 * <code>doWriteRemoteInvocation</code> to actually write the object.
+	 * Creates an {@code ObjectOutputStream} for the final stream and calls
+	 * {@code doWriteRemoteInvocation} to actually write the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param invocation the RemoteInvocation object
 	 * @param os the OutputStream to write to
@@ -186,7 +188,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	/**
 	 * Perform the actual writing of the given invocation object to the
 	 * given ObjectOutputStream.
-	 * <p>The default implementation simply calls <code>writeObject</code>.
+	 * <p>The default implementation simply calls {@code writeObject}.
 	 * Can be overridden for serialization of a custom wrapper object rather
 	 * than the plain invocation, for example an encryption-aware holder.
 	 * @param invocation the RemoteInvocation object
@@ -201,7 +203,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 
 	/**
 	 * Execute a request to send the given serialized remote invocation.
-	 * <p>Implementations will usually call <code>readRemoteInvocationResult</code>
+	 * <p>Implementations will usually call {@code readRemoteInvocationResult}
 	 * to deserialize a returned RemoteInvocationResult object.
 	 * @param config the HTTP invoker configuration that specifies the
 	 * target service
@@ -219,10 +221,10 @@ public abstract class AbstractHttpInvokerRequestExecutor
 
 	/**
 	 * Deserialize a RemoteInvocationResult object from the given InputStream.
-	 * <p>Gives <code>decorateInputStream</code> a chance to decorate the stream
+	 * <p>Gives {@code decorateInputStream} a chance to decorate the stream
 	 * first (for example, for custom encryption or compression). Creates an
-	 * <code>ObjectInputStream</code> via <code>createObjectInputStream</code> and
-	 * calls <code>doReadRemoteInvocationResult</code> to actually read the object.
+	 * {@code ObjectInputStream} via {@code createObjectInputStream} and
+	 * calls {@code doReadRemoteInvocationResult} to actually read the object.
 	 * <p>Can be overridden for custom serialization of the invocation.
 	 * @param is the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
@@ -262,7 +264,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	 * The default implementation creates a CodebaseAwareObjectInputStream.
 	 * @param is the InputStream to read from
 	 * @param codebaseUrl the codebase URL to load classes from if not found locally
-	 * (can be <code>null</code>)
+	 * (can be {@code null})
 	 * @return the new ObjectInputStream instance to use
 	 * @throws IOException if creation of the ObjectInputStream failed
 	 * @see org.springframework.remoting.rmi.CodebaseAwareObjectInputStream
@@ -274,7 +276,7 @@ public abstract class AbstractHttpInvokerRequestExecutor
 	/**
 	 * Perform the actual reading of an invocation object from the
 	 * given ObjectInputStream.
-	 * <p>The default implementation simply calls <code>readObject</code>.
+	 * <p>The default implementation simply calls {@code readObject}.
 	 * Can be overridden for deserialization of a custom wrapper object rather
 	 * than the plain invocation, for example an encryption-aware holder.
 	 * @param ois the ObjectInputStream to read from

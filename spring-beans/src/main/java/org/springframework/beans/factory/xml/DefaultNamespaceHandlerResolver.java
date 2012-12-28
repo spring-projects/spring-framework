@@ -37,7 +37,7 @@ import org.springframework.util.CollectionUtils;
  * contained in mapping file.
  *
  * <p>By default, this implementation looks for the mapping file at
- * <code>META-INF/spring.handlers</code>, but this can be changed using the
+ * {@code META-INF/spring.handlers}, but this can be changed using the
  * {@link #DefaultNamespaceHandlerResolver(ClassLoader, String)} constructor.
  *
  * @author Rob Harrop
@@ -68,7 +68,7 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 
 
 	/**
-	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
+	 * Create a new {@code DefaultNamespaceHandlerResolver} using the
 	 * default mapping file location.
 	 * <p>This constructor will result in the thread context ClassLoader being used
 	 * to load resources.
@@ -79,10 +79,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	}
 
 	/**
-	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
+	 * Create a new {@code DefaultNamespaceHandlerResolver} using the
 	 * default mapping file location.
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
-	 * (may be <code>null</code>, in which case the thread context ClassLoader will be used)
+	 * (may be {@code null}, in which case the thread context ClassLoader will be used)
 	 * @see #DEFAULT_HANDLER_MAPPINGS_LOCATION
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader) {
@@ -90,10 +90,10 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	}
 
 	/**
-	 * Create a new <code>DefaultNamespaceHandlerResolver</code> using the
+	 * Create a new {@code DefaultNamespaceHandlerResolver} using the
 	 * supplied mapping file location.
 	 * @param classLoader the {@link ClassLoader} instance used to load mapping resources
-	 * may be <code>null</code>, in which case the thread context ClassLoader will be used)
+	 * may be {@code null}, in which case the thread context ClassLoader will be used)
 	 * @param handlerMappingsLocation the mapping file location
 	 */
 	public DefaultNamespaceHandlerResolver(ClassLoader classLoader, String handlerMappingsLocation) {
@@ -107,8 +107,9 @@ public class DefaultNamespaceHandlerResolver implements NamespaceHandlerResolver
 	 * Locate the {@link NamespaceHandler} for the supplied namespace URI
 	 * from the configured mappings.
 	 * @param namespaceUri the relevant namespace URI
-	 * @return the located {@link NamespaceHandler}, or <code>null</code> if none found
+	 * @return the located {@link NamespaceHandler}, or {@code null} if none found
 	 */
+	@Override
 	public NamespaceHandler resolve(String namespaceUri) {
 		Map<String, Object> handlerMappings = getHandlerMappings();
 		Object handlerOrClassName = handlerMappings.get(namespaceUri);

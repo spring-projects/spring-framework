@@ -8,7 +8,7 @@ package org.springframework.aop.framework;
  * intention of reducing the surface area of java files within this
  * package.  This allows developers to think about tests first, and deal
  * with these second class testing artifacts on an as-needed basis.
- * 
+ *
  * Types here should be defined as package-private top level classes in
  * order to avoid needing to fully qualify, e.g.: _TestTypes$Foo.
  *
@@ -26,15 +26,18 @@ interface IEcho {
 
 class Echo implements IEcho {
 	private int a;
-	
+
+	@Override
 	public int echoException(int i, Throwable t) throws Throwable {
 		if (t != null)
 			throw t;
 		return i;
 	}
+	@Override
 	public void setA(int a) {
 		this.a = a;
 	}
+	@Override
 	public int getA() {
 		return a;
 	}

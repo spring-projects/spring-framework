@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ import org.springframework.aop.ThrowsAdvice;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 class ThrowsAdviceAdapter implements AdvisorAdapter, Serializable {
 
+	@Override
 	public boolean supportsAdvice(Advice advice) {
 		return (advice instanceof ThrowsAdvice);
 	}
 
+	@Override
 	public MethodInterceptor getInterceptor(Advisor advisor) {
 		return new ThrowsAdviceInterceptor(advisor.getAdvice());
 	}

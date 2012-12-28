@@ -1,7 +1,6 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.jms.core</code> package.
+ * Classes supporting the {@code org.springframework.jms.core} package.
  * Contains a base class for JmsTemplate usage.
  *
  */

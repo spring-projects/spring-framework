@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import org.springframework.util.Assert;
  * All interfaces except IntroductionInterceptor are picked up from
  * the subclass or delegate by default.
  *
- * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
+ * <p>The {@code suppressInterface} method can be used to suppress interfaces
  * implemented by the delegate but which should not be introduced to the owning
  * AOP proxy.
- * 
+ *
  * <p>An instance of this class is serializable if the delegate is.
  *
  * @author Rod Johnson
@@ -48,9 +48,10 @@ import org.springframework.util.Assert;
  * @see #suppressInterface
  * @see DelegatePerTargetObjectIntroductionInterceptor
  */
+@SuppressWarnings("serial")
 public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 		implements IntroductionInterceptor {
-		
+
 	/**
 	 * Object that actually implements the interfaces.
 	 * May be "this" if a subclass implements the introduced interfaces.
@@ -66,7 +67,7 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 	public DelegatingIntroductionInterceptor(Object delegate) {
 		init(delegate);
 	}
-	
+
 	/**
 	 * Construct a new DelegatingIntroductionInterceptor.
 	 * The delegate will be the subclass, which must implement
@@ -91,20 +92,21 @@ public class DelegatingIntroductionInterceptor extends IntroductionInfoSupport
 		suppressInterface(IntroductionInterceptor.class);
 		suppressInterface(DynamicIntroductionAdvice.class);
 	}
-		
-	
+
+
 	/**
 	 * Subclasses may need to override this if they want to  perform custom
 	 * behaviour in around advice. However, subclasses should invoke this
 	 * method, which handles introduced interfaces and forwarding to the target.
 	 */
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
 			// Using the following method rather than direct reflection, we
 			// get correct handling of InvocationTargetException
 			// if the introduced method throws an exception.
 			Object retVal = AopUtils.invokeJoinpointUsingReflection(this.delegate, mi.getMethod(), mi.getArguments());
-			
+
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
 			if (retVal == this.delegate && mi instanceof ProxyMethodInvocation) {

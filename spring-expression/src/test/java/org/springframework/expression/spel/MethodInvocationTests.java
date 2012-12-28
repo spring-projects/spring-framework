@@ -274,6 +274,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 			return false;
 		}
 
+		@Override
 		public List<Method> filter(List<Method> methods) {
 			filterCalled = true;
 			List<Method> forRemoval = new ArrayList<Method>();
@@ -329,6 +330,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 
 	static class DummyMethodResolver implements MethodResolver {
 
+		@Override
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 				List<TypeDescriptor> argumentTypes) throws AccessException {
 			throw new UnsupportedOperationException("Auto-generated method stub");
@@ -379,6 +381,7 @@ public class MethodInvocationTests extends ExpressionTestCase {
 		byte[] bytes = new byte[100];
 		StandardEvaluationContext context = new StandardEvaluationContext(bytes);
 		context.setBeanResolver(new BeanResolver() {
+			@Override
 			public Object resolve(EvaluationContext context, String beanName)
 					throws AccessException {
 				if ("service".equals(beanName)) {

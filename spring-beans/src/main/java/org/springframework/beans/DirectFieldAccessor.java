@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -60,11 +59,12 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
 		ReflectionUtils.doWithFields(this.target.getClass(), new ReflectionUtils.FieldCallback() {
+			@Override
 			public void doWith(Field field) {
 				if (fieldMap.containsKey(field.getName())) {
 					// ignore superclass declarations of fields already found in a subclass
 				}
-                else {
+				else {
 					fieldMap.put(field.getName(), field);
 				}
 			}
@@ -75,10 +75,12 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 	}
 
 
+	@Override
 	public boolean isReadableProperty(String propertyName) throws BeansException {
 		return this.fieldMap.containsKey(propertyName);
 	}
 
+	@Override
 	public boolean isWritableProperty(String propertyName) throws BeansException {
 		return this.fieldMap.containsKey(propertyName);
 	}
@@ -92,6 +94,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		return null;
 	}
 
+	@Override
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		Field field = this.fieldMap.get(propertyName);
 		if (field != null) {

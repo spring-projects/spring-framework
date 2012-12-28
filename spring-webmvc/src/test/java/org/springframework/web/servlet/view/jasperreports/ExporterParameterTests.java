@@ -41,6 +41,7 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		params.put("net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI", "/foo/bar");
 
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
+			@Override
 			protected void renderReport(JasperPrint filledReport, Map model, HttpServletResponse response)
 					throws Exception {
 

@@ -40,7 +40,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>Spring's {@link Repeat &#064;Repeat}</li>
  * <li>Spring's {@link Timed &#064;Timed}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

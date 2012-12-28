@@ -26,6 +26,7 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		return new HttpComponentsClientHttpRequestFactory();
 	}
 
+	@Override
 	@Test
 	public void httpMethods() throws Exception {
 		assertHttpMethod("patch", HttpMethod.PATCH);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,7 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 		this.connectionManager = connectionManager;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws ResourceException {
 		if (this.managedConnectionFactory == null) {
 			throw new IllegalArgumentException("Property 'managedConnectionFactory' is required");
@@ -122,14 +123,17 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.connectionFactory;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.connectionFactory != null ? this.connectionFactory.getClass() : null);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -44,9 +44,9 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * then be passed to Hibernate-based data access objects via dependency injection.
  *
  * <p><b>NOTE:</b> This variant of LocalSessionFactoryBean requires Hibernate 4.0 or higher.
- * It is similar in role to the same-named class in the <code>orm.hibernate3</code> package.
- * However, in practice, it is closer to <code>AnnotationSessionFactoryBean</code> since
- * its core purpose is to bootstrap a <code>SessionFactory</code> from annotation scanning.
+ * It is similar in role to the same-named class in the {@code orm.hibernate3} package.
+ * However, in practice, it is closer to {@code AnnotationSessionFactoryBean} since
+ * its core purpose is to bootstrap a {@code SessionFactory} from annotation scanning.
  *
  * <p><b>NOTE:</b> To set up Hibernate 4 for Spring-driven JTA transactions, make
  * sure to either specify the {@link #setJtaTransactionManager "jtaTransactionManager"}
@@ -268,11 +268,13 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException {
 		LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(this.dataSource, this.resourcePatternResolver);
 
@@ -385,19 +387,23 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 
+	@Override
 	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.sessionFactory != null ? this.sessionFactory.getClass() : SessionFactory.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		this.sessionFactory.close();
 	}

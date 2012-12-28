@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,17 @@ import org.springframework.core.NestedIOException;
 
 /**
  * Deserializer that reads an input stream using Java Serialization.
- * 
+ *
  * @author Gary Russell
  * @author Mark Fisher
  * @since 3.0.5
  */
-public class DefaultDeserializer implements Deserializer<Object> { 
+public class DefaultDeserializer implements Deserializer<Object> {
 
 	/**
 	 * Reads the input stream and deserializes into an object.
 	 */
+	@Override
 	public Object deserialize(InputStream inputStream) throws IOException {
 		ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 		try {

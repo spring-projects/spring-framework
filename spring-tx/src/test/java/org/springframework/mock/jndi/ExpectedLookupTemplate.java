@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.naming.NamingException;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.jndi.JndiTemplate;
 
 /**
@@ -38,7 +37,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 
 	/**
 	 * Construct a new JndiTemplate that will always return given objects
-	 * for given names. To be populated through <code>addObject</code> calls.
+	 * for given names. To be populated through {@code addObject} calls.
 	 * @see #addObject(String, Object)
 	 */
 	public ExpectedLookupTemplate() {
@@ -71,6 +70,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 	 * return the object provided in the constructor. If the name is
 	 * unexpected, a respective NamingException gets thrown.
 	 */
+	@Override
 	public Object lookup(String name) throws NamingException {
 		Object object = this.jndiObjects.get(name);
 		if (object == null) {

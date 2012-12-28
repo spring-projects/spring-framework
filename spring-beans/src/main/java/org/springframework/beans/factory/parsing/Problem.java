@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ public class Problem {
 
 	/**
 	 * Create a new instance of the {@link Problem} class.
-	 * @param message	a message detailing the problem
-	 * @param rootCause the underlying expection that caused the error (may be <code>null</code>)
+	 * @param message    a message detailing the problem
+	 * @param rootCause the underlying expection that caused the error (may be {@code null})
 	 * @param parseState the {@link ParseState} at the time of the error
 	 * @param location the location within a bean configuration source that triggered the error
 	 */
@@ -100,14 +100,14 @@ public class Problem {
 	}
 
 	/**
-	 * Get the {@link ParseState} at the time of the error (may be <code>null</code>).
+	 * Get the {@link ParseState} at the time of the error (may be {@code null}).
 	 */
 	public ParseState getParseState() {
 		return this.parseState;
 	}
 
 	/**
-	 * Get the underlying expection that caused the error (may be <code>null</code>).
+	 * Get the underlying expection that caused the error (may be {@code null}).
 	 */
 	public Throwable getRootCause() {
 		return this.rootCause;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public abstract class AutoProxyUtils {
 	/**
 	 * Bean definition attribute that may indicate whether a given bean is supposed
 	 * to be proxied with its target class (in case of it getting proxied in the first
-	 * place). The value is <code>Boolean.TRUE</code> or <code>Boolean.FALSE</code>.
+	 * place). The value is {@code Boolean.TRUE} or {@code Boolean.FALSE}.
 	 * <p>Proxy factories can set this attribute if they built a target class proxy
 	 * for a specific bean, and want to enforce that that bean can always be cast
 	 * to its target class (even if AOP advices get applied through auto-proxying).

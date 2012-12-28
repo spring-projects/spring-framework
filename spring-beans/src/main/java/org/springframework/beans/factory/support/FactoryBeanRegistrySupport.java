@@ -50,12 +50,13 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * Determine the type for the given FactoryBean.
 	 * @param factoryBean the FactoryBean instance to check
 	 * @return the FactoryBean's object type,
-	 * or <code>null</code> if the type cannot be determined yet
+	 * or {@code null} if the type cannot be determined yet
 	 */
 	protected Class getTypeForFactoryBean(final FactoryBean factoryBean) {
 		try {
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedAction<Class>() {
+					@Override
 					public Class run() {
 						return factoryBean.getObjectType();
 					}
@@ -78,7 +79,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * in cached form. Quick check for minimal synchronization.
 	 * @param beanName the name of the bean
 	 * @return the object obtained from the FactoryBean,
-	 * or <code>null</code> if not available
+	 * or {@code null} if not available
 	 */
 	protected Object getCachedObjectForFactoryBean(String beanName) {
 		Object object = this.factoryBeanObjectCache.get(beanName);
@@ -129,6 +130,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				AccessControlContext acc = getAccessControlContext();
 				try {
 					object = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 								return factory.getObject();
 							}
@@ -149,7 +151,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
 
-		
+
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
 		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -206,7 +208,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		super.removeSingleton(beanName);
 		this.factoryBeanObjectCache.remove(beanName);
 	}
-	
+
 	/**
 	 * Returns the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged

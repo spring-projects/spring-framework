@@ -75,6 +75,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				new InstanceComparator<Annotation>(
 						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
 				new Converter<Method, Annotation>() {
+					@Override
 					public Annotation convert(Method method) {
 						AspectJAnnotation<?> annotation = AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
 						return annotation == null ? null : annotation.getAnnotation();
@@ -82,6 +83,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				}));
 		comparator.addComparator(new ConvertingComparator<Method, String>(
 				new Converter<Method, String>() {
+					@Override
 					public String convert(Method method) {
 						return method.getName();
 					}
@@ -90,6 +92,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
+	@Override
 	public List<Advisor> getAdvisors(MetadataAwareAspectInstanceFactory maaif) {
 		final Class<?> aspectClass = maaif.getAspectMetadata().getAspectClass();
 		final String aspectName = maaif.getAspectMetadata().getAspectName();
@@ -128,6 +131,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	private List<Method> getAdvisorMethods(Class<?> aspectClass) {
 		final List<Method> methods = new LinkedList<Method>();
 		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException {
 				// Exclude pointcuts
 				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
@@ -144,7 +148,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
 	 * @param introductionField the field to introspect
-	 * @return <code>null</code> if not an Advisor
+	 * @return {@code null} if not an Advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);
@@ -164,6 +168,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
+	@Override
 	public Advisor getAdvisor(Method candidateAdviceMethod, MetadataAwareAspectInstanceFactory aif,
 			int declarationOrderInAspect, String aspectName) {
 
@@ -191,6 +196,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	}
 
 
+	@Override
 	public Advice getAdvice(Method candidateAdviceMethod, AspectJExpressionPointcut ajexp,
 			MetadataAwareAspectInstanceFactory aif, int declarationOrderInAspect, String aspectName) {
 
@@ -203,7 +209,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			return null;
 		}
 
-		// If we get here, we know we have an AspectJ method. 
+		// If we get here, we know we have an AspectJ method.
 		// Check that it's an AspectJ-annotated class
 		if (!isAspect(candidateAspectClass)) {
 			throw new AopConfigException("Advice must be declared inside an aspect type: " +
@@ -272,6 +278,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 
 		public SyntheticInstantiationAdvisor(final MetadataAwareAspectInstanceFactory aif) {
 			super(aif.getAspectMetadata().getPerClausePointcut(), new MethodBeforeAdvice() {
+				@Override
 				public void before(Method method, Object[] args, Object target) {
 					// Simply instantiate the aspect
 					aif.getAspectInstance();

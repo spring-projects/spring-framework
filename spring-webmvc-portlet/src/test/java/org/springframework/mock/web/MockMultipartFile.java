@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Iterator;
-
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -99,34 +96,42 @@ public class MockMultipartFile implements MultipartFile {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.name;
 	}
 
+	@Override
 	public String getOriginalFilename() {
 		return this.originalFilename;
 	}
 
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return (this.content.length == 0);
 	}
 
+	@Override
 	public long getSize() {
 		return this.content.length;
 	}
 
+	@Override
 	public byte[] getBytes() throws IOException {
 		return this.content;
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return new ByteArrayInputStream(this.content);
 	}
 
+	@Override
 	public void transferTo(File dest) throws IOException, IllegalStateException {
 		FileCopyUtils.copy(this.content, dest);
 	}

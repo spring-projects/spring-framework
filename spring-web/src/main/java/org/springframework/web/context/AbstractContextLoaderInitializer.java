@@ -41,6 +41,7 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
 		this.registerContextLoaderListener(servletContext);
 	}

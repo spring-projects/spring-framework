@@ -45,7 +45,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Creates a new instance of thie {@link OC4JLoadTimeWeaver} class
 	 * using the default {@link ClassLoader class loader}.
-	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader() 
+	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
 	public OC4JLoadTimeWeaver() {
 		this(ClassUtils.getDefaultClassLoader());
@@ -54,7 +54,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Creates a new instance of the {@link OC4JLoadTimeWeaver} class
 	 * using the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
 	 */
 	public OC4JLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
@@ -62,6 +62,7 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
@@ -69,10 +70,12 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader.getClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.aop.Pointcut;
  * @see #setPointcut
  * @see #setAdviceBeanName
  */
+@SuppressWarnings("serial")
 public class DefaultBeanFactoryPointcutAdvisor extends AbstractBeanFactoryPointcutAdvisor {
 
 	private Pointcut pointcut = Pointcut.TRUE;
@@ -39,13 +40,14 @@ public class DefaultBeanFactoryPointcutAdvisor extends AbstractBeanFactoryPointc
 
 	/**
 	 * Specify the pointcut targeting the advice.
-	 * <p>Default is <code>Pointcut.TRUE</code>.
+	 * <p>Default is {@code Pointcut.TRUE}.
 	 * @see #setAdviceBeanName
 	 */
 	public void setPointcut(Pointcut pointcut) {
 		this.pointcut = (pointcut != null ? pointcut : Pointcut.TRUE);
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

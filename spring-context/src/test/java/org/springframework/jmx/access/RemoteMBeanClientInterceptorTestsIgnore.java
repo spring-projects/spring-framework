@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -46,6 +46,7 @@ public class RemoteMBeanClientInterceptorTestsIgnore extends MBeanClientIntercep
 
 	private JMXConnector connector;
 
+	@Override
 	public void onSetUp() throws Exception {
 		super.onSetUp();
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
@@ -61,11 +62,13 @@ public class RemoteMBeanClientInterceptorTestsIgnore extends MBeanClientIntercep
 		return new JMXServiceURL(SERVICE_URL);
 	}
 
+	@Override
 	protected MBeanServerConnection getServerConnection() throws Exception {
 		this.connector = JMXConnectorFactory.connect(getServiceUrl());
 		return this.connector.getMBeanServerConnection();
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		if (this.connector != null) {
 			this.connector.close();

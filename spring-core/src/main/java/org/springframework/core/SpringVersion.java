@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ public class SpringVersion {
 
 	/**
 	 * Return the full version string of the present Spring codebase,
-	 * or <code>null</code> if it cannot be determined.
-	 * @see java.lang.Package#getImplementationVersion()
+	 * or {@code null} if it cannot be determined.
+	 * @see Package#getImplementationVersion()
 	 */
 	public static String getVersion() {
 		Package pkg = SpringVersion.class.getPackage();

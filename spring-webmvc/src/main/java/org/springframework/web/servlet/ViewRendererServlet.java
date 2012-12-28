@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.util.NestedServletException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ViewRendererServlet extends HttpServlet {
 
 	/**
@@ -76,7 +77,7 @@ public class ViewRendererServlet extends HttpServlet {
 	/**
 	 * Process this request, handling exceptions.
 	 * The actually event handling is performed by the abstract
-	 * <code>renderView()</code> template method.
+	 * {@code renderView()} template method.
 	 * @see #renderView
 	 */
 	protected final void processRequest(HttpServletRequest request, HttpServletResponse response)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
 /**
  * {@link javax.jms.ConnectionFactory} implementation that delegates all calls
  * to a given target {@link javax.jms.ConnectionFactory}, adapting specific
- * <code>create(Queue/Topic)Connection</code> calls to the target ConnectionFactory
+ * {@code create(Queue/Topic)Connection} calls to the target ConnectionFactory
  * if necessary (e.g. when running JMS 1.0.2 API based code against a generic
  * JMS 1.1 ConnectionFactory, such as ActiveMQ's PooledConnectionFactory).
  *
@@ -85,6 +85,7 @@ public class DelegatingConnectionFactory
 		this.shouldStopConnections = shouldStopConnections;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("'targetConnectionFactory' is required");
@@ -92,14 +93,17 @@ public class DelegatingConnectionFactory
 	}
 
 
+	@Override
 	public Connection createConnection() throws JMSException {
 		return getTargetConnectionFactory().createConnection();
 	}
 
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		return getTargetConnectionFactory().createConnection(username, password);
 	}
 
+	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof QueueConnectionFactory) {
@@ -114,6 +118,7 @@ public class DelegatingConnectionFactory
 		}
 	}
 
+	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof QueueConnectionFactory) {
@@ -128,6 +133,7 @@ public class DelegatingConnectionFactory
 		}
 	}
 
+	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof TopicConnectionFactory) {
@@ -142,6 +148,7 @@ public class DelegatingConnectionFactory
 		}
 	}
 
+	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof TopicConnectionFactory) {
@@ -156,6 +163,7 @@ public class DelegatingConnectionFactory
 		}
 	}
 
+	@Override
 	public boolean shouldStop(Connection con) {
 		return this.shouldStopConnections;
 	}

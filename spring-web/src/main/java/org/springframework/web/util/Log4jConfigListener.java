@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import javax.servlet.ServletContextListener;
  * don't need application-specific log files within the WAR directory, don't use
  * log4j setup within the application (thus, don't use Log4jConfigListener or
  * Log4jConfigServlet). Instead, use a global, VM-wide log4j setup (for example,
- * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
+ * in JBoss) or JDK 1.4's {@code java.util.logging} (which is global too).
  *
- * <p>This listener should be registered before ContextLoaderListener in <code>web.xml</code>
+ * <p>This listener should be registered before ContextLoaderListener in {@code web.xml}
  * when using custom log4j initialization.
  *
  * @author Juergen Hoeller
@@ -41,10 +41,12 @@ import javax.servlet.ServletContextListener;
  */
 public class Log4jConfigListener implements ServletContextListener {
 
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		Log4jWebConfigurer.initLogging(event.getServletContext());
 	}
 
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		Log4jWebConfigurer.shutdownLogging(event.getServletContext());
 	}

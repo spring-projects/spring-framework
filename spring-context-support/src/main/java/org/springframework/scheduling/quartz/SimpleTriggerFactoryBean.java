@@ -40,7 +40,7 @@ import org.springframework.util.ReflectionUtils;
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.SimpleTrigger}
  * instance, supporting bean-style usage for trigger configuration.
  *
- * <p><code>SimpleTrigger(Impl)</code> itself is already a JavaBean but lacks sensible defaults.
+ * <p>{@code SimpleTrigger(Impl)} itself is already a JavaBean but lacks sensible defaults.
  * This class uses the Spring bean name as job name, the Quartz default group ("DEFAULT")
  * as job group, the current time as start time, and indefinite repetition, if not specified.
  *
@@ -58,9 +58,9 @@ import org.springframework.util.ReflectionUtils;
  * @see #setGroup
  * @see #setStartDelay
  * @see #setJobDetail
- * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setTriggers
- * @see org.springframework.scheduling.quartz.SchedulerFactoryBean#setJobDetails
- * @see org.springframework.scheduling.quartz.CronTriggerBean
+ * @see SchedulerFactoryBean#setTriggers
+ * @see SchedulerFactoryBean#setJobDetails
+ * @see CronTriggerBean
  */
 public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, BeanNameAware, InitializingBean {
 
@@ -183,7 +183,7 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	/**
 	 * Set the misfire instruction via the name of the corresponding
 	 * constant in the {@link org.quartz.SimpleTrigger} class.
-	 * Default is <code>MISFIRE_INSTRUCTION_SMART_POLICY</code>.
+	 * Default is {@code MISFIRE_INSTRUCTION_SMART_POLICY}.
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_FIRE_NOW
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_EXISTING_COUNT
 	 * @see org.quartz.SimpleTrigger#MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT
@@ -195,11 +195,13 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ParseException {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -266,14 +268,17 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	}
 
 
+	@Override
 	public SimpleTrigger getObject() {
 		return this.simpleTrigger;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return SimpleTrigger.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

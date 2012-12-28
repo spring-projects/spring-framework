@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import java.lang.annotation.Target;
  * {@link AbstractAnnotationAwareTransactionalTests} is less error-prone than
  * calling
  * {@link org.springframework.test.AbstractSingleSpringContextTests#setDirty() setDirty()}
- * explicitly because the call to <code>setDirty()</code> is guaranteed to
+ * explicitly because the call to {@code setDirty()} is guaranteed to
  * occur, even if the test failed. If only a particular code path in the test
- * dirties the context, prefer calling <code>setDirty()</code> explicitly --
+ * dirties the context, prefer calling {@code setDirty()} explicitly --
  * and take care!
  * </p>
  *

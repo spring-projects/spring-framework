@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 
 /**
  * {@link BeanDefinitionDecorator} responsible for parsing the
- * <code>&lt;aop:scoped-proxy/&gt;</code> tag.
+ * {@code &lt;aop:scoped-proxy/&gt;} tag.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -39,6 +39,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 	private static final String PROXY_TARGET_CLASS = "proxy-target-class";
 
 
+	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		boolean proxyTargetClass = true;
 		if (node instanceof Element) {
@@ -47,7 +48,7 @@ class ScopedProxyBeanDefinitionDecorator implements BeanDefinitionDecorator {
 				proxyTargetClass = Boolean.valueOf(ele.getAttribute(PROXY_TARGET_CLASS));
 			}
 		}
-		
+
 		// Register the original bean definition as it will be referenced by the scoped proxy
 		// and is relevant for tooling (validation, navigation).
 		BeanDefinitionHolder holder =

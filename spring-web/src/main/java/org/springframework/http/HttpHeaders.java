@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+	 * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,8 +96,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private static final String[] DATE_FORMATS = new String[] {
 		"EEE, dd MMM yyyy HH:mm:ss zzz",
-        "EEE, dd-MMM-yy HH:mm:ss zzz",
-        "EEE MMM dd HH:mm:ss yyyy"
+		"EEE, dd-MMM-yy HH:mm:ss zzz",
+		"EEE MMM dd HH:mm:ss yyyy"
 	};
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
@@ -507,6 +507,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @param headerName the header name
 	 * @return the first header value; or {@code null}
 	 */
+	@Override
 	public String getFirst(String headerName) {
 		List<String> headerValues = headers.get(headerName);
 		return headerValues != null ? headerValues.get(0) : null;
@@ -520,6 +521,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #put(String, List)
 	 * @see #set(String, String)
 	 */
+	@Override
 	public void add(String headerName, String headerValue) {
 		List<String> headerValues = headers.get(headerName);
 		if (headerValues == null) {
@@ -537,18 +539,21 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see #put(String, List)
 	 * @see #add(String, String)
 	 */
+	@Override
 	public void set(String headerName, String headerValue) {
 		List<String> headerValues = new LinkedList<String>();
 		headerValues.add(headerValue);
 		headers.put(headerName, headerValues);
 	}
 
+	@Override
 	public void setAll(Map<String, String> values) {
 		for (Entry<String, String> entry : values.entrySet()) {
 			set(entry.getKey(), entry.getValue());
 		}
 	}
 
+	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
 		for (Entry<String, List<String>> entry : headers.entrySet()) {
@@ -559,50 +564,62 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	// Map implementation
 
+	@Override
 	public int size() {
 		return this.headers.size();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return this.headers.isEmpty();
 	}
 
+	@Override
 	public boolean containsKey(Object key) {
 		return this.headers.containsKey(key);
 	}
 
+	@Override
 	public boolean containsValue(Object value) {
 		return this.headers.containsValue(value);
 	}
 
+	@Override
 	public List<String> get(Object key) {
 		return this.headers.get(key);
 	}
 
+	@Override
 	public List<String> put(String key, List<String> value) {
 		return this.headers.put(key, value);
 	}
 
+	@Override
 	public List<String> remove(Object key) {
 		return this.headers.remove(key);
 	}
 
+	@Override
 	public void putAll(Map<? extends String, ? extends List<String>> m) {
 		this.headers.putAll(m);
 	}
 
+	@Override
 	public void clear() {
 		this.headers.clear();
 	}
 
+	@Override
 	public Set<String> keySet() {
 		return this.headers.keySet();
 	}
 
+	@Override
 	public Collection<List<String>> values() {
 		return this.headers.values();
 	}
 
+	@Override
 	public Set<Entry<String, List<String>>> entrySet() {
 		return this.headers.entrySet();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.apache.derby.jdbc.EmbeddedDriver;
 final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
 	private static final Log logger = LogFactory.getLog(DerbyEmbeddedDatabaseConfigurer.class);
-	
+
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
 
 	// Error code that indicates successful shutdown
@@ -69,6 +69,7 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	private DerbyEmbeddedDatabaseConfigurer() {
 	}
 
+	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
 		properties.setDriverClass(EmbeddedDriver.class);
 		properties.setUrl(String.format(URL_TEMPLATE, databaseName, "create=true"));
@@ -76,6 +77,7 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 		properties.setPassword("");
 	}
 
+	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
 			new EmbeddedDriver().connect(

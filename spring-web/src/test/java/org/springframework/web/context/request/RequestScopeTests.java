@@ -38,6 +38,7 @@ public class RequestScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.registerScope("request", new RequestScope());

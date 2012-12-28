@@ -72,7 +72,7 @@ import org.springframework.web.context.ServletContextAware;
  * <p>The TilesConfigurer simply configures a TilesContainer using a set of files
  * containing definitions, to be accessed by {@link TilesView} instances. This is a
  * Spring-based alternative (for usage in Spring configuration) to the Tiles-provided
- * {@link org.apache.tiles.web.startup.TilesListener} (for usage in <code>web.xml</code>).
+ * {@link org.apache.tiles.web.startup.TilesListener} (for usage in {@code web.xml}).
  *
  * <p>TilesViews can be managed by any {@link org.springframework.web.servlet.ViewResolver}.
  * For simple convention-based view resolution, consider using {@link TilesViewResolver}.
@@ -236,6 +236,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 		this.useMutableTilesContainer = useMutableTilesContainer;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -245,6 +246,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * delegating to the TilesInitializer.
 	 * @throws TilesException in case of setup failure
 	 */
+	@Override
 	public void afterPropertiesSet() throws TilesException {
 
 		SpringWildcardServletTilesApplicationContext preliminaryContext =
@@ -272,6 +274,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 	 * Removes the TilesContainer from this web application.
 	 * @throws TilesException in case of cleanup failure
 	 */
+	@Override
 	public void destroy() throws TilesException {
 		this.tilesInitializer.destroy();
 	}

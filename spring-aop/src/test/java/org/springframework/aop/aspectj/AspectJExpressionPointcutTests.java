@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,7 +44,7 @@ import test.beans.subpkg.DeepBean;
  * @author Chris Beams
  */
 public final class AspectJExpressionPointcutTests {
-	
+
 	public static final String MATCH_ALL_METHODS = "execution(* *(..))";
 
 	private Method getAge;
@@ -54,8 +54,8 @@ public final class AspectJExpressionPointcutTests {
 	private Method setSomeNumber;
 
 	private Method isPostProcessed;
-	
-	
+
+
 	@Before
 	public void setUp() throws NoSuchMethodException {
 		getAge = TestBean.class.getMethod("getAge", (Class<?>[])null);
@@ -63,7 +63,7 @@ public final class AspectJExpressionPointcutTests {
 		setSomeNumber = TestBean.class.getMethod("setSomeNumber", new Class[]{Number.class});
 		isPostProcessed = TestBean.class.getMethod("isPostProcessed", (Class[]) null);
 	}
-	
+
 	@Test
 	public void testMatchExplicit() {
 		String expression = "execution(int test.beans.TestBean.getAge())";
@@ -100,60 +100,61 @@ public final class AspectJExpressionPointcutTests {
 		assertTrue("Expression should match setAge(int) method", methodMatcher.matches(setAge, TestBean.class));
 	}
 
-	
+
 	@Test
 	public void testThis() throws SecurityException, NoSuchMethodException{
 		testThisOrTarget("this");
 	}
-	
+
 	@Test
 	public void testTarget() throws SecurityException, NoSuchMethodException {
 		testThisOrTarget("target");
 	}
-	
+
 	public static class OtherIOther implements IOther {
 
+		@Override
 		public void absquatulate() {
 			// Empty
 		}
-		
+
 	}
-	
+
 	/**
 	 * This and target are equivalent. Really instanceof pointcuts.
-	 * @throws Exception
 	 * @param which this or target
-	 * @throws NoSuchMethodException 
-	 * @throws SecurityException 
+	 * @throws Exception
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
 	 */
 	private void testThisOrTarget(String which) throws SecurityException, NoSuchMethodException {
 		String matchesTestBean = which + "(test.beans.TestBean)";
 		String matchesIOther = which + "(test.beans.IOther)";
 		AspectJExpressionPointcut testBeanPc = new AspectJExpressionPointcut();
 		testBeanPc.setExpression(matchesTestBean);
-		
+
 		AspectJExpressionPointcut iOtherPc = new AspectJExpressionPointcut();
 		iOtherPc.setExpression(matchesIOther);
-		
+
 		assertTrue(testBeanPc.matches(TestBean.class));
 		assertTrue(testBeanPc.matches(getAge, TestBean.class));
 		assertTrue(iOtherPc.matches(OtherIOther.class.getMethod("absquatulate", (Class<?>[])null),
 				OtherIOther.class));
-	
+
 		assertFalse(testBeanPc.matches(OtherIOther.class.getMethod("absquatulate", (Class<?>[])null),
 				OtherIOther.class));
 	}
-	
+
 	@Test
 	public void testWithinRootPackage() throws SecurityException, NoSuchMethodException {
 		testWithinPackage(false);
 	}
-	
+
 	@Test
 	public void testWithinRootAndSubpackages() throws SecurityException, NoSuchMethodException {
 		testWithinPackage(true);
 	}
-	
+
 	private void testWithinPackage(boolean matchSubpackages) throws SecurityException, NoSuchMethodException {
 		String withinBeansPackage = "within(test.beans.";
 		// Subpackages are matched by **
@@ -163,7 +164,7 @@ public final class AspectJExpressionPointcutTests {
 		withinBeansPackage = withinBeansPackage + "*)";
 		AspectJExpressionPointcut withinBeansPc = new AspectJExpressionPointcut();
 		withinBeansPc.setExpression(withinBeansPackage);
-		
+
 		assertTrue(withinBeansPc.matches(TestBean.class));
 		assertTrue(withinBeansPc.matches(getAge, TestBean.class));
 		assertEquals(matchSubpackages, withinBeansPc.matches(DeepBean.class));
@@ -173,7 +174,7 @@ public final class AspectJExpressionPointcutTests {
 		assertFalse(withinBeansPc.matches(OtherIOther.class.getMethod("absquatulate", (Class<?>[])null),
 				OtherIOther.class));
 	}
-	
+
 	@Test
 	public void testFriendlyErrorOnNoLocationClassMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
@@ -185,7 +186,7 @@ public final class AspectJExpressionPointcutTests {
 			assertTrue(ex.getMessage().indexOf("expression") != -1);
 		}
 	}
-	
+
 	@Test
 	public void testFriendlyErrorOnNoLocation2ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
@@ -197,7 +198,7 @@ public final class AspectJExpressionPointcutTests {
 			assertTrue(ex.getMessage().indexOf("expression") != -1);
 		}
 	}
-	
+
 	@Test
 	public void testFriendlyErrorOnNoLocation3ArgMatching() {
 		AspectJExpressionPointcut pc = new AspectJExpressionPointcut();
@@ -210,7 +211,7 @@ public final class AspectJExpressionPointcutTests {
 		}
 	}
 
-	
+
 	@Test
 	public void testMatchWithArgs() throws Exception {
 		String expression = "execution(void test.beans.TestBean.setSomeNumber(Number)) && args(Double)";
@@ -329,19 +330,19 @@ public final class AspectJExpressionPointcutTests {
 	@Test
 	public void testAndSubstitution() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String)");
-		PointcutExpression expr = 
+		PointcutExpression expr =
 			((AspectJExpressionPointcut) pc).getPointcutExpression();
 		assertEquals("execution(* *(..)) && args(String)",expr.getPointcutExpression());
 	}
-	
+
 	@Test
 	public void testMultipleAndSubstitutions() {
 		Pointcut pc = getPointcut("execution(* *(..)) and args(String) and this(Object)");
-		PointcutExpression expr = 
+		PointcutExpression expr =
 			((AspectJExpressionPointcut) pc).getPointcutExpression();
-		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());		
+		assertEquals("execution(* *(..)) && args(String) && this(Object)",expr.getPointcutExpression());
 	}
-	
+
 	private Pointcut getPointcut(String expression) {
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 		pointcut.setExpression(expression);
@@ -354,6 +355,7 @@ class CallCountingInterceptor implements MethodInterceptor {
 
 	private int count;
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		count++;
 		return methodInvocation.proceed();

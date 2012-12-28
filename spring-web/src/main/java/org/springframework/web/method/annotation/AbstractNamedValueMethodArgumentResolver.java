@@ -74,6 +74,7 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 		this.expressionContext = (beanFactory != null) ? new BeanExpressionContext(beanFactory, new RequestScope()) : null;
 	}
 
+	@Override
 	public final Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

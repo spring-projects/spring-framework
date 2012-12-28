@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @param beanClass the class of the bean to be instantiated
 	 * @param beanName the name of the bean
 	 * @return the bean object to expose instead of a default instance of the target bean,
-	 * or <code>null</code> to proceed with default instantiation
+	 * or {@code null} to proceed with default instantiation
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#hasBeanClass
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName
@@ -76,9 +76,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * for a typical example.
 	 * @param bean the bean instance created, with properties not having been set yet
 	 * @param beanName the name of the bean
-	 * @return <code>true</code> if properties should be set on the bean; <code>false</code>
-	 * if property population should be skipped. Normal implementations should return <code>true</code>.
-	 * Returning <code>false</code> will also prevent any subsequent InstantiationAwareBeanPostProcessor
+	 * @return {@code true} if properties should be set on the bean; {@code false}
+	 * if property population should be skipped. Normal implementations should return {@code true}.
+	 * Returning {@code false} will also prevent any subsequent InstantiationAwareBeanPostProcessor
 	 * instances being invoked on this bean instance.
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
@@ -91,13 +91,13 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * <p>Also allows for replacing the property values to apply, typically through
 	 * creating a new MutablePropertyValues instance based on the original PropertyValues,
 	 * adding or removing specific values.
-	 * @param pvs the property values that the factory is about to apply (never <code>null</code>)
+	 * @param pvs the property values that the factory is about to apply (never {@code null})
 	 * @param pds the relevant property descriptors for the target bean (with ignored
 	 * dependency types - which the factory handles specifically - already filtered out)
 	 * @param bean the bean instance created, but whose properties have not yet been set
 	 * @param beanName the name of the bean
 	 * @return the actual property values to apply to to the given bean
-	 * (can be the passed-in PropertyValues instance), or <code>null</code>
+	 * (can be the passed-in PropertyValues instance), or {@code null}
 	 * to skip property population
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.MutablePropertyValues

@@ -318,6 +318,7 @@ class ConfigurationClassBeanDefinitionReader {
 			this.annotationMetadata = original.annotationMetadata;
 		}
 
+		@Override
 		public AnnotationMetadata getMetadata() {
 			return this.annotationMetadata;
 		}
@@ -333,7 +334,7 @@ class ConfigurationClassBeanDefinitionReader {
 		}
 	}
 
-	
+
 	/**
 	 * Configuration classes must be annotated with {@link Configuration @Configuration} or
 	 * declare at least one {@link Bean @Bean} method.

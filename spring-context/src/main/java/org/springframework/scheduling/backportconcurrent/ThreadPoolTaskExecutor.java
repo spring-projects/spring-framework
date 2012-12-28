@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,7 @@ import org.springframework.util.Assert;
  * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		implements SchedulingTaskExecutor, Executor, BeanNameAware, InitializingBean, DisposableBean {
 
@@ -130,7 +131,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
@@ -188,7 +189,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue
@@ -237,15 +238,17 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		this.threadNamePrefixSet = true;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
 	/**
-	 * Calls <code>initialize()</code> after the container applied all property values.
+	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		initialize();
 	}
@@ -290,7 +293,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 	/**
 	 * Return the underlying ThreadPoolExecutor for native access.
-	 * @return the underlying ThreadPoolExecutor (never <code>null</code>)
+	 * @return the underlying ThreadPoolExecutor (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskExecutor hasn't been initialized yet
 	 */
 	public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {
@@ -305,6 +308,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.Executor#execute(Runnable)
 	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
 	 */
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getThreadPoolExecutor();
 		try {
@@ -315,16 +319,19 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -334,6 +341,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -357,10 +365,11 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 
 
 	/**
-	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * Calls {@code shutdown} when the BeanFactory destroys
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}

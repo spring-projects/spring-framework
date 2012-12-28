@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ServletRequestMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -52,7 +52,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	private Method method;
 
 	private ModelAndViewContainer mavContainer;
-	
+
 	private ServletWebRequest webRequest;
 
 	private MockHttpServletRequest servletRequest;
@@ -69,10 +69,10 @@ public class ServletRequestMethodArgumentResolverTests {
 	@Test
 	public void servletRequest() throws Exception {
 		MethodParameter servletRequestParameter = new MethodParameter(method, 0);
-		
+
 		boolean isSupported = resolver.supportsParameter(servletRequestParameter);
 		Object result = resolver.resolveArgument(servletRequestParameter, mavContainer, webRequest, null);
-		
+
 		assertTrue("ServletRequest not supported", isSupported);
 		assertSame("Invalid result", servletRequest, result);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
@@ -95,6 +95,7 @@ public class ServletRequestMethodArgumentResolverTests {
 	@Test
 	public void principal() throws Exception {
 		Principal principal = new Principal() {
+			@Override
 			public String getName() {
 				return "Foo";
 			}

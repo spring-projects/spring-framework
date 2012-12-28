@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
 
@@ -82,6 +83,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		if (acc != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
+				@Override
 				public Object run() {
 					invokeAwareInterfaces(bean);
 					return null;
@@ -91,10 +93,10 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		else {
 			invokeAwareInterfaces(bean);
 		}
-		
+
 		return bean;
 	}
-	
+
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {
@@ -119,6 +121,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		}
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
@@ -132,6 +135,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			this.beanFactory = beanFactory;
 		}
 
+		@Override
 		public String resolveStringValue(String strVal) {
 			return this.beanFactory.resolveEmbeddedValue(strVal);
 		}

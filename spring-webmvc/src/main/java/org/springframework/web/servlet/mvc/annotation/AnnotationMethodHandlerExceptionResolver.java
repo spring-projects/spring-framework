@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
+@Deprecated
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	// dummy method placeholder
@@ -154,7 +155,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	 * Finds the handler method that matches the thrown exception best.
 	 * @param handler the handler object
 	 * @param thrownException the exception to be handled
-	 * @return the best matching method; or <code>null</code> if none is found
+	 * @return the best matching method; or {@code null} if none is found
 	 */
 	private Method findBestExceptionHandlerMethod(Object handler, final Exception thrownException) {
 		final Class<?> handlerType = ClassUtils.getUserClass(handler);
@@ -176,6 +177,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		final Map<Class<? extends Throwable>, Method> matchedHandlers = new HashMap<Class<? extends Throwable>, Method>();
 
 		ReflectionUtils.doWithMethods(handlerType, new ReflectionUtils.MethodCallback() {
+			@Override
 			public void doWith(Method method) {
 				method = ClassUtils.getMostSpecificMethod(method, handlerType);
 				List<Class<? extends Throwable>> handledExceptions = getHandledExceptions(method);

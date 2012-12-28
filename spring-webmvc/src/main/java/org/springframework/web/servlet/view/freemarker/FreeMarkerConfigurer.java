@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,6 +97,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Initialize the {@link TaglibFactory} for the given ServletContext.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.taglibFactory = new TaglibFactory(servletContext);
 	}
@@ -109,6 +110,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	 * @see #createConfiguration
 	 * @see #setConfiguration
 	 */
+	@Override
 	public void afterPropertiesSet() throws IOException, TemplateException {
 		if (this.configuration == null) {
 			this.configuration = createConfiguration();
@@ -129,6 +131,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Return the Configuration object wrapped by this bean.
 	 */
+	@Override
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}
@@ -136,6 +139,7 @@ public class FreeMarkerConfigurer extends FreeMarkerConfigurationFactory
 	/**
 	 * Return the TaglibFactory object wrapped by this bean.
 	 */
+	@Override
 	public TaglibFactory getTaglibFactory() {
 		return this.taglibFactory;
 	}

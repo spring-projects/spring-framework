@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,10 +82,10 @@ public abstract class MethodMatchers {
 	 * (if applicable).
 	 * @param mm the MethodMatcher to apply (may be an IntroductionAwareMethodMatcher)
 	 * @param method the candidate method
-	 * @param targetClass the target class (may be <code>null</code>, in which case
+	 * @param targetClass the target class (may be {@code null}, in which case
 	 * the candidate class must be taken to be the method's declaring class)
-	 * @param hasIntroductions <code>true</code> if the object on whose behalf we are
-	 * asking is the subject on one or more introductions; <code>false</code> otherwise
+	 * @param hasIntroductions {@code true} if the object on whose behalf we are
+	 * asking is the subject on one or more introductions; {@code false} otherwise
 	 * @return whether or not this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class targetClass, boolean hasIntroductions) {
@@ -99,6 +99,7 @@ public abstract class MethodMatchers {
 	/**
 	 * MethodMatcher implementation for a union of two given MethodMatchers.
 	 */
+	@SuppressWarnings("serial")
 	private static class UnionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher mm1;
@@ -111,11 +112,13 @@ public abstract class MethodMatchers {
 			this.mm2 = mm2;
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass, boolean hasIntroductions) {
 			return (matchesClass1(targetClass) && MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions)) ||
 					(matchesClass2(targetClass) && MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions));
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass) {
 			return (matchesClass1(targetClass) && this.mm1.matches(method, targetClass)) ||
 					(matchesClass2(targetClass) && this.mm2.matches(method, targetClass));
@@ -129,10 +132,12 @@ public abstract class MethodMatchers {
 			return true;
 		}
 
+		@Override
 		public boolean isRuntime() {
 			return this.mm1.isRuntime() || this.mm2.isRuntime();
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass, Object[] args) {
 			return this.mm1.matches(method, targetClass, args) || this.mm2.matches(method, targetClass, args);
 		}
@@ -163,6 +168,7 @@ public abstract class MethodMatchers {
 	 * MethodMatcher implementation for a union of two given MethodMatchers,
 	 * supporting an associated ClassFilter per MethodMatcher.
 	 */
+	@SuppressWarnings("serial")
 	private static class ClassFilterAwareUnionMethodMatcher extends UnionMethodMatcher {
 
 		private final ClassFilter cf1;
@@ -201,6 +207,7 @@ public abstract class MethodMatchers {
 	/**
 	 * MethodMatcher implementation for an intersection of two given MethodMatchers.
 	 */
+	@SuppressWarnings("serial")
 	private static class IntersectionMethodMatcher implements IntroductionAwareMethodMatcher, Serializable {
 
 		private MethodMatcher mm1;
@@ -213,19 +220,23 @@ public abstract class MethodMatchers {
 			this.mm2 = mm2;
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass, boolean hasIntroductions) {
 			return MethodMatchers.matches(this.mm1, method, targetClass, hasIntroductions) &&
 					MethodMatchers.matches(this.mm2, method, targetClass, hasIntroductions);
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass) {
 			return this.mm1.matches(method, targetClass) && this.mm2.matches(method, targetClass);
 		}
 
+		@Override
 		public boolean isRuntime() {
 			return this.mm1.isRuntime() || this.mm2.isRuntime();
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass, Object[] args) {
 			// Because a dynamic intersection may be composed of a static and dynamic part,
 			// we must avoid calling the 3-arg matches method on a dynamic matcher, as

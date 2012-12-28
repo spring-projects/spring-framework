@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.beans.BeansException;
  * of the latter are normally meant to be defined as SPI instances in a
  * {@link BeanFactory}, while implementations of this class are normally meant
  * to be fed as an API to other beans (through injection). As such, the
- * <code>getObject()</code> method has different exception handling behavior.
+ * {@code getObject()} method has different exception handling behavior.
  *
  * @author Colin Sampaleanu
  * @since 1.0.2
@@ -40,7 +40,7 @@ public interface ObjectFactory<T> {
 	/**
 	 * Return an instance (possibly shared or independent)
 	 * of the object managed by this factory.
-	 * @return an instance of the bean (should never be <code>null</code>)
+	 * @return an instance of the bean (should never be {@code null})
 	 * @throws BeansException in case of creation errors
 	 */
 	T getObject() throws BeansException;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Simple <code>FactoryBean</code> that exposes the underlying {@link SessionFactory}
+ * Simple {@code FactoryBean} that exposes the underlying {@link SessionFactory}
  * behind a Hibernate-backed JPA {@link EntityManagerFactory}.
  *
  * <p>Primarily available for resolving a SessionFactory by JPA persistence unit name
@@ -39,16 +39,19 @@ import org.springframework.util.Assert;
  */
 public class HibernateJpaSessionFactoryBean extends EntityManagerFactoryAccessor implements FactoryBean<SessionFactory> {
 
+	@Override
 	public SessionFactory getObject() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		Assert.isInstanceOf(HibernateEntityManagerFactory.class, emf);
 		return ((HibernateEntityManagerFactory) emf).getSessionFactory();
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return SessionFactory.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

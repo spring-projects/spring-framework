@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.expression.TypedValue;
  */
 public class EnvironmentAccessor implements PropertyAccessor {
 
+	@Override
 	public Class<?>[] getSpecificTargetClasses() {
 		return new Class[] { Environment.class };
 	}
@@ -39,6 +40,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * Can read any {@link Environment}, thus always returns true.
 	 * @return true
 	 */
+	@Override
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 		return true;
 	}
@@ -47,6 +49,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * Access the given target object by resolving the given property name against the given target
 	 * environment.
 	 */
+	@Override
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 		return new TypedValue(((Environment)target).getProperty(name));
 	}
@@ -55,6 +58,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	 * Read only.
 	 * @return false
 	 */
+	@Override
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 		return false;
 	}
@@ -62,6 +66,7 @@ public class EnvironmentAccessor implements PropertyAccessor {
 	/**
 	 * Read only. No-op.
 	 */
+	@Override
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 	}
 

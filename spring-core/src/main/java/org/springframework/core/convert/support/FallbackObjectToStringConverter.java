@@ -24,7 +24,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 
 /**
  * Simply calls {@link Object#toString()} to convert any supported Object to a String.
- * Supports CharSequence, StringWriter, and any class with a String constructor or <code>valueOf(String)</code> method.
+ * Supports CharSequence, StringWriter, and any class with a String constructor or {@code valueOf(String)} method.
  *
  * <p>Used by the default ConversionService as a fallback if there are no other explicit
  * to-String converters registered.
@@ -35,10 +35,12 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  */
 final class FallbackObjectToStringConverter implements ConditionalGenericConverter {
 
+	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, String.class));
 	}
 
+	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
 		if (String.class.equals(sourceClass)) {
@@ -48,6 +50,7 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 			ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return (source != null ? source.toString() : null);
 	}

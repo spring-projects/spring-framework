@@ -59,6 +59,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
 	 * {@link HandlerMethodArgumentResolver}.
 	 */
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return getArgumentResolver(parameter) != null;
 	}
@@ -67,6 +68,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 * Iterate over registered {@link HandlerMethodArgumentResolver}s and invoke the one that supports it.
 	 * @exception IllegalStateException if no suitable {@link HandlerMethodArgumentResolver} is found.
 	 */
+	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

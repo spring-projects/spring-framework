@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,6 +131,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * Eagerly initialize the JDO dialect, creating a default one
 	 * for the specified PersistenceManagerFactory if none set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
@@ -158,7 +159,7 @@ public abstract class JdoAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * {@code org.springframework.dao} hierarchy.
 	 * <p>Default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured

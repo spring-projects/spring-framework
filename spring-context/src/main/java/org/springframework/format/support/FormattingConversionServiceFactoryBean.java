@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.StringValueResolver;
  * of registrars to use through {@link #setFormatterRegistrars(Set)}.
  *
  * <p>A good example for registering converters and formatters in code is
- * <code>JodaTimeFormatterRegistrar</code>, which registers a number of
+ * {@code JodaTimeFormatterRegistrar}, which registers a number of
  * date-related formatters and converters. For a more detailed list of cases
  * see {@link #setFormatterRegistrars(Set)}
  *
@@ -96,15 +96,15 @@ public class FormattingConversionServiceFactoryBean
 	}
 
 	/**
-	 * <p>Configure the set of FormatterRegistrars to invoke to register 
-	 * Converters and Formatters in addition to those added declaratively 
+	 * <p>Configure the set of FormatterRegistrars to invoke to register
+	 * Converters and Formatters in addition to those added declaratively
 	 * via {@link #setConverters(Set)} and {@link #setFormatters(Set)}.
-	 * <p>FormatterRegistrars are useful when registering multiple related 
-	 * converters and formatters for a formatting category, such as Date 
-	 * formatting. All types related needed to support the formatting 
+	 * <p>FormatterRegistrars are useful when registering multiple related
+	 * converters and formatters for a formatting category, such as Date
+	 * formatting. All types related needed to support the formatting
 	 * category can be registered from one place.
-	 * <p>FormatterRegistrars can also be used to register Formatters 
-	 * indexed under a specific field type different from its own &lt;T&gt;, 
+	 * <p>FormatterRegistrars can also be used to register Formatters
+	 * indexed under a specific field type different from its own &lt;T&gt;,
 	 * or when registering a Formatter from a Printer/Parser pair.
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Formatter)
 	 * @see FormatterRegistry#addFormatterForFieldType(Class, Printer, Parser)
@@ -124,11 +124,13 @@ public class FormattingConversionServiceFactoryBean
 		this.registerDefaultFormatters = registerDefaultFormatters;
 	}
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
 		this.embeddedValueResolver = embeddedValueResolver;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		this.conversionService = new DefaultFormattingConversionService(this.embeddedValueResolver, this.registerDefaultFormatters);
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
@@ -171,14 +173,17 @@ public class FormattingConversionServiceFactoryBean
 	}
 
 
+	@Override
 	public FormattingConversionService getObject() {
 		return this.conversionService;
 	}
 
+	@Override
 	public Class<? extends FormattingConversionService> getObjectType() {
 		return FormattingConversionService.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

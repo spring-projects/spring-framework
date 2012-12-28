@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.ReflectionUtils;
  * implementations. It is only public so that it may be accessed from
  * implementations within other packages. It is <i>not</i> intended for general
  * use and may change in the future.
- * 
+ *
  * @author Mark Fisher
  * @since 3.0
  */
@@ -90,6 +90,7 @@ public abstract class TaskUtils {
 
 		private final Log logger = LogFactory.getLog(LoggingErrorHandler.class);
 
+		@Override
 		public void handleError(Throwable t) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Unexpected error occurred in scheduled task.", t);
@@ -104,6 +105,7 @@ public abstract class TaskUtils {
 	 */
 	static class PropagatingErrorHandler extends LoggingErrorHandler {
 
+		@Override
 		public void handleError(Throwable t) {
 			super.handleError(t);
 			ReflectionUtils.rethrowRuntimeException(t);

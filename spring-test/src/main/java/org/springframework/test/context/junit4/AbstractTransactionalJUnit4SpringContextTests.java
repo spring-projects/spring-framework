@@ -56,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
  * &#064;ContextConfiguration}, {@link TestExecutionListeners
  * &#064;TestExecutionListeners}, {@link Transactional &#064;Transactional},
  * etc.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -164,7 +164,7 @@ public abstract class AbstractTransactionalJUnit4SpringContextTests extends Abst
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
 		Resource resource = this.applicationContext.getResource(sqlResourcePath);

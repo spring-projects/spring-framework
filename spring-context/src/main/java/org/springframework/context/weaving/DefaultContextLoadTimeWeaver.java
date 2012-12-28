@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
 
 /**
  * Default {@link LoadTimeWeaver} bean for use in an application context,
- * decorating an automatically detected internal <code>LoadTimeWeaver</code>.
+ * decorating an automatically detected internal {@code LoadTimeWeaver}.
  *
  * <p>Typically registered for the default bean name
- * "<code>loadTimeWeaver</code>"; the most convenient way to achieve this is
- * Spring's <code>&lt;context:load-time-weaver&gt;</code> XML tag.
+ * "{@code loadTimeWeaver}"; the most convenient way to achieve this is
+ * Spring's {@code &lt;context:load-time-weaver&gt;} XML tag.
  *
  * <p>This class implements a runtime environment check for obtaining
  * the appropriate weaver implementation: As of Spring 3.1, it detects
@@ -70,6 +70,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		setBeanClassLoader(beanClassLoader);
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoadTimeWeaver(classLoader);
 		if (serverSpecificLoadTimeWeaver != null) {
@@ -130,6 +131,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		return null;
 	}
 
+	@Override
 	public void destroy() {
 		if (this.loadTimeWeaver instanceof InstrumentationLoadTimeWeaver) {
 			logger.info("Removing all registered transformers for class loader: " +
@@ -139,14 +141,17 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.loadTimeWeaver.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.loadTimeWeaver.getInstrumentableClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}

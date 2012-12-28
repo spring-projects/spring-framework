@@ -19,7 +19,6 @@ package org.springframework.beans;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -41,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.GenericCollectionTypeResolver;
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.Property;
@@ -55,18 +53,18 @@ import org.springframework.util.StringUtils;
  * for all typical use cases. Caches introspection results for efficiency.
  *
  * <p>Note: Auto-registers default property editors from the
- * <code>org.springframework.beans.propertyeditors</code> package, which apply
+ * {@code org.springframework.beans.propertyeditors} package, which apply
  * in addition to the JDK's standard PropertyEditors. Applications can call
  * the {@link #registerCustomEditor(Class, java.beans.PropertyEditor)} method
  * to register an editor for a particular instance (i.e. they are not shared
  * across the application). See the base class
  * {@link PropertyEditorRegistrySupport} for details.
  *
- * <p><code>BeanWrapperImpl</code> will convert collection and array values
+ * <p>{@code BeanWrapperImpl} will convert collection and array values
  * to the corresponding target collections or arrays, if necessary. Custom
  * property editors that deal with collections or arrays can either be
- * written via PropertyEditor's <code>setValue</code>, or against a
- * comma-delimited String via <code>setAsText</code>, as String arrays are
+ * written via PropertyEditor's {@code setValue}, or against a
+ * comma-delimited String via {@code setAsText}, as String arrays are
  * converted in such a format if the array itself is not assignable.
  *
  * <p><b>NOTE: As of Spring 2.5, this is - for almost all purposes - an
@@ -179,7 +177,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
-	 * @param superBw the containing BeanWrapper (must not be <code>null</code>)
+	 * @param superBw the containing BeanWrapper (must not be {@code null})
 	 */
 	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
 		setWrappedInstance(object, nestedPath, superBw.getWrappedInstance());
@@ -221,10 +219,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setIntrospectionClass(object.getClass());
 	}
 
+	@Override
 	public final Object getWrappedInstance() {
 		return this.object;
 	}
 
+	@Override
 	public final Class getWrappedClass() {
 		return (this.object != null ? this.object.getClass() : null);
 	}
@@ -259,6 +259,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * enables auto-growth of collection elements when accessing an out-of-bounds index.
 	 * <p>Default is "false" on a plain BeanWrapper.
 	 */
+	@Override
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
@@ -266,6 +267,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Return whether "auto-growing" of nested paths has been activated.
 	 */
+	@Override
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
 	}
@@ -274,6 +276,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Specify a limit for array and collection auto-growing.
 	 * <p>Default is unlimited on a plain BeanWrapper.
 	 */
+	@Override
 	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
 		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
@@ -281,6 +284,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Return the limit for array and collection auto-growing.
 	 */
+	@Override
 	public int getAutoGrowCollectionLimit() {
 		return this.autoGrowCollectionLimit;
 	}
@@ -326,10 +330,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 
+	@Override
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return getCachedIntrospectionResults().getPropertyDescriptors();
 	}
 
+	@Override
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 		if (pd == null) {
@@ -341,10 +347,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 
 	/**
 	 * Internal version of {@link #getPropertyDescriptor}:
-	 * Returns <code>null</code> if not found rather than throwing an exception.
+	 * Returns {@code null} if not found rather than throwing an exception.
 	 * @param propertyName the property to obtain the descriptor for
 	 * @return the property descriptor for the specified property,
-	 * or <code>null</code> if not found
+	 * or {@code null} if not found
 	 * @throws BeansException in case of introspection failure
 	 */
 	protected PropertyDescriptor getPropertyDescriptorInternal(String propertyName) throws BeansException {
@@ -380,6 +386,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return null;
 	}
 
+	@Override
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
 			BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
@@ -404,6 +411,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return null;
 	}
 
+	@Override
 	public boolean isReadableProperty(String propertyName) {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -424,6 +432,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
+	@Override
 	public boolean isWritableProperty(String propertyName) {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -474,7 +483,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Convert the given value for the specified property to the latter's type.
 	 * <p>This method is only intended for optimizations in a BeanFactory.
-	 * Use the <code>convertIfNecessary</code> methods for programmatic conversion.
+	 * Use the {@code convertIfNecessary} methods for programmatic conversion.
 	 * @param value the value to convert
 	 * @param propertyName the target property
 	 * (note that nested or indexed properties are not supported here)
@@ -559,7 +568,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				propertyValue = setDefaultValue(tokens);
 			}
 			else {
-				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);				
+				throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + canonicalName);
 			}
 		}
 
@@ -713,6 +722,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged(new PrivilegedAction<Object>() {
+						@Override
 						public Object run() {
 							readMethod.setAccessible(true);
 							return null;
@@ -723,11 +733,12 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					readMethod.setAccessible(true);
 				}
 			}
-			
+
 			Object value;
 			if (System.getSecurityManager() != null) {
 				try {
 					value = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							return readMethod.invoke(object, (Object[]) null);
 						}
@@ -738,10 +749,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				}
 			}
 			else {
-                value = readMethod.invoke(object, (Object[]) null);
+				value = readMethod.invoke(object, (Object[]) null);
 			}
-			
-			if (tokens.keys != null) {				
+
+			if (tokens.keys != null) {
 				if (value == null) {
 					if (this.autoGrowNestedPaths) {
 						value = setDefaultValue(tokens.actualName);
@@ -749,9 +760,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					else {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
-								"property path '" + propertyName + "': returned null");							
+								"property path '" + propertyName + "': returned null");
 					}
-				}			
+				}
 				String indexedPropertyName = tokens.actualName;
 				// apply indexes and map keys
 				for (int i = 0; i < tokens.keys.length; i++) {
@@ -759,7 +770,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 					if (value == null) {
 						throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 								"Cannot access indexed value of property referenced in indexed " +
-								"property path '" + propertyName + "': returned null");						
+								"property path '" + propertyName + "': returned null");
 					}
 					else if (value.getClass().isArray()) {
 						int index = Integer.parseInt(key);
@@ -767,9 +778,9 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 						value = Array.get(value, index);
 					}
 					else if (value instanceof List) {
-						int index = Integer.parseInt(key);						
+						int index = Integer.parseInt(key);
 						List list = (List) value;
-						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);						
+						growCollectionIfNecessary(list, index, indexedPropertyName, pd, i + 1);
 						value = list.get(index);
 					}
 					else if (value instanceof Set) {
@@ -804,7 +815,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 								"Property referenced in indexed property path '" + propertyName +
 								"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");
 					}
-					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;					
+					indexedPropertyName += PROPERTY_KEY_PREFIX + key + PROPERTY_KEY_SUFFIX;
 				}
 			}
 			return value;
@@ -1064,6 +1075,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 									!readMethod.isAccessible()) {
 								if (System.getSecurityManager()!= null) {
 									AccessController.doPrivileged(new PrivilegedAction<Object>() {
+										@Override
 										public Object run() {
 											readMethod.setAccessible(true);
 											return null;
@@ -1077,6 +1089,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							try {
 								if (System.getSecurityManager() != null) {
 									oldValue = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+										@Override
 										public Object run() throws Exception {
 											return readMethod.invoke(object);
 										}
@@ -1106,6 +1119,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
 					if (System.getSecurityManager()!= null) {
 						AccessController.doPrivileged(new PrivilegedAction<Object>() {
+							@Override
 							public Object run() {
 								writeMethod.setAccessible(true);
 								return null;
@@ -1120,6 +1134,7 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (System.getSecurityManager() != null) {
 					try {
 						AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+							@Override
 							public Object run() throws Exception {
 								writeMethod.invoke(object, value);
 								return null;

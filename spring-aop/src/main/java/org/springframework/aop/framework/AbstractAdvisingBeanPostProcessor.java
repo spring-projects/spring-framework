@@ -33,6 +33,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 3.2
  */
+@SuppressWarnings("serial")
 public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 		implements BeanPostProcessor, BeanClassLoaderAware, Ordered {
 
@@ -49,6 +50,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	private final Map<String, Boolean> eligibleBeans = new ConcurrentHashMap<String, Boolean>(64);
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -57,15 +59,18 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.
@@ -93,7 +98,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	/**
 	 * Check whether the given bean is eligible for advising with this
 	 * post-processor's {@link Advisor}.
-	 * <p>Implements caching of <code>canApply</code> results per bean name.
+	 * <p>Implements caching of {@code canApply} results per bean name.
 	 * @param bean the bean instance
 	 * @param beanName the name of the bean
 	 * @see AopUtils#canApply(Advisor, Class)

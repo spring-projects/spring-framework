@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ import org.springframework.util.Assert;
  * Implementation of AspectJ ProceedingJoinPoint interface
  * wrapping an AOP Alliance MethodInvocation.
  *
- * <p><b>Note</b>: the <code>getThis()</code> method returns the current Spring AOP proxy.
- * The <code>getTarget()</code> method returns the current Spring AOP target (which may be
- * <code>null</code> if there is no target), and is a plain POJO without any advice.
+ * <p><b>Note</b>: the {@code getThis()} method returns the current Spring AOP proxy.
+ * The {@code getTarget()} method returns the current Spring AOP target (which may be
+ * {@code null} if there is no target), and is a plain POJO without any advice.
  * <b>If you want to call the object and have the advice take effect, use
- * <code>getThis()</code>.</b> A common example is casting the object to an
+ * {@code getThis()}.</b> A common example is casting the object to an
  * introduced interface in the implementation of an introduction.
  *
  * <p>Of course there is no such distinction between target and proxy in AspectJ.
@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
-	
+
 	private final ProxyMethodInvocation methodInvocation;
 
 	private Object[] defensiveCopyOfArgs;
@@ -72,14 +72,17 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		this.methodInvocation = methodInvocation;
 	}
 
+	@Override
 	public void set$AroundClosure(AroundClosure aroundClosure) {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public Object proceed() throws Throwable {
 		return this.methodInvocation.invocableClone().proceed();
 	}
 
+	@Override
 	public Object proceed(Object[] arguments) throws Throwable {
 		Assert.notNull(arguments, "Argument array passed to proceed cannot be null");
 		if (arguments.length != this.methodInvocation.getArguments().length) {
@@ -92,19 +95,22 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	}
 
 	/**
-	 * Returns the Spring AOP proxy. Cannot be <code>null</code>.
+	 * Returns the Spring AOP proxy. Cannot be {@code null}.
 	 */
+	@Override
 	public Object getThis() {
 		return this.methodInvocation.getProxy();
 	}
 
 	/**
-	 * Returns the Spring AOP target. May be <code>null</code> if there is no target.
+	 * Returns the Spring AOP target. May be {@code null} if there is no target.
 	 */
+	@Override
 	public Object getTarget() {
 		return this.methodInvocation.getThis();
 	}
 
+	@Override
 	public Object[] getArgs() {
 		if (this.defensiveCopyOfArgs == null) {
 			Object[] argsSource = this.methodInvocation.getArguments();
@@ -114,6 +120,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return this.defensiveCopyOfArgs;
 	}
 
+	@Override
 	public Signature getSignature() {
 		if (this.signature == null) {
 			this.signature = new MethodSignatureImpl();
@@ -121,6 +128,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return signature;
 	}
 
+	@Override
 	public SourceLocation getSourceLocation() {
 		if (this.sourceLocation == null) {
 			this.sourceLocation = new SourceLocationImpl();
@@ -128,23 +136,28 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 		return this.sourceLocation;
 	}
 
+	@Override
 	public String getKind() {
 		return ProceedingJoinPoint.METHOD_EXECUTION;
 	}
 
+	@Override
 	public int getId() {
 		// TODO: It's just an adapter but returning 0 might still have side effects...
 		return 0;
 	}
 
+	@Override
 	public JoinPoint.StaticPart getStaticPart() {
 		return this;
 	}
 
+	@Override
 	public String toShortString() {
 		return "execution(" + getSignature().toShortString() + ")";
 	}
 
+	@Override
 	public String toLongString() {
 		return "execution(" + getSignature().toLongString() + ")";
 	}
@@ -161,34 +174,42 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 		private volatile String[] parameterNames;
 
+		@Override
 		public String getName() {
 			return methodInvocation.getMethod().getName();
 		}
 
+		@Override
 		public int getModifiers() {
 			return methodInvocation.getMethod().getModifiers();
 		}
 
+		@Override
 		public Class getDeclaringType() {
 			return methodInvocation.getMethod().getDeclaringClass();
 		}
 
+		@Override
 		public String getDeclaringTypeName() {
 			return methodInvocation.getMethod().getDeclaringClass().getName();
 		}
 
+		@Override
 		public Class getReturnType() {
 			return methodInvocation.getMethod().getReturnType();
 		}
 
+		@Override
 		public Method getMethod() {
 			return methodInvocation.getMethod();
 		}
 
+		@Override
 		public Class[] getParameterTypes() {
 			return methodInvocation.getMethod().getParameterTypes();
 		}
 
+		@Override
 		public String[] getParameterNames() {
 			if (this.parameterNames == null) {
 				this.parameterNames = (new LocalVariableTableParameterNameDiscoverer()).getParameterNames(getMethod());
@@ -196,14 +217,17 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return this.parameterNames;
 		}
 
+		@Override
 		public Class[] getExceptionTypes() {
 			return methodInvocation.getMethod().getExceptionTypes();
 		}
 
+		@Override
 		public String toShortString() {
 			return toString(false, false, false, false);
 		}
 
+		@Override
 		public String toLongString() {
 			return toString(true, true, true, true);
 		}
@@ -267,6 +291,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 	 */
 	private class SourceLocationImpl implements SourceLocation {
 
+		@Override
 		public Class getWithinType() {
 			if (methodInvocation.getThis() == null) {
 				throw new UnsupportedOperationException("No source location joinpoint available: target is null");
@@ -274,14 +299,17 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 			return methodInvocation.getThis().getClass();
 		}
 
+		@Override
 		public String getFileName() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int getLine() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int getColumn() {
 			throw new UnsupportedOperationException();
 		}

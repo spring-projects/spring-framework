@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,22 +40,27 @@ public abstract class TemplateAwareExpressionParser implements ExpressionParser 
 	 * Default ParserContext instance for non-template expressions.
 	 */
 	private static final ParserContext NON_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return null;
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return null;
 		}
+		@Override
 		public boolean isTemplate() {
 			return false;
 		}
 	};
 
 
+	@Override
 	public Expression parseExpression(String expressionString) throws ParseException {
 		return parseExpression(expressionString, NON_TEMPLATE_PARSER_CONTEXT);
 	}
 
+	@Override
 	public Expression parseExpression(String expressionString, ParserContext context) throws ParseException {
 		if (context == null) {
 			context = NON_TEMPLATE_PARSER_CONTEXT;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 
 
 	/**
-	 * Specify the target database to operate on, as a value of the <code>Database</code> enum:
+	 * Specify the target database to operate on, as a value of the {@code Database} enum:
 	 * DB2, DERBY, H2, HSQL, INFORMIX, MYSQL, ORACLE, POSTGRESQL, SQL_SERVER, SYBASE
 	 */
 	public void setDatabase(Database database) {
@@ -110,22 +110,27 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	}
 
 
+	@Override
 	public String getPersistenceProviderRootPackage() {
 		return null;
 	}
 
+	@Override
 	public Map<String, ?> getJpaPropertyMap() {
 		return null;
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return null;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getEntityManagerFactoryInterface() {
 		return EntityManagerFactory.class;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return EntityManager.class;
 	}
@@ -134,6 +139,7 @@ public abstract class AbstractJpaVendorAdapter implements JpaVendorAdapter {
 	 * Post-process the EntityManagerFactory after it has been initialized.
 	 * @param emf the EntityManagerFactory to process
 	 */
+	@Override
 	public void postProcessEntityManagerFactory(EntityManagerFactory emf) {
 	}
 

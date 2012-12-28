@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public interface SqlParameterSource {
 
 	/**
 	 * Constant that indicates an unknown (or unspecified) SQL type.
-	 * To be returned from <code>getType</code> when no specific SQL type known.
+	 * To be returned from {@code getType} when no specific SQL type known.
 	 * @see #getSqlType
 	 * @see java.sql.Types
 	 */
@@ -68,7 +68,7 @@ public interface SqlParameterSource {
 	 * Determine the SQL type for the specified named parameter.
 	 * @param paramName the name of the parameter
 	 * @return the SQL type of the specified parameter,
-	 * or <code>TYPE_UNKNOWN</code> if not known
+	 * or {@code TYPE_UNKNOWN} if not known
 	 * @see #TYPE_UNKNOWN
 	 */
 	int getSqlType(String paramName);
@@ -77,7 +77,7 @@ public interface SqlParameterSource {
 	 * Determine the type name for the specified named parameter.
 	 * @param paramName the name of the parameter
 	 * @return the type name of the specified parameter,
-	 * or <code>null</code> if not known
+	 * or {@code null} if not known
 	 */
 	String getTypeName(String paramName);
 

@@ -34,10 +34,10 @@ import org.springframework.expression.spel.support.ReflectivePropertyAccessor;
 
 /**
  * Represents a simple property or field reference.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
- * @author Clark Duplichien 
+ * @author Clark Duplichien
  * @since 3.0
  */
 public class PropertyOrFieldReference extends SpelNodeImpl {
@@ -83,14 +83,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			this.isAutoGrowNullReferences = isAutoGrowNullReferences;
 		}
 
+		@Override
 		public TypedValue getValue() {
 			return ref.getValueInternal(contextObject,eContext,isAutoGrowNullReferences);
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			ref.writeProperty(contextObject,eContext, ref.name, newValue);
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -119,7 +122,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			if ((resultDescriptor.getType().equals(List.class) || resultDescriptor.getType().equals(Map.class))) {
 				// Create a new collection or map ready for the indexer
 				if (resultDescriptor.getType().equals(List.class)) {
-					try { 
+					try {
 						if (isWritableProperty(this.name,contextObject,eContext)) {
 							List<?> newList = ArrayList.class.newInstance();
 							writeProperty(contextObject, eContext, this.name, newList);
@@ -136,7 +139,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 					}
 				}
 				else {
-					try { 
+					try {
 						if (isWritableProperty(this.name,contextObject,eContext)) {
 							Map<?,?> newMap = HashMap.class.newInstance();
 							writeProperty(contextObject, eContext, name, newMap);
@@ -155,7 +158,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			}
 			else {
 				// 'simple' object
-				try { 
+				try {
 					if (isWritableProperty(this.name,contextObject,eContext)) {
 						Object newObject  = result.getTypeDescriptor().getType().newInstance();
 						writeProperty(contextObject, eContext, name, newObject);
@@ -169,7 +172,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				catch (IllegalAccessException ex) {
 					throw new SpelEvaluationException(getStartPosition(), ex,
 							SpelMessage.UNABLE_TO_DYNAMICALLY_CREATE_OBJECT, result.getTypeDescriptor().getType());
-				}				
+				}
 			}
 		}
 		return result;
@@ -249,7 +252,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 	}
 
 	private void writeProperty(TypedValue contextObject, EvaluationContext eContext, String name, Object newValue) throws SpelEvaluationException {
-		
+
 		if (contextObject.getValue() == null && nullSafe) {
 			return;
 		}
@@ -339,7 +342,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 							specificAccessors.add( resolver);
 							break;
 						}
-						else if (clazz.isAssignableFrom(targetType)) { 
+						else if (clazz.isAssignableFrom(targetType)) {
 							generalAccessors.add(resolver);
 						}
 					}

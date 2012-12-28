@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ import java.util.ListIterator;
  * <p>Note: This class is not thread-safe. To create a thread-safe version,
  * use the {@link java.util.Collections#synchronizedList} utility methods.
  *
- * <p>Inspired by <code>LazyList</code> from Commons Collections.
+ * <p>Inspired by {@code LazyList} from Commons Collections.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	/**
@@ -54,7 +55,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by a standard
+	 * Creates a new {@code AutoPopulatingList} that is backed by a standard
 	 * {@link ArrayList} and adds new instances of the supplied {@link Class element Class}
 	 * to the backing {@link List} on demand.
 	 */
@@ -63,7 +64,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by the supplied {@link List}
+	 * Creates a new {@code AutoPopulatingList} that is backed by the supplied {@link List}
 	 * and adds new instances of the supplied {@link Class element Class} to the backing
 	 * {@link List} on demand.
 	 */
@@ -72,7 +73,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by a standard
+	 * Creates a new {@code AutoPopulatingList} that is backed by a standard
 	 * {@link ArrayList} and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(ElementFactory<E> elementFactory) {
@@ -80,7 +81,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 	/**
-	 * Creates a new <code>AutoPopulatingList</code> that is backed by the supplied {@link List}
+	 * Creates a new {@code AutoPopulatingList} that is backed by the supplied {@link List}
 	 * and creates new elements on demand using the supplied {@link ElementFactory}.
 	 */
 	public AutoPopulatingList(List<E> backingList, ElementFactory<E> elementFactory) {
@@ -91,30 +92,37 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 
+	@Override
 	public void add(int index, E element) {
 		this.backingList.add(index, element);
 	}
 
+	@Override
 	public boolean add(E o) {
 		return this.backingList.add(o);
 	}
 
+	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		return this.backingList.addAll(c);
 	}
 
+	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		return this.backingList.addAll(index, c);
 	}
 
+	@Override
 	public void clear() {
 		this.backingList.clear();
 	}
 
+	@Override
 	public boolean contains(Object o) {
 		return this.backingList.contains(o);
 	}
 
+	@Override
 	public boolean containsAll(Collection c) {
 		return this.backingList.containsAll(c);
 	}
@@ -123,6 +131,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * Get the element at the supplied index, creating it if there is
 	 * no element at that index.
 	 */
+	@Override
 	public E get(int index) {
 		int backingListSize = this.backingList.size();
 		E element = null;
@@ -143,62 +152,77 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		return element;
 	}
 
+	@Override
 	public int indexOf(Object o) {
 		return this.backingList.indexOf(o);
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return this.backingList.isEmpty();
 	}
 
+	@Override
 	public Iterator<E> iterator() {
 		return this.backingList.iterator();
 	}
 
+	@Override
 	public int lastIndexOf(Object o) {
 		return this.backingList.lastIndexOf(o);
 	}
 
+	@Override
 	public ListIterator<E> listIterator() {
 		return this.backingList.listIterator();
 	}
 
+	@Override
 	public ListIterator<E> listIterator(int index) {
 		return this.backingList.listIterator(index);
 	}
 
+	@Override
 	public E remove(int index) {
 		return this.backingList.remove(index);
 	}
 
+	@Override
 	public boolean remove(Object o) {
 		return this.backingList.remove(o);
 	}
 
+	@Override
 	public boolean removeAll(Collection<?> c) {
 		return this.backingList.removeAll(c);
 	}
 
+	@Override
 	public boolean retainAll(Collection<?> c) {
 		return this.backingList.retainAll(c);
 	}
 
+	@Override
 	public E set(int index, E element) {
 		return this.backingList.set(index, element);
 	}
 
+	@Override
 	public int size() {
 		return this.backingList.size();
 	}
 
+	@Override
 	public List<E> subList(int fromIndex, int toIndex) {
 		return this.backingList.subList(fromIndex, toIndex);
 	}
 
+	@Override
 	public Object[] toArray() {
 		return this.backingList.toArray();
 	}
 
+	@Override
 	public <T> T[] toArray(T[] a) {
 		return this.backingList.toArray(a);
 	}
@@ -244,8 +268,8 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	/**
 	 * Reflective implementation of the ElementFactory interface,
-	 * using <code>Class.newInstance()</code> on a given element class.
-	 * @see java.lang.Class#newInstance()
+	 * using {@code Class.newInstance()} on a given element class.
+	 * @see Class#newInstance()
 	 */
 	private static class ReflectiveElementFactory<E> implements ElementFactory<E>, Serializable {
 
@@ -258,6 +282,7 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 			this.elementClass = elementClass;
 		}
 
+		@Override
 		public E createElement(int index) {
 			try {
 				return this.elementClass.newInstance();

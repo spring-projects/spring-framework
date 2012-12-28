@@ -86,7 +86,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	/** Servlet config that this context runs in, if any */
 	private ServletConfig servletConfig;
 
-	/** Namespace of this context, or <code>null</code> if root */
+	/** Namespace of this context, or {@code null} if root */
 	private String namespace;
 
 	/** the ThemeSource for this ApplicationContext */
@@ -98,14 +98,17 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 	}
 
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 		if (servletConfig != null && this.servletContext == null) {
@@ -113,10 +116,12 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		}
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 
+	@Override
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 		if (namespace != null) {
@@ -124,6 +129,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		}
 	}
 
+	@Override
 	public String getNamespace() {
 		return this.namespace;
 	}
@@ -215,6 +221,7 @@ public abstract class AbstractRefreshableWebApplicationContext extends AbstractR
 		this.getEnvironment().initPropertySources(this.servletContext, this.servletConfig);
 	}
 
+	@Override
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
 	}

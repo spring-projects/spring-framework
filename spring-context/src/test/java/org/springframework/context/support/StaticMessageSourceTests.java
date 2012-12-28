@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,11 +49,13 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	protected StaticApplicationContext sac;
 
 	/** Overridden */
+	@Override
 	public void testCount() {
 		// These are only checked for current Ctx (not parent ctx)
 		assertCount(15);
 	}
 
+	@Override
 	public void testMessageSource() throws NoSuchMessageException {
 		// Do nothing here since super is looking for errorCodes we
 		// do NOT have in the Context
@@ -195,10 +197,11 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 	}
 
 	/** Run for each test */
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 
-		Map m = new HashMap();
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("name", "Roderick");
 		parent.registerPrototype("rod", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
@@ -221,7 +224,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		sac.addListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
-		Map usMessages = new HashMap(3);
+		Map<String, String> usMessages = new HashMap<String, String>(3);
 		usMessages.put("message.format.example1", MSG_TXT1_US);
 		usMessages.put("message.format.example2", MSG_TXT2_US);
 		usMessages.put("message.format.example3", MSG_TXT3_US);

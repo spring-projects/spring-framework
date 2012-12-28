@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.core.io.Resource;
  * @see ResourceEntityResolver
  */
 public class BeansDtdResolver implements EntityResolver {
-	
+
 	private static final String DTD_EXTENSION = ".dtd";
 
 	private static final String[] DTD_NAMES = {"spring-beans-2.0", "spring-beans"};
@@ -50,6 +50,7 @@ public class BeansDtdResolver implements EntityResolver {
 	private static final Log logger = LogFactory.getLog(BeansDtdResolver.class);
 
 
+	@Override
 	public InputSource resolveEntity(String publicId, String systemId) throws IOException {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Trying to resolve XML entity with public ID [" + publicId +

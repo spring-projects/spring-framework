@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -155,6 +155,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 		this.defaultObject = defaultObject;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -228,10 +229,12 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 	/**
 	 * Return the singleton JNDI object.
 	 */
+	@Override
 	public Object getObject() {
 		return this.jndiObject;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		if (this.proxyInterfaces != null) {
 			if (this.proxyInterfaces.length == 1) {
@@ -249,6 +252,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 		}
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -323,6 +327,7 @@ public class JndiObjectFactoryBean extends JndiObjectLocator implements FactoryB
 			this.jndiTemplate = jndiTemplate;
 		}
 
+		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Context ctx = (isEligible(invocation.getMethod()) ? this.jndiTemplate.getContext() : null);
 			try {

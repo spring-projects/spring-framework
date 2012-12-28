@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -71,14 +72,17 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 		this.advice = advice;
 	}
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this;
 	}

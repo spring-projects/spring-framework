@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.util.StringUtils;
  * <p>Uses the "required" error code and the field name to resolve message codes
  * for a missing field error.
  *
- * <p>Creates a <code>FieldError</code> for each <code>PropertyAccessException</code>
- * given, using the <code>PropertyAccessException</code>'s error code ("typeMismatch",
+ * <p>Creates a {@code FieldError} for each {@code PropertyAccessException}
+ * given, using the {@code PropertyAccessException}'s error code ("typeMismatch",
  * "methodInvocation") for resolving message codes.
  *
  * @author Alef Arendsen
@@ -52,6 +52,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
 
+	@Override
 	public void processMissingFieldError(String missingField, BindingResult bindingResult) {
 		// Create field error with code "required".
 		String fixedField = bindingResult.getNestedPath() + missingField;
@@ -62,6 +63,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 				codes, arguments, "Field '" + fixedField + "' is required"));
 	}
 
+	@Override
 	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
 		// Create field error with the exceptions's code, e.g. "typeMismatch".
 		String field = ex.getPropertyName();

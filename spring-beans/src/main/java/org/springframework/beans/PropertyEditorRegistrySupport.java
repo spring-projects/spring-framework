@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Retrieve the default editor for the given property type, if any.
 	 * <p>Lazily registers the default editors, if they are active.
 	 * @param requiredType type of the property
-	 * @return the default editor, or <code>null</code> if none found
+	 * @return the default editor, or {@code null} if none found
 	 * @see #registerDefaultEditors
 	 */
 	public PropertyEditor getDefaultEditor(Class<?> requiredType) {
@@ -269,10 +269,12 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	// Management of custom editors
 	//---------------------------------------------------------------------
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		registerCustomEditor(requiredType, null, propertyEditor);
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, String propertyPath, PropertyEditor propertyEditor) {
 		if (requiredType == null && propertyPath == null) {
 			throw new IllegalArgumentException("Either requiredType or propertyPath is required");
@@ -319,6 +321,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 		return (this.sharedEditors != null && this.sharedEditors.contains(propertyEditor));
 	}
 
+	@Override
 	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
 		Class<?> requiredTypeToUse = requiredType;
 		if (propertyPath != null) {
@@ -349,9 +352,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Determine whether this registry contains a custom editor
 	 * for the specified array/collection element.
 	 * @param elementType the target type of the element
-	 * (can be <code>null</code> if not known)
+	 * (can be {@code null} if not known)
 	 * @param propertyPath the property path (typically of the array/collection;
-	 * can be <code>null</code> if not known)
+	 * can be {@code null} if not known)
 	 * @return whether a matching custom editor has been found
 	 */
 	public boolean hasCustomEditorForElement(Class<?> elementType, String propertyPath) {
@@ -372,11 +375,11 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Determine the property type for the given property path.
 	 * <p>Called by {@link #findCustomEditor} if no required type has been specified,
 	 * to be able to find a type-specific editor even if just given a property path.
-	 * <p>The default implementation always returns <code>null</code>.
-	 * BeanWrapperImpl overrides this with the standard <code>getPropertyType</code>
+	 * <p>The default implementation always returns {@code null}.
+	 * BeanWrapperImpl overrides this with the standard {@code getPropertyType}
 	 * method as defined by the BeanWrapper interface.
 	 * @param propertyPath the property path to determine the type for
-	 * @return the type of the property, or <code>null</code> if not determinable
+	 * @return the type of the property, or {@code null} if not determinable
 	 * @see BeanWrapper#getPropertyType(String)
 	 */
 	protected Class<?> getPropertyType(String propertyPath) {
@@ -387,7 +390,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Get custom editor that has been registered for the given property.
 	 * @param propertyName the property path to look for
 	 * @param requiredType the type to look for
-	 * @return the custom editor, or <code>null</code> if none specific for this property
+	 * @return the custom editor, or {@code null} if none specific for this property
 	 */
 	private PropertyEditor getCustomEditor(String propertyName, Class<?> requiredType) {
 		CustomEditorHolder holder = this.customEditorsForPath.get(propertyName);
@@ -397,9 +400,9 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	/**
 	 * Get custom editor for the given type. If no direct match found,
 	 * try custom editor for superclass (which will in any case be able
-	 * to render a value as String via <code>getAsText</code>).
+	 * to render a value as String via {@code getAsText}).
 	 * @param requiredType the type to look for
-	 * @return the custom editor, or <code>null</code> if none found for this type
+	 * @return the custom editor, or {@code null} if none found for this type
 	 * @see java.beans.PropertyEditor#getAsText()
 	 */
 	private PropertyEditor getCustomEditor(Class<?> requiredType) {
@@ -436,7 +439,7 @@ public class PropertyEditorRegistrySupport implements PropertyEditorRegistry {
 	 * Guess the property type of the specified property from the registered
 	 * custom editors (provided that they were registered for a specific type).
 	 * @param propertyName the name of the property
-	 * @return the property type, or <code>null</code> if not determinable
+	 * @return the property type, or {@code null} if not determinable
 	 */
 	protected Class<?> guessPropertyTypeFromEditors(String propertyName) {
 		if (this.customEditorsForPath != null) {

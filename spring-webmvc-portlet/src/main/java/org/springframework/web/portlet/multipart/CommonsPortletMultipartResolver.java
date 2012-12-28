@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	/**
-	 * Initialize the underlying <code>org.apache.commons.fileupload.portlet.PortletFileUpload</code>
+	 * Initialize the underlying {@code org.apache.commons.fileupload.portlet.PortletFileUpload}
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @return the new PortletFileUpload instance
 	 */
@@ -106,6 +106,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		return new PortletFileUpload(fileItemFactory);
 	}
 
+	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		if (!isUploadTempDirSpecified()) {
 			getFileItemFactory().setRepository(PortletUtils.getTempDir(portletContext));
@@ -113,10 +114,12 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 
+	@Override
 	public boolean isMultipart(ActionRequest request) {
 		return (request != null && PortletFileUpload.isMultipartContent(request));
 	}
 
+	@Override
 	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
@@ -165,7 +168,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current portlet request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.portlet.ActionRequest#getCharacterEncoding
 	 * @see #setDefaultEncoding
 	 */
@@ -177,6 +180,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		return encoding;
 	}
 
+	@Override
 	public void cleanupMultipart(MultipartActionRequest request) {
 		if (request != null) {
 			try {

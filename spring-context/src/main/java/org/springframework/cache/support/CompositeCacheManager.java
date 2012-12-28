@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 		this.fallbackToNoOpCache = fallbackToNoOpCache;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.fallbackToNoOpCache) {
 			this.cacheManagers.add(new NoOpCacheManager());
@@ -66,6 +67,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 	}
 
 
+	@Override
 	public Cache getCache(String name) {
 		for (CacheManager cacheManager : this.cacheManagers) {
 			Cache cache = cacheManager.getCache(name);
@@ -76,6 +78,7 @@ public class CompositeCacheManager implements InitializingBean, CacheManager {
 		return null;
 	}
 
+	@Override
 	public Collection<String> getCacheNames() {
 		List<String> names = new ArrayList<String>();
 		for (CacheManager manager : this.cacheManagers) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.jsf.FacesContextUtils;
 
 /**
- * JSF 1.2 <code>ELResolver</code> that delegates to the Spring root
- * <code>WebApplicationContext</code>, resolving name references to
+ * JSF 1.2 {@code ELResolver} that delegates to the Spring root
+ * {@code WebApplicationContext}, resolving name references to
  * Spring-defined beans.
  *
- * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
+ * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre>
  * &lt;application>
@@ -72,7 +72,7 @@ public class SpringBeanFacesELResolver extends SpringBeanELResolver {
 	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
 	 * against; usually, this will be a full Spring ApplicationContext.
 	 * @param elContext the current JSF ELContext
-	 * @return the Spring BeanFactory (never <code>null</code>)
+	 * @return the Spring BeanFactory (never {@code null})
 	 */
 	@Override
 	protected BeanFactory getBeanFactory(ELContext elContext) {
@@ -83,7 +83,7 @@ public class SpringBeanFacesELResolver extends SpringBeanELResolver {
 	 * Retrieve the web application context to delegate bean name resolution to.
 	 * <p>The default implementation delegates to FacesContextUtils.
 	 * @param elContext the current JSF ELContext
-	 * @return the Spring web application context (never <code>null</code>)
+	 * @return the Spring web application context (never {@code null})
 	 * @see org.springframework.web.jsf.FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(ELContext elContext) {

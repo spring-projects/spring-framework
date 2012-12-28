@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,7 +308,7 @@ public abstract class AbstractJdbcInsert {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by <code>validateParameters</code>.
+	 * <p>Automatically called by {@code validateParameters}.
 	 */
 	protected void checkCompiled() {
 		if (!isCompiled()) {
@@ -444,6 +444,7 @@ public abstract class AbstractJdbcInsert {
 		if (this.tableMetaDataContext.isGetGeneratedKeysSupported()) {
 			jdbcTemplate.update(
 					new PreparedStatementCreator() {
+						@Override
 						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 							PreparedStatement ps = prepareStatementForGeneratedKeys(con);
 							setParameterValues(ps, values, getInsertTypes());
@@ -483,6 +484,7 @@ public abstract class AbstractJdbcInsert {
 			}
 			else {
 				jdbcTemplate.execute(new ConnectionCallback() {
+					@Override
 					public Object doInConnection(Connection con) throws SQLException, DataAccessException {
 						// Do the insert
 						PreparedStatement ps = null;
@@ -592,11 +594,13 @@ public abstract class AbstractJdbcInsert {
 				getInsertString(),
 				new BatchPreparedStatementSetter() {
 
+					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						List<Object> values = batchValues[i];
 						setParameterValues(ps, values, getInsertTypes());
 					}
 
+					@Override
 					public int getBatchSize() {
 						return batchValues.length;
 					}
@@ -622,7 +626,7 @@ public abstract class AbstractJdbcInsert {
 			}
 		}
 	}
-	
+
 	/**
 	 * Match the provided in parameter values with regitered parameters and parameters defined via metedata
 	 * processing.

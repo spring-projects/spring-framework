@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 			new HashMap<String, DefaultListableBeanFactory>();
 
 
+	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
 			throw new IllegalStateException("Cannot do auto-TargetSource creation with a BeanFactory " +
@@ -86,6 +87,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	// Implementation of the TargetSourceCreator interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
@@ -159,6 +161,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
 	 * @see #getInternalBeanFactoryForBean
 	 */
+	@Override
 	public void destroy() {
 		synchronized (this.internalBeanFactories) {
 			for (DefaultListableBeanFactory bf : this.internalBeanFactories.values()) {
@@ -184,14 +187,14 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 
 	/**
 	 * Subclasses must implement this method to return a new AbstractPrototypeBasedTargetSource
-	 * if they wish to create a custom TargetSource for this bean, or <code>null</code> if they are
+	 * if they wish to create a custom TargetSource for this bean, or {@code null} if they are
 	 * not interested it in, in which case no special target source will be created.
-	 * Subclasses should not call <code>setTargetBeanName</code> or <code>setBeanFactory</code>
+	 * Subclasses should not call {@code setTargetBeanName} or {@code setBeanFactory}
 	 * on the AbstractPrototypeBasedTargetSource: This class' implementation of
-	 * <code>getTargetSource()</code> will do that.
+	 * {@code getTargetSource()} will do that.
 	 * @param beanClass the class of the bean to create a TargetSource for
 	 * @param beanName the name of the bean
-	 * @return the AbstractPrototypeBasedTargetSource, or <code>null</code> if we don't match this
+	 * @return the AbstractPrototypeBasedTargetSource, or {@code null} if we don't match this
 	 */
 	protected abstract AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName);

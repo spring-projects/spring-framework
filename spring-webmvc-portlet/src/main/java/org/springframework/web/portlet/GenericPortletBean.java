@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ import org.springframework.web.portlet.context.PortletContextResourceLoader;
 import org.springframework.web.portlet.context.StandardPortletEnvironment;
 
 /**
- * Simple extension of <code>javax.portlet.GenericPortlet</code> that treats
+ * Simple extension of {@code javax.portlet.GenericPortlet} that treats
  * its config parameters as bean properties.
  *
  * <p>A very handy superclass for any type of portlet. Type conversion is automatic.
  * It is also possible for subclasses to specify required properties.
  *
  * <p>This portlet leaves request handling to subclasses, inheriting the default
- * behaviour of GenericPortlet (<code>doDispatch</code>, <code>processAction</code>, etc).
+ * behaviour of GenericPortlet ({@code doDispatch}, {@code processAction}, etc).
  *
  * <p>This portlet superclass has no dependency on a Spring application context,
  * in contrast to the FrameworkPortlet class which loads its own context.
@@ -74,7 +74,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this portlet.
 	 */
@@ -105,7 +105,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 		if (logger.isInfoEnabled()) {
 			logger.info("Initializing portlet '" + getPortletName() + "'");
 		}
-		
+
 		// Set bean properties from init parameters.
 		try {
 			PropertyValues pvs = new PortletConfigPropertyValues(getPortletConfig(), this.requiredProperties);
@@ -127,7 +127,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 			logger.info("Portlet '" + getPortletName() + "' configured successfully");
 		}
 	}
-	
+
 	/**
 	 * Initialize the BeanWrapper for this GenericPortletBean,
 	 * possibly with custom editors.
@@ -140,7 +140,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
@@ -150,7 +150,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	}
 
 	/**
-	 * Overridden method that simply returns <code>null</code> when no
+	 * Overridden method that simply returns {@code null} when no
 	 * PortletConfig set yet.
 	 * @see #getPortletConfig()
 	 */
@@ -174,6 +174,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	 * @throws IllegalArgumentException if environment is not assignable to
 	 * {@code ConfigurableEnvironment}.
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
 		this.environment = (ConfigurableEnvironment)environment;
@@ -184,6 +185,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 	 * <p>If {@code null}, a new environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
+	@Override
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = this.createEnvironment();
@@ -215,7 +217,7 @@ public abstract class GenericPortletBean extends GenericPortlet
 		 */
 		private PortletConfigPropertyValues(PortletConfig config, Set<String> requiredProperties)
 			throws PortletException {
-				
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 

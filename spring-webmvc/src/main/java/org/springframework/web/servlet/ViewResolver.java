@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,17 @@ import java.util.Locale;
  */
 public interface ViewResolver {
 
-	/** 
+	/**
 	 * Resolve the given view by name.
 	 * <p>Note: To allow for ViewResolver chaining, a ViewResolver should
-	 * return <code>null</code> if a view with the given name is not defined in it.
+	 * return {@code null} if a view with the given name is not defined in it.
 	 * However, this is not required: Some ViewResolvers will always attempt
-	 * to build View objects with the given name, unable to return <code>null</code> 
+	 * to build View objects with the given name, unable to return {@code null}
 	 * (rather throwing an exception when View creation failed).
 	 * @param viewName name of the view to resolve
 	 * @param locale Locale in which to resolve the view.
 	 * ViewResolvers that support internationalization should respect this.
-	 * @return the View object, or <code>null</code> if not found
+	 * @return the View object, or {@code null} if not found
 	 * (optional, to allow for ViewResolver chaining)
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)

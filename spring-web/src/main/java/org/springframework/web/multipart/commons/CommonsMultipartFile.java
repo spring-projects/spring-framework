@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Iterator;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -40,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @since 29.09.2003
  * @see CommonsMultipartResolver
  */
+@SuppressWarnings("serial")
 public class CommonsMultipartFile implements MultipartFile, Serializable {
 
 	protected static final Log logger = LogFactory.getLog(CommonsMultipartFile.class);
@@ -59,7 +57,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 	/**
-	 * Return the underlying <code>org.apache.commons.fileupload.FileItem</code>
+	 * Return the underlying {@code org.apache.commons.fileupload.FileItem}
 	 * instance. There is hardly any need to access this.
 	 */
 	public final FileItem getFileItem() {
@@ -67,10 +65,12 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	}
 
 
+	@Override
 	public String getName() {
 		return this.fileItem.getFieldName();
 	}
 
+	@Override
 	public String getOriginalFilename() {
 		String filename = this.fileItem.getName();
 		if (filename == null) {
@@ -93,18 +93,22 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		}
 	}
 
+	@Override
 	public String getContentType() {
 		return this.fileItem.getContentType();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return (this.size == 0);
 	}
 
+	@Override
 	public long getSize() {
 		return this.size;
 	}
 
+	@Override
 	public byte[] getBytes() {
 		if (!isAvailable()) {
 			throw new IllegalStateException("File has been moved - cannot be read again");
@@ -113,6 +117,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		return (bytes != null ? bytes : new byte[0]);
 	}
 
+	@Override
 	public InputStream getInputStream() throws IOException {
 		if (!isAvailable()) {
 			throw new IllegalStateException("File has been moved - cannot be read again");
@@ -121,6 +126,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		return (inputStream != null ? inputStream : new ByteArrayInputStream(new byte[0]));
 	}
 
+	@Override
 	public void transferTo(File dest) throws IOException, IllegalStateException {
 		if (!isAvailable()) {
 			throw new IllegalStateException("File has already been moved - cannot be transferred again");

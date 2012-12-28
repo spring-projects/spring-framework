@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class AdaptableJobFactory implements JobFactory {
 	/**
 	 * Quartz 1.x version of newJob: contains actual implementation code.
 	 */
+	@Override
 	public Job newJob(TriggerFiredBundle bundle) throws SchedulerException {
 		try {
 			Object jobObject = createJobInstance(bundle);

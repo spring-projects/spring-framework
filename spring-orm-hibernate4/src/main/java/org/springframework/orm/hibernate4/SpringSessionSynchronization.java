@@ -52,10 +52,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	}
 
 
+	@Override
 	public int getOrder() {
 		return SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER;
 	}
 
+	@Override
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
@@ -64,12 +66,14 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void resume() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 		}
 	}
 
+	@Override
 	public void flush() {
 		try {
 			SessionFactoryUtils.logger.debug("Flushing Hibernate Session on explicit request");
@@ -80,6 +84,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void beforeCommit(boolean readOnly) throws DataAccessException {
 		if (!readOnly) {
 			Session session = getCurrentSession();
@@ -97,6 +102,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void beforeCompletion() {
 		Session session = this.sessionHolder.getSession();
 		if (this.sessionHolder.getPreviousFlushMode() != null) {
@@ -107,9 +113,11 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		session.disconnect();
 	}
 
+	@Override
 	public void afterCommit() {
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 		try {
 			if (status != STATUS_COMMITTED) {

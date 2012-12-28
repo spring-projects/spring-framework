@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class TemplateParserContext implements ParserContext {
 	public TemplateParserContext() {
 		this("#{", "}");
 	}
-	
+
 	/**
 	 * Create a new TemplateParserContext for the given prefix and suffix.
 	 * @param expressionPrefix the expression prefix to use
@@ -50,14 +50,17 @@ public class TemplateParserContext implements ParserContext {
 	}
 
 
+	@Override
 	public final boolean isTemplate() {
 		return true;
 	}
 
+	@Override
 	public final String getExpressionPrefix() {
 		return this.expressionPrefix;
 	}
 
+	@Override
 	public final String getExpressionSuffix() {
 		return this.expressionSuffix;
 	}

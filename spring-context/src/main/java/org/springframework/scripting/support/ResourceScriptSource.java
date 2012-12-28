@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ public class ResourceScriptSource implements ScriptSource {
 		return this.resource;
 	}
 
+	@Override
 	public String getScriptAsString() throws IOException {
 		synchronized (this.lastModifiedMonitor) {
 			this.lastModified = retrieveLastModifiedTime();
@@ -86,6 +87,7 @@ public class ResourceScriptSource implements ScriptSource {
 		return FileCopyUtils.copyToString(reader);
 	}
 
+	@Override
 	public boolean isModified() {
 		synchronized (this.lastModifiedMonitor) {
 			return (this.lastModified < 0 || retrieveLastModifiedTime() > this.lastModified);
@@ -108,6 +110,7 @@ public class ResourceScriptSource implements ScriptSource {
 		}
 	}
 
+	@Override
 	public String suggestedClassName() {
 		return StringUtils.stripFilenameExtension(getResource().getFilename());
 	}
@@ -115,7 +118,7 @@ public class ResourceScriptSource implements ScriptSource {
 	/**
 	 * Sets the encoding used for reading the script resource. The default value is "UTF-8".
 	 * A null value, implies the platform default.
-	 * 
+	 *
 	 * @param encoding charset encoding used for reading the script.
 	 */
 	public void setEncoding(String encoding) {

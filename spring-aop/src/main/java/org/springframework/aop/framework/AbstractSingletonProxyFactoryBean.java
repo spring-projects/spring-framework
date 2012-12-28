@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		this.proxyClassLoader = classLoader;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (this.proxyClassLoader == null) {
 			this.proxyClassLoader = classLoader;
@@ -129,6 +130,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.target == null) {
 			throw new IllegalArgumentException("Property 'target' is required");
@@ -190,6 +192,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 
+	@Override
 	public Object getObject() {
 		if (this.proxy == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -197,6 +200,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		return this.proxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();
@@ -213,6 +217,7 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		return null;
 	}
 
+	@Override
 	public final boolean isSingleton() {
 		return true;
 	}

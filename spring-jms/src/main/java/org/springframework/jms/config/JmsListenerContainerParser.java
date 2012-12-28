@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,8 +27,8 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the JMS <code>&lt;listener-container&gt;</code> element.
- * 
+ * Parser for the JMS {@code &lt;listener-container&gt;} element.
+ *
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @since 2.5
@@ -50,10 +50,11 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String RECEIVE_TIMEOUT_ATTRIBUTE = "receive-timeout";
 
 
+	@Override
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
 		containerDef.setSource(parserContext.extractSource(containerEle));
-		
+
 		parseListenerConfiguration(listenerEle, parserContext, containerDef);
 		parseContainerConfiguration(containerEle, parserContext, containerDef);
 

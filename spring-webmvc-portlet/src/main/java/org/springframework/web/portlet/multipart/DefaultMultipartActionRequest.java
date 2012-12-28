@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,14 +74,17 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 
+	@Override
 	public Iterator<String> getFileNames() {
 		return getMultipartFiles().keySet().iterator();
 	}
 
+	@Override
 	public MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
 
+	@Override
 	public List<MultipartFile> getFiles(String name) {
 		List<MultipartFile> multipartFiles = getMultipartFiles().get(name);
 		if (multipartFiles != null) {
@@ -91,12 +94,14 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 			return Collections.emptyList();
 		}
 	}
-	
 
+
+	@Override
 	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles().toSingleValueMap();
 	}
 
+	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return getMultipartFiles();
 	}
@@ -131,7 +136,6 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, String[]> getParameterMap() {
 		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());
@@ -139,6 +143,7 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 		return paramMap;
 	}
 
+	@Override
 	public String getMultipartContentType(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {

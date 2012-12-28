@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * @since 13.02.2004
  * @see org.springframework.context.MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
  */
+@SuppressWarnings("serial")
 public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
 	private final String[] codes;
@@ -95,6 +96,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 
+	@Override
 	public String[] getCodes() {
 		return this.codes;
 	}
@@ -107,10 +109,12 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
 	}
 
+	@Override
 	public Object[] getArguments() {
 		return this.arguments;
 	}
 
+	@Override
 	public String getDefaultMessage() {
 		return this.defaultMessage;
 	}
@@ -131,7 +135,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	/**
 	 * Default implementation exposes the attributes of this MessageSourceResolvable.
 	 * To be overridden in more specific subclasses, potentially including the
-	 * resolvable content through <code>resolvableToString()</code>.
+	 * resolvable content through {@code resolvableToString()}.
 	 * @see #resolvableToString()
 	 */
 	@Override

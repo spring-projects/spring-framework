@@ -41,19 +41,20 @@ public class RequestContextFilterTests extends TestCase {
 	public void testHappyPath() throws Exception {
 		testFilterInvocation(null);
 	}
-	
+
 	public void testWithException() throws Exception {
 		testFilterInvocation(new ServletException());
 	}
-		
+
 	public void testFilterInvocation(final ServletException sex) throws Exception {
 		final MockHttpServletRequest req = new MockHttpServletRequest();
 		req.setAttribute("myAttr", "myValue");
 		final MockHttpServletResponse resp = new MockHttpServletResponse();
-		
+
 		// Expect one invocation by the filter being tested
 		class DummyFilterChain implements FilterChain {
 			public int invocations = 0;
+			@Override
 			public void doFilter(ServletRequest req, ServletResponse resp) throws IOException, ServletException {
 				++invocations;
 				if (invocations == 1) {
@@ -84,7 +85,7 @@ public class RequestContextFilterTests extends TestCase {
 		catch (ServletException ex) {
 			assertNotNull(sex);
 		}
-		
+
 		try {
 			RequestContextHolder.currentRequestAttributes();
 			fail();

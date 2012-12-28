@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Base Controller interface, representing a component that receives
- * <code>HttpServletRequest</code> and <code>HttpServletResponse</code>
- * instances just like a <code>HttpServlet</code> but is able to
+ * {@code HttpServletRequest} and {@code HttpServletResponse}
+ * instances just like a {@code HttpServlet} but is able to
  * participate in an MVC workflow. Controllers are comparable to the
- * notion of a Struts <code>Action</code>.
+ * notion of a Struts {@code Action}.
  *
  * <p>Any implementation of the Controller interface should be a
  * <i>reusable, thread-safe</i> class, capable of handling multiple
@@ -80,9 +80,9 @@ import org.springframework.web.servlet.ModelAndView;
  * choose to implement specific awareness interfaces, just like any other bean in a
  * Spring (web) application context can do, for example:</p>
  * <ul>
- * <li><code>org.springframework.context.ApplicationContextAware</code></li>
- * <li><code>org.springframework.context.ResourceLoaderAware</code></li>
- * <li><code>org.springframework.web.context.ServletContextAware</code></li>
+ * <li>{@code org.springframework.context.ApplicationContextAware}</li>
+ * <li>{@code org.springframework.context.ResourceLoaderAware}</li>
+ * <li>{@code org.springframework.web.context.ServletContextAware}</li>
  * </ul>
  *
  * <p>Such environment references can easily be passed in testing environments,
@@ -111,12 +111,12 @@ public interface Controller {
 
 	/**
 	 * Process the request and return a ModelAndView object which the DispatcherServlet
-	 * will render. A <code>null</code> return value is not an error: It indicates that
+	 * will render. A {@code null} return value is not an error: It indicates that
 	 * this object completed request processing itself, thus there is no ModelAndView
 	 * to render.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a ModelAndView to render, or <code>null</code> if handled directly
+	 * @return a ModelAndView to render, or {@code null} if handled directly
 	 * @throws Exception in case of errors
 	 */
 	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;

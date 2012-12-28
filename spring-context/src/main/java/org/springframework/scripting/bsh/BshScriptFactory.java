@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 
 	/**
 	 * Create a new BshScriptFactory for the given script source.
-	 * <p>With this <code>BshScriptFactory</code> variant, the script needs to
+	 * <p>With this {@code BshScriptFactory} variant, the script needs to
 	 * declare a full class or return an actual instance of the scripted object.
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
@@ -76,7 +76,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * @param scriptSourceLocator a locator that points to the source of the script.
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param scriptInterfaces the Java interfaces that the scripted object
-	 * is supposed to implement (may be <code>null</code>)
+	 * is supposed to implement (may be {@code null})
 	 */
 	public BshScriptFactory(String scriptSourceLocator, Class[] scriptInterfaces) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
@@ -84,15 +84,18 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		this.scriptInterfaces = scriptInterfaces;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public String getScriptSourceLocator() {
 		return this.scriptSourceLocator;
 	}
 
+	@Override
 	public Class[] getScriptInterfaces() {
 		return this.scriptInterfaces;
 	}
@@ -100,6 +103,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	/**
 	 * BeanShell scripts do require a config interface.
 	 */
+	@Override
 	public boolean requiresConfigInterface() {
 		return true;
 	}
@@ -108,6 +112,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	 * Load and parse the BeanShell script via {@link BshScriptUtils}.
 	 * @see BshScriptUtils#createBshObject(String, Class[], ClassLoader)
 	 */
+	@Override
 	public Object getScriptedObject(ScriptSource scriptSource, Class[] actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
@@ -159,6 +164,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
+	@Override
 	public Class getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
@@ -177,6 +183,7 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 		}
 	}
 
+	@Override
 	public boolean requiresScriptedObjectRefresh(ScriptSource scriptSource) {
 		synchronized (this.scriptClassMonitor) {
 			return (scriptSource.isModified() || this.wasModifiedForTypeCheck);

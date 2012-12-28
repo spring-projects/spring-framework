@@ -1,6 +1,5 @@
-package org.springframework.transaction;
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +14,8 @@ package org.springframework.transaction;
  * limitations under the License.
  */
 
+package org.springframework.transaction;
+
 
 
 import org.springframework.transaction.support.AbstractPlatformTransactionManager;
@@ -24,6 +25,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
 
 	public TransactionDefinition lastDefinition;
@@ -32,26 +34,30 @@ public class CallCountingTransactionManager extends AbstractPlatformTransactionM
 	public int rollbacks;
 	public int inflight;
 
+	@Override
 	protected Object doGetTransaction() {
 		return new Object();
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		this.lastDefinition = definition;
 		++begun;
 		++inflight;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		++rollbacks;
 		--inflight;
 	}
-	
+
 	public void clear() {
 		begun = commits = rollbacks = inflight = 0;
 	}

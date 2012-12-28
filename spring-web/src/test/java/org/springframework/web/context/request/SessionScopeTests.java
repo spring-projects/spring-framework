@@ -40,6 +40,7 @@ public class SessionScopeTests extends TestCase {
 
 	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
 		this.beanFactory = new DefaultListableBeanFactory();
 		this.beanFactory.registerScope("session", new SessionScope());
@@ -162,30 +163,37 @@ public class SessionScopeTests extends TestCase {
 
 	private static class CustomDestructionAwareBeanPostProcessor implements DestructionAwareBeanPostProcessor {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		}
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class CustomSerializableDestructionAwareBeanPostProcessor
 			implements DestructionAwareBeanPostProcessor, Serializable {
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 			return bean;
 		}
 
+		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 			if (bean instanceof BeanNameAware) {
 				((BeanNameAware) bean).setBeanName(null);

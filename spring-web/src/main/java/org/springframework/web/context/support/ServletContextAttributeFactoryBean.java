@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, 
 		this.attributeName = attributeName;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		if (this.attributeName == null) {
 			throw new IllegalArgumentException("Property 'attributeName' is required");
@@ -66,14 +67,17 @@ public class ServletContextAttributeFactoryBean implements FactoryBean<Object>, 
 	}
 
 
+	@Override
 	public Object getObject() throws Exception {
 		return this.attribute;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.attribute != null ? this.attribute.getClass() : null);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

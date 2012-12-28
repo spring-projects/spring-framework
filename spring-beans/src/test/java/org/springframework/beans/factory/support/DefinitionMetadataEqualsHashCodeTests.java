@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import test.beans.TestBean;
  */
 public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 
+	@SuppressWarnings("serial")
 	public void testRootBeanDefinitionEqualsAndHashCode() throws Exception {
 		RootBeanDefinition master = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition equal = new RootBeanDefinition(TestBean.class);
@@ -42,6 +43,7 @@ public class DefinitionMetadataEqualsHashCodeTests extends TestCase {
 		assertEquals("Hash code for equal instances should match", master.hashCode(), equal.hashCode());
 	}
 
+	@SuppressWarnings("serial")
 	public void testChildBeanDefinitionEqualsAndHashCode() throws Exception {
 		ChildBeanDefinition master = new ChildBeanDefinition("foo");
 		ChildBeanDefinition equal = new ChildBeanDefinition("foo");

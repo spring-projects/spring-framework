@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException, CacheException {
 		logger.info("Initializing EHCache CacheManager");
 		if (this.configLocation != null) {
@@ -116,19 +117,23 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 	}
 
 
+	@Override
 	public CacheManager getObject() {
 		return this.cacheManager;
 	}
 
+	@Override
 	public Class<? extends CacheManager> getObjectType() {
 		return (this.cacheManager != null ? this.cacheManager.getClass() : CacheManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		logger.info("Shutting down EHCache CacheManager");
 		this.cacheManager.shutdown();

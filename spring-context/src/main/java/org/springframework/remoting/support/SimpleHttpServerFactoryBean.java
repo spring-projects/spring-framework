@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,6 +143,7 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException {
 		InetSocketAddress address = (this.hostname != null ?
 				new InetSocketAddress(this.hostname, this.port) : new InetSocketAddress(this.port));
@@ -167,18 +168,22 @@ public class SimpleHttpServerFactoryBean implements FactoryBean<HttpServer>, Ini
 		this.server.start();
 	}
 
+	@Override
 	public HttpServer getObject() {
 		return this.server;
 	}
 
+	@Override
 	public Class<? extends HttpServer> getObjectType() {
 		return (this.server != null ? this.server.getClass() : HttpServer.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
+	@Override
 	public void destroy() {
 		logger.info("Stopping HttpServer");
 		this.server.stop(this.shutdownDelay);

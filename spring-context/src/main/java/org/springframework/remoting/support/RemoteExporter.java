@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public abstract class RemoteExporter extends RemotingSupport {
 
 	/**
 	 * Set whether to register a RemoteInvocationTraceInterceptor for exported
-	 * services. Only applied when a subclass uses <code>getProxyForService</code>
+	 * services. Only applied when a subclass uses {@code getProxyForService}
 	 * for creating the proxy to expose.
 	 * <p>Default is "true". RemoteInvocationTraceInterceptor's most important value
 	 * is that it logs exception stacktraces on the server, before propagating an

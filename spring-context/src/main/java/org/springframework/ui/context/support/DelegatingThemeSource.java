@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,15 +36,18 @@ public class DelegatingThemeSource implements HierarchicalThemeSource {
 	private ThemeSource parentThemeSource;
 
 
+	@Override
 	public void setParentThemeSource(ThemeSource parentThemeSource) {
 		this.parentThemeSource = parentThemeSource;
 	}
 
+	@Override
 	public ThemeSource getParentThemeSource() {
 		return parentThemeSource;
 	}
 
 
+	@Override
 	public Theme getTheme(String themeName) {
 		if (this.parentThemeSource != null) {
 			return this.parentThemeSource.getTheme(themeName);

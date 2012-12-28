@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.web.util.WebUtils;
 /**
  * <p>Convenient superclass for controller implementations, using the Template
  * Method design pattern.</p>
- * 
- * <p>As stated in the {@link org.springframework.web.servlet.mvc.Controller Controller}
+ *
+ * <p>As stated in the {@link Controller Controller}
  * interface, a lot of functionality is already provided by certain abstract
  * base controllers. The AbstractController is one of the most important
  * abstract base controller providing basic features such as the generation
@@ -38,13 +38,13 @@ import org.springframework.web.util.WebUtils;
  * <p><b><a name="workflow">Workflow
  * (<a href="Controller.html#workflow">and that defined by interface</a>):</b><br>
  * <ol>
- *  <li>{@link #handleRequest(HttpServletRequest,HttpServletResponse) handleRequest()}
+ *  <li>{@link #handleRequest(HttpServletRequest, HttpServletResponse) handleRequest()}
  *      will be called by the DispatcherServlet</li>
  *  <li>Inspection of supported methods (ServletException if request method
  *      is not support)</li>
  *  <li>If session is required, try to get it (ServletException if not found)</li>
  *  <li>Set caching headers if needed according to the cacheSeconds property</li>
- *  <li>Call abstract method {@link #handleRequestInternal(HttpServletRequest,HttpServletResponse) handleRequestInternal()}
+ *  <li>Call abstract method {@link #handleRequestInternal(HttpServletRequest, HttpServletResponse) handleRequestInternal()}
  *      (optionally synchronizing around the call on the HttpSession),
  *      which should be implemented by extending classes to provide actual
  *      functionality to return {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.</li>
@@ -86,7 +86,7 @@ import org.springframework.web.util.WebUtils;
  *  <tr>
  *      <td>synchronizeOnSession</td>
  *      <td>false</td>
- *      <td>whether the call to <code>handleRequestInternal</code> should be
+ *      <td>whether the call to {@code handleRequestInternal} should be
  *          synchronized around the HttpSession, to serialize invocations
  *          from the same client. No effect if there is no HttpSession.
  *      </td>
@@ -105,19 +105,19 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleRequestInternal</code>
+	 * <p>More specifically, the execution of the {@code handleRequestInternal}
 	 * method will get synchronized if this flag is "true". The best available
 	 * session mutex will be used for the synchronization; ideally, this will
 	 * be a mutex exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the HttpSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
 	 * same active logical session. However, this is not guaranteed across
 	 * different servlet containers; the only 100% safe way is a session mutex.
-	 * @see org.springframework.web.servlet.mvc.AbstractController#handleRequestInternal
+	 * @see AbstractController#handleRequestInternal
 	 * @see org.springframework.web.util.HttpSessionMutexListener
 	 * @see org.springframework.web.util.WebUtils#getSessionMutex(javax.servlet.http.HttpSession)
 	 */
@@ -133,6 +133,7 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 
 
+	@Override
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 
@@ -149,13 +150,13 @@ public abstract class AbstractController extends WebContentGenerator implements 
 				}
 			}
 		}
-		
+
 		return handleRequestInternal(request, response);
 	}
 
 	/**
 	 * Template method. Subclasses must implement this.
-	 * The contract is the same as for <code>handleRequest</code>.
+	 * The contract is the same as for {@code handleRequest}.
 	 * @see #handleRequest
 	 */
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)

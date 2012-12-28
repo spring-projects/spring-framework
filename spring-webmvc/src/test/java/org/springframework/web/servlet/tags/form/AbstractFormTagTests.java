@@ -31,12 +31,14 @@ public abstract class AbstractFormTagTests extends AbstractHtmlElementTagTests {
 	private FormTag formTag = new FormTag();
 
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		request.setAttribute(COMMAND_NAME, createTestBean());
 	}
 
 	protected abstract TestBean createTestBean();
 
+	@Override
 	protected void extendPageContext(MockPageContext pageContext) throws JspException {
 		this.formTag.setCommandName(COMMAND_NAME);
 		this.formTag.setAction("myAction");

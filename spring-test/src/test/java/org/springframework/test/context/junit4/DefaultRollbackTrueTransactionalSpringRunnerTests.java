@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * JUnit 4 based integration test which verifies proper transactional behavior when the
  * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
- * of the {@link TransactionConfiguration} annotation is set to <strong><code>true</code></strong>.
+ * of the {@link TransactionConfiguration} annotation is set to <strong>{@code true}</strong>.
  *
  * @author Sam Brannen
  * @since 2.5

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,12 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 	}
 
 
+	@Override
 	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 		include((PortletRequest) request, (PortletResponse) response);
 	}
 
+	@Override
 	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
@@ -69,6 +71,7 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 		}
 	}
 
+	@Override
 	public void forward(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");

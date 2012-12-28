@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	/**
 	 * Specify the target class explicitly, to avoid any kind of access to the
 	 * target bean (for example, to avoid initialization of a FactoryBean instance).
-	 * <p>Default is to detect the type automatically, through a <code>getType</code>
-	 * call on the BeanFactory (or even a full <code>getBean</code> call as fallback).
+	 * <p>Default is to detect the type automatically, through a {@code getType}
+	 * call on the BeanFactory (or even a full {@code getBean} call as fallback).
 	 */
 	public void setTargetClass(Class targetClass) {
 		this.targetClass = targetClass;
@@ -103,8 +103,9 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 
 	/**
 	 * Set the owning BeanFactory. We need to save a reference so that we can
-	 * use the <code>getBean</code> method on every invocation.
+	 * use the {@code getBean} method on every invocation.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {
 			throw new IllegalStateException("Property'targetBeanName' is required");
@@ -120,6 +121,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 
+	@Override
 	public synchronized Class<?> getTargetClass() {
 		if (this.targetClass == null && this.beanFactory != null) {
 			// Determine type of the target bean.
@@ -137,10 +139,12 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		return this.targetClass;
 	}
 
+	@Override
 	public boolean isStatic() {
 		return false;
 	}
 
+	@Override
 	public void releaseTarget(Object target) throws Exception {
 		// Nothing to do here.
 	}

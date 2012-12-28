@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link MethodMetadata} implementation that uses standard reflection
- * to introspect a given <code>Method</code>.
+ * to introspect a given {@code Method}.
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
@@ -67,27 +67,33 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod;
 	}
 
-	
+
+	@Override
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
 	}
-	
+
+	@Override
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
 	}
 
+	@Override
 	public boolean isStatic() {
 		return Modifier.isStatic(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isFinal() {
 		return Modifier.isFinal(this.introspectedMethod.getModifiers());
 	}
 
+	@Override
 	public boolean isOverridable() {
 		return (!isStatic() && !isFinal() && !Modifier.isPrivate(this.introspectedMethod.getModifiers()));
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {
@@ -103,6 +109,7 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return false;
 	}
 
+	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		Annotation[] anns = this.introspectedMethod.getAnnotations();
 		for (Annotation ann : anns) {

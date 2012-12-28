@@ -49,7 +49,7 @@ import org.springframework.web.servlet.View;
 public class BaseViewTests extends TestCase {
 
 	public void testRenderWithoutStaticAttributes() throws Exception {
-		
+
 		WebApplicationContext wac = createMock(WebApplicationContext.class);
 		wac.getServletContext();
 		expectLastCall().andReturn(new MockServletContext());
@@ -58,11 +58,11 @@ public class BaseViewTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		TestView tv = new TestView(wac);
-		
+
 		// Check superclass handles duplicate init
-		tv.setApplicationContext(wac);		
 		tv.setApplicationContext(wac);
-		
+		tv.setApplicationContext(wac);
+
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("foo", "bar");
 		model.put("something", new Object());
@@ -70,11 +70,11 @@ public class BaseViewTests extends TestCase {
 
 		// check it contains all
 		checkContainsAll(model, tv.model);
-		
+
 		assertTrue(tv.inited);
 		verify(wac);
 	}
-	
+
 	/**
 	 * Test attribute passing, NOT CSV parsing.
 	 */
@@ -87,13 +87,13 @@ public class BaseViewTests extends TestCase {
 		HttpServletRequest request = new MockHttpServletRequest();
 		HttpServletResponse response = new MockHttpServletResponse();
 		TestView tv = new TestView(wac);
-	
+
 		tv.setApplicationContext(wac);
-		Properties p = new Properties();	
+		Properties p = new Properties();
 		p.setProperty("foo", "bar");
 		p.setProperty("something", "else");
-		tv.setAttributes(p);	
-	
+		tv.setAttributes(p);
+
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("one", new HashMap<Object, Object>());
 		model.put("two", new Object());
@@ -102,7 +102,7 @@ public class BaseViewTests extends TestCase {
 		// Check it contains all
 		checkContainsAll(model, tv.model);
 		checkContainsAll(p, tv.model);
-	
+
 		assertTrue(tv.inited);
 		verify(wac);
 	}
@@ -118,17 +118,17 @@ public class BaseViewTests extends TestCase {
 
 		TestView tv = new TestView(wac);
 		tv.setApplicationContext(wac);
-		
-		Properties p = new Properties();	
+
+		Properties p = new Properties();
 		p.setProperty("one", "bar");
 		p.setProperty("something", "else");
-		tv.setAttributes(p);	
-		
+		tv.setAttributes(p);
+
 		Map<String, Object> pathVars = new HashMap<String, Object>();
 		pathVars.put("one", new HashMap<Object, Object>());
 		pathVars.put("two", new Object());
 		request.setAttribute(View.PATH_VARIABLES, pathVars);
-		
+
 		tv.render(new HashMap<String, Object>(), request, response);
 
 		// Check it contains all
@@ -140,7 +140,7 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.inited);
 		verify(wac);
 	}
-	
+
 	public void testDynamicModelOverridesStaticAttributesIfCollision() throws Exception {
 		WebApplicationContext wac = createMock(WebApplicationContext.class);
 		wac.getServletContext();
@@ -152,10 +152,10 @@ public class BaseViewTests extends TestCase {
 		TestView tv = new TestView(wac);
 
 		tv.setApplicationContext(wac);
-		Properties p = new Properties();	
+		Properties p = new Properties();
 		p.setProperty("one", "bar");
 		p.setProperty("something", "else");
-		tv.setAttributes(p);	
+		tv.setAttributes(p);
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("one", new HashMap<Object, Object>());
@@ -204,13 +204,13 @@ public class BaseViewTests extends TestCase {
 		assertTrue(tv.inited);
 		verify(wac);
 	}
-	
+
 	public void testIgnoresNullAttributes() {
 		AbstractView v = new ConcreteView();
 		v.setAttributes(null);
 		assertTrue(v.getStaticAttributes().size() == 0);
 	}
-	
+
 	/**
 	 * Test only the CSV parsing implementation.
 	 */
@@ -219,13 +219,13 @@ public class BaseViewTests extends TestCase {
 		v.setAttributesCSV(null);
 		assertTrue(v.getStaticAttributes().size() == 0);
 	}
-	
+
 	public void testAttributeCSVParsingIgnoresEmptyString() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("");
 		assertTrue(v.getStaticAttributes().size() == 0);
 	}
-	
+
 	/**
 	 * Format is attname0={value1},attname1={value1}
 	 */
@@ -236,7 +236,7 @@ public class BaseViewTests extends TestCase {
 		assertTrue(v.getStaticAttributes().get("foo").equals("bar"));
 		assertTrue(v.getStaticAttributes().get("king").equals("kong"));
 	}
-	
+
 	public void testAttributeCSVParsingValidWithWeirdCharacters() {
 		AbstractView v = new ConcreteView();
 		String fooval = "owfie   fue&3[][[[2 \n\n \r  \t 8\ufffd3";
@@ -247,7 +247,7 @@ public class BaseViewTests extends TestCase {
 		assertTrue(v.getStaticAttributes().get("foo").equals(fooval));
 		assertTrue(v.getStaticAttributes().get("king").equals(kingval));
 	}
-	
+
 	public void testAttributeCSVParsingInvalid() {
 		AbstractView v = new ConcreteView();
 		try {
@@ -257,7 +257,7 @@ public class BaseViewTests extends TestCase {
 		}
 		catch (IllegalArgumentException ex) {
 		}
-		
+
 		try {
 			// No value
 			v.setAttributesCSV("fweoiruiu=");
@@ -265,7 +265,7 @@ public class BaseViewTests extends TestCase {
 		}
 		catch (IllegalArgumentException ex) {
 		}
-		
+
 		try {
 			// No closing ]
 			v.setAttributesCSV("fweoiruiu=[");
@@ -281,13 +281,13 @@ public class BaseViewTests extends TestCase {
 		catch (IllegalArgumentException ex) {
 		}
 	}
-	
+
 	public void testAttributeCSVParsingIgoresTrailingComma() {
 		AbstractView v = new ConcreteView();
 		v.setAttributesCSV("foo=[de],");
 		assertTrue(v.getStaticAttributes().size() == 1);
 	}
-	
+
 	/**
 	 * Check that all keys in expected have same values in actual
 	 * @param expected
@@ -297,18 +297,19 @@ public class BaseViewTests extends TestCase {
 	private void checkContainsAll(Map expected, Map<String, Object> actual) {
 		Set<String> keys = expected.keySet();
 		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			//System.out.println("Checking model key " + key);
-			assertTrue("Value for model key '" + key + "' must match", actual.get(key) == expected.get(key));			
+			assertTrue("Value for model key '" + key + "' must match", actual.get(key) == expected.get(key));
 		}
 	}
-	
+
 	/**
 	 * Trivial concrete subclass we can use when we're interested only
 	 * in CSV parsing, which doesn't require lifecycle management
 	 */
 	private class ConcreteView extends AbstractView {
 		// Do-nothing concrete subclass
+		@Override
 		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 			throw new UnsupportedOperationException();
@@ -322,14 +323,15 @@ public class BaseViewTests extends TestCase {
 	private class TestView extends AbstractView {
 		private WebApplicationContext wac;
 		public boolean inited;
-		
+
 		/** Captured model in render */
 		public Map<String, Object> model;
-		
+
 		public TestView(WebApplicationContext wac) {
 			this.wac = wac;
-			
+
 		}
+		@Override
 		protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 				// do nothing
@@ -338,6 +340,7 @@ public class BaseViewTests extends TestCase {
 		/**
 		 * @see org.springframework.context.support.ApplicationObjectSupport#initApplicationContext()
 		 */
+		@Override
 		protected void initApplicationContext() throws ApplicationContextException {
 			if (inited)
 				throw new RuntimeException("Already initialized");

@@ -58,19 +58,23 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		return this.servletResponse;
 	}
 
+	@Override
 	public void setStatusCode(HttpStatus status) {
 		this.servletResponse.setStatus(status.value());
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
+	@Override
 	public OutputStream getBody() throws IOException {
 		writeHeaders();
 		return this.servletResponse.getOutputStream();
 	}
 
+	@Override
 	public void close() {
 		writeHeaders();
 	}

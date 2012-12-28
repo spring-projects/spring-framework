@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * <code>LoadTimeWeaver</code> that builds and exposes a
+ * {@code LoadTimeWeaver} that builds and exposes a
  * {@link SimpleInstrumentableClassLoader}.
  *
  * <p>Mainly intended for testing environments, where it is sufficient to
  * perform all class transformation on a newly created
- * <code>ClassLoader</code> instance.
+ * {@code ClassLoader} instance.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -42,8 +42,8 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 
 
 	/**
-	 * Create a new <code>SimpleLoadTimeWeaver</code> for the current context
-	 * <code>ClassLoader</code>.
+	 * Create a new {@code SimpleLoadTimeWeaver} for the current context
+	 * {@code ClassLoader}.
 	 * @see SimpleInstrumentableClassLoader
 	 */
 	public SimpleLoadTimeWeaver() {
@@ -51,10 +51,10 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 	/**
-	 * Create a new <code>SimpleLoadTimeWeaver</code> for the given
-	 * <code>ClassLoader</code>.
-	 * @param classLoader the <code>ClassLoader</code> to build a simple
-	 * instrumentable <code>ClassLoader</code> on top of
+	 * Create a new {@code SimpleLoadTimeWeaver} for the given
+	 * {@code ClassLoader}.
+	 * @param classLoader the {@code ClassLoader} to build a simple
+	 * instrumentable {@code ClassLoader} on top of
 	 */
 	public SimpleLoadTimeWeaver(SimpleInstrumentableClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
@@ -62,10 +62,12 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
@@ -73,6 +75,7 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * This implementation builds a {@link SimpleThrowawayClassLoader}.
 	 */
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}

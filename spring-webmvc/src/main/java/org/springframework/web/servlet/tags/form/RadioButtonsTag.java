@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 /**
- * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
- * elements with a '<code>type</code>' of '<code>radio</code>'.
+ * Databinding-aware JSP tag for rendering multiple HTML '{@code input}'
+ * elements with a '{@code type}' of '{@code radio}'.
  *
  * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setItems(Object) value} matches the bound value.
@@ -27,6 +27,7 @@ package org.springframework.web.servlet.tags.form;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class RadioButtonsTag extends AbstractMultiCheckedElementTag {
 
 	@Override

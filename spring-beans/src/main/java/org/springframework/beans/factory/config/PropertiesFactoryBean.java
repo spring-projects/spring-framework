@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,17 +59,20 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 		this.singleton = singleton;
 	}
 
+	@Override
 	public final boolean isSingleton() {
 		return this.singleton;
 	}
 
 
+	@Override
 	public final void afterPropertiesSet() throws IOException {
 		if (this.singleton) {
 			this.singletonInstance = createProperties();
 		}
 	}
 
+	@Override
 	public final Properties getObject() throws IOException {
 		if (this.singleton) {
 			return this.singletonInstance;
@@ -79,6 +82,7 @@ public class PropertiesFactoryBean extends PropertiesLoaderSupport
 		}
 	}
 
+	@Override
 	public Class<Properties> getObjectType() {
 		return Properties.class;
 	}

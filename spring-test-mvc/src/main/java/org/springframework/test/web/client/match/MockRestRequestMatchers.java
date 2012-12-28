@@ -59,6 +59,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher anything() {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws AssertionError {
 			}
 		};
@@ -73,6 +74,7 @@ public abstract class MockRestRequestMatchers {
 	public static RequestMatcher requestTo(final Matcher<String> matcher) {
 		Assert.notNull(matcher, "'matcher' must not be null");
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				assertThat("Request URI", request.getURI().toString(), matcher);
 			}
@@ -88,6 +90,7 @@ public abstract class MockRestRequestMatchers {
 	public static RequestMatcher requestTo(final String expectedUri) {
 		Assert.notNull(expectedUri, "'uri' must not be null");
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				assertEquals("Request URI", expectedUri, request.getURI().toString());
 			}
@@ -103,6 +106,7 @@ public abstract class MockRestRequestMatchers {
 	public static RequestMatcher method(final HttpMethod method) {
 		Assert.notNull(method, "'method' must not be null");
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws AssertionError {
 				AssertionErrors.assertEquals("Unexpected HttpMethod", method, request.getMethod());
 			}
@@ -118,6 +122,7 @@ public abstract class MockRestRequestMatchers {
 	public static RequestMatcher requestTo(final URI uri) {
 		Assert.notNull(uri, "'uri' must not be null");
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				AssertionErrors.assertEquals("Unexpected request", uri, request.getURI());
 			}
@@ -129,6 +134,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher header(final String name, final Matcher<? super String>... matchers) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) {
 				assertHeaderValueCount(name, request.getHeaders(), matchers.length);
 				for (int i = 0 ; i < matchers.length; i++) {
@@ -143,6 +149,7 @@ public abstract class MockRestRequestMatchers {
 	 */
 	public static RequestMatcher header(final String name, final String... expectedValues) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) {
 				assertHeaderValueCount(name, request.getHeaders(), expectedValues.length);
 				for (int i = 0 ; i < expectedValues.length; i++) {

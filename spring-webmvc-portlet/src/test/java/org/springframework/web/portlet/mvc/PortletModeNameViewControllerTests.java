@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,12 @@ import org.springframework.web.portlet.ModelAndView;
 public class PortletModeNameViewControllerTests extends TestCase {
 
 	private PortletModeNameViewController controller;
-	
+
+	@Override
 	public void setUp() {
 		controller = new PortletModeNameViewController();
 	}
-	
+
 	public void testEditPortletMode() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
@@ -53,7 +54,7 @@ public class PortletModeNameViewControllerTests extends TestCase {
 		ModelAndView mav = controller.handleRenderRequest(request, response);
 		assertEquals("help", mav.getViewName());
 	}
-	
+
 	public void testViewPortletMode() throws Exception {
 		MockRenderRequest request = new MockRenderRequest();
 		MockRenderResponse response = new MockRenderResponse();
@@ -61,7 +62,7 @@ public class PortletModeNameViewControllerTests extends TestCase {
 		ModelAndView mav = controller.handleRenderRequest(request, response);
 		assertEquals("view", mav.getViewName());
 	}
-	
+
 	public void testActionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();

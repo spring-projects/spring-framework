@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,22 +31,22 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * for simplified implementation of basic extractors.
  * Basically returns the passed-in JDBC objects on all methods.
  *
- * <p><code>getNativeConnection</code> checks for a ConnectionProxy chain,
+ * <p>{@code getNativeConnection} checks for a ConnectionProxy chain,
  * for example from a TransactionAwareDataSourceProxy, before delegating to
- * <code>doGetNativeConnection</code> for actual unwrapping. You can override
+ * {@code doGetNativeConnection} for actual unwrapping. You can override
  * either of the two for a specific connection pool, but the latter is
  * recommended to participate in ConnectionProxy unwrapping.
  *
- * <p><code>getNativeConnection</code> also applies a fallback if the first
+ * <p>{@code getNativeConnection} also applies a fallback if the first
  * native extraction process failed, that is, returned the same Connection as
  * passed in. It assumes that some additional proxying is going in this case:
  * Hence, it retrieves the underlying native Connection from the DatabaseMetaData
- * via <code>conHandle.getMetaData().getConnection()</code> and retries the native
+ * via {@code conHandle.getMetaData().getConnection()} and retries the native
  * extraction process based on that Connection handle. This works, for example,
- * for the Connection proxies exposed by Hibernate 3.1's <code>Session.connection()</code>.
+ * for the Connection proxies exposed by Hibernate 3.1's {@code Session.connection()}.
  *
- * <p>The <code>getNativeConnectionFromStatement</code> method is implemented
- * to simply delegate to <code>getNativeConnection</code> with the Statement's
+ * <p>The {@code getNativeConnectionFromStatement} method is implemented
+ * to simply delegate to {@code getNativeConnection} with the Statement's
  * Connection. This is what most extractor implementations will stick to,
  * unless there's a more efficient version for a specific pool.
  *
@@ -59,22 +59,25 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor {
 
 	/**
-	 * Return <code>false</code> by default.
+	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeStatements() {
 		return false;
 	}
 
 	/**
-	 * Return <code>false</code> by default.
+	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 		return false;
 	}
 
 	/**
-	 * Return <code>false</code> by default.
+	 * Return {@code false} by default.
 	 */
+	@Override
 	public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 		return false;
 	}
@@ -91,6 +94,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 */
+	@Override
 	public Connection getNativeConnection(Connection con) throws SQLException {
 		if (con == null) {
 			return null;
@@ -128,6 +132,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	 * @see #getNativeConnection
 	 * @see Statement#getConnection
 	 */
+	@Override
 	public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
 		if (stmt == null) {
 			return null;
@@ -138,6 +143,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in Statement.
 	 */
+	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
 		return stmt;
 	}
@@ -145,6 +151,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in PreparedStatement.
 	 */
+	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
 		return ps;
 	}
@@ -152,6 +159,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in CallableStatement.
 	 */
+	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
 		return cs;
 	}
@@ -159,6 +167,7 @@ public abstract class NativeJdbcExtractorAdapter implements NativeJdbcExtractor 
 	/**
 	 * Not able to unwrap: return passed-in ResultSet.
 	 */
+	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
 		return rs;
 	}

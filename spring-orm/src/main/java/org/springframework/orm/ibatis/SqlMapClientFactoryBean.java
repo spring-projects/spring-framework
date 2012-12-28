@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 
 	/**
 	 * Set optional properties to be passed into the SqlMapClientBuilder, as
-	 * alternative to a <code>&lt;properties&gt;</code> tag in the sql-map-config.xml
+	 * alternative to a {@code &lt;properties&gt;} tag in the sql-map-config.xml
 	 * file. Will be used to resolve placeholders in the config file.
 	 * @see #setConfigLocation
 	 * @see com.ibatis.sqlmap.client.SqlMapClientBuilder#buildSqlMapClient(java.io.InputStream, java.util.Properties)
@@ -205,7 +205,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 
 	/**
 	 * Set the iBATIS TransactionConfig class to use. Default is
-	 * <code>com.ibatis.sqlmap.engine.transaction.external.ExternalTransactionConfig</code>.
+	 * {@code com.ibatis.sqlmap.engine.transaction.external.ExternalTransactionConfig}.
 	 * <p>Will only get applied when using a Spring-managed DataSource.
 	 * An instance of this class will get populated with the given DataSource
 	 * and initialized with the given properties.
@@ -235,7 +235,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	 * @see com.ibatis.sqlmap.engine.transaction.jdbc.JdbcTransactionConfig
 	 * @see com.ibatis.sqlmap.engine.transaction.jta.JtaTransactionConfig
 	 * @see com.ibatis.sqlmap.client.SqlMapTransactionManager
-	 	 */
+	 */
 	public void setTransactionConfigClass(Class transactionConfigClass) {
 		if (transactionConfigClass == null || !TransactionConfig.class.isAssignableFrom(transactionConfigClass)) {
 			throw new IllegalArgumentException("Invalid transactionConfigClass: does not implement " +
@@ -282,6 +282,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SqlMapClient configuration.
@@ -320,7 +321,7 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	 * on iBATIS 2.3 and higher) or on a Reader (on iBATIS up to version 2.2).
 	 * @param configLocations the config files to load from
 	 * @param properties the SqlMapClient properties (if any)
-	 * @return the SqlMapClient instance (never <code>null</code>)
+	 * @return the SqlMapClient instance (never {@code null})
 	 * @throws IOException if loading the config file failed
 	 * @see com.ibatis.sqlmap.client.SqlMapClientBuilder#buildSqlMapClient
 	 */
@@ -382,14 +383,17 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	}
 
 
+	@Override
 	public SqlMapClient getObject() {
 		return this.sqlMapClient;
 	}
 
+	@Override
 	public Class<? extends SqlMapClient> getObjectType() {
 		return (this.sqlMapClient != null ? this.sqlMapClient.getClass() : SqlMapClient.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

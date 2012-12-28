@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} that evaluates a property path on a given target object.
- * 
+ *
  * <p>The target object can be specified directly or via a bean name.
  *
  * <p>Usage examples:
@@ -64,12 +64,12 @@ import org.springframework.util.StringUtils;
  *
  * &lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;
  * &lt;bean id="tb.age" class="org.springframework.beans.factory.config.PropertyPathFactoryBean"/&gt;</pre>
- * 
+ *
  * <p>If you are using Spring 2.0 and XML Schema support in your configuration file(s),
  * you can also use the following style of configuration for property path access.
  * (See also the appendix entitled 'XML Schema-based configuration' in the Spring
  * reference manual for more examples.)
- * 
+ *
  * <pre class="code"> &lt;!-- will result in 10, which is the value of property 'age' of bean 'tb' --&gt;
  * &lt;util:property-path id="name" path="testBean.age"/&gt;</pre>
  *
@@ -147,11 +147,13 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	 * "targetBeanName" nor "propertyPath" have been specified.
 	 * This allows for concise bean definitions with just an id/name.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 
@@ -162,15 +164,15 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 		if (this.targetBeanWrapper == null && this.targetBeanName == null) {
 			if (this.propertyPath != null) {
 				throw new IllegalArgumentException(
-				    "Specify 'targetObject' or 'targetBeanName' in combination with 'propertyPath'");
+						"Specify 'targetObject' or 'targetBeanName' in combination with 'propertyPath'");
 			}
 
 			// No other properties specified: check bean name.
 			int dotIndex = this.beanName.indexOf('.');
 			if (dotIndex == -1) {
 				throw new IllegalArgumentException(
-				    "Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
-				    "bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
+						"Neither 'targetObject' nor 'targetBeanName' specified, and PropertyPathFactoryBean " +
+						"bean name '" + this.beanName + "' does not follow 'beanName.property' syntax");
 			}
 			this.targetBeanName = this.beanName.substring(0, dotIndex);
 			this.propertyPath = this.beanName.substring(dotIndex + 1);
@@ -190,6 +192,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	}
 
 
+	@Override
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {
@@ -208,6 +211,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 		return target.getPropertyValue(this.propertyPath);
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.resultType;
 	}
@@ -218,6 +222,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	 * for each call, so we have to assume that we're not returning the
 	 * same object for each {@link #getObject()} call.
 	 */
+	@Override
 	public boolean isSingleton() {
 		return false;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ import org.springframework.util.SerializationTestUtils;
  * @author Chris Beams
  */
 public class ScopedProxyTests {
-	
+
 	private static final Class<?> CLASS = ScopedProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final ClassPathResource LIST_CONTEXT = new ClassPathResource(CLASSNAME + "-list.xml", CLASS);
 	private static final ClassPathResource MAP_CONTEXT = new ClassPathResource(CLASSNAME + "-map.xml", CLASS);
 	private static final ClassPathResource OVERRIDE_CONTEXT = new ClassPathResource(CLASSNAME + "-override.xml", CLASS);
@@ -126,7 +126,7 @@ public class ScopedProxyTests {
 		assertTrue(scope.getMap().containsKey("scopedTarget.scopedList"));
 		assertEquals(ArrayList.class, scope.getMap().get("scopedTarget.scopedList").getClass());
 
-		ArrayList deserialized = (ArrayList) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
+		ArrayList<?> deserialized = (ArrayList<?>) SerializationTestUtils.serializeAndDeserialize(tb.getFriends());
 		assertNotNull(deserialized);
 		assertTrue(AopUtils.isCglibProxy(deserialized));
 		assertTrue(deserialized.contains("myFriend"));

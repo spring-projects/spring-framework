@@ -278,11 +278,13 @@ public class SimpleMappingExceptionResolverTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SomeOddException extends Exception {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class AnotherOddException extends Exception {
 
 	}

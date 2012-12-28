@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.core.io.Resource;
 public abstract class SaxResourceUtils {
 
 	/**
-	 * Create a SAX <code>InputSource</code> from the given resource.
-	 * <p>Sets the system identifier to the resource's <code>URL</code>, if available.
+	 * Create a SAX {@code InputSource} from the given resource.
+	 * <p>Sets the system identifier to the resource's {@code URL}, if available.
 	 * @param resource the resource
 	 * @return the input source created from the resource
 	 * @throws IOException if an I/O exception occurs
@@ -48,7 +48,7 @@ public abstract class SaxResourceUtils {
 
 	/**
 	 * Retrieve the URL from the given resource as System ID.
-	 * <p>Returns <code>null</code> if it cannot be opened.
+	 * <p>Returns {@code null} if it cannot be opened.
 	 */
 	private static String getSystemId(Resource resource) {
 		try {

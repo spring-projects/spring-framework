@@ -113,6 +113,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		this.autoStartup = autoStartup;
 	}
 
+	@Override
 	public boolean isAutoStartup() {
 		return this.autoStartup;
 	}
@@ -131,10 +132,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Return the phase in which this container will be started and stopped.
 	 */
+	@Override
 	public int getPhase() {
 		return this.phase;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -169,6 +172,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * Calls {@link #shutdown()} when the BeanFactory destroys the container instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}
@@ -260,6 +264,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JmsException if starting failed
 	 * @see #doStart
 	 */
+	@Override
 	public void start() throws JmsException {
 		try {
 			doStart();
@@ -298,6 +303,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @throws JmsException if stopping failed
 	 * @see #doStop
 	 */
+	@Override
 	public void stop() throws JmsException {
 		try {
 			doStop();
@@ -307,6 +313,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 		}
 	}
 
+	@Override
 	public void stop(Runnable callback) {
 		this.stop();
 		callback.run();
@@ -335,6 +342,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	 * @see #stop()
 	 * @see #runningAllowed()
 	 */
+	@Override
 	public final boolean isRunning() {
 		synchronized (this.lifecycleMonitor) {
 			return (this.running && runningAllowed());
@@ -343,12 +351,12 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 
 	/**
 	 * Check whether this container's listeners are generally allowed to run.
-	 * <p>This implementation always returns <code>true</code>; the default 'running'
+	 * <p>This implementation always returns {@code true}; the default 'running'
 	 * state is purely determined by {@link #start()} / {@link #stop()}.
 	 * <p>Subclasses may override this method to check against temporary
 	 * conditions that prevent listeners from actually running. In other words,
 	 * they may apply further restrictions to the 'running' state, returning
-	 * <code>false</code> if such a restriction prevents listeners from running.
+	 * {@code false} if such a restriction prevents listeners from running.
 	 */
 	protected boolean runningAllowed() {
 		return true;
@@ -470,7 +478,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Return the shared JMS Connection maintained by this container.
 	 * Available after initialization.
-	 * @return the shared Connection (never <code>null</code>)
+	 * @return the shared Connection (never {@code null})
 	 * @throws IllegalStateException if this container does not maintain a
 	 * shared Connection, or if the Connection hasn't been initialized yet
 	 * @see #sharedConnectionEnabled()
@@ -562,7 +570,7 @@ public abstract class AbstractJmsListeningContainer extends JmsDestinationAccess
 	/**
 	 * Reschedule the given task object immediately.
 	 * <p>To be implemented by subclasses if they ever call
-	 * <code>rescheduleTaskIfNecessary</code>.
+	 * {@code rescheduleTaskIfNecessary}.
 	 * This implementation throws an UnsupportedOperationException.
 	 * @param task the task object to reschedule
 	 * @see #rescheduleTaskIfNecessary

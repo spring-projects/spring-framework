@@ -34,8 +34,11 @@ public class LabelTagTests extends AbstractFormTagTests {
 	private LabelTag tag;
 
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new LabelTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -43,6 +46,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected void extendPageContext(MockPageContext pageContext) throws JspException {
 		super.extendPageContext(pageContext);
 
@@ -71,15 +75,15 @@ public class LabelTagTests extends AbstractFormTagTests {
 		assertTrue(output.startsWith("<label "));
 		assertTrue(output.endsWith("</label>"));
 	}
-	
+
 	public void testSimpleRenderWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("name");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int startResult = this.tag.doStartTag();
 		int endResult = this.tag.doEndTag();
 
@@ -138,6 +142,7 @@ public class LabelTagTests extends AbstractFormTagTests {
 	}
 
 
+	@Override
 	protected TestBean createTestBean() {
 		TestBean bean = new TestBean();
 		bean.setSpouse(new TestBean("Hoopy"));

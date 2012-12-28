@@ -44,7 +44,7 @@ import org.springframework.util.FileCopyUtils;
 
 /**
  * {@link LobHandler} implementation for Oracle databases. Uses proprietary API
- * to create <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+ * to create {@code oracle.sql.BLOB} and {@code oracle.sql.CLOB}
  * instances, as necessary when working with Oracle's JDBC driver.
  * Note that this LobHandler requires Oracle JDBC driver 9i or higher!
  *
@@ -55,7 +55,7 @@ import org.springframework.util.FileCopyUtils;
  * to use a strategy like this LobHandler implementation.
  *
  * <p>Needs to work on a native JDBC Connection, to be able to cast it to
- * <code>oracle.jdbc.OracleConnection</code>. If you pass in Connections from a
+ * {@code oracle.jdbc.OracleConnection}. If you pass in Connections from a
  * connection pool (the usual case in a J2EE environment), you need to set an
  * appropriate {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor}
  * to allow for automatic retrieval of the underlying native JDBC Connection.
@@ -108,13 +108,13 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Set an appropriate NativeJdbcExtractor to be able to retrieve the underlying
-	 * native <code>oracle.jdbc.OracleConnection</code>. This is necessary for
+	 * native {@code oracle.jdbc.OracleConnection}. This is necessary for
 	 * DataSource-based connection pools, as those need to return wrapped JDBC
 	 * Connection handles that cannot be cast to a native Connection implementation.
 	 * <p>Effectively, this LobHandler just invokes a single NativeJdbcExtractor
-	 * method, namely <code>getNativeConnectionFromStatement</code> with a
+	 * method, namely {@code getNativeConnectionFromStatement} with a
 	 * PreparedStatement argument (falling back to a
-	 * <code>PreparedStatement.getConnection()</code> call if no extractor is set).
+	 * {@code PreparedStatement.getConnection()} call if no extractor is set).
 	 * <p>A common choice is {@code SimpleNativeJdbcExtractor}, whose Connection unwrapping
 	 * (which is what OracleLobHandler needs) will work with many connection pools.
 	 * See {@code SimpleNativeJdbcExtractor} and
@@ -131,7 +131,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	/**
 	 * Set whether to cache the temporary LOB in the buffer cache.
 	 * This value will be passed into BLOB/CLOB.createTemporary.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 * <p><strong>See Also:</strong>
 	 * <ul>
 	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#createTemporary()">oracle.sql.BLOB.createTemporary</a></li>
@@ -143,13 +143,13 @@ public class OracleLobHandler extends AbstractLobHandler {
 	}
 
 	/**
-	 * Set whether to agressively release any resources used by the LOB. If set to <code>true</code>
+	 * Set whether to agressively release any resources used by the LOB. If set to {@code true}
 	 * then you can only read the LOB values once. Any subsequent reads will fail since the resources
 	 * have been closed.
-	 * <p>Setting this property to <code>true</code> can be useful when your queries generates large
+	 * <p>Setting this property to {@code true} can be useful when your queries generates large
 	 * temporary LOBs that occupy space in the TEMPORARY tablespace or when you want to free up any
 	 * memory allocated by the driver for the LOB reading.
-	 * <p>Default is <code>false</code>.
+	 * <p>Default is {@code false}.
 	 * <p><strong>See Also:</strong>
 	 * <ul>
 	 * <li><a href="http://download.oracle.com/otn_hosted_doc/jdeveloper/905/jdbc-javadoc/oracle/sql/BLOB.html#freeTemporary()">oracle.sql.BLOB.freeTemporary</a></li>
@@ -166,7 +166,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 
 	/**
-	 * Retrieve the <code>oracle.sql.BLOB</code> and <code>oracle.sql.CLOB</code>
+	 * Retrieve the {@code oracle.sql.BLOB} and {@code oracle.sql.CLOB}
 	 * classes via reflection, and initialize the values for the
 	 * DURATION_SESSION, MODE_READWRITE and MODE_READONLY constants defined there.
 	 * <p><strong>See Also:</strong>
@@ -211,6 +211,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 	}
 
 
+	@Override
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle BLOB as bytes");
 		Blob blob = rs.getBlob(columnIndex);
@@ -220,6 +221,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		return retVal;
 	}
 
+	@Override
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle BLOB as binary stream");
 		Blob blob = rs.getBlob(columnIndex);
@@ -229,6 +231,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		return retVal;
 	}
 
+	@Override
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as string");
 		Clob clob = rs.getClob(columnIndex);
@@ -238,6 +241,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		return retVal;
 	}
 
+	@Override
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as ASCII stream");
 		Clob clob = rs.getClob(columnIndex);
@@ -247,6 +251,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		return retVal;
 	}
 
+	@Override
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning Oracle CLOB as character stream");
 		Clob clob = rs.getClob(columnIndex);
@@ -256,15 +261,16 @@ public class OracleLobHandler extends AbstractLobHandler {
 		return retVal;
 	}
 
+	@Override
 	public LobCreator getLobCreator() {
 		return new OracleLobCreator();
 	}
 
 	/**
 	 * Initialize any LOB resources before a read is done.
-	 * <p>This implementation calls <code>BLOB.open(BLOB.MODE_READONLY)</code> or
-	 * <code>CLOB.open(CLOB.MODE_READONLY)</code> on any non-temporary LOBs if
-	 * <code>releaseResourcesAfterRead</code> property is set to <code>true</code>.
+	 * <p>This implementation calls {@code BLOB.open(BLOB.MODE_READONLY)} or
+	 * {@code CLOB.open(CLOB.MODE_READONLY)} on any non-temporary LOBs if
+	 * {@code releaseResourcesAfterRead} property is set to {@code true}.
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
 	 * @param lob the LOB to initialize
@@ -297,11 +303,11 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Release any LOB resources after read is complete.
-	 * <p>If <code>releaseResourcesAfterRead</code> property is set to <code>true</code>
+	 * <p>If {@code releaseResourcesAfterRead} property is set to {@code true}
 	 * then this implementation calls
-	 * <code>BLOB.close()</code> or <code>CLOB.close()</code>
+	 * {@code BLOB.close()} or {@code CLOB.close()}
 	 * on any non-temporary LOBs that are open or
-	 * <code>BLOB.freeTemporary()</code> or <code>CLOB.freeTemporary()</code>
+	 * {@code BLOB.freeTemporary()} or {@code CLOB.freeTemporary()}
 	 * on any temporary LOBs.
 	 * <p>This method can be overridden by sublcasses if different behavior is desired.
 	 * @param con the connection to be usde for initilization
@@ -368,11 +374,13 @@ public class OracleLobHandler extends AbstractLobHandler {
 
 		private final List createdLobs = new LinkedList();
 
+		@Override
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, final byte[] content)
 				throws SQLException {
 
 			if (content != null) {
 				Blob blob = (Blob) createLob(ps, false, new LobCallback() {
+					@Override
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream");
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob);
@@ -390,12 +398,14 @@ public class OracleLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setBlobAsBinaryStream(
 				PreparedStatement ps, int paramIndex, final InputStream binaryStream, int contentLength)
 				throws SQLException {
 
 			if (binaryStream != null) {
 				Blob blob = (Blob) createLob(ps, false, new LobCallback() {
+					@Override
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getBinaryOutputStream", (Class[]) null);
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
@@ -413,11 +423,13 @@ public class OracleLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsString(PreparedStatement ps, int paramIndex, final String content)
-		    throws SQLException {
+			throws SQLException {
 
 			if (content != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
+					@Override
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
 						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
@@ -435,12 +447,14 @@ public class OracleLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, final InputStream asciiStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (asciiStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
+					@Override
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getAsciiOutputStream", (Class[]) null);
 						OutputStream out = (OutputStream) methodToInvoke.invoke(lob, (Object[]) null);
@@ -458,12 +472,14 @@ public class OracleLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, final Reader characterStream, int contentLength)
-		    throws SQLException {
+			throws SQLException {
 
 			if (characterStream != null) {
 				Clob clob = (Clob) createLob(ps, true, new LobCallback() {
+					@Override
 					public void populateLob(Object lob) throws Exception {
 						Method methodToInvoke = lob.getClass().getMethod("getCharacterOutputStream", (Class[]) null);
 						Writer writer = (Writer) methodToInvoke.invoke(lob, (Object[]) null);
@@ -554,6 +570,7 @@ public class OracleLobHandler extends AbstractLobHandler {
 		/**
 		 * Free all temporary BLOBs and CLOBs created by this creator.
 		 */
+		@Override
 		public void close() {
 			try {
 				for (Iterator it = this.createdLobs.iterator(); it.hasNext();) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 /**
  * Holder for bean wiring metadata information about a particular class. Used in
  * conjunction with the {@link org.springframework.beans.factory.annotation.Configurable}
- * annotation and the AspectJ <code>AnnotationBeanConfigurerAspect</code>.
+ * annotation and the AspectJ {@code AnnotationBeanConfigurerAspect}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -67,7 +67,7 @@ public class BeanWiringInfo {
 	/**
 	 * Create a new BeanWiringInfo that points to the given bean name.
 	 * @param beanName the name of the bean definition to take the property values from
-	 * @throws IllegalArgumentException if the supplied beanName is <code>null</code>,
+	 * @throws IllegalArgumentException if the supplied beanName is {@code null},
 	 * is empty, or consists wholly of whitespace
 	 */
 	public BeanWiringInfo(String beanName) {
@@ -79,7 +79,7 @@ public class BeanWiringInfo {
 	 * @param beanName the name of the bean definition to take the property values from
 	 * @param isDefaultBeanName whether the given bean name is a suggested
 	 * default bean name, not necessarily matching an actual bean definition
-	 * @throws IllegalArgumentException if the supplied beanName is <code>null</code>,
+	 * @throws IllegalArgumentException if the supplied beanName is {@code null},
 	 * is empty, or consists wholly of whitespace
 	 */
 	public BeanWiringInfo(String beanName, boolean isDefaultBeanName) {
@@ -94,7 +94,7 @@ public class BeanWiringInfo {
 	 * {@link #AUTOWIRE_BY_TYPE}
 	 * @param dependencyCheck whether to perform a dependency check for object
 	 * references in the bean instance (after autowiring)
-	 * @throws IllegalArgumentException if the supplied <code>autowireMode</code>
+	 * @throws IllegalArgumentException if the supplied {@code autowireMode}
 	 * is not one of the allowed values
 	 * @see #AUTOWIRE_BY_NAME
 	 * @see #AUTOWIRE_BY_TYPE

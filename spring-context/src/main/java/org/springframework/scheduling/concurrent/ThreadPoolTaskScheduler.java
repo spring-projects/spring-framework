@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.ErrorHandler;
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
+@SuppressWarnings("serial")
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements TaskScheduler, SchedulingTaskExecutor {
 
@@ -75,6 +76,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		this.errorHandler = errorHandler;
 	}
 
+	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -101,7 +103,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	/**
 	 * Return the underlying ScheduledExecutorService for native access.
-	 * @return the underlying ScheduledExecutorService (never <code>null</code>)
+	 * @return the underlying ScheduledExecutorService (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskScheduler hasn't been initialized yet
 	 */
 	public ScheduledExecutorService getScheduledExecutor() throws IllegalStateException {
@@ -112,6 +114,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	// SchedulingTaskExecutor implementation
 
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getScheduledExecutor();
 		try {
@@ -122,10 +125,12 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
@@ -136,6 +141,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getScheduledExecutor();
 		try {
@@ -149,6 +155,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -156,6 +163,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	// TaskScheduler implementation
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -168,6 +176,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -179,6 +188,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -190,6 +200,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -200,6 +211,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -211,6 +223,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -237,6 +250,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 			this.errorHandler = errorHandler;
 		}
 
+		@Override
 		public V call() throws Exception {
 			try {
 				return delegate.call();

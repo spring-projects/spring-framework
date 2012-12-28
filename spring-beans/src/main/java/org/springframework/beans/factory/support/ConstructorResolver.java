@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,9 +97,9 @@ class ConstructorResolver {
 	 * dependency resolution.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @param chosenCtors chosen candidate constructors (or <code>null</code> if none)
+	 * @param chosenCtors chosen candidate constructors (or {@code null} if none)
 	 * @param explicitArgs argument values passed in programmatically via the getBean method,
-	 * or <code>null</code> if none (-> use constructor argument values from bean definition)
+	 * or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper autowireConstructor(
@@ -270,6 +270,7 @@ class ConstructorResolver {
 				final Constructor ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, ctorToUse, argumentsToUse);
@@ -280,7 +281,7 @@ class ConstructorResolver {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
-			
+
 			bw.setWrappedInstance(beanInstance);
 			return bw;
 		}
@@ -333,7 +334,7 @@ class ConstructorResolver {
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param explicitArgs argument values passed in programmatically via the getBean
-	 * method, or <code>null</code> if none (-> use constructor argument values from bean definition)
+	 * method, or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper instantiateUsingFactoryMethod(final String beanName, final RootBeanDefinition mbd, final Object[] explicitArgs) {
@@ -402,6 +403,7 @@ class ConstructorResolver {
 			final Class factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
+					@Override
 					public Method[] run() {
 						return (mbd.isNonPublicAccessAllowed() ?
 								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
@@ -412,7 +414,7 @@ class ConstructorResolver {
 				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
 						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
 			}
-			
+
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
@@ -560,6 +562,7 @@ class ConstructorResolver {
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, fb, factoryMethod, args);
@@ -570,7 +573,7 @@ class ConstructorResolver {
 				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 			}
-			
+
 			if (beanInstance == null) {
 				return null;
 			}

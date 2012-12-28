@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * Determine whether the underlying class has an annotation or
 	 * meta-annotation of the given type defined.
 	 * <p>This is equivalent to a "hasAnnotation || hasMetaAnnotation"
-	 * check. If this method returns <code>true</code>, then
+	 * check. If this method returns {@code true}, then
 	 * {@link #getAnnotationAttributes} will return a non-null Map.
 	 * @param annotationType the annotation type to look for
 	 * @return whether a matching annotation is defined
@@ -79,7 +79,7 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * @param annotationType the annotation type to look for
 	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
 	 * and the defined attribute value as Map value. This return value will be
-	 * <code>null</code> if no matching annotation is defined.
+	 * {@code null} if no matching annotation is defined.
 	 */
 	Map<String, Object> getAnnotationAttributes(String annotationType);
 
@@ -93,7 +93,7 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * references which might potentially have to be loaded first
 	 * @return a Map of attributes, with the attribute name as key (e.g. "value")
 	 * and the defined attribute value as Map value. This return value will be
-	 * <code>null</code> if no matching annotation is defined.
+	 * {@code null} if no matching annotation is defined.
 	 */
 	Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString);
 
@@ -107,7 +107,7 @@ public interface AnnotationMetadata extends ClassMetadata {
 	 * Retrieve the method metadata for all methods that are annotated
 	 * (or meta-annotated) with the given annotation type.
 	 * <p>For any returned method, {@link MethodMetadata#isAnnotated} will
-	 * return <code>true</code> for the given annotation type.
+	 * return {@code true} for the given annotation type.
 	 * @param annotationType the annotation type to look for
 	 * @return a Set of {@link MethodMetadata} for methods that have a matching
 	 * annotation. The return value will be an empty set if no methods match

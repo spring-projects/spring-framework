@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *     },
  *     new int[] {Types.VARCHAR, Types.BLOB, Types.CLOB});
  * </pre>
- *   
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 1.1
@@ -168,6 +168,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	/**
 	 * Set the specified content via the LobCreator.
 	 */
+	@Override
 	public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
 			throws SQLException {
 		if (sqlType == Types.BLOB) {
@@ -208,6 +209,7 @@ public class SqlLobValue implements DisposableSqlTypeValue {
 	/**
 	 * Close the LobCreator, if any.
 	 */
+	@Override
 	public void cleanup() {
 		this.lobCreator.close();
 	}

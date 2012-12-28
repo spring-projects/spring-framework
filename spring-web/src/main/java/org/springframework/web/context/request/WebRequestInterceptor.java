@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public interface WebRequestInterceptor {
 	 * execution (for example, flushing a Hibernate Session).
 	 * @param request the current web request
 	 * @param model the map of model objects that will be exposed to the view
-	 * (may be <code>null</code>). Can be used to analyze the exposed model
+	 * (may be {@code null}). Can be used to analyze the exposed model
 	 * and/or to add further model attributes, if desired.
 	 * @throws Exception in case of errors
 	 */
@@ -86,7 +86,7 @@ public interface WebRequestInterceptor {
 	 * Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
+	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
 	 * method has successfully completed!
 	 * @param request the current web request
 	 * @param ex exception thrown on handler execution, if any

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,11 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -80,7 +83,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
-	
+
 	public void testWithIndexedBooleanObjectNotChecked() throws Exception {
 		this.tag.setPath("someMap[key]");
 		int result = this.tag.doStartTag();
@@ -110,7 +113,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someBoolean");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
@@ -612,7 +615,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
-	
+
 	public void testDynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
@@ -622,8 +625,8 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
 		}
 	}
-	
-	
+
+
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);
@@ -635,6 +638,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -677,6 +681,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			super.setAsText(text);
@@ -688,6 +693,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 		public int count = 0;
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			setValue(new Integer(text.trim()));

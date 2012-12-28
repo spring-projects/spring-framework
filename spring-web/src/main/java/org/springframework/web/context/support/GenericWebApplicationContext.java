@@ -40,13 +40,13 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <p>Implements the
  * {@link org.springframework.web.context.ConfigurableWebApplicationContext},
- * but is not intended for declarative setup in <code>web.xml</code>. Instead,
+ * but is not intended for declarative setup in {@code web.xml}. Instead,
  * it is designed for programmatic setup, for example for building nested contexts or
  * for use within Spring 3.1 {@link org.springframework.web.WebApplicationInitializer}s.
  *
  * <p><b>If you intend to implement a WebApplicationContext that reads bean definitions
  * from configuration files, consider deriving from AbstractRefreshableWebApplicationContext,
- * reading the bean definitions in an implementation of the <code>loadBeanDefinitions</code>
+ * reading the bean definitions in an implementation of the {@code loadBeanDefinitions}
  * method.</b>
  *
  * <p>Interprets resource paths as servlet context resources, i.e. as paths beneath
@@ -116,10 +116,12 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	/**
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -205,6 +207,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		this.getEnvironment().initPropertySources(this.servletContext, null);
 	}
 
+	@Override
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
 	}
@@ -214,24 +217,29 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 	// Pseudo-implementation of ConfigurableWebApplicationContext
 	// ---------------------------------------------------------------------
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		// no-op
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getServletConfig()");
 	}
 
+	@Override
 	public void setNamespace(String namespace) {
 		// no-op
 	}
 
+	@Override
 	public String getNamespace() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getNamespace()");
 	}
 
+	@Override
 	public void setConfigLocation(String configLocation) {
 		if (StringUtils.hasText(configLocation)) {
 			throw new UnsupportedOperationException(
@@ -240,6 +248,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		}
 	}
 
+	@Override
 	public void setConfigLocations(String[] configLocations) {
 		if (!ObjectUtils.isEmpty(configLocations)) {
 			throw new UnsupportedOperationException(
@@ -248,6 +257,7 @@ public class GenericWebApplicationContext extends GenericApplicationContext
 		}
 	}
 
+	@Override
 	public String[] getConfigLocations() {
 		throw new UnsupportedOperationException(
 				"GenericWebApplicationContext does not support getConfigLocations()");

@@ -39,7 +39,7 @@ import org.springframework.validation.annotation.Validated;
  * and/or on their return value (in the latter case specified at the method level,
  * typically as inline annotation).
  *
- * <p>E.g.: <code>public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)</code>
+ * <p>E.g.: {@code public @NotNull Object myValidMethod(@NotNull String arg1, @Max(10) int arg2)}
  *
  * <p>Validation groups can be specified through Spring's {@link Validated} annotation
  * at the type level of the containing target class, applying to all public service methods
@@ -83,6 +83,7 @@ public class MethodValidationInterceptor implements MethodInterceptor {
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Class[] groups = determineValidationGroups(invocation);
 		Set<MethodConstraintViolation<Object>> result = this.validator.validateAllParameters(

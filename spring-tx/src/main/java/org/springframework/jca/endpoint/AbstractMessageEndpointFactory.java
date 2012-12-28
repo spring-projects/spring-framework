@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,20 +118,22 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 
 	/**
-	 * This implementation returns <code>true</code> if a transaction manager
-	 * has been specified; <code>false</code> otherwise.
+	 * This implementation returns {@code true} if a transaction manager
+	 * has been specified; {@code false} otherwise.
 	 * @see #setTransactionManager
 	 * @see #setTransactionFactory
 	 */
+	@Override
 	public boolean isDeliveryTransacted(Method method) throws NoSuchMethodException {
 		return (this.transactionFactory != null);
 	}
 
 	/**
-	 * The standard JCA 1.5 version of <code>createEndpoint</code>.
+	 * The standard JCA 1.5 version of {@code createEndpoint}.
 	 * <p>This implementation delegates to {@link #createEndpointInternal()},
 	 * initializing the endpoint's XAResource before the endpoint gets invoked.
 	 */
+	@Override
 	public MessageEndpoint createEndpoint(XAResource xaResource) throws UnavailableException {
 		AbstractMessageEndpoint endpoint = createEndpointInternal();
 		endpoint.initXAResource(xaResource);
@@ -139,7 +141,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	}
 
 	/**
-	 * The alternative JCA 1.6 version of <code>createEndpoint</code>.
+	 * The alternative JCA 1.6 version of {@code createEndpoint}.
 	 * <p>This implementation delegates to {@link #createEndpointInternal()},
 	 * ignoring the specified timeout. It is only here for JCA 1.6 compliance.
 	 */
@@ -152,7 +154,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 	/**
 	 * Create the actual endpoint instance, as a subclass of the
 	 * {@link AbstractMessageEndpoint} inner class of this factory.
-	 * @return the actual endpoint instance (never <code>null</code>)
+	 * @return the actual endpoint instance (never {@code null})
 	 * @throws UnavailableException if no endpoint is available at present
 	 */
 	protected abstract AbstractMessageEndpoint createEndpointInternal()
@@ -180,15 +182,16 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		}
 
 		/**
-		 * This <code>beforeDelivery</code> implementation starts a transaction,
+		 * This {@code beforeDelivery} implementation starts a transaction,
 		 * if necessary, and exposes the endpoint ClassLoader as current
 		 * thread context ClassLoader.
 		 * <p>Note that the JCA 1.5 specification does not require a ResourceAdapter
 		 * to call this method before invoking the concrete endpoint. If this method
 		 * has not been called (check {@link #hasBeforeDeliveryBeenCalled()}), the
-		 * concrete endpoint method should call <code>beforeDelivery</code> and its
+		 * concrete endpoint method should call {@code beforeDelivery} and its
 		 * sibling {@link #afterDelivery()} explicitly, as part of its own processing.
 		 */
+		@Override
 		public void beforeDelivery(Method method) throws ResourceException {
 			this.beforeDeliveryCalled = true;
 			try {
@@ -206,7 +209,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		 * Template method for exposing the endpoint's ClassLoader
 		 * (typically the ClassLoader that the message listener class
 		 * has been loaded with).
-		 * @return the endpoint ClassLoader (never <code>null</code>)
+		 * @return the endpoint ClassLoader (never {@code null})
 		 */
 		protected abstract ClassLoader getEndpointClassLoader();
 
@@ -230,12 +233,13 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 		}
 
 		/**
-		 * This <code>afterDelivery</code> implementation resets the thread context
+		 * This {@code afterDelivery} implementation resets the thread context
 		 * ClassLoader and completes the transaction, if any.
 		 * <p>Note that the JCA 1.5 specification does not require a ResourceAdapter
 		 * to call this method after invoking the concrete endpoint. See the
 		 * explanation in {@link #beforeDelivery}'s javadoc.
 		 */
+		@Override
 		public void afterDelivery() throws ResourceException {
 			this.beforeDeliveryCalled = false;
 			Thread.currentThread().setContextClassLoader(this.previousContextClassLoader);
@@ -248,6 +252,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 			}
 		}
 
+		@Override
 		public void release() {
 			try {
 				this.transactionDelegate.setRollbackOnly();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.PatternMatchUtils;
  * @since 11.02.2004
  * @see #isMatch
  */
+@SuppressWarnings("serial")
 public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut implements Serializable {
 
 	private List<String> mappedNames = new LinkedList<String>();
@@ -42,7 +43,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 
 	/**
 	 * Convenience method when we have only a single method name to match.
-	 * Use either this method or <code>setMappedNames</code>, not both.
+	 * Use either this method or {@code setMappedNames}, not both.
 	 * @see #setMappedNames
 	 */
 	public void setMappedName(String mappedName) {
@@ -76,6 +77,7 @@ public class NameMatchMethodPointcut extends StaticMethodMatcherPointcut impleme
 	}
 
 
+	@Override
 	public boolean matches(Method method, Class targetClass) {
 		for (String mappedName : this.mappedNames) {
 			if (mappedName.equals(method.getName()) || isMatch(method.getName(), mappedName)) {

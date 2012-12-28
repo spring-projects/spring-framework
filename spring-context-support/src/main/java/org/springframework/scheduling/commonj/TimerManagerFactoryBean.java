@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ public class TimerManagerFactoryBean extends TimerManagerAccessor
 	// Implementation of InitializingBean interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void afterPropertiesSet() throws NamingException {
 		super.afterPropertiesSet();
 		if (this.scheduledTimerListeners != null) {
@@ -105,15 +106,18 @@ public class TimerManagerFactoryBean extends TimerManagerAccessor
 	// Implementation of FactoryBean interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public TimerManager getObject() {
 		return getTimerManager();
 	}
 
+	@Override
 	public Class<? extends TimerManager> getObjectType() {
 		TimerManager timerManager = getTimerManager();
 		return (timerManager != null ? timerManager.getClass() : TimerManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

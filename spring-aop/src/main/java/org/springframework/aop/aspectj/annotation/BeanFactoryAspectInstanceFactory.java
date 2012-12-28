@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
  * backed by a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Note that this may instantiate multiple times if using a prototype,
- * which probably won't give the semantics you expect. 
+ * which probably won't give the semantics you expect.
  * Use a {@link LazySingletonAspectInstanceFactoryDecorator}
  * to wrap this to ensure only one new aspect comes back.
  *
@@ -56,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this(beanFactory, name, beanFactory.getType(name));
 	}
-	
+
 	/**
 	 * Create a BeanFactoryAspectInstanceFactory, providing a type that AspectJ should
 	 * introspect to create AJType metadata. Use if the BeanFactory may consider the type
@@ -72,10 +72,12 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 
+	@Override
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.name);
 	}
 
+	@Override
 	public ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
@@ -85,6 +87,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		}
 	}
 
+	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.aspectMetadata;
 	}
@@ -99,6 +102,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.annotation.Order
 	 */
+	@Override
 	public int getOrder() {
 		Class<?> type = this.beanFactory.getType(this.name);
 		if (type != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.mail.internet.MimeMessage;
 /**
  * Callback interface for the preparation of JavaMail MIME messages.
  *
- * <p>The corresponding <code>send</code> methods of {@link JavaMailSender}
+ * <p>The corresponding {@code send} methods of {@link JavaMailSender}
  * will take care of the actual creation of a {@link MimeMessage} instance,
  * and of proper exception conversion.
  *

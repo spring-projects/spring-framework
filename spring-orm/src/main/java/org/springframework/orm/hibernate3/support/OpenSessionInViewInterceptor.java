@@ -34,14 +34,14 @@ import org.springframework.web.context.request.async.WebAsyncManager;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 
 /**
- * Spring web request interceptor that binds a Hibernate <code>Session</code> to the
+ * Spring web request interceptor that binds a Hibernate {@code Session} to the
  * thread for the entire processing of the request.
  *
  * <p>This class is a concrete expression of the "Open Session in View" pattern, which
  * is a pattern that allows for the lazy loading of associations in web views despite
  * the original transactions already being completed.
  *
- * <p>This interceptor makes Hibernate <code>Sessions</code> available via the current
+ * <p>This interceptor makes Hibernate {@code Sessions} available via the current
  * thread, which will be autodetected by transaction managers. It is suitable for
  * service layer transactions via
  * {@link org.springframework.orm.hibernate3.HibernateTransactionManager} or
@@ -49,11 +49,11 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This interceptor will by default <i>not</i> flush the Hibernate
- * <code>Session</code>, with the flush mode being set to <code>FlushMode.NEVER</code>.
+ * {@code Session}, with the flush mode being set to {@code FlushMode.NEVER}.
  * It assumes that it will be used in combination with service layer transactions
  * that handle the flushing: the active transaction manager will temporarily change
- * the flush mode to <code>FlushMode.AUTO</code> during a read-write transaction,
- * with the flush mode reset to <code>FlushMode.NEVER</code> at the end of each
+ * the flush mode to {@code FlushMode.AUTO} during a read-write transaction,
+ * with the flush mode reset to {@code FlushMode.NEVER} at the end of each
  * transaction. If you intend to use this interceptor without transactions, consider
  * changing the default flush mode (through the
  * {@link #setFlushMode(int) "flushMode"} property).
@@ -66,8 +66,8 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  *
  * <p><b>WARNING:</b> Applying this interceptor to existing logic can cause issues
  * that have not appeared before, through the use of a single Hibernate
- * <code>Session</code> for the processing of an entire request. In particular, the
- * reassociation of persistent objects with a Hibernate <code>Session</code> has to
+ * {@code Session} for the processing of an entire request. In particular, the
+ * reassociation of persistent objects with a Hibernate {@code Session} has to
  * occur at the very beginning of request processing, to avoid clashes with already
  * loaded instances of the same objects.
  *
@@ -79,7 +79,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * request completion.
  *
  * <p>A single session per request allows for the most efficient first-level caching,
- * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * but can cause side effects, for example on {@code saveOrUpdate} or when
  * continuing after a rolled-back transaction. The deferred close strategy is as safe
  * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
@@ -97,8 +97,8 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 public class OpenSessionInViewInterceptor extends HibernateAccessor implements AsyncWebRequestInterceptor {
 
 	/**
-	 * Suffix that gets appended to the <code>SessionFactory</code>
-	 * <code>toString()</code> representation for the "participate in existing
+	 * Suffix that gets appended to the {@code SessionFactory}
+	 * {@code toString()} representation for the "participate in existing
 	 * session handling" request attribute.
 	 * @see #getParticipateAttributeName
 	 */
@@ -109,8 +109,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 
 
 	/**
-	 * Create a new <code>OpenSessionInViewInterceptor</code>,
-	 * turning the default flushMode to <code>FLUSH_NEVER</code>.
+	 * Create a new {@code OpenSessionInViewInterceptor},
+	 * turning the default flushMode to {@code FLUSH_NEVER}.
 	 * @see #setFlushMode
 	 */
 	public OpenSessionInViewInterceptor() {
@@ -139,11 +139,12 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 
 
 	/**
-	 * Open a new Hibernate <code>Session</code> according to the settings of this
-	 * <code>HibernateAccessor</code> and bind it to the thread via the
+	 * Open a new Hibernate {@code Session} according to the settings of this
+	 * {@code HibernateAccessor} and bind it to the thread via the
 	 * {@link TransactionSynchronizationManager}.
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
 	 */
+	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
@@ -156,7 +157,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		}
 
 		if ((isSingleSession() && TransactionSynchronizationManager.hasResource(getSessionFactory())) ||
-		    SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
+			SessionFactoryUtils.isDeferredCloseActive(getSessionFactory())) {
 			// Do not modify the Session: just mark the request accordingly.
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);
@@ -183,12 +184,13 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	}
 
 	/**
-	 * Flush the Hibernate <code>Session</code> before view rendering, if necessary.
+	 * Flush the Hibernate {@code Session} before view rendering, if necessary.
 	 * <p>Note that this just applies in {@link #isSingleSession() single session mode}!
-	 * <p>The default is <code>FLUSH_NEVER</code> to avoid this extra flushing,
+	 * <p>The default is {@code FLUSH_NEVER} to avoid this extra flushing,
 	 * assuming that service layer transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
+	@Override
 	public void postHandle(WebRequest request, ModelMap model) throws DataAccessException {
 		if (isSingleSession()) {
 			// Only potentially flush in single session mode.
@@ -205,11 +207,12 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	}
 
 	/**
-	 * Unbind the Hibernate <code>Session</code> from the thread and close it (in
+	 * Unbind the Hibernate {@code Session} from the thread and close it (in
 	 * single session mode), or process deferred close for all sessions that have
 	 * been opened during the current request (in deferred close mode).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
+	@Override
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		if (!decrementParticipateCount(request)) {
 			if (isSingleSession()) {
@@ -226,6 +229,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		}
 	}
 
+	@Override
 	public void afterConcurrentHandlingStarted(WebRequest request) {
 		if (!decrementParticipateCount(request)) {
 			if (isSingleSession()) {
@@ -257,8 +261,8 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	/**
 	 * Return the name of the request attribute that identifies that a request is
 	 * already intercepted.
-	 * <p>The default implementation takes the <code>toString()</code> representation
-	 * of the <code>SessionFactory</code> instance and appends {@link #PARTICIPATE_SUFFIX}.
+	 * <p>The default implementation takes the {@code toString()} representation
+	 * of the {@code SessionFactory} instance and appends {@link #PARTICIPATE_SUFFIX}.
 	 */
 	protected String getParticipateAttributeName() {
 		return getSessionFactory().toString() + PARTICIPATE_SUFFIX;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * PropertyEditor for {@link TransactionAttribute} objects. Accepts a String of form
- * <p><code>PROPAGATION_NAME,ISOLATION_NAME,readOnly,timeout_NNNN,+Exception1,-Exception2</code>
+ * <p>{@code PROPAGATION_NAME, ISOLATION_NAME, readOnly, timeout_NNNN,+Exception1,-Exception2}
  * <p>where only propagation code is required. For example:
- * <p><code>PROPAGATION_MANDATORY,ISOLATION_DEFAULT</code>
+ * <p>{@code PROPAGATION_MANDATORY, ISOLATION_DEFAULT}
  *
  * <p>The tokens can be in <strong>any</strong> order. Propagation and isolation codes
  * must use the names of the constants in the TransactionDefinition class. Timeout values

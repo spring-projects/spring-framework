@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,9 +92,10 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * This implementation is final. Override <code>onSetUp</code> for custom behavior.
+	 * This implementation is final. Override {@code onSetUp} for custom behavior.
 	 * @see #onSetUp()
 	 */
+	@Override
 	protected final void setUp() throws Exception {
 		// lazy load, in case getApplicationContext() has not yet been called.
 		if (this.applicationContext == null) {
@@ -114,7 +115,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * Subclasses can override this method in place of the <code>setUp()</code>
+	 * Subclasses can override this method in place of the {@code setUp()}
 	 * method, which is final in this class.
 	 * <p>The default implementation does nothing.
 	 * @throws Exception simply let any exception propagate
@@ -132,10 +133,11 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	}
 
 	/**
-	 * This implementation is final. Override <code>onTearDown</code> for
+	 * This implementation is final. Override {@code onTearDown} for
 	 * custom behavior.
 	 * @see #onTearDown()
 	 */
+	@Override
 	protected final void tearDown() throws Exception {
 		onTearDown();
 	}
@@ -165,9 +167,10 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * context from the given locations.
 	 * <p>If you override {@link #contextKey()}, you will typically have to
 	 * override this method as well, being able to handle the key type that
-	 * <code>contextKey()</code> returns.
+	 * {@code contextKey()} returns.
 	 * @see #getConfigLocations()
 	 */
+	@Override
 	protected ConfigurableApplicationContext loadContext(Object key) throws Exception {
 		return loadContextLocations((String[]) key);
 	}
@@ -198,7 +201,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * instance, calls the {@link #prepareApplicationContext} prepareApplicationContext}
 	 * method and the {@link #customizeBeanFactory customizeBeanFactory} method to allow
 	 * for customizing the context and its DefaultListableBeanFactory, populates the
-	 * context from the specified config <code>locations</code> through the configured
+	 * context from the specified config {@code locations} through the configured
 	 * {@link #createBeanDefinitionReader(GenericApplicationContext) BeanDefinitionReader},
 	 * and finally {@link ConfigurableApplicationContext#refresh() refreshes} the context.
 	 * @param locations the config locations (as Spring resource locations,
@@ -321,10 +324,10 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * from the same package that the concrete test class is defined in. A path
 	 * starting with a slash is treated as fully qualified class path location,
 	 * e.g.: "/org/springframework/whatever/foo.xml".
-	 * <p>The default implementation simply returns <code>null</code>.
+	 * <p>The default implementation simply returns {@code null}.
 	 * @return an array of config locations
 	 * @see #getConfigPath()
-	 * @see java.lang.Class#getResource(String)
+	 * @see Class#getResource(String)
 	 */
 	protected String getConfigPath() {
 		return null;
@@ -332,7 +335,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 
 	/**
 	 * Return the ApplicationContext that this base class manages; may be
-	 * <code>null</code>.
+	 * {@code null}.
 	 */
 	public final ConfigurableApplicationContext getApplicationContext() {
 		// lazy load, in case setUp() has not yet been called.

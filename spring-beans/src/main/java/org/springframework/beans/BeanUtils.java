@@ -169,14 +169,14 @@ public abstract class BeanUtils {
 	 * Find a method with the given method name and the given parameter types,
 	 * declared on the given class or one of its superclasses. Prefers public methods,
 	 * but will return a protected, package access, or private method too.
-	 * <p>Checks <code>Class.getMethod</code> first, falling back to
-	 * <code>findDeclaredMethod</code>. This allows to find public methods
+	 * <p>Checks {@code Class.getMethod} first, falling back to
+	 * {@code findDeclaredMethod}. This allows to find public methods
 	 * without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the Method object, or <code>null</code> if not found
-	 * @see java.lang.Class#getMethod
+	 * @return the Method object, or {@code null} if not found
+	 * @see Class#getMethod
 	 * @see #findDeclaredMethod
 	 */
 	public static Method findMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) {
@@ -192,12 +192,12 @@ public abstract class BeanUtils {
 	 * Find a method with the given method name and the given parameter types,
 	 * declared on the given class or one of its superclasses. Will return a public,
 	 * protected, package access, or private method.
-	 * <p>Checks <code>Class.getDeclaredMethod</code>, cascading upwards to all superclasses.
+	 * <p>Checks {@code Class.getDeclaredMethod}, cascading upwards to all superclasses.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
 	 * @param paramTypes the parameter types of the method to find
-	 * @return the Method object, or <code>null</code> if not found
-	 * @see java.lang.Class#getDeclaredMethod
+	 * @return the Method object, or {@code null} if not found
+	 * @see Class#getDeclaredMethod
 	 */
 	public static Method findDeclaredMethod(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
 		try {
@@ -215,15 +215,15 @@ public abstract class BeanUtils {
 	 * Find a method with the given method name and minimal parameters (best case: none),
 	 * declared on the given class or one of its superclasses. Prefers public methods,
 	 * but will return a protected, package access, or private method too.
-	 * <p>Checks <code>Class.getMethods</code> first, falling back to
-	 * <code>findDeclaredMethodWithMinimalParameters</code>. This allows for finding public
+	 * <p>Checks {@code Class.getMethods} first, falling back to
+	 * {@code findDeclaredMethodWithMinimalParameters}. This allows for finding public
 	 * methods without issues even in environments with restricted Java security settings.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the Method object, or <code>null</code> if not found
+	 * @return the Method object, or {@code null} if not found
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
-	 * @see java.lang.Class#getMethods
+	 * @see Class#getMethods
 	 * @see #findDeclaredMethodWithMinimalParameters
 	 */
 	public static Method findMethodWithMinimalParameters(Class<?> clazz, String methodName)
@@ -240,13 +240,13 @@ public abstract class BeanUtils {
 	 * Find a method with the given method name and minimal parameters (best case: none),
 	 * declared on the given class or one of its superclasses. Will return a public,
 	 * protected, package access, or private method.
-	 * <p>Checks <code>Class.getDeclaredMethods</code>, cascading upwards to all superclasses.
+	 * <p>Checks {@code Class.getDeclaredMethods}, cascading upwards to all superclasses.
 	 * @param clazz the class to check
 	 * @param methodName the name of the method to find
-	 * @return the Method object, or <code>null</code> if not found
+	 * @return the Method object, or {@code null} if not found
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
-	 * @see java.lang.Class#getDeclaredMethods
+	 * @see Class#getDeclaredMethods
 	 */
 	public static Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)
 			throws IllegalArgumentException {
@@ -263,7 +263,7 @@ public abstract class BeanUtils {
 	 * in the given list of methods.
 	 * @param methods the methods to check
 	 * @param methodName the name of the method to find
-	 * @return the Method object, or <code>null</code> if not found
+	 * @return the Method object, or {@code null} if not found
 	 * @throws IllegalArgumentException if methods of the given name were found but
 	 * could not be resolved to a unique method with minimal parameters
 	 */
@@ -297,17 +297,17 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Parse a method signature in the form <code>methodName[([arg_list])]</code>,
-	 * where <code>arg_list</code> is an optional, comma-separated list of fully-qualified
-	 * type names, and attempts to resolve that signature against the supplied <code>Class</code>.
-	 * <p>When not supplying an argument list (<code>methodName</code>) the method whose name
+	 * Parse a method signature in the form {@code methodName[([arg_list])]},
+	 * where {@code arg_list} is an optional, comma-separated list of fully-qualified
+	 * type names, and attempts to resolve that signature against the supplied {@code Class}.
+	 * <p>When not supplying an argument list ({@code methodName}) the method whose name
 	 * matches and has the least number of parameters will be returned. When supplying an
 	 * argument type list, only the method whose name and argument types match will be returned.
-	 * <p>Note then that <code>methodName</code> and <code>methodName()</code> are <strong>not</strong>
-	 * resolved in the same way. The signature <code>methodName</code> means the method called
-	 * <code>methodName</code> with the least number of arguments, whereas <code>methodName()</code>
-	 * means the method called <code>methodName</code> with exactly 0 arguments.
-	 * <p>If no method can be found, then <code>null</code> is returned.
+	 * <p>Note then that {@code methodName} and {@code methodName()} are <strong>not</strong>
+	 * resolved in the same way. The signature {@code methodName} means the method called
+	 * {@code methodName} with the least number of arguments, whereas {@code methodName()}
+	 * means the method called {@code methodName} with exactly 0 arguments.
+	 * <p>If no method can be found, then {@code null} is returned.
 	 * @param signature the method signature as String representation
 	 * @param clazz the class to resolve the method signature against
 	 * @return the resolved Method
@@ -353,9 +353,9 @@ public abstract class BeanUtils {
 
 
 	/**
-	 * Retrieve the JavaBeans <code>PropertyDescriptor</code>s of a given class.
+	 * Retrieve the JavaBeans {@code PropertyDescriptor}s of a given class.
 	 * @param clazz the Class to retrieve the PropertyDescriptors for
-	 * @return an array of <code>PropertyDescriptors</code> for the given class
+	 * @return an array of {@code PropertyDescriptors} for the given class
 	 * @throws BeansException if PropertyDescriptor look fails
 	 */
 	public static PropertyDescriptor[] getPropertyDescriptors(Class<?> clazz) throws BeansException {
@@ -364,10 +364,10 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Retrieve the JavaBeans <code>PropertyDescriptors</code> for the given property.
+	 * Retrieve the JavaBeans {@code PropertyDescriptors} for the given property.
 	 * @param clazz the Class to retrieve the PropertyDescriptor for
 	 * @param propertyName the name of the property
-	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
+	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor getPropertyDescriptor(Class<?> clazz, String propertyName)
@@ -378,11 +378,11 @@ public abstract class BeanUtils {
 	}
 
 	/**
-	 * Find a JavaBeans <code>PropertyDescriptor</code> for the given method,
+	 * Find a JavaBeans {@code PropertyDescriptor} for the given method,
 	 * with the method either being the read method or the write method for
 	 * that bean property.
 	 * @param method the method to find a corresponding PropertyDescriptor for
-	 * @return the corresponding PropertyDescriptor, or <code>null</code> if none
+	 * @return the corresponding PropertyDescriptor, or {@code null} if none
 	 * @throws BeansException if PropertyDescriptor lookup fails
 	 */
 	public static PropertyDescriptor findPropertyForMethod(Method method) throws BeansException {
@@ -403,7 +403,7 @@ public abstract class BeanUtils {
 	 * {@link java.beans.PropertyEditorManager} but isolated from the latter's
 	 * registered default editors for primitive types.
 	 * @param targetType the type to find an editor for
-	 * @return the corresponding editor, or <code>null</code> if none found
+	 * @return the corresponding editor, or {@code null} if none found
 	 */
 	public static PropertyEditor findEditorByConvention(Class<?> targetType) {
 		if (targetType == null || targetType.isArray() || unknownEditorTypes.containsKey(targetType)) {
@@ -453,7 +453,7 @@ public abstract class BeanUtils {
 	 * given classes/interfaces, if possible.
 	 * @param propertyName the name of the bean property
 	 * @param beanClasses the classes to check against
-	 * @return the property type, or <code>Object.class</code> as fallback
+	 * @return the property type, or {@code Object.class} as fallback
 	 */
 	public static Class<?> findPropertyType(String propertyName, Class<?>[] beanClasses) {
 		if (beanClasses != null) {

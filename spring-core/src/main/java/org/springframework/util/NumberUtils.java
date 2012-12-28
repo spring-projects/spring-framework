@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,21 +122,21 @@ public abstract class NumberUtils {
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the corresponding <code>decode</code> / <code>valueOf</code> methods.
-	 * <p>Trims the input <code>String</code> before attempting to parse the number.
+	 * using the corresponding {@code decode} / {@code valueOf} methods.
+	 * <p>Trims the input {@code String} before attempting to parse the number.
 	 * Supports numbers in hex format (with leading "0x", "0X" or "#") as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
-	 * @see java.lang.Byte#decode
-	 * @see java.lang.Short#decode
-	 * @see java.lang.Integer#decode
-	 * @see java.lang.Long#decode
+	 * @see Byte#decode
+	 * @see Short#decode
+	 * @see Integer#decode
+	 * @see Long#decode
 	 * @see #decodeBigInteger(String)
-	 * @see java.lang.Float#valueOf
-	 * @see java.lang.Double#valueOf
+	 * @see Float#valueOf
+	 * @see Double#valueOf
 	 * @see java.math.BigDecimal#BigDecimal(String)
 	 */
 	@SuppressWarnings("unchecked")
@@ -177,12 +177,12 @@ public abstract class NumberUtils {
 
 	/**
 	 * Parse the given text into a number instance of the given target class,
-	 * using the given NumberFormat. Trims the input <code>String</code>
+	 * using the given NumberFormat. Trims the input {@code String}
 	 * before attempting to parse the number.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
-	 * @param numberFormat the NumberFormat to use for parsing (if <code>null</code>,
-	 * this method falls back to <code>parseNumber(String, Class)</code>)
+	 * @param numberFormat the NumberFormat to use for parsing (if {@code null},
+	 * this method falls back to {@code parseNumber(String, Class)})
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
@@ -223,7 +223,7 @@ public abstract class NumberUtils {
 
 	/**
 	 * Determine whether the given value String indicates a hex number, i.e. needs to be
-	 * passed into <code>Integer.decode</code> instead of <code>Integer.valueOf</code> (etc).
+	 * passed into {@code Integer.decode} instead of {@code Integer.valueOf} (etc).
 	 */
 	private static boolean isHexNumber(String value) {
 		int index = (value.startsWith("-") ? 1 : 0);

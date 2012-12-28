@@ -226,10 +226,12 @@ public class InvocableHandlerMethodTests {
 
 	private static class ExceptionRaisingArgumentResolver implements HandlerMethodArgumentResolver {
 
+		@Override
 		public boolean supportsParameter(MethodParameter parameter) {
 			return true;
 		}
 
+		@Override
 		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 				NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 			throw new HttpMessageNotReadableException("oops, can't read");

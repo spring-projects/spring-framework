@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.PatternMatchUtils;
 /**
  * Simple {@link TransactionAttributeSource} implementation that
  * allows attributes to be stored per method in a {@link Map}.
- * 
+ *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @since 24.04.2003
@@ -69,7 +69,7 @@ public class MethodMapTransactionAttributeSource
 	 * Set a name/attribute map, consisting of "FQCN.method" method names
 	 * (e.g. "com.mycompany.mycode.MyClass.myMethod") and
 	 * {@link TransactionAttribute} instances (or Strings to be converted
-	 * to <code>TransactionAttribute</code> instances).
+	 * to {@code TransactionAttribute} instances).
 	 * <p>Intended for configuration via setter injection, typically within
 	 * a Spring bean factory. Relies on {@link #afterPropertiesSet()}
 	 * being called afterwards.
@@ -81,6 +81,7 @@ public class MethodMapTransactionAttributeSource
 		this.methodMap = methodMap;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -91,6 +92,7 @@ public class MethodMapTransactionAttributeSource
 	 * {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
 	 * @see #initMethodMap(java.util.Map)
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		initMethodMap(this.methodMap);
 		this.eagerlyInitialized = true;
@@ -99,7 +101,7 @@ public class MethodMapTransactionAttributeSource
 
 	/**
 	 * Initialize the specified {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
-	 * @param methodMap Map from method names to <code>TransactionAttribute</code> instances
+	 * @param methodMap Map from method names to {@code TransactionAttribute} instances
 	 * @see #setMethodMap
 	 */
 	protected void initMethodMap(Map<String, TransactionAttribute> methodMap) {
@@ -204,6 +206,7 @@ public class MethodMapTransactionAttributeSource
 	}
 
 
+	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);

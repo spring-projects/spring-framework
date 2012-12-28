@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.servlet.tags.NestedPathTag;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag implements EditorAwareTag {
 
 	/**
@@ -67,7 +68,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	private String path;
 
 	/**
-	 * The value of the '<code>id</code>' attribute.
+	 * The value of the '{@code id}' attribute.
 	 */
 	private String id;
 
@@ -95,7 +96,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Set the value of the '<code>id</code>' attribute.
+	 * Set the value of the '{@code id}' attribute.
 	 * <p>May be a runtime expression; defaults to the value of {@link #getName()}.
 	 * Note that the default value may not be valid for certain tags.
 	 */
@@ -105,7 +106,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Get the value of the '<code>id</code>' attribute.
+	 * Get the value of the '{@code id}' attribute.
 	 */
 	@Override
 	public String getId() {
@@ -117,7 +118,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Writes the default set of attributes to the supplied {@link TagWriter}.
 	 * Further abstract sub-classes should override this method to add in
 	 * any additional default attributes but <strong>must</strong> remember
-	 * to call the <code>super</code> method.
+	 * to call the {@code super} method.
 	 * <p>Concrete sub-classes should call this method when/if they want
 	 * to render default attributes.
 	 * @param tagWriter the {@link TagWriter} to which any attributes are to be written
@@ -128,7 +129,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Determine the '<code>id</code>' attribute value for this tag,
+	 * Determine the '{@code id}' attribute value for this tag,
 	 * autogenerating one if none specified.
 	 * @see #getId()
 	 * @see #autogenerateId()
@@ -143,7 +144,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Autogenerate the '<code>id</code>' attribute value for this tag.
+	 * Autogenerate the '{@code id}' attribute value for this tag.
 	 * <p>The default implementation simply delegates to {@link #getName()},
 	 * deleting invalid characters (such as "[" or "]").
 	 */
@@ -152,13 +153,13 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	}
 
 	/**
-	 * Get the value for the HTML '<code>name</code>' attribute.
+	 * Get the value for the HTML '{@code name}' attribute.
 	 * <p>The default implementation simply delegates to
 	 * {@link #getPropertyPath()} to use the property path as the name.
 	 * For the most part this is desirable as it links with the server-side
 	 * expectation for data binding. However, some subclasses may wish to change
-	 * the value of the '<code>name</code>' attribute without changing the bind path.
-	 * @return the value for the HTML '<code>name</code>' attribute
+	 * the value of the '{@code name}' attribute without changing the bind path.
+	 * @return the value for the HTML '{@code name}' attribute
 	 */
 	protected String getName() throws JspException {
 		return getPropertyPath();
@@ -218,6 +219,7 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Exposes the {@link PropertyEditor} for {@link EditorAwareTag}.
 	 * <p>Use {@link #getPropertyEditor()} for internal rendering purposes.
 	 */
+	@Override
 	public final PropertyEditor getEditor() throws JspException {
 		return getPropertyEditor();
 	}

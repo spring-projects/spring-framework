@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.awt.Component;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Date;
 
 import junit.framework.TestCase;
@@ -51,14 +50,14 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testConsParameterNameDiscoveryNoArgs() throws NoSuchMethodException {
-		Constructor noArgsCons = TestBean.class.getConstructor(new Class[0]);
+		Constructor<TestBean> noArgsCons = TestBean.class.getConstructor(new Class[0]);
 		String[] names = discoverer.getParameterNames(noArgsCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("no argument names", 0, names.length);
 	}
 
 	public void testConsParameterNameDiscoveryArgs() throws NoSuchMethodException {
-		Constructor twoArgCons = TestBean.class.getConstructor(new Class[] { String.class, int.class });
+		Constructor<TestBean> twoArgCons = TestBean.class.getConstructor(new Class[] { String.class, int.class });
 		String[] names = discoverer.getParameterNames(twoArgCons);
 		assertNotNull("should find cons info", names);
 		assertEquals("one argument", 2, names.length);
@@ -74,7 +73,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testOverloadedStaticMethod() throws Exception {
-		Class clazz = this.getClass();
+		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE, Long.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
@@ -93,7 +92,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testOverloadedStaticMethodInInnerClass() throws Exception {
-		Class clazz = InnerClass.class;
+		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("staticMethod", new Class[] { Long.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
@@ -110,7 +109,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testOverloadedMethod() throws Exception {
-		Class clazz = this.getClass();
+		Class<? extends LocalVariableTableParameterNameDiscovererTests> clazz = this.getClass();
 
 		Method m1 = clazz.getMethod("instanceMethod", new Class[] { Double.TYPE, Double.TYPE });
 		String[] names = discoverer.getParameterNames(m1);
@@ -129,7 +128,7 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testOverloadedMethodInInnerClass() throws Exception {
-		Class clazz = InnerClass.class;
+		Class<InnerClass> clazz = InnerClass.class;
 
 		Method m1 = clazz.getMethod("instanceMethod", new Class[] { String.class });
 		String[] names = discoverer.getParameterNames(m1);
@@ -146,9 +145,9 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	}
 
 	public void testGenerifiedClass() throws Exception {
-		Class clazz = GenerifiedClass.class;
+		Class<?> clazz = (Class<?>)GenerifiedClass.class;
 
-		Constructor ctor = clazz.getDeclaredConstructor(Object.class);
+		Constructor<?> ctor = clazz.getDeclaredConstructor(Object.class);
 		String[] names = discoverer.getParameterNames(ctor);
 		assertEquals(1, names.length);
 		assertEquals("key", names[0]);
@@ -186,10 +185,10 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		assertEquals("x", names[1]);
 		assertEquals("i", names[2]);
 
-		m = clazz.getMethod("getDate", null);
+		m = clazz.getMethod("getDate");
 		names = discoverer.getParameterNames(m);
 		assertEquals(0, names.length);
-		
+
 		//System.in.read();
 	}
 
@@ -200,10 +199,10 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	@Ignore
 	public void ignore_testClassesWithoutDebugSymbols() throws Exception {
 		// JDK classes don't have debug information (usually)
-		Class clazz = Component.class;
+		Class<Component> clazz = Component.class;
 		String methodName = "list";
 
-		Method m = clazz.getMethod(methodName, null);
+		Method m = clazz.getMethod(methodName);
 		String[] names = discoverer.getParameterNames(m);
 		assertNull(names);
 
@@ -276,9 +275,6 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 	public static class GenerifiedClass<K, V> {
 		private static long date;
 
-		private K key;
-		private V value;
-
 		static {
 			// some custom static bloc or <clinit>
 			date = new Date().getTime();
@@ -293,8 +289,6 @@ public class LocalVariableTableParameterNameDiscovererTests extends TestCase {
 		}
 
 		public GenerifiedClass(K key, V value) {
-			this.key = key;
-			this.value = value;
 		}
 
 		public static <P> long generifiedStaticMethod(P param) {

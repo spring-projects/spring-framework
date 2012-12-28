@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,13 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 	/**
-	 * Set the list of exception resolvers to delegate to. 
+	 * Set the list of exception resolvers to delegate to.
 	 */
 	public void setExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.resolvers = exceptionResolvers;
@@ -61,9 +62,10 @@ public class HandlerExceptionResolverComposite implements HandlerExceptionResolv
 	}
 
 	/**
-	 * Resolve the exception by iterating over the list of configured exception resolvers. 
+	 * Resolve the exception by iterating over the list of configured exception resolvers.
 	 * The first one to return a ModelAndView instance wins. Otherwise {@code null} is returned.
 	 */
+	@Override
 	public ModelAndView resolveException(HttpServletRequest request,
 										 HttpServletResponse response,
 										 Object handler,

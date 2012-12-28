@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ package org.springframework.core.env;
  * {@code Environment} in order to query profile state or resolve properties directly.
  *
  * <p>In most cases, however, application-level beans should not need to interact with the
- * {@code Environment} directly but instead may have to have <code>${...}</code> property
+ * {@code Environment} directly but instead may have to have {@code ${...}} property
  * values replaced by a property placeholder configurer such as
  * {@link org.springframework.context.support.PropertySourcesPlaceholderConfigurer
  * PropertySourcesPlaceholderConfigurer}, which itself is {@code EnvironmentAware} and
@@ -102,8 +102,8 @@ public interface Environment extends PropertyResolver {
 	 * explicit active profiles, whether one or more of the given profiles is included in
 	 * the set of default profiles. If a profile begins with '!' the logic is inverted,
 	 * i.e. the method will return true if the given profile is <em>not</em> active. For
-	 * example, {@code env.acceptsProfiles("p1", "!p2")} will return true if profile 'p1'
-	 * is active or 'p2' is not active.
+	 * example, <pre>env.acceptsProfiles("p1", "!p2")</pre> will return true if profile
+	 * 'p1' is active or 'p2' is not active.
 	 * @throws IllegalArgumentException if called with zero arguments
 	 * @throws IllegalArgumentException if any profile is null, empty or whitespace-only
 	 * @see #getActiveProfiles

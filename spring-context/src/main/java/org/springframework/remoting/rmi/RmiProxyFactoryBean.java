@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.beans.factory.FactoryBean;
  *
  * <p>The service URL must be a valid RMI URL like "rmi://localhost:1099/myservice".
  * RMI invokers work at the RmiInvocationHandler level, using the same invoker stub
- * for any service. Service interfaces do not have to extend <code>java.rmi.Remote</code>
- * or throw <code>java.rmi.RemoteException</code>. Of course, in and out parameters
+ * for any service. Service interfaces do not have to extend {@code java.rmi.Remote}
+ * or throw {@code java.rmi.RemoteException}. Of course, in and out parameters
  * have to be serializable.
  *
  * <p>With conventional RMI services, this proxy factory is typically used with the
@@ -73,14 +73,17 @@ public class RmiProxyFactoryBean extends RmiClientInterceptor implements Factory
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.serviceProxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

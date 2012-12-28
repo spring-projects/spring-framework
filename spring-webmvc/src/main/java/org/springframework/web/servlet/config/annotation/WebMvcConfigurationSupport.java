@@ -49,7 +49,6 @@ import org.springframework.http.converter.json.MappingJacksonHttpMessageConverte
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
-import org.springframework.http.converter.xml.XmlAwareFormHttpMessageConverter;
 import org.springframework.util.ClassUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
@@ -174,6 +173,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * Set the {@link javax.servlet.ServletContext}, e.g. for resource handling,
 	 * looking up file extensions, etc.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
@@ -181,6 +181,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	/**
 	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
 	 */
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
@@ -433,9 +434,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			}
 			else {
 				validator = new Validator() {
+					@Override
 					public boolean supports(Class<?> clazz) {
 						return false;
 					}
+					@Override
 					public void validate(Object target, Errors errors) {
 					}
 				};

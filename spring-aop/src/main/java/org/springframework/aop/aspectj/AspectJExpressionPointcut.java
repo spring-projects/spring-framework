@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
@@ -154,16 +155,19 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		this.pointcutParameterTypes = types;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
+	@Override
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
 		return this;
 	}
 
+	@Override
 	public MethodMatcher getMethodMatcher() {
 		checkReadyToMatch();
 		return this;
@@ -223,9 +227,9 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
-	 * write <code>and</code> as "&&" (though &amp;&amp; will work).
-	 * We also allow <code>and</code> between two pointcut sub-expressions.
-	 * <p>This method converts back to <code>&&</code> for the AspectJ pointcut parser.
+	 * write {@code and} as "&&" (though &amp;&amp; will work).
+	 * We also allow {@code and} between two pointcut sub-expressions.
+	 * <p>This method converts back to {@code &&} for the AspectJ pointcut parser.
 	 */
 	private String replaceBooleanOperators(String pcExpr) {
 		String result = StringUtils.replace(pcExpr, " and ", " && ");
@@ -243,6 +247,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return this.pointcutExpression;
 	}
 
+	@Override
 	public boolean matches(Class targetClass) {
 		checkReadyToMatch();
 		try {
@@ -259,13 +264,14 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 						ex);
 				return false;
 			}
-		} 
+		}
 		catch (BCException ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 			return false;
 		}
 	}
 
+	@Override
 	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
 		checkReadyToMatch();
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
@@ -286,15 +292,18 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 	}
 
+	@Override
 	public boolean matches(Method method, Class targetClass) {
 		return matches(method, targetClass, false);
 	}
 
+	@Override
 	public boolean isRuntime() {
 		checkReadyToMatch();
 		return this.pointcutExpression.mayNeedDynamicTest();
 	}
 
+	@Override
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
@@ -494,10 +503,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 
 	/**
-	 * Handler for the Spring-specific <code>bean()</code> pointcut designator
+	 * Handler for the Spring-specific {@code bean()} pointcut designator
 	 * extension to AspectJ.
 	 * <p>This handler must be added to each pointcut object that needs to
-	 * handle the <code>bean()</code> PCD. Matching context is obtained
+	 * handle the {@code bean()} PCD. Matching context is obtained
 	 * automatically by examining a thread local variable and therefore a matching
 	 * context need not be set on the pointcut.
 	 */
@@ -505,10 +514,12 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		private static final String BEAN_DESIGNATOR_NAME = "bean";
 
+		@Override
 		public String getDesignatorName() {
 			return BEAN_DESIGNATOR_NAME;
 		}
 
+		@Override
 		public ContextBasedMatcher parse(String expression) {
 			return new BeanNameContextMatcher(expression);
 		}
@@ -530,22 +541,27 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			this.expressionPattern = new NamePattern(expression);
 		}
 
+		@Override
 		public boolean couldMatchJoinPointsInType(Class someClass) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
+		@Override
 		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
+		@Override
 		public boolean matchesDynamically(MatchingContext context) {
 			return true;
 		}
 
+		@Override
 		public FuzzyBoolean matchesStatically(MatchingContext context) {
 			return contextMatch(null);
 		}
 
+		@Override
 		public boolean mayNeedDynamicTest() {
 			return false;
 		}
@@ -554,7 +570,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			String advisedBeanName = getCurrentProxiedBeanName();
 			if (advisedBeanName == null) {  // no proxy creation in progress
 				// abstain; can't return YES, since that will make pointcut with negation fail
-				return FuzzyBoolean.MAYBE; 
+				return FuzzyBoolean.MAYBE;
 			}
 			if (BeanFactoryUtils.isGeneratedBeanName(advisedBeanName)) {
 				return FuzzyBoolean.NO;
@@ -610,18 +626,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			this.other = other;
 		}
 
+		@Override
 		public boolean alwaysMatches() {
 			return primary.alwaysMatches();
 		}
 
+		@Override
 		public boolean maybeMatches() {
 			return primary.maybeMatches();
 		}
 
+		@Override
 		public boolean neverMatches() {
 			return primary.neverMatches();
 		}
 
+		@Override
 		public JoinPointMatch matchesJoinPoint(Object thisObject,
 				Object targetObject, Object[] args) {
 			try {
@@ -631,6 +651,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			}
 		}
 
+		@Override
 		public void setMatchingContext(MatchingContext aMatchContext) {
 			primary.setMatchingContext(aMatchContext);
 			other.setMatchingContext(aMatchContext);

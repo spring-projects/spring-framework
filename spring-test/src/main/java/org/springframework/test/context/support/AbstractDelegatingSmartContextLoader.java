@@ -42,7 +42,7 @@ import org.springframework.util.ObjectUtils;
  * that is annotated with {@link ContextConfiguration @ContextConfiguration}, and
  * the candidate that supports the merged, processed configuration will be used to
  * actually {@link #loadContext load} the context.
- * 
+ *
  * <p>Placing an empty {@code @ContextConfiguration} annotation on a test class signals
  * that default resource locations (i.e., XML configuration files) or default
  * {@link org.springframework.context.annotation.Configuration configuration classes}
@@ -52,13 +52,13 @@ import org.springframework.util.ObjectUtils;
  * {@code AbstractDelegatingSmartContextLoader} will be used as the default loader,
  * thus providing automatic support for either XML configuration files or annotated
  * classes, but not both simultaneously.
- * 
+ *
  * <p>As of Spring 3.2, a test class may optionally declare neither XML configuration
  * files nor annotated classes and instead declare only {@linkplain
  * ContextConfiguration#initializers application context initializers}. In such
  * cases, an attempt will still be made to detect defaults, but their absence will
  * not result an an exception.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see SmartContextLoader
@@ -111,15 +111,15 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	/**
 	 * Delegates to candidate {@code SmartContextLoaders} to process the supplied
 	 * {@link ContextConfigurationAttributes}.
-	 * 
+	 *
 	 * <p>Delegation is based on explicit knowledge of the implementations of the
 	 * default loaders for {@link #getXmlLoader() XML configuration files} and
 	 * {@link #getAnnotationConfigLoader() annotated classes}. Specifically, the
 	 * delegation algorithm is as follows:
-	 * 
+	 *
 	 * <ul>
 	 * <li>If the resource locations or annotated classes in the supplied
-	 * {@code ContextConfigurationAttributes} are not empty, the appropriate 
+	 * {@code ContextConfigurationAttributes} are not empty, the appropriate
 	 * candidate loader will be allowed to process the configuration <em>as is</em>,
 	 * without any checks for detection of defaults.</li>
 	 * <li>Otherwise, the XML-based loader will be allowed to process
@@ -131,10 +131,10 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * If the annotation-based loader detects default configuration
 	 * classes, an {@code info} message will be logged.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @throws IllegalArgumentException if the supplied configuration attributes are
-	 * <code>null</code>, or if the supplied configuration attributes include both
+	 * {@code null}, or if the supplied configuration attributes include both
 	 * resource locations and annotated classes
 	 * @throws IllegalStateException if the XML-based loader detects default
 	 * configuration classes; if the annotation-based loader detects default
@@ -142,6 +142,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * context configuration; or if both candidate loaders detect defaults for the
 	 * supplied context configuration
 	 */
+	@Override
 	public void processContextConfiguration(final ContextConfigurationAttributes configAttributes) {
 
 		Assert.notNull(configAttributes, "configAttributes must not be null");
@@ -216,12 +217,12 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	/**
 	 * Delegates to an appropriate candidate {@code SmartContextLoader} to load
 	 * an {@link ApplicationContext}.
-	 * 
+	 *
 	 * <p>Delegation is based on explicit knowledge of the implementations of the
 	 * default loaders for {@link #getXmlLoader() XML configuration files} and
 	 * {@link #getAnnotationConfigLoader() annotated classes}. Specifically, the
 	 * delegation algorithm is as follows:
-	 * 
+	 *
 	 * <ul>
 	 * <li>If the resource locations in the supplied {@code MergedContextConfiguration}
 	 * are not empty and the annotated classes are empty,
@@ -230,12 +231,13 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * are not empty and the resource locations are empty,
 	 * the annotation-based loader will load the {@code ApplicationContext}.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @param mergedConfig the merged context configuration to use to load the application context
-	 * @throws IllegalArgumentException if the supplied merged configuration is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 */
+	@Override
 	public ApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 		Assert.notNull(mergedConfig, "mergedConfig must not be null");
 
@@ -268,6 +270,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * {@link #processContextConfiguration(ContextConfigurationAttributes)} instead.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public final String[] processLocations(Class<?> clazz, String... locations) {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call processContextConfiguration(ContextConfigurationAttributes) instead.");
@@ -279,6 +282,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * {@link #loadContext(MergedContextConfiguration)} instead.
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public final ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException("DelegatingSmartContextLoaders do not support the ContextLoader SPI. "
 				+ "Call loadContext(MergedContextConfiguration) instead.");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,8 +137,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Configure the given raw bean: autowiring bean properties, applying
-	 * bean property values, applying factory callbacks such as <code>setBeanName</code>
-	 * and <code>setBeanFactory</code>, and also applying all bean post processors
+	 * bean property values, applying factory callbacks such as {@code setBeanName}
+	 * and {@code setBeanFactory}, and also applying all bean post processors
 	 * (including ones which might wrap the given raw bean).
 	 * <p>This is effectively a superset of what {@link #initializeBean} provides,
 	 * fully applying the configuration specified by the corresponding bean definition.
@@ -158,7 +158,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency
 	 * @param beanName the name of the bean which declares the present dependency
-	 * @return the resolved object, or <code>null</code> if none found
+	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException in dependency resolution failed
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName) throws BeansException;
@@ -190,7 +190,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	/**
 	 * Instantiate a new bean instance of the given class with the specified autowire
 	 * strategy. All constants defined in this interface are supported here.
-	 * Can also be invoked with <code>AUTOWIRE_NO</code> in order to just apply
+	 * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
 	 * before-instantiation callbacks (e.g. for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
@@ -217,7 +217,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Autowire the bean properties of the given bean instance by name or type.
-	 * Can also be invoked with <code>AUTOWIRE_NO</code> in order to just apply
+	 * Can also be invoked with {@code AUTOWIRE_NO} in order to just apply
 	 * after-instantiation callbacks (e.g. for annotation-driven injection).
 	 * <p>Does <i>not</i> apply standard {@link BeanPostProcessor BeanPostProcessors}
 	 * callbacks or perform any further initialization of the bean. This interface
@@ -262,7 +262,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Initialize the given raw bean, applying factory callbacks
-	 * such as <code>setBeanName</code> and <code>setBeanFactory</code>,
+	 * such as {@code setBeanName} and {@code setBeanFactory},
 	 * also applying all bean post processors (including ones which
 	 * might wrap the given raw bean).
 	 * <p>Note that no bean definition of the given name has to exist
@@ -278,7 +278,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
-	 * instance, invoking their <code>postProcessBeforeInitialization</code> methods.
+	 * instance, invoking their {@code postProcessBeforeInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean
@@ -291,7 +291,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
 	 * Apply {@link BeanPostProcessor BeanPostProcessors} to the given existing bean
-	 * instance, invoking their <code>postProcessAfterInitialization</code> methods.
+	 * instance, invoking their {@code postProcessAfterInitialization} methods.
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param existingBean the new bean instance
 	 * @param beanName the name of the bean
@@ -310,7 +310,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * resolving the present dependency) are supposed to be added to
 	 * @param typeConverter the TypeConverter to use for populating arrays and
 	 * collections
-	 * @return the resolved object, or <code>null</code> if none found
+	 * @return the resolved object, or {@code null} if none found
 	 * @throws BeansException in dependency resolution failed
 	 */
 	Object resolveDependency(DependencyDescriptor descriptor, String beanName,

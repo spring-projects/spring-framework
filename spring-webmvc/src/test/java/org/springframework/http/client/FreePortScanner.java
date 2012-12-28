@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,69 +31,69 @@ import org.springframework.util.Assert;
  */
 public abstract class FreePortScanner {
 
-    private static final int MIN_SAFE_PORT = 1024;
+	private static final int MIN_SAFE_PORT = 1024;
 
-    private static final int MAX_PORT = 65535;
+	private static final int MAX_PORT = 65535;
 
-    private static final Random random = new Random();
+	private static final Random random = new Random();
 
-    /**
-     * Returns the number of a free port in the default range.
-     */
-    public static int getFreePort() {
-        return getFreePort(MIN_SAFE_PORT, MAX_PORT);
-    }
+	/**
+	 * Returns the number of a free port in the default range.
+	 */
+	public static int getFreePort() {
+		return getFreePort(MIN_SAFE_PORT, MAX_PORT);
+	}
 
-    /**
-     * Returns the number of a free port in the given range.
-     */
-    public static int getFreePort(int minPort, int maxPort) {
-        Assert.isTrue(minPort > 0, "'minPort' must be larger than 0");
-        Assert.isTrue(maxPort > minPort, "'maxPort' must be larger than minPort");
-        int portRange = maxPort - minPort;
-        int candidatePort;
-        int searchCounter = 0;
-        do {
-            if (++searchCounter > portRange) {
-                throw new IllegalStateException(
-                        String.format("There were no ports available in the range %d to %d", minPort, maxPort));
-            }
-            candidatePort = getRandomPort(minPort, portRange);
-        }
-        while (!isPortAvailable(candidatePort));
+	/**
+	 * Returns the number of a free port in the given range.
+	 */
+	public static int getFreePort(int minPort, int maxPort) {
+		Assert.isTrue(minPort > 0, "'minPort' must be larger than 0");
+		Assert.isTrue(maxPort > minPort, "'maxPort' must be larger than minPort");
+		int portRange = maxPort - minPort;
+		int candidatePort;
+		int searchCounter = 0;
+		do {
+			if (++searchCounter > portRange) {
+				throw new IllegalStateException(
+						String.format("There were no ports available in the range %d to %d", minPort, maxPort));
+			}
+			candidatePort = getRandomPort(minPort, portRange);
+		}
+		while (!isPortAvailable(candidatePort));
 
-        return candidatePort;
-    }
+		return candidatePort;
+	}
 
-    private static int getRandomPort(int minPort, int portRange) {
-        return minPort + random.nextInt(portRange);
-    }
+	private static int getRandomPort(int minPort, int portRange) {
+		return minPort + random.nextInt(portRange);
+	}
 
-    private static boolean isPortAvailable(int port) {
-        ServerSocket serverSocket;
-        try {
-            serverSocket = new ServerSocket();
-        }
-        catch (IOException ex) {
-            throw new IllegalStateException("Unable to create ServerSocket.", ex);
-        }
+	private static boolean isPortAvailable(int port) {
+		ServerSocket serverSocket;
+		try {
+			serverSocket = new ServerSocket();
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Unable to create ServerSocket.", ex);
+		}
 
-        try {
-            InetSocketAddress sa = new InetSocketAddress(port);
-            serverSocket.bind(sa);
-            return true;
-        }
-        catch (IOException ex) {
-            return false;
-        }
-        finally {
-            try {
-                serverSocket.close();
-            }
-            catch (IOException ex) {
-                // ignore
-            }
-        }
-    }
+		try {
+			InetSocketAddress sa = new InetSocketAddress(port);
+			serverSocket.bind(sa);
+			return true;
+		}
+		catch (IOException ex) {
+			return false;
+		}
+		finally {
+			try {
+				serverSocket.close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+		}
+	}
 
 }

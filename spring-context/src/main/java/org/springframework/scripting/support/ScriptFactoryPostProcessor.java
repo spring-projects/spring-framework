@@ -85,7 +85,7 @@ import org.springframework.util.StringUtils;
  * At runtime, the actual scripted objects will be exposed for
  * "bshMessenger" and "groovyMessenger", rather than the
  * {@link org.springframework.scripting.ScriptFactory} instances. Both of
- * those are supposed to be castable to the example's <code>Messenger</code>
+ * those are supposed to be castable to the example's {@code Messenger}
  * interfaces here.
  *
  * <pre class="code">&lt;bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/&gt;
@@ -106,13 +106,13 @@ import org.springframework.util.StringUtils;
  * (in an effort to illustrate using the {@link ScriptFactoryPostProcessor} itself).
  * In reality, you would never create a &lt;bean/&gt; definition for a
  * {@link ScriptFactoryPostProcessor} explicitly; rather you would import the
- * tags from the <code>'lang'</code> namespace and simply create scripted
+ * tags from the {@code 'lang'} namespace and simply create scripted
  * beans using the tags in that namespace... as part of doing so, a
  * {@link ScriptFactoryPostProcessor} will implicitly be created for you.
  *
  * <p>The Spring reference documentation contains numerous examples of using
- * tags in the <code>'lang'</code> namespace; by way of an example, find below
- * a Groovy-backed bean defined using the <code>'lang:groovy'</code> tag.
+ * tags in the {@code 'lang'} namespace; by way of an example, find below
+ * a Groovy-backed bean defined using the {@code 'lang:groovy'} tag.
  *
  * <pre class="code">
  * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -193,17 +193,19 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	/**
-	 * Flag to signal that refreshable proxies should be created to proxy the target class not its interfaces. 
+	 * Flag to signal that refreshable proxies should be created to proxy the target class not its interfaces.
 	 * @param defaultProxyTargetClass the flag value to set
 	 */
 	public void setDefaultProxyTargetClass(boolean defaultProxyTargetClass) {
 		this.defaultProxyTargetClass = defaultProxyTargetClass;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
 			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory "
@@ -226,10 +228,12 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
+	@Override
 	public int getOrder() {
 		return Integer.MIN_VALUE;
 	}
@@ -541,7 +545,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	/**
 	 * Create a refreshable proxy for the given AOP TargetSource.
 	 * @param ts the refreshable TargetSource
-	 * @param interfaces the proxy interfaces (may be <code>null</code> to
+	 * @param interfaces the proxy interfaces (may be {@code null} to
 	 * indicate proxying of all interfaces implemented by the target class)
 	 * @return the generated proxy
 	 * @see RefreshableScriptTargetSource
@@ -570,6 +574,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	/**
 	 * Destroy the inner bean factory (used for scripts) on shutdown.
 	 */
+	@Override
 	public void destroy() {
 		this.scriptBeanFactory.destroySingletons();
 	}

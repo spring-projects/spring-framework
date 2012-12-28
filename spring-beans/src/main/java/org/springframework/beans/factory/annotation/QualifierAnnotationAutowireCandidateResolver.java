@@ -36,6 +36,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link AutowireCandidateResolver} implementation that matches bean definition qualifiers
@@ -125,6 +126,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		this.valueAnnotationType = valueAnnotationType;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -142,6 +144,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * attribute does not match.
 	 * @see Qualifier
 	 */
+	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 			// if explicitly false, do not proceed with qualifier check
@@ -192,7 +195,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 						foundMeta = true;
 						// Only accept fallback match if @Qualifier annotation has a value...
 						// Otherwise it is just a marker for a custom qualifier annotation.
-						if ((fallbackToMeta && AnnotationUtils.getValue(metaAnn) == null) ||
+						if ((fallbackToMeta && StringUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||
 								!checkQualifier(bdHolder, metaAnn, typeConverter)) {
 							return false;
 						}
@@ -292,6 +295,7 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * Determine whether the given dependency carries a value annotation.
 	 * @see Value
 	 */
+	@Override
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {

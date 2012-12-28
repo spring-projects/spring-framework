@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * Reflective wrapper around a JBoss 5 and 6 class loader methods (discovered and called
  * through reflection) for load time weaving.
- * 
+ *
  * @author Costin Leau
  * @since 3.1
  */
@@ -127,6 +127,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		InvocationHandler adapter = new JBossMCTranslatorAdapter(transformer);
 		Object adapterInstance = Proxy.newProxyInstance(this.translatorClass.getClassLoader(),
@@ -139,6 +140,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return classLoader;
 	}

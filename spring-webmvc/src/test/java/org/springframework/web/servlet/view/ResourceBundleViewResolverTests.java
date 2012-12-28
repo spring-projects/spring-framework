@@ -42,10 +42,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 	private static String PROPS_FILE = "org.springframework.web.servlet.view.testviews";
 
 	private ResourceBundleViewResolver rb;
-	
+
 	private StaticWebApplicationContext wac;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		rb = new ResourceBundleViewResolver();
 		rb.setBasename(PROPS_FILE);
@@ -147,7 +148,7 @@ public class ResourceBundleViewResolverTests extends TestCase {
 		assertTrue("test has correct name", "test".equals(tv.getBeanName()));
 		assertTrue("test should have been initialized once, not " + tv.initCount + " times", tv.initCount == 1);
 	}
-	
+
 	public void testNoSuchBasename() throws Exception {
 		try {
 			rb.setBasename("weoriwoierqupowiuer");
@@ -170,9 +171,11 @@ public class ResourceBundleViewResolverTests extends TestCase {
 			}
 		}
 
+		@Override
 		protected void renderMergedOutputModel(Map model, HttpServletRequest request, HttpServletResponse response) {
 		}
 
+		@Override
 		protected void initApplicationContext() {
 			++initCount;
 		}

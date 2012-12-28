@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,18 +50,22 @@ public class AspectJWeavingEnabler
 	public static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 
+	@Override
 	public int getOrder() {
 		return HIGHEST_PRECEDENCE;
 	}
 
+	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		enableAspectJWeaving(this.loadTimeWeaver, this.beanClassLoader);
 	}
@@ -95,6 +99,7 @@ public class AspectJWeavingEnabler
 			this.delegate = delegate;
 		}
 
+		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 

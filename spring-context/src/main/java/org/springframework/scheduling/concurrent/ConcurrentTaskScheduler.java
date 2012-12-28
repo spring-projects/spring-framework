@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.ScheduledExecutorService</code>
+ * Adapter that takes a JDK 1.5 {@code java.util.concurrent.ScheduledExecutorService}
  * and exposes a Spring {@link org.springframework.scheduling.TaskScheduler} for it.
  * Extends {@link ConcurrentTaskExecutor} in order to implement the
  * {@link org.springframework.scheduling.SchedulingTaskExecutor} interface as well.
@@ -116,6 +116,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		try {
 			ErrorHandler errorHandler =
@@ -127,6 +128,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -138,6 +140,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -149,6 +152,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(
@@ -159,6 +163,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -170,6 +175,7 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(

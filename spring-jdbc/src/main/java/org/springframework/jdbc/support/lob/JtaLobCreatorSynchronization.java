@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import org.springframework.util.Assert;
 
 /**
  * Callback for resource cleanup at the end of a JTA transaction.
- * Invokes <code>LobCreator.close()</code> to clean up temporary LOBs
+ * Invokes {@code LobCreator.close()} to clean up temporary LOBs
  * that might have been created.
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.jdbc.support.lob.LobCreator#close()
+ * @see LobCreator#close()
  * @see javax.transaction.Transaction#registerSynchronization
  */
 public class JtaLobCreatorSynchronization implements Synchronization {
@@ -46,6 +46,7 @@ public class JtaLobCreatorSynchronization implements Synchronization {
 		this.lobCreator = lobCreator;
 	}
 
+	@Override
 	public void beforeCompletion() {
 		// Close the LobCreator early if possible, to avoid issues with strict JTA
 		// implementations that issue warnings when doing JDBC operations after
@@ -54,6 +55,7 @@ public class JtaLobCreatorSynchronization implements Synchronization {
 		this.lobCreator.close();
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 		if (!this.beforeCompletionCalled) {
 			// beforeCompletion not called before (probably because of JTA rollback).

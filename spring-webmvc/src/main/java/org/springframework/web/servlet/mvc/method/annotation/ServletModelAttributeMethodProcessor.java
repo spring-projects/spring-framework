@@ -80,7 +80,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 
 		return super.createAttribute(attributeName, parameter, binderFactory, request);
 	}
-	
+
 	/**
 	 * Obtain a value from the request that may be used to instantiate the
 	 * model attribute through type conversion from String to the target type.
@@ -140,7 +140,7 @@ public class ServletModelAttributeMethodProcessor extends ModelAttributeMethodPr
 		}
 		return null;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * <p>Downcast {@link WebDataBinder} to {@link ServletRequestDataBinder} before binding.

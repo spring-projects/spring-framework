@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p><code class="code">-javaagent:path/to/org.springframework.instrument.jar</code>
  *
- * <p>where <code>org.springframework.instrument.jar</code> is a JAR file containing
+ * <p>where {@code org.springframework.instrument.jar} is a JAR file containing
  * the {@link InstrumentationSavingAgent} class, as shipped with Spring.
  *
  * <p>In Eclipse, for example, set the "Run configuration"'s JVM args to be of the form:
@@ -78,6 +78,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		FilteringClassFileTransformer actualTransformer =
@@ -97,6 +98,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * JVM in this way, so the instrumentable class loader will always be the
 	 * current loader.
 	 */
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
@@ -104,6 +106,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * This implementation always returns a {@link SimpleThrowawayClassLoader}.
 	 */
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
@@ -133,7 +136,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 
 	/**
 	 * Obtain the Instrumentation instance for the current VM, if available.
-	 * @return the Instrumentation instance, or <code>null</code> if none found
+	 * @return the Instrumentation instance, or {@code null} if none found
 	 * @see #isInstrumentationAvailable()
 	 */
 	private static Instrumentation getInstrumentation() {
@@ -171,6 +174,7 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 			this.targetClassLoader = targetClassLoader;
 		}
 
+		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 

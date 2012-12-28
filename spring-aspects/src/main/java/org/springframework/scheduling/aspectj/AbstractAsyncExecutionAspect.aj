@@ -28,7 +28,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 /**
  * Abstract aspect that routes selected methods asynchronously.
  *
- * <p>This aspect needs to be injected with an implementation of 
+ * <p>This aspect needs to be injected with an implementation of
  * {@link Executor} to activate it for a specific thread pool.
  * Otherwise it will simply delegate all calls synchronously.
  *

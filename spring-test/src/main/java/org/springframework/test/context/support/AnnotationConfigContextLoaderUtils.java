@@ -55,15 +55,15 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * <p>Specifically, such candidates:
 	 *
 	 * <ul>
-	 * <li>must not be <code>null</code></li>
-	 * <li>must not be <code>private</code></li>
-	 * <li>must not be <code>final</code></li>
-	 * <li>must be <code>static</code></li>
+	 * <li>must not be {@code null}</li>
+	 * <li>must not be {@code private}</li>
+	 * <li>must not be {@code final}</li>
+	 * <li>must be {@code static}</li>
 	 * <li>must be annotated with {@code @Configuration}</li>
 	 * </ul>
 	 *
 	 * @param clazz the class to check
-	 * @return <code>true</code> if the supplied class meets the candidate criteria
+	 * @return {@code true} if the supplied class meets the candidate criteria
 	 */
 	private static boolean isDefaultConfigurationClassCandidate(Class<?> clazz) {
 		return clazz != null && isStaticNonPrivateAndNonFinal(clazz) && clazz.isAnnotationPresent(Configuration.class);
@@ -86,7 +86,7 @@ public abstract class AnnotationConfigContextLoaderUtils {
 	 * warning, and the potential candidate class will be ignored.
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @return an array of default configuration classes, potentially empty but
-	 * never <code>null</code>
+	 * never {@code null}
 	 */
 	public static Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {
 		Assert.notNull(declaringClass, "Declaring class must not be null");

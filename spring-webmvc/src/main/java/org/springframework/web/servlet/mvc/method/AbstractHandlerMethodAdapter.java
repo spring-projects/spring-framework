@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * Abstract base class for {@link HandlerAdapter} implementations that support 
+ * Abstract base class for {@link HandlerAdapter} implementations that support
  * handlers of type {@link HandlerMethod}.
  *
  * @author Arjen Poutsma
@@ -43,23 +43,25 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
-	
+
 	/**
 	 * {@inheritDoc} <p>This implementation expects the handler to be an {@link HandlerMethod}.
 	 *
 	 * @param handler the handler instance to check
 	 * @return whether or not this adapter can adapt the given handler
 	 */
+	@Override
 	public final boolean supports(Object handler) {
 		return handler instanceof HandlerMethod && supportsInternal((HandlerMethod) handler);
 	}
@@ -75,6 +77,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	/**
 	 * {@inheritDoc} <p>This implementation expects the handler to be an {@link HandlerMethod}.
 	 */
+	@Override
 	public final ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		return handleInternal(request, response, (HandlerMethod) handler);
@@ -85,9 +88,9 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	 *
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handlerMethod handler method to use. This object must have previously been passed to the 
+	 * @param handlerMethod handler method to use. This object must have previously been passed to the
 	 * {@link #supportsInternal(HandlerMethod)} this interface, which must have returned {@code true}.
-	 * @return ModelAndView object with the name of the view and the required model data, or {@code null} if 
+	 * @return ModelAndView object with the name of the view and the required model data, or {@code null} if
 	 * the request has been handled directly
 	 * @throws Exception in case of errors
 	 */
@@ -98,6 +101,7 @@ public abstract class AbstractHandlerMethodAdapter extends WebContentGenerator i
 	/**
 	 * {@inheritDoc} <p>This implementation expects the handler to be an {@link HandlerMethod}.
 	 */
+	@Override
 	public final long getLastModified(HttpServletRequest request, Object handler) {
 		return getLastModifiedInternal(request, (HandlerMethod) handler);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,10 +197,10 @@ public abstract class AbstractJdbcCall {
 
 	/**
 	 * Add a declared parameter to the list of parameters for the call.
-	 * Only parameters declared as <code>SqlParameter</code> and <code>SqlInOutParameter</code>
-	 * will be used to provide input values. This is different from the <code>StoredProcedure</code> class
+	 * Only parameters declared as {@code SqlParameter} and {@code SqlInOutParameter}
+	 * will be used to provide input values. This is different from the {@code StoredProcedure} class
 	 * which for backwards compatibility reasons allows input values to be provided for parameters declared
-	 * as <code>SqlOutParameter</code>.
+	 * as {@code SqlOutParameter}.
 	 * @param parameter the {@link SqlParameter} to add
 	 */
 	public void addDeclaredParameter(SqlParameter parameter) {
@@ -326,7 +326,7 @@ public abstract class AbstractJdbcCall {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by <code>doExecute</code>.
+	 * <p>Automatically called by {@code doExecute}.
 	 */
 	protected void checkCompiled() {
 		if (!isCompiled()) {

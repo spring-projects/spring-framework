@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,10 +106,12 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 	}
 
 
+	@Override
 	public int getOrder() {
 		return SessionFactoryUtils.SESSION_SYNCHRONIZATION_ORDER;
 	}
 
+	@Override
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.sessionFactory);
@@ -118,12 +120,14 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void resume() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.bindResource(this.sessionFactory, this.sessionHolder);
 		}
 	}
 
+	@Override
 	public void flush() {
 		try {
 			SessionFactoryUtils.logger.debug("Flushing Hibernate Session on explicit request");
@@ -134,6 +138,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void beforeCommit(boolean readOnly) throws DataAccessException {
 		if (!readOnly) {
 			Session session = getCurrentSession();
@@ -160,6 +165,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		return SessionFactoryUtils.convertHibernateAccessException(ex);
 	}
 
+	@Override
 	public void beforeCompletion() {
 		if (this.jtaTransaction != null) {
 			// Typically in case of a suspended JTA transaction:
@@ -214,9 +220,11 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 		}
 	}
 
+	@Override
 	public void afterCommit() {
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 		try {
 			if (!this.hibernateTransactionCompletion || !this.newSession) {

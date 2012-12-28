@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * (i.e. the interval between successive executions is measured from each
  * <emphasis>completion</emphasis> time). To measure the interval between the
  * scheduled <emphasis>start</emphasis> time of each execution instead, set the
- * 'fixedRate' property to <code>true</code>.
+ * 'fixedRate' property to {@code true}.
  * <p>
  * Note that the TaskScheduler interface already defines methods for scheduling
  * tasks at fixed-rate or with fixed-delay. Both also support an optional value
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * within components that rely on the Trigger abstraction. For example, it may
  * be convenient to allow periodic triggers, cron-based triggers, and even
  * custom Trigger implementations to be used interchangeably.
- * 
+ *
  * @author Mark Fisher
  * @since 3.0
  */
@@ -76,7 +76,7 @@ public class PeriodicTrigger implements Trigger {
 	/**
 	 * Specify the delay for the initial execution. It will be evaluated in
 	 * terms of this trigger's {@link TimeUnit}. If no time unit was explicitly
-	 * provided upon instantiation, the default is milliseconds. 
+	 * provided upon instantiation, the default is milliseconds.
 	 */
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = this.timeUnit.toMillis(initialDelay);
@@ -94,6 +94,7 @@ public class PeriodicTrigger implements Trigger {
 	/**
 	 * Returns the time after which a task should run again.
 	 */
+	@Override
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		if (triggerContext.lastScheduledExecutionTime() == null) {
 			return new Date(System.currentTimeMillis() + this.initialDelay);
@@ -122,7 +123,7 @@ public class PeriodicTrigger implements Trigger {
 	public int hashCode() {
 		return (this.fixedRate ? 17 : 29) +
 				(int) (37 * this.period) +
-				(int) (41 * this.initialDelay); 
+				(int) (41 * this.initialDelay);
 	}
 
 }

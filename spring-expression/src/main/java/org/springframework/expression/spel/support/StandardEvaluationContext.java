@@ -47,13 +47,13 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public class StandardEvaluationContext implements EvaluationContext {
-	
+
 	private TypedValue rootObject;
 
 	private List<ConstructorResolver> constructorResolvers;
 
 	private List<MethodResolver> methodResolvers;
-	
+
 	private ReflectiveMethodResolver reflectiveMethodResolver;
 
 	private List<PropertyAccessor> propertyAccessors;
@@ -67,14 +67,14 @@ public class StandardEvaluationContext implements EvaluationContext {
 	private OperatorOverloader operatorOverloader = new StandardOperatorOverloader();
 
 	private final Map<String, Object> variables = new HashMap<String, Object>();
-	
+
 	private BeanResolver beanResolver;
 
 
 	public StandardEvaluationContext() {
 		setRootObject(null);
 	}
-	
+
 	public StandardEvaluationContext(Object rootObject) {
 		this();
 		setRootObject(rootObject);
@@ -89,6 +89,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.rootObject = (rootObject != null ? new TypedValue(rootObject) : TypedValue.NULL);
 	}
 
+	@Override
 	public TypedValue getRootObject() {
 		return this.rootObject;
 	}
@@ -102,12 +103,13 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureConstructorResolversInitialized();
 		return this.constructorResolvers.remove(resolver);
 	}
-	
+
+	@Override
 	public List<ConstructorResolver> getConstructorResolvers() {
 		ensureConstructorResolversInitialized();
 		return this.constructorResolvers;
 	}
-	
+
 	public void setConstructorResolvers(List<ConstructorResolver> constructorResolvers) {
 		this.constructorResolvers = constructorResolvers;
 	}
@@ -117,12 +119,13 @@ public class StandardEvaluationContext implements EvaluationContext {
 		ensureMethodResolversInitialized();
 		this.methodResolvers.add(this.methodResolvers.size() - 1, resolver);
 	}
-	
+
 	public boolean removeMethodResolver(MethodResolver methodResolver) {
 		ensureMethodResolversInitialized();
 		return this.methodResolvers.remove(methodResolver);
 	}
 
+	@Override
 	public List<MethodResolver> getMethodResolvers() {
 		ensureMethodResolversInitialized();
 		return this.methodResolvers;
@@ -131,30 +134,32 @@ public class StandardEvaluationContext implements EvaluationContext {
 	public void setBeanResolver(BeanResolver beanResolver) {
 		this.beanResolver = beanResolver;
 	}
-	
+
+	@Override
 	public BeanResolver getBeanResolver() {
 		return this.beanResolver;
 	}
-	
+
 	public void setMethodResolvers(List<MethodResolver> methodResolvers) {
 		this.methodResolvers = methodResolvers;
 	}
-	
+
 
 	public void addPropertyAccessor(PropertyAccessor accessor) {
 		ensurePropertyAccessorsInitialized();
 		this.propertyAccessors.add(this.propertyAccessors.size() - 1, accessor);
 	}
-	
+
 	public boolean removePropertyAccessor(PropertyAccessor accessor) {
 		return this.propertyAccessors.remove(accessor);
 	}
 
+	@Override
 	public List<PropertyAccessor> getPropertyAccessors() {
 		ensurePropertyAccessorsInitialized();
 		return this.propertyAccessors;
 	}
-	
+
 	public void setPropertyAccessors(List<PropertyAccessor> propertyAccessors) {
 		this.propertyAccessors = propertyAccessors;
 	}
@@ -165,6 +170,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.typeLocator = typeLocator;
 	}
 
+	@Override
 	public TypeLocator getTypeLocator() {
 		if (this.typeLocator == null) {
 			 this.typeLocator = new StandardTypeLocator();
@@ -177,6 +183,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.typeConverter = typeConverter;
 	}
 
+	@Override
 	public TypeConverter getTypeConverter() {
 		if (this.typeConverter == null) {
 			 this.typeConverter = new StandardTypeConverter();
@@ -189,6 +196,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.typeComparator = typeComparator;
 	}
 
+	@Override
 	public TypeComparator getTypeComparator() {
 		return this.typeComparator;
 	}
@@ -198,10 +206,12 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.operatorOverloader = operatorOverloader;
 	}
 
+	@Override
 	public OperatorOverloader getOperatorOverloader() {
 		return this.operatorOverloader;
 	}
 
+	@Override
 	public void setVariable(String name, Object value) {
 		this.variables.put(name, value);
 	}
@@ -214,6 +224,7 @@ public class StandardEvaluationContext implements EvaluationContext {
 		this.variables.put(name, method);
 	}
 
+	@Override
 	public Object lookupVariable(String name) {
 		return this.variables.get(name);
 	}

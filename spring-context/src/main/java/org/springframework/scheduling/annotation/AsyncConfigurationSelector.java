@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	 * @return {@link ProxyAsyncConfiguration} or {@code AspectJAsyncConfiguration} for
 	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()}, respectively
 	 */
+	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:

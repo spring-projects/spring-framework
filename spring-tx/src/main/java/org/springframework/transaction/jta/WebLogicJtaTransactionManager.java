@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.transaction.TransactionSystemException;
  * transaction coordinator, <i>beyond standard JTA</i>: transaction names,
  * per-transaction isolation levels, and proper resuming of transactions in all cases.
  *
- * <p>Uses WebLogic's special <code>begin(name)</code> method to start a JTA transaction,
+ * <p>Uses WebLogic's special {@code begin(name)} method to start a JTA transaction,
  * in order to make <b>Spring-driven transactions visible in WebLogic's transaction
  * monitor</b>. In case of Spring's declarative transactions, the exposed name will
  * (by default) be the fully-qualified class name + "." + method name.
@@ -45,13 +45,13 @@ import org.springframework.transaction.TransactionSystemException;
  * level (e.g. ISOLATION_SERIALIZABLE) to all JDBC Connections that participate in the
  * given transaction.
  *
- * <p>Invokes WebLogic's special <code>forceResume</code> method if standard JTA resume
+ * <p>Invokes WebLogic's special {@code forceResume} method if standard JTA resume
  * failed, to <b>also resume if the target transaction was marked rollback-only</b>.
  * If you're not relying on this feature of transaction suspension in the first
  * place, Spring's standard JtaTransactionManager will behave properly too.
  *
  * <p>By default, the JTA UserTransaction and TransactionManager handles are
- * fetched directly from WebLogic's <code>TransactionHelper</code>. This can be
+ * fetched directly from WebLogic's {@code TransactionHelper}. This can be
  * overridden by specifying "userTransaction"/"userTransactionName" and
  * "transactionManager"/"transactionManagerName", passing in existing handles
  * or specifying corresponding JNDI locations to look up.
@@ -65,6 +65,7 @@ import org.springframework.transaction.TransactionSystemException;
  * @see weblogic.transaction.TransactionManager#forceResume
  * @see weblogic.transaction.TransactionHelper
  */
+@SuppressWarnings("serial")
 public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	private static final String USER_TRANSACTION_CLASS_NAME = "weblogic.transaction.UserTransaction";
@@ -274,7 +275,7 @@ public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Standard JTA resume threw InvalidTransactionException: " + ex.getMessage() +
-				    " - trying WebLogic JTA forceResume");
+					" - trying WebLogic JTA forceResume");
 			}
 			/*
 			weblogic.transaction.TransactionManager wtm =

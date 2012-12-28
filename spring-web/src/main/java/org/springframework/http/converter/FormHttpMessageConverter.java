@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.charset = charset;
 	}
 
+	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
@@ -139,6 +140,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
+	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		if (!MultiValueMap.class.isAssignableFrom(clazz)) {
 			return false;
@@ -161,10 +163,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		this.supportedMediaTypes = supportedMediaTypes;
 	}
 
+	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.supportedMediaTypes);
 	}
 
+	@Override
 	public MultiValueMap<String, String> read(Class<? extends MultiValueMap<String, ?>> clazz,
 			HttpInputMessage inputMessage) throws IOException, HttpMessageNotReadableException {
 
@@ -190,6 +194,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return result;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void write(MultiValueMap<String, ?> map, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
@@ -373,10 +378,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 			this.os = os;
 		}
 
+		@Override
 		public HttpHeaders getHeaders() {
 			return headersWritten ? HttpHeaders.readOnlyHttpHeaders(headers) : this.headers;
 		}
 
+		@Override
 		public OutputStream getBody() throws IOException {
 			writeHeaders();
 			return this.os;

@@ -45,6 +45,7 @@ import org.springframework.util.Assert;
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
+@SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	// using a ConcurrentHashMap as a Set
@@ -240,10 +241,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
+	@Override
 	public String getParentName() {
 		return null;
 	}
 
+	@Override
 	public void setParentName(String parentName) {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");
@@ -268,7 +271,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 	/**
 	 * Return the resolved factory method as a Java Method object, if available.
-	 * @return the factory method, or <code>null</code> if not found or not resolved yet
+	 * @return the factory method, or {@code null} if not found or not resolved yet
 	 */
 	public Method getResolvedFactoryMethod() {
 		synchronized (this.constructorArgumentLock) {

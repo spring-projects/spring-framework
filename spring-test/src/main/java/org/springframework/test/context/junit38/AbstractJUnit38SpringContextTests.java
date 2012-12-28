@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,11 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * AbstractJUnit38SpringContextTests()} and
  * {@link #AbstractJUnit38SpringContextTests(String)
  * AbstractJUnit38SpringContextTests(String)} and delegate to
- * <code>super();</code> and <code>super(name);</code> respectively.</li>
+ * {@code super();} and {@code super(name);} respectively.</li>
  * </ul>
  * <p>
  * The following list constitutes all annotations currently supported directly
- * by <code>AbstractJUnit38SpringContextTests</code>. <i>(Note that additional
+ * by {@code AbstractJUnit38SpringContextTests}. <i>(Note that additional
  * annotations may be supported by various
  * {@link org.springframework.test.context.TestExecutionListener
  * TestExecutionListeners})</i>
@@ -99,7 +99,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * {@link org.springframework.test.context.TestExecutionListener#afterTestClass(org.springframework.test.context.TestContext)
  * afterTestClass()}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -161,10 +161,10 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 
 	/**
 	 * Constructs a new AbstractJUnit38SpringContextTests instance with the
-	 * supplied <code>name</code>; initializes the internal
+	 * supplied {@code name}; initializes the internal
 	 * {@link TestContextManager} for the current test; and retrieves the
 	 * configured (or default) {@link ProfileValueSource}.
-	 * 
+	 *
 	 * @param name the name of the current test to execute
 	 */
 	public AbstractJUnit38SpringContextTests(String name) {
@@ -177,6 +177,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * Sets the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
 	 */
+	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -200,7 +201,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * <li>Provides support for {@link ExpectedException
 	 * &#064;ExpectedException}.</li>
 	 * </ul>
-	 * 
+	 *
 	 * @see ProfileValueUtils#isTestEnabledInThisEnvironment
 	 */
 	@Override
@@ -215,6 +216,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 
 		runTestTimed(new TestExecutionCallback() {
 
+			@Override
 			public void run() throws Throwable {
 				runManaged(testMethod);
 			}
@@ -242,10 +244,10 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	/**
 	 * Runs a <em>timed</em> test via the supplied {@link TestExecutionCallback}
 	 * , providing support for the {@link Timed &#064;Timed} annotation.
-	 * 
+	 *
 	 * @param tec the test execution callback to run
 	 * @param testMethod the actual test method: used to retrieve the
-	 * <code>timeout</code>
+	 * {@code timeout}
 	 * @throws Throwable if any exception is thrown
 	 * @see Timed
 	 * @see #runTest
@@ -273,7 +275,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * Runs a test via the supplied {@link TestExecutionCallback}, providing
 	 * support for the {@link ExpectedException &#064;ExpectedException} and
 	 * {@link Repeat &#064;Repeat} annotations.
-	 * 
+	 *
 	 * @param tec the test execution callback to run
 	 * @param testMethod the actual test method: used to retrieve the
 	 * {@link ExpectedException &#064;ExpectedException} and {@link Repeat
@@ -320,7 +322,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * Calls {@link TestContextManager#beforeTestMethod(Object,Method)} and
 	 * {@link TestContextManager#afterTestMethod(Object,Method,Throwable)} at
 	 * the appropriate test execution points.
-	 * 
+	 *
 	 * @param testMethod the test method to run
 	 * @throws Throwable if any exception is thrown
 	 * @see #runBare()
@@ -374,7 +376,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * Records the supplied test method as <em>disabled</em> in the current
 	 * environment by incrementing the total number of disabled tests and
 	 * logging a debug message.
-	 * 
+	 *
 	 * @param testMethod the test method that is disabled.
 	 * @see #getDisabledTestCount()
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import javax.servlet.ServletContext;
 
 import org.springframework.context.ApplicationContext;
 
-/** 
+/**
  * Interface to provide configuration for a web application. This is read-only while
  * the application is running, but may be reloaded if the implementation supports this.
  *
- * <p>This interface adds a <code>getServletContext()</code> method to the generic
+ * <p>This interface adds a {@code getServletContext()} method to the generic
  * ApplicationContext interface, and defines a well-known application attribute name
  * that the root context must be bound to in the bootstrap process.
  *
@@ -34,7 +34,7 @@ import org.springframework.context.ApplicationContext;
  *
  * <p>In addition to standard application context lifecycle capabilities,
  * WebApplicationContext implementations need to detect {@link ServletContextAware}
- * beans and invoke the <code>setServletContext</code> method accordingly.
+ * beans and invoke the {@code setServletContext} method accordingly.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -107,5 +107,5 @@ public interface WebApplicationContext extends ApplicationContext {
 	 * <p>Also available for a Portlet application, in addition to the PortletContext.
 	 */
 	ServletContext getServletContext();
-	
+
 }

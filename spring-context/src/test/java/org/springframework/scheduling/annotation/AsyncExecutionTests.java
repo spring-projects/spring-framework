@@ -248,10 +248,12 @@ public class AsyncExecutionTests {
 
 	public static class AsyncInterfaceBean implements AsyncInterface {
 
+		@Override
 		public void doSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
@@ -273,14 +275,17 @@ public class AsyncExecutionTests {
 
 	public static class AsyncMethodsInterfaceBean implements AsyncMethodsInterface {
 
+		@Override
 		public void doNothing(int i) {
 			assertTrue(Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public void doSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 		}
 
+		@Override
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
 			return new AsyncResult<String>(Integer.toString(i));
@@ -290,6 +295,7 @@ public class AsyncExecutionTests {
 
 	public static class AsyncMethodListener implements ApplicationListener<ApplicationEvent> {
 
+		@Override
 		@Async
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
@@ -305,6 +311,7 @@ public class AsyncExecutionTests {
 			listenerConstructed++;
 		}
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			listenerCalled++;
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));

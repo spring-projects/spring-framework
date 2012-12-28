@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.scripting.support;
 
+import static org.mockito.Mockito.mock;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -75,15 +75,12 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 	}
 
 	public void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() throws Exception {
-		MockControl mock = MockControl.createControl(BeanFactory.class);
-		mock.replay();
 		try {
-			new ScriptFactoryPostProcessor().setBeanFactory((BeanFactory) mock.getMock());
+			new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class));
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalStateException expected) {
 		}
-		mock.verify();
 	}
 
 	public void testChangeScriptWithRefreshableBeanFunctionality() throws Exception {
@@ -216,7 +213,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		ctx.registerBeanDefinition(BEAN_WITH_DEPENDENCY_NAME, scriptedBeanBuilder.getBeanDefinition());
 		ctx.registerBeanDefinition("scriptProcessor", createScriptFactoryPostProcessor(true));
 		ctx.refresh();
-		
+
 		Messenger messenger1 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
 		Messenger messenger2 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
 		assertNotSame(messenger1, messenger2);

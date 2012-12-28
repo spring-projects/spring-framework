@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,17 +29,17 @@ import java.util.Properties;
 
 /**
  * Default implementation of the {@link PropertiesPersister} interface.
- * Follows the native parsing of <code>java.util.Properties</code>.
+ * Follows the native parsing of {@code java.util.Properties}.
  *
  * <p>Allows for reading from any Reader and writing to any Writer, for example
  * to specify a charset for a properties file. This is a capability that standard
- * <code>java.util.Properties</code> unfortunately lacks up until JDK 1.5:
+ * {@code java.util.Properties} unfortunately lacks up until JDK 1.5:
  * You can only load files using the ISO-8859-1 charset there.
  *
- * <p>Loading from and storing to a stream delegates to <code>Properties.load</code>
- * and <code>Properties.store</code>, respectively, to be fully compatible with
+ * <p>Loading from and storing to a stream delegates to {@code Properties.load}
+ * and {@code Properties.store}, respectively, to be fully compatible with
  * the Unicode conversion as implemented by the JDK Properties class. On JDK 1.6,
- * <code>Properties.load/store</code> will also be used for readers/writers,
+ * {@code Properties.load/store} will also be used for readers/writers,
  * effectively turning this class into a plain backwards compatibility adapter.
  *
  * <p>The persistence code that works with Reader/Writer follows the JDK's parsing
@@ -50,7 +50,7 @@ import java.util.Properties;
  * "defaultEncoding" and "fileEncodings" properties).
  *
  * <p>As of Spring 1.2.2, this implementation also supports properties XML files,
- * through the <code>loadFromXml</code> and <code>storeToXml</code> methods.
+ * through the {@code loadFromXml} and {@code storeToXml} methods.
  * The default implementations delegate to JDK 1.5's corresponding methods,
  * throwing an exception if running on an older JDK. Those implementations
  * could be subclassed to apply custom XML handling on JDK 1.4, for example.
@@ -75,10 +75,12 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 			ClassUtils.hasMethod(Properties.class, "store", new Class[] {Writer.class, String.class});
 
 
+	@Override
 	public void load(Properties props, InputStream is) throws IOException {
 		props.load(is);
 	}
 
+	@Override
 	public void load(Properties props, Reader reader) throws IOException {
 		if (loadFromReaderAvailable) {
 			// On JDK 1.6+
@@ -157,10 +159,12 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 
+	@Override
 	public void store(Properties props, OutputStream os, String header) throws IOException {
 		props.store(os, header);
 	}
 
+	@Override
 	public void store(Properties props, Writer writer, String header) throws IOException {
 		if (storeToWriterAvailable) {
 			// On JDK 1.6+
@@ -227,6 +231,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 
+	@Override
 	public void loadFromXml(Properties props, InputStream is) throws IOException {
 		try {
 			props.loadFromXML(is);
@@ -236,6 +241,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 		}
 	}
 
+	@Override
 	public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
 		try {
 			props.storeToXML(os, header);
@@ -245,6 +251,7 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 		}
 	}
 
+	@Override
 	public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
 		try {
 			props.storeToXML(os, header, encoding);

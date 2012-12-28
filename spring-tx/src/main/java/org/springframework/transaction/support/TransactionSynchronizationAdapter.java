@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,28 +32,36 @@ import org.springframework.core.Ordered;
  */
 public abstract class TransactionSynchronizationAdapter implements TransactionSynchronization, Ordered {
 
+	@Override
 	public int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
+	@Override
 	public void suspend() {
 	}
 
+	@Override
 	public void resume() {
 	}
 
+	@Override
 	public void flush() {
 	}
 
+	@Override
 	public void beforeCommit(boolean readOnly) {
 	}
 
+	@Override
 	public void beforeCompletion() {
 	}
 
+	@Override
 	public void afterCommit() {
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 	}
 

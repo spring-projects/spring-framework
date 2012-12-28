@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return this.keyGenerator;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.cacheManager == null) {
 			throw new IllegalStateException("'cacheManager' is required");
@@ -223,7 +224,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 
 		return invoker.invoke();
 	}
-	
+
 	private void inspectBeforeCacheEvicts(Collection<CacheOperationContext> evictions) {
 		inspectCacheEvicts(evictions, true);
 	}
@@ -326,7 +327,7 @@ public abstract class CacheAspectSupport implements InitializingBean {
 					}
 				}
 			}
-			
+
 			// return a status only if at least on cacheable matched
 			if (atLeastOnePassed) {
 				return new CacheStatus(cUpdates, updateRequire, retVal);

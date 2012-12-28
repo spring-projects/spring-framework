@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,12 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 		this.databaseCleaner = databaseCleaner;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		initDatabase();
 	}
 
+	@Override
 	public void destroy() {
 		if (this.databaseCleaner != null) {
 			DatabasePopulatorUtils.execute(this.databaseCleaner, getDataSource());
@@ -66,14 +68,17 @@ public class EmbeddedDatabaseFactoryBean extends EmbeddedDatabaseFactory
 	}
 
 
+	@Override
 	public DataSource getObject() {
 		return getDataSource();
 	}
 
+	@Override
 	public Class<? extends DataSource> getObjectType() {
 		return DataSource.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ public class PropertyComparator implements Comparator {
 	}
 
 
+	@Override
 	public int compare(Object o1, Object o2) {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);
@@ -81,7 +82,7 @@ public class PropertyComparator implements Comparator {
 		}
 
 		int result;
-		
+
 		// Put an object with null property at the end of the sort result.
 		try {
 			if (v1 != null) {

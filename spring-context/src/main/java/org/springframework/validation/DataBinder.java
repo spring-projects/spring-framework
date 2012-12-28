@@ -148,7 +148,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Create a new DataBinder instance, with default object name.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @see #DEFAULT_OBJECT_NAME
 	 */
@@ -158,7 +158,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Create a new DataBinder instance.
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the name of the target object
 	 */
@@ -383,7 +383,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * fields. Restrict this for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>disallowed</i> fields.
 	 * @param allowedFields array of field names
 	 * @see #setDisallowedFields
@@ -407,7 +407,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Mark fields as disallowed for example to avoid unwanted modifications
 	 * by malicious users when binding HTTP request parameters.
 	 * <p>Supports "xxx*", "*xxx" and "*xxx*" patterns. More sophisticated matching
-	 * can be implemented by overriding the <code>isAllowed</code> method.
+	 * can be implemented by overriding the {@code isAllowed} method.
 	 * <p>Alternatively, specify a list of <i>allowed</i> fields.
 	 * @param disallowedFields array of field names
 	 * @see #setAllowedFields
@@ -475,7 +475,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
+	 * required field errors and {@code PropertyAccessException}s.
 	 * <p>Default is a DefaultBindingErrorProcessor.
 	 * @see DefaultBindingErrorProcessor
 	 */
@@ -532,28 +532,34 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return this.conversionService;
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, propertyEditor);
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, String field, PropertyEditor propertyEditor) {
 		getPropertyEditorRegistry().registerCustomEditor(requiredType, field, propertyEditor);
 	}
 
+	@Override
 	public PropertyEditor findCustomEditor(Class<?> requiredType, String propertyPath) {
 		return getPropertyEditorRegistry().findCustomEditor(requiredType, propertyPath);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType) throws TypeMismatchException {
 		return getTypeConverter().convertIfNecessary(value, requiredType);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, MethodParameter methodParam)
 			throws TypeMismatchException {
 
 		return getTypeConverter().convertIfNecessary(value, requiredType, methodParam);
 	}
 
+	@Override
 	public <T> T convertIfNecessary(Object value, Class<T> requiredType, Field field)
 			throws TypeMismatchException {
 

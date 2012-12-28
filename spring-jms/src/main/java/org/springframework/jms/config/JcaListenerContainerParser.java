@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the JMS <code>&lt;jca-listener-container&gt;</code> element.
+ * Parser for the JMS {@code &lt;jca-listener-container&gt;} element.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -37,11 +37,12 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String ACTIVATION_SPEC_FACTORY_ATTRIBUTE = "activation-spec-factory";
 
 
+	@Override
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
 		containerDef.setSource(parserContext.extractSource(containerEle));
 		containerDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsMessageEndpointManager");
-		
+
 		if (containerEle.hasAttribute(RESOURCE_ADAPTER_ATTRIBUTE)) {
 			String resourceAdapterBeanName = containerEle.getAttribute(RESOURCE_ADAPTER_ATTRIBUTE);
 			if (!StringUtils.hasText(resourceAdapterBeanName)) {
@@ -73,7 +74,7 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 		RootBeanDefinition configDef = new RootBeanDefinition();
 		configDef.setSource(parserContext.extractSource(configDef));
 		configDef.setBeanClassName("org.springframework.jms.listener.endpoint.JmsActivationSpecConfig");
-		
+
 		parseListenerConfiguration(listenerEle, parserContext, configDef);
 		parseContainerConfiguration(containerEle, parserContext, configDef);
 

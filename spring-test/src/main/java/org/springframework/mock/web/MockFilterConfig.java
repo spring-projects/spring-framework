@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,12 @@ public class MockFilterConfig implements FilterConfig {
 	}
 
 
+	@Override
 	public String getFilterName() {
 		return filterName;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return servletContext;
 	}
@@ -92,11 +94,13 @@ public class MockFilterConfig implements FilterConfig {
 		this.initParameters.put(name, value);
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Default implementation of the {@link LobHandler} interface. Invokes
- * the direct accessor methods that <code>java.sql.ResultSet</code>
- * and <code>java.sql.PreparedStatement</code> offer.
+ * the direct accessor methods that {@code java.sql.ResultSet}
+ * and {@code java.sql.PreparedStatement} offer.
  *
  * <p>This LobHandler should work for any JDBC driver that is JDBC compliant
  * in terms of the spec's suggestions regarding simple BLOB and CLOB handling.
@@ -42,12 +42,12 @@ import org.apache.commons.logging.LogFactory;
  * As a consequence, use {@link OracleLobHandler} for accessing Oracle BLOBs/CLOBs.
  *
  * <p>Some JDBC drivers require values with a BLOB/CLOB target column to be
- * explicitly set through the JDBC <code>setBlob</code> / <code>setClob</code>
+ * explicitly set through the JDBC {@code setBlob} / {@code setClob}
  * API: for example, PostgreSQL's driver. Switch the {@link #setWrapAsLob "wrapAsLob"}
  * property to "true" when operating against such a driver.
  *
  * <p>On JDBC 4.0, this LobHandler also supports streaming the BLOB/CLOB content
- * via the <code>setBlob</code> / <code>setClob</code> variants that take a stream
+ * via the {@code setBlob} / {@code setClob} variants that take a stream
  * argument directly. Consider switching the {@link #setStreamAsLob "streamAsLob"}
  * property to "true" when operating against a fully compliant JDBC 4.0 driver.
  *
@@ -78,10 +78,10 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Specify whether to submit a byte array / String to the JDBC driver
-	 * wrapped in a JDBC Blob / Clob object, using the JDBC <code>setBlob</code> /
-	 * <code>setClob</code> method with a Blob / Clob argument.
-	 * <p>Default is "false", using the common JDBC 2.0 <code>setBinaryStream</code>
-	 * / <code>setCharacterStream</code> method for setting the content.
+	 * wrapped in a JDBC Blob / Clob object, using the JDBC {@code setBlob} /
+	 * {@code setClob} method with a Blob / Clob argument.
+	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
+	 * / {@code setCharacterStream} method for setting the content.
 	 * Switch this to "true" for explicit Blob / Clob wrapping against
 	 * JDBC drivers that are known to require such wrapping (e.g. PostgreSQL's).
 	 * <p>This setting affects byte array / String arguments as well as stream
@@ -96,10 +96,10 @@ public class DefaultLobHandler extends AbstractLobHandler {
 
 	/**
 	 * Specify whether to submit a binary stream / character stream to the JDBC
-	 * driver as explicit LOB content, using the JDBC 4.0 <code>setBlob</code> /
-	 * <code>setClob</code> method with a stream argument.
-	 * <p>Default is "false", using the common JDBC 2.0 <code>setBinaryStream</code>
-	 * / <code>setCharacterStream</code> method for setting the content.
+	 * driver as explicit LOB content, using the JDBC 4.0 {@code setBlob} /
+	 * {@code setClob} method with a stream argument.
+	 * <p>Default is "false", using the common JDBC 2.0 {@code setBinaryStream}
+	 * / {@code setCharacterStream} method for setting the content.
 	 * Switch this to "true" for explicit JDBC 4.0 usage, provided that your
 	 * JDBC driver actually supports those JDBC 4.0 operations (e.g. Derby's).
 	 * <p>This setting affects stream arguments as well as byte array / String
@@ -113,6 +113,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 
+	@Override
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
 		if (this.wrapAsLob) {
@@ -124,6 +125,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as binary stream");
 		if (this.wrapAsLob) {
@@ -135,6 +137,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as string");
 		if (this.wrapAsLob) {
@@ -146,6 +149,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as ASCII stream");
 		if (this.wrapAsLob) {
@@ -157,6 +161,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as character stream");
 		if (this.wrapAsLob) {
@@ -168,6 +173,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public LobCreator getLobCreator() {
 		return new DefaultLobCreator();
 	}
@@ -179,6 +185,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 */
 	protected class DefaultLobCreator implements LobCreator {
 
+		@Override
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 				throws SQLException {
 
@@ -207,6 +214,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setBlobAsBinaryStream(
 				PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 				throws SQLException {
@@ -236,6 +244,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 				throws SQLException {
 
@@ -264,6 +273,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 				throws SQLException {
@@ -295,6 +305,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 				throws SQLException {
@@ -324,6 +335,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void close() {
 			// nothing to do here
 		}

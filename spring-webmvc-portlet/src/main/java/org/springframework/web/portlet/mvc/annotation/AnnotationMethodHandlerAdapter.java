@@ -174,11 +174,11 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 	/**
-	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
+	 * Cache content produced by {@code @SessionAttributes} annotated handlers
 	 * for the given number of seconds. Default is 0, preventing caching completely.
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
-	 * handlers (but not to <code>@SessionAttributes</code> annotated handlers), this
-	 * setting will apply to <code>@SessionAttributes</code> annotated handlers only.
+	 * handlers (but not to {@code @SessionAttributes} annotated handlers), this
+	 * setting will apply to {@code @SessionAttributes} annotated handlers only.
 	 * @see #setCacheSeconds
 	 * @see org.springframework.web.bind.annotation.SessionAttributes
 	 */
@@ -195,7 +195,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the PortletSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
@@ -256,17 +256,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -275,10 +277,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 
+	@Override
 	public boolean supports(Object handler) {
 		return getMethodResolver(handler).hasHandlerMethods();
 	}
 
+	@Override
 	public void handleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
 		Object returnValue = doHandle(request, response, handler);
 		if (returnValue != null) {
@@ -286,16 +290,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 	}
 
+	@Override
 	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
 		checkAndPrepare(request, response);
 		return doHandle(request, response, handler);
 	}
 
+	@Override
 	public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler) throws Exception {
 		checkAndPrepare(request, response);
 		return doHandle(request, response, handler);
 	}
 
+	@Override
 	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
 		Object returnValue = doHandle(request, response, handler);
 		if (returnValue != null) {
@@ -413,7 +420,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	 * <p>The default implementation creates a standard PortletRequestDataBinder.
 	 * This can be overridden for custom PortletRequestDataBinder subclasses.
 	 * @param request current portlet request
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the objectName of the target object
 	 * @return the PortletRequestDataBinder instance to use

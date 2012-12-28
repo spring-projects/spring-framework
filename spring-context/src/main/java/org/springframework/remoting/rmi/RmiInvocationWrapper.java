@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ class RmiInvocationWrapper implements RmiInvocationHandler {
 	 * Exposes the exporter's service interface, if any, as target interface.
 	 * @see RmiBasedExporter#getServiceInterface()
 	 */
+	@Override
 	public String getTargetInterfaceName() {
 		Class ifc = this.rmiExporter.getServiceInterface();
 		return (ifc != null ? ifc.getName() : null);
@@ -66,8 +67,9 @@ class RmiInvocationWrapper implements RmiInvocationHandler {
 	 * Delegates the actual invocation handling to the RMI exporter.
 	 * @see RmiBasedExporter#invoke(org.springframework.remoting.support.RemoteInvocation, Object)
 	 */
+	@Override
 	public Object invoke(RemoteInvocation invocation)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		return this.rmiExporter.invoke(invocation, this.wrappedObject);
 	}

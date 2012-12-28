@@ -79,12 +79,13 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Set the view's name. Helpful for traceability.
 	 * <p>Framework code must call this when constructing views.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 	/**
-	 * Return the view's name. Should never be <code>null</code>,
+	 * Return the view's name. Should never be {@code null},
 	 * if the view was correctly configured.
 	 */
 	public String getBeanName() {
@@ -104,6 +105,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return the content type for this view.
 	 */
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
@@ -157,7 +159,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 
 	/**
 	 * Set static attributes for this view from a
-	 * <code>java.util.Properties</code> object.
+	 * {@code java.util.Properties} object.
 	 * <p>"Static" attributes are fixed attributes that are specified in
 	 * the View instance configuration. "Dynamic" attributes, on the other hand,
 	 * are values passed in as part of the model.
@@ -205,7 +207,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>"Static" attributes are fixed attributes that are specified in
 	 * the View instance configuration. "Dynamic" attributes, on the other hand,
 	 * are values passed in as part of the model.
-	 * <p>Must be invoked before any calls to <code>render</code>.
+	 * <p>Must be invoked before any calls to {@code render}.
 	 * @param name the name of the attribute to expose
 	 * @param value the attribute value to expose
 	 * @see #render
@@ -252,6 +254,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * Delegates to renderMergedOutputModel for the actual rendering.
 	 * @see #renderMergedOutputModel
 	 */
+	@Override
 	public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Rendering view with name '" + this.beanName + "' with model " + model +
@@ -265,7 +268,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	}
 
 	/**
-	 * Creates a combined output Map (never <code>null</code>) that includes dynamic values and static attributes.
+	 * Creates a combined output Map (never {@code null}) that includes dynamic values and static attributes.
 	 * Dynamic values take precedence over static attributes.
 	 */
 	protected Map<String, Object> createMergedOutputModel(Map<String, ?> model, HttpServletRequest request,
@@ -300,7 +303,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * <p>Default implementation creates a standard RequestContext instance for the
 	 * given request and model. Can be overridden in subclasses for custom instances.
 	 * @param request current HTTP request
-	 * @param model combined output Map (never <code>null</code>),
+	 * @param model combined output Map (never {@code null}),
 	 * with dynamic values taking precedence over static attributes
 	 * @return the RequestContext instance
 	 * @see #setRequestContextAttribute
@@ -329,8 +332,8 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	/**
 	 * Return whether this view generates download content
 	 * (typically binary content like PDF or Excel files).
-	 * <p>The default implementation returns <code>false</code>. Subclasses are
-	 * encouraged to return <code>true</code> here if they know that they are
+	 * <p>The default implementation returns {@code false}. Subclasses are
+	 * encouraged to return {@code true} here if they know that they are
 	 * generating download content that requires temporary caching on the
 	 * client side, typically via the response OutputStream.
 	 * @see #prepareResponse
@@ -346,7 +349,7 @@ public abstract class AbstractView extends WebApplicationObjectSupport implement
 	 * this would mean setting model objects as request attributes.
 	 * The second step will be the actual rendering of the view,
 	 * for example including the JSP via a RequestDispatcher.
-	 * @param model combined output Map (never <code>null</code>),
+	 * @param model combined output Map (never {@code null}),
 	 * with dynamic values taking precedence over static attributes
 	 * @param request current HTTP request
 	 * @param response current HTTP response

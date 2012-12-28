@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 
 	/**
 	 * Specify the unknown properties (not found in the bean) that should be ignored.
-	 * <p>Default is <code>null</code>, indicating that all unknown properties
+	 * <p>Default is {@code null}, indicating that all unknown properties
 	 * should be ignored. Specify an empty array to throw an exception in case
 	 * of any unknown properties, or a list of property names that should be
 	 * ignored if there is no corresponding property found on the particular
@@ -63,6 +63,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 		this.ignoredUnknownProperties = ignoredUnknownProperties;
 	}
 
+	@Override
 	public void setSchedulerContext(SchedulerContext schedulerContext) {
 		this.schedulerContext = schedulerContext;
 	}

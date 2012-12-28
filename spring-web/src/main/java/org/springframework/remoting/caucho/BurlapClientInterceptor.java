@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,6 +137,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (this.burlapProxy == null) {
 			throw new IllegalStateException("BurlapClientInterceptor is not properly initialized - " +
@@ -183,7 +184,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		}
 		else {
 			return new RemoteAccessException(
-			    "Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
+				"Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

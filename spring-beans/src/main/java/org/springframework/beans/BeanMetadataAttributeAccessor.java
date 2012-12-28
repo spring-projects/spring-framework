@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,21 @@ import org.springframework.core.AttributeAccessorSupport;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport implements BeanMetadataElement {
 
 	private Object source;
 
 
 	/**
-	 * Set the configuration source <code>Object</code> for this metadata element.
+	 * Set the configuration source {@code Object} for this metadata element.
 	 * <p>The exact type of the object will depend on the configuration mechanism used.
 	 */
 	public void setSource(Object source) {
 		this.source = source;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -56,7 +58,7 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 	 * Look up the given BeanMetadataAttribute in this accessor's set of attributes.
 	 * @param name the name of the attribute
 	 * @return the corresponding BeanMetadataAttribute object,
-	 * or <code>null</code> if no such attribute defined
+	 * or {@code null} if no such attribute defined
 	 */
 	public BeanMetadataAttribute getMetadataAttribute(String name) {
 		return (BeanMetadataAttribute) super.getAttribute(name);

@@ -94,6 +94,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void doubles() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -266,6 +267,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -281,6 +283,7 @@ public class UriTemplateServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void noDefaultSuffixPattern() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -378,6 +381,7 @@ public class UriTemplateServletAnnotationControllerTests {
 
 	// SPR-6906
 	@Test
+	@SuppressWarnings("serial")
 	public void controllerClassName() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override

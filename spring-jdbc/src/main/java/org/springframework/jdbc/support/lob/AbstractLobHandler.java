@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,27 @@ import java.sql.SQLException;
  */
 public abstract class AbstractLobHandler implements LobHandler {
 
+	@Override
 	public byte[] getBlobAsBytes(ResultSet rs, String columnName) throws SQLException {
 		return getBlobAsBytes(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public InputStream getBlobAsBinaryStream(ResultSet rs, String columnName) throws SQLException {
 		return getBlobAsBinaryStream(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public String getClobAsString(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsString(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public InputStream getClobAsAsciiStream(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsAsciiStream(rs, rs.findColumn(columnName));
 	}
 
+	@Override
 	public Reader getClobAsCharacterStream(ResultSet rs, String columnName) throws SQLException {
 		return getClobAsCharacterStream(rs, rs.findColumn(columnName));
 	}

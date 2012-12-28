@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AttributeAccessorSupport implements AttributeAccessor, Serializable {
 
 	/** Map with String keys and Object values */
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>(0);
 
 
+	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Name must not be null");
 		if (value != null) {
@@ -48,21 +50,25 @@ public abstract class AttributeAccessorSupport implements AttributeAccessor, Ser
 		}
 	}
 
+	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.get(name);
 	}
 
+	@Override
 	public Object removeAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.remove(name);
 	}
 
+	@Override
 	public boolean hasAttribute(String name) {
 		Assert.notNull(name, "Name must not be null");
 		return this.attributes.containsKey(name);
 	}
 
+	@Override
 	public String[] attributeNames() {
 		return this.attributes.keySet().toArray(new String[this.attributes.size()]);
 	}

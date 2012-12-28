@@ -238,6 +238,7 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		this.transactionManager = transactionManager;
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
@@ -333,8 +334,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Add the given job to the Scheduler, if it doesn't already exist.
 	 * Overwrites the job in any case if "overwriteExistingJobs" is set.
 	 * @param jobDetail the job to add
-	 * @return <code>true</code> if the job was actually added,
-	 * <code>false</code> if it already existed before
+	 * @return {@code true} if the job was actually added,
+	 * {@code false} if it already existed before
 	 * @see #setOverwriteExistingJobs
 	 */
 	private boolean addJobToScheduler(JobDetail jobDetail) throws SchedulerException {
@@ -351,8 +352,8 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 	 * Add the given trigger to the Scheduler, if it doesn't already exist.
 	 * Overwrites the trigger in any case if "overwriteExistingJobs" is set.
 	 * @param trigger the trigger to add
-	 * @return <code>true</code> if the trigger was actually added,
-	 * <code>false</code> if it already existed before
+	 * @return {@code true} if the trigger was actually added,
+	 * {@code false} if it already existed before
 	 * @see #setOverwriteExistingJobs
 	 */
 	private boolean addTriggerToScheduler(Trigger trigger) throws SchedulerException {

@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import junit.framework.TestCase;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.ConfigurableWebApplicationContext;

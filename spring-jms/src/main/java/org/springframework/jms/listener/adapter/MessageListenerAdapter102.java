@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ public class MessageListenerAdapter102 extends MessageListenerAdapter {
 	 * @see #setMessageConverter
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter102
 	 */
+	@Override
 	protected void initDefaultStrategies() {
 		setMessageConverter(new SimpleMessageConverter102());
 	}
@@ -78,6 +79,7 @@ public class MessageListenerAdapter102 extends MessageListenerAdapter {
 	 * <p>Uses the JMS pub-sub API if the given destination is a topic,
 	 * else uses the JMS queue API.
 	 */
+	@Override
 	protected void sendResponse(Session session, Destination destination, Message response) throws JMSException {
 		MessageProducer producer = null;
 		try {

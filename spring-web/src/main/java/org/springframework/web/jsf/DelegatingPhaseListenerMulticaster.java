@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.web.context.WebApplicationContext;
  * JSF PhaseListener implementation that delegates to one or more Spring-managed
  * PhaseListener beans coming from the Spring root WebApplicationContext.
  *
- * <p>Configure this listener multicaster in your <code>faces-config.xml</code> file
+ * <p>Configure this listener multicaster in your {@code faces-config.xml} file
  * as follows:
  *
  * <pre class="code">
@@ -42,13 +42,13 @@ import org.springframework.web.context.WebApplicationContext;
  *   ...
  * &lt;/application&gt;</pre>
  *
- * The multicaster will delegate all <code>beforePhase</code> and <code>afterPhase</code>
+ * The multicaster will delegate all {@code beforePhase} and {@code afterPhase}
  * events to all target PhaseListener beans. By default, those will simply be obtained
  * by type: All beans in the Spring root WebApplicationContext that implement the
  * PhaseListener interface will be fetched and invoked.
  *
- * <p>Note: This multicaster's <code>getPhaseId()</code> method will always return
- * <code>ANY_PHASE</code>. <b>The phase id exposed by the target listener beans
+ * <p>Note: This multicaster's {@code getPhaseId()} method will always return
+ * {@code ANY_PHASE}. <b>The phase id exposed by the target listener beans
  * will be ignored; all events will be propagated to all listeners.</b>
  *
  * <p>This multicaster may be subclassed to change the strategy used to obtain
@@ -59,18 +59,22 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Colin Sampaleanu
  * @since 1.2.7
  */
+@SuppressWarnings("serial")
 public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 
+	@Override
 	public PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
 	}
 
+	@Override
 	public void beforePhase(PhaseEvent event) {
 		for (PhaseListener listener : getDelegates(event.getFacesContext())) {
 			listener.beforePhase(event);
 		}
 	}
 
+	@Override
 	public void afterPhase(PhaseEvent event) {
 		for (PhaseListener listener : getDelegates(event.getFacesContext())) {
 			listener.afterPhase(event);
@@ -92,11 +96,11 @@ public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 
 	/**
 	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
-	 * <p>The default implementation delegates to <code>getWebApplicationContext</code>.
+	 * <p>The default implementation delegates to {@code getWebApplicationContext}.
 	 * Can be overridden to provide an arbitrary ListableBeanFactory reference to
 	 * resolve against; usually, this will be a full Spring ApplicationContext.
 	 * @param facesContext the current JSF context
-	 * @return the Spring ListableBeanFactory (never <code>null</code>)
+	 * @return the Spring ListableBeanFactory (never {@code null})
 	 * @see #getWebApplicationContext
 	 */
 	protected ListableBeanFactory getBeanFactory(FacesContext facesContext) {
@@ -107,7 +111,7 @@ public class DelegatingPhaseListenerMulticaster implements PhaseListener {
 	 * Retrieve the web application context to delegate bean name resolution to.
 	 * <p>The default implementation delegates to FacesContextUtils.
 	 * @param facesContext the current JSF context
-	 * @return the Spring web application context (never <code>null</code>)
+	 * @return the Spring web application context (never {@code null})
 	 * @see FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {

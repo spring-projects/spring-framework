@@ -35,7 +35,7 @@ import org.springframework.context.ApplicationContextAware;
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.JobDetail}
  * instance, supporting bean-style usage for JobDetail configuration.
  *
- * <p><code>JobDetail(Impl)</code> itself is already a JavaBean but lacks
+ * <p>{@code JobDetail(Impl)} itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
@@ -139,10 +139,12 @@ public class JobDetailFactoryBean
 		this.description = description;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -168,6 +170,7 @@ public class JobDetailFactoryBean
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -215,14 +218,17 @@ public class JobDetailFactoryBean
 	}
 
 
+	@Override
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return JobDetail.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

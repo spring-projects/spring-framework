@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public interface MethodResolver {
 	/**
 	 * Within the supplied context determine a suitable method on the supplied object that can handle the
 	 * specified arguments. Return a MethodExecutor that can be used to invoke that method
-	 * (or <code>null</code> if no method could be found).
+	 * (or {@code null} if no method could be found).
 	 * @param context the current evaluation context
 	 * @param targetObject the object upon which the method is being called
 	 * @param argumentTypes the arguments that the constructor must be able to handle

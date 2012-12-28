@@ -53,19 +53,19 @@ public class InitBinderDataBinderFactoryTests {
 	private HandlerMethodArgumentResolverComposite argumentResolvers;
 
 	private NativeWebRequest webRequest;
-	
+
 	@Before
 	public void setUp() throws Exception {
 		bindingInitializer = new ConfigurableWebBindingInitializer();
 		argumentResolvers = new HandlerMethodArgumentResolverComposite();
 		webRequest = new ServletWebRequest(new MockHttpServletRequest());
 	}
-	
+
 	@Test
 	public void createBinder() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
-		
+
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
 	}
@@ -74,10 +74,10 @@ public class InitBinderDataBinderFactoryTests {
 	public void createBinderWithGlobalInitialization() throws Exception {
 		ConversionService conversionService = new DefaultFormattingConversionService();
 		bindingInitializer.setConversionService(conversionService);
-		
+
 		WebDataBinderFactory factory = createBinderFactory("initBinder", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
-		
+
 		assertSame(conversionService, dataBinder.getConversionService());
 	}
 
@@ -85,7 +85,7 @@ public class InitBinderDataBinderFactoryTests {
 	public void createBinderWithAttrName() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, "foo");
-		
+
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("id", dataBinder.getDisallowedFields()[0]);
 	}
@@ -94,18 +94,18 @@ public class InitBinderDataBinderFactoryTests {
 	public void createBinderWithAttrNameNoMatch() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, "invalidName");
-		
+
 		assertNull(dataBinder.getDisallowedFields());
 	}
-	
+
 	@Test
 	public void createBinderNullAttrName() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderWithAttributeName", WebDataBinder.class);
 		WebDataBinder dataBinder = factory.createBinder(webRequest, null, null);
-		
+
 		assertNull(dataBinder.getDisallowedFields());
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void returnValueNotExpected() throws Exception {
 		WebDataBinderFactory factory = createBinderFactory("initBinderReturnValue", WebDataBinder.class);
@@ -123,7 +123,7 @@ public class InitBinderDataBinderFactoryTests {
 		assertNotNull(dataBinder.getDisallowedFields());
 		assertEquals("requestParam-22", dataBinder.getDisallowedFields()[0]);
 	}
-	
+
 	private WebDataBinderFactory createBinderFactory(String methodName, Class<?>... parameterTypes)
 			throws Exception {
 
@@ -134,9 +134,9 @@ public class InitBinderDataBinderFactoryTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(argumentResolvers);
 		handlerMethod.setDataBinderFactory(new DefaultDataBinderFactory(null));
 		handlerMethod.setParameterNameDiscoverer(new LocalVariableTableParameterNameDiscoverer());
-		
+
 		return new InitBinderDataBinderFactory(Arrays.asList(handlerMethod), bindingInitializer);
-	}	
+	}
 
 	private static class InitBinderHandler {
 
@@ -145,24 +145,24 @@ public class InitBinderDataBinderFactoryTests {
 		public void initBinder(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
-		
+
 		@SuppressWarnings("unused")
 		@InitBinder(value="foo")
 		public void initBinderWithAttributeName(WebDataBinder dataBinder) {
 			dataBinder.setDisallowedFields("id");
 		}
-		
+
 		@SuppressWarnings("unused")
 		@InitBinder
 		public String initBinderReturnValue(WebDataBinder dataBinder) {
 			return "invalid";
 		}
-		
+
 		@SuppressWarnings("unused")
 		@InitBinder
 		public void initBinderTypeConversion(WebDataBinder dataBinder, @RequestParam int requestParam) {
 			dataBinder.setDisallowedFields("requestParam-" + requestParam);
 		}
 	}
-	
+
 }

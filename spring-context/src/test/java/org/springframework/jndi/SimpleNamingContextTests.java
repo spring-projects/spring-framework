@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,38 +219,47 @@ public class SimpleNamingContextTests {
 
 class StubDataSource implements DataSource {
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		return null;
 	}
 
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return null;
 	}
 
+	@Override
 	public int getLoginTimeout() throws SQLException {
 		return 0;
 	}
 
+	@Override
 	public void setLogWriter(PrintWriter arg0) throws SQLException {
 
 	}
 
+	@Override
 	public void setLoginTimeout(int arg0) throws SQLException {
 
 	}
 
+	@Override
 	public boolean isWrapperFor(Class<?> arg0) throws SQLException {
 		return false;
 	}
 
+	@Override
 	public <T> T unwrap(Class<T> arg0) throws SQLException {
 		return null;
 	}
 
+	@Override
 	public Logger getParentLogger() {
 		return null;
 	}

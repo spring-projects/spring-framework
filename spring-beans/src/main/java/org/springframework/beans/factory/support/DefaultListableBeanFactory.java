@@ -94,6 +94,7 @@ import org.springframework.util.StringUtils;
  * @see PropertiesBeanDefinitionReader
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
+@SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
@@ -214,6 +215,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (System.getSecurityManager() != null) {
 				final BeanFactory target = this;
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						((BeanFactoryAware) autowireCandidateResolver).setBeanFactory(target);
 						return null;
@@ -228,7 +230,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Return the autowire candidate resolver for this BeanFactory (never <code>null</code>).
+	 * Return the autowire candidate resolver for this BeanFactory (never {@code null}).
 	 */
 	public AutowireCandidateResolver getAutowireCandidateResolver() {
 		return this.autowireCandidateResolver;
@@ -252,6 +254,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		Assert.notNull(requiredType, "Required type must not be null");
 		String[] beanNames = getBeanNamesForType(requiredType);
@@ -284,10 +287,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return this.beanDefinitionMap.containsKey(beanName);
 	}
 
+	@Override
 	public int getBeanDefinitionCount() {
 		return this.beanDefinitionMap.size();
 	}
 
+	@Override
 	public String[] getBeanDefinitionNames() {
 		synchronized (this.beanDefinitionMap) {
 			if (this.frozenBeanDefinitionNames != null) {
@@ -299,10 +304,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	@Override
 	public String[] getBeanNamesForType(Class<?> type) {
 		return getBeanNamesForType(type, true, true);
 	}
 
+	@Override
 	public String[] getBeanNamesForType(Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 		if (!isConfigurationFrozen()  || type == null || !allowEagerInit) {
 			return doGetBeanNamesForType(type, includeNonSingletons, allowEagerInit);
@@ -406,10 +413,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (factoryBeanName != null && isFactoryBean(factoryBeanName) && !containsSingleton(factoryBeanName));
 	}
 
+	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return getBeansOfType(type, true, true);
 	}
 
+	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
 			throws BeansException {
 
@@ -440,6 +449,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return result;
 	}
 
+	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		Set<String> beanNames = new LinkedHashSet<String>(getBeanDefinitionCount());
 		beanNames.addAll(Arrays.asList(getBeanDefinitionNames()));
@@ -454,11 +464,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
-	 * Find a {@link Annotation} of <code>annotationType</code> on the specified
+	 * Find a {@link Annotation} of {@code annotationType} on the specified
 	 * bean, traversing its interfaces and super classes if no annotation can be
 	 * found on the given class itself, as well as checking its raw bean class
 	 * if not found on the exposed bean reference (e.g. in case of a proxy).
 	 */
+	@Override
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
 		A ann = null;
 		Class<?> beanType = getType(beanName);
@@ -482,6 +493,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of ConfigurableListableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void registerResolvableDependency(Class<?> dependencyType, Object autowiredValue) {
 		Assert.notNull(dependencyType, "Type must not be null");
 		if (autowiredValue != null) {
@@ -491,6 +503,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	@Override
 	public boolean isAutowireCandidate(String beanName, DependencyDescriptor descriptor)
 			throws NoSuchBeanDefinitionException {
 
@@ -551,6 +564,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return bd;
 	}
 
+	@Override
 	public void freezeConfiguration() {
 		this.configurationFrozen = true;
 		synchronized (this.beanDefinitionMap) {
@@ -558,6 +572,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 	}
 
+	@Override
 	public boolean isConfigurationFrozen() {
 		return this.configurationFrozen;
 	}
@@ -572,6 +587,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		return (this.configurationFrozen || super.isBeanEligibleForMetadataCaching(beanName));
 	}
 
+	@Override
 	public void preInstantiateSingletons() throws BeansException {
 		if (this.logger.isInfoEnabled()) {
 			this.logger.info("Pre-instantiating singletons in " + this);
@@ -590,6 +606,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					boolean isEagerInit;
 					if (System.getSecurityManager() != null && factory instanceof SmartFactoryBean) {
 						isEagerInit = AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+							@Override
 							public Boolean run() {
 								return ((SmartFactoryBean<?>) factory).isEagerInit();
 							}
@@ -615,6 +632,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
@@ -656,6 +674,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		resetBeanDefinition(beanName);
 	}
 
+	@Override
 	public void removeBeanDefinition(String beanName) throws NoSuchBeanDefinitionException {
 		Assert.hasText(beanName, "'beanName' must not be empty");
 
@@ -716,6 +735,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Dependency resolution functionality
 	//---------------------------------------------------------------------
 
+	@Override
 	public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 			Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException  {
 
@@ -744,7 +764,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			TypeConverter converter = (typeConverter != null ? typeConverter : getTypeConverter());
 			return (descriptor.getField() != null ?
 					converter.convertIfNecessary(value, type, descriptor.getField()) :
-			        converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
+					converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 		}
 
 		if (type.isArray()) {
@@ -847,7 +867,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * (may be an array component type or collection element type)
 	 * @param descriptor the descriptor of the dependency to resolve
 	 * @return a Map of candidate names and candidate instances that match
-	 * the required type (never <code>null</code>)
+	 * the required type (never {@code null})
 	 * @throws BeansException in case of errors
 	 * @see #autowireByType
 	 * @see #autowireConstructor
@@ -881,7 +901,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * @param candidateBeans a Map of candidate names and candidate instances
 	 * that match the required type, as returned by {@link #findAutowireCandidates}
 	 * @param descriptor the target dependency to match against
-	 * @return the name of the primary candidate, or <code>null</code> if none found
+	 * @return the name of the primary candidate, or {@code null} if none found
 	 */
 	protected String determinePrimaryCandidate(Map<String, Object> candidateBeans, DependencyDescriptor descriptor) {
 		String primaryBeanName = null;
@@ -992,7 +1012,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * Minimal id reference to the factory.
 	 * Resolved to the actual factory instance on deserialization.
 	 */
-	@SuppressWarnings("serial")
 	private static class SerializedBeanFactoryReference implements Serializable {
 
 		private final String id;
@@ -1020,7 +1039,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	@SuppressWarnings("serial")
 	private class DependencyObjectFactory implements ObjectFactory<Object>, Serializable {
 
 		private final DependencyDescriptor descriptor;
@@ -1033,6 +1051,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			this.beanName = beanName;
 		}
 
+		@Override
 		public Object getObject() throws BeansException {
 			return doResolveDependency(this.descriptor, this.descriptor.getDependencyType(), this.beanName, null, null);
 		}
@@ -1042,13 +1061,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	@SuppressWarnings("serial")
 	private class DependencyProvider extends DependencyObjectFactory implements Provider<Object> {
 
 		public DependencyProvider(DependencyDescriptor descriptor, String beanName) {
 			super(descriptor, beanName);
 		}
 
+		@Override
 		public Object get() throws BeansException {
 			return getObject();
 		}
@@ -1056,7 +1075,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Separate inner class for avoiding a hard dependency on the <code>javax.inject</code> API.
+	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
 	 */
 	private class DependencyProviderFactory {
 

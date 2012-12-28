@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	/**
 	 * Set the interface that the proxy must implement.
 	 * @param serviceInterface the interface that the proxy must implement
-	 * @throws IllegalArgumentException if the supplied <code>serviceInterface</code>
-	 * is <code>null</code>, or if the supplied <code>serviceInterface</code>
+	 * @throws IllegalArgumentException if the supplied {@code serviceInterface}
+	 * is {@code null}, or if the supplied {@code serviceInterface}
 	 * is not an interface type
 	 */
 	public void setServiceInterface(Class serviceInterface) {
@@ -64,10 +64,12 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 		this.serviceInterface = serviceInterface;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.serviceInterface == null) {
@@ -77,14 +79,17 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.serviceProxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.serviceInterface;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

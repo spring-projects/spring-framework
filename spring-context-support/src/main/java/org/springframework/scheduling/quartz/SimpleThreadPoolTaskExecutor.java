@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,13 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		this.waitForJobsToCompleteOnShutdown = waitForJobsToCompleteOnShutdown;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws SchedulerConfigException {
 		initialize();
 	}
 
 
+	@Override
 	public void execute(Runnable task) {
 		Assert.notNull(task, "Runnable must not be null");
 		if (!runInThread(task)) {
@@ -71,16 +73,19 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -90,11 +95,13 @@ public class SimpleThreadPoolTaskExecutor extends SimpleThreadPool
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
 
 
+	@Override
 	public void destroy() {
 		shutdown(this.waitForJobsToCompleteOnShutdown);
 	}

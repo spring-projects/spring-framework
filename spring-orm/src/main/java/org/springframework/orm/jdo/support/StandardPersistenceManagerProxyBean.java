@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,14 +57,17 @@ public class StandardPersistenceManagerProxyBean implements FactoryBean<Persiste
 	}
 
 
+	@Override
 	public PersistenceManager getObject() {
 		return this.proxy;
 	}
 
+	@Override
 	public Class<? extends PersistenceManager> getObjectType() {
 		return (this.proxy != null ? this.proxy.getClass() : PersistenceManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

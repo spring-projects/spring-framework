@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Comparator;
  * @author Keith Donald
  * @since 1.2.2
  */
+@SuppressWarnings("serial")
 public final class BooleanComparator implements Comparator<Boolean>, Serializable {
 
 	/**
@@ -47,8 +48,8 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	 * Create a BooleanComparator that sorts boolean values based on
 	 * the provided flag.
 	 * <p>Alternatively, you can use the default shared instances:
-	 * <code>BooleanComparator.TRUE_LOW</code> and
-	 * <code>BooleanComparator.TRUE_HIGH</code>.
+	 * {@code BooleanComparator.TRUE_LOW} and
+	 * {@code BooleanComparator.TRUE_HIGH}.
 	 * @param trueLow whether to treat true as lower or higher than false
 	 * @see #TRUE_LOW
 	 * @see #TRUE_HIGH
@@ -58,6 +59,7 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	}
 
 
+	@Override
 	public int compare(Boolean v1, Boolean v2) {
 		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
 	}

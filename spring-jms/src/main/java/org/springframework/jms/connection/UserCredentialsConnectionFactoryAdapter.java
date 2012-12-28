@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * An adapter for a target JMS {@link javax.jms.ConnectionFactory}, applying the
- * given user credentials to every standard <code>createConnection()</code> call,
- * that is, implicitly invoking <code>createConnection(username, password)</code>
+ * given user credentials to every standard {@code createConnection()} call,
+ * that is, implicitly invoking {@code createConnection(username, password)}
  * on the target. All other methods simply delegate to the corresponding methods
  * of the target ConnectionFactory.
  *
  * <p>Can be used to proxy a target JNDI ConnectionFactory that does not have user
  * credentials configured. Client code can work with the ConnectionFactory without
- * passing in username and password on every <code>createConnection()</code> call.
+ * passing in username and password on every {@code createConnection()} call.
  *
  * <p>In the following example, client code can simply transparently work
  * with the preconfigured "myConnectionFactory", implicitly accessing
@@ -56,7 +56,7 @@ import org.springframework.util.StringUtils;
  * &lt;/bean></pre>
  *
  * <p>If the "username" is empty, this proxy will simply delegate to the standard
- * <code>createConnection()</code> method of the target ConnectionFactory.
+ * {@code createConnection()} method of the target ConnectionFactory.
  * This can be used to keep a UserCredentialsConnectionFactoryAdapter bean
  * definition just for the <i>option</i> of implicitly passing in user credentials
  * if the particular target ConnectionFactory requires it.
@@ -104,6 +104,7 @@ public class UserCredentialsConnectionFactoryAdapter
 		this.password = password;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.targetConnectionFactory == null) {
 			throw new IllegalArgumentException("Property 'targetConnectionFactory' is required");
@@ -114,7 +115,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Set user credententials for this proxy and the current thread.
 	 * The given username and password will be applied to all subsequent
-	 * <code>createConnection()</code> calls on this ConnectionFactory proxy.
+	 * {@code createConnection()} calls on this ConnectionFactory proxy.
 	 * <p>This will override any statically specified user credentials,
 	 * that is, values of the "username" and "password" bean properties.
 	 * @param username the username to apply
@@ -141,6 +142,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateConnection
 	 */
+	@Override
 	public final Connection createConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -154,15 +156,16 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target ConnectionFactory.
 	 */
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		return doCreateConnection(username, password);
 	}
 
 	/**
-	 * This implementation delegates to the <code>createConnection(username, password)</code>
+	 * This implementation delegates to the {@code createConnection(username, password)}
 	 * method of the target ConnectionFactory, passing in the specified user credentials.
 	 * If the specified username is empty, it will simply delegate to the standard
-	 * <code>createConnection()</code> method of the target ConnectionFactory.
+	 * {@code createConnection()} method of the target ConnectionFactory.
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the Connection
@@ -186,6 +189,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateQueueConnection
 	 */
+	@Override
 	public final QueueConnection createQueueConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -199,15 +203,16 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target QueueConnectionFactory.
 	 */
+	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		return doCreateQueueConnection(username, password);
 	}
 
 	/**
-	 * This implementation delegates to the <code>createQueueConnection(username, password)</code>
+	 * This implementation delegates to the {@code createQueueConnection(username, password)}
 	 * method of the target QueueConnectionFactory, passing in the specified user credentials.
 	 * If the specified username is empty, it will simply delegate to the standard
-	 * <code>createQueueConnection()</code> method of the target ConnectionFactory.
+	 * {@code createQueueConnection()} method of the target ConnectionFactory.
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the Connection
@@ -235,6 +240,7 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateTopicConnection
 	 */
+	@Override
 	public final TopicConnection createTopicConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -248,15 +254,16 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target TopicConnectionFactory.
 	 */
+	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		return doCreateTopicConnection(username, password);
 	}
 
 	/**
-	 * This implementation delegates to the <code>createTopicConnection(username, password)</code>
+	 * This implementation delegates to the {@code createTopicConnection(username, password)}
 	 * method of the target TopicConnectionFactory, passing in the specified user credentials.
 	 * If the specified username is empty, it will simply delegate to the standard
-	 * <code>createTopicConnection()</code> method of the target ConnectionFactory.
+	 * {@code createTopicConnection()} method of the target ConnectionFactory.
 	 * @param username the username to use
 	 * @param password the password to use
 	 * @return the Connection

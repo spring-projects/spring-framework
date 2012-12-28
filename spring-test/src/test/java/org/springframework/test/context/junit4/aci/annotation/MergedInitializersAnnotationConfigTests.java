@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.aci.DevProfileInitializer;
 @ContextConfiguration(initializers = DevProfileInitializer.class)
 public class MergedInitializersAnnotationConfigTests extends SingleInitializerAnnotationConfigTests {
 
+	@Override
 	@Test
 	public void activeBeans() {
 		assertEquals("foo", foo);

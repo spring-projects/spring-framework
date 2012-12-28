@@ -86,7 +86,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * in the target DataSource map - simply falling back to the default DataSource
 	 * in that case.
 	 * <p>Switch this flag to "false" if you would prefer the fallback to only apply
-	 * if the lookup key was <code>null</code>. Lookup keys without a DataSource
+	 * if the lookup key was {@code null}. Lookup keys without a DataSource
 	 * entry will then lead to an IllegalStateException.
 	 * @see #setTargetDataSources
 	 * @see #setDefaultTargetDataSource
@@ -107,6 +107,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
@@ -141,7 +142,7 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	 * names (to be resolved via a {@link #setDataSourceLookup DataSourceLookup}).
 	 * @param dataSource the data source value object as specified in the
 	 * {@link #setTargetDataSources targetDataSources} map
-	 * @return the resolved DataSource (never <code>null</code>)
+	 * @return the resolved DataSource (never {@code null})
 	 * @throws IllegalArgumentException in case of an unsupported value type
 	 */
 	protected DataSource resolveSpecifiedDataSource(Object dataSource) throws IllegalArgumentException {
@@ -158,10 +159,12 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	}
 
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		return determineTargetDataSource().getConnection();
 	}
 
+	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return determineTargetDataSource().getConnection(username, password);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @since 1.1.2
  * @see AbstractGenericPointcutAdvisor
  */
+@SuppressWarnings("serial")
 public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
 	private Integer order;
@@ -43,6 +44,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		if (this.order != null) {
 			return this.order;
@@ -54,6 +56,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}

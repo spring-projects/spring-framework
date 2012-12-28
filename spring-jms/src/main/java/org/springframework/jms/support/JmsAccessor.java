@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * Set the transaction mode that is used when creating a JMS {@link Session}.
 	 * Default is "false".
 	 * <p>Note that within a JTA transaction, the parameters passed to
-	 * <code>create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)</code>
+	 * {@code create(Queue/Topic)Session(boolean transacted, int acknowledgeMode)}
 	 * method are not taken into account. Depending on the J2EE transaction context,
 	 * the container makes its own decisions on these values. Analogously, these
 	 * parameters are not taken into account within a locally managed transaction
@@ -147,6 +147,7 @@ public abstract class JmsAccessor implements InitializingBean {
 		return this.sessionAcknowledgeMode;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
@@ -159,10 +160,10 @@ public abstract class JmsAccessor implements InitializingBean {
 	 * a Spring runtime {@link org.springframework.jms.JmsException JmsException}
 	 * equivalent.
 	 * <p>The default implementation delegates to the
-	 * {@link org.springframework.jms.support.JmsUtils#convertJmsAccessException} method.
+	 * {@link JmsUtils#convertJmsAccessException} method.
 	 * @param ex the original checked {@link JMSException} to convert
-	 * @return the Spring runtime {@link JmsException} wrapping <code>ex</code>
-	 * @see org.springframework.jms.support.JmsUtils#convertJmsAccessException
+	 * @return the Spring runtime {@link JmsException} wrapping {@code ex}
+	 * @see JmsUtils#convertJmsAccessException
 	 */
 	protected JmsException convertJmsAccessException(JMSException ex) {
 		return JmsUtils.convertJmsAccessException(ex);

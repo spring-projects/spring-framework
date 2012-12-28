@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
 import org.springframework.util.Assert;
 
 /**
- * SAX <code>ContentHandler</code> that transforms callback calls to DOM <code>Node</code>s.
+ * SAX {@code ContentHandler} that transforms callback calls to DOM {@code Node}s.
  *
  * @author Arjen Poutsma
  * @see org.w3c.dom.Node
@@ -47,7 +47,7 @@ class DomContentHandler implements ContentHandler {
 	private final Node node;
 
 	/**
-	 * Creates a new instance of the <code>DomContentHandler</code> with the given node.
+	 * Creates a new instance of the {@code DomContentHandler} with the given node.
 	 *
 	 * @param node the node to publish events to
 	 */
@@ -72,6 +72,7 @@ class DomContentHandler implements ContentHandler {
 		}
 	}
 
+	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		Node parent = getParent();
 		Element element = document.createElementNS(uri, qName);
@@ -87,10 +88,12 @@ class DomContentHandler implements ContentHandler {
 		elements.add(element);
 	}
 
+	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		elements.remove(elements.size() - 1);
 	}
 
+	@Override
 	public void characters(char ch[], int start, int length) throws SAXException {
 		String data = new String(ch, start, length);
 		Node parent = getParent();
@@ -104,6 +107,7 @@ class DomContentHandler implements ContentHandler {
 		}
 	}
 
+	@Override
 	public void processingInstruction(String target, String data) throws SAXException {
 		Node parent = getParent();
 		ProcessingInstruction pi = document.createProcessingInstruction(target, data);
@@ -114,24 +118,31 @@ class DomContentHandler implements ContentHandler {
 	 * Unsupported
 	 */
 
+	@Override
 	public void setDocumentLocator(Locator locator) {
 	}
 
+	@Override
 	public void startDocument() throws SAXException {
 	}
 
+	@Override
 	public void endDocument() throws SAXException {
 	}
 
+	@Override
 	public void startPrefixMapping(String prefix, String uri) throws SAXException {
 	}
 
+	@Override
 	public void endPrefixMapping(String prefix) throws SAXException {
 	}
 
+	@Override
 	public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
 	}
 
+	@Override
 	public void skippedEntity(String name) throws SAXException {
 	}
 }

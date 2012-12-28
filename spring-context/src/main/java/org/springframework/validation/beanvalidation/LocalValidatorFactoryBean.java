@@ -39,8 +39,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.CollectionUtils;
 
 /**
- * This is the central class for <code>javax.validation</code> (JSR-303) setup
- * in a Spring application context: It bootstraps a <code>javax.validation.ValidationFactory</code>
+ * This is the central class for {@code javax.validation} (JSR-303) setup
+ * in a Spring application context: It bootstraps a {@code javax.validation.ValidationFactory}
  * and exposes it through the Spring {@link org.springframework.validation.Validator} interface
  * as well as through the JSR-303 {@link javax.validation.Validator} interface and the
  * {@link javax.validation.ValidatorFactory} interface itself.
@@ -171,11 +171,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validationPropertyMap;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		@SuppressWarnings("rawtypes")
@@ -222,22 +224,27 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 
+	@Override
 	public Validator getValidator() {
 		return this.validatorFactory.getValidator();
 	}
 
+	@Override
 	public ValidatorContext usingContext() {
 		return this.validatorFactory.usingContext();
 	}
 
+	@Override
 	public MessageInterpolator getMessageInterpolator() {
 		return this.validatorFactory.getMessageInterpolator();
 	}
 
+	@Override
 	public TraversableResolver getTraversableResolver() {
 		return this.validatorFactory.getTraversableResolver();
 	}
 
+	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}

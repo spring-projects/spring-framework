@@ -125,10 +125,12 @@ public class OrderedInitializersAnnotationConfigTests {
 
 	static class OrderedOneInitializer implements ApplicationContextInitializer<GenericApplicationContext>, Ordered {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 			applicationContext.getEnvironment().setActiveProfiles(PROFILE_ONE);
 		}
 
+		@Override
 		public int getOrder() {
 			return 1;
 		}
@@ -137,6 +139,7 @@ public class OrderedInitializersAnnotationConfigTests {
 	@Order(2)
 	static class OrderedTwoInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
+		@Override
 		public void initialize(GenericApplicationContext applicationContext) {
 			applicationContext.getEnvironment().setActiveProfiles(PROFILE_TWO);
 		}

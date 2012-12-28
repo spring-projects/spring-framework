@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.springframework.util.ReflectionUtils;
  * support the following weaving methods (as defined in the {@link LoadTimeWeaver}
  * interface):
  * <ul>
- * <li><code>public void addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
+ * <li>{@code public void addTransformer(java.lang.instrument.ClassFileTransformer)}:
  * for registering the given ClassFileTransformer on this ClassLoader
- * <li><code>public ClassLoader getThrowawayClassLoader()</code>:
+ * <li>{@code public ClassLoader getThrowawayClassLoader()}:
  * for obtaining a throwaway class loader for this ClassLoader (optional;
  * ReflectiveLoadTimeWeaver will fall back to a SimpleThrowawayClassLoader if
  * that method isn't available)
@@ -88,9 +88,9 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	/**
 	 * Create a new SimpleLoadTimeWeaver for the given class loader.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for
+	 * @param classLoader the {@code ClassLoader} to delegate to for
 	 * weaving (<i>must</i> support the required weaving methods).
-	 * @throws IllegalStateException if the supplied <code>ClassLoader</code>
+	 * @throws IllegalStateException if the supplied {@code ClassLoader}
 	 * does not support the required weaving methods
 	 */
 	public ReflectiveLoadTimeWeaver(ClassLoader classLoader) {
@@ -117,15 +117,18 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] {transformer});
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		if (this.getThrowawayClassLoaderMethod != null) {
 			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader,

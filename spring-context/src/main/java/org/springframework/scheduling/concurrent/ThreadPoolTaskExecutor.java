@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see ConcurrentTaskExecutor
  */
+@SuppressWarnings("serial")
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport implements SchedulingTaskExecutor {
 
 	private final Object poolSizeMonitor = new Object();
@@ -105,7 +106,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
@@ -164,7 +165,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see java.util.concurrent.LinkedBlockingQueue
@@ -175,6 +176,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 
+	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -210,7 +212,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Return the underlying ThreadPoolExecutor for native access.
-	 * @return the underlying ThreadPoolExecutor (never <code>null</code>)
+	 * @return the underlying ThreadPoolExecutor (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskExecutor hasn't been initialized yet
 	 */
 	public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {
@@ -235,6 +237,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	}
 
 
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getThreadPoolExecutor();
 		try {
@@ -245,10 +248,12 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
@@ -259,6 +264,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 		}
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		ExecutorService executor = getThreadPoolExecutor();
 		try {
@@ -272,6 +278,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}

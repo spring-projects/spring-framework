@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	/**
 	 * This implementation checks the UserTransaction's rollback-only flag.
 	 */
+	@Override
 	public boolean isRollbackOnly() {
 		if (this.userTransaction == null) {
 			return false;
@@ -78,6 +79,7 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	 * assuming that they will flush all affected ORM sessions.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#flush()
 	 */
+	@Override
 	public void flush() {
 		TransactionSynchronizationUtils.triggerFlush();
 	}

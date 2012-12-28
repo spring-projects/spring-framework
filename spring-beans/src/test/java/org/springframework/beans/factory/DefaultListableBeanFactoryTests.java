@@ -72,6 +72,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -497,7 +499,7 @@ public class DefaultListableBeanFactoryTests {
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertTrue("2 beans registered, not " + count, count == 2);
 
-		TestBean kerry = (TestBean) lbf.getBean("kerry", TestBean.class);
+		TestBean kerry = lbf.getBean("kerry", TestBean.class);
 		assertTrue("Kerry name is Kerry", "Kerry".equals(kerry.getName()));
 		ITestBean spouse = kerry.getSpouse();
 		assertTrue("Kerry spouse is non null", spouse != null);
@@ -516,7 +518,7 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("1 beans registered, not " + count, count == 1);
 		assertEquals(1, lbf.getBeanDefinitionCount());
 
-		TestBean tb = (TestBean) lbf.getBean("tb", TestBean.class);
+		TestBean tb = lbf.getBean("tb", TestBean.class);
 		assertEquals("my.value", tb.getSomeMap().get("my.key"));
 	}
 
@@ -836,6 +838,7 @@ public class DefaultListableBeanFactoryTests {
 	public void testCustomEditor() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
@@ -853,6 +856,7 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		GenericConversionService conversionService = new DefaultConversionService();
 		conversionService.addConverter(new Converter<String, Float>() {
+			@Override
 			public Float convert(String source) {
 				try {
 					NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
@@ -875,6 +879,7 @@ public class DefaultListableBeanFactoryTests {
 	public void testCustomEditorWithBeanReference() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				NumberFormat nf = NumberFormat.getInstance(Locale.GERMAN);
 				registry.registerCustomEditor(Float.class, new CustomNumberEditor(Float.class, nf, true));
@@ -1310,7 +1315,7 @@ public class DefaultListableBeanFactoryTests {
 	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
 	 * be autowired <em>by name</em>, as &amp; is an illegal character in
 	 * Java method names. In other words, you can't name a method
-	 * <code>set&amp;FactoryBean(...)</code>.
+	 * {@code set&amp;FactoryBean(...)}.
 	 */
 	@Test(expected=TypeMismatchException.class)
 	public void testAutowireBeanWithFactoryBeanByName() {
@@ -1690,10 +1695,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1710,10 +1713,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1756,10 +1757,8 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	@Ignore  // TODO re-enable when ConstructorResolver TODO sorted out
 	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1806,10 +1805,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1830,10 +1827,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1879,10 +1874,8 @@ public class DefaultListableBeanFactoryTests {
 	 */
 	@Test
 	public void testPrototypeCreationWithResolvedPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1907,9 +1900,11 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDisposableBean.class);
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1926,9 +1921,11 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd = new RootBeanDefinition(BeanWithCloseable.class);
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -1946,9 +1943,11 @@ public class DefaultListableBeanFactoryTests {
 		bd.setDestroyMethodName("close");
 		lbf.registerBeanDefinition("test", bd);
 		lbf.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
@@ -2117,6 +2116,7 @@ public class DefaultListableBeanFactoryTests {
 		lbf.registerBeanDefinition("test", bd);
 		final String nameSetOnField = "nameSetOnField";
 		lbf.addBeanPostProcessor(new InstantiationAwareBeanPostProcessorAdapter() {
+			@Override
 			public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 				TestBean tb = (TestBean) bean;
 				try {
@@ -2156,6 +2156,7 @@ public class DefaultListableBeanFactoryTests {
 
 		TestSecuredBean bean = (TestSecuredBean) Subject.doAsPrivileged(subject,
 				new PrivilegedAction() {
+					@Override
 					public Object run() {
 						return lbf.getBean("test");
 					}
@@ -2189,6 +2190,7 @@ public class DefaultListableBeanFactoryTests {
 	 */
 	@Test(timeout=1000)
 	public void testByTypeLookupIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		for (int i = 0; i < 1000; i++) {
@@ -2244,14 +2246,17 @@ public class DefaultListableBeanFactoryTests {
 		public ConstructorDependencyFactoryBean(String dependency) {
 		}
 
+		@Override
 		public Object getObject() {
 			return "test";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -2262,6 +2267,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private static boolean closed;
 
+		@Override
 		public void destroy() {
 			closed = true;
 		}
@@ -2272,6 +2278,7 @@ public class DefaultListableBeanFactoryTests {
 
 		private static boolean closed;
 
+		@Override
 		public void close() {
 			closed = true;
 		}
@@ -2316,14 +2323,17 @@ public class DefaultListableBeanFactoryTests {
 
 	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			throw new IllegalStateException();
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return false;
 		}
@@ -2334,15 +2344,18 @@ public class DefaultListableBeanFactoryTests {
 
 		public boolean initialized = false;
 
+		@Override
 		public Object getObject() throws Exception {
 			this.initialized = true;
 			return "";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -2353,23 +2366,28 @@ public class DefaultListableBeanFactoryTests {
 
 		public boolean initialized = false;
 
+		@Override
 		public Object getObject() throws Exception {
 			this.initialized = true;
 			return "";
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
 
+		@Override
 		public boolean isPrototype() {
 			return false;
 		}
 
+		@Override
 		public boolean isEagerInit() {
 			return true;
 		}
@@ -2452,6 +2470,7 @@ public class DefaultListableBeanFactoryTests {
 			this.numberFormat = numberFormat;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType) {
 			if (value instanceof String && Float.class.isAssignableFrom(requiredType)) {
@@ -2470,11 +2489,13 @@ public class DefaultListableBeanFactoryTests {
 			}
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType, MethodParameter methodParam) {
 			return convertIfNecessary(value, requiredType);
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object convertIfNecessary(Object value, Class requiredType, Field field) {
 			return convertIfNecessary(value, requiredType);
@@ -2490,6 +2511,7 @@ public class DefaultListableBeanFactoryTests {
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			return this.name;
 		}
@@ -2539,38 +2561,38 @@ public class DefaultListableBeanFactoryTests {
 			return this.userName;
 		}
 	}
-	
+
 	/**
 	 * Bean that changes state on a business invocation, so that
 	 * we can check whether it's been invoked
 	 * @author Rod Johnson
 	 */
 	private static class SideEffectBean {
-		
+
 		private int count;
-		
+
 		public void setCount(int count) {
 			this.count = count;
 		}
-		
+
 		public int getCount() {
 			return this.count;
 		}
-		
+
 		public void doWork() {
 			++count;
 		}
 
 	}
-	
+
 	private static class KnowsIfInstantiated {
-		
+
 		private static boolean instantiated;
-		
+
 		public static void clearInstantiationRecord() {
 			instantiated = false;
 		}
-		
+
 		public static boolean wasInstantiated() {
 			return instantiated;
 		}

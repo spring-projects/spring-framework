@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.web.bind.support;
 
 /**
  * Simple implementation of the {@link SessionStatus} interface,
- * keeping the <code>complete</code> flag as an instance variable.
+ * keeping the {@code complete} flag as an instance variable.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -28,10 +28,12 @@ public class SimpleSessionStatus implements SessionStatus {
 	private boolean complete = false;
 
 
+	@Override
 	public void setComplete() {
 		this.complete = true;
 	}
 
+	@Override
 	public boolean isComplete() {
 		return this.complete;
 	}

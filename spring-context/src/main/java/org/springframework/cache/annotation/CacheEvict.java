@@ -38,7 +38,7 @@ public @interface CacheEvict {
 
 	/**
 	 * Qualifier value for the specified cached operation.
-	 * <p>May be used to determine the target cache (or caches), matching the qualifier 
+	 * <p>May be used to determine the target cache (or caches), matching the qualifier
 	 * value (or the bean name(s)) of (a) specific bean definition.
 	 */
 	String[] value();
@@ -50,7 +50,7 @@ public @interface CacheEvict {
 	String key() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching. 
+	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
 	 * <p>Default is "", meaning the method is always cached.
 	 */
 	String condition() default "";

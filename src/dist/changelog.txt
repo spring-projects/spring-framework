@@ -3,6 +3,16 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
+Changes in version 3.2.1 (2013-01-24)
+--------------------------------------
+
+* fixed QualifierAnnotationAutowireCandidateResolver's detection of custom qualifier annotations (SPR-10107)
+* fixed AbstractAutoProxyCreator to accept null bean names again (SPR-10108)
+* spring-task-3.2.xsd allows for SpEL expressions in initial-delay attribute (SPR-10102)
+* JmsTemplate uses configured receiveTimeout if shorter than remaining transaction timeout (SPR-10109)
+* added MappingJackson2MessageConverter for JMS (SPR-10099)
+
+
 Changes in version 3.2 GA (2012-12-13)
 --------------------------------------
 

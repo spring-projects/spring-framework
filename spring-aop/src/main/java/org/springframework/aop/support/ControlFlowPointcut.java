@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rob Harrop
  * @see org.springframework.core.ControlFlow
  */
+@SuppressWarnings("serial")
 public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher, Serializable {
 
 	private Class clazz;
@@ -70,6 +71,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	/**
 	 * Subclasses can override this for greater filtering (and performance).
 	 */
+	@Override
 	public boolean matches(Class clazz) {
 		return true;
 	}
@@ -78,14 +80,17 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * Subclasses can override this if it's possible to filter out
 	 * some candidate classes.
 	 */
+	@Override
 	public boolean matches(Method method, Class targetClass) {
 		return true;
 	}
 
+	@Override
 	public boolean isRuntime() {
 		return true;
 	}
 
+	@Override
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		++this.evaluations;
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
@@ -100,10 +105,12 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 
+	@Override
 	public ClassFilter getClassFilter() {
 		return this;
 	}
 
+	@Override
 	public MethodMatcher getMethodMatcher() {
 		return this;
 	}

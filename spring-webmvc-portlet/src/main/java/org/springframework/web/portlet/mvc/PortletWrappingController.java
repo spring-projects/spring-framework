@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ public class PortletWrappingController extends AbstractController
 
 	/**
 	 * Set whether to use the shared PortletConfig object passed in
-	 * through <code>setPortletConfig</code>, if available.
+	 * through {@code setPortletConfig}, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
 	 * a mock PortletConfig object with the bean name as portlet name,
 	 * holding the current PortletContext.
@@ -117,13 +117,14 @@ public class PortletWrappingController extends AbstractController
 		this.portletContext = portletContext;
 	}
 
+	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}
 
 	/**
 	 * Set the class of the Portlet to wrap.
-	 * Needs to implement <code>javax.portlet.Portlet</code>.
+	 * Needs to implement {@code javax.portlet.Portlet}.
 	 * @see javax.portlet.Portlet
 	 */
 	public void setPortletClass(Class portletClass) {
@@ -146,11 +147,13 @@ public class PortletWrappingController extends AbstractController
 		this.initParameters = initParameters;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.portletClass == null) {
 			throw new IllegalArgumentException("portletClass is required");
@@ -186,6 +189,7 @@ public class PortletWrappingController extends AbstractController
 		return null;
 	}
 
+	@Override
 	public ModelAndView handleResourceRequest(
 			ResourceRequest request, ResourceResponse response) throws Exception {
 
@@ -214,6 +218,7 @@ public class PortletWrappingController extends AbstractController
 		return null;
 	}
 
+	@Override
 	public void handleEventRequest(
 			EventRequest request, EventResponse response) throws Exception {
 
@@ -242,6 +247,7 @@ public class PortletWrappingController extends AbstractController
 	}
 
 
+	@Override
 	public void destroy() {
 		this.portletInstance.destroy();
 	}
@@ -255,46 +261,57 @@ public class PortletWrappingController extends AbstractController
 	 */
 	private class DelegatingPortletConfig implements PortletConfig {
 
+		@Override
 		public String getPortletName() {
 			return portletName;
 		}
 
+		@Override
 		public PortletContext getPortletContext() {
 			return portletContext;
 		}
 
+		@Override
 		public String getInitParameter(String paramName) {
 			return initParameters.get(paramName);
 		}
 
+		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(initParameters.keySet());
 		}
 
+		@Override
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (portletConfig != null ? portletConfig.getResourceBundle(locale) : null);
 		}
 
+		@Override
 		public Enumeration<String> getPublicRenderParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
+		@Override
 		public String getDefaultNamespace() {
 			return XMLConstants.NULL_NS_URI;
 		}
 
+		@Override
 		public Enumeration<QName> getPublishingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
+		@Override
 		public Enumeration<QName> getProcessingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
+		@Override
 		public Enumeration<Locale> getSupportedLocales() {
 			return Collections.enumeration(new HashSet<Locale>());
 		}
 
+		@Override
 		public Map<String, String[]> getContainerRuntimeOptions() {
 			return (portletConfig != null ? portletConfig.getContainerRuntimeOptions() : null);
 		}

@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * be provided as well as the annotation type that indicates a method should be
  * invoked asynchronously. If no annotation type is specified, this post-
  * processor will detect both Spring's {@link Async @Async} annotation as well
- * as the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation.
+ * as the EJB 3.1 {@code javax.ejb.Asynchronous} annotation.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
@@ -56,7 +56,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 	/**
 	 * Set the 'async' annotation type to be detected at either class or method
 	 * level. By default, both the {@link Async} annotation and the EJB 3.1
-	 * <code>javax.ejb.Asynchronous</code> annotation will be detected.
+	 * {@code javax.ejb.Asynchronous} annotation will be detected.
 	 * <p>This setter property exists so that developers can provide their own
 	 * (non-Spring-specific) annotation type to indicate that a method (or all
 	 * methods of a given class) should be invoked asynchronously.
@@ -74,6 +74,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 		this.executor = executor;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		AsyncAnnotationAdvisor advisor = (this.executor != null ?
 				new AsyncAnnotationAdvisor(this.executor) : new AsyncAnnotationAdvisor());

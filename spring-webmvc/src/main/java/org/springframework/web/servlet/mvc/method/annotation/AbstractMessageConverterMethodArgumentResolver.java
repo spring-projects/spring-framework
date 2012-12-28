@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,6 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
@@ -135,7 +132,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 								logger.debug("Reading [" + targetType + "] as \"" +
 										contentType + "\" using [" + converter + "]");
 							}
-							return (T) genericConverter.read(targetType, contextClass, inputMessage);
+							return genericConverter.read(targetType, contextClass, inputMessage);
 						}
 					}
 					if (targetClass != null) {

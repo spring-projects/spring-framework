@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,15 @@ import org.springframework.util.WeakReferenceMonitor;
  * facade, with the business logic deferred to beans in the BeanFactory. Default
  * is to use a {@link org.springframework.context.access.ContextJndiBeanFactoryLocator},
  * which will initialize an XML ApplicationContext from the class path (based on a JNDI
- * name specified). For a different locator strategy, <code>setBeanFactoryLocator</code>
- * may be called (<i>before</i> your EJB's <code>ejbCreate</code> method is invoked,
- * e.g. in <code>setSessionContext</code>). For use of a shared ApplicationContext between
+ * name specified). For a different locator strategy, {@code setBeanFactoryLocator}
+ * may be called (<i>before</i> your EJB's {@code ejbCreate} method is invoked,
+ * e.g. in {@code setSessionContext}). For use of a shared ApplicationContext between
  * multiple EJBs, where the container class loader setup supports this visibility, you may
  * instead use a {@link org.springframework.context.access.ContextSingletonBeanFactoryLocator}.
  * Alternatively, {@link #setBeanFactoryLocator} may be called with a custom implementation
  * of the {@link org.springframework.beans.factory.access.BeanFactoryLocator} interface.
  *
- * <p>Note that we cannot use <code>final</code> for our implementation of EJB lifecycle
+ * <p>Note that we cannot use {@code final} for our implementation of EJB lifecycle
  * methods, as this would violate the EJB specification.
  *
  * @author Rod Johnson
@@ -54,6 +54,7 @@ import org.springframework.util.WeakReferenceMonitor;
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	public static final String BEAN_FACTORY_PATH_ENVIRONMENT_KEY = "java:comp/env/ejb/BeanFactoryPath";
@@ -77,10 +78,10 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * ContextJndiBeanFactoryLocator.
 	 * <p>Can be invoked before loadBeanFactory, for example in constructor or
 	 * setSessionContext if you want to override the default locator.
-	 * <p>Note that the BeanFactory is automatically loaded by the <code>ejbCreate</code>
+	 * <p>Note that the BeanFactory is automatically loaded by the {@code ejbCreate}
 	 * implementations of AbstractStatelessSessionBean and
 	 * AbstractMessageDriverBean but needs to be explicitly loaded in custom
-	 * AbstractStatefulSessionBean <code>ejbCreate</code> methods.
+	 * AbstractStatefulSessionBean {@code ejbCreate} methods.
 	 * @see AbstractStatelessSessionBean#ejbCreate
 	 * @see AbstractMessageDrivenBean#ejbCreate
 	 * @see AbstractStatefulSessionBean#loadBeanFactory
@@ -96,7 +97,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	 * ContextJndiBeanFactoryLocator, this is the JNDI path. The default value
 	 * of this property is "java:comp/env/ejb/BeanFactoryPath".
 	 * <p>Can be invoked before {@link #loadBeanFactory}, for example in the constructor
-	 * or <code>setSessionContext</code> if you want to override the default locator key.
+	 * or {@code setSessionContext} if you want to override the default locator key.
 	 * @see #BEAN_FACTORY_PATH_ENVIRONMENT_KEY
 	 */
 	public void setBeanFactoryLocatorKey(String factoryKey) {
@@ -127,7 +128,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	/**
 	 * Unload the Spring BeanFactory instance. The default {@link #ejbRemove()}
-	 * method invokes this method, but subclasses which override <code>ejbRemove()</code>
+	 * method invokes this method, but subclasses which override {@code ejbRemove()}
 	 * must invoke this method themselves.
 	 * <p>Package-visible as it shouldn't be called directly by user-created
 	 * subclasses.
@@ -142,7 +143,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	}
 
 	/**
-	 * May be called after <code>ejbCreate()</code>.
+	 * May be called after {@code ejbCreate()}.
 	 * @return the bean factory
 	 */
 	protected BeanFactory getBeanFactory() {
@@ -150,7 +151,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 	}
 
 	/**
-	 * EJB lifecycle method, implemented to invoke <code>onEjbRemove()</code>
+	 * EJB lifecycle method, implemented to invoke {@code onEjbRemove()}
 	 * and unload the BeanFactory afterwards.
 	 * <p>Don't override it (although it can't be made final): code your shutdown
 	 * in {@link #onEjbRemove()}.
@@ -162,11 +163,11 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 
 	/**
 	 * Subclasses must implement this method to do any initialization they would
-	 * otherwise have done in an <code>ejbRemove()</code> method.
+	 * otherwise have done in an {@code ejbRemove()} method.
 	 * The BeanFactory will be unloaded afterwards.
 	 * <p>This implementation is empty, to be overridden in subclasses.
 	 * The same restrictions apply to the work of this method as to an
-	 * <code>ejbRemove()<code> method.
+	 * {@code ejbRemove()} method.
 	 */
 	protected void onEjbRemove() {
 		// empty
@@ -186,6 +187,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 			this.beanFactoryReference = beanFactoryReference;
 		}
 
+		@Override
 		public void released() {
 			this.beanFactoryReference.release();
 		}

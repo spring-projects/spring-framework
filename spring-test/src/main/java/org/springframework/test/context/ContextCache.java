@@ -70,7 +70,7 @@ class ContextCache {
 
 	/**
 	 * Return whether there is a cached context for the given key.
-	 * @param key the context key (never <code>null</code>)
+	 * @param key the context key (never {@code null})
 	 */
 	boolean contains(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
@@ -81,9 +81,9 @@ class ContextCache {
 	 * Obtain a cached ApplicationContext for the given key.
 	 * <p>The {@link #getHitCount() hit} and {@link #getMissCount() miss}
 	 * counts will be updated accordingly.
-	 * @param key the context key (never <code>null</code>)
+	 * @param key the context key (never {@code null})
 	 * @return the corresponding ApplicationContext instance,
-	 * or <code>null</code> if not found in the cache.
+	 * or {@code null} if not found in the cache.
 	 * @see #remove
 	 */
 	ApplicationContext get(MergedContextConfiguration key) {
@@ -108,7 +108,7 @@ class ContextCache {
 
 	/**
 	 * Increment the miss count by one. A <em>miss</em> is an access to the
-	 * cache, which returned a <code>null</code> context for a queried key.
+	 * cache, which returned a {@code null} context for a queried key.
 	 */
 	private void incrementMissCount() {
 		this.missCount++;
@@ -124,7 +124,7 @@ class ContextCache {
 
 	/**
 	 * Get the overall miss count for this cache. A <em>miss</em> is an
-	 * access to the cache, which returned a <code>null</code> context for a
+	 * access to the cache, which returned a {@code null} context for a
 	 * queried key.
 	 */
 	int getMissCount() {
@@ -133,8 +133,8 @@ class ContextCache {
 
 	/**
 	 * Explicitly add an ApplicationContext instance to the cache under the given key.
-	 * @param key the context key (never <code>null</code>)
-	 * @param context the ApplicationContext instance (never <code>null</code>)
+	 * @param key the context key (never {@code null})
+	 * @param context the ApplicationContext instance (never {@code null})
 	 */
 	void put(MergedContextConfiguration key, ApplicationContext context) {
 		Assert.notNull(key, "Key must not be null");
@@ -144,8 +144,8 @@ class ContextCache {
 
 	/**
 	 * Remove the context with the given key.
-	 * @param key the context key (never <code>null</code>)
-	 * @return the corresponding ApplicationContext instance, or <code>null</code>
+	 * @param key the context key (never {@code null})
+	 * @return the corresponding ApplicationContext instance, or {@code null}
 	 * if not found in the cache.
 	 * @see #setDirty
 	 */
@@ -161,7 +161,7 @@ class ContextCache {
 	 * <p>Generally speaking, you would only call this method if you change the
 	 * state of a singleton bean, potentially affecting future interaction with
 	 * the context.
-	 * @param key the context key (never <code>null</code>)
+	 * @param key the context key (never {@code null})
 	 * @see #remove
 	 */
 	void setDirty(MergedContextConfiguration key) {

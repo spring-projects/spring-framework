@@ -38,6 +38,7 @@ public class HeaderContentNegotiationStrategy implements ContentNegotiationStrat
 	 * {@inheritDoc}
 	 * @throws HttpMediaTypeNotAcceptableException if the 'Accept' header cannot be parsed.
 	 */
+	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) throws HttpMediaTypeNotAcceptableException {
 		String acceptHeader = webRequest.getHeader(ACCEPT_HEADER);
 		try {

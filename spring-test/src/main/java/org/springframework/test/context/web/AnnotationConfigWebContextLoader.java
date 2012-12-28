@@ -28,20 +28,20 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 /**
  * Concrete implementation of {@link AbstractGenericWebContextLoader} that loads
  * bean definitions from annotated classes.
- * 
+ *
  * <p>See the Javadoc for
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
  * for a definition of <em>annotated class</em>.
- * 
- * <p>Note: <code>AnnotationConfigWebContextLoader</code> supports <em>annotated classes</em>
+ *
+ * <p>Note: {@code AnnotationConfigWebContextLoader} supports <em>annotated classes</em>
  * rather than the String-based resource locations defined by the legacy
  * {@link org.springframework.test.context.ContextLoader ContextLoader} API. Thus,
- * although <code>AnnotationConfigWebContextLoader</code> extends
- * <code>AbstractGenericWebContextLoader</code>, <code>AnnotationConfigWebContextLoader</code>
+ * although {@code AnnotationConfigWebContextLoader} extends
+ * {@code AbstractGenericWebContextLoader}, {@code AnnotationConfigWebContextLoader}
  * does <em>not</em> support any String-based methods defined by
  * {@link org.springframework.test.context.support.AbstractContextLoader
- * AbstractContextLoader} or <code>AbstractGenericWebContextLoader</code>.
- * Consequently, <code>AnnotationConfigWebContextLoader</code> should chiefly be
+ * AbstractContextLoader} or {@code AbstractGenericWebContextLoader}.
+ * Consequently, {@code AnnotationConfigWebContextLoader} should chiefly be
  * considered a {@link org.springframework.test.context.SmartContextLoader SmartContextLoader}
  * rather than a {@link org.springframework.test.context.ContextLoader ContextLoader}.
  *
@@ -61,20 +61,21 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	/**
 	 * Process <em>annotated classes</em> in the supplied {@link ContextConfigurationAttributes}.
 	 *
-	 * <p>If the <em>annotated classes</em> are <code>null</code> or empty and
-	 * {@link #isGenerateDefaultLocations()} returns <code>true</code>, this
-	 * <code>SmartContextLoader</code> will attempt to {@linkplain
+	 * <p>If the <em>annotated classes</em> are {@code null} or empty and
+	 * {@link #isGenerateDefaultLocations()} returns {@code true}, this
+	 * {@code SmartContextLoader} will attempt to {@linkplain
 	 * #detectDefaultConfigurationClasses detect default configuration classes}.
 	 * If defaults are detected they will be
 	 * {@linkplain ContextConfigurationAttributes#setClasses(Class[]) set} in the
 	 * supplied configuration attributes. Otherwise, properties in the supplied
 	 * configuration attributes will not be modified.
-	 * 
+	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @see org.springframework.test.context.SmartContextLoader#processContextConfiguration(ContextConfigurationAttributes)
 	 * @see #isGenerateDefaultLocations()
 	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
+	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
 			Class<?>[] defaultConfigClasses = detectDefaultConfigurationClasses(configAttributes.getDeclaringClass());
@@ -90,7 +91,7 @@ public class AnnotationConfigWebContextLoader extends AbstractGenericWebContextL
 	 *
 	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
 	 * @return an array of default configuration classes, potentially empty but
-	 * never <code>null</code>
+	 * never {@code null}
 	 * @see AnnotationConfigContextLoaderUtils
 	 */
 	protected Class<?>[] detectDefaultConfigurationClasses(Class<?> declaringClass) {

@@ -53,30 +53,36 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private final Set<String> requiredProperties = new LinkedHashSet<String>();
 
+	@Override
 	public ConfigurableConversionService getConversionService() {
 		return this.conversionService;
 	}
 
+	@Override
 	public void setConversionService(ConfigurableConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+	@Override
 	public String getProperty(String key, String defaultValue) {
 		String value = getProperty(key);
 		return value == null ? defaultValue : value;
 	}
 
+	@Override
 	public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
 		T value = getProperty(key, targetType);
 		return value == null ? defaultValue : value;
 	}
 
+	@Override
 	public void setRequiredProperties(String... requiredProperties) {
 		for (String key : requiredProperties) {
 			this.requiredProperties.add(key);
 		}
 	}
 
+	@Override
 	public void validateRequiredProperties() {
 		MissingRequiredPropertiesException ex = new MissingRequiredPropertiesException();
 		for (String key : this.requiredProperties) {
@@ -89,6 +95,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		}
 	}
 
+	@Override
 	public String getRequiredProperty(String key) throws IllegalStateException {
 		String value = getProperty(key);
 		if (value == null) {
@@ -97,6 +104,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return value;
 	}
 
+	@Override
 	public <T> T getRequiredProperty(String key, Class<T> valueType) throws IllegalStateException {
 		T value = getProperty(key, valueType);
 		if (value == null) {
@@ -109,6 +117,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * {@inheritDoc} The default is "${".
 	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_PREFIX
 	 */
+	@Override
 	public void setPlaceholderPrefix(String placeholderPrefix) {
 		this.placeholderPrefix = placeholderPrefix;
 	}
@@ -117,6 +126,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * {@inheritDoc} The default is "}".
 	 * @see org.springframework.util.SystemPropertyUtils#PLACEHOLDER_SUFFIX
 	 */
+	@Override
 	public void setPlaceholderSuffix(String placeholderSuffix) {
 		this.placeholderSuffix = placeholderSuffix;
 	}
@@ -125,10 +135,12 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * {@inheritDoc} The default is ":".
 	 * @see org.springframework.util.SystemPropertyUtils#VALUE_SEPARATOR
 	 */
+	@Override
 	public void setValueSeparator(String valueSeparator) {
 		this.valueSeparator = valueSeparator;
 	}
 
+	@Override
 	public String resolvePlaceholders(String text) {
 		if (nonStrictHelper == null) {
 			nonStrictHelper = createPlaceholderHelper(true);
@@ -136,6 +148,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 		return doResolvePlaceholders(text, nonStrictHelper);
 	}
 
+	@Override
 	public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
 		if (strictHelper == null) {
 			strictHelper = createPlaceholderHelper(false);
@@ -148,6 +161,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 	 * <p>The default value for this implementation is {@code false}.
 	 * @since 3.2
 	 */
+	@Override
 	public void setIgnoreUnresolvableNestedPlaceholders(boolean ignoreUnresolvableNestedPlaceholders) {
 		this.ignoreUnresolvableNestedPlaceholders = ignoreUnresolvableNestedPlaceholders;
 	}
@@ -172,6 +186,7 @@ public abstract class AbstractPropertyResolver implements ConfigurablePropertyRe
 
 	private String doResolvePlaceholders(String text, PropertyPlaceholderHelper helper) {
 		return helper.replacePlaceholders(text, new PlaceholderResolver() {
+			@Override
 			public String resolvePlaceholder(String placeholderName) {
 				return getProperty(placeholderName);
 			}

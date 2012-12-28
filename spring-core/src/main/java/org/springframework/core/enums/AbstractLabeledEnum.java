@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ package org.springframework.core.enums;
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractLabeledEnum implements LabeledEnum {
 
 	/**
@@ -34,12 +35,14 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	protected AbstractLabeledEnum() {
 	}
 
+	@Override
 	public Class getType() {
 		// Could be coded as getClass().isAnonymousClass() on JDK 1.5
 		boolean isAnonymous = (getClass().getDeclaringClass() == null && getClass().getName().indexOf('$') != -1);
 		return (isAnonymous ? getClass().getSuperclass() : getClass());
 	}
 
+	@Override
 	public int compareTo(Object obj) {
 		if (!(obj instanceof LabeledEnum)) {
 			throw new ClassCastException("You may only compare LabeledEnums");

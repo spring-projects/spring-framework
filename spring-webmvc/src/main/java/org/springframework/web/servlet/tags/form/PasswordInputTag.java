@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>password</code>'.
+ * Databinding-aware JSP tag for rendering an HTML '{@code input}'
+ * element with a '{@code type}' of '{@code password}'.
  *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Rossen Stoyanchev
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class PasswordInputTag extends InputTag {
 
 	private boolean showPassword = false;
@@ -34,7 +35,7 @@ public class PasswordInputTag extends InputTag {
 
 	/**
 	 * Is the password value to be rendered?
-	 * @return <code>true</code> if the password value to be rendered.
+	 * @return {@code true} if the password value to be rendered.
 	 */
 	public boolean isShowPassword() {
 		return this.showPassword;
@@ -42,7 +43,7 @@ public class PasswordInputTag extends InputTag {
 
 	/**
 	 * Is the password value to be rendered?
-	 * @param showPassword <code>true</code> if the password value is to be rendered.
+	 * @param showPassword {@code true} if the password value is to be rendered.
 	 */
 	public void setShowPassword(boolean showPassword) {
 		this.showPassword = showPassword;
@@ -57,8 +58,8 @@ public class PasswordInputTag extends InputTag {
 	}
 
 	/**
-	 * Return '<code>password</code>' causing the rendered HTML '<code>input</code>'
-	 * element to have a '<code>type</code>' of '<code>password</code>'.
+	 * Return '{@code password}' causing the rendered HTML '{@code input}'
+	 * element to have a '{@code type}' of '{@code password}'.
 	 */
 	@Override
 	protected String getType() {

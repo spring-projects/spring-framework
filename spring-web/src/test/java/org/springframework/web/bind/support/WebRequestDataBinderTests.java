@@ -46,6 +46,7 @@ public class WebRequestDataBinderTests {
 
 		WebRequestDataBinder binder = new WebRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,11 @@ import org.springframework.test.context.TestContext;
 import org.springframework.util.Assert;
 
 /**
- * <code>TestExecutionListener</code> which provides support for marking the
- * <code>ApplicationContext</code> associated with a test as <em>dirty</em> for
+ * {@code TestExecutionListener} which provides support for marking the
+ * {@code ApplicationContext} associated with a test as <em>dirty</em> for
  * both test classes and test methods configured with the {@link DirtiesContext
  * &#064;DirtiesContext} annotation.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -47,7 +47,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * {@link TestContext test context} as
 	 * {@link TestContext#markApplicationContextDirty() dirty}, and sets the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
-	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to <code>true</code>.
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
 	 */
 	protected void dirtyContext(TestContext testContext) {
 		testContext.markApplicationContextDirty();
@@ -65,7 +65,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * {@link TestContext#markApplicationContextDirty() marked as dirty} and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
-	 * <code>true</code>.
+	 * {@code true}.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
@@ -100,7 +100,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
-	 * <code>true</code>.
+	 * {@code true}.
 	 */
 	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {

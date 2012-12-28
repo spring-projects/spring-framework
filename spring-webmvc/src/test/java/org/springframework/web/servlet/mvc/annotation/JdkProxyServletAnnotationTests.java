@@ -76,6 +76,7 @@ public class JdkProxyServletAnnotationTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -109,6 +110,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class TypeLevelImpl implements TypeLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}
@@ -125,6 +127,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class MethodLevelImpl implements MethodLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}
@@ -141,6 +144,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class TypeAndMethodLevelImpl implements TypeAndMethodLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}

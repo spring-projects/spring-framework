@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import org.springframework.util.Assert;
 
 /**
  * {@link Source} implementation that uses a {@link Marshaller}.Can be constructed with a
- * <code>Marshaller</code> and an object to be marshalled.
+ * {@code Marshaller} and an object to be marshalled.
  *
- * <p>Even though <code>MarshallingSource</code> extends from <code>SAXSource</code>, calling the methods of
- * <code>SAXSource</code> is <strong>not supported</strong>. In general, the only supported operation on this class is
- * to use the <code>XMLReader</code> obtained via {@link #getXMLReader()} to parse the input source obtained via {@link
+ * <p>Even though {@code MarshallingSource} extends from {@code SAXSource}, calling the methods of
+ * {@code SAXSource} is <strong>not supported</strong>. In general, the only supported operation on this class is
+ * to use the {@code XMLReader} obtained via {@link #getXMLReader()} to parse the input source obtained via {@link
  * #getInputSource()}. Calling {@link #setXMLReader(XMLReader)} or {@link #setInputSource(InputSource)} will result in
- * <code>UnsupportedOperationException</code>s.
+ * {@code UnsupportedOperationException}s.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -57,7 +57,7 @@ public class MarshallingSource extends SAXSource {
 
 
 	/**
-	 * Create a new <code>MarshallingSource</code> with the given marshaller and content.
+	 * Create a new {@code MarshallingSource} with the given marshaller and content.
 	 * @param marshaller the marshaller to use
 	 * @param content the object to be marshalled
 	 */
@@ -71,7 +71,7 @@ public class MarshallingSource extends SAXSource {
 
 
 	/**
-	 * Return the <code>Marshaller</code> used by this <code>MarshallingSource</code>.
+	 * Return the {@code Marshaller} used by this {@code MarshallingSource}.
 	 */
 	public Marshaller getMarshaller() {
 		return this.marshaller;
@@ -85,7 +85,7 @@ public class MarshallingSource extends SAXSource {
 	}
 
 	/**
-	 * Throws a <code>UnsupportedOperationException</code>.
+	 * Throws a {@code UnsupportedOperationException}.
 	 */
 	@Override
 	public void setInputSource(InputSource inputSource) {
@@ -93,7 +93,7 @@ public class MarshallingSource extends SAXSource {
 	}
 
 	/**
-	 * Throws a <code>UnsupportedOperationException</code>.
+	 * Throws a {@code UnsupportedOperationException}.
 	 */
 	@Override
 	public void setXMLReader(XMLReader reader) {
@@ -124,34 +124,42 @@ public class MarshallingSource extends SAXSource {
 			this.content = content;
 		}
 
+		@Override
 		public void setContentHandler(ContentHandler contentHandler) {
 			this.contentHandler = contentHandler;
 		}
 
+		@Override
 		public ContentHandler getContentHandler() {
 			return this.contentHandler;
 		}
 
+		@Override
 		public void setDTDHandler(DTDHandler dtdHandler) {
 			this.dtdHandler = dtdHandler;
 		}
 
+		@Override
 		public DTDHandler getDTDHandler() {
 			return this.dtdHandler;
 		}
 
+		@Override
 		public void setEntityResolver(EntityResolver entityResolver) {
 			this.entityResolver = entityResolver;
 		}
 
+		@Override
 		public EntityResolver getEntityResolver() {
 			return this.entityResolver;
 		}
 
+		@Override
 		public void setErrorHandler(ErrorHandler errorHandler) {
 			this.errorHandler = errorHandler;
 		}
 
+		@Override
 		public ErrorHandler getErrorHandler() {
 			return this.errorHandler;
 		}
@@ -160,14 +168,17 @@ public class MarshallingSource extends SAXSource {
 			return this.lexicalHandler;
 		}
 
+		@Override
 		public boolean getFeature(String name) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
+		@Override
 		public void setFeature(String name, boolean value) throws SAXNotRecognizedException {
 			throw new SAXNotRecognizedException(name);
 		}
 
+		@Override
 		public Object getProperty(String name) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				return lexicalHandler;
@@ -177,6 +188,7 @@ public class MarshallingSource extends SAXSource {
 			}
 		}
 
+		@Override
 		public void setProperty(String name, Object value) throws SAXNotRecognizedException {
 			if ("http://xml.org/sax/properties/lexical-handler".equals(name)) {
 				this.lexicalHandler = (LexicalHandler) value;
@@ -186,10 +198,12 @@ public class MarshallingSource extends SAXSource {
 			}
 		}
 
+		@Override
 		public void parse(InputSource input) throws SAXException {
 			parse();
 		}
 
+		@Override
 		public void parse(String systemId) throws SAXException {
 			parse();
 		}

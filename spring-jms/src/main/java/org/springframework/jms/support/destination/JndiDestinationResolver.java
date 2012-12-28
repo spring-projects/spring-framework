@@ -98,6 +98,7 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	}
 
 
+	@Override
 	public Destination resolveDestinationName(Session session, String destinationName, boolean pubSubDomain)
 			throws JMSException {
 
@@ -135,8 +136,8 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	 * the expected type.
 	 * @param destination the Destination object to validate
 	 * @param destinationName the name of the destination
-	 * @param pubSubDomain <code>true</code> if a Topic is expected,
-	 * <code>false</code> in case of a Queue
+	 * @param pubSubDomain {@code true} if a Topic is expected,
+	 * {@code false} in case of a Queue
 	 */
 	protected void validateDestination(Destination destination, String destinationName, boolean pubSubDomain) {
 		Class targetClass = Queue.class;
@@ -150,10 +151,12 @@ public class JndiDestinationResolver extends JndiLocatorSupport implements Cachi
 	}
 
 
+	@Override
 	public void removeFromCache(String destinationName) {
 		this.destinationCache.remove(destinationName);
 	}
 
+	@Override
 	public void clearCache() {
 		this.destinationCache.clear();
 	}

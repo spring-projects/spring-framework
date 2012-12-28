@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,11 +68,11 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	 * TransactionSynchronization and JTA TransactionManager.
 	 * <p>Note that this adapter will never perform a rollback-only call on WebLogic,
 	 * since WebLogic Server is known to automatically mark the transaction as
-	 * rollback-only in case of a <code>beforeCompletion</code> exception. Hence,
+	 * rollback-only in case of a {@code beforeCompletion} exception. Hence,
 	 * on WLS, this constructor is equivalent to the single-arg constructor.
 	 * @param springSynchronization the Spring TransactionSynchronization to delegate to
 	 * @param jtaUserTransaction the JTA UserTransaction to use for rollback-only
-	 * setting in case of an exception thrown in <code>beforeCompletion</code>
+	 * setting in case of an exception thrown in {@code beforeCompletion}
 	 * (can be omitted if the JTA provider itself marks the transaction rollback-only
 	 * in such a scenario, which is required by the JTA specification as of JTA 1.1).
 	 */
@@ -90,11 +90,11 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	 * TransactionSynchronization and JTA TransactionManager.
 	 * <p>Note that this adapter will never perform a rollback-only call on WebLogic,
 	 * since WebLogic Server is known to automatically mark the transaction as
-	 * rollback-only in case of a <code>beforeCompletion</code> exception. Hence,
+	 * rollback-only in case of a {@code beforeCompletion} exception. Hence,
 	 * on WLS, this constructor is equivalent to the single-arg constructor.
 	 * @param springSynchronization the Spring TransactionSynchronization to delegate to
 	 * @param jtaTransactionManager the JTA TransactionManager to use for rollback-only
-	 * setting in case of an exception thrown in <code>beforeCompletion</code>
+	 * setting in case of an exception thrown in {@code beforeCompletion}
 	 * (can be omitted if the JTA provider itself marks the transaction rollback-only
 	 * in such a scenario, which is required by the JTA specification as of JTA 1.1)
 	 */
@@ -109,10 +109,11 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 
 
 	/**
-	 * JTA <code>beforeCompletion</code> callback: just invoked before commit.
+	 * JTA {@code beforeCompletion} callback: just invoked before commit.
 	 * <p>In case of an exception, the JTA transaction will be marked as rollback-only.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCommit
 	 */
+	@Override
 	public void beforeCompletion() {
 		try {
 			boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
@@ -161,13 +162,14 @@ public class SpringJtaSynchronizationAdapter implements Synchronization {
 	}
 
 	/**
-	 * JTA <code>afterCompletion</code> callback: invoked after commit/rollback.
-	 * <p>Needs to invoke the Spring synchronization's <code>beforeCompletion</code>
+	 * JTA {@code afterCompletion} callback: invoked after commit/rollback.
+	 * <p>Needs to invoke the Spring synchronization's {@code beforeCompletion}
 	 * at this late stage in case of a rollback, since there is no corresponding
 	 * callback with JTA.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#beforeCompletion
 	 * @see org.springframework.transaction.support.TransactionSynchronization#afterCompletion
 	 */
+	@Override
 	public void afterCompletion(int status) {
 		if (!this.beforeCompletionCalled) {
 			// beforeCompletion not called before (probably because of JTA rollback).

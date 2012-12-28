@@ -30,12 +30,12 @@ import org.springframework.util.StringUtils;
 /**
  * {@code ReflectionTestUtils} is a collection of reflection-based utility
  * methods for use in unit and integration testing scenarios.
- * 
+ *
  * <p>There are often times when it would be beneficial to be able to set a
  * non-{@code public} field, invoke a non-{@code public} setter method, or
  * invoke a non-{@code public} <em>configuration</em> or <em>lifecycle</em>
  * callback method when testing code involving, for example:
- * 
+ *
  * <ul>
  * <li>ORM frameworks such as JPA and Hibernate which condone the usage of
  * {@code private} or {@code protected} field access as opposed to
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
  * and {@link javax.annotation.PreDestroy @PreDestroy} for lifecycle callback
  * methods.</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -67,12 +67,12 @@ public class ReflectionTestUtils {
 	/**
 	 * Set the {@link Field field} with the given {@code name} on the provided
 	 * {@link Object target object} to the supplied {@code value}.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired field.
 	 * In addition, an attempt will be made to make non-{@code public} fields
 	 * <em>accessible</em>, thus allowing one to set {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
-	 * 
+	 *
 	 * @param target the target object on which to set the field
 	 * @param name the name of the field to set
 	 * @param value the value to set
@@ -87,12 +87,12 @@ public class ReflectionTestUtils {
 	/**
 	 * Set the {@link Field field} with the given {@code name} on the provided
 	 * {@link Object target object} to the supplied {@code value}.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to set {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
-	 * 
+	 *
 	 * @param target the target object on which to set the field
 	 * @param name the name of the field to set
 	 * @param value the value to set
@@ -123,12 +123,12 @@ public class ReflectionTestUtils {
 
 	/**
 	 * Get the field with the given {@code name} from the provided target object.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * field. In addition, an attempt will be made to make non-{@code public}
 	 * fields <em>accessible</em>, thus allowing one to get {@code protected},
 	 * {@code private}, and <em>package-private</em> fields.
-	 * 
+	 *
 	 * @param target the target object on which to set the field
 	 * @param name the name of the field to get
 	 * @return the field's current value
@@ -151,17 +151,17 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the setter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> setter methods.
-	 * 
+	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to set the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;setName&quot; as the method name.
-	 * 
+	 *
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
@@ -178,17 +178,17 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the setter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> setter methods.
-	 * 
+	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to set the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;setName&quot; as the method name.
-	 * 
+	 *
 	 * @param target the target object on which to invoke the specified setter
 	 * method
 	 * @param name the name of the setter method to invoke or the corresponding
@@ -226,17 +226,17 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the getter method with the given {@code name} on the supplied
 	 * target object with the supplied {@code value}.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> getter methods.
-	 * 
+	 *
 	 * <p>In addition, this method supports JavaBean-style <em>property</em>
 	 * names. For example, if you wish to get the {@code name} property on the
 	 * target object, you may pass either &quot;name&quot; or
 	 * &quot;getName&quot; as the method name.
-	 * 
+	 *
 	 * @param target the target object on which to invoke the specified getter
 	 * method
 	 * @param name the name of the getter method to invoke or the corresponding
@@ -271,12 +271,12 @@ public class ReflectionTestUtils {
 	/**
 	 * Invoke the method with the given {@code name} on the supplied target
 	 * object with the supplied arguments.
-	 * 
+	 *
 	 * <p>This method traverses the class hierarchy in search of the desired
 	 * method. In addition, an attempt will be made to make non-{@code public}
 	 * methods <em>accessible</em>, thus allowing one to invoke {@code protected},
 	 * {@code private}, and <em>package-private</em> methods.
-	 * 
+	 *
 	 * @param target the target object on which to invoke the specified method
 	 * @param name the name of the method to invoke
 	 * @param args the arguments to provide to the method

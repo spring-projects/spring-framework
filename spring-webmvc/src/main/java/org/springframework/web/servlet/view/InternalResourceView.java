@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,12 +36,12 @@ import org.springframework.web.util.WebUtils;
  * the specified resource URL using a {@link javax.servlet.RequestDispatcher}.
  *
  * <p>A URL for this view is supposed to specify a resource within the web
- * application, suitable for RequestDispatcher's <code>forward</code> or
- * <code>include</code> method.
+ * application, suitable for RequestDispatcher's {@code forward} or
+ * {@code include} method.
  *
  * <p>If operating within an already included request or within a response that
  * has already been committed, this view will fall back to an include instead of
- * a forward. This can be enforced by calling <code>response.flushBuffer()</code>
+ * a forward. This can be enforced by calling {@code response.flushBuffer()}
  * (which will commit the response) before rendering the view.
  *
  * <p>Typical usage with {@link InternalResourceViewResolver} looks as follows,
@@ -133,8 +133,8 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	/**
 	 * Set whether to make all Spring beans in the application context accessible
 	 * as request attributes, through lazy checking once an attribute gets accessed.
-	 * <p>This will make all such beans accessible in plain <code>${...}</code>
-	 * expressions in a JSP 2.0 page, as well as in JSTL's <code>c:out</code>
+	 * <p>This will make all such beans accessible in plain {@code ${...}}
+	 * expressions in a JSP 2.0 page, as well as in JSTL's {@code c:out}
 	 * value expressions.
 	 * <p>Default is "false". Switch this flag on to transparently expose all
 	 * Spring beans in the request attribute namespace.
@@ -311,14 +311,14 @@ public class InternalResourceView extends AbstractUrlBasedView {
 	}
 
 	/**
-	 * Determine whether to use RequestDispatcher's <code>include</code> or
-	 * <code>forward</code> method.
+	 * Determine whether to use RequestDispatcher's {@code include} or
+	 * {@code forward} method.
 	 * <p>Performs a check whether an include URI attribute is found in the request,
 	 * indicating an include request, and whether the response has already been committed.
 	 * In both cases, an include will be performed, as a forward is not possible anymore.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return <code>true</code> for include, <code>false</code> for forward
+	 * @return {@code true} for include, {@code false} for forward
 	 * @see javax.servlet.RequestDispatcher#forward
 	 * @see javax.servlet.RequestDispatcher#include
 	 * @see javax.servlet.ServletResponse#isCommitted

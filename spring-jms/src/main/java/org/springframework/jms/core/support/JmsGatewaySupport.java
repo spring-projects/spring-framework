@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.jms.core.JmsTemplate;
 
 /**
  * Convenient super class for application classes that need JMS access.
- * 
+ *
  * <p>Requires a ConnectionFactory or a JmsTemplate instance to be set.
  * It will create its own JmsTemplate if a ConnectionFactory is passed in.
  * A custom JmsTemplate instance can be created for a given ConnectionFactory
@@ -44,7 +44,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	private JmsTemplate jmsTemplate;
 
 
@@ -58,7 +58,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	public final void setConnectionFactory(ConnectionFactory connectionFactory) {
 		this.jmsTemplate = createJmsTemplate(connectionFactory);
 	}
-	
+
 	/**
 	 * Create a JmsTemplate for the given ConnectionFactory.
 	 * Only invoked if populating the gateway with a ConnectionFactory reference.
@@ -72,14 +72,14 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	protected JmsTemplate createJmsTemplate(ConnectionFactory connectionFactory) {
 		return new JmsTemplate(connectionFactory);
 	}
-	
+
 	/**
 	 * Return the JMS ConnectionFactory used by the gateway.
 	 */
 	public final ConnectionFactory getConnectionFactory() {
 		return (this.jmsTemplate != null ? this.jmsTemplate.getConnectionFactory() : null);
 	}
-	
+
 	/**
 	 * Set the JmsTemplate for the gateway.
 	 * @param jmsTemplate
@@ -88,14 +88,15 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 	public final void setJmsTemplate(JmsTemplate jmsTemplate) {
 		this.jmsTemplate = jmsTemplate;
 	}
-	
+
 	/**
 	 * Return the JmsTemplate for the gateway.
 	 */
 	public final JmsTemplate getJmsTemplate() {
 		return this.jmsTemplate;
 	}
-	
+
+	@Override
 	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		if (this.jmsTemplate == null) {
 			throw new IllegalArgumentException("'connectionFactory' or 'jmsTemplate' is required");
@@ -107,7 +108,7 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 			throw new BeanInitializationException("Initialization of JMS gateway failed: " + ex.getMessage(), ex);
 		}
 	}
-	
+
 	/**
 	 * Subclasses can override this for custom initialization behavior.
 	 * Gets called after population of this instance's bean properties.

@@ -23,7 +23,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
  * Represents a variable reference, eg. #someVar. Note this is different to a *local* variable like $someVar
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -55,14 +55,17 @@ public class VariableReference extends SpelNodeImpl {
 			this.eContext = evaluationContext;
 		}
 
+		@Override
 		public TypedValue getValue() {
 			return value;
 		}
 
+		@Override
 		public void setValue(Object newValue) {
 			eContext.setVariable(name, newValue);
 		}
 
+		@Override
 		public boolean isWritable() {
 			return true;
 		}
@@ -102,7 +105,7 @@ public class VariableReference extends SpelNodeImpl {
 	}
 
 	@Override
-	public String toStringAST() { 
+	public String toStringAST() {
 		return "#" + this.name;
 	}
 

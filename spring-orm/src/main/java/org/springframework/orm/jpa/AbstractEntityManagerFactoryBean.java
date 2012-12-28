@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +142,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceProvider = persistenceProvider;
 	}
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}
@@ -157,13 +158,14 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
 
 	/**
 	 * Specify JPA properties, to be passed into
-	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor) or a
 	 * "props" element in XML bean definitions.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
@@ -175,7 +177,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Specify JPA properties as a Map, to be passed into
-	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
@@ -200,7 +202,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManagerFactory interface
 	 * that this EntityManagerFactory proxy is supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard <code>javax.persistence.EntityManagerFactory</code>
+	 * or set to the standard {@code javax.persistence.EntityManagerFactory}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
 	 */
@@ -213,7 +215,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManager interface
 	 * that this factory's EntityManagers are supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard <code>javax.persistence.EntityManager</code>
+	 * or set to the standard {@code javax.persistence.EntityManager}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
@@ -223,6 +225,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.entityManagerInterface = emInterface;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getEntityManagerInterface() {
 		return this.entityManagerInterface;
 	}
@@ -238,6 +241,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		this.jpaDialect = jpaDialect;
 	}
 
+	@Override
 	public JpaDialect getJpaDialect() {
 		return this.jpaDialect;
 	}
@@ -254,29 +258,34 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Return the JpaVendorAdapter implementation for this
-	 * EntityManagerFactory, or <code>null</code> if not known.
+	 * EntityManagerFactory, or {@code null} if not known.
 	 */
 	public JpaVendorAdapter getJpaVendorAdapter() {
 		return this.jpaVendorAdapter;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
+	@Override
 	public final void afterPropertiesSet() throws PersistenceException {
 		if (this.jpaVendorAdapter != null) {
 			if (this.persistenceProvider == null) {
@@ -383,7 +392,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Subclasses must implement this method to create the EntityManagerFactory
-	 * that will be returned by the <code>getObject()</code> method.
+	 * that will be returned by the {@code getObject()} method.
 	 * @return EntityManagerFactory instance returned by this FactoryBean
 	 * @throws PersistenceException if the EntityManager cannot be created
 	 */
@@ -399,19 +408,23 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * @see JpaDialect#translateExceptionIfPossible
 	 * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
 	 */
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		return (this.jpaDialect != null ? this.jpaDialect.translateExceptionIfPossible(ex) :
 				EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ex));
 	}
 
+	@Override
 	public EntityManagerFactory getNativeEntityManagerFactory() {
 		return this.nativeEntityManagerFactory;
 	}
 
+	@Override
 	public PersistenceUnitInfo getPersistenceUnitInfo() {
 		return null;
 	}
 
+	@Override
 	public DataSource getDataSource() {
 		return null;
 	}
@@ -420,14 +433,17 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Return the singleton EntityManagerFactory.
 	 */
+	@Override
 	public EntityManagerFactory getObject() {
 		return this.entityManagerFactory;
 	}
 
+	@Override
 	public Class<? extends EntityManagerFactory> getObjectType() {
 		return (this.entityManagerFactory != null ? this.entityManagerFactory.getClass() : EntityManagerFactory.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -436,6 +452,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	/**
 	 * Close the EntityManagerFactory on bean factory shutdown.
 	 */
+	@Override
 	public void destroy() {
 		if (logger.isInfoEnabled()) {
 			logger.info("Closing JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
@@ -467,6 +484,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Minimal bean reference to the surrounding AbstractEntityManagerFactoryBean.
 	 * Resolved to the actual AbstractEntityManagerFactoryBean instance on deserialization.
 	 */
+	@SuppressWarnings("serial")
 	private static class SerializedEntityManagerFactoryBeanReference implements Serializable {
 
 		private final BeanFactory beanFactory;
@@ -489,6 +507,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * return a proxy EntityManager if necessary from createEntityManager()
 	 * methods.
 	 */
+	@SuppressWarnings("serial")
 	private static class ManagedEntityManagerFactoryInvocationHandler implements InvocationHandler, Serializable {
 
 		private final AbstractEntityManagerFactoryBean entityManagerFactoryBean;
@@ -497,6 +516,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			this.entityManagerFactoryBean = emfb;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				if (method.getName().equals("equals")) {

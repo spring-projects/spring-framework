@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  *
  * <p>Delegates to {@link ConnectionFactoryUtils} for automatically participating
  * in thread-bound transactions, for example managed by {@link JmsTransactionManager}.
- * <code>createSession</code> calls and <code>close</code> calls on returned Sessions
+ * {@code createSession} calls and {@code close} calls on returned Sessions
  * will behave properly within a transaction, that is, always work on the transactional
  * Session. If not within a transaction, normal ConnectionFactory behavior applies.
  *
@@ -136,16 +136,19 @@ public class TransactionAwareConnectionFactoryProxy
 	}
 
 
+	@Override
 	public Connection createConnection() throws JMSException {
 		Connection targetConnection = this.targetConnectionFactory.createConnection();
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
+	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		Connection targetConnection = this.targetConnectionFactory.createConnection(username, password);
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
+	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
@@ -155,6 +158,7 @@ public class TransactionAwareConnectionFactoryProxy
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
+	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
@@ -164,6 +168,7 @@ public class TransactionAwareConnectionFactoryProxy
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
+	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
@@ -173,6 +178,7 @@ public class TransactionAwareConnectionFactoryProxy
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
+	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
@@ -216,6 +222,7 @@ public class TransactionAwareConnectionFactoryProxy
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
@@ -288,6 +295,7 @@ public class TransactionAwareConnectionFactoryProxy
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 

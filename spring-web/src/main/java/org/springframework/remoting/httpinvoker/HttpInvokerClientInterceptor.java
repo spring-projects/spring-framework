@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	/**
 	 * Return the codebase URL to download classes from if not found locally.
 	 */
+	@Override
 	public String getCodebaseUrl() {
 		return this.codebaseUrl;
 	}
@@ -131,6 +132,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "HTTP invoker proxy for service URL [" + getServiceUrl() + "]";
@@ -210,7 +212,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		}
 		else {
 			throw new RemoteAccessException(
-			    "Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+				"Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

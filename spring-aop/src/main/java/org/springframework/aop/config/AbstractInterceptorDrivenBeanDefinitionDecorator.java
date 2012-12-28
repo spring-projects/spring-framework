@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * to the resulting bean.
  *
  * <p>This base class controls the creation of the {@link ProxyFactoryBean} bean definition
- * and wraps the original as an inner-bean definition for the <code>target</code> property
+ * and wraps the original as an inner-bean definition for the {@code target} property
  * of {@link ProxyFactoryBean}.
  *
  * <p>Chaining is correctly handled, ensuring that only one {@link ProxyFactoryBean} definition
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * already created the {@link org.springframework.aop.framework.ProxyFactoryBean} then the
  * interceptor is simply added to the existing definition.
  *
- * <p>Subclasses have only to create the <code>BeanDefinition</code> to the interceptor that
+ * <p>Subclasses have only to create the {@code BeanDefinition} to the interceptor that
  * they wish to add.
  *
  * @author Rob Harrop
@@ -58,9 +58,10 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implements BeanDefinitionDecorator {
 
+	@Override
 	public final BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definitionHolder, ParserContext parserContext) {
 		BeanDefinitionRegistry registry = parserContext.getRegistry();
-		
+
 		// get the root bean name - will be the name of the generated proxy factory bean
 		String existingBeanName = definitionHolder.getBeanName();
 		BeanDefinition targetDefinition = definitionHolder.getBeanDefinition();
@@ -118,7 +119,7 @@ public abstract class AbstractInterceptorDrivenBeanDefinitionDecorator implement
 	}
 
 	/**
-	 * Subclasses should implement this method to return the <code>BeanDefinition</code>
+	 * Subclasses should implement this method to return the {@code BeanDefinition}
 	 * for the interceptor they wish to apply to the bean being decorated.
 	 */
 	protected abstract BeanDefinition createInterceptorDefinition(Node node);

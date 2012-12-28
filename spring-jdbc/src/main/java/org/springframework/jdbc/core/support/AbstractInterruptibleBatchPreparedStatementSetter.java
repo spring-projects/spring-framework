@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	 * This implementation calls {@link #setValuesIfAvailable}
 	 * and sets this instance's exhaustion flag accordingly.
 	 */
+	@Override
 	public final void setValues(PreparedStatement ps, int i) throws SQLException {
 		this.exhausted = !setValuesIfAvailable(ps, i);
 	}
@@ -47,14 +48,16 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 	/**
 	 * This implementation return this instance's current exhaustion flag.
 	 */
+	@Override
 	public final boolean isBatchExhausted(int i) {
 		return this.exhausted;
 	}
 
 	/**
-	 * This implementation returns <code>Integer.MAX_VALUE</code>.
+	 * This implementation returns {@code Integer.MAX_VALUE}.
 	 * Can be overridden in subclasses to lower the maximum batch size.
 	 */
+	@Override
 	public int getBatchSize() {
 		return Integer.MAX_VALUE;
 	}
@@ -62,7 +65,7 @@ public abstract class AbstractInterruptibleBatchPreparedStatementSetter
 
 	/**
 	 * Check for available values and set them on the given PreparedStatement.
-	 * If no values are available anymore, return <code>false</code>.
+	 * If no values are available anymore, return {@code false}.
 	 * @param ps PreparedStatement we'll invoke setter methods on
 	 * @param i index of the statement we're issuing in the batch, starting from 0
 	 * @return whether there were values to apply (that is, whether the applied

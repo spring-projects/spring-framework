@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,8 @@ import org.springframework.util.StringUtils;
  * @see ScheduledTimerTask
  * @see java.util.Timer
  * @see java.util.TimerTask
- * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
- * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
+ * @deprecated as of Spring 3.0, in favor of the {@code scheduling.concurrent}
+ * package which is based on Java 5's {@code java.util.concurrent.ExecutorService}
  */
 @Deprecated
 public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, InitializingBean, DisposableBean {
@@ -88,11 +88,13 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 		this.daemon = daemon;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.beanName, this.daemon);
@@ -104,7 +106,7 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 	}
 
 	/**
-	 * Create a new Timer instance. Called by <code>afterPropertiesSet</code>.
+	 * Create a new Timer instance. Called by {@code afterPropertiesSet}.
 	 * Can be overridden in subclasses to provide custom Timer subclasses.
 	 * @param name the desired name of the Timer's associated thread
 	 * @param daemon whether to create a Timer that runs as daemon thread
@@ -144,14 +146,17 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 	}
 
 
+	@Override
 	public Timer getObject() {
 		return this.timer;
 	}
 
+	@Override
 	public Class<? extends Timer> getObjectType() {
 		return Timer.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -161,6 +166,7 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 	 * Cancel the Timer on bean factory shutdown, stopping all scheduled tasks.
 	 * @see java.util.Timer#cancel()
 	 */
+	@Override
 	public void destroy() {
 		logger.info("Cancelling Timer");
 		this.timer.cancel();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.concurrent.ScheduledFuture;
  * and adding extended trigger capabilities.
  *
  * <p>This interface is roughly equivalent to a JSR-236
- * <code>ManagedScheduledExecutorService</code> as supported in Java EE 6
+ * {@code ManagedScheduledExecutorService} as supported in Java EE 6
  * environments. However, at the time of the Spring 3.0 release, the
  * JSR-236 interfaces have not been released in official form yet.
  *
@@ -56,8 +56,8 @@ public interface TaskScheduler {
 	 * e.g. a {@link org.springframework.scheduling.support.CronTrigger} object
 	 * wrapping a cron expression
 	 * @return a {@link ScheduledFuture} representing pending completion of the task,
-	 * or <code>null</code> if the given Trigger object never fires (i.e. returns
-	 * <code>null</code> from {@link Trigger#nextExecutionTime})
+	 * or {@code null} if the given Trigger object never fires (i.e. returns
+	 * {@code null} from {@link Trigger#nextExecutionTime})
 	 * @throws org.springframework.core.task.TaskRejectedException if the given task was not accepted
 	 * for internal reasons (e.g. a pool overload handling policy or a pool shutdown in progress)
 	 * @see org.springframework.scheduling.support.CronTrigger
