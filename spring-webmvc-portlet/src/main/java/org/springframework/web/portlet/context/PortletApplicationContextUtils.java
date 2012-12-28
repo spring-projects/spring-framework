@@ -55,7 +55,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @see org.springframework.web.portlet.DispatcherPortlet
  */
 public abstract class PortletApplicationContextUtils {
-	
+
 	/**
 	 * Find the root WebApplicationContext for this portlet application, which is
 	 * typically loaded via ContextLoaderListener or ContextLoaderServlet.
@@ -98,7 +98,7 @@ public abstract class PortletApplicationContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static ApplicationContext getRequiredWebApplicationContext(PortletContext pc)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		ApplicationContext wac = getWebApplicationContext(pc);
 		if (wac == null) {

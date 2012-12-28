@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,11 +63,11 @@ import org.springframework.core.io.Resource;
 /**
  * Security test case. Checks whether the container uses its privileges for its
  * internal work but does not leak them when touching/calling user code.
- * 
+ *
  *t The first half of the test case checks that permissions are downgraded when
  * calling user code while the second half that the caller code permission get
  * through and Spring doesn't override the permission stack.
- * 
+ *
  * @author Costin Leau
  */
 public class CallbacksSecurityTests {
@@ -97,7 +97,7 @@ public class CallbacksSecurityTests {
 		public void setProperty(Object value) {
 			checkCurrentContext();
 		}
-		
+
 		public Object getProperty() {
 			checkCurrentContext();
 			return null;
@@ -111,7 +111,7 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 			return null;
 		}
-		
+
 		private void checkCurrentContext() {
 			assertEquals(expectedName, getCurrentSubjectName());
 		}
@@ -352,7 +352,7 @@ public class CallbacksSecurityTests {
 			assertTrue(ex.getCause() instanceof SecurityException);
 		}
 	}
-	
+
 	@Test
 	public void testCustomInitBean() throws Exception {
 		try {

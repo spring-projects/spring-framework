@@ -42,9 +42,9 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 public final class AspectJPrecedenceComparatorTests {
 
 	/*
-	 * Specification for the comparator (as defined in the 
+	 * Specification for the comparator (as defined in the
 	 * AspectJPrecedenceComparator class)
-	 * 
+	 *
 	 * <p>
 	 * Orders AspectJ advice/advisors by invocation order.
 	 * </p>

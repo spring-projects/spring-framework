@@ -305,7 +305,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 			logger.debug("Published WebApplicationContext of Struts ActionServlet '" + getServletName() +
 					"', module '" + getModulePrefix() + "' as ServletContext attribute with name [" + attrName + "]");
 		}
-		
+
 		return wac;
 	}
 
@@ -340,7 +340,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		wac.setNamespace(getNamespace());
 		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(
+				StringUtils.tokenizeToStringArray(
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.addBeanFactoryPostProcessor(

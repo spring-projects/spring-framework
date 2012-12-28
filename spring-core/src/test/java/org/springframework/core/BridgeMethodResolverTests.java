@@ -882,7 +882,7 @@ public class BridgeMethodResolverTests {
 	}
 
 
-	public class GenericHibernateRepository<T, ID extends Serializable> 
+	public class GenericHibernateRepository<T, ID extends Serializable>
 					implements ConvenientGenericRepository<T, ID> {
 
 		/**

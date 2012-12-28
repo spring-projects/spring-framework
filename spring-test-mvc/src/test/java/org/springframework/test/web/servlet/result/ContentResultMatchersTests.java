@@ -36,49 +36,49 @@ public class ContentResultMatchersTests {
 	public void typeNoMatch() throws Exception {
 		new ContentResultMatchers().contentType("text/plain").match(getStubMvcResult());
 	}
-	
+
 	@Test
 	public void encoding() throws Exception {
 		new ContentResultMatchers().encoding("UTF-8").match(getStubMvcResult());
 	}
-	
+
 	@Test(expected=AssertionError.class)
 	public void encodingNoMatch() throws Exception {
 		new ContentResultMatchers().encoding("ISO-8859-1").match(getStubMvcResult());
 	}
-	
+
 	@Test
 	public void string() throws Exception {
 		new ContentResultMatchers().string(new String(CONTENT.getBytes("UTF-8"))).match(getStubMvcResult());
 	}
-	
+
 	@Test(expected=AssertionError.class)
 	public void stringNoMatch() throws Exception {
 		new ContentResultMatchers().encoding("bogus").match(getStubMvcResult());
 	}
-	
+
 	@Test
 	public void stringMatcher() throws Exception {
 		String content = new String(CONTENT.getBytes("UTF-8"));
 		new ContentResultMatchers().string(Matchers.equalTo(content)).match(getStubMvcResult());
 	}
-	
+
 	@Test(expected=AssertionError.class)
 	public void stringMatcherNoMatch() throws Exception {
 		new ContentResultMatchers().string(Matchers.equalTo("bogus")).match(getStubMvcResult());
 	}
-	
+
 	@Test
 	public void bytes() throws Exception {
 		new ContentResultMatchers().bytes(CONTENT.getBytes("UTF-8")).match(getStubMvcResult());
 	}
-	
+
 	@Test(expected=AssertionError.class)
 	public void bytesNoMatch() throws Exception {
 		new ContentResultMatchers().bytes("bogus".getBytes()).match(getStubMvcResult());
 	}
 
-	
+
 	private static final String CONTENT = "{\"foo\":\"bar\"}";
 
 	private StubMvcResult getStubMvcResult() throws Exception {

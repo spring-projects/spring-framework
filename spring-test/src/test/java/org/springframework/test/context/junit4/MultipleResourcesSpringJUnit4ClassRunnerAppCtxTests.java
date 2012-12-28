@@ -30,7 +30,7 @@ import org.springframework.util.ResourceUtils;
  * to verify support for the new <code>value</code> attribute alias for
  * <code>&#064;ContextConfiguration</code>'s <code>locations</code> attribute.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see SpringJUnit4ClassRunnerAppCtxTests

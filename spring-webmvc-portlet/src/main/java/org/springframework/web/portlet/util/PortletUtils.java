@@ -194,7 +194,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Get the specified session attribute under the {@link javax.portlet.PortletSession#PORTLET_SCOPE},
-	 * creating and setting a new attribute if no existing found. The given class 
+	 * creating and setting a new attribute if no existing found. The given class
 	 * needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
 	 * @param session current portlet session
@@ -211,7 +211,7 @@ public abstract class PortletUtils {
 
 	/**
 	 * Get the specified session attribute in the given scope,
-	 * creating and setting a new attribute if no existing found. The given class 
+	 * creating and setting a new attribute if no existing found. The given class
 	 * needs to have a public no-arg constructor.
 	 * Useful for on-demand state objects in a web tier, like shopping carts.
 	 * @param session current portlet session
@@ -369,7 +369,7 @@ public abstract class PortletUtils {
 	}
 
 	/**
-	 * Return the full name of a specific input type="submit" parameter 
+	 * Return the full name of a specific input type="submit" parameter
 	 * if it was sent in the request, either via a button (directly with name)
 	 * or via an image (name + ".x" or name + ".y").
 	 * @param request current portlet request

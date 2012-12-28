@@ -24,7 +24,7 @@ import org.springframework.jms.JmsException;
 
 /**
  * Specifies a basic set of JMS operations.
- * 
+ *
  * <p>Implemented by {@link JmsTemplate}. Not often used but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
@@ -160,7 +160,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -172,7 +172,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -185,7 +185,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 
 	//-------------------------------------------------------------------------

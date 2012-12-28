@@ -26,7 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 /**
  * Supports parameters of a given type and resolves them using a stub value.
  * Also records the resolved parameter value.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class StubArgumentResolver implements HandlerMethodArgumentResolver {
@@ -34,7 +34,7 @@ public class StubArgumentResolver implements HandlerMethodArgumentResolver {
 	private final Class<?> parameterType;
 
 	private final Object stubValue;
-	
+
 	private List<MethodParameter> resolvedParameters = new ArrayList<MethodParameter>();
 
 	public StubArgumentResolver(Class<?> supportedParameterType, Object stubValue) {

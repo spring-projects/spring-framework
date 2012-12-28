@@ -34,7 +34,7 @@ class PropertyOverrideBeanDefinitionParser extends AbstractPropertyLoadingBeanDe
 	protected Class getBeanClass(Element element) {
 		return PropertyOverrideConfigurer.class;
 	}
-	
+
 	@Override
 	protected void doParse(Element element, BeanDefinitionBuilder builder) {
 

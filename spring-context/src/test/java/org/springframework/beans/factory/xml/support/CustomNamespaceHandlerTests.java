@@ -63,18 +63,18 @@ import org.springframework.core.io.Resource;
 
 /**
  * Unit tests for custom XML namespace handler implementations.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  * @author Chris Beams
  * @author Juergen Hoeller
  */
 public class CustomNamespaceHandlerTests {
-	
+
 	private static final Class<?> CLASS = CustomNamespaceHandlerTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
 	private static final String FQ_PATH = "org/springframework/beans/factory/xml/support";
-	
+
 	private static final String NS_PROPS = format("%s/%s.properties", FQ_PATH, CLASSNAME);
 	private static final String NS_XML = format("%s/%s-context.xml", FQ_PATH, CLASSNAME);
 	private static final String TEST_XSD = format("%s/%s.xsd", FQ_PATH, CLASSNAME);
@@ -211,7 +211,7 @@ public class CustomNamespaceHandlerTests {
 
 /**
  * Custom namespace handler implementation.
- * 
+ *
  * @author Rob Harrop
  */
 final class TestNamespaceHandler extends NamespaceHandlerSupport {

@@ -30,7 +30,7 @@ public class MethodInvocationException extends PropertyAccessException {
 	 * Error code that a method invocation error will be registered with.
 	 */
 	public static final String ERROR_CODE = "methodInvocation";
-	
+
 
 	/**
 	 * Create a new MethodInvocationException.

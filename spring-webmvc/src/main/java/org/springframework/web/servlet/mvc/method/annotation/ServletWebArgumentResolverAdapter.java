@@ -27,12 +27,12 @@ import org.springframework.web.method.annotation.AbstractWebArgumentResolverAdap
 /**
  * A Servlet-specific {@link org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter} that creates a
  * {@link NativeWebRequest} from {@link ServletRequestAttributes}.
- * 
+ *
  * <p><strong>Note:</strong> This class is provided for backwards compatibility.
- * However it is recommended to re-write a {@code WebArgumentResolver} as 
- * {@code HandlerMethodArgumentResolver}. For more details see javadoc of 
+ * However it is recommended to re-write a {@code WebArgumentResolver} as
+ * {@code HandlerMethodArgumentResolver}. For more details see javadoc of
  * {@link org.springframework.web.method.annotation.AbstractWebArgumentResolverAdapter}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */

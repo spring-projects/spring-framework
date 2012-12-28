@@ -55,7 +55,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
  * and {@link TestExecutionListener#afterTestClass(TestContext)
  * afterTestClass()} lifecycle callback methods.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

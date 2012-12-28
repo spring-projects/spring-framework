@@ -62,7 +62,7 @@ import org.springframework.validation.ObjectError;
  * &lt;form-beans&gt;
  *   &lt;form-bean name="actionForm" type="org.springframework.web.struts.SpringBindingActionForm"/&gt;
  * &lt;/form-beans&gt;</pre>
- * 
+ *
  * Example code in a custom Struts <code>Action</code>:
  *
  * <pre>

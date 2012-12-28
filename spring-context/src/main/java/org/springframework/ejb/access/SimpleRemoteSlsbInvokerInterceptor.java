@@ -106,7 +106,7 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 			if (targetEx instanceof RemoteException) {
 				RemoteException rex = (RemoteException) targetEx;
 				throw RmiClientInterceptorUtils.convertRmiAccessException(
-				    invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
+					invocation.getMethod(), rex, isConnectFailure(rex), getJndiName());
 			}
 			else if (targetEx instanceof CreateException) {
 				throw RmiClientInterceptorUtils.convertRmiAccessException(

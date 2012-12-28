@@ -36,7 +36,7 @@ public final class AspectJAdviceParameterNameDiscoverAnnotationTests
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MyAnnotation {}
-	
+
 	public void pjpAndAnAnnotation(ProceedingJoinPoint pjp, MyAnnotation ann) {}
 
 	@Test

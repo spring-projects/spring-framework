@@ -346,10 +346,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else {
 			Object bean;
 			final BeanFactory parent = this;
-			
+
 			if (System.getSecurityManager() != null) {
 				bean = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-	
+
 					public Object run() {
 						return getInstantiationStrategy().instantiate(bd, null, parent);
 					}
@@ -358,7 +358,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			else {
 				bean = getInstantiationStrategy().instantiate(bd, null, parent);
 			}
-				
+
 			populateBean(beanClass.getName(), bd, new BeanWrapperImpl(bean));
 			return bean;
 		}
@@ -1346,7 +1346,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		MutablePropertyValues mpvs = null;
 		List<PropertyValue> original;
-		
+
 		if (System.getSecurityManager()!= null) {
 			if (bw instanceof BeanWrapperImpl) {
 				((BeanWrapperImpl) bw).setSecurityContext(getAccessControlContext());
@@ -1473,7 +1473,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		else {
 			invokeAwareMethods(beanName, bean);
 		}
-		
+
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
@@ -1540,7 +1540,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				catch (PrivilegedActionException pae) {
 					throw pae.getException();
 				}
-			}				
+			}
 			else {
 				((InitializingBean) bean).afterPropertiesSet();
 			}
@@ -1585,7 +1585,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		if (logger.isDebugEnabled()) {
 			logger.debug("Invoking init method  '" + initMethodName + "' on bean with name '" + beanName + "'");
 		}
-		
+
 		if (System.getSecurityManager() != null) {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 				public Object run() throws Exception {
@@ -1610,7 +1610,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			try {
 				ReflectionUtils.makeAccessible(initMethod);
 				initMethod.invoke(bean);
-			} 
+			}
 			catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}

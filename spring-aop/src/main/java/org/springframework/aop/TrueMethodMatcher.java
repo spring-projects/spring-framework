@@ -25,9 +25,9 @@ import java.lang.reflect.Method;
  * @author Rod Johnson
  */
 class TrueMethodMatcher implements MethodMatcher, Serializable {
-	
+
 	public static final TrueMethodMatcher INSTANCE = new TrueMethodMatcher();
-	
+
 	/**
 	 * Enforce Singleton pattern.
 	 */
@@ -46,7 +46,7 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 		// Should never be invoked as isRuntime returns false.
 		throw new UnsupportedOperationException();
 	}
-	
+
 	/**
 	 * Required to support serialization. Replaces with canonical
 	 * instance on deserialization, protecting Singleton pattern.
@@ -55,7 +55,7 @@ class TrueMethodMatcher implements MethodMatcher, Serializable {
 	private Object readResolve() {
 		return INSTANCE;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "MethodMatcher.TRUE";

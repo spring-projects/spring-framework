@@ -81,7 +81,7 @@ public class PropertyComparator implements Comparator {
 		}
 
 		int result;
-		
+
 		// Put an object with null property at the end of the sort result.
 		try {
 			if (v1 != null) {

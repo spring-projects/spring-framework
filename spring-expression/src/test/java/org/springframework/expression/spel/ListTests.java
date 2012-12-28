@@ -26,7 +26,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 /**
  * Test usage of inline lists.
- * 
+ *
  * @author Andy Clement
  * @since 3.0.4
  */

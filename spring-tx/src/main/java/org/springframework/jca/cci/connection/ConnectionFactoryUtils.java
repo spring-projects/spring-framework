@@ -28,7 +28,7 @@ import org.springframework.jca.cci.CannotGetCciConnectionException;
 import org.springframework.transaction.support.ResourceHolderSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
- 
+
 /**
  * Helper class that provides static methods for obtaining CCI Connections
  * from a {@link javax.resource.cci.ConnectionFactory}. Includes special

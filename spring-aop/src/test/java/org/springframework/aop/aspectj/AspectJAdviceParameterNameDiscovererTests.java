@@ -247,7 +247,7 @@ public class AspectJAdviceParameterNameDiscovererTests {
 	public void testReferenceBindingWithAlternateTokenizations() {
 		assertParameterNames(getMethod("onePrimitive"),"call(bar *) && somepc(foo)",new String[] {"foo"});
 		assertParameterNames(getMethod("onePrimitive"),"somepc ( foo )",new String[] {"foo"});
-		assertParameterNames(getMethod("onePrimitive"),"somepc( foo)",new String[] {"foo"});  
+		assertParameterNames(getMethod("onePrimitive"),"somepc( foo)",new String[] {"foo"});
 	}
 
 

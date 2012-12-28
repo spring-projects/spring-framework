@@ -213,13 +213,13 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		}
 	}
 
-		
+
 	/**
 	 * Confirm no connection was used to get metadata.
 	 * Does not use superclass replay mechanism.
 	 * @throws Exception
 	 */
-	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator() throws Exception {					
+	public void testStoredProcedureConfiguredViaJdbcTemplateWithCustomExceptionTranslator() throws Exception {
 		mockCallable.setObject(1, new Integer(11), Types.INTEGER);
 		ctrlCallable.setVoidCallable(1);
 		mockCallable.registerOutParameter(2, Types.INTEGER);
@@ -246,7 +246,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockConnection.close();
 		ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
-		
+
 		MockControl dsControl = MockControl.createControl(DataSource.class);
 		DataSource localDs = (DataSource) dsControl.getMock();
 		localDs.getConnection();
@@ -267,15 +267,15 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		// DataSource here if we need to to create an ExceptionTranslator
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-		
+
 		assertEquals(sp.execute(11), 5);
 		assertEquals(1, t.calls);
-		
+
 		dsControl.verify();
 		ctrlCallable.verify();
 		ctrlConnection.verify();
 	}
-	
+
 	/**
 	 * Confirm our JdbcTemplate is used
 	 * @throws Exception
@@ -301,11 +301,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		mockConnection.prepareCall("{call " + StoredProcedureConfiguredViaJdbcTemplate.SQL + "(?, ?)}");
 		ctrlConnection.setReturnValue(mockCallable);
 
-		replay();	
+		replay();
 		JdbcTemplate t = new JdbcTemplate();
 		t.setDataSource(mockDataSource);
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
-	
+
 		assertEquals(sp.execute(1106), 4);
 	}
 
@@ -429,7 +429,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		ctrlResultSet.verify();
 		assertEquals(2, sproc.getCount());
 	}
-	
+
 	public void testStoredProcedureWithResultSetMapped() throws Exception {
 		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
 		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
@@ -473,11 +473,11 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 		Map res = sproc.execute();
 
 		ctrlResultSet.verify();
-		
+
 		List rs = (List) res.get("rs");
 		assertEquals(2, rs.size());
 		assertEquals("Foo", rs.get(0));
-		assertEquals("Bar", rs.get(1));		
+		assertEquals("Bar", rs.get(1));
 
 	}
 
@@ -958,12 +958,12 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 			out = execute(new TestParameterMapper());
 			return out;
 		}
-		
+
 		private static class TestParameterMapper implements ParameterMapper {
-			
+
 			private TestParameterMapper() {
 			}
-			
+
 			public Map createMap(Connection conn) throws SQLException {
 				Map inParms = new HashMap();
 				String testValue = conn.toString();

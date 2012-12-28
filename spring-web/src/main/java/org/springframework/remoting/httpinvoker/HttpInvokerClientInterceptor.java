@@ -210,7 +210,7 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 		}
 		else {
 			throw new RemoteAccessException(
-			    "Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
+				"Could not access HTTP invoker remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

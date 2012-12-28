@@ -66,7 +66,7 @@ import org.springframework.util.StringUtils;
  * Examples are real URLs such as "<code>file:C:/context.xml</code>", pseudo-URLs
  * such as "<code>classpath:/context.xml</code>", and simple unprefixed paths
  * such as "<code>/WEB-INF/context.xml</code>". The latter will resolve in a
- * fashion specific to the underlying <code>ResourceLoader</code> (e.g. 
+ * fashion specific to the underlying <code>ResourceLoader</code> (e.g.
  * <code>ServletContextResource</code> for a <code>WebApplicationContext</code>).
  *
  * <p><b>Ant-style Patterns:</b>
@@ -147,7 +147,7 @@ import org.springframework.util.StringUtils;
  *     com/mycompany/package1/service-context.xml
  * </pre>may be in only one location, but when a path such as<pre>
  *     classpath:com/mycompany/**&#47;service-context.xml
- * </pre>is used to try to resolve it, the resolver will work off the (first) URL 
+ * </pre>is used to try to resolve it, the resolver will work off the (first) URL
  * returned by <code>getResource("com/mycompany");</code>. If this base package
  * node exists in multiple classloader locations, the actual end resource may
  * not be underneath. Therefore, preferably, use "<code>classpath*:<code>" with the same
@@ -695,7 +695,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			else if ("toString".equals(methodName)) {
 				return toString();
 			}
-			
+
 			throw new IllegalStateException("Unexpected method invocation: " + method);
 		}
 

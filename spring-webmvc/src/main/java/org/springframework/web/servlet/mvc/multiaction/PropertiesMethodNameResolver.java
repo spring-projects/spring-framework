@@ -48,7 +48,7 @@ import org.springframework.util.PathMatcher;
  */
 public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		implements InitializingBean {
-	
+
 	private Properties mappings;
 
 	private PathMatcher pathMatcher = new AntPathMatcher();

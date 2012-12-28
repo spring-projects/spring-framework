@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * <em>profile values</em> configured via the {@link IfProfileValue
  * &#064;IfProfileValue} annotation.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see ProfileValueSource
@@ -48,7 +48,7 @@ public @interface ProfileValueSourceConfiguration {
 	 * The type of {@link ProfileValueSource} to use when retrieving
 	 * <em>profile values</em>.
 	 * </p>
-	 * 
+	 *
 	 * @see SystemProfileValueSource
 	 */
 	Class<? extends ProfileValueSource> value() default SystemProfileValueSource.class;

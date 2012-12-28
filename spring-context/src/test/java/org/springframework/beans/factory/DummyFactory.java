@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  */
 public class DummyFactory
 		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
-	
+
 	public static final String SINGLETON_NAME = "Factory singleton";
 
 	private static boolean prototypeCreated;
@@ -125,7 +125,7 @@ public class DummyFactory
 		}
 		this.initialized = true;
 	}
-	
+
 	/**
 	 * Was this initialized by invocation of the
 	 * afterPropertiesSet() method from the InitializingBean interface?

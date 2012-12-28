@@ -52,7 +52,7 @@ public class LiteralExpression implements Expression {
 	public String getValue(EvaluationContext context) {
 		return this.literalValue;
 	}
-	
+
 	public String getValue(Object rootObject) {
 		return this.literalValue;
 	}

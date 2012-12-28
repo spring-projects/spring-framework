@@ -51,7 +51,7 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
- * 
+ *
  * <p>Subclasses typically must provide the {@link Source} to transform
  * by overriding {@link #createXsltSource}. Subclasses do not need to
  * concern themselves with XSLT other than providing a valid stylesheet location.
@@ -67,7 +67,7 @@ import org.springframework.web.util.NestedServletException;
  * the {@link ErrorListener} implementation instance for custom handling of warnings and errors during TransformerFactory operations
  * <li>{@link #setIndent(boolean) indent} (optional): whether additional whitespace
  * may be added when outputting the result; defaults to <code>true</code>
- * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code> 
+ * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code>
  * </ul>
  *
  * <p>Note that setting {@link #setCache(boolean) "cache"} to <code>false</code>

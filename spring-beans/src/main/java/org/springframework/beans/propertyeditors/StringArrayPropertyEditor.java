@@ -46,7 +46,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	private final String charsToDelete;
 
 	private final boolean emptyArrayAsNull;
-	
+
 	private final boolean trimValues;
 
 
@@ -83,7 +83,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param separator the separator to use for splitting a {@link String}
 	 * @param emptyArrayAsNull <code>true</code> if an empty String array
 	 * is to be transformed into <code>null</code>
-	 * @param trimValues <code>true</code> if the values in the parsed arrays 
+	 * @param trimValues <code>true</code> if the values in the parsed arrays
 	 * are to be be trimmed of whitespace (default is true).
 	 */
 	public StringArrayPropertyEditor(String separator, boolean emptyArrayAsNull, boolean trimValues) {
@@ -111,7 +111,7 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * e.g. "\r\n\f" will delete all new lines and line feeds in a String.
 	 * @param emptyArrayAsNull <code>true</code> if an empty String array
 	 * is to be transformed into <code>null</code>
-	 * @param trimValues <code>true</code> if the values in the parsed arrays 
+	 * @param trimValues <code>true</code> if the values in the parsed arrays
 	 * are to be be trimmed of whitespace (default is true).
 	 */
 	public StringArrayPropertyEditor(String separator, String charsToDelete, boolean emptyArrayAsNull, boolean trimValues) {

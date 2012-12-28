@@ -183,7 +183,7 @@ public class BurlapClientInterceptor extends UrlBasedRemoteAccessor implements M
 		}
 		else {
 			return new RemoteAccessException(
-			    "Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
+				"Cannot access Burlap remote service at [" + getServiceUrl() + "]", ex);
 		}
 	}
 

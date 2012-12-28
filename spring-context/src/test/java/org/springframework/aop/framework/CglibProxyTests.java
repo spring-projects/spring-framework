@@ -227,7 +227,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 		return (ITestBean) pf.getProxy();
 	}
-	
+
 	@Test
 	public void testMultipleProxiesForIntroductionAdvisor() {
 		TestBean target = new TestBean();
@@ -243,7 +243,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
 		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
 		pf.setProxyTargetClass(true);
-		
+
 		pf.addAdvisor(new LockMixinAdvisor());
 		pf.setTarget(target);
 		pf.setFrozen(true);
@@ -462,15 +462,15 @@ class CglibTestBean {
 class NoArgCtorTestBean {
 
 	private boolean called = false;
-	
+
 	public NoArgCtorTestBean(String x, int y) {
 		called = true;
 	}
-	
+
 	public boolean wasCalled() {
 		return called;
 	}
-	
+
 	public void reset() {
 		called = false;
 	}

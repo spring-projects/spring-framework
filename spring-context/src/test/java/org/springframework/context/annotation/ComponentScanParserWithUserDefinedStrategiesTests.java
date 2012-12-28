@@ -68,5 +68,5 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 			// expected
 		}
 	}
-	
+
 }

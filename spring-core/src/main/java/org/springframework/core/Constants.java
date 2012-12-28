@@ -207,7 +207,7 @@ public class Constants {
 	 * in accordance with the standard Java convention for constant
 	 * values (i.e. all uppercase). The supplied <code>namePrefix</code>
 	 * will be uppercased (in a locale-insensitive fashion) prior to
-	 * the main logic of this method kicking in. 
+	 * the main logic of this method kicking in.
 	 * @param namePrefix prefix of the constant names to search (may be <code>null</code>)
 	 * @return the set of values
 	 */
@@ -319,17 +319,17 @@ public class Constants {
 	 * @see #toCodeForProperty
 	 */
 	public String propertyToConstantNamePrefix(String propertyName) {
-	  StringBuilder parsedPrefix = new StringBuilder();
-	  for(int i = 0; i < propertyName.length(); i++) {
-	    char c = propertyName.charAt(i);
-	    if (Character.isUpperCase(c)) {
-	      parsedPrefix.append("_");
-	      parsedPrefix.append(c);
-	    }
-	    else {
-	      parsedPrefix.append(Character.toUpperCase(c));
-	    }
-	  }
+		StringBuilder parsedPrefix = new StringBuilder();
+		for (int i = 0; i < propertyName.length(); i++) {
+			char c = propertyName.charAt(i);
+			if (Character.isUpperCase(c)) {
+				parsedPrefix.append("_");
+				parsedPrefix.append(c);
+			}
+			else {
+				parsedPrefix.append(Character.toUpperCase(c));
+			}
+		}
 		return parsedPrefix.toString();
 	}
 

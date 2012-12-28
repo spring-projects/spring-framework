@@ -37,16 +37,16 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * System tests covering use of {@link Autowired} and {@link Value} within
  * {@link Configuration} classes.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  */
 public class AutowiredConfigurationTests {
 
-	@Test 
+	@Test
 	public void testAutowiredConfigurationDependencies() {
 		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
-		        AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
+				AutowiredConfigurationTests.class.getSimpleName() + ".xml", AutowiredConfigurationTests.class);
 
 		assertThat(factory.getBean("colour", Colour.class), equalTo(Colour.RED));
 		assertThat(factory.getBean("testBean", TestBean.class).getName(), equalTo(Colour.RED.toString()));
@@ -100,7 +100,7 @@ public class AutowiredConfigurationTests {
 	@Test
 	public void testValueInjection() {
 		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
-		        "ValueInjectionTests.xml", AutowiredConfigurationTests.class);
+				"ValueInjectionTests.xml", AutowiredConfigurationTests.class);
 
 		System.clearProperty("myProp");
 
@@ -155,7 +155,7 @@ public class AutowiredConfigurationTests {
 	@Test
 	public void testCustomProperties() {
 		ClassPathXmlApplicationContext factory = new ClassPathXmlApplicationContext(
-		        "AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
+				"AutowiredConfigurationTests-custom.xml", AutowiredConfigurationTests.class);
 
 		TestBean testBean = factory.getBean("testBean", TestBean.class);
 		assertThat(testBean.getName(), equalTo("localhost"));

@@ -193,7 +193,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	}
 
 	/**
-	 * Flag to signal that refreshable proxies should be created to proxy the target class not its interfaces. 
+	 * Flag to signal that refreshable proxies should be created to proxy the target class not its interfaces.
 	 * @param defaultProxyTargetClass the flag value to set
 	 */
 	public void setDefaultProxyTargetClass(boolean defaultProxyTargetClass) {

@@ -39,7 +39,7 @@ import org.springframework.util.CollectionUtils;
  * @see #execute
  */
 public class JndiTemplate {
-	
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Properties environment;
@@ -200,7 +200,7 @@ public class JndiTemplate {
 			}
 		});
 	}
-	
+
 	/**
 	 * Rebind the given object to the current JNDI context, using the given name.
 	 * Overwrites any existing binding.
@@ -236,5 +236,5 @@ public class JndiTemplate {
 			}
 		});
 	}
-	
+
 }

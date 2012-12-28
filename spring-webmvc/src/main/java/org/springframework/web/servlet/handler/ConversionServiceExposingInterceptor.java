@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @since 3.0.1
  */
 public class ConversionServiceExposingInterceptor extends HandlerInterceptorAdapter {
-	
+
 	private final ConversionService conversionService;
 
 

@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @see javax.persistence.spi.PersistenceUnitInfo#addTransformer(javax.persistence.spi.ClassTransformer)
  */
 class ClassFileTransformerAdapter implements ClassFileTransformer {
-	
+
 	private static final Log logger = LogFactory.getLog(ClassFileTransformerAdapter.class);
 
 	private final ClassTransformer classTransformer;
@@ -51,7 +51,7 @@ class ClassFileTransformerAdapter implements ClassFileTransformer {
 	public byte[] transform(
 			ClassLoader loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-		
+
 		try {
 			byte[] transformed = this.classTransformer.transform(
 					loader, className, classBeingRedefined, protectionDomain, classfileBuffer);

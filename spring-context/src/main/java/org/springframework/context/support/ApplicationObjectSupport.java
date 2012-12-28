@@ -45,10 +45,10 @@ import org.springframework.context.ApplicationContextException;
  * @see org.springframework.web.context.support.WebApplicationObjectSupport
  */
 public abstract class ApplicationObjectSupport implements ApplicationContextAware {
-	
+
 	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
-	
+
 	/** ApplicationContext this object runs in */
 	private ApplicationContext applicationContext;
 

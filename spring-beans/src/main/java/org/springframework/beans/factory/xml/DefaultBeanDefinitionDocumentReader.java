@@ -223,7 +223,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 
 		Set<Resource> actualResources = new LinkedHashSet<Resource>(4);
 
-		// Discover whether the location is an absolute or relative URI 
+		// Discover whether the location is an absolute or relative URI
 		boolean absoluteLocation = false;
 		try {
 			absoluteLocation = ResourcePatternUtils.isUrl(location) || ResourceUtils.toURI(location).isAbsolute();

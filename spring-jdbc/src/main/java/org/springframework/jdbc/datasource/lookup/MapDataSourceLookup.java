@@ -68,7 +68,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	 * Set the {@link Map} of {@link DataSource DataSources}; the keys
 	 * are {@link String Strings}, the values are actual {@link DataSource} instances.
 	 * <p>If the supplied {@link Map} is <code>null</code>, then this method
-	 * call effectively has no effect. 
+	 * call effectively has no effect.
 	 * @param dataSources said {@link Map} of {@link DataSource DataSources}
 	 */
 	public void setDataSources(Map<String, DataSource> dataSources) {
@@ -80,7 +80,7 @@ public class MapDataSourceLookup implements DataSourceLookup {
 	/**
 	 * Get the {@link Map} of {@link DataSource DataSources} maintained by this object.
 	 * <p>The returned {@link Map} is {@link Collections#unmodifiableMap(java.util.Map) unmodifiable}.
-	 * @return said {@link Map} of {@link DataSource DataSources} (never <code>null</code>) 
+	 * @return said {@link Map} of {@link DataSource DataSources} (never <code>null</code>)
 	 */
 	public Map<String, DataSource> getDataSources() {
 		return Collections.unmodifiableMap(this.dataSources);

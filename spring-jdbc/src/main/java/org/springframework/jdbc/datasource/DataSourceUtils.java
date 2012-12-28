@@ -29,7 +29,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
- 
+
 /**
  * Helper class that provides static methods for obtaining JDBC Connections from
  * a {@link javax.sql.DataSource}. Includes special support for Spring-managed

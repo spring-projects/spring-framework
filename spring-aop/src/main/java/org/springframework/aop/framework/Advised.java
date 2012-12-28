@@ -124,7 +124,7 @@ public interface Advised extends TargetClassAware {
 	 */
 	void addAdvisor(Advisor advisor) throws AopConfigException;
 
-	/** 
+	/**
 	 * Add an Advisor at the specified position in the chain.
 	 * @param advisor the advisor to add at the specified position in the chain
 	 * @param pos position in chain (0 is head). Must be valid.

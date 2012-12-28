@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,10 +19,10 @@ package org.springframework.web.servlet.tags;
 /**
  * Bean used to pass name-value pair parameters from a {@link ParamTag} to a
  * {@link ParamAware} tag.
- * 
- * <p>Attributes are the raw values passed to the spring:param tag and have not 
- * been encoded or escaped. 
- * 
+ *
+ * <p>Attributes are the raw values passed to the spring:param tag and have not
+ * been encoded or escaped.
+ *
  * @author Scott Andrews
  * @since 3.0
  * @see ParamTag

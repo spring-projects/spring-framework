@@ -55,7 +55,7 @@ public abstract class RequestContextUtils {
 	 * @throws IllegalStateException if no servlet-specific context has been found
 	 */
 	public static WebApplicationContext getWebApplicationContext(ServletRequest request)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		return getWebApplicationContext(request, null);
 	}
@@ -158,9 +158,9 @@ public abstract class RequestContextUtils {
 
 	/**
 	 * Return a read-only {@link Map} with "input" flash attributes saved on a
-	 * previous request. 
+	 * previous request.
 	 * @param request the current request
-	 * @return a read-only Map, or {@code null} 
+	 * @return a read-only Map, or {@code null}
 	 * @see FlashMap
 	 */
 	@SuppressWarnings("unchecked")

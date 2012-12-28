@@ -67,7 +67,7 @@ public class UriTemplate implements Serializable {
 		this.uriTemplate = uriTemplate;
 		this.variableNames = parser.getVariableNames();
 		this.matchPattern = parser.getMatchPattern();
-        this.uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).build();
+		this.uriComponents = UriComponentsBuilder.fromUriString(uriTemplate).build();
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class UriTemplate implements Serializable {
 		return this.variableNames;
 	}
 
-    // expanding
+	// expanding
 
 	/**
 	 * Given the Map of variables, expands this template into a URI. The Map keys represent variable names,
@@ -98,12 +98,12 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain values for all the variable names
 	 */
 	public URI expand(Map<String, ?> uriVariables) {
-        UriComponents expandedComponents = uriComponents.expand(uriVariables);
+		UriComponents expandedComponents = uriComponents.expand(uriVariables);
 		UriComponents encodedComponents = expandedComponents.encode();
-        return encodedComponents.toUri();
+		return encodedComponents.toUri();
 	}
 
-    /**
+	/**
 	 * Given an array of variables, expand this template into a full URI. The array represent variable values.
 	 * The order of variables is significant.
 	 * <p>Example:
@@ -118,12 +118,12 @@ public class UriTemplate implements Serializable {
 	 * or if it does not contain sufficient variables
 	 */
 	public URI expand(Object... uriVariableValues) {
-        UriComponents expandedComponents = uriComponents.expand(uriVariableValues);
+		UriComponents expandedComponents = uriComponents.expand(uriVariableValues);
 		UriComponents encodedComponents = expandedComponents.encode();
-        return encodedComponents.toUri();
+		return encodedComponents.toUri();
 	}
 
-    // matching
+	// matching
 
 	/**
 	 * Indicate whether the given URI matches this template.

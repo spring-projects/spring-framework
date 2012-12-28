@@ -49,7 +49,7 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 	private static TypeDescriptor typeDescriptorForListOfString = null;
 	private static List<Integer> listOfInteger = new ArrayList<Integer>();
 	private static TypeDescriptor typeDescriptorForListOfInteger = null;
-	
+
 	static {
 		listOfString.add("1");
 		listOfString.add("2");
@@ -58,21 +58,21 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		listOfInteger.add(5);
 		listOfInteger.add(6);
 	}
-	
+
 	@Before
 	public void setUp() throws Exception {
 		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfString = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfString"));
 		ExpressionTestsUsingCoreConversionService.typeDescriptorForListOfInteger = new TypeDescriptor(ExpressionTestsUsingCoreConversionService.class.getDeclaredField("listOfInteger"));
 	}
-		
-	
+
+
 	/**
 	 * Test the service can convert what we are about to use in the expression evaluation tests.
 	 */
 	@Test
 	public void testConversionsAvailable() throws Exception {
 		TypeConvertorUsingConversionService tcs = new TypeConvertorUsingConversionService();
-		
+
 		// ArrayList containing List<Integer> to List<String>
 		Class<?> clazz = typeDescriptorForListOfString.getElementTypeDescriptor().getType();
 		assertEquals(String.class,clazz);
@@ -82,11 +82,11 @@ public class ExpressionTestsUsingCoreConversionService extends ExpressionTestCas
 		// ArrayList containing List<String> to List<Integer>
 		clazz = typeDescriptorForListOfInteger.getElementTypeDescriptor().getType();
 		assertEquals(Integer.class,clazz);
-		
+
 		l = (List) tcs.convertValue(listOfString, TypeDescriptor.forObject(listOfString), typeDescriptorForListOfString);
 		assertNotNull(l);
 	}
-	
+
 	@Test
 	public void testSetParameterizedList() throws Exception {
 		StandardEvaluationContext context = TestScenarioCreator.getTestEvaluationContext();

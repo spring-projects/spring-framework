@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
  * @since 03.09.2004
  */
 public final class PrototypeTargetTests {
-	
+
 	private static final Resource CONTEXT = qualifiedResource(PrototypeTargetTests.class, "context.xml");
 
 	@Test

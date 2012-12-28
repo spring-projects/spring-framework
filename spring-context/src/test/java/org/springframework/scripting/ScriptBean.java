@@ -18,7 +18,7 @@ package org.springframework.scripting;
 
 /**
  * Simple interface used in testing the scripted beans support.
- * 
+ *
  * @author Rick Evans
  */
 public interface ScriptBean {

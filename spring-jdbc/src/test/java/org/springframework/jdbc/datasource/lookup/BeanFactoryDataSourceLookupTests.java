@@ -38,7 +38,7 @@ public class BeanFactoryDataSourceLookupTests {
 	@Test
 	public void testLookupSunnyDay() {
 		BeanFactory beanFactory = createMock(BeanFactory.class);
-		
+
 		StubDataSource expectedDataSource = new StubDataSource();
 		expect(beanFactory.getBean(DATASOURCE_BEAN_NAME, DataSource.class)).andReturn(expectedDataSource);
 

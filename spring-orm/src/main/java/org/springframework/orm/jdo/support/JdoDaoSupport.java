@@ -144,7 +144,7 @@ public abstract class JdoDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.jdo.PersistenceManagerFactoryUtils#getPersistenceManager
 	 */
 	protected final PersistenceManager getPersistenceManager(boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		return PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), allowCreate);
 	}

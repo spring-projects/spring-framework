@@ -30,7 +30,7 @@ import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
  * @since 2.0
  */
 public abstract class AspectJProxyUtils {
-	
+
 	/**
 	 * Add special advisors if necessary to work with a proxy chain that contains AspectJ advisors.
 	 * This will expose the current Spring AOP invocation (necessary for some AspectJ pointcut matching)

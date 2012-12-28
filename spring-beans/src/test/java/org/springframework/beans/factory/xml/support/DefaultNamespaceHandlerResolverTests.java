@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.UtilNamespaceHandler;
 
 /**
  * Unit and integration tests for the {@link DefaultNamespaceHandlerResolver} class.
- * 
+ *
  * @author Rob Harrop
  * @author Rick Evans
  */

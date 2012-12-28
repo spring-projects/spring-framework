@@ -103,7 +103,7 @@ public class StandardClasses {
 		Duration duration = factory.newDuration(42000);
 		return new JAXBElement<Duration>(NAME, Duration.class, duration);
 	}
-	
+
 	public JAXBElement<Image> standardClassImage() throws IOException {
 		Image image = ImageIO.read(getClass().getResourceAsStream("spring-ws.png"));
 		return new JAXBElement<Image>(NAME, Image.class, image);

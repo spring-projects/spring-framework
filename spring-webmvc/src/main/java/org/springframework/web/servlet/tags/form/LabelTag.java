@@ -62,7 +62,7 @@ public class LabelTag extends AbstractHtmlElementTag {
 	/**
 	 * Set the value of the '<code>for</code>' attribute.
 	 * <p>Defaults to the value of {@link #getPath}; may be a runtime expression.
-	 * @throws IllegalArgumentException if the supplied value is <code>null</code> 
+	 * @throws IllegalArgumentException if the supplied value is <code>null</code>
 	 */
 	public void setFor(String forId) {
 		Assert.notNull(forId, "'forId' must not be null");

@@ -37,7 +37,7 @@ import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 public class ResourceHandlerRegistryTests {
 
 	private ResourceHandlerRegistry registry;
-	
+
 	private ResourceHandlerRegistration registration;
 
 	private MockHttpServletResponse response;

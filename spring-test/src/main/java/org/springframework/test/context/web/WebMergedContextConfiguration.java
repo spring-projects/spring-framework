@@ -117,7 +117,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * instance by comparing both object's {@linkplain #getLocations() locations},
 	 * {@linkplain #getClasses() annotated classes},
 	 * {@linkplain #getContextInitializerClasses() context initializer classes},
-	 * {@linkplain #getActiveProfiles() active profiles}, 
+	 * {@linkplain #getActiveProfiles() active profiles},
 	 * {@linkplain #getResourceBasePath() resource base path}, and the fully
 	 * qualified names of their {@link #getContextLoader() ContextLoaders}.
 	 */

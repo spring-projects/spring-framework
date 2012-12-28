@@ -79,7 +79,7 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	protected AbstractLobTypeHandler(LobHandler lobHandler) {
 		if (lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on SqlMapClientFactoryBean");
+				"lobHandler property must be set on SqlMapClientFactoryBean");
 		}
 		this.lobHandler = lobHandler;
 	}

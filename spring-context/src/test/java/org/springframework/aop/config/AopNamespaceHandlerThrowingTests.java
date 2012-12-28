@@ -33,7 +33,7 @@ public final class AopNamespaceHandlerThrowingTests {
 	public void testThrowingOnThrowingAdvice() {
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ok.xml", getClass());
 	}
-	
+
 	@Test
 	public void testParseThrowingOnOtherAdviceType() {
 		try {

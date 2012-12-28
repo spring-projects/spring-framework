@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * within components that rely on the Trigger abstraction. For example, it may
  * be convenient to allow periodic triggers, cron-based triggers, and even
  * custom Trigger implementations to be used interchangeably.
- * 
+ *
  * @author Mark Fisher
  * @since 3.0
  */
@@ -76,7 +76,7 @@ public class PeriodicTrigger implements Trigger {
 	/**
 	 * Specify the delay for the initial execution. It will be evaluated in
 	 * terms of this trigger's {@link TimeUnit}. If no time unit was explicitly
-	 * provided upon instantiation, the default is milliseconds. 
+	 * provided upon instantiation, the default is milliseconds.
 	 */
 	public void setInitialDelay(long initialDelay) {
 		this.initialDelay = this.timeUnit.toMillis(initialDelay);
@@ -122,7 +122,7 @@ public class PeriodicTrigger implements Trigger {
 	public int hashCode() {
 		return (this.fixedRate ? 17 : 29) +
 				(int) (37 * this.period) +
-				(int) (41 * this.initialDelay); 
+				(int) (41 * this.initialDelay);
 	}
 
 }

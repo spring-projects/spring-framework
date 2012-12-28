@@ -73,7 +73,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", "hidden");
 		assertContainsAttribute(output, "value", "12.34f");
 	}
-	
+
 	public void testDynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
@@ -86,7 +86,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	public void testDisabledTrue() throws Exception {
 		this.tag.setDisabled("true");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 
@@ -98,10 +98,10 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	// SPR-8661
-	
+
 	public void testDisabledFalse() throws Exception {
 		this.tag.setDisabled("false");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 
@@ -111,7 +111,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		assertAttributeNotPresent(output, "disabled");
 	}
-	
+
 	private void assertTagClosed(String output) {
 		assertTrue(output.endsWith("/>"));
 	}

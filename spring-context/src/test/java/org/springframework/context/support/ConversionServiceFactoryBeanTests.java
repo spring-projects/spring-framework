@@ -48,7 +48,7 @@ public class ConversionServiceFactoryBeanTests {
 		ConversionService service = factory.getObject();
 		assertTrue(service.canConvert(String.class, Integer.class));
 	}
-	
+
 	@Test
 	public void createDefaultConversionServiceWithSupplements() {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
@@ -81,7 +81,7 @@ public class ConversionServiceFactoryBeanTests {
 		assertTrue(service.canConvert(String.class, Integer.class));
 		assertTrue(service.canConvert(String.class, Foo.class));
 		assertTrue(service.canConvert(String.class, Bar.class));
-		assertTrue(service.canConvert(String.class, Baz.class));		
+		assertTrue(service.canConvert(String.class, Baz.class));
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -119,10 +119,10 @@ public class ConversionServiceFactoryBeanTests {
 
 	public static class Foo {
 	}
-	
+
 	public static class Bar {
 	}
-	
+
 	public static class Baz {
 	}
 

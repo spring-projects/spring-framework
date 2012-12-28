@@ -45,7 +45,7 @@ import org.springframework.util.ReflectionUtils;
  * this class will create the object that it creates exactly once
  * on initialization and subsequently return said singleton instance
  * on all calls to the {@link #getObject()} method.
- * 
+ *
  * <p>Else, this class will create a new instance every time the
  * {@link #getObject()} method is invoked. Subclasses are responsible
  * for implementing the abstract {@link #createInstance()} template

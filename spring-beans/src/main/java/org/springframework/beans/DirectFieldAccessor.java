@@ -64,7 +64,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 				if (fieldMap.containsKey(field.getName())) {
 					// ignore superclass declarations of fields already found in a subclass
 				}
-                else {
+				else {
 					fieldMap.put(field.getName(), field);
 				}
 			}

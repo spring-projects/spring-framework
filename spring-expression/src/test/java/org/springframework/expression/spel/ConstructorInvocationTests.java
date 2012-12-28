@@ -34,7 +34,7 @@ import org.springframework.expression.spel.testresources.PlaceOfBirth;
 
 /**
  * Tests invocation of constructors.
- * 
+ *
  * @author Andy Clement
  */
 public class ConstructorInvocationTests extends ExpressionTestCase {
@@ -43,22 +43,22 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 	public void testTypeConstructors() {
 		evaluate("new String('hello world')", "hello world", String.class);
 	}
-	
+
 	@Test
 	public void testNonExistentType() {
 		evaluateAndCheckError("new FooBar()",SpelMessage.CONSTRUCTOR_INVOCATION_PROBLEM);
 	}
-	
+
 	static class TestException extends Exception {
-		
+
 	}
-	
+
 	static class Tester {
 		public static int counter;
 		public int i;
-		
+
 		public Tester() {}
-		
+
 		public Tester(int i) throws Exception {
 			counter++;
 			if (i==1) {
@@ -72,11 +72,11 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 			}
 			this.i = i;
 		}
-		
+
 		public Tester(PlaceOfBirth pob) {
-			
+
 		}
-		
+
 	}
 	@Test
 	public void testConstructorThrowingException_SPR6760() {
@@ -85,7 +85,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		// On 2 it will throw a RuntimeException
 		// On 3 it will exit normally
 		// In each case it increments the Tester field 'counter' when invoked
-		
+
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expr = parser.parseExpression("new org.springframework.expression.spel.ConstructorInvocationTests$Tester(#bar).i");
 
@@ -104,11 +104,11 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		o = expr.getValue(eContext);
 		Assert.assertEquals(0, o);
 		// That confirms the logic to mark the cached reference stale and retry is working
-		
-		
+
+
 		// Now let's cause the method to exit via exception and ensure it doesn't cause
 		// a retry.
-		
+
 		// First, switch back to throwException(int)
 		eContext.setVariable("bar",3);
 		o = expr.getValue(eContext);
@@ -130,8 +130,8 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		}
 		// If counter is 4 then the method got called twice!
 		Assert.assertEquals(3,parser.parseExpression("counter").getValue(eContext));
-		
-		
+
+
 		// 1 will make it throw a RuntimeException - SpEL will let this through
 		eContext.setVariable("bar",1);
 		try {
@@ -147,38 +147,38 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		// If counter is 5 then the method got called twice!
 		Assert.assertEquals(4,parser.parseExpression("counter").getValue(eContext));
 	}
-	
+
 	@Test
 	public void testAddingConstructorResolvers() {
 		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		
+
 		// reflective constructor accessor is the only one by default
 		List<ConstructorResolver> constructorResolvers = ctx.getConstructorResolvers();
 		Assert.assertEquals(1,constructorResolvers.size());
-		
+
 		ConstructorResolver dummy = new DummyConstructorResolver();
 		ctx.addConstructorResolver(dummy);
 		Assert.assertEquals(2,ctx.getConstructorResolvers().size());
-		
+
 		List<ConstructorResolver> copy = new ArrayList<ConstructorResolver>();
 		copy.addAll(ctx.getConstructorResolvers());
 		Assert.assertTrue(ctx.removeConstructorResolver(dummy));
 		Assert.assertFalse(ctx.removeConstructorResolver(dummy));
 		Assert.assertEquals(1,ctx.getConstructorResolvers().size());
-		
+
 		ctx.setConstructorResolvers(copy);
 		Assert.assertEquals(2,ctx.getConstructorResolvers().size());
 	}
-	
+
 	static class DummyConstructorResolver implements ConstructorResolver {
 
 		public ConstructorExecutor resolve(EvaluationContext context, String typeName, List<TypeDescriptor> argumentTypes)
 				throws AccessException {
 			throw new UnsupportedOperationException("Auto-generated method stub");
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testVarargsInvocation01() {
 		// Calling 'Fruit(String... strings)'
@@ -192,7 +192,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 
 	@Test
 	public void testVarargsInvocation02() {
-	    // Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
+		// Calling 'Fruit(int i, String... strings)' - returns int+length_of_strings
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(5,'a','b','c').stringscount()", 8, Integer.class);
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(2,'a').stringscount()", 3, Integer.class);
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(4).stringscount()", 4, Integer.class);
@@ -201,7 +201,7 @@ public class ConstructorInvocationTests extends ExpressionTestCase {
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(2,'a',3.0d).stringscount()", 4, Integer.class);
 		evaluate("new org.springframework.expression.spel.testresources.Fruit(8,stringArrayOfThreeItems).stringscount()", 11, Integer.class);
 	}
-	
+
 	/*
 	 * These tests are attempting to call constructors where we need to widen or convert the argument in order to
 	 * satisfy a suitable constructor.

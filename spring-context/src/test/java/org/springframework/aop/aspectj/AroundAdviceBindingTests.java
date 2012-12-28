@@ -39,27 +39,27 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class AroundAdviceBindingTests {
 
 	private AroundAdviceBindingCollaborator mockCollaborator;
-	
+
 	private ITestBean testBeanProxy;
-	
+
 	private TestBean testBeanTarget;
-	
+
 	protected ApplicationContext ctx;
 
 	@Before
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
-		
+
 		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
-		
+
 		ITestBean injectedTestBean = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(injectedTestBean));
-		
+
 		this.testBeanProxy = injectedTestBean;
 		// we need the real target too, not just the proxy...
-		
+
 		this.testBeanTarget = (TestBean) ((Advised) testBeanProxy).getTargetSource().getTarget();
-		
+
 		mockCollaborator = createNiceMock(AroundAdviceBindingCollaborator.class);
 		aroundAdviceAspect.setCollaborator(mockCollaborator);
 	}
@@ -71,7 +71,7 @@ public class AroundAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneObjectArgBoundToTarget() {
 		mockCollaborator.oneObjectArg(this.testBeanTarget);
@@ -79,7 +79,7 @@ public class AroundAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testOneIntAndOneObjectArgs() {
 		mockCollaborator.oneIntAndOneObject(5, this.testBeanProxy);
@@ -87,7 +87,7 @@ public class AroundAdviceBindingTests {
 		testBeanProxy.setAge(5);
 		verify(mockCollaborator);
 	}
-	
+
 	@Test
 	public void testJustJoinPoint() {
 		mockCollaborator.justJoinPoint("getAge");
@@ -95,7 +95,7 @@ public class AroundAdviceBindingTests {
 		testBeanProxy.getAge();
 		verify(mockCollaborator);
 	}
-	
+
 }
 
 

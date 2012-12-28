@@ -46,7 +46,7 @@ public final class ByteArrayPropertyEditorTests extends TestCase {
 	public void testGetAsTextReturnsEmptyStringIfValueIsNull() throws Exception {
 		PropertyEditor byteEditor = new ByteArrayPropertyEditor();
 		assertEquals("", byteEditor.getAsText());
-		
+
 		byteEditor.setAsText(null);
 		assertEquals("", byteEditor.getAsText());
 	}

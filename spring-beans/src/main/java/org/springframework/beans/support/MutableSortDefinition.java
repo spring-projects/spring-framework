@@ -159,7 +159,8 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		}
 		SortDefinition otherSd = (SortDefinition) other;
 		return (getProperty().equals(otherSd.getProperty()) &&
-		    isAscending() == otherSd.isAscending() && isIgnoreCase() == otherSd.isIgnoreCase());
+				isAscending() == otherSd.isAscending() &&
+				isIgnoreCase() == otherSd.isIgnoreCase());
 	}
 
 	@Override

@@ -31,7 +31,7 @@ import org.springframework.test.context.junit4.PropertiesBasedSpringJUnit4ClassR
  * be used at all levels within a test class hierarchy when the
  * <code>loader</code> is <i>inherited</i> (i.e., not explicitly declared) via
  * {@link ContextConfiguration &#064;ContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  * @see PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests

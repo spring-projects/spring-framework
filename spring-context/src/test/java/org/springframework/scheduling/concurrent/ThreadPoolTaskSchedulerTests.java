@@ -229,7 +229,7 @@ public class ThreadPoolTaskSchedulerTests {
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
-	
+
 		private final CountDownLatch latch;
 
 		private Thread lastThread;
@@ -254,7 +254,7 @@ public class ThreadPoolTaskSchedulerTests {
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
-	
+
 		TestCallable(int expectedRunCount) {
 			this.expectedRunCount = expectedRunCount;
 		}

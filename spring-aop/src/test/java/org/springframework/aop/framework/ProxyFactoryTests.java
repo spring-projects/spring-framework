@@ -64,7 +64,7 @@ public final class ProxyFactoryTests {
 		assertEquals(1, pf.indexOf(advisor));
 		assertEquals(-1, advised.indexOf(new DefaultPointcutAdvisor(null)));
 	}
-	
+
 	@Test
 	public void testRemoveAdvisorByReference() {
 		TestBean target = new TestBean();
@@ -84,7 +84,7 @@ public final class ProxyFactoryTests {
 		assertEquals(2, nop.getCount());
 		assertFalse(pf.removeAdvisor(new DefaultPointcutAdvisor(null)));
 	}
-	
+
 	@Test
 	public void testRemoveAdvisorByIndex() {
 		TestBean target = new TestBean();
@@ -113,7 +113,7 @@ public final class ProxyFactoryTests {
 		assertEquals(1, cba.getCalls());
 		assertEquals(2, nop.getCount());
 		assertEquals(3, nop2.getCount());
-		
+
 		// Check out of bounds
 		try {
 			pf.removeAdvisor(-1);
@@ -121,14 +121,14 @@ public final class ProxyFactoryTests {
 		catch (AopConfigException ex) {
 			// Ok
 		}
-		
+
 		try {
 			pf.removeAdvisor(2);
 		}
 		catch (AopConfigException ex) {
 			// Ok
 		}
-		
+
 		assertEquals(5, proxied.getAge());
 		assertEquals(4, nop2.getCount());
 	}
@@ -191,17 +191,17 @@ public final class ProxyFactoryTests {
 		assertEquals("Found correct number of interfaces", 3, factory.getProxiedInterfaces().length);
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertThat("Picked up secondary interface", tb, instanceOf(IOther.class));
-				
+
 		raw.setAge(25);
 		assertTrue(tb.getAge() == raw.getAge());
 
 		long t = 555555L;
 		TimestampIntroductionInterceptor ti = new TimestampIntroductionInterceptor(t);
-		
+
 		Class<?>[] oldProxiedInterfaces = factory.getProxiedInterfaces();
-		
+
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(ti, TimeStamped.class));
-		
+
 		Class<?>[] newProxiedInterfaces = factory.getProxiedInterfaces();
 		assertEquals("Advisor proxies one more interface after introduction", oldProxiedInterfaces.length + 1, newProxiedInterfaces.length);
 
@@ -210,7 +210,7 @@ public final class ProxyFactoryTests {
 		// Shouldn't fail;
 		 ((IOther) ts).absquatulate();
 	}
-	
+
 	@Test
 	public void testInterceptorInclusionMethods() {
 		class MyInterceptor implements MethodInterceptor {
@@ -218,7 +218,7 @@ public final class ProxyFactoryTests {
 				throw new UnsupportedOperationException();
 			}
 		}
-		
+
 		NopInterceptor di = new NopInterceptor();
 		NopInterceptor diUnused = new NopInterceptor();
 		ProxyFactory factory = new ProxyFactory(new TestBean());
@@ -228,7 +228,7 @@ public final class ProxyFactoryTests {
 		assertTrue(!factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 1);
 		assertTrue(factory.countAdvicesOfType(MyInterceptor.class) == 0);
-	
+
 		factory.addAdvice(0, diUnused);
 		assertTrue(factory.adviceIncluded(diUnused));
 		assertTrue(factory.countAdvicesOfType(NopInterceptor.class) == 2);

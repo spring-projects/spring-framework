@@ -47,7 +47,7 @@ import org.springframework.test.context.transaction.BeforeTransaction;
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3960"
  * target="_blank">SPR-3960</a>.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

@@ -54,7 +54,7 @@ public class LifecycleTestBean implements Lifecycle {
 
 	public void stop() {
 		this.stopOrder = ++stopCounter;
-		this.running = false;		
+		this.running = false;
 	}
 
 }

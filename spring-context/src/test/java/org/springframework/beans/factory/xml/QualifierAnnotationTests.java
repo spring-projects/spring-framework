@@ -120,7 +120,7 @@ public final class QualifierAnnotationTests {
 		context.refresh();
 		QualifiedByAliasTestBean testBean = (QualifiedByAliasTestBean) context.getBean("testBean");
 		Person person = testBean.getStooge();
-		assertEquals("LarryBean", person.getName());		
+		assertEquals("LarryBean", person.getName());
 	}
 
 	@Test

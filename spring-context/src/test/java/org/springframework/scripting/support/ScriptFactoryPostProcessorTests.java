@@ -216,7 +216,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		ctx.registerBeanDefinition(BEAN_WITH_DEPENDENCY_NAME, scriptedBeanBuilder.getBeanDefinition());
 		ctx.registerBeanDefinition("scriptProcessor", createScriptFactoryPostProcessor(true));
 		ctx.refresh();
-		
+
 		Messenger messenger1 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
 		Messenger messenger2 = (Messenger) ctx.getBean(BEAN_WITH_DEPENDENCY_NAME);
 		assertNotSame(messenger1, messenger2);

@@ -425,12 +425,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            marshal(graph, this.streamDriver.createWriter(outputStream));
-        }
-        else {
-		    marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
-        }
+		if (this.streamDriver != null) {
+			marshal(graph, this.streamDriver.createWriter(outputStream));
+		}
+		else {
+			marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
+		}
 	}
 
 	@Override

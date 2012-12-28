@@ -934,7 +934,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.jdbc.core.JdbcOperations#batchUpdate(java.lang.String, java.util.Collection, int, org.springframework.jdbc.core.ParameterizedPreparedStatementSetter)
-	 * 
+	 *
 	 * Contribution by Nicolas Fabre
 	 */
 	public <T> int[][] batchUpdate(String sql, final Collection<T> batchArgs, final int batchSize, final ParameterizedPreparedStatementSetter<T> pss) {
@@ -1054,7 +1054,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 					resultSetParameters.add(parameter);
 				}
 				else {
-					updateCountParameters.add(parameter);					
+					updateCountParameters.add(parameter);
 				}
 			}
 			else {

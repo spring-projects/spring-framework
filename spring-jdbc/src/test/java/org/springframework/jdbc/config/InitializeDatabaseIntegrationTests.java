@@ -110,16 +110,16 @@ public class InitializeDatabaseIntegrationTests {
 		JdbcTemplate t = new JdbcTemplate(dataSource);
 		assertEquals(1, t.queryForInt("select count(*) from T_TEST"));
 	}
-	
+
 	public static class CacheData implements InitializingBean {
 
 		private JdbcTemplate jdbcTemplate;
 		private List<Map<String,Object>> cache;
-		
+
 		public void setDataSource(DataSource dataSource) {
 			this.jdbcTemplate = new JdbcTemplate(dataSource);
 		}
-		
+
 		public List<Map<String,Object>> getCachedData() {
 			return cache;
 		}
@@ -127,7 +127,7 @@ public class InitializeDatabaseIntegrationTests {
 		public void afterPropertiesSet() throws Exception {
 			cache = jdbcTemplate.queryForList("SELECT * FROM T_TEST");
 		}
-		
+
 	}
 
 }

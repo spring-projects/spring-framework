@@ -42,7 +42,7 @@ public class IncorrectUpdateSemanticsDataAccessException extends InvalidDataAcce
 	public IncorrectUpdateSemanticsDataAccessException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
-	
+
 	/**
 	 * Return whether data was updated.
 	 * If this method returns false, there's nothing to roll back.

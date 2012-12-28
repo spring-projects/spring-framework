@@ -32,7 +32,7 @@ import org.springframework.format.number.CurrencyFormatter;
 public class CurrencyFormatterTests {
 
 	private CurrencyFormatter formatter = new CurrencyFormatter();
-	
+
 	@Test
 	public void formatValue() {
 		assertEquals("$23.00", formatter.print(new BigDecimal("23"), Locale.US));

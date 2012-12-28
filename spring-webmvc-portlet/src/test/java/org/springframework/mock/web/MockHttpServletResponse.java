@@ -51,7 +51,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-	
+
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
 	private static final String LOCATION_HEADER = "Location";
@@ -65,7 +65,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private boolean writerAccessAllowed = true;
 
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
-	
+
 	private boolean charset = false;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
@@ -141,7 +141,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.charset = true;
 		updateContentTypeHeader();
 	}
-	
+
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
@@ -151,7 +151,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
 		}
 	}
-	
+
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -457,7 +457,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		doAddHeaderValue(name, value, false);
 	}
-	
+
 	private boolean setSpecialHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
 			setContentType((String) value);

@@ -35,4 +35,3 @@ public class ConfigurableJasperReportsViewWithStreamTests extends AbstractConfig
 		return "application/pdf";
 	}
 }
- 

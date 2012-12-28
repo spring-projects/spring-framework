@@ -26,7 +26,7 @@ import java.sql.SQLException;
  * <pre class="code"> create table tab (id int not null primary key, text varchar(100))
  * create table tab_sequence (id bigint identity)
  * insert into tab_sequence default values</pre>
- * 
+ *
  * If "cacheSize" is set, the intermediate values are served without querying the
  * database. If the server or your application is stopped or crashes or a transaction
  * is rolled back, the unused values will never be served. The maximum hole size in

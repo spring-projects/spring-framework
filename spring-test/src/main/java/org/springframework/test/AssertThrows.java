@@ -166,7 +166,7 @@ public abstract class AssertThrows {
 	 * {@link #test() test logic} and the
 	 * {@link #checkExceptionExpectations(Exception) checking} of the
 	 * resulting (expected) {@link java.lang.Exception}.
-	 * @see #test() 
+	 * @see #test()
 	 * @see #doFail()
 	 * @see #checkExceptionExpectations(Exception)
 	 */

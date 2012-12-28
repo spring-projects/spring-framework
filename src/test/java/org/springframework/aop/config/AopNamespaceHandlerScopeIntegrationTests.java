@@ -38,15 +38,15 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 /**
  * Integration tests for scoped proxy use in conjunction with aop: namespace.
  * Deemed an integration test because .web mocks and application contexts are required.
- * 
+ *
  * @see org.springframework.aop.config.AopNamespaceHandlerTests;
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Chris Beams
  */
 public final class AopNamespaceHandlerScopeIntegrationTests {
-	
+
 	private static final String CLASSNAME = AopNamespaceHandlerScopeIntegrationTests.class.getName();
 	private static final String CONTEXT = format("classpath:%s-context.xml", ClassUtils.convertClassNameToResourcePath(CLASSNAME));
 

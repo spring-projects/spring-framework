@@ -35,7 +35,7 @@ import org.springframework.util.CollectionUtils;
  * <code>ObjectNamingStrategy</code> implementation that builds
  * <code>ObjectName</code> instances from the key used in the
  * "beans" map passed to <code>MBeanExporter</code>.
- * 
+ *
  * <p>Can also check object name mappings, given as <code>Properties</code>
  * or as <code>mappingLocations</code> of properties files. The key used
  * to look up is the key used in <code>MBeanExporter</code>'s "beans" map.
@@ -123,7 +123,7 @@ public class KeyNamingStrategy implements ObjectNamingStrategy, InitializingBean
 			}
 		}
 	}
-	
+
 
 	/**
 	 * Attempts to retrieve the <code>ObjectName</code> via the given key, trying to

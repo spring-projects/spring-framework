@@ -33,7 +33,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletCookieValueM
 
 /**
  * Test fixture with {@link ServletCookieValueMethodArgumentResolver}.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
@@ -52,7 +52,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 	@Before
 	public void setUp() throws Exception {
 		resolver = new ServletCookieValueMethodArgumentResolver(null);
-		
+
 		Method method = getClass().getMethod("params", Cookie.class, String.class);
 		cookieParameter = new MethodParameter(method, 0);
 		cookieStringParameter = new MethodParameter(method, 1);

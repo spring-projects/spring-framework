@@ -40,7 +40,7 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
  * application context caching} in conjunction with the
  * {@link SpringJUnit4ClassRunner} and the {@link DirtiesContext
  * &#064;DirtiesContext} annotation at the method level.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -59,7 +59,7 @@ public class SpringRunnerContextCacheTests {
 
 	/**
 	 * Asserts the statistics of the context cache in {@link TestContextManager}.
-	 * 
+	 *
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache
 	 * @param expectedHitCount the expected hit count
@@ -73,7 +73,7 @@ public class SpringRunnerContextCacheTests {
 
 	/**
 	 * Asserts the statistics of the supplied context cache.
-	 * 
+	 *
 	 * @param contextCache the cache to assert against
 	 * @param usageScenario the scenario in which the statistics are used
 	 * @param expectedSize the expected number of contexts in the cache

@@ -33,10 +33,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Chris Beams
  */
 public final class LookupMethodWrappedByCglibProxyTests {
-	
+
 	private static final Class<?> CLASS = LookupMethodWrappedByCglibProxyTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String CONTEXT = CLASSNAME + "-context.xml";
 
 	private ApplicationContext applicationContext;

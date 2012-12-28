@@ -2539,38 +2539,38 @@ public class DefaultListableBeanFactoryTests {
 			return this.userName;
 		}
 	}
-	
+
 	/**
 	 * Bean that changes state on a business invocation, so that
 	 * we can check whether it's been invoked
 	 * @author Rod Johnson
 	 */
 	private static class SideEffectBean {
-		
+
 		private int count;
-		
+
 		public void setCount(int count) {
 			this.count = count;
 		}
-		
+
 		public int getCount() {
 			return this.count;
 		}
-		
+
 		public void doWork() {
 			++count;
 		}
 
 	}
-	
+
 	private static class KnowsIfInstantiated {
-		
+
 		private static boolean instantiated;
-		
+
 		public static void clearInstantiationRecord() {
 			instantiated = false;
 		}
-		
+
 		public static boolean wasInstantiated() {
 			return instantiated;
 		}

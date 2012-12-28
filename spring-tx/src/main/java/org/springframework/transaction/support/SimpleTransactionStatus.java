@@ -19,7 +19,7 @@ package org.springframework.transaction.support;
 /**
  * A simple {@link org.springframework.transaction.TransactionStatus}
  * implementation.
- * 
+ *
  * <p>Derives from {@link AbstractTransactionStatus} and adds an explicit
  * {@link #isNewTransaction() "newTransaction"} flag.
  *

@@ -53,7 +53,7 @@ public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 		// absolutely needs thread-bound TransactionManager to initialize
 		if (tm == null) {
 			throw new IllegalStateException("No JTA TransactionManager found - " +
-			    "'jtaTransactionManager' property must be set on LocalSessionFactoryBean");
+				"'jtaTransactionManager' property must be set on LocalSessionFactoryBean");
 		}
 		this.transactionManager = tm;
 	}

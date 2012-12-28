@@ -100,7 +100,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String[] interceptorNames;
-	
+
 	private String targetName;
 
 	private boolean autodetectInterfaces = true;
@@ -543,10 +543,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		Advisor advisor = namedBeanToAdvisor(next);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding advisor with name '" + name + "'");
-		}			
+		}
 		addAdvisor(advisor);
 	}
-	
+
 	/**
 	 * Return a TargetSource to use when creating a proxy. If the target was not
 	 * specified at the end of the interceptorNames list, the TargetSource will be
@@ -627,24 +627,24 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		private final String beanName;
 
 		private final String message;
-		
+
 		public PrototypePlaceholderAdvisor(String beanName) {
 			this.beanName = beanName;
 			this.message = "Placeholder for prototype Advisor/Advice with bean name '" + beanName + "'";
 		}
-		
+
 		public String getBeanName() {
 			return beanName;
 		}
-		
+
 		public Advice getAdvice() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
-		
+
 		public boolean isPerInstance() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
-		
+
 		@Override
 		public String toString() {
 			return this.message;

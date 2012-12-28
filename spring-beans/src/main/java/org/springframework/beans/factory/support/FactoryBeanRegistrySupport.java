@@ -149,7 +149,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 			throw new BeanCreationException(beanName, "FactoryBean threw exception on object creation", ex);
 		}
 
-		
+
 		// Do not accept a null value for a FactoryBean that's not fully
 		// initialized yet: Many FactoryBeans just return null then.
 		if (object == null && isSingletonCurrentlyInCreation(beanName)) {
@@ -206,7 +206,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		super.removeSingleton(beanName);
 		this.factoryBeanObjectCache.remove(beanName);
 	}
-	
+
 	/**
 	 * Returns the security context for this bean factory. If a security manager
 	 * is set, interaction with the user code will be executed using the privileged

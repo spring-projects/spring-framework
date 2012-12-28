@@ -39,7 +39,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * Note that {@link TestExecutionListeners &#064;TestExecutionListeners} is
  * explicitly configured with an empty list, thus disabling all default
  * listeners.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see HardCodedProfileValueSourceSpringRunnerTests

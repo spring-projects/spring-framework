@@ -384,7 +384,7 @@ public class GroovyScriptFactoryTests {
 		assertEquals("Hello World!", messenger.getMessage());
 
 		assertTrue(ctx.getBeansOfType(ConcreteMessenger.class).values().contains(messenger));
-		
+
 		// Check that AnnotationUtils works with concrete proxied script classes
 		assertNotNull(AnnotationUtils.findAnnotation(messenger.getClass(), Component.class));
 	}

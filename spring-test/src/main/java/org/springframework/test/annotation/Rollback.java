@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
  * test method should be <em>rolled back</em> after the test method has
  * completed. If <code>true</code>, the transaction will be rolled back;
  * otherwise, the transaction will be committed.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

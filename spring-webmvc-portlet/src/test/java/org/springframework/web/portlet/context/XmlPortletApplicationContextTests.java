@@ -40,7 +40,7 @@ import org.springframework.mock.web.portlet.MockPortletContext;
 public class XmlPortletApplicationContextTests extends AbstractXmlWebApplicationContextTests {
 
 	private ConfigurablePortletApplicationContext root;
-	
+
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlPortletApplicationContext();
 		PortletContext portletContext = new MockPortletContext();
@@ -72,7 +72,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		pac.refresh();
 		return pac;
 	}
-	
+
 	/**
 	 * Overridden in order to use MockPortletConfig
 	 * @see org.springframework.web.context.XmlWebApplicationContextTests#testWithoutMessageSource()
@@ -96,7 +96,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		String msg = pac.getMessage("someMessage", null, "default", Locale.getDefault());
 		assertTrue("Default message returned", "default".equals(msg));
 	}
-	
+
 	/**
 	 * Overridden in order to access the root ApplicationContext
 	 * @see org.springframework.web.context.XmlWebApplicationContextTests#testContextNesting()
@@ -115,12 +115,12 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		assertTrue("Bean from root context", "Roderick".equals(rod.getName()));
 		assertTrue("Custom BeanPostProcessor applied", rod.getFriends().contains("myFriend"));
 	}
-	
+
 	public void testCount() {
 		assertTrue("should have 16 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 				this.applicationContext.getBeanDefinitionCount() == 16);
 	}
-	
+
 	public void testPortletContextAwareBean() {
 		PortletContextAwareBean bean = (PortletContextAwareBean)this.applicationContext.getBean("portletContextAwareBean");
 		assertNotNull(bean.getPortletContext());

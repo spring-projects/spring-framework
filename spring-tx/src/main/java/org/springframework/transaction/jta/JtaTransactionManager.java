@@ -717,7 +717,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		if (transactionSynchronizationRegistryClass == null) {
 			// JTA 1.1 API not present - skip.
 			if (logger.isDebugEnabled()) {
-			    logger.debug("JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] API not available");
+				logger.debug("JTA 1.1 [" + TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME + "] API not available");
 			}
 			return null;
 		}
@@ -823,12 +823,12 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		catch (NotSupportedException ex) {
 			// assume nested transaction not supported
 			throw new NestedTransactionNotSupportedException(
-			    "JTA implementation does not support nested transactions", ex);
+				"JTA implementation does not support nested transactions", ex);
 		}
 		catch (UnsupportedOperationException ex) {
 			// assume nested transaction not supported
 			throw new NestedTransactionNotSupportedException(
-			    "JTA implementation does not support nested transactions", ex);
+				"JTA implementation does not support nested transactions", ex);
 		}
 		catch (SystemException ex) {
 			throw new CannotCreateTransactionException("JTA failure on begin", ex);
@@ -883,7 +883,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 
 		if (!this.allowCustomIsolationLevels && isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException(
-			    "JtaTransactionManager does not support custom isolation levels by default - " +
+				"JtaTransactionManager does not support custom isolation levels by default - " +
 				"switch 'allowCustomIsolationLevels' to 'true'");
 		}
 	}
@@ -962,7 +962,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * @see javax.transaction.TransactionManager#resume(javax.transaction.Transaction)
 	 */
 	protected void doJtaResume(JtaTransactionObject txObject, Object suspendedTransaction)
-	    throws InvalidTransactionException, SystemException {
+		throws InvalidTransactionException, SystemException {
 
 		if (getTransactionManager() == null) {
 			throw new TransactionSuspensionNotSupportedException(

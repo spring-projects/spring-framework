@@ -87,7 +87,7 @@ public class StringHttpMessageConverterTests {
 	}
 
 	// SPR-8867
-	
+
 	@Test
 	public void writeOverrideRequestedContentType() throws IOException {
 		Charset utf8 = Charset.forName("UTF-8");

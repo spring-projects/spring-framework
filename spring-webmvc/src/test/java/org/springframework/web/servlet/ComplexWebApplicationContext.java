@@ -152,8 +152,8 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "1");
 		pvs.add("exceptionMappings",
-		    "java.lang.IllegalAccessException=failed2\n" +
-		    "ServletRequestBindingException=failed3");
+			"java.lang.IllegalAccessException=failed2\n" +
+			"ServletRequestBindingException=failed3");
 		pvs.add("defaultErrorView", "failed0");
 		registerSingleton("exceptionResolver1", SimpleMappingExceptionResolver.class, pvs);
 
@@ -250,7 +250,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
-		    throws ServletException, IllegalAccessException {
+			throws ServletException, IllegalAccessException {
 			((MyHandler) delegate).doSomething(request);
 			return null;
 		}
@@ -268,7 +268,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		}
 
 		public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object delegate)
-		    throws IOException, ServletException {
+			throws IOException, ServletException {
 			throw new ServletException("dummy");
 		}
 
@@ -281,7 +281,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class MyHandlerInterceptor1 implements HandlerInterceptor {
 
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
+			throws ServletException {
 			if (request.getAttribute("test2") != null) {
 				throw new ServletException("Wrong interceptor order");
 			}
@@ -317,7 +317,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class MyHandlerInterceptor2 implements HandlerInterceptor {
 
 		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-		    throws ServletException {
+			throws ServletException {
 			if (request.getAttribute("test1x") == null) {
 				throw new ServletException("Wrong interceptor order");
 			}

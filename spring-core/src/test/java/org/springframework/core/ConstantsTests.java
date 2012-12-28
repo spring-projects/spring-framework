@@ -33,7 +33,7 @@ public class ConstantsTests extends TestCase {
 		Constants c = new Constants(A.class);
 		assertEquals(A.class.getName(), c.getClassName());
 		assertEquals(9, c.getSize());
-		
+
 		assertEquals(c.asNumber("DOG").intValue(), A.DOG);
 		assertEquals(c.asNumber("dog").intValue(), A.DOG);
 		assertEquals(c.asNumber("cat").intValue(), A.CAT);

@@ -24,11 +24,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@code @WebAppConfiguration} is a class-level annotation that is used to 
+ * {@code @WebAppConfiguration} is a class-level annotation that is used to
  * declare that the {@code ApplicationContext} loaded for an integration test
  * should be a {@link org.springframework.web.context.WebApplicationContext
  * WebApplicationContext}.
- * 
+ *
  * <p>The mere presence of {@code @WebAppConfiguration} on a test class ensures
  * that a {@code WebApplicationContext} will be loaded for the test using a default
  * for the path to the root of the web application. To override the default,
@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *
  * <p>Note that {@code @WebAppConfiguration} must be used in conjunction with
  * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration},
- * either within a single test class or within a test class hierarchy. 
+ * either within a single test class or within a test class hierarchy.
  *
  * @author Sam Brannen
  * @since 3.2

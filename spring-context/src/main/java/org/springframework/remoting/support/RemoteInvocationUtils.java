@@ -23,7 +23,7 @@ import org.springframework.core.JdkVersion;
 
 /**
  * General utilities for handling remote invocations.
- * 
+ *
  * <p>Mainly intended for use within the remoting framework.
  *
  * @author Juergen Hoeller

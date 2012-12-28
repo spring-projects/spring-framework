@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
  * Utility class that builds pretty-printing <code>toString()</code> methods
  * with pluggable styling conventions. By default, ToStringCreator adheres
  * to Spring's <code>toString()</code> styling conventions.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2

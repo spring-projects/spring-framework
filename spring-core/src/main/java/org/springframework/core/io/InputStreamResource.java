@@ -111,7 +111,7 @@ public class InputStreamResource extends AbstractResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
+			(obj instanceof InputStreamResource && ((InputStreamResource) obj).inputStream.equals(this.inputStream)));
 	}
 
 	/**

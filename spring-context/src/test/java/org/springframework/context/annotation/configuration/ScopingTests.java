@@ -196,7 +196,7 @@ public class ScopingTests {
 		// 6 @Beans + 1 Configuration + 2 scoped proxy + 1 importRegistry
 		assertEquals(10, ctx.getBeanDefinitionCount());
 	}
-	
+
 //	/**
 //	 * SJC-254 caught a regression in handling scoped proxies starting in 1.0 m4.
 //	 * The ScopedProxyFactoryBean object was having its scope set to that of its delegate
@@ -207,10 +207,10 @@ public class ScopingTests {
 //		JavaConfigWebApplicationContext ctx = new JavaConfigWebApplicationContext();
 //		ctx.setConfigLocations(new String[] { ScopeTestConfiguration.class.getName() });
 //		ctx.refresh();
-//		
+//
 //		// should be fine
 //		ctx.getBean(Bar.class);
-//		
+//
 //		boolean threw = false;
 //		try {
 //			ctx.getBean(Foo.class);
@@ -221,7 +221,7 @@ public class ScopingTests {
 //		}
 //		assertTrue(threw);
 //	}
-	
+
 	@Configuration
 	static class ScopeTestConfiguration {
 
@@ -236,30 +236,30 @@ public class ScopingTests {
 			return new Bar(foo());
 		}
 	}
-	
+
 	static class Foo {
 		public Foo() {
 			//System.out.println("created foo: " + this.getClass().getName());
 		}
-		
+
 		public void doSomething() {
 			//System.out.println("interesting: " + this);
 		}
 	}
-	
+
 	static class Bar {
-	
+
 		private final Foo foo;
-	
+
 		public Bar(Foo foo) {
 			this.foo = foo;
 			//System.out.println("created bar: " + this);
 		}
-	
+
 		public Foo getFoo() {
 			return foo;
 		}
-		
+
 	}
 
 	private void genericTestScope(String beanName) throws Exception {

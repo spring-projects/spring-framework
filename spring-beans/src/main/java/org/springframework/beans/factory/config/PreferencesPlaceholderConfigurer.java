@@ -76,9 +76,9 @@ public class PreferencesPlaceholderConfigurer extends PropertyPlaceholderConfigu
 	 */
 	public void afterPropertiesSet() {
 		this.systemPrefs = (this.systemTreePath != null) ?
-		    Preferences.systemRoot().node(this.systemTreePath) : Preferences.systemRoot();
+				Preferences.systemRoot().node(this.systemTreePath) : Preferences.systemRoot();
 		this.userPrefs = (this.userTreePath != null) ?
-		    Preferences.userRoot().node(this.userTreePath) : Preferences.userRoot();
+				Preferences.userRoot().node(this.userTreePath) : Preferences.userRoot();
 	}
 
 	/**

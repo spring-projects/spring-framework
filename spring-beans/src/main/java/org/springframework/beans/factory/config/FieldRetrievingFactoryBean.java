@@ -30,7 +30,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link FactoryBean} which retrieves a static or non-static field value.
- * 
+ *
  * <p>Typically used for retrieving public static final constants. Usage example:
  *
  * <pre class="code">// standard definition for exposing a static field, specifying the "staticField" property
@@ -42,10 +42,10 @@ import org.springframework.util.StringUtils;
  * &lt;bean id="java.sql.Connection.TRANSACTION_SERIALIZABLE"
  *       class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean"/&gt;</pre>
  * </pre>
- * 
+ *
  * <p>If you are using Spring 2.0, you can also use the following style of configuration for
  * public static fields.
- * 
+ *
  * <pre class="code">&lt;util:constant static-field="java.sql.Connection.TRANSACTION_SERIALIZABLE"/&gt;</pre>
  *
  * @author Juergen Hoeller
@@ -159,7 +159,7 @@ public class FieldRetrievingFactoryBean
 		if (this.targetClass == null && this.targetObject == null) {
 			if (this.targetField != null) {
 				throw new IllegalArgumentException(
-				    "Specify targetClass or targetObject in combination with targetField");
+						"Specify targetClass or targetObject in combination with targetField");
 			}
 
 			// If no other property specified, consider bean name as static field expression.

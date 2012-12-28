@@ -87,13 +87,13 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 				}
 			}
 		}
-		
+
 		if (this.exceptionHandlerMap.isEmpty()) {
 			throw new IllegalArgumentException(
 					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}
-	
+
 	public int getHandlerMethodCount() {
 		return this.exceptionHandlerMap.size();
 	}
@@ -131,7 +131,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			throw ex;
 		}
 	}
-	
+
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
 		if (method.getParameterTypes().length == 1) {

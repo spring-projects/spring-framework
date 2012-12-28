@@ -57,5 +57,5 @@ public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAsse
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssemblerCustom.xml";
 	}
-	
+
 }

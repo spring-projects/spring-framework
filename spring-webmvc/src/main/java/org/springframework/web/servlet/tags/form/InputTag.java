@@ -21,7 +21,7 @@ import javax.servlet.jsp.JspException;
 /**
  * Data-binding-aware JSP tag for rendering an HTML '<code>input</code>'
  * element with a '<code>type</code>' of '<code>text</code>'.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -172,7 +172,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal 
+	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal
 	 * dynamic attributes.
 	 */
 	@Override
@@ -184,7 +184,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Get the value of the '<code>type</code>' attribute. Subclasses
 	 * can override this to change the type of '<code>input</code>' element

@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>
  * Intended for use with JUnit 4 and TestNG. All <code>assert*()</code> methods
  * throw {@link AssertionError}s.
- * 
+ *
  * @author Sam Brannen
  * @author Alef Arendsen
  * @author Bram Smeets
@@ -48,7 +48,7 @@ public abstract class ModelAndViewAssert {
 	 * Checks whether the model value under the given <code>modelName</code>
 	 * exists and checks it type, based on the <code>expectedType</code>. If the
 	 * model entry exists and the type matches, the model value is returned.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -68,7 +68,7 @@ public abstract class ModelAndViewAssert {
 
 	/**
 	 * Compare each individual entry in a list, without first sorting the lists.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -87,7 +87,7 @@ public abstract class ModelAndViewAssert {
 
 	/**
 	 * Assert whether or not a model attribute is available.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -102,7 +102,7 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Compare a given <code>expectedValue</code> to the value from the model
 	 * bound under the given <code>modelName</code>.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -118,7 +118,7 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Inspect the <code>expectedModel</code> to see if all elements in the
 	 * model appear and are equal.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedModel the expected model
 	 */
@@ -151,7 +151,7 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Compare each individual entry in a list after having sorted both lists
 	 * (optionally using a comparator).
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param modelName name of the object to add to the model (never
 	 * <code>null</code>)
@@ -187,7 +187,7 @@ public abstract class ModelAndViewAssert {
 	/**
 	 * Check to see if the view name in the ModelAndView matches the given
 	 * <code>expectedName</code>.
-	 * 
+	 *
 	 * @param mav ModelAndView to test against (never <code>null</code>)
 	 * @param expectedName the name of the model value
 	 */

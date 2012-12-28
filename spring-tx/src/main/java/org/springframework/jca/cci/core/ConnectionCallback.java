@@ -28,7 +28,7 @@ import org.springframework.dao.DataAccessException;
  * Generic callback interface for code that operates on a CCI Connection.
  * Allows to execute any number of operations on a single Connection,
  * using any type and number of Interaction.
- * 
+ *
  * <p>This is particularly useful for delegating to existing data access code
  * that expects a Connection to work on and throws ResourceException. For newly
  * written code, it is strongly recommended to use CciTemplate's more specific
@@ -47,7 +47,7 @@ public interface ConnectionCallback<T> {
 	 * Gets called by <code>CciTemplate.execute</code> with an active CCI Connection.
 	 * Does not need to care about activating or closing the Connection, or handling
 	 * transactions.
-	 * 
+	 *
 	 * <p>If called without a thread-bound CCI transaction (initiated by
 	 * CciLocalTransactionManager), the code will simply get executed on the CCI
 	 * Connection with its transactional semantics. If CciTemplate is configured

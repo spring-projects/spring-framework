@@ -23,9 +23,9 @@ import org.springframework.util.comparator.CompoundComparator;
 
 /**
  * Unit tests for {@link PropertyComparator}
- * 
+ *
  * @see org.springframework.util.comparator.ComparatorTests
- * 
+ *
  * @author Keith Donald
  * @author Chris Beams
  */

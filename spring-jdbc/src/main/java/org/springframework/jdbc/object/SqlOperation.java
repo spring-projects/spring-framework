@@ -86,7 +86,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 		}
 	}
 
-	
+
 	/**
 	 * Return a PreparedStatementSetter to perform an operation
 	 * with the given parameters.

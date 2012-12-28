@@ -23,7 +23,7 @@ import junit.framework.TestResult;
  * Verifies proper handling of {@link IfProfileValue @IfProfileValue} and
  * {@link ProfileValueSourceConfiguration @ProfileValueSourceConfiguration} in
  * conjunction with {@link AbstractAnnotationAwareTransactionalTests}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

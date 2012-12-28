@@ -52,7 +52,7 @@ import org.springframework.util.ClassUtils;
  * DataSource ds = new DriverManagerDataSource(...);
  * builder.bind("java:comp/env/jdbc/myds", ds);
  * builder.activate();</pre>
- * 
+ *
  * Note that it's impossible to activate multiple builders within the same JVM,
  * due to JNDI restrictions. Thus to configure a fresh builder repeatedly, use
  * the following code to get a reference to either an already activated builder

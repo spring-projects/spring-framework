@@ -56,7 +56,7 @@ public class LocalRegionFactoryProxy implements RegionFactory {
 		// absolutely needs thread-bound RegionFactory to initialize
 		if (rf == null) {
 			throw new IllegalStateException("No Hibernate RegionFactory found - " +
-			    "'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
+				"'cacheRegionFactory' property must be set on LocalSessionFactoryBean");
 		}
 		this.regionFactory = rf;
 	}

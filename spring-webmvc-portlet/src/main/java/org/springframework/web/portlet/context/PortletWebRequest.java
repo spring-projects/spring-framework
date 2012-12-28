@@ -111,7 +111,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	public Iterator<String> getParameterNames() {
 		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
-	
+
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}

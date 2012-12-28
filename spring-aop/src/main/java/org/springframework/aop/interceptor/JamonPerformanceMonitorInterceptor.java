@@ -27,7 +27,7 @@ import org.apache.commons.logging.Log;
  * and output the stats.
  *
  * <p>This code is inspired by Thierry Templier's blog.
- * 
+ *
  * @author Dmitriy Kopylenko
  * @author Juergen Hoeller
  * @author Rob Harrop

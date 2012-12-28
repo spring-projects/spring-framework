@@ -317,11 +317,11 @@ public abstract class EntityManagerFactoryUtils {
 		if (ex instanceof PersistenceException) {
 			return new JpaSystemException((PersistenceException) ex);
 		}
-		
+
 		// If we get here, we have an exception that resulted from user code,
 		// rather than the persistence provider, so we return null to indicate
 		// that translation should not occur.
-		return null;				
+		return null;
 	}
 
 	/**

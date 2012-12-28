@@ -133,7 +133,7 @@ public class RollbackRuleAttribute implements Serializable{
 		RollbackRuleAttribute rhs = (RollbackRuleAttribute) other;
 		return this.exceptionName.equals(rhs.exceptionName);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return this.exceptionName.hashCode();

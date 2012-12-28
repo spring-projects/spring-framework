@@ -36,7 +36,7 @@ public class AspectJAfterAdvice extends AbstractAspectJAdvice implements MethodI
 
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
-	
+
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();

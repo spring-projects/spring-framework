@@ -25,7 +25,7 @@ package test.beans;
  * @author Chris Beams
  */
 public final class FactoryMethods {
-	
+
 	public static FactoryMethods nullInstance() {
 		return null;
 	}

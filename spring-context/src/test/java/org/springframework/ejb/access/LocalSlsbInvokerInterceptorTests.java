@@ -186,7 +186,7 @@ public class LocalSlsbInvokerInterceptorTests {
 	}
 
 
-	/** 
+	/**
 	 * Needed so that we can mock the create() method.
 	 */
 	private interface SlsbHome extends EJBLocalHome {

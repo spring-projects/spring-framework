@@ -52,7 +52,7 @@ public class Delegate {
 		AnnotationDrivenStaticEntityMockingControl.playback();
 		Assert.assertEquals(found, Person.findPerson(id + 1));
 	}
-	
+
 	@Test
 	public void failTooFewCalls() {
 		long id = 13;
@@ -69,7 +69,7 @@ public class Delegate {
 	public void doesntEverReplay() {
 		Person.countPeople();
 	}
-	
+
 	@Test
 	public void doesntEverSetReturn() {
 		Person.countPeople();
@@ -81,7 +81,7 @@ public class Delegate {
 		AnnotationDrivenStaticEntityMockingControl.playback();
 		Person.countPeople();
 	}
-	
+
 	@Test(expected=RemoteException.class)
 	public void testVerificationFailsEvenWhenTestFailsInExpectedManner() throws RemoteException {
 		Person.countPeople();

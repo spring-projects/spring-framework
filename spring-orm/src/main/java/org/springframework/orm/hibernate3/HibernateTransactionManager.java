@@ -888,7 +888,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public void flush() {
 			try {
-			    this.sessionHolder.getSession().flush();
+				this.sessionHolder.getSession().flush();
 			}
 			catch (HibernateException ex) {
 				throw convertHibernateAccessException(ex);

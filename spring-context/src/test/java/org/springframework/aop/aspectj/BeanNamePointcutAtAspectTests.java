@@ -100,5 +100,5 @@ class CounterAspect {
 	public void increment1ForAnonymousPointcut() {
 		count++;
 	}
-	
+
 }

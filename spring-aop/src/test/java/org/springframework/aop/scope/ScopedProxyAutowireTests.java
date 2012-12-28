@@ -28,9 +28,9 @@ import org.springframework.core.io.Resource;
  * @author Chris Beams
  */
 public final class ScopedProxyAutowireTests {
-	
+
 	private static final Class<?> CLASS = ScopedProxyAutowireTests.class;
-	
+
 	private static final Resource SCOPED_AUTOWIRE_TRUE_CONTEXT = qualifiedResource(CLASS, "scopedAutowireTrue.xml");
 	private static final Resource SCOPED_AUTOWIRE_FALSE_CONTEXT = qualifiedResource(CLASS, "scopedAutowireFalse.xml");
 

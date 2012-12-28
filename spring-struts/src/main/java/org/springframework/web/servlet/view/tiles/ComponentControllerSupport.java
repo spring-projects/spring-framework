@@ -69,7 +69,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	public final void perform(
 			ComponentContext componentContext, HttpServletRequest request,
 			HttpServletResponse response, ServletContext servletContext)
-	    throws ServletException, IOException {
+		throws ServletException, IOException {
 
 		try {
 			execute(componentContext, request, response, servletContext);
@@ -97,7 +97,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	public final void execute(
 			ComponentContext componentContext, HttpServletRequest request,
 			HttpServletResponse response, ServletContext servletContext)
-	    throws Exception {
+		throws Exception {
 
 		synchronized (this) {
 			if (this.webApplicationContext == null) {

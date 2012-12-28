@@ -638,7 +638,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 			binder.bind(request);
 			onBindOnNewForm(request, command, errors);
 		}
-		
+
 		// Return BindException object that resulted from binding.
 		return errors;
 	}
@@ -690,7 +690,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		if (!isSessionForm()) {
 			return formBackingObject(request);
 		}
-		
+
 		// Session-form mode: retrieve form object from portlet session attribute.
 		PortletSession session = request.getPortletSession(false);
 		if (session == null) {
@@ -821,7 +821,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 		// Fetch errors model as starting point, containing form object under
 		// "commandName", and corresponding Errors instance under internal key.
 		Map model = errors.getModel();
-		
+
 		// Merge reference data into model, if any.
 		Map referenceData = referenceData(request, errors.getTarget(), errors);
 		if (referenceData != null) {

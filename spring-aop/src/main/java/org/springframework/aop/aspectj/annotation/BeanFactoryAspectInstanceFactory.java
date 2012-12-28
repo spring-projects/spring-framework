@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
  * backed by a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
  * <p>Note that this may instantiate multiple times if using a prototype,
- * which probably won't give the semantics you expect. 
+ * which probably won't give the semantics you expect.
  * Use a {@link LazySingletonAspectInstanceFactoryDecorator}
  * to wrap this to ensure only one new aspect comes back.
  *
@@ -56,7 +56,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	public BeanFactoryAspectInstanceFactory(BeanFactory beanFactory, String name) {
 		this(beanFactory, name, beanFactory.getType(name));
 	}
-	
+
 	/**
 	 * Create a BeanFactoryAspectInstanceFactory, providing a type that AspectJ should
 	 * introspect to create AJType metadata. Use if the BeanFactory may consider the type

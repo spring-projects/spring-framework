@@ -55,8 +55,8 @@ public class AspectMetadata {
 	private final Pointcut perClausePointcut;
 
 	/**
-	 * The name of this aspect as defined to Spring (the bean name) - 
-	 * allows us to determine if two pieces of advice come from the 
+	 * The name of this aspect as defined to Spring (the bean name) -
+	 * allows us to determine if two pieces of advice come from the
 	 * same aspect and hence their relative precedence.
 	 */
 	private String aspectName;

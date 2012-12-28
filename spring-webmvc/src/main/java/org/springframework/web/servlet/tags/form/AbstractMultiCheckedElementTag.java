@@ -199,7 +199,7 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		if (itemsObject == null && boundType != null && boundType.isEnum()) {
 			itemsObject = boundType.getEnumConstants();
 		}
-		
+
 		if (itemsObject == null) {
 			throw new IllegalArgumentException("Attribute 'items' is required and must be a Collection, an Array or a Map");
 		}
@@ -241,10 +241,10 @@ public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElem
 		Object renderValue;
 		if (valueProperty != null) {
 			renderValue = wrapper.getPropertyValue(valueProperty);
-		} 
+		}
 		else if (item instanceof Enum) {
 			renderValue = ((Enum<?>) item).name();
-		} 
+		}
 		else {
 			renderValue = item;
 		}

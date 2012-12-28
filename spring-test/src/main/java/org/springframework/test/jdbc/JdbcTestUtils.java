@@ -233,7 +233,7 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Read a script from the provided {@code LineNumberReader}, using 
+	 * Read a script from the provided {@code LineNumberReader}, using
 	 * "{@code --}" as the comment prefix, and build a {@code String} containing
 	 * the lines.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script

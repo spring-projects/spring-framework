@@ -30,7 +30,7 @@ import org.springframework.util.ClassUtils;
 
 /**
  * {@link FactoryBean} which returns a value which is the result of a static or instance
- * method invocation. For most use cases it is better to just use the container's 
+ * method invocation. For most use cases it is better to just use the container's
  * built-in factory method support for the same purpose, since that is smarter at
  * converting arguments. This factory bean is still useful though when you need to
  * call a method which doesn't return any value (for example, a static class method
@@ -55,7 +55,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>This class depends on {@link #afterPropertiesSet()} being called once
  * all properties have been set, as per the InitializingBean contract.
- * 
+ *
  * <p>An example (in an XML based bean factory definition) of a bean definition
  * which uses this class to call a static factory method:
  *
@@ -82,7 +82,7 @@ import org.springframework.util.ClassUtils;
  *     &lt;/list>
  *   &lt;/property>
  * &lt;/bean></pre>
- * 
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 21.11.2003

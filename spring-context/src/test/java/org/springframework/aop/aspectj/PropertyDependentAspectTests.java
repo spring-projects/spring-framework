@@ -90,7 +90,7 @@ class JoinPointMonitorAspect {
 	 * is sufficient to reproduce the bug.
 	 */
 	private ICounter counter;
-	
+
 	int beforeExecutions;
 	int aroundExecutions;
 
@@ -121,7 +121,7 @@ class JoinPointMonitorAtAspectJAspect {
 	 * is sufficient to reproduce the bug.
 	 */
 	private ICounter counter;
-	
+
 	int beforeExecutions;
 	int aroundExecutions;
 

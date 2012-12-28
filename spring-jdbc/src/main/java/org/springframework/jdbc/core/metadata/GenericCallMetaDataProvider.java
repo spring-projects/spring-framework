@@ -197,7 +197,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 	public SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta) {
-		return new SqlParameter(parameterName, meta.getSqlType());		
+		return new SqlParameter(parameterName, meta.getSqlType());
 	}
 
 	public String getUserName() {

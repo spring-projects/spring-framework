@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 public class AutoProxyWithCodeStyleAspectsTests extends TestCase {
 
 	public void testNoAutoproxyingOfAjcCompiledAspects() {
-		new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/autoproxy/ajcAutoproxyTests.xml");		
+		new ClassPathXmlApplicationContext("org/springframework/aop/aspectj/autoproxy/ajcAutoproxyTests.xml");
 	}
-	
+
 }

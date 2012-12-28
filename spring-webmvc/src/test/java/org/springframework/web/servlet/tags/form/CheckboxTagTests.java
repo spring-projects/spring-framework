@@ -80,7 +80,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
-	
+
 	public void testWithIndexedBooleanObjectNotChecked() throws Exception {
 		this.tag.setPath("someMap[key]");
 		int result = this.tag.doStartTag();
@@ -110,7 +110,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		this.tag.setPath("someBoolean");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
-		
+
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
 		String output = getOutput();
@@ -612,7 +612,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		assertEquals("checked", checkboxElement.attribute("checked").getValue());
 		assertEquals("true", checkboxElement.attribute("value").getValue());
 	}
-	
+
 	public void testDynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
@@ -622,8 +622,8 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			assertEquals("Attribute type=\"email\" is not allowed", e.getMessage());
 		}
 	}
-	
-	
+
+
 	private Date getDate() {
 		Calendar cal = Calendar.getInstance();
 		cal.set(Calendar.YEAR, 10);

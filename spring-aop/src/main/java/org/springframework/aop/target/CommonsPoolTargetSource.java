@@ -41,7 +41,7 @@ import org.springframework.core.Constants;
  * properties are explictly not mirrored because the implementation of
  * <code>PoolableObjectFactory</code> used by this class does not implement
  * meaningful validation. All exposed Commons Pool properties use the corresponding
- * Commons Pool defaults: for example, 
+ * Commons Pool defaults: for example,
  *
  * @author Rod Johnson
  * @author Rob Harrop

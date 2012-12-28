@@ -42,7 +42,7 @@ public class XMLEventStreamWriterTests {
 		XMLEventWriter eventWriter = outputFactory.createXMLEventWriter(stringWriter);
 		streamWriter = new XMLEventStreamWriter(eventWriter, XMLEventFactory.newInstance());
 	}
-	
+
 	@Test
 	public void write() throws Exception {
 		streamWriter.writeStartDocument();

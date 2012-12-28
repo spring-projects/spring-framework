@@ -159,16 +159,16 @@ public class EvalTagTests extends AbstractTagTests {
 
 
 	public static class Bean {
-		
+
 		public String method() {
 			return "foo";
 		}
-		
+
 		@NumberFormat(style=Style.PERCENT)
 		public BigDecimal getFormattable() {
 			return new BigDecimal(".25");
 		}
-		
+
 		public String html() {
 			return "<p>";
 		}
@@ -176,7 +176,7 @@ public class EvalTagTests extends AbstractTagTests {
 		public String getBean() {
 			return "not the bean object";
 		}
-		
+
 		public Object getNull() {
 			return null;
 		}

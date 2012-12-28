@@ -41,7 +41,7 @@ package org.springframework.test.context;
  * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * TransactionalTestExecutionListener}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -58,7 +58,7 @@ public interface TestExecutionListener {
 	 * If a given testing framework (e.g., JUnit 3.8) does not support
 	 * <em>before class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
-	 * 
+	 *
 	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */
@@ -70,7 +70,7 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately after instantiation of the test
 	 * instance but prior to any framework-specific lifecycle callbacks.
-	 * 
+	 *
 	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */
@@ -84,7 +84,7 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately prior to framework-specific
 	 * <em>before</em> lifecycle callbacks.
-	 * 
+	 *
 	 * @param testContext the test context in which the test method will be
 	 * executed; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
@@ -99,7 +99,7 @@ public interface TestExecutionListener {
 	 * <p>
 	 * This method should be called immediately after framework-specific
 	 * <em>after</em> lifecycle callbacks.
-	 * 
+	 *
 	 * @param testContext the test context in which the test method was
 	 * executed; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
@@ -116,7 +116,7 @@ public interface TestExecutionListener {
 	 * If a given testing framework (e.g., JUnit 3.8) does not support
 	 * <em>after class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
-	 * 
+	 *
 	 * @param testContext the test context for the test; never <code>null</code>
 	 * @throws Exception allows any exception to propagate
 	 */

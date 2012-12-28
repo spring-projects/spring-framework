@@ -34,10 +34,10 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  */
 public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactoryLocatorTests {
-	
+
 	private static final Class<?> CLASS = ContextSingletonBeanFactoryLocatorTests.class;
 	private static final String CONTEXT = CLASS.getSimpleName() + "-context.xml";
-	
+
 
 	@Test
 	public void testBaseBeanFactoryDefs() {
@@ -51,7 +51,7 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	public void testBasicFunctionality() {
 		ContextSingletonBeanFactoryLocator facLoc = new ContextSingletonBeanFactoryLocator(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
-		
+
 		basicFunctionalityTest(facLoc);
 
 		BeanFactoryReference bfr = facLoc.useBeanFactory("a.qualified.name.of.some.sort");
@@ -77,7 +77,7 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 		BeanFactoryLocator facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest1(facLoc);
-		
+
 		facLoc = ContextSingletonBeanFactoryLocator.getInstance(
 				"classpath*:" + ClassUtils.addResourcePathToPackagePath(CLASS, CONTEXT));
 		getInstanceTest2(facLoc);

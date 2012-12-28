@@ -89,5 +89,5 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 			throw new UnsupportedOperationException("Unknown parameter type: " + paramType + " in method: " + method);
 		}
 	}
-	
+
 }

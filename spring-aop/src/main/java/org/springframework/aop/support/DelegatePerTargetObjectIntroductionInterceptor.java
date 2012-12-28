@@ -53,7 +53,7 @@ import org.springframework.aop.ProxyMethodInvocation;
 public class DelegatePerTargetObjectIntroductionInterceptor extends IntroductionInfoSupport
 		implements IntroductionInterceptor {
 
-	/** 
+	/**
 	 * Hold weak references to keys as we don't want to interfere with garbage collection..
 	 */
 	private final Map<Object, Object> delegateMap = new WeakHashMap<Object, Object>();
@@ -85,12 +85,12 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		if (isMethodOnIntroducedInterface(mi)) {
 			Object delegate = getIntroductionDelegateFor(mi.getThis());
-			
+
 			// Using the following method rather than direct reflection,
 			// we get correct handling of InvocationTargetException
 			// if the introduced method throws an exception.
 			Object retVal = AopUtils.invokeJoinpointUsingReflection(delegate, mi.getMethod(), mi.getArguments());
-			
+
 			// Massage return value if possible: if the delegate returned itself,
 			// we really want to return the proxy.
 			if (retVal == delegate && mi instanceof ProxyMethodInvocation) {
@@ -126,7 +126,7 @@ public class DelegatePerTargetObjectIntroductionInterceptor extends Introduction
 			}
 		}
 	}
-	
+
 	private Object createNewDelegate() {
 		try {
 			return this.defaultImplType.newInstance();

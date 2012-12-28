@@ -28,7 +28,7 @@ import org.springframework.util.SerializationUtils;
 
 /**
  * Test for static utility to help with serialization.
- * 
+ *
  * @author Dave Syer
  * @since 3.0.5
  */

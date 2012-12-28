@@ -16,7 +16,7 @@
 
 package org.springframework.transaction.annotation;
 
-import org.springframework.transaction.TransactionDefinition; 
+import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Enumeration that represents transaction propagation behaviors for use
@@ -28,7 +28,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @since 1.2
  */
 public enum Propagation {
-	
+
 	/**
 	 * Support a current transaction, create a new one if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
@@ -99,7 +99,7 @@ public enum Propagation {
 
 
 	Propagation(int value) { this.value = value; }
-	
+
 	public int value() { return this.value; }
-	
+
 }

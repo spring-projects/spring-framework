@@ -68,7 +68,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertTrue("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersKeyValueNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -77,7 +77,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertFalse("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersNegatedValueMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -86,7 +86,7 @@ public class ServletAnnotationMappingUtilsTests {
 		boolean result = ServletAnnotationMappingUtils.checkParameters(params, request);
 		assertTrue("Invalid request method result", result);
 	}
-	
+
 	@Test
 	public void checkParametersNegatedValueNoMatch() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
@@ -143,8 +143,8 @@ public class ServletAnnotationMappingUtilsTests {
 		assertFalse("Invalid request method result", result);
 	}
 
-	// SPR-8862 
-	
+	// SPR-8862
+
 	@Test
 	public void checkHeadersKeyValueNoMatchWithNegation() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");

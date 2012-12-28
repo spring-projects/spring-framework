@@ -30,14 +30,14 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertTrue("Should not have any property values", pvs.getPropertyValues().length == 0);
 	}
-	
+
 	public void testWithNoPrefix() {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", "value");
 		PortletRequestParameterPropertyValues pvs = new PortletRequestParameterPropertyValues(request);
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
 	}
-	
+
 	public void testWithPrefix() {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("test_param", "value");
@@ -60,5 +60,5 @@ public class PortletRequestParameterPropertyValuesTests extends TestCase {
 		assertFalse(pvs.contains("other"));
 		assertTrue(pvs.contains("param"));
 		assertEquals("value", pvs.getPropertyValue("param").getValue());
-	}	
+	}
 }

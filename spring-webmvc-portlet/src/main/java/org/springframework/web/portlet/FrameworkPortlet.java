@@ -609,7 +609,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 		if (userName != null) {
 			return userName;
 		}
-		
+
 		// Try the Portlet USER_INFO map.
 		Map userInfo = (Map) request.getAttribute(PortletRequest.USER_INFO);
 		if (userInfo != null) {
@@ -620,7 +620,7 @@ public abstract class FrameworkPortlet extends GenericPortletBean
 				}
 			}
 		}
-		
+
 		// Nothing worked...
 		return null;
 	}

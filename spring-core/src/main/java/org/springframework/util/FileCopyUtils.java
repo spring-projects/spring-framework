@@ -61,7 +61,7 @@ public abstract class FileCopyUtils {
 		Assert.notNull(in, "No input File specified");
 		Assert.notNull(out, "No output File specified");
 		return copy(new BufferedInputStream(new FileInputStream(in)),
-		    new BufferedOutputStream(new FileOutputStream(out)));
+			new BufferedOutputStream(new FileOutputStream(out)));
 	}
 
 	/**

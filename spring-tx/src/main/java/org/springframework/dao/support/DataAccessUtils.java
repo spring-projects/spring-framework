@@ -196,8 +196,8 @@ public abstract class DataAccessUtils {
 
 		return objectResult(results, Number.class).longValue();
 	}
-	
-	
+
+
 	/**
 	 * Return a translated exception if this is appropriate,
 	 * otherwise return the input exception.

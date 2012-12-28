@@ -98,7 +98,7 @@ public interface TableMetaDataProvider {
 	 * Are we using the meta data for the table columns?
 	 */
  	boolean isTableColumnMetaDataUsed();
-	
+
 	/**
 	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}

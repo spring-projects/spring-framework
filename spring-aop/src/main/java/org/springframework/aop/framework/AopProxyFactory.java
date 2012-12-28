@@ -35,7 +35,7 @@ package org.springframework.aop.framework;
  *
  * <p>Proxies may or may not allow advice changes to be made.
  * If they do not permit advice changes (for example, because
- * the configuration was frozen) a proxy should throw an 
+ * the configuration was frozen) a proxy should throw an
  * {@link AopConfigException} on an attempted advice change.
  *
  * @author Rod Johnson

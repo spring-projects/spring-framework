@@ -138,7 +138,7 @@ public class TilesView extends InternalResourceView {
 	 * @return the component definition
 	 */
 	protected ComponentDefinition getComponentDefinition(DefinitionsFactory factory, HttpServletRequest request)
-	    throws Exception {
+		throws Exception {
 		return factory.getDefinition(getUrl(), request, getServletContext());
 	}
 

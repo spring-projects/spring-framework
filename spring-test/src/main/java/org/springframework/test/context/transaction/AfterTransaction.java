@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * The <code>&#064;AfterTransaction</code> methods of superclasses will be
  * executed after those of the current class.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.transaction.annotation.Transactional

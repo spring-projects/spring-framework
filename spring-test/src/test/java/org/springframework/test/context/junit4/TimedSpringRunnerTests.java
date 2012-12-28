@@ -33,7 +33,7 @@ import org.springframework.test.context.TestExecutionListeners;
  * <li>JUnit's {@link Test#timeout() @Test(timeout=...)}</li>
  * <li>Spring's {@link Timed @Timed}</li>
  * </ul>
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

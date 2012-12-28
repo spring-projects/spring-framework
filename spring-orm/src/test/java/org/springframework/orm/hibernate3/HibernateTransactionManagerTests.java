@@ -1024,7 +1024,7 @@ public class HibernateTransactionManagerTests extends TestCase {
 		beanFactory.getBean("entityInterceptor", Interceptor.class);
 		beanFactoryControl.setReturnValue(entityInterceptor2, 1);
 		beanFactoryControl.replay();
-		
+
 		HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 		tm.setEntityInterceptorBeanName("entityInterceptor");
 		tm.setBeanFactory(beanFactory);

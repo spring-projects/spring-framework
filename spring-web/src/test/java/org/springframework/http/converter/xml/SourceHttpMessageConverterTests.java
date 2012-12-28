@@ -120,7 +120,7 @@ public class SourceHttpMessageConverterTests {
 		assertEquals("Invalid content-length", outputMessage.getBodyAsBytes().length,
 				outputMessage.getHeaders().getContentLength());
 	}
-	
+
 	@Test
 	public void writeSAXSource() throws Exception {
 		String xml = "<root>Hello World</root>";

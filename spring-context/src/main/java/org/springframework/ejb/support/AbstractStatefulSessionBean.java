@@ -29,7 +29,7 @@ import org.springframework.beans.FatalBeanException;
  * method in their custom <code>ejbCreate()</code> and <code>ejbActivate()</code>
  * methods, and should invoke the <code>unloadBeanFactory()</code> method in
  * their <code>ejbPassivate</code> method.</b>
- * 
+ *
  * <p><b>Note: The default BeanFactoryLocator used by this class's superclass
  * (ContextJndiBeanFactoryLocator) is <b>not</b> serializable. Therefore,
  * when using the default BeanFactoryLocator, or another variant which is

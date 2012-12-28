@@ -86,7 +86,7 @@ public class CronTrigger implements Trigger {
 	public int hashCode() {
 		return this.sequenceGenerator.hashCode();
 	}
-	
+
 	@Override
 	public String toString() {
 		return sequenceGenerator.toString();

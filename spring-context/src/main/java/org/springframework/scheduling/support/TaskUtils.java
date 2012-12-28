@@ -31,7 +31,7 @@ import org.springframework.util.ReflectionUtils;
  * implementations. It is only public so that it may be accessed from
  * implementations within other packages. It is <i>not</i> intended for general
  * use and may change in the future.
- * 
+ *
  * @author Mark Fisher
  * @since 3.0
  */

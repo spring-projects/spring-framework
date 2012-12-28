@@ -108,7 +108,7 @@ public class JpaInterceptorTests extends TestCase {
 	public void testInterceptorWithThreadBound() {
 		factoryControl.replay();
 		managerControl.replay();
-		
+
 		TransactionSynchronizationManager.bindResource(factory, new EntityManagerHolder(entityManager));
 		JpaInterceptor interceptor = new JpaInterceptor();
 		interceptor.setEntityManagerFactory(factory);
@@ -179,12 +179,12 @@ public class JpaInterceptorTests extends TestCase {
 	public void testInterceptorWithFlushFailure() throws Throwable {
 		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
 		entityManager.flush();
-		
+
 		PersistenceException exception = new PersistenceException();
 		managerControl.setThrowable(exception, 1);
 		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
-		
+
 		factoryControl.replay();
 		managerControl.replay();
 
@@ -203,16 +203,16 @@ public class JpaInterceptorTests extends TestCase {
 		factoryControl.verify();
 		managerControl.verify();
 	}
-	
+
 	public void testInterceptorWithFlushFailureWithoutConversion() throws Throwable {
 		factoryControl.expectAndReturn(factory.createEntityManager(), entityManager);
 		entityManager.flush();
-		
+
 		PersistenceException exception = new PersistenceException();
 		managerControl.setThrowable(exception, 1);
 		managerControl.expectAndReturn(entityManager.isOpen(), true);
 		entityManager.close();
-		
+
 		factoryControl.replay();
 		managerControl.replay();
 

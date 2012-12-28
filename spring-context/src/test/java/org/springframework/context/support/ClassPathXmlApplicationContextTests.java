@@ -71,7 +71,7 @@ public final class ClassPathXmlApplicationContextTests {
 	private static final String TEST_PROPERTIES = "test.properties";
 	private static final String FQ_TEST_PROPERTIES = "classpath:org/springframework/beans/factory/xml/" + TEST_PROPERTIES;
 
-	
+
 	@Test
 	public void testSingleConfigLocation() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(FQ_SIMPLE_CONTEXT);
@@ -319,8 +319,7 @@ public final class ClassPathXmlApplicationContextTests {
 
 	@Test
 	public void testResourceAndInputStream() throws IOException {
-		ClassPathXmlApplicationContext ctx =
-		    new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {
 			public Resource getResource(String location) {
 				if (TEST_PROPERTIES.equals(location)) {
 					return new ClassPathResource(TEST_PROPERTIES, ClassPathXmlApplicationContextTests.class);

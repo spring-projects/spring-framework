@@ -47,11 +47,11 @@ public class TypePatternClassFilter implements ClassFilter {
 	}
 
 	/**
-	 * Create a fully configured {@link TypePatternClassFilter} using the  
+	 * Create a fully configured {@link TypePatternClassFilter} using the
 	 * given type pattern.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
 	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * or is recognized as invalid
 	 */
 	public TypePatternClassFilter(String typePattern) {
 		setTypePattern(typePattern);
@@ -73,7 +73,7 @@ public class TypePatternClassFilter implements ClassFilter {
 	 * <p>These conventions are established by AspectJ, not Spring AOP.
 	 * @param typePattern the type pattern that AspectJ weaver should parse
 	 * @throws IllegalArgumentException if the supplied <code>typePattern</code> is <code>null</code>
-	 * or is recognized as invalid 
+	 * or is recognized as invalid
 	 */
 	public void setTypePattern(String typePattern) {
 		Assert.notNull(typePattern);

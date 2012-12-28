@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  */
 public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint, JoinPoint.StaticPart {
-	
+
 	private final ProxyMethodInvocation methodInvocation;
 
 	private Object[] defensiveCopyOfArgs;

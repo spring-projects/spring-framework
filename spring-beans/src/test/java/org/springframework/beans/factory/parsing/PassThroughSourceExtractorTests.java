@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link PassThroughSourceExtractor}.
- * 
+ *
  * @author Rick Evans
  * @author Chris Beams
  */

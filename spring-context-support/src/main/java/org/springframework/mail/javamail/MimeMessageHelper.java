@@ -241,7 +241,7 @@ public class MimeMessageHelper {
 	 * @see #MimeMessageHelper(javax.mail.internet.MimeMessage, int, String)
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, boolean multipart, String encoding)
-	    throws MessagingException {
+			throws MessagingException {
 
 		this(mimeMessage, (multipart ? MULTIPART_MODE_MIXED_RELATED : MULTIPART_MODE_NO), encoding);
 	}
@@ -283,7 +283,7 @@ public class MimeMessageHelper {
 	 * @see #MULTIPART_MODE_MIXED_RELATED
 	 */
 	public MimeMessageHelper(MimeMessage mimeMessage, int multipartMode, String encoding)
-	    throws MessagingException {
+			throws MessagingException {
 
 		this.mimeMessage = mimeMessage;
 		createMimeMultiparts(mimeMessage, multipartMode);
@@ -380,8 +380,8 @@ public class MimeMessageHelper {
 	private void checkMultipart() throws IllegalStateException {
 		if (!isMultipart()) {
 			throw new IllegalStateException("Not in multipart mode - " +
-			    "create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
-			    "if you need to set alternative texts or add inline elements or attachments.");
+				"create an appropriate MimeMessageHelper via a constructor that takes a 'multipart' flag " +
+				"if you need to set alternative texts or add inline elements or attachments.");
 		}
 	}
 
@@ -546,7 +546,7 @@ public class MimeMessageHelper {
 	public void setFrom(String from, String personal) throws MessagingException, UnsupportedEncodingException {
 		Assert.notNull(from, "From address must not be null");
 		setFrom(getEncoding() != null ?
-		    new InternetAddress(from, personal, getEncoding()) : new InternetAddress(from, personal));
+			new InternetAddress(from, personal, getEncoding()) : new InternetAddress(from, personal));
 	}
 
 	public void setReplyTo(InternetAddress replyTo) throws MessagingException {
@@ -608,8 +608,8 @@ public class MimeMessageHelper {
 	public void addTo(String to, String personal) throws MessagingException, UnsupportedEncodingException {
 		Assert.notNull(to, "To address must not be null");
 		addTo(getEncoding() != null ?
-		    new InternetAddress(to, personal, getEncoding()) :
-		    new InternetAddress(to, personal));
+			new InternetAddress(to, personal, getEncoding()) :
+			new InternetAddress(to, personal));
 	}
 
 
@@ -653,8 +653,8 @@ public class MimeMessageHelper {
 	public void addCc(String cc, String personal) throws MessagingException, UnsupportedEncodingException {
 		Assert.notNull(cc, "Cc address must not be null");
 		addCc(getEncoding() != null ?
-		    new InternetAddress(cc, personal, getEncoding()) :
-		    new InternetAddress(cc, personal));
+			new InternetAddress(cc, personal, getEncoding()) :
+			new InternetAddress(cc, personal));
 	}
 
 
@@ -698,8 +698,8 @@ public class MimeMessageHelper {
 	public void addBcc(String bcc, String personal) throws MessagingException, UnsupportedEncodingException {
 		Assert.notNull(bcc, "Bcc address must not be null");
 		addBcc(getEncoding() != null ?
-		    new InternetAddress(bcc, personal, getEncoding()) :
-		    new InternetAddress(bcc, personal));
+			new InternetAddress(bcc, personal, getEncoding()) :
+			new InternetAddress(bcc, personal));
 	}
 
 	private InternetAddress parseAddress(String address) throws MessagingException {
@@ -960,7 +960,7 @@ public class MimeMessageHelper {
 	 * @see #addInline(String, javax.activation.DataSource)
 	 */
 	public void addInline(String contentId, InputStreamSource inputStreamSource, String contentType)
-	    throws MessagingException {
+		throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
@@ -1035,7 +1035,7 @@ public class MimeMessageHelper {
 	 * @see org.springframework.core.io.Resource
 	 */
 	public void addAttachment(String attachmentFilename, InputStreamSource inputStreamSource)
-	    throws MessagingException {
+		throws MessagingException {
 
 		String contentType = getFileTypeMap().getContentType(attachmentFilename);
 		addAttachment(attachmentFilename, inputStreamSource, contentType);
@@ -1059,7 +1059,7 @@ public class MimeMessageHelper {
 	 */
 	public void addAttachment(
 			String attachmentFilename, InputStreamSource inputStreamSource, String contentType)
-	    throws MessagingException {
+		throws MessagingException {
 
 		Assert.notNull(inputStreamSource, "InputStreamSource must not be null");
 		if (inputStreamSource instanceof Resource && ((Resource) inputStreamSource).isOpen()) {
@@ -1079,7 +1079,7 @@ public class MimeMessageHelper {
 	 * @return the Activation Framework DataSource
 	 */
 	protected DataSource createDataSource(
-	    final InputStreamSource inputStreamSource, final String contentType, final String name) {
+		final InputStreamSource inputStreamSource, final String contentType, final String name) {
 
 		return new DataSource() {
 			public InputStream getInputStream() throws IOException {

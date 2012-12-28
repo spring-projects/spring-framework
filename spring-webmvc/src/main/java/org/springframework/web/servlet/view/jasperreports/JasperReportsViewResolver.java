@@ -28,7 +28,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * {@link org.springframework.web.servlet.ViewResolver} implementation that
  * resolves instances of {@link AbstractJasperReportsView} by translating
  * the supplied view name into the URL of the report file.
- * 
+ *
  * @author Rob Harrop
  * @since 1.2.6
  */

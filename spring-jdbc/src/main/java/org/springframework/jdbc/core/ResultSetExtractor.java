@@ -21,7 +21,7 @@ import java.sql.SQLException;
 
 import org.springframework.dao.DataAccessException;
 
-/** 
+/**
  * Callback interface used by {@link JdbcTemplate}'s query methods.
  * Implementations of this interface perform the actual work of extracting
  * results from a {@link java.sql.ResultSet}, but don't need to worry

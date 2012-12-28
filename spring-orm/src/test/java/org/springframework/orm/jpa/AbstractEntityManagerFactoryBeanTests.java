@@ -68,7 +68,7 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 	protected static class DummyEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
 		private final EntityManagerFactory emf;
-		
+
 		public DummyEntityManagerFactoryBean(EntityManagerFactory emf) {
 			this.emf = emf;
 		}

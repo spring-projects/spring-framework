@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>See {@link org.springframework.jndi.JndiObjectLocator} for info on
  * how to specify the JNDI location of the target EJB.
- * 
+ *
  * <p>If you want control over interceptor chaining, use an AOP ProxyFactoryBean
  * with LocalSlsbInvokerInterceptor rather than rely on this class.
  *
@@ -41,7 +41,7 @@ import org.springframework.util.ClassUtils;
  * bound at the target location yet. The best solution is to set the "lookupHomeOnStartup"
  * property to "false", in which case the home will be fetched on first access to the EJB.
  * (This flag is only true by default for backwards compatibility reasons).
- *  
+ *
  * @author Rod Johnson
  * @author Colin Sampaleanu
  * @since 09.05.2003

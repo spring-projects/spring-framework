@@ -27,15 +27,15 @@ import org.junit.Test;
  */
 public class XmlOptionsFactoryBeanTests {
 
-    private XmlOptionsFactoryBean factoryBean = new XmlOptionsFactoryBean();
+	private XmlOptionsFactoryBean factoryBean = new XmlOptionsFactoryBean();
 
-    @Test
+	@Test
 	public void xmlOptionsFactoryBean() throws Exception {
-        factoryBean.setOptions(Collections.singletonMap(XmlOptions.SAVE_PRETTY_PRINT, Boolean.TRUE));
-        XmlOptions xmlOptions = factoryBean.getObject();
-        assertNotNull("No XmlOptions returned", xmlOptions);
-        assertTrue("Option not set", xmlOptions.hasOption(XmlOptions.SAVE_PRETTY_PRINT));
-        assertFalse("Invalid option set", xmlOptions.hasOption(XmlOptions.LOAD_LINE_NUMBERS));
-    }
+		factoryBean.setOptions(Collections.singletonMap(XmlOptions.SAVE_PRETTY_PRINT, Boolean.TRUE));
+		XmlOptions xmlOptions = factoryBean.getObject();
+		assertNotNull("No XmlOptions returned", xmlOptions);
+		assertTrue("Option not set", xmlOptions.hasOption(XmlOptions.SAVE_PRETTY_PRINT));
+		assertFalse("Invalid option set", xmlOptions.hasOption(XmlOptions.LOAD_LINE_NUMBERS));
+	}
 
 }

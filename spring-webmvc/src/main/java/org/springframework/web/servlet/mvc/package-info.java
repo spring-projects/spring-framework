@@ -6,7 +6,7 @@
  *     with Spring. Provides both abstract base classes and concrete implementations
  *     for often seen use cases.
  * </p>
- * 
+ *
  * <p>
  *     A <code>Controller</code> - as defined in this package - is analogous to a Struts
  *     <code>Action</code>. Usually <code>Controllers</code> are JavaBeans
@@ -18,7 +18,7 @@
  *     independent of the view, PDF views are possible, as well as for instance Excel
  *     views.
  * </p>
- * 
+ *
  * <p>
  *     How to actually set up a (web)application using the MVC framework Spring
  *     provides is explained in more detail in the
@@ -29,7 +29,7 @@
  *     workflow of some of the abstract and concrete controller and how to extend
  *     and fully use their functionality.
  * </p>
- * 
+ *
  * <p>
  *     Especially useful to read, while getting into the Spring MVC framework
  *     are the following:

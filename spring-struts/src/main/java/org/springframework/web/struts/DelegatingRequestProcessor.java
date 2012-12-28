@@ -108,7 +108,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class DelegatingRequestProcessor extends RequestProcessor {
 
 	private WebApplicationContext webApplicationContext;
-	
+
 
 	@Override
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {

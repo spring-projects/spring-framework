@@ -31,10 +31,10 @@ import org.springframework.test.context.support.GenericXmlContextLoader;
 
 /**
  * Unit tests for {@link MergedContextConfiguration}.
- * 
+ *
  * <p>These tests primarily exist to ensure that {@code MergedContextConfiguration}
  * can safely be used as the cache key for {@link ContextCache}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

@@ -52,11 +52,11 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "readonly", "readonly");
 		assertBlockTagContains(output, "Rob");
 	}
-	
+
 	public void testSimpleBindWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setPath("name");
 		this.tag.setReadonly("true");
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
@@ -87,7 +87,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 	public void testSimpleBindWithHtmlEscaping() throws Exception {
 		final String NAME = "Rob \"I Love Mangos\" Harrop";
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
-		
+
 		this.tag.setPath("name");
 		this.rob.setName(NAME);
 

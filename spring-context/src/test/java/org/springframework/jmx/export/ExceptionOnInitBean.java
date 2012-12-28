@@ -22,7 +22,7 @@ package org.springframework.jmx.export;
 public class ExceptionOnInitBean {
 
 	private boolean exceptOnInit = false;
-	
+
 	private String name;
 
 	public String getName() {

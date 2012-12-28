@@ -138,7 +138,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	protected final Session getSession()
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		return getSession(this.hibernateTemplate.isAllowCreate());
 	}
@@ -163,10 +163,10 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	protected final Session getSession(boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		return (!allowCreate ?
-		    SessionFactoryUtils.getSession(getSessionFactory(), false) :
+			SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(
 						getSessionFactory(),
 						this.hibernateTemplate.getEntityInterceptor(),

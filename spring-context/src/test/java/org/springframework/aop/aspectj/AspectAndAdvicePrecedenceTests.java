@@ -36,15 +36,15 @@ import org.springframework.core.Ordered;
 public final class AspectAndAdvicePrecedenceTests {
 
 	private PrecedenceTestAspect highPrecedenceAspect;
-	
+
 	private PrecedenceTestAspect lowPrecedenceAspect;
-	
+
 	private SimpleSpringBeforeAdvice highPrecedenceSpringAdvice;
-	
+
 	private SimpleSpringBeforeAdvice lowPrecedenceSpringAdvice;
-	
+
 	private ITestBean testBean;
-	
+
 
 	@Before
 	public void setUp() {
@@ -176,7 +176,7 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		this.collaborator.aroundAdviceOne(this.name);
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
-		} 
+		}
 		catch(Throwable t) { throw new RuntimeException(t); }
 		this.collaborator.aroundAdviceOne(this.name);
 		return ret;
@@ -187,7 +187,7 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		this.collaborator.aroundAdviceTwo(this.name);
 		try {
 			ret = ((Integer)pjp.proceed()).intValue();
-		} 
+		}
 		catch(Throwable t) {throw new RuntimeException(t);}
 		this.collaborator.aroundAdviceTwo(this.name);
 		return ret;
@@ -219,7 +219,7 @@ class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
 
 	private PrecedenceTestAspect.Collaborator collaborator;
 	private String name;
-	
+
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
 	 */

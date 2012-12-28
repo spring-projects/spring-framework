@@ -82,7 +82,7 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 			// no tx active
 			assertSame(manager, EntityManagerFactoryUtils.doGetTransactionalEntityManager(factory, null));
 			assertSame(manager, ((EntityManagerHolder)TransactionSynchronizationManager.unbindResource(factory)).getEntityManager());
-			
+
 			mockControl.verify();
 		}
 		finally {
@@ -91,21 +91,21 @@ public class EntityManagerFactoryUtilsTests extends TestCase {
 
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 	}
-	
+
 	public void testTranslatesIllegalStateException() {
 		IllegalStateException ise = new IllegalStateException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(ise);
 		assertSame(ise, dex.getCause());
 		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
 	}
-	
+
 	public void testTranslatesIllegalArgumentException() {
 		IllegalArgumentException iae = new IllegalArgumentException();
 		DataAccessException dex = EntityManagerFactoryUtils.convertJpaAccessExceptionIfPossible(iae);
 		assertSame(iae, dex.getCause());
 		assertTrue(dex instanceof InvalidDataAccessApiUsageException);
 	}
-	
+
 	/**
 	 * We do not convert unknown exceptions. They may result from user code.
 	 */

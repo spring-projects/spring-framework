@@ -48,7 +48,7 @@ public final class ConcurrentBeanFactoryTests {
 
 	private static final Log logger = LogFactory.getLog(ConcurrentBeanFactoryTests.class);
 	private static final Resource CONTEXT = qualifiedResource(ConcurrentBeanFactoryTests.class, "context.xml");
-	
+
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd");
 	private static final Date DATE_1, DATE_2;
 

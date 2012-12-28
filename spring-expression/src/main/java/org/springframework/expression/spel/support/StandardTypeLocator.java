@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
 /**
  * A default implementation of a TypeLocator that uses the context classloader (or any classloader set upon it). It
  * supports 'well known' packages so if a type cannot be found it will try the registered imports to locate it.
- * 
+ *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @since 3.0
@@ -95,9 +95,9 @@ public class StandardTypeLocator implements TypeLocator {
 	public List<String> getImportPrefixes() {
 		return Collections.unmodifiableList(this.knownPackagePrefixes);
 	}
-	
+
 	public void removeImport(String prefix) {
-		this.knownPackagePrefixes.remove(prefix);		
+		this.knownPackagePrefixes.remove(prefix);
 	}
 
 }

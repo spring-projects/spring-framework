@@ -40,7 +40,7 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("contains one entry", p.entrySet().size() == 1);
 		assertTrue("foo=bar", p.get("foo").equals("bar"));
 	}
-	
+
 	public void testTwoProperties() {
 		String s = "foo=bar with whitespace\n" +
 			"me=mi";
@@ -51,7 +51,7 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("foo=bar with whitespace", p.get("foo").equals("bar with whitespace"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
-	
+
 	public void testHandlesEqualsInValue() {
 		String s = "foo=bar\n" +
 			"me=mi\n" +
@@ -64,7 +64,7 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("me=mi", p.get("me").equals("mi"));
 		assertTrue("x='y=z'", p.get("x").equals("y=z"));
 	}
-	
+
 	public void testHandlesEmptyProperty() {
 		String s = "foo=bar\nme=mi\nx=";
 		PropertiesEditor pe= new PropertiesEditor();
@@ -75,7 +75,7 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("me=mi", p.get("me").equals("mi"));
 		assertTrue("x='y=z'", p.get("x").equals(""));
 	}
-	
+
 	public void testHandlesEmptyPropertyWithoutEquals() {
 		String s = "foo\nme=mi\nx=x";
 		PropertiesEditor pe= new PropertiesEditor();
@@ -85,7 +85,7 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("foo is empty", p.get("foo").equals(""));
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
-	
+
 	/**
 	 * Comments begin with #
 	 */
@@ -124,14 +124,14 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("foo is bar", p.get("foo").equals("bar"));
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
-	
+
 	public void testNull() {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(null);
 		Properties p = (Properties) pe.getValue();
 		assertEquals(0, p.size());
 	}
-	
+
 	public void testEmptyString() {
 		PropertiesEditor pe = new PropertiesEditor();
 		pe.setAsText("");

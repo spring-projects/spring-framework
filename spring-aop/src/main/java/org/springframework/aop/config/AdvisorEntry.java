@@ -20,7 +20,7 @@ import org.springframework.beans.factory.parsing.ParseState;
 
 /**
  * {@link ParseState} entry representing an advisor.
- * 
+ *
  * @author Mark Fisher
  * @since 2.0
  */

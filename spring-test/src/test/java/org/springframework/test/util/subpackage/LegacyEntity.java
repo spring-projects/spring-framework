@@ -21,7 +21,7 @@ import org.springframework.core.style.ToStringCreator;
 /**
  * A <em>legacy entity</em> whose {@link #toString()} method has side effects;
  * intended for use in unit tests.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  */

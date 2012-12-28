@@ -76,7 +76,7 @@ public abstract class FacesContextUtils {
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE
 	 */
 	public static WebApplicationContext getRequiredWebApplicationContext(FacesContext fc)
-	    throws IllegalStateException {
+		throws IllegalStateException {
 
 		WebApplicationContext wac = getWebApplicationContext(fc);
 		if (wac == null) {

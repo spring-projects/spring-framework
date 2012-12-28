@@ -214,7 +214,7 @@ public class AnnotationMetadataTests {
 			})
 	@SuppressWarnings({"serial", "unused"})
 	private static class AnnotatedComponent implements Serializable {
-		
+
 		@TestAutowired
 		public void doWork(@TestQualifier("myColor") java.awt.Color color) {
 		}

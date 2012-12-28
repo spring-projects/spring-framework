@@ -29,7 +29,7 @@ import org.springframework.validation.ObjectError;
 public class MethodArgumentNotValidException extends Exception {
 
 	private final MethodParameter parameter;
-	
+
 	private final BindingResult bindingResult;
 
 
@@ -69,5 +69,5 @@ public class MethodArgumentNotValidException extends Exception {
 		}
 		return sb.toString();
 	}
-	
+
 }

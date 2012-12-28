@@ -107,7 +107,7 @@ public class UriComponentsBuilder {
 	protected UriComponentsBuilder() {
 	}
 
-    // Factory methods
+	// Factory methods
 
 	/**
 	 * Returns a new, empty builder.
@@ -253,7 +253,7 @@ public class UriComponentsBuilder {
 
 
 
-    // build methods
+	// build methods
 
 	/**
 	 * Builds a {@code UriComponents} instance from the various components contained in this builder.
@@ -306,7 +306,7 @@ public class UriComponentsBuilder {
 		return build(false).expand(uriVariableValues);
 	}
 
-    // URI components methods
+	// URI components methods
 
 	/**
 	 * Initializes all components of this URI builder with the components of the given URI.

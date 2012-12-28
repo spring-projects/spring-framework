@@ -37,7 +37,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class CallableStatementCreatorFactory { 
+public class CallableStatementCreatorFactory {
 
 	/** The SQL call string, which won't change when the parameters change. */
 	private final String callString;

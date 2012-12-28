@@ -38,12 +38,12 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 /**
  * Integration tests that investigate the applicability of JSR-250 lifecycle
  * annotations in test classes.
- * 
+ *
  * <p>This class does not really contain actual <em>tests</em> per se. Rather it
  * can be used to empirically verify the expected log output (see below). In
- * order to see the log output, one would naturally need to ensure that the 
+ * order to see the log output, one would naturally need to ensure that the
  * logger category for this class is enabled at {@code INFO} level.
- * 
+ *
  * <h4>Expected Log Output</h4>
  * <pre>
  * INFO : org.springframework.test.context.junit4.spr4868.LifecycleBean - initializing
@@ -57,7 +57,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
  * INFO : org.springframework.test.context.junit4.spr4868.ExampleTest - tearDown()
  * INFO : org.springframework.test.context.junit4.spr4868.LifecycleBean - destroying
  * </pre>
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  */

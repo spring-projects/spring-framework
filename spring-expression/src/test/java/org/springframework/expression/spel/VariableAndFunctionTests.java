@@ -25,7 +25,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of expressions that access variables and functions (lambda/java).
- * 
+ *
  * @author Andy Clement
  */
 public class VariableAndFunctionTests extends ExpressionTestCase {
@@ -35,7 +35,7 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		evaluate("#answer", "42", Integer.class, SHOULD_BE_WRITABLE);
 		evaluate("#answer / 2", 21, Integer.class, SHOULD_NOT_BE_WRITABLE);
 	}
-	
+
 	@Test
 	public void testVariableAccess_WellKnownVariables() {
 		evaluate("#this.getName()","Nikola Tesla",String.class);

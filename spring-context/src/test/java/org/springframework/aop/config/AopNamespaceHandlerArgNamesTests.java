@@ -32,7 +32,7 @@ public final class AopNamespaceHandlerArgNamesTests {
 	public void testArgNamesOK() {
 		new ClassPathXmlApplicationContext(getClass().getSimpleName() + "-ok.xml", getClass());
 	}
-	
+
 	@Test
 	public void testArgNamesError() {
 		try {

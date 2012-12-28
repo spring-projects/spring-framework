@@ -273,7 +273,7 @@ public class JdbcTemplateQueryTests extends AbstractJdbcTests {
 
 	public void testQueryForObjectThrowsIncorrectResultSizeForMoreThanOneRow() throws Exception {
 		String sql = "select pass from t_account where first_name='Alef'";
-		
+
 		mockResultSetMetaData.getColumnCount();
 		ctrlResultSetMetaData.setReturnValue(1);
 

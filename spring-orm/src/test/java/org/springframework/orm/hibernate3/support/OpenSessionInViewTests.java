@@ -436,7 +436,7 @@ public class OpenSessionInViewTests {
 
 		final FilterChain filterChain2 = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -665,7 +665,7 @@ public class OpenSessionInViewTests {
 
 		final FilterChain filterChain2 = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf2);
 				TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
@@ -767,7 +767,7 @@ public class OpenSessionInViewTests {
 
 		FilterChain filterChain2 = new FilterChain() {
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};

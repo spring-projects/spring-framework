@@ -25,12 +25,12 @@ import java.lang.annotation.Target;
 /**
  * Test annotation to indicate that a test method is required to throw the
  * specified exception.
- * 
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  * @deprecated as of Spring 3.1 in favor of using built-in support for declaring
- * expected exceptions in the underlying testing framework (e.g., JUnit, TestNG, etc.) 
+ * expected exceptions in the underlying testing framework (e.g., JUnit, TestNG, etc.)
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

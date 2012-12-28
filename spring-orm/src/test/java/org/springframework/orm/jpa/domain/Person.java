@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 @Configurable
 public class Person {
 
-	@Id 
+	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 

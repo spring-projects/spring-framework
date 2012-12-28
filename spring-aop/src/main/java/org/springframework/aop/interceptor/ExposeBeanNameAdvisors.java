@@ -125,7 +125,7 @@ public abstract class ExposeBeanNameAdvisors {
 	 */
 	private static class ExposeBeanNameIntroduction extends DelegatingIntroductionInterceptor implements NamedBean {
 
-		private final String beanName; 
+		private final String beanName;
 
 		public ExposeBeanNameIntroduction(String beanName) {
 			this.beanName = beanName;

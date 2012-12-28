@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
-/** 
+/**
  * Interface for retrieving keys, typically used for auto-generated keys
  * as potentially returned by JDBC insert statements.
  *
@@ -41,8 +41,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * @see org.springframework.jdbc.object.SqlUpdate
  */
 public interface KeyHolder {
-	
-	/** 
+
+	/**
 	 * Retrieve the first item from the first map, assuming that there is just
 	 * one item and just one map, and that the item is a number.
 	 * This is the typical case: a single, numeric generated key.
@@ -54,9 +54,9 @@ public interface KeyHolder {
 	 * @return the generated key
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
 	 */
-	Number getKey() throws InvalidDataAccessApiUsageException; 
+	Number getKey() throws InvalidDataAccessApiUsageException;
 
-	/** 
+	/**
 	 * Retrieve the first map of keys. If there are multiple entries in the list
 	 * (meaning that multiple rows had keys returned), then an
 	 * InvalidDataAccessApiUsageException is thrown.
@@ -65,7 +65,7 @@ public interface KeyHolder {
 	 */
 	Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
 
-	/** 
+	/**
 	 * Return a reference to the List that contains the keys.
 	 * Can be used for extracting keys for multiple rows (an unusual case),
 	 * and also for adding new maps of keys.

@@ -43,7 +43,7 @@ public class ServiceInvocationCounter {
 		this.threadLocalCount.set(this.useCount);
 		System.out.println("");
 	}
-	
+
 	public int getCount() {
 		return this.useCount;
 	}

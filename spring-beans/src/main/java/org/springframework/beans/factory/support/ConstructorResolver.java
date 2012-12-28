@@ -280,7 +280,7 @@ class ConstructorResolver {
 				beanInstance = this.beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
-			
+
 			bw.setWrappedInstance(beanInstance);
 			return bw;
 		}
@@ -412,7 +412,7 @@ class ConstructorResolver {
 				rawCandidates = (mbd.isNonPublicAccessAllowed() ?
 						ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
 			}
-			
+
 			List<Method> candidateSet = new ArrayList<Method>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic &&
@@ -570,7 +570,7 @@ class ConstructorResolver {
 				beanInstance = beanFactory.getInstantiationStrategy().instantiate(
 						mbd, beanName, beanFactory, factoryBean, factoryMethodToUse, argsToUse);
 			}
-			
+
 			if (beanInstance == null) {
 				return null;
 			}

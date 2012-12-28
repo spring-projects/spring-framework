@@ -100,17 +100,17 @@ public class VelocityViewTests {
 	public void testMergeTemplateSucceeds() throws Exception {
 		testValidTemplateName(null);
 	}
-	
+
 	@Test
 	public void testMergeTemplateFailureWithIOException() throws Exception {
 		testValidTemplateName(new IOException());
 	}
-	
+
 	@Test
 	public void testMergeTemplateFailureWithParseErrorException() throws Exception {
 		testValidTemplateName(new ParseErrorException(""));
 	}
-		
+
 	@Test
 	public void testMergeTemplateFailureWithUnspecifiedException() throws Exception {
 		testValidTemplateName(new Exception(""));
@@ -241,7 +241,7 @@ public class VelocityViewTests {
 		expectLastCall().andReturn(null);
 		wac.getServletContext();
 		expectLastCall().andReturn(new MockServletContext());
-		
+
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
 			public VelocityEngine getVelocityEngine() {

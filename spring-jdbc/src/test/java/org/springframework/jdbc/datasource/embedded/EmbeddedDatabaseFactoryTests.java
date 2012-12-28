@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 
 public class EmbeddedDatabaseFactoryTests {
-	
+
 	private EmbeddedDatabaseFactory factory = new EmbeddedDatabaseFactory();
-	
+
 	@Test
 	public void testGetDataSource() {
 		StubDatabasePopulator populator = new StubDatabasePopulator();
@@ -19,14 +19,14 @@ public class EmbeddedDatabaseFactoryTests {
 		assertTrue(populator.populateCalled);
 		db.shutdown();
 	}
-	
+
 	private static class StubDatabasePopulator implements DatabasePopulator {
 
 		private boolean populateCalled;
-		
+
 		public void populate(Connection connection) {
 			this.populateCalled = true;
 		}
-		
+
 	}
 }

@@ -39,64 +39,64 @@ import org.springframework.web.context.support.ServletContextResourcePatternReso
  */
 public class SpringWildcardServletTilesApplicationContext extends ServletApplicationContext {
 
-    /**
-     * The pattern resolver.
-     */
-    protected ResourcePatternResolver resolver;
+	/**
+	 * The pattern resolver.
+	 */
+	protected ResourcePatternResolver resolver;
 
-    /**
-     * Constructor.
-     *
-     * @param servletContext The servlet context.
-     */
-    public SpringWildcardServletTilesApplicationContext(ServletContext servletContext) {
-        super(servletContext);
-        resolver = new ServletContextResourcePatternResolver(servletContext);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param servletContext The servlet context.
+	 */
+	public SpringWildcardServletTilesApplicationContext(ServletContext servletContext) {
+		super(servletContext);
+		resolver = new ServletContextResourcePatternResolver(servletContext);
+	}
 
-    @Override
-    public ApplicationResource getResource(String localePath) {
-        ApplicationResource retValue = null;
-        Collection<ApplicationResource> urlSet = getResources(localePath);
-        if (urlSet != null && !urlSet.isEmpty()) {
-            retValue = urlSet.iterator().next();
-        }
-        return retValue;
-    }
+	@Override
+	public ApplicationResource getResource(String localePath) {
+		ApplicationResource retValue = null;
+		Collection<ApplicationResource> urlSet = getResources(localePath);
+		if (urlSet != null && !urlSet.isEmpty()) {
+			retValue = urlSet.iterator().next();
+		}
+		return retValue;
+	}
 
-    @Override
-    public ApplicationResource getResource(ApplicationResource base, Locale locale) {
-        ApplicationResource retValue = null;
-        Collection<ApplicationResource> urlSet = getResources(base.getLocalePath(locale));
-        if (urlSet != null && !urlSet.isEmpty()) {
-            retValue = urlSet.iterator().next();
-        }
-        return retValue;
-    }
+	@Override
+	public ApplicationResource getResource(ApplicationResource base, Locale locale) {
+		ApplicationResource retValue = null;
+		Collection<ApplicationResource> urlSet = getResources(base.getLocalePath(locale));
+		if (urlSet != null && !urlSet.isEmpty()) {
+			retValue = urlSet.iterator().next();
+		}
+		return retValue;
+	}
 
-    @Override
-    public Collection<ApplicationResource> getResources(String path) {
-        Resource[] resources;
-        try {
-            resources = resolver.getResources(path);
-        } catch (IOException e) {
-            return Collections.<ApplicationResource> emptyList();
-        }
-        Collection<ApplicationResource> resourceList = new ArrayList<ApplicationResource>();
-        if (resources != null && resources.length > 0) {
-            for (int i = 0; i < resources.length; i++) {
-                URL url;
-                try {
-                    url = resources[i].getURL();
-                    resourceList.add(new URLApplicationResource(url.toExternalForm(), url));
-                } catch (IOException e) {
-                    // shouldn't happen with the kind of resources we're using
-                    throw new IllegalArgumentException("no URL for " + resources[i].toString(), e);
-                }
-            }
-        }
-        return resourceList;
-    }
+	@Override
+	public Collection<ApplicationResource> getResources(String path) {
+		Resource[] resources;
+		try {
+			resources = resolver.getResources(path);
+		} catch (IOException e) {
+			return Collections.<ApplicationResource> emptyList();
+		}
+		Collection<ApplicationResource> resourceList = new ArrayList<ApplicationResource>();
+		if (resources != null && resources.length > 0) {
+			for (int i = 0; i < resources.length; i++) {
+				URL url;
+				try {
+					url = resources[i].getURL();
+					resourceList.add(new URLApplicationResource(url.toExternalForm(), url));
+				} catch (IOException e) {
+					// shouldn't happen with the kind of resources we're using
+					throw new IllegalArgumentException("no URL for " + resources[i].toString(), e);
+				}
+			}
+		}
+		return resourceList;
+	}
 
 }
 

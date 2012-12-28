@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  * {@link Repeat repetitions} of the test, and any <em>set up</em> or
  * <em>tear down</em> of the test fixture.
  * </p>
- * 
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0

@@ -226,7 +226,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	@Override
 	protected final void onBindAndValidate(HttpServletRequest request, Object command, BindException errors)
-	    throws Exception {
+		throws Exception {
 
 		onBindAndValidate(request, command, errors, getCurrentPage(request));
 	}
@@ -248,7 +248,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see org.springframework.validation.Errors
 	 */
 	protected void onBindAndValidate(HttpServletRequest request, Object command, BindException errors, int page)
-	    throws Exception {
+		throws Exception {
 	}
 
 	/**
@@ -266,7 +266,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 */
 	@Override
 	protected final Map referenceData(HttpServletRequest request, Object command, Errors errors)
-	    throws Exception {
+		throws Exception {
 
 		return referenceData(request, command, errors, getCurrentPage(request));
 	}
@@ -286,7 +286,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @see ModelAndView
 	 */
 	protected Map referenceData(HttpServletRequest request, Object command, Errors errors, int page)
-	    throws Exception {
+		throws Exception {
 
 		return referenceData(request, page);
 	}
@@ -315,7 +315,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	@Override
 	protected ModelAndView showForm(
 			HttpServletRequest request, HttpServletResponse response, BindException errors)
-	    throws Exception {
+		throws Exception {
 
 		return showPage(request, errors, getInitialPage(request, errors.getTarget()));
 	}
@@ -331,7 +331,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @throws Exception in case of invalid state or arguments
 	 */
 	protected final ModelAndView showPage(HttpServletRequest request, BindException errors, int page)
-	    throws Exception {
+		throws Exception {
 
 		if (page >= 0 && page < getPageCount(request, errors.getTarget())) {
 			if (logger.isDebugEnabled()) {

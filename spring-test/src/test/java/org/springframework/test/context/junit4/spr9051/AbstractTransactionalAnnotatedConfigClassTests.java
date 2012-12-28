@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  * This set of tests (i.e., all concrete subclasses) investigates the claims made in
  * <a href="https://jira.springsource.org/browse/SPR-9051" target="_blank">SPR-9051</a>
  * with regard to transactional tests.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see org.springframework.test.context.testng.AnnotationConfigTransactionalTestNGSpringContextTests

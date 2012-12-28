@@ -138,7 +138,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws ServletException {
+		throws ServletException {
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		if (logger.isDebugEnabled()) {

@@ -51,7 +51,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractorAdapter;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-/** 
+/**
  * Mock object based tests for JdbcTemplate.
  *
  * @author Rod Johnson
@@ -737,12 +737,12 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		try {
 			template.batchUpdate(sql);
 			fail("Shouldn't have executed batch statement with a select");
-		} 
+		}
 		catch (DataAccessException ex) {
 			// pass
 			assertTrue("Check exception type", ex.getClass() == InvalidDataAccessApiUsageException.class);
 		}
-		
+
 		ctrlStatement.verify();
 		ctrlDatabaseMetaData.verify();
 	}
@@ -1189,7 +1189,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
 	}
-	
+
 	public void testBatchUpdateWithCollectionOfObjects() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final List<Integer> ids = new ArrayList<Integer>();
@@ -1275,12 +1275,12 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 			template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 			fail("Shouldn't have executed query without a connection");
-		} 
+		}
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
 			assertTrue("Check root cause", ex.getCause() == sex);
 		}
-		
+
 		ctrlDataSource.verify();
 	}
 
@@ -1348,7 +1348,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		//mockConnection.close();
 		//ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
-		
+
 		// Change behaviour in setUp() because we only expect one call to getConnection():
 		// none is necessary to get metadata for exception translator
 		ctrlDataSource = MockControl.createControl(DataSource.class);
@@ -1366,26 +1366,26 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
 			template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 			fail("Shouldn't have executed query without a connection");
-		} 
+		}
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
 			assertTrue("Check root cause", ex.getCause() == sex);
 		}
-	
+
 		ctrlDataSource.verify();
 		ctrlConnection.verify();
 	}
-	
+
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
 			throws Exception {
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
-	
+
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
 			throws Exception {
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
 	}
-	
+
 	/**
 	 * If beanProperty is true, initialize via exception translator bean property;
 	 * if false, use afterPropertiesSet().
@@ -1402,7 +1402,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		//mockConnection.close();
 		//ctrlConnection.setVoidCallable(1);
 		ctrlConnection.replay();
-	
+
 		// Change behaviour in setUp() because we only expect one call to getConnection():
 		// none is necessary to get metadata for exception translator
 		ctrlDataSource = MockControl.createControl(DataSource.class);
@@ -1434,7 +1434,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
 				rcch);
 			fail("Shouldn't have executed query without a connection");
-		} 
+		}
 		catch (CannotGetJdbcConnectionException ex) {
 			// pass
 			assertTrue("Check root cause", ex.getCause() == sex);
@@ -1778,7 +1778,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		mockConnection.createStatement();
 		ctrlConnection.setReturnValue(mockStatement);
-		
+
 		// Change behaviour in setUp() because we only expect one call to getConnection():
 		// none is necessary to get metadata for exception translator
 		ctrlConnection = MockControl.createControl(Connection.class);
@@ -1817,11 +1817,11 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			assertTrue(
 				"Wanted same exception back, not " + ex,
 				sex == ex.getCause());
-		} 
+		}
 
 		ctrlResultSet.verify();
 		ctrlStatement.verify();
-		
+
 		// We didn't call superclass replay() so we need to check these ourselves
 		ctrlDataSource.verify();
 		ctrlConnection.verify();
@@ -2139,7 +2139,7 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 
 		template.setResultsMapCaseInsensitive(true);
 		assertTrue("now it should have been set to case insensitive", template.isResultsMapCaseInsensitive());
-		
+
 		List params = new ArrayList();
 		params.add(new SqlOutParameter("a", 12));
 

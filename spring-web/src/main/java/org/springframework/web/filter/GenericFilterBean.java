@@ -185,7 +185,7 @@ public abstract class GenericFilterBean implements
 		}
 		catch (BeansException ex) {
 			String msg = "Failed to set bean properties on filter '" +
-			    filterConfig.getFilterName() + "': " + ex.getMessage();
+				filterConfig.getFilterName() + "': " + ex.getMessage();
 			logger.error(msg, ex);
 			throw new NestedServletException(msg, ex);
 		}
@@ -310,9 +310,9 @@ public abstract class GenericFilterBean implements
 			// Fail if we are still missing properties.
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new ServletException(
-				    "Initialization from FilterConfig for filter '" + config.getFilterName() +
-				    "' failed; the following required properties were missing: " +
-				    StringUtils.collectionToDelimitedString(missingProps, ", "));
+					"Initialization from FilterConfig for filter '" + config.getFilterName() +
+					"' failed; the following required properties were missing: " +
+					StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

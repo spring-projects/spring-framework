@@ -1197,7 +1197,7 @@ public class Portlet20AnnotationControllerTests {
 		@ActionMapping(params = "action=details")
 		public void renderDetails(ActionRequest request, ActionResponse response, Model model) {
 			response.setRenderParameter("test", "details");
-	    }
+		}
 
 		@ResourceMapping
 		public void myDefaultResource(Writer writer) throws IOException {

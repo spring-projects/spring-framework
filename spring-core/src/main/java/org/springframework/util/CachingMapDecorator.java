@@ -37,7 +37,7 @@ import java.util.WeakHashMap;
  * <p>This class is an abstract template. Caching Map implementations
  * should subclass and override the <code>create(key)</code> method which
  * encapsulates expensive creation of a new object.
- * 
+ *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @since 1.2.2

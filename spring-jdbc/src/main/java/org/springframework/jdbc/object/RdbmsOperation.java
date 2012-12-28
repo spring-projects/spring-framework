@@ -69,7 +69,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	private boolean updatableResults = false;
 
 	private boolean returnGeneratedKeys = false;
-	
+
 	private String[] generatedKeysColumnNames = null;
 
 	private String sql;
@@ -82,8 +82,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 	 * but subclasses may also implement their own custom validation.
 	 */
 	private boolean compiled;
-	
-	
+
+
 	/**
 	 * An alternative to the more commonly used setDataSource() when you want to
 	 * use the same JdbcTemplate in multiple RdbmsOperations. This is appropriate if the
@@ -281,7 +281,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	}
 
 	/**
-	 * Add one or more declared parameters. Used for configuring this operation 
+	 * Add one or more declared parameters. Used for configuring this operation
 	 * when used in a bean factory.  Each parameter will specify SQL type and (optionally)
 	 * the parameter's name.
 	 * @param parameters Array containing the declared {@link SqlParameter} objects
@@ -334,8 +334,8 @@ public abstract class RdbmsOperation implements InitializingBean {
 			}
 			catch (IllegalArgumentException ex) {
 				throw new InvalidDataAccessApiUsageException(ex.getMessage());
-			}	
-		
+			}
+
 			compileInternal();
 			this.compiled = true;
 

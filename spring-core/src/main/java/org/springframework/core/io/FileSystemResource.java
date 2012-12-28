@@ -204,7 +204,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
+			(obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
 	}
 
 	/**

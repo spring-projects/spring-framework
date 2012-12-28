@@ -20,17 +20,17 @@ import java.util.ArrayList;
 
 public class Flights {
 
-    protected ArrayList flightList = new ArrayList();
+	protected ArrayList flightList = new ArrayList();
 
-    public void addFlight(FlightType flight) {
-        flightList.add(flight);
-    }
+	public void addFlight(FlightType flight) {
+		flightList.add(flight);
+	}
 
-    public FlightType getFlight(int index) {
-        return (FlightType) flightList.get(index);
-    }
+	public FlightType getFlight(int index) {
+		return (FlightType) flightList.get(index);
+	}
 
-    public int sizeFlightList() {
-        return flightList.size();
-    }
+	public int sizeFlightList() {
+		return flightList.size();
+	}
 }

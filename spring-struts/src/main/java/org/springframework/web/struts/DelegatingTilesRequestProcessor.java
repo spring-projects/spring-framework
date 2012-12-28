@@ -60,7 +60,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class DelegatingTilesRequestProcessor extends TilesRequestProcessor {
 
 	private WebApplicationContext webApplicationContext;
-	
+
 
 	@Override
 	public void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {

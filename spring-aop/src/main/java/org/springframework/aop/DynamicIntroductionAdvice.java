@@ -18,7 +18,7 @@ package org.springframework.aop;
 
 import org.aopalliance.aop.Advice;
 
-/** 
+/**
  * Subinterface of AOP Alliance Advice that allows additional interfaces
  * to be implemented by an Advice, and available via a proxy using that
  * interceptor. This is a fundamental AOP concept called <b>introduction</b>.
@@ -37,7 +37,7 @@ import org.aopalliance.aop.Advice;
  * @see IntroductionAdvisor
  */
 public interface DynamicIntroductionAdvice extends Advice {
-	
+
 	/**
 	 * Does this introduction advice implement the given interface?
 	 * @param intf the interface to check

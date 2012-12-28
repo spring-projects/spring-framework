@@ -58,5 +58,5 @@ public class BeanNameGenerationTests extends TestCase {
 
 		assertFalse(child1.getBeanName().equals(child2.getBeanName()));
 	}
-	
+
 }

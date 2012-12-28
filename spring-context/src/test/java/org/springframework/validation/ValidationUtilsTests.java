@@ -23,7 +23,7 @@ import org.springframework.beans.TestBean;
 
 /**
  * Unit tests for {@link ValidationUtils}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Chris Beams

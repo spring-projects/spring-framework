@@ -20,14 +20,14 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 
 /**
  * Extension of JdbcDaoSupport that exposes a NamedParameterJdbcTemplate as well.
- * 
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 2.0
  * @see NamedParameterJdbcTemplate
  */
 public class NamedParameterJdbcDaoSupport extends JdbcDaoSupport {
-	
+
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 

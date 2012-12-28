@@ -171,7 +171,7 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
-	 * Method to execute the update given arguments and 
+	 * Method to execute the update given arguments and
 	 * retrieve the generated keys using a KeyHolder.
 	 * @param params array of parameter objects
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys

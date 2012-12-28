@@ -28,7 +28,7 @@ import org.springframework.util.ClassUtils;
  * <code>SpringRepeat</code> is a custom JUnit 4.5+ {@link Statement} which adds
  * support for Spring's {@link Repeat &#064;Repeat} annotation by repeating the
  * test for the specified number of times.
- * 
+ *
  * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
@@ -46,7 +46,7 @@ public class SpringRepeat extends Statement {
 
 	/**
 	 * Constructs a new <code>SpringRepeat</code> statement.
-	 * 
+	 *
 	 * @param next the next <code>Statement</code> in the execution chain
 	 * @param testMethod the current test method
 	 * @param repeat the configured repeat count for the current test method

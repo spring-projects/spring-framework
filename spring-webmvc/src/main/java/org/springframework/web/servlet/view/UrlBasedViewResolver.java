@@ -341,13 +341,13 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	/**
 	 * Whether views resolved by this resolver should add path variables the model or not.
 	 * The default setting is to allow each View decide (see {@link AbstractView#setExposePathVariables(boolean)}.
-	 * However, you can use this property to override that. 
+	 * However, you can use this property to override that.
 	 * @param exposePathVariables
 	 * 	<ul>
 	 * 		<li>{@code true} - all Views resolved by this resolver will expose path variables
 	 * 		<li>{@code false} - no Views resolved by this resolver will expose path variables
-	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default) 
-	 * 	<ul> 
+	 * 		<li>{@code null} - individual Views can decide for themselves (this is used by the default)
+	 * 	<ul>
 	 * 	@see AbstractView#setExposePathVariables(boolean)
 	 */
 	public void setExposePathVariables(Boolean exposePathVariables) {

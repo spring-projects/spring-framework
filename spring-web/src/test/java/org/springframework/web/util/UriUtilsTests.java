@@ -29,7 +29,7 @@ public class UriUtilsTests {
 
 	private static final String ENC = "UTF-8";
 
-	
+
 
 	@Test
 	public void encodeScheme() throws UnsupportedEncodingException {

@@ -37,7 +37,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * JavaBeans based on request parameters, validate the content of such
  * JavaBeans using {@link org.springframework.validation.Validator Validators}
  * and use custom editors (in the form of
- * {@link java.beans.PropertyEditor PropertyEditors}) to transform 
+ * {@link java.beans.PropertyEditor PropertyEditors}) to transform
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
@@ -50,7 +50,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * Upon receiving a request, any BaseCommandController will attempt to fill the
  * command object using the request parameters. This is done using the typical
  * and well-known JavaBeans property notation. When a request parameter named
- * <code>'firstName'</code> exists, the framework will attempt to call 
+ * <code>'firstName'</code> exists, the framework will attempt to call
  * <code>setFirstName([value])</code> passing the value of the parameter. Nested properties
  * are of course supported. For instance a parameter named <code>'address.city'</code>
  * will result in a <code>getAddress().setCity([value])</code> call on the
@@ -434,7 +434,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #initBinder
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-	    throws Exception {
+		throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		prepareBinder(binder);

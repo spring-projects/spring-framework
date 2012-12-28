@@ -41,23 +41,23 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation {
 
 	private final AspectJExpressionPointcut declaredPointcut;
-	
+
 	private Pointcut pointcut;
-	
+
 	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
-	
+
 	private final Method method;
-	
+
 	private final boolean lazy;
-	
+
 	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
-	
+
 	private Advice instantiatedAdvice;
 
 	private int declarationOrder;
-	
+
 	private String aspectName;
-	
+
 	private Boolean isBeforeAdvice;
 
 	private Boolean isAfterAdvice;
@@ -72,12 +72,12 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		this.aspectInstanceFactory = aif;
 		this.declarationOrder = declarationOrderInAspect;
 		this.aspectName = aspectName;
-		
+
 		if (aif.getAspectMetadata().isLazilyInstantiated()) {
 			// Static part of the pointcut is a lazy type.
 			Pointcut preInstantiationPointcut =
 					Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
-			
+
 			// Make it dynamic: must mutate from pre-instantiation to post-instantiation state.
 			// If it's not a dynamic pointcut, it may be optimized out
 			// by the Spring AOP infrastructure after the first evaluation.
@@ -109,7 +109,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	public boolean isPerInstance() {
 		return (getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON);
 	}
-	
+
 	/**
 	 * Return the AspectJ AspectMetadata for this advisor.
 	 */
@@ -126,7 +126,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		return this.instantiatedAdvice;
 	}
-	
+
 	public boolean isLazy() {
 		return this.lazy;
 	}
@@ -140,7 +140,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.atAspectJAdvisorFactory.getAdvice(
 				this.method, pcut, this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
 	}
-	
+
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
 		return this.aspectInstanceFactory;
 	}

@@ -26,7 +26,7 @@ import org.springframework.web.servlet.HandlerMapping;
 /**
  * Simple <code>Controller</code> implementation that transforms the virtual
  * path of a URL into a view name and returns that view.
- * 
+ *
  * <p>Can optionally prepend a {@link #setPrefix prefix} and/or append a
  * {@link #setSuffix suffix} to build the viewname from the URL filename.
  *

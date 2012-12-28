@@ -19,7 +19,7 @@ package org.springframework.orm.jpa.openjpa;
 import org.junit.Ignore;
 
 /**
- * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA (see SPR-3873 for more details). 
+ * Test that AspectJ weaving (in particular the currently shipped aspects) work with JPA (see SPR-3873 for more details).
  *
  * @author Ramnivas Laddad
  */
@@ -34,7 +34,7 @@ public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests exten
 
 	protected String[] getConfigLocations() {
 		return new String[] {
-				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml", 
+				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml",
 				"/org/springframework/orm/jpa/memdb.xml",
 				"/org/springframework/orm/jpa/inject.xml"};
 	}

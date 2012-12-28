@@ -48,11 +48,11 @@ import org.springframework.transaction.support.TransactionTemplate;
  * @since 04.07.2003
  */
 public class DataSourceTransactionManagerTests extends TestCase {
-	
+
 	public void testTransactionCommitWithAutoCommitTrue() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(true, false, false);
 	}
-	
+
 	public void testTransactionCommitWithAutoCommitFalse() throws Exception {
 		doTestTransactionCommitRestoringAutoCommit(false, false, false);
 	}
@@ -159,11 +159,11 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		conControl.verify();
 		dsControl.verify();
 	}
-	
+
 	public void testTransactionRollbackWithAutoCommitTrue() throws Exception  {
 		doTestTransactionRollbackRestoringAutoCommit(true, false, false);
 	}
-	
+
 	public void testTransactionRollbackWithAutoCommitFalse() throws Exception  {
 		doTestTransactionRollbackRestoringAutoCommit(false, false, false);
 	}
@@ -1509,7 +1509,7 @@ public class DataSourceTransactionManagerTests extends TestCase {
 		// Must restore
 		con.setAutoCommit(false);
 		conControl.setVoidCallable(1);
-				
+
 		con.rollback();
 		conControl.setThrowable(new SQLException("Cannot rollback"), 1);
 		con.setAutoCommit(true);

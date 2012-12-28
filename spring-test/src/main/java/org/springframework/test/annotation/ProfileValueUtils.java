@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for working with <em>profile values</em>.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
@@ -51,7 +51,7 @@ public abstract class ProfileValueUtils {
 	 * &#064;ProfileValueSourceConfiguration} is not present on the specified
 	 * class or if a custom {@link ProfileValueSource} is not declared, the
 	 * default {@link SystemProfileValueSource} will be returned instead.
-	 * 
+	 *
 	 * @param testClass The test class for which the ProfileValueSource should
 	 * be retrieved
 	 * @return the configured (or default) ProfileValueSource for the specified
@@ -108,7 +108,7 @@ public abstract class ProfileValueUtils {
 	 * <p>
 	 * Defaults to <code>true</code> if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param testClass the test class
 	 * @return <code>true</code> if the test is <em>enabled</em> in the current
 	 * environment
@@ -127,7 +127,7 @@ public abstract class ProfileValueUtils {
 	 * <p>
 	 * Defaults to <code>true</code> if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param testMethod the test method
 	 * @param testClass the test class
 	 * @return <code>true</code> if the test is <em>enabled</em> in the current
@@ -146,7 +146,7 @@ public abstract class ProfileValueUtils {
 	 * <p>
 	 * Defaults to <code>true</code> if no {@link IfProfileValue
 	 * &#064;IfProfileValue} annotation is declared.
-	 * 
+	 *
 	 * @param profileValueSource the ProfileValueSource to use to determine if
 	 * the test is enabled
 	 * @param testMethod the test method
@@ -172,7 +172,7 @@ public abstract class ProfileValueUtils {
 	 * Determine if the <code>value</code> (or one of the <code>values</code>)
 	 * in the supplied {@link IfProfileValue &#064;IfProfileValue} annotation is
 	 * <em>enabled</em> in the current environment.
-	 * 
+	 *
 	 * @param profileValueSource the ProfileValueSource to use to determine if
 	 * the test is enabled
 	 * @param ifProfileValue the annotation to introspect; may be

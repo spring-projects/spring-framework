@@ -86,7 +86,7 @@ public abstract class HttpServletBean extends HttpServlet
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** 
+	/**
 	 * Set of required properties (Strings) that must be supplied as
 	 * config parameters to this servlet.
 	 */
@@ -229,8 +229,8 @@ public abstract class HttpServletBean extends HttpServlet
 		 * @throws ServletException if any required properties are missing
 		 */
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
-		    throws ServletException {
-			
+			throws ServletException {
+
 			Set<String> missingProps = (requiredProperties != null && !requiredProperties.isEmpty()) ?
 					new HashSet<String>(requiredProperties) : null;
 
@@ -247,9 +247,9 @@ public abstract class HttpServletBean extends HttpServlet
 			// Fail if we are still missing properties.
 			if (missingProps != null && missingProps.size() > 0) {
 				throw new ServletException(
-				    "Initialization from ServletConfig for servlet '" + config.getServletName() +
-				    "' failed; the following required properties were missing: " +
-				    StringUtils.collectionToDelimitedString(missingProps, ", "));
+					"Initialization from ServletConfig for servlet '" + config.getServletName() +
+					"' failed; the following required properties were missing: " +
+					StringUtils.collectionToDelimitedString(missingProps, ", "));
 			}
 		}
 	}

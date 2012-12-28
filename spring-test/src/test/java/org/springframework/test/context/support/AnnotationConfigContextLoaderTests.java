@@ -23,7 +23,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link AnnotationConfigContextLoader}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  */

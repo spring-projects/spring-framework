@@ -36,9 +36,9 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests proving that @Qualifier annotations work when used 
+ * Tests proving that @Qualifier annotations work when used
  * with @Configuration classes on @Bean methods.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  */
@@ -69,7 +69,7 @@ public class BeanMethodQualificationTests {
 		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
-		
+
 		@Bean @Qualifier("boring")
 		public TestBean testBean2() {
 			return new TestBean("boring");

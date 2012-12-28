@@ -26,7 +26,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 /**
  * Reusable RDBMS query in which concrete subclasses must implement
- * the abstract updateRow(ResultSet, int, context) method to update each 
+ * the abstract updateRow(ResultSet, int, context) method to update each
  * row of the JDBC ResultSet and optionally map contents into an object.
  *
  * <p>Subclasses can be constructed providing SQL, parameter types
@@ -65,15 +65,15 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	}
 
 	/**
-	 * Subclasses must implement this method to update each row of the 
+	 * Subclasses must implement this method to update each row of the
 	 * ResultSet and optionally create object of the result type.
 	 * @param rs ResultSet we're working through
 	 * @param rowNum row number (from 0) we're up to
 	 * @param context passed to the execute() method.
 	 * It can be <code>null</code> if no contextual information is need.  If you
-	 * need to pass in data for each row, you can pass in a HashMap with 
+	 * need to pass in data for each row, you can pass in a HashMap with
 	 * the primary key of the row being the key for the HashMap.  That way
-	 * it is easy to locate the updates for each row 
+	 * it is easy to locate the updates for each row
 	 * @return an object of the result type
 	 * @throws SQLException if there's an error updateing data.
 	 * Subclasses can simply not catch SQLExceptions, relying on the

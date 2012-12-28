@@ -34,13 +34,13 @@ package org.springframework.validation;
  * at least <code>'MINIMUM_PASSWORD_LENGTH'</code> characters in length.
  *
  * <pre class="code"> public class UserLoginValidator implements Validator {
- * 
+ *
  *    private static final int MINIMUM_PASSWORD_LENGTH = 6;
- * 
+ *
  *    public boolean supports(Class clazz) {
  *       return UserLogin.class.isAssignableFrom(clazz);
  *    }
- * 
+ *
  *    public void validate(Object target, Errors errors) {
  *       ValidationUtils.rejectIfEmptyOrWhitespace(errors, "userName", "field.required");
  *       ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "field.required");
@@ -56,7 +56,7 @@ package org.springframework.validation;
  *
  * <p>See also the Spring reference manual for a fuller discussion of
  * the <code>Validator</code> interface and it's role in an enterprise
- * application. 
+ * application.
  *
  * @author Rod Johnson
  * @see Errors
@@ -75,7 +75,7 @@ public interface Validator {
 	 * being asked if it can {@link #validate(Object, Errors) validate}
 	 * @return <code>true</code> if this {@link Validator} can indeed
 	 * {@link #validate(Object, Errors) validate} instances of the
-	 * supplied <code>clazz</code> 
+	 * supplied <code>clazz</code>
 	 */
 	boolean supports(Class<?> clazz);
 
@@ -85,8 +85,8 @@ public interface Validator {
 	 * typically has (or would) return <code>true</code>.
 	 * <p>The supplied {@link Errors errors} instance can be used to report
 	 * any resulting validation errors.
-	 * @param target the object that is to be validated (can be <code>null</code>) 
-	 * @param errors contextual state about the validation process (never <code>null</code>) 
+	 * @param target the object that is to be validated (can be <code>null</code>)
+	 * @param errors contextual state about the validation process (never <code>null</code>)
 	 * @see ValidationUtils
 	 */
 	void validate(Object target, Errors errors);

@@ -44,7 +44,7 @@ public final class ArgumentBindingTests {
 		TestBean tb = new TestBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(NamedPointcutWithArgs.class);
-		
+
 		ITestBean proxiedTestBean = (ITestBean) proxyFactory.getProxy();
 		proxiedTestBean.setName("Supercalifragalisticexpialidocious"); // should throw
 	}
@@ -54,7 +54,7 @@ public final class ArgumentBindingTests {
 		TransactionalBean tb = new TransactionalBean();
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(tb);
 		proxyFactory.addAspect(PointcutWithAnnotationArgument.class);
-		
+
 		ITransactionalBean proxiedTestBean = (ITransactionalBean) proxyFactory.getProxy();
 		proxiedTestBean.doInTransaction(); // should throw
 	}

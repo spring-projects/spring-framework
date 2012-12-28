@@ -132,7 +132,7 @@ public class Jaxb2Marshaller
 	private String contextPath;
 
 	private Class<?>[] classesToBeBound;
-	
+
 	private String[] packagesToScan;
 
 	private Map<String, ?> jaxbContextProperties;

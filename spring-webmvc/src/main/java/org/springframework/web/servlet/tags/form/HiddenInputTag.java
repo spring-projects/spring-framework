@@ -48,7 +48,7 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 	public String getDisabled() {
 		return this.disabled;
 	}
-	
+
 	/**
 	 * Set the value of the '<code>disabled</code>' attribute.
 	 * May be a runtime expression.

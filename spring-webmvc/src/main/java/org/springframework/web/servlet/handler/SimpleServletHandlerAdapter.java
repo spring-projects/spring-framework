@@ -59,7 +59,7 @@ public class SimpleServletHandlerAdapter implements HandlerAdapter {
 
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
-		
+
 		((Servlet) handler).service(request, response);
 		return null;
 	}

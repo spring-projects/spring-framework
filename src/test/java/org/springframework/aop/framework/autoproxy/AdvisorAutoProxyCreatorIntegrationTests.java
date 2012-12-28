@@ -44,7 +44,7 @@ import test.interceptor.NopInterceptor;
 /**
  * Integration tests for auto proxy creation by advisor recognition working in
  * conjunction with transaction managment resources.
- * 
+ *
  * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorTests;
  *
  * @author Rod Johnson
@@ -54,7 +54,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorIntegrationTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String DEFAULT_CONTEXT = CLASSNAME + "-context.xml";
 
 	private static final String ADVISOR_APC_BEAN_NAME = "aapc";
@@ -66,7 +66,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 	protected BeanFactory getBeanFactory() throws IOException {
 		return new ClassPathXmlApplicationContext(DEFAULT_CONTEXT, CLASS);
 	}
-	
+
 	@Test
 	public void testDefaultExclusionPrefix() throws Exception {
 		DefaultAdvisorAutoProxyCreator aapc = (DefaultAdvisorAutoProxyCreator) getBeanFactory().getBean(ADVISOR_APC_BEAN_NAME);
@@ -100,7 +100,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		test.getName();
 		assertEquals(1, counter.getCalls());
 	}
-	
+
 	@Test
 	public void testTransactionAttributeOnMethod() throws Exception {
 		BeanFactory bf = getBeanFactory();
@@ -157,7 +157,7 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 		CallCountingTransactionManager txMan = (CallCountingTransactionManager) bf.getBean(TXMANAGER_BEAN_NAME);
 
 		assertEquals(0, txMan.commits);
-		// Should NOT roll back on ServletException 
+		// Should NOT roll back on ServletException
 		try {
 			rb.echoException(new ServletException());
 		}
@@ -190,18 +190,18 @@ public final class AdvisorAutoProxyCreatorIntegrationTests {
 
 @SuppressWarnings("serial")
 class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
-	
+
 	public NeverMatchAdvisor() {
 		super(new NopInterceptor());
 	}
-	
+
 	/**
 	 * This method is solely to allow us to create a mixture of dependencies in
 	 * the bean definitions. The dependencies don't have any meaning, and don't
 	 * <b>do</b> anything.
 	 */
 	public void setDependencies(List<?> l) {
-		
+
 	}
 
 	/**
@@ -215,11 +215,11 @@ class NeverMatchAdvisor extends StaticMethodMatcherPointcutAdvisor {
 
 
 class NoSetters {
-	
+
 	public void A() {
-		
+
 	}
-	
+
 	public int getB() {
 		return -1;
 	}
@@ -282,7 +282,7 @@ class OrderedTxCheckAdvisor extends StaticMethodMatcherPointcutAdvisor implement
 
 
 class Rollback {
-	
+
 	/**
 	 * Inherits transaction attribute.
 	 * Illustrates programmatic rollback.
@@ -293,7 +293,7 @@ class Rollback {
 			setRollbackOnly();
 		}
 	}
-	
+
 	/**
 	 * Extracted in a protected method to facilitate testing
 	 */
@@ -342,7 +342,7 @@ class CallCountingTransactionManager extends AbstractPlatformTransactionManager 
 		++rollbacks;
 		--inflight;
 	}
-	
+
 	public void clear() {
 		begun = commits = rollbacks = inflight = 0;
 	}

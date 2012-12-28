@@ -137,14 +137,14 @@ public class PathMatchingResourcePatternResolverTests {
 //		List expectedNames = new LinkedList(Arrays.asList(fileNames));
 //		Collections.sort(sortedActualNames);
 //		Collections.sort(expectedNames);
-//		
+//
 //		System.out.println("-----------");
 //		System.out.println("Expected: " + StringUtils.collectionToCommaDelimitedString(expectedNames));
 //		System.out.println("Actual: " + StringUtils.collectionToCommaDelimitedString(sortedActualNames));
 //		for (int i = 0; i < resources.length; i++) {
 //			System.out.println(resources[i]);
 //		}
-			
+
 		assertEquals("Correct number of files found", fileNames.length, resources.length);
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];

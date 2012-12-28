@@ -29,7 +29,7 @@ import org.springframework.web.servlet.support.RequestContext;
 
 /**
  * Superclass for all tags that require a {@link RequestContext}.
- * 
+ *
  * <p>The <code>RequestContext</code> instance provides easy access
  * to current state like the
  * {@link org.springframework.web.context.WebApplicationContext},
@@ -54,7 +54,7 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	public static final String REQUEST_CONTEXT_PAGE_ATTRIBUTE =
 			"org.springframework.web.servlet.tags.REQUEST_CONTEXT";
 
-	
+
 	/** Logger available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 

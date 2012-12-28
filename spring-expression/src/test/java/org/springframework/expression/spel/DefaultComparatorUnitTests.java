@@ -24,7 +24,7 @@ import org.springframework.expression.spel.support.StandardTypeComparator;
 
 /**
  * Unit tests for type comparison
- * 
+ *
  * @author Andy Clement
  */
 public class DefaultComparatorUnitTests {
@@ -52,12 +52,12 @@ public class DefaultComparatorUnitTests {
 		Assert.assertTrue(comparator.compare(1, 2L) < 0);
 		Assert.assertTrue(comparator.compare(1, 1L) == 0);
 		Assert.assertTrue(comparator.compare(2, 1L) > 0);
-		
+
 		Assert.assertTrue(comparator.compare(1L, 2L) < 0);
 		Assert.assertTrue(comparator.compare(1L, 1L) == 0);
 		Assert.assertTrue(comparator.compare(2L, 1L) > 0);
 	}
-	
+
 	@Test
 	public void testNulls() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
@@ -73,7 +73,7 @@ public class DefaultComparatorUnitTests {
 		Assert.assertTrue(comparator.compare("a","b")<0);
 		Assert.assertTrue(comparator.compare("b","a")>0);
 	}
-	
+
 	@Test
 	public void testCanCompare() throws EvaluationException {
 		TypeComparator comparator = new StandardTypeComparator();
@@ -85,5 +85,5 @@ public class DefaultComparatorUnitTests {
 		Assert.assertTrue(comparator.canCompare("abc",3));
 		Assert.assertFalse(comparator.canCompare(String.class,3));
 	}
-	
+
 }

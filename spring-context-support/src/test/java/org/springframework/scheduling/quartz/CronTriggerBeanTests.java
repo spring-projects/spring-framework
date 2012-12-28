@@ -32,7 +32,7 @@ public class CronTriggerBeanTests {
 
 	@Test
 	public void testStartTime() throws Exception {
-	    CronTriggerBean bean = createTriggerBean();
+		CronTriggerBean bean = createTriggerBean();
 		Date startTime = new Date(System.currentTimeMillis() + 1234L);
 		bean.setStartTime(startTime);
 		bean.afterPropertiesSet();

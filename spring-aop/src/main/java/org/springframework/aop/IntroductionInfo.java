@@ -29,7 +29,7 @@ package org.springframework.aop;
  * @since 1.1.1
  */
 public interface IntroductionInfo {
-	
+
 	/**
 	 * Return the additional interfaces introduced by this Advisor or Advice.
 	 * @return the introduced interfaces

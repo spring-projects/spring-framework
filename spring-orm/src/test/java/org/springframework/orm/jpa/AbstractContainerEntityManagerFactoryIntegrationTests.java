@@ -47,7 +47,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	@NotTransactional
 	public void testEntityManagerFactoryImplementsEntityManagerFactoryInfo() {
 		assertTrue(Proxy.isProxyClass(entityManagerFactory.getClass()));
-		assertTrue("Must have introduced config interface", 
+		assertTrue("Must have introduced config interface",
 				entityManagerFactory instanceof EntityManagerFactoryInfo);
 		EntityManagerFactoryInfo emfi = (EntityManagerFactoryInfo) entityManagerFactory;
 		//assertEquals("Person", emfi.getPersistenceUnitName());
@@ -79,7 +79,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		
+
 		assertTrue("Should be open to start with", sharedEntityManager.isOpen());
 		sharedEntityManager.close();
 		assertTrue("Close should have been silently ignored", sharedEntityManager.isOpen());
@@ -96,8 +96,8 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 	public void testGetReferenceWhenNoRow() {
 		// Fails here with TopLink
 		Person notThere = sharedEntityManager.getReference(Person.class, 666);
-		
-		// We may get here (as with Hibernate). 
+
+		// We may get here (as with Hibernate).
 		// Either behaviour is valid: throw exception on first access
 		// or on getReference itself.
 		notThere.getFirstName();
@@ -112,15 +112,15 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 			sharedEntityManager.persist(tony);
 			setComplete();
 			endTransaction();
-			
+
 			startNewTransaction();
 			sharedEntityManager.clear();
 			Person newTony = entityManagerFactory.createEntityManager().getReference(Person.class, tony.getId());
 			assertNotSame(newTony, tony);
 			endTransaction();
-				
+
 			assertNotNull(newTony.getDriversLicense());
-			
+
 			newTony.getDriversLicense().getSerialNumber();
 		}
 		finally {
@@ -128,17 +128,17 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 			//setComplete();
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void testMultipleResults() {
 		// Add with JDBC
 		String firstName = "Tony";
 		insertPerson(firstName);
-		
+
 		assertTrue(Proxy.isProxyClass(sharedEntityManager.getClass()));
 		Query q = sharedEntityManager.createQuery("select p from Person as p");
 		List<Person> people = q.getResultList();
-		
+
 		assertEquals(1, people.size());
 		assertEquals(firstName, people.get(0).getFirstName());
 	}
@@ -147,32 +147,32 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		String INSERT_PERSON = "INSERT INTO PERSON (ID, FIRST_NAME, LAST_NAME) VALUES (?, ?, ?)";
 		simpleJdbcTemplate.update(INSERT_PERSON, 1, firstName, "Blair");
 	}
-	
+
 	public void testEntityManagerProxyRejectsProgrammaticTxManagement() {
 		try {
 			sharedEntityManager.getTransaction();
 			fail("Should not be able to create transactions on container managed EntityManager");
 		}
-		catch (IllegalStateException ex) {			
+		catch (IllegalStateException ex) {
 		}
 	}
-	
+
 	public void testSharedEntityManagerProxyRejectsProgrammaticTxJoining() {
 		try {
 			sharedEntityManager.joinTransaction();
 			fail("Should not be able to join transactions with container managed EntityManager");
 		}
-		catch (IllegalStateException ex) {		
+		catch (IllegalStateException ex) {
 		}
 	}
-	
+
 //	public void testAspectJInjectionOfConfigurableEntity() {
 //		Person p = new Person();
 //		System.err.println(p);
 //		assertNotNull("Was injected", p.getTestBean());
 //		assertEquals("Ramnivas", p.getTestBean().getName());
 //	}
-	
+
 	public void testInstantiateAndSaveWithSharedEmProxy() {
 		testInstantiateAndSave(sharedEntityManager);
 	}
@@ -183,7 +183,7 @@ public abstract class AbstractContainerEntityManagerFactoryIntegrationTests
 		p.setFirstName("Tony");
 		p.setLastName("Blair");
 		em.persist(p);
-		
+
 		em.flush();
 		assertEquals("1 row must have been inserted", 1, countRowsInTable("person"));
 	}

@@ -603,7 +603,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 					"Unable to register MBean [" + mapValue + "] with key '" + beanKey + "'", ex);
 		}
 	}
-	
+
 	/**
 	 * Replaces any bean names used as keys in the <code>NotificationListener</code>
 	 * mappings with their corresponding <code>ObjectName</code> values.
@@ -782,8 +782,8 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * interface for the supplied managed resource.
 	 * @param managedResource the resource that is to be exported as an MBean
 	 * @param beanKey the key associated with the managed bean
-	 * @see #createModelMBean() 
-	 * @see #getMBeanInfo(Object, String) 
+	 * @see #createModelMBean()
+	 * @see #getMBeanInfo(Object, String)
 	 */
 	protected ModelMBean createAndConfigureMBean(Object managedResource, String beanKey)
 			throws MBeanExportException {
@@ -1072,7 +1072,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
 
 		private ModelMBean modelMBean;
-		
+
 		private ObjectName objectName;
 
 		public void setModelMBean(ModelMBean modelMBean) {

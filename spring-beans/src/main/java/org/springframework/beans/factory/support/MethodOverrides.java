@@ -82,7 +82,7 @@ public class MethodOverrides {
 	public boolean isEmpty() {
 		return this.overrides.isEmpty();
 	}
-	
+
 	/**
 	 * Return the override for the given method, if any.
 	 * @param method method to check for overrides for

@@ -37,7 +37,7 @@ public abstract class MatcherAssertionErrors {
 
 
 	private MatcherAssertionErrors() {
-    }
+	}
 
 	/**
 	 * Asserts that the given matcher matches the actual value.
@@ -65,8 +65,8 @@ public abstract class MatcherAssertionErrors {
 			description.appendText("\nExpected: ");
 			description.appendDescriptionOf(matcher);
 			if (describeMismatchMethod != null) {
-                description.appendText("\n     but: ");
-                matcher.describeMismatch(actual, description);
+				description.appendText("\n     but: ");
+				matcher.describeMismatch(actual, description);
 			}
 			else {
 				description.appendText("\n     got: ");

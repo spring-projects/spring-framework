@@ -71,7 +71,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession with a default {@link MockServletContext}.
-	 * 
+	 *
 	 * @see MockServletContext
 	 */
 	public MockHttpSession() {
@@ -80,7 +80,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 * 
+	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 */
 	public MockHttpSession(ServletContext servletContext) {
@@ -89,7 +89,7 @@ public class MockHttpSession implements HttpSession {
 
 	/**
 	 * Create a new MockHttpSession.
-	 * 
+	 *
 	 * @param servletContext the ServletContext that the session runs in
 	 * @param id a unique identifier for this session
 	 */
@@ -222,7 +222,7 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Serialize the attributes of this session into an object that can be
 	 * turned into a byte array with standard Java serialization.
-	 * 
+	 *
 	 * @return a representation of this session's serialized state
 	 */
 	public Serializable serializeState() {
@@ -249,7 +249,7 @@ public class MockHttpSession implements HttpSession {
 	/**
 	 * Deserialize the attributes of this session from a state object created by
 	 * {@link #serializeState()}.
-	 * 
+	 *
 	 * @param state a representation of this session's serialized state
 	 */
 	@SuppressWarnings("unchecked")

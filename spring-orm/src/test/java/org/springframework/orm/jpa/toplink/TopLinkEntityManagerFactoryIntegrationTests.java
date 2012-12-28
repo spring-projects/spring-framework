@@ -21,7 +21,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 
 /**
  * TopLink-specific JPA tests.
- * 
+ *
  * @author Costin Leau
  * @author Rod Johnson
  * @author Juergen Hoeller

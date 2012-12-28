@@ -82,7 +82,7 @@ public class SimpleJdbcInsertTests extends TestCase {
 		ctrlResultSet.setReturnValue(false);
 		mockResultSet.close();
 		ctrlResultSet.setVoidCallable();
-		
+
 		mockDatabaseMetaData.getDatabaseProductName();
 		ctrlDatabaseMetaData.setReturnValue("MyDB");
 		mockDatabaseMetaData.supportsGetGeneratedKeys();

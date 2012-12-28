@@ -25,7 +25,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Keith Donald
  */
 public class ConversionServiceContextConfigTests {
-	
+
 	@Test
 	public void testConfigOk() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("org/springframework/context/conversionservice/conversionService.xml");
