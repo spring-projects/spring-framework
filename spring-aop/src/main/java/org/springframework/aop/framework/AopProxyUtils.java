@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ public abstract class AopProxyUtils {
 	 * as long as possible without side effects, that is, just for singleton targets.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback;
-	 * never <code>null</code>)
+	 * never {@code null})
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
-	 * @see org.springframework.aop.framework.Advised#getTargetSource()
+	 * @see Advised#getTargetSource()
 	 */
 	public static Class<?> ultimateTargetClass(Object candidate) {
 		Assert.notNull(candidate, "Candidate object must not be null");
@@ -112,7 +112,7 @@ public abstract class AopProxyUtils {
 	 * i.e. all non-Advised interfaces that the proxy implements.
 	 * @param proxy the proxy to analyze (usually a JDK dynamic proxy)
 	 * @return all user-specified interfaces that the proxy implements,
-	 * in the original order (never <code>null</code> or empty)
+	 * in the original order (never {@code null} or empty)
 	 * @see Advised
 	 */
 	public static Class[] proxiedUserInterfaces(Object proxy) {

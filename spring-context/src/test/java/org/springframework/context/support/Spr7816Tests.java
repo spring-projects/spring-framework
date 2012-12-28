@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ public class Spr7816Tests {
 		assertEquals(Entrance.class, adapter.getSupportedTypes().get("Entrance"));
 		assertEquals(Dwelling.class, adapter.getSupportedTypes().get("Dwelling"));
 	}
-	
+
 	public static class FilterAdapter {
-		
+
 		private String extensionPrefix;
-		
+
 		private Map<String, Class<? extends DomainEntity>> supportedTypes;
-		
+
 		public FilterAdapter(final String extensionPrefix, final Map<String, Class<? extends DomainEntity>> supportedTypes) {
 			this.extensionPrefix = extensionPrefix;
 			this.supportedTypes = supportedTypes;
@@ -58,17 +58,17 @@ public class Spr7816Tests {
 		}
 
 	}
-	
+
 	public static class Building extends DomainEntity {
 	}
-	
+
 	public static class Entrance extends DomainEntity {
 	}
-	
+
 	public static class Dwelling extends DomainEntity {
 	}
-	
+
 	public abstract static class DomainEntity {
-		
+
 	}
 }

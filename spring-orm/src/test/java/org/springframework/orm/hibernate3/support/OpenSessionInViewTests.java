@@ -17,12 +17,6 @@
 package org.springframework.orm.hibernate3.support;
 
 import static org.easymock.EasyMock.*;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -188,6 +182,7 @@ public class OpenSessionInViewTests {
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -428,6 +423,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -435,8 +431,9 @@ public class OpenSessionInViewTests {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -486,6 +483,7 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				count.incrementAndGet();
@@ -504,6 +502,7 @@ public class OpenSessionInViewTests {
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -574,6 +573,7 @@ public class OpenSessionInViewTests {
 		filter.init(filterConfig);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(sf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -645,6 +645,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -664,8 +665,9 @@ public class OpenSessionInViewTests {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf2);
 				TransactionStatus ts = tm.getTransaction(new DefaultTransactionDefinition());
@@ -744,6 +746,7 @@ public class OpenSessionInViewTests {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				HibernateTransactionManager tm = new HibernateTransactionManager(sf);
 				TransactionStatus ts = tm.getTransaction(
@@ -766,8 +769,9 @@ public class OpenSessionInViewTests {
 		};
 
 		FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
 		};

@@ -178,23 +178,28 @@ public class ControllerTests extends TestCase {
 			destroyed = false;
 		}
 
+		@Override
 		public void init(ServletConfig servletConfig) {
 			config = servletConfig;
 		}
 
+		@Override
 		public ServletConfig getServletConfig() {
 			return config;
 		}
 
+		@Override
 		public void service(ServletRequest servletRequest, ServletResponse servletResponse) {
 			request = servletRequest;
 			response = servletResponse;
 		}
 
+		@Override
 		public String getServletInfo() {
 			return "TestServlet";
 		}
 
+		@Override
 		public void destroy() {
 			destroyed = true;
 		}

@@ -40,7 +40,7 @@ public class CustomSQLExceptionTranslatorRegistrar implements InitializingBean {
 
 	/**
 	 * Setter for a Map of {@link SQLExceptionTranslator} references where the key must
-	 * be the database name as defined in the <code>sql-error-codes.xml</code> file.
+	 * be the database name as defined in the {@code sql-error-codes.xml} file.
 	 * <p>Note that any existing translators will remain unless there is a match in the
 	 * database name, at which point the new translator will replace the existing one.
 	 */

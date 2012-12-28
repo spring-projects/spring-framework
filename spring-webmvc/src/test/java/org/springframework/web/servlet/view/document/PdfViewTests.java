@@ -44,6 +44,7 @@ public class PdfViewTests extends TestCase {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		AbstractPdfView pdfView = new AbstractPdfView() {
+			@Override
 			protected void buildPdfDocument(Map model, Document document, PdfWriter writer,
 					HttpServletRequest request, HttpServletResponse response) throws Exception {
 				document.add(new Paragraph(text));

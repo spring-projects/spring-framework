@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ public interface WritableResource extends Resource {
 	/**
 	 * Return whether the contents of this resource can be modified,
 	 * e.g. via {@link #getOutputStream()} or {@link #getFile()}.
-	 * <p>Will be <code>true</code> for typical resource descriptors;
+	 * <p>Will be {@code true} for typical resource descriptors;
 	 * note that actual content writing may still fail when attempted.
-	 * However, a value of <code>false</code> is a definitive indication
+	 * However, a value of {@code false} is a definitive indication
 	 * that the resource content cannot be modified.
 	 * @see #getOutputStream()
 	 * @see #isReadable()

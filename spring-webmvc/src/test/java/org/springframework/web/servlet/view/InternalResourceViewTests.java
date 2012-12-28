@@ -63,7 +63,7 @@ public class InternalResourceViewTests extends TestCase {
 		model.put("I", obj);
 
 		String url = "forward-to";
-		
+
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myservlet/handler.do");
 		request.setContextPath("/mycontext");
 		request.setServletPath("/myservlet");
@@ -73,6 +73,7 @@ public class InternalResourceViewTests extends TestCase {
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
 		view.setServletContext(new MockServletContext() {
+			@Override
 			public int getMinorVersion() {
 				return 4;
 			}
@@ -84,7 +85,7 @@ public class InternalResourceViewTests extends TestCase {
 
 		Set<String> keys = model.keySet();
 		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+			String key = it.next();
 			assertEquals(model.get(key), request.getAttribute(key));
 		}
 
@@ -118,6 +119,7 @@ public class InternalResourceViewTests extends TestCase {
 		InternalResourceView view = new InternalResourceView();
 		view.setUrl(url);
 		view.setServletContext(new MockServletContext() {
+			@Override
 			public int getMinorVersion() {
 				return 4;
 			}
@@ -129,7 +131,7 @@ public class InternalResourceViewTests extends TestCase {
 
 		Set<String> keys = model.keySet();
 		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+			String key = it.next();
 			assertEquals(model.get(key), request.getAttribute(key));
 		}
 
@@ -153,7 +155,7 @@ public class InternalResourceViewTests extends TestCase {
 		expectLastCall().andReturn(null);
 		Set<String> keys = model.keySet();
 		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			request.setAttribute(key, model.get(key));
 			expectLastCall().times(1);
 		}
@@ -186,7 +188,7 @@ public class InternalResourceViewTests extends TestCase {
 		expectLastCall().andReturn(null);
 		Set<String> keys = model.keySet();
 		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			request.setAttribute(key, model.get(key));
 			expectLastCall().times(1);
 		}
@@ -220,7 +222,7 @@ public class InternalResourceViewTests extends TestCase {
 		expectLastCall().andReturn(null);
 		Set<String> keys = model.keySet();
 		for (Iterator<String> iter = keys.iterator(); iter.hasNext();) {
-			String key = (String) iter.next();
+			String key = iter.next();
 			request.setAttribute(key, model.get(key));
 			expectLastCall().times(1);
 		}

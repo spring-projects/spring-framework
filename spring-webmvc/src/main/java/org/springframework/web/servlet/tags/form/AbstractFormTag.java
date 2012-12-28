@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,12 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
-	 * is <code>null</code> then <code>null</code> is returned, otherwise evaluation is
+	 * is {@code null} then {@code null} is returned, otherwise evaluation is
 	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)}.
 	 */
 	protected Object evaluate(String attributeName, Object value) throws JspException {
@@ -56,9 +57,9 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 
 	/**
 	 * Evaluate the supplied value for the supplied attribute name. If the supplied value
-	 * is <code>null</code> then <code>false</code> is returned, otherwise evaluation is
+	 * is {@code null} then {@code false} is returned, otherwise evaluation is
 	 * handled using {@link ExpressionEvaluationUtils#evaluate(String, String, javax.servlet.jsp.PageContext)},
-	 * with subsequent matching against <code>Boolean.TRUE</code> and <code>Boolean.valueOf</code>.
+	 * with subsequent matching against {@code Boolean.TRUE} and {@code Boolean.valueOf}.
 	 */
 	protected boolean evaluateBoolean(String attributeName, String value) throws JspException {
 		Object evaluated = ExpressionEvaluationUtils.evaluate(attributeName, value, this.pageContext);
@@ -70,7 +71,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	 * Optionally writes the supplied value under the supplied attribute name into the supplied
 	 * {@link TagWriter}. In this case, the supplied value is {@link #evaluate evaluated} first
 	 * and then the {@link ObjectUtils#getDisplayString String representation} is written as the
-	 * attribute value. If the resultant <code>String</code> representation is <code>null</code>
+	 * attribute value. If the resultant {@code String} representation is {@code null}
 	 * or empty, no attribute is written.
 	 * @see TagWriter#writeOptionalAttributeValue(String, String)
 	 */
@@ -103,7 +104,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Get the display value of the supplied <code>Object</code>, HTML escaped
+	 * Get the display value of the supplied {@code Object}, HTML escaped
 	 * as required. This version is <strong>not</strong> {@link PropertyEditor}-aware.
 	 */
 	protected String getDisplayString(Object value) {
@@ -111,7 +112,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Get the display value of the supplied <code>Object</code>, HTML escaped
+	 * Get the display value of the supplied {@code Object}, HTML escaped
 	 * as required. If the supplied value is not a {@link String} and the supplied
 	 * {@link PropertyEditor} is not null then the {@link PropertyEditor} is used
 	 * to obtain the display value.
@@ -121,7 +122,7 @@ public abstract class AbstractFormTag extends HtmlEscapingAwareTag {
 	}
 
 	/**
-	 * Overridden to default to <code>true</code> in case of no explicit default given.
+	 * Overridden to default to {@code true} in case of no explicit default given.
 	 */
 	@Override
 	protected boolean isDefaultHtmlEscape() {

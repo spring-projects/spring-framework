@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ final class PropertyMatches {
 
 	/**
 	 * Generate possible property alternatives for the given property and
-	 * class. Internally uses the <code>getStringDistance</code> method, which
+	 * class. Internally uses the {@code getStringDistance} method, which
 	 * in turn uses the Levenshtein algorithm to determine the distance between
 	 * two Strings.
 	 * @param propertyDescriptors the JavaBeans property descriptors to search

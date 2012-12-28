@@ -41,15 +41,15 @@ import org.springframework.util.StringUtils;
  * {@link ContextConfiguration#inheritLocations inheritLocations} and
  * {@link ActiveProfiles#inheritProfiles inheritProfiles} flags in
  * {@code @ContextConfiguration} and {@code @ActiveProfiles}, respectively.
- * 
+ *
  * <p>A {@link SmartContextLoader} uses {@code MergedContextConfiguration}
  * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
- * 
+ *
  * <p>{@code MergedContextConfiguration} is also used by the {@link TestContext}
  * as the context cache key for caching an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * that was loaded using properties of this {@code MergedContextConfiguration}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see ContextConfiguration
@@ -103,7 +103,7 @@ public class MergedContextConfiguration implements Serializable {
 	/**
 	 * Generate a null-safe {@link String} representation of the supplied
 	 * {@link ContextLoader} based solely on the fully qualified name of the
-	 * loader or &quot;null&quot; if the supplied loaded is <code>null</code>.
+	 * loader or &quot;null&quot; if the supplied loaded is {@code null}.
 	 */
 	protected static String nullSafeToString(ContextLoader contextLoader) {
 		return contextLoader == null ? "null" : contextLoader.getClass().getName();
@@ -114,16 +114,16 @@ public class MergedContextConfiguration implements Serializable {
 	 * supplied test class, resource locations, annotated classes, active
 	 * profiles, and {@code ContextLoader}.
 	 *
-	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
-	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
+	 * <p>If a {@code null} value is supplied for {@code locations},
+	 * {@code classes}, or {@code activeProfiles} an empty array will
 	 * be stored instead. Furthermore, active profiles will be sorted, and duplicate
 	 * profiles will be removed.
-	 * 
+	 *
 	 * @param testClass the test class for which the configuration was merged
 	 * @param locations the merged resource locations
 	 * @param classes the merged annotated classes
 	 * @param activeProfiles the merged active bean definition profiles
-	 * @param contextLoader the resolved <code>ContextLoader</code>
+	 * @param contextLoader the resolved {@code ContextLoader}
 	 * @see #MergedContextConfiguration(Class, String[], Class[], Set, String[], ContextLoader)
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
@@ -136,10 +136,10 @@ public class MergedContextConfiguration implements Serializable {
 	 * supplied test class, resource locations, annotated classes, context
 	 * initializers, active profiles, and {@code ContextLoader}.
 	 *
-	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
-	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
-	 * be stored instead. If a <code>null</code> value is supplied for the
-	 * <code>contextInitializerClasses</code> an empty set will be stored instead.
+	 * <p>If a {@code null} value is supplied for {@code locations},
+	 * {@code classes}, or {@code activeProfiles} an empty array will
+	 * be stored instead. If a {@code null} value is supplied for the
+	 * {@code contextInitializerClasses} an empty set will be stored instead.
 	 * Furthermore, active profiles will be sorted, and duplicate profiles will
 	 * be removed.
 	 *
@@ -148,7 +148,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param classes the merged annotated classes
 	 * @param contextInitializerClasses the merged context initializer classes
 	 * @param activeProfiles the merged active bean definition profiles
-	 * @param contextLoader the resolved <code>ContextLoader</code>
+	 * @param contextLoader the resolved {@code ContextLoader}
 	 */
 	public MergedContextConfiguration(
 			Class<?> testClass,

@@ -1,7 +1,6 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.jdbc.core</code> package.
+ * Classes supporting the {@code org.springframework.jdbc.core} package.
  * Contains a DAO base class for JdbcTemplate usage.
  *
  */

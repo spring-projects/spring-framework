@@ -32,7 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * Concrete implementation of {@link AbstractTransactionalAnnotatedConfigClassTests}
  * that uses a true {@link Configuration @Configuration class}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see TransactionalAnnotatedConfigClassesWithoutAtConfigurationTests
@@ -43,7 +43,7 @@ public class TransactionalAnnotatedConfigClassWithAtConfigurationTests extends
 
 	/**
 	 * This is <b>intentionally</b> annotated with {@code @Configuration}.
-	 * 
+	 *
 	 * <p>Consequently, this class contains standard singleton bean methods
 	 * instead of <i>annotated factory bean methods</i>.
 	 */

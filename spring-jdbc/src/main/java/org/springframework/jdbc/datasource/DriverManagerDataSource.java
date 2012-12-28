@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ClassUtils;
 /**
  * Simple implementation of the standard JDBC {@link javax.sql.DataSource} interface,
  * configuring the plain old JDBC {@link java.sql.DriverManager} via bean properties, and
- * returning a new {@link java.sql.Connection} from every <code>getConnection</code> call.
+ * returning a new {@link java.sql.Connection} from every {@code getConnection} call.
  *
  * <p><b>NOTE: This class is not an actual connection pool; it does not actually
  * pool Connections.</b> It just serves as simple replacement for a full-blown
@@ -36,7 +36,7 @@ import org.springframework.util.ClassUtils;
  *
  * <p>Useful for test or standalone environments outside of a J2EE container, either
  * as a DataSource bean in a corresponding ApplicationContext or in conjunction with
- * a simple JNDI environment. Pool-assuming <code>Connection.close()</code> calls will
+ * a simple JNDI environment. Pool-assuming {@code Connection.close()} calls will
  * simply close the Connection, so any DataSource-aware persistence code should work.
  *
  * <p><b>NOTE: Within special class loading environments such as OSGi, this class

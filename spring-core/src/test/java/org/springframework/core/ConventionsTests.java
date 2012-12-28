@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,15 +41,15 @@ public class ConventionsTests extends TestCase {
 	}
 
 	public void testCollections() {
-		List list = new ArrayList();
+		List<TestBean> list = new ArrayList<TestBean>();
 		list.add(new TestBean());
 		assertEquals("Incorrect plural List form", "testBeanList", Conventions.getVariableName(list));
 
-		Set set = new HashSet();
+		Set<TestBean> set = new HashSet<TestBean>();
 		set.add(new TestBean());
 		assertEquals("Incorrect plural Set form", "testBeanList", Conventions.getVariableName(set));
 
-		List emptyList = new ArrayList();
+		List<?> emptyList = new ArrayList<Object>();
 		try {
 			Conventions.getVariableName(emptyList);
 			fail("Should not be able to generate name for empty collection");
@@ -67,7 +67,7 @@ public class ConventionsTests extends TestCase {
 
 	public void testGetQualifiedAttributeName() throws Exception {
 		String baseName = "foo";
-		Class cls = String.class;
+		Class<String> cls = String.class;
 		String desiredResult = "java.lang.String.foo";
 		assertEquals(desiredResult, Conventions.getQualifiedAttributeName(cls, baseName));
 	}

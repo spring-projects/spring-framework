@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 /**
  * Models a simple mail message, including data such as the from, to, cc, subject, and text fields.
  *
- * <p>Consider <code>JavaMailSender</code> and JavaMail <code>MimeMessages</code> for creating
+ * <p>Consider {@code JavaMailSender} and JavaMail {@code MimeMessages} for creating
  * more sophisticated messages, for example messages with attachments, special
  * character encodings, or personal names that accompany mail addresses.
  *
@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.mail.javamail.MimeMessageHelper
  * @see org.springframework.mail.javamail.MimeMailMessage
  */
+@SuppressWarnings("serial")
 public class SimpleMailMessage implements MailMessage, Serializable {
 
 	private String from;
@@ -59,15 +60,15 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 
 	/**
-	 * Create a new <code>SimpleMailMessage</code>.
+	 * Create a new {@code SimpleMailMessage}.
 	 */
 	public SimpleMailMessage() {
 	}
 
 	/**
-	 * Copy constructor for creating a new <code>SimpleMailMessage</code> from the state
-	 * of an existing <code>SimpleMailMessage</code> instance.
-	 * @throws IllegalArgumentException if the supplied message is <code>null</code> 
+	 * Copy constructor for creating a new {@code SimpleMailMessage} from the state
+	 * of an existing {@code SimpleMailMessage} instance.
+	 * @throws IllegalArgumentException if the supplied message is {@code null}
 	 */
 	public SimpleMailMessage(SimpleMailMessage original) {
 		Assert.notNull(original, "The 'original' message argument cannot be null");
@@ -167,8 +168,8 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 
 	/**
 	 * Copy the contents of this message to the given target message.
-	 * @param target the <code>MailMessage</code> to copy to
-	 * @throws IllegalArgumentException if the supplied <code>target</code> is <code>null</code> 
+	 * @param target the {@code MailMessage} to copy to
+	 * @throws IllegalArgumentException if the supplied {@code target} is {@code null}
 	 */
 	public void copyTo(MailMessage target) {
 		Assert.notNull(target, "The 'target' message argument cannot be null");

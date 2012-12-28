@@ -35,7 +35,7 @@ import org.springframework.context.ApplicationContextAware;
  * A Spring {@link FactoryBean} for creating a Quartz {@link org.quartz.JobDetail}
  * instance, supporting bean-style usage for JobDetail configuration.
  *
- * <p><code>JobDetail(Impl)</code> itself is already a JavaBean but lacks
+ * <p>{@code JobDetail(Impl)} itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *

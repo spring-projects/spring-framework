@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.xml.sax.SAXParseException;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract base class for SAX <code>XMLReader</code> implementations that use StAX as a basis.
+ * Abstract base class for SAX {@code XMLReader} implementations that use StAX as a basis.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -97,24 +97,24 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	}
 
 	/**
-	 * Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces</code> is turned on.
+	 * Indicates whether the SAX feature {@code http://xml.org/sax/features/namespaces} is turned on.
 	 */
 	protected boolean hasNamespacesFeature() {
 		return this.namespacesFeature;
 	}
 
 	/**
-	 * Indicates whether the SAX feature <code>http://xml.org/sax/features/namespaces-prefixes</code> is turned on.
+	 * Indicates whether the SAX feature {@code http://xml.org/sax/features/namespaces-prefixes} is turned on.
 	 */
 	protected boolean hasNamespacePrefixesFeature() {
 		return this.namespacePrefixesFeature;
 	}
 
 	/**
-	 * Convert a <code>QName</code> to a qualified name, as used by DOM and SAX.
-	 * The returned string has a format of <code>prefix:localName</code> if the
-	 * prefix is set, or just <code>localName</code> if not.
-	 * @param qName the <code>QName</code>
+	 * Convert a {@code QName} to a qualified name, as used by DOM and SAX.
+	 * The returned string has a format of {@code prefix:localName} if the
+	 * prefix is set, or just {@code localName} if not.
+	 * @param qName the {@code QName}
 	 * @return the qualified name
 	 */
 	protected String toQualifiedName(QName qName) {
@@ -130,9 +130,9 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	/**
 	 * Parse the StAX XML reader passed at construction-time.
-	 * <p><b>NOTE:</b>: The given <code>InputSource</code> is not read, but ignored.
+	 * <p><b>NOTE:</b>: The given {@code InputSource} is not read, but ignored.
 	 * @param ignored is ignored
-	 * @throws SAXException a SAX exception, possibly wrapping a <code>XMLStreamException</code>
+	 * @throws SAXException a SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
 	public final void parse(InputSource ignored) throws SAXException {
 		parse();
@@ -142,7 +142,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	 * Parse the StAX XML reader passed at construction-time.
 	 * <p><b>NOTE:</b>: The given system identifier is not read, but ignored.
 	 * @param ignored is ignored
-	 * @throws SAXException A SAX exception, possibly wrapping a <code>XMLStreamException</code>
+	 * @throws SAXException A SAX exception, possibly wrapping a {@code XMLStreamException}
 	 */
 	public final void parse(String ignored) throws SAXException {
 		parse();
@@ -205,7 +205,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 	}
 
 	/**
-	 * Implementation of the <code>Locator</code> interface that is based on a StAX <code>Location</code>.
+	 * Implementation of the {@code Locator} interface that is based on a StAX {@code Location}.
 	 * @see Locator
 	 * @see Location
 	 */

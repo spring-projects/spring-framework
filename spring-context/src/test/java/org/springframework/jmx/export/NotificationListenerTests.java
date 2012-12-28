@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,6 +158,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		NotificationListenerBean listenerBean = new NotificationListenerBean();
 		listenerBean.setNotificationListener(listener);
 		listenerBean.setNotificationFilter(new NotificationFilter() {
+			@Override
 			public boolean isNotificationEnabled(Notification notification) {
 				if (notification instanceof AttributeChangeNotification) {
 					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
@@ -434,6 +435,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 
 		private Map attributeHandbacks = new HashMap();
 
+		@Override
 		public void handleNotification(Notification notification, Object handback) {
 			if (notification instanceof AttributeChangeNotification) {
 				AttributeChangeNotification attNotification = (AttributeChangeNotification) notification;
@@ -473,6 +475,7 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 			this.objectName = objectName;
 		}
 
+		@Override
 		public ObjectName getObjectName() throws MalformedObjectNameException {
 			return this.objectName;
 		}

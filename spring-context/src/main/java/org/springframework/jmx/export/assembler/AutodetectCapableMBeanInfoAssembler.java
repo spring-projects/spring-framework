@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.springframework.jmx.export.assembler;
 
 /**
- * Extends the <code>MBeanInfoAssembler</code> to add autodetection logic.
+ * Extends the {@code MBeanInfoAssembler} to add autodetection logic.
  * Implementations of this interface are given the opportunity by the
- * <code>MBeanExporter</code> to include additional beans in the registration process.
+ * {@code MBeanExporter} to include additional beans in the registration process.
  *
  * <p>The exact mechanism for deciding which beans to include is left to
  * implementing classes.
@@ -32,8 +32,8 @@ public interface AutodetectCapableMBeanInfoAssembler extends MBeanInfoAssembler 
 
 	/**
 	 * Indicate whether a particular bean should be included in the registration
-	 * process, if it is not specified in the <code>beans</code> map of the
-	 * <code>MBeanExporter</code>.
+	 * process, if it is not specified in the {@code beans} map of the
+	 * {@code MBeanExporter}.
 	 * @param beanClass the class of the bean (might be a proxy class)
 	 * @param beanName the name of the bean in the bean factory
 	 */

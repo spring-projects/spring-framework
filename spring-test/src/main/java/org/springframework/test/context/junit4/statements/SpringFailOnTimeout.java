@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.annotation.Timed;
 
 /**
- * <code>SpringFailOnTimeout</code> is a custom JUnit 4.5+ {@link Statement}
+ * {@code SpringFailOnTimeout} is a custom JUnit 4.5+ {@link Statement}
  * which adds support for Spring's {@link Timed @Timed} annotation by throwing
  * an exception if the next statement in the execution chain takes more than the
  * specified number of milliseconds.
- * 
+ *
  * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
@@ -39,10 +39,10 @@ public class SpringFailOnTimeout extends Statement {
 
 
 	/**
-	 * Constructs a new <code>SpringFailOnTimeout</code> statement.
-	 * 
-	 * @param next the next <code>Statement</code> in the execution chain
-	 * @param timeout the configured <code>timeout</code> for the current test
+	 * Constructs a new {@code SpringFailOnTimeout} statement.
+	 *
+	 * @param next the next {@code Statement} in the execution chain
+	 * @param timeout the configured {@code timeout} for the current test
 	 * @see Timed#millis()
 	 */
 	public SpringFailOnTimeout(Statement next, long timeout) {
@@ -56,7 +56,7 @@ public class SpringFailOnTimeout extends Statement {
 	 * {@link org.junit.internal.runners.statements.InvokeMethod InvokeMethod}
 	 * or {@link org.junit.internal.runners.statements.ExpectException
 	 * ExpectException}) and throws an exception if the next
-	 * <code>statement</code> takes more than the specified <code>timeout</code>
+	 * {@code statement} takes more than the specified {@code timeout}
 	 * .
 	 */
 	@Override

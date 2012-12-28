@@ -79,10 +79,12 @@ public class MockFilterConfig implements FilterConfig {
 	}
 
 
+	@Override
 	public String getFilterName() {
 		return filterName;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return servletContext;
 	}
@@ -92,11 +94,13 @@ public class MockFilterConfig implements FilterConfig {
 		this.initParameters.put(name, value);
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}

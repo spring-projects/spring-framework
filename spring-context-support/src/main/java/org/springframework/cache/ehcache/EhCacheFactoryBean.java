@@ -112,7 +112,7 @@ public class EhCacheFactoryBean implements FactoryBean<Ehcache>, BeanNameAware, 
 
 	/**
 	 * Set a CacheManager from which to retrieve a named Cache instance.
-	 * By default, <code>CacheManager.getInstance()</code> will be called.
+	 * By default, {@code CacheManager.getInstance()} will be called.
 	 * <p>Note that in particular for persistent caches, it is advisable to
 	 * properly handle the shutdown of the CacheManager: Set up a separate
 	 * EhCacheManagerFactoryBean and pass a reference to this bean property.

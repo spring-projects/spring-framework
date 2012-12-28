@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
-/** 
+/**
  * Central interface to provide configuration for an application.
  * This is read-only while the application is running, but may be
  * reloaded if the implementation supports this.
@@ -59,7 +59,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return the unique id of this application context.
-	 * @return the unique id of the context, or <code>null</code> if none
+	 * @return the unique id of the context, or {@code null} if none
 	 */
 	String getId();
 
@@ -71,8 +71,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return a friendly name for this context.
-	 * @return a display name for this context (never <code>null</code>)
-	*/
+	 * @return a display name for this context (never {@code null})
+	 */
 	String getDisplayName();
 
 	/**
@@ -82,9 +82,9 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	long getStartupDate();
 
 	/**
-	 * Return the parent context, or <code>null</code> if there is no parent
+	 * Return the parent context, or {@code null} if there is no parent
 	 * and this is the root of the context hierarchy.
-	 * @return the parent context, or <code>null</code> if there is no parent
+	 * @return the parent context, or {@code null} if there is no parent
 	 */
 	ApplicationContext getParent();
 
@@ -101,7 +101,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	 * @return the AutowireCapableBeanFactory for this context
 	 * @throws IllegalStateException if the context does not support
 	 * the AutowireCapableBeanFactory interface or does not hold an autowire-capable
-	 * bean factory yet (usually if <code>refresh()</code> has never been called)
+	 * bean factory yet (usually if {@code refresh()} has never been called)
 	 * @see ConfigurableApplicationContext#refresh()
 	 * @see ConfigurableApplicationContext#getBeanFactory()
 	 */

@@ -389,8 +389,8 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 				if (dataType == Types.DECIMAL) {
 					String typeName = tableColumns.getString("TYPE_NAME");
 					int decimalDigits = tableColumns.getInt("DECIMAL_DIGITS");
-					// override a DECIMAL data type for no-decimal numerics 
-					// (this is for better Oracle support where there have been issues 
+					// override a DECIMAL data type for no-decimal numerics
+					// (this is for better Oracle support where there have been issues
 					// using DECIMAL for certain inserts (see SPR-6912))
 					if ("NUMBER".equals(typeName) && decimalDigits == 0) {
 						dataType = Types.NUMERIC;
@@ -475,7 +475,6 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			this.type = type;
 		}
 
-		@SuppressWarnings("unused")
 		public String getType() {
 			return this.type;
 		}

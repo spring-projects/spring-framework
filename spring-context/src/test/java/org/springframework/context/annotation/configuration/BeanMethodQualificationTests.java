@@ -24,21 +24,19 @@ import test.beans.TestBean;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests proving that @Qualifier annotations work when used 
+ * Tests proving that @Qualifier annotations work when used
  * with @Configuration classes on @Bean methods.
- * 
+ *
  * @author Chris Beams
  * @author Juergen Hoeller
  */
@@ -69,7 +67,7 @@ public class BeanMethodQualificationTests {
 		public TestBean testBean1() {
 			return new TestBean("interesting");
 		}
-		
+
 		@Bean @Qualifier("boring")
 		public TestBean testBean2() {
 			return new TestBean("boring");

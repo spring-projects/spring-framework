@@ -39,6 +39,7 @@ public class VelocityToolboxViewTests {
 		wac.setServletContext(new MockServletContext());
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine(templateName, expectedTemplate);
 			}
@@ -49,6 +50,7 @@ public class VelocityToolboxViewTests {
 		final HttpServletResponse expectedResponse = new MockHttpServletResponse();
 
 		VelocityToolboxView vv = new VelocityToolboxView() {
+			@Override
 			protected void mergeTemplate(Template template, Context context, HttpServletResponse response) throws Exception {
 				assertTrue(template == expectedTemplate);
 				assertTrue(response == expectedResponse);

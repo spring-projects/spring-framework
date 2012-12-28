@@ -48,8 +48,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 	private ErrorsTag tag;
 
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new ErrorsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -59,6 +62,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		return new TestBean();
 	}
@@ -159,11 +163,11 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "Default Message");
 		assertBlockTagContains(output, "Too Short");
 	}
-	
+
 	public void testWithErrorsAndDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
-		
+
 		this.tag.setDynamicAttribute(null, dynamicAttribute1, dynamicAttribute1);
 		this.tag.setDynamicAttribute(null, dynamicAttribute2, dynamicAttribute2);
 
@@ -433,6 +437,7 @@ public class ErrorsTagTests extends AbstractFormTagTests {
 		assertTrue(output.contains("field error"));
 	}
 
+	@Override
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();

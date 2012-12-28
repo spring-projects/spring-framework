@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,19 +27,24 @@ import javax.faces.lifecycle.Lifecycle;
  */
 public class MockLifecycle extends Lifecycle {
 
+	@Override
 	public void addPhaseListener(PhaseListener phaseListener) {
 	}
 
+	@Override
 	public void execute(FacesContext facesContext) throws FacesException {
 	}
 
+	@Override
 	public PhaseListener[] getPhaseListeners() {
 		return null;
 	}
 
+	@Override
 	public void removePhaseListener(PhaseListener phaseListener) {
 	}
 
+	@Override
 	public void render(FacesContext facesContext) throws FacesException {
 	}
 

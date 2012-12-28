@@ -16,7 +16,6 @@
 
 package org.springframework.beans;
 
-import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -64,7 +63,7 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 				if (fieldMap.containsKey(field.getName())) {
 					// ignore superclass declarations of fields already found in a subclass
 				}
-                else {
+				else {
 					fieldMap.put(field.getName(), field);
 				}
 			}

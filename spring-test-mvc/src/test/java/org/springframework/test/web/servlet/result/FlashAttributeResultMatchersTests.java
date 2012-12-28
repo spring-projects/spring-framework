@@ -35,7 +35,7 @@ public class FlashAttributeResultMatchersTests {
 	public void attributeExists_doesntExist() throws Exception {
 		new FlashAttributeResultMatchers().attributeExists("bad").match(getStubMvcResult());
 	}
-	
+
 	@Test
 	public void attribute() throws Exception {
 		new FlashAttributeResultMatchers().attribute("good", "good").match(getStubMvcResult());

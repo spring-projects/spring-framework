@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,10 +146,12 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		return postProcessed;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -165,10 +167,12 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		}
 	}
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
@@ -181,14 +185,17 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		this.jedi = jedi;
 	}
 
+	@Override
 	public ITestBean getSpouse() {
 		return (spouses != null ? spouses[0] : null);
 	}
 
+	@Override
 	public void setSpouse(ITestBean spouse) {
 		this.spouses = new ITestBean[] {spouse};
 	}
 
+	@Override
 	public ITestBean[] getSpouses() {
 		return spouses;
 	}
@@ -215,10 +222,12 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		this.country = country;
 	}
 
+	@Override
 	public String[] getStringArray() {
 		return stringArray;
 	}
 
+	@Override
 	public void setStringArray(String[] stringArray) {
 		this.stringArray = stringArray;
 	}
@@ -287,6 +296,7 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		this.someProperties = someProperties;
 	}
 
+	@Override
 	public INestedTestBean getDoctor() {
 		return doctor;
 	}
@@ -295,6 +305,7 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		this.doctor = doctor;
 	}
 
+	@Override
 	public INestedTestBean getLawyer() {
 		return lawyer;
 	}
@@ -347,18 +358,21 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 	/**
 	 * @see ITestBean#exceptional(Throwable)
 	 */
+	@Override
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
 		}
 	}
 
+	@Override
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
 	/**
 	 * @see ITestBean#returnsThis()
 	 */
+	@Override
 	public Object returnsThis() {
 		return this;
 	}
@@ -366,9 +380,11 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 	/**
 	 * @see IOther#absquatulate()
 	 */
+	@Override
 	public void absquatulate() {
 	}
 
+	@Override
 	public int haveBirthday() {
 		return age++;
 	}
@@ -398,6 +414,7 @@ public class TestBean implements ITestBean, IOther, Comparable<Object> {
 		return this.age;
 	}
 
+	@Override
 	public int compareTo(Object other) {
 		if (this.name != null && other instanceof TestBean) {
 			return this.name.compareTo(((TestBean) other).getName());

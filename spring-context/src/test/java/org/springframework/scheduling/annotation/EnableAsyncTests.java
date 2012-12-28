@@ -247,6 +247,7 @@ public class EnableAsyncTests {
 			return new AsyncBean();
 		}
 
+		@Override
 		public Executor getAsyncExecutor() {
 			ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 			executor.setThreadNamePrefix("Custom-");

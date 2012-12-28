@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,9 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * Return an array of resource locations, referring to the XML bean definition
 	 * files that this context should be built with. Can also include location
 	 * patterns, which will get resolved via a ResourcePatternResolver.
-	 * <p>The default implementation returns <code>null</code>. Subclasses can override
+	 * <p>The default implementation returns {@code null}. Subclasses can override
 	 * this to provide a set of resource locations to load bean definitions from.
-	 * @return an array of resource locations, or <code>null</code> if none
+	 * @return an array of resource locations, or {@code null} if none
 	 * @see #getResources
 	 * @see #getResourcePatternResolver
 	 */
@@ -103,7 +103,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	/**
 	 * Return the default config locations to use, for the case where no
 	 * explicit config locations have been specified.
-	 * <p>The default implementation returns <code>null</code>,
+	 * <p>The default implementation returns {@code null},
 	 * requiring explicit config locations.
 	 * @return an array of default config locations, if any
 	 * @see #setConfigLocations

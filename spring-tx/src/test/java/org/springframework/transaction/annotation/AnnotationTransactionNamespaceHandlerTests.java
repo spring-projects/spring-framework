@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,13 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 	private ConfigurableApplicationContext context;
 
+	@Override
 	public void setUp() {
 		this.context = new ClassPathXmlApplicationContext(
 				"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 	}
 
+	@Override
 	protected void tearDown() {
 		this.context.close();
 	}
@@ -82,14 +84,14 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		}
 	}
-	
+
 	public void testNonPublicMethodsNotAdvised() {
 		TransactionalTestBean testBean = getTestBean();
 		CallCountingTransactionManager ptm = (CallCountingTransactionManager) context.getBean("transactionManager");
 
 		assertEquals("Should not have any started transactions", 0, ptm.begun);
 		testBean.annotationsOnProtectedAreIgnored();
-		assertEquals("Should not have any started transactions", 0, ptm.begun);		
+		assertEquals("Should not have any started transactions", 0, ptm.begun);
 	}
 
 	public void testMBeanExportAlsoWorks() throws Exception {
@@ -125,7 +127,7 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 		public String doSomething() {
 			return "done";
 		}
-		
+
 		@Transactional
 		protected void annotationsOnProtectedAreIgnored() {
 		}

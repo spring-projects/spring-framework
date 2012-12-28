@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Cache of original SQL String to ParsedSql representation */
+	@SuppressWarnings("serial")
 	private final Map<String, ParsedSql> parsedSqlCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override
@@ -305,7 +306,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 
 	/**
 	 * Build a PreparedStatementCreator based on the given SQL and named parameters.
-	 * <p>Note: Not used for the <code>update</code> variant with generated key handling.
+	 * <p>Note: Not used for the {@code update} variant with generated key handling.
 	 * @param sql SQL to execute
 	 * @param paramSource container of arguments to bind
 	 * @return the corresponding PreparedStatementCreator

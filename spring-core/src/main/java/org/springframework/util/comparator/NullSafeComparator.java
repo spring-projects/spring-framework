@@ -51,27 +51,27 @@ public class NullSafeComparator<T> implements Comparator<T> {
 
 
 	/**
-	 * Create a NullSafeComparator that sorts <code>null</code> based on
+	 * Create a NullSafeComparator that sorts {@code null} based on
 	 * the provided flag, working on Comparables.
 	 * <p>When comparing two non-null objects, their Comparable implementation
 	 * will be used: this means that non-null elements (that this Comparator
 	 * will be applied to) need to implement Comparable.
 	 * <p>As a convenience, you can use the default shared instances:
-	 * <code>NullSafeComparator.NULLS_LOW</code> and
-	 * <code>NullSafeComparator.NULLS_HIGH</code>.
+	 * {@code NullSafeComparator.NULLS_LOW} and
+	 * {@code NullSafeComparator.NULLS_HIGH}.
 	 * @param nullsLow whether to treat nulls lower or higher than non-null objects
-	 * @see java.lang.Comparable
+	 * @see Comparable
 	 * @see #NULLS_LOW
 	 * @see #NULLS_HIGH
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked"})
 	private NullSafeComparator(boolean nullsLow) {
 		this.nonNullComparator = new ComparableComparator();
 		this.nullsLow = nullsLow;
 	}
 
 	/**
-	 * Create a NullSafeComparator that sorts <code>null</code> based on the
+	 * Create a NullSafeComparator that sorts {@code null} based on the
 	 * provided flag, decorating the given Comparator.
 	 * <p>When comparing two non-null objects, the specified Comparator will be used.
 	 * The given underlying Comparator must be able to handle the elements that this

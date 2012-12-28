@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.util.ReflectionUtils;
  * Spring's unchecked RemoteAccessException.
  *
  * <p>The JNDI environment can be specified as "jndiEnvironment" property,
- * or be configured in a <code>jndi.properties</code> file or as system properties.
+ * or be configured in a {@code jndi.properties} file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;
@@ -190,8 +190,8 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 				else if (getServiceInterface() != null) {
 					boolean isImpl = getServiceInterface().isInstance(remoteObj);
 					logger.debug("Using service interface [" + getServiceInterface().getName() +
-					    "] for JNDI RMI object [" + getJndiName() + "] - " +
-					    (!isImpl ? "not " : "") + "directly implemented");
+						"] for JNDI RMI object [" + getJndiName() + "] - " +
+						(!isImpl ? "not " : "") + "directly implemented");
 				}
 			}
 			if (this.cacheStub) {
@@ -426,7 +426,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see org.springframework.remoting.support.RemoteInvocation
 	 */
 	protected Object doInvoke(MethodInvocation methodInvocation, RmiInvocationHandler invocationHandler)
-	    throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		throws RemoteException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "RMI invoker proxy for service URL [" + getJndiName() + "]";

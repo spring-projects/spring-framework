@@ -812,6 +812,7 @@ public final class PropertyResourceConfigurerTests {
 
 	private static class ConvertingOverrideConfigurer extends PropertyOverrideConfigurer {
 
+		@Override
 		protected String convertPropertyValue(String originalValue) {
 			return "X" + originalValue;
 		}
@@ -826,10 +827,12 @@ public final class PropertyResourceConfigurerTests {
 
 		private Preferences userRoot = new MockPreferences();
 
+		@Override
 		public Preferences systemRoot() {
 			return systemRoot;
 		}
 
+		@Override
 		public Preferences userRoot() {
 			return userRoot;
 		}

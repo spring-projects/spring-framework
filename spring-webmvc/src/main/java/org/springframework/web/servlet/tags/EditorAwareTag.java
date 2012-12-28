@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface EditorAwareTag {
 	/**
 	 * Retrieve the PropertyEditor for the property that this tag is
 	 * currently bound to. Intended for cooperating nesting tags.
-	 * @return the current PropertyEditor, or <code>null</code> if none
+	 * @return the current PropertyEditor, or {@code null} if none
 	 * @throws JspException if resolving the editor failed
 	 */
 	PropertyEditor getEditor() throws JspException;

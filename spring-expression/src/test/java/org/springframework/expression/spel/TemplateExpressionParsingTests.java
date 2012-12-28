@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,24 +36,30 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 public class TemplateExpressionParsingTests extends ExpressionTestCase {
 
 	public static final ParserContext DEFAULT_TEMPLATE_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return "${";
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}
 	};
 
 	public static final ParserContext HASH_DELIMITED_PARSER_CONTEXT = new ParserContext() {
+		@Override
 		public String getExpressionPrefix() {
 			return "#{";
 		}
+		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
+		@Override
 		public boolean isTemplate() {
 			return true;
 		}
@@ -91,7 +97,7 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		Expression expr = parser.parseExpression("${'hello'} world", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		Object o = expr.getValue();
 		Assert.assertEquals("hello world", o.toString());
-		
+
 		expr = parser.parseExpression("", DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		o = expr.getValue();
 		Assert.assertEquals("", o.toString());
@@ -135,7 +141,7 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		Assert.assertEquals(String.class,ex.getValueType(ctx, new Rooty()));
 		Assert.assertEquals(String.class,ex.getValueTypeDescriptor(new Rooty()).getType());
 		Assert.assertEquals(String.class,ex.getValueTypeDescriptor(ctx, new Rooty()).getType());
-		
+
 		try {
 			ex.setValue(ctx, null);
 			Assert.fail();
@@ -155,9 +161,9 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 			// success
 		}
 	}
-	
+
 	static class Rooty {}
-	
+
 	@Test
 	public void testNestedExpressions() throws Exception {
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -179,22 +185,22 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} ${listOfNumbersUpToTen.$[#this>5]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		Assert.assertEquals("hello 4 10 world",s);
-		
+
 		try {
 			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#this<5]} ${listOfNumbersUpToTen.$[#this>5] world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 			Assert.fail("Should have failed");
 		} catch (ParseException pe) {
 			Assert.assertEquals("No ending suffix '}' for expression starting at character 41: ${listOfNumbersUpToTen.$[#this>5] world",pe.getMessage());
-		}	
-		
+		}
+
 		try {
 			ex = parser.parseExpression("hello ${listOfNumbersUpToTen.$[#root.listOfNumbersUpToTen.$[#this%2==1==3]} world",DEFAULT_TEMPLATE_PARSER_CONTEXT);
 			Assert.fail("Should have failed");
 		} catch (ParseException pe) {
 			Assert.assertEquals("Found closing '}' at position 74 but most recent opening is '[' at position 30",pe.getMessage());
-		}	
+		}
 	}
-	
+
 	@Test
 
 	public void testClashingWithSuffixes() throws Exception {
@@ -211,7 +217,7 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		s = ex.getValue(TestScenarioCreator.getTestEvaluationContext(),String.class);
 		Assert.assertEquals("hello 7 wo}rld",s);
 	}
-	
+
 	@Test
 	public void testParsingNormalExpressionThroughTemplateParser() throws Exception {
 		Expression expr = parser.parseExpression("1+2+3");
@@ -219,7 +225,7 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 		expr = parser.parseExpression("1+2+3",null);
 		Assert.assertEquals(6,expr.getValue());
 	}
-	
+
 	@Test
 	public void testErrorCases() throws Exception {
 		try {
@@ -240,29 +246,29 @@ public class TemplateExpressionParsingTests extends ExpressionTestCase {
 			Assert.fail("Should have failed");
 		} catch (ParseException pe) {
 			Assert.assertEquals("No expression defined within delimiter '${}' at character 6",pe.getMessage());
-		}		
+		}
 	}
 
 	@Test
 	public void testTemplateParserContext() {
 		TemplateParserContext tpc = new TemplateParserContext("abc","def");
 		Assert.assertEquals("abc", tpc.getExpressionPrefix());
-		Assert.assertEquals("def", tpc.getExpressionSuffix()); 
+		Assert.assertEquals("def", tpc.getExpressionSuffix());
 		Assert.assertTrue(tpc.isTemplate());
 
 		tpc = new TemplateParserContext();
 		Assert.assertEquals("#{", tpc.getExpressionPrefix());
-		Assert.assertEquals("}", tpc.getExpressionSuffix()); 
+		Assert.assertEquals("}", tpc.getExpressionSuffix());
 		Assert.assertTrue(tpc.isTemplate());
-		
+
 		ParserContext pc = ParserContext.TEMPLATE_EXPRESSION;
 		Assert.assertEquals("#{", pc.getExpressionPrefix());
-		Assert.assertEquals("}", pc.getExpressionSuffix()); 
+		Assert.assertEquals("}", pc.getExpressionSuffix());
 		Assert.assertTrue(pc.isTemplate());
 	}
-	
+
 	// ---
-	
+
 	private void checkString(String expectedString, Object value) {
 		if (!(value instanceof String)) {
 			Assert.fail("Result was not a string, it was of type " + value.getClass() + "  (value=" + value + ")");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperReportsMultiFormatViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		JasperReportsMultiFormatView view = new JasperReportsMultiFormatView();
 		view.setFormatKey("fmt");
@@ -37,10 +38,12 @@ public class JasperReportsMultiFormatViewWithCustomMappingsTests extends JasperR
 		return view;
 	}
 
+	@Override
 	protected String getDiscriminatorKey() {
 		return "fmt";
 	}
 
+	@Override
 	protected void extendModel(Map<String, Object> model) {
 		model.put(getDiscriminatorKey(), "comma-separated");
 	}

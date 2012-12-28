@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.core.io.Resource;
 
 /**
  * If this test case fails, uncomment diagnostics in
- * <code>assertProtocolAndFilenames</code> method.
+ * {@code assertProtocolAndFilenames} method.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
@@ -137,14 +137,14 @@ public class PathMatchingResourcePatternResolverTests {
 //		List expectedNames = new LinkedList(Arrays.asList(fileNames));
 //		Collections.sort(sortedActualNames);
 //		Collections.sort(expectedNames);
-//		
+//
 //		System.out.println("-----------");
 //		System.out.println("Expected: " + StringUtils.collectionToCommaDelimitedString(expectedNames));
 //		System.out.println("Actual: " + StringUtils.collectionToCommaDelimitedString(sortedActualNames));
 //		for (int i = 0; i < resources.length; i++) {
 //			System.out.println(resources[i]);
 //		}
-			
+
 		assertEquals("Correct number of files found", fileNames.length, resources.length);
 		for (int i = 0; i < resources.length; i++) {
 			Resource resource = resources[i];

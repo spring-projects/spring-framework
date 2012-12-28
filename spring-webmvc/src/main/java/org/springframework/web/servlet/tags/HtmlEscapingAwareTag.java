@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * <p>Provides a "htmlEscape" property for explicitly specifying whether to
  * apply HTML escaping. If not set, a page-level default (e.g. from the
  * HtmlEscapeTag) or an application-wide default (the "defaultHtmlEscape"
- * context-param in <code>web.xml</code>) is used.
+ * context-param in {@code web.xml}) is used.
  *
  * @author Juergen Hoeller
  * @since 1.1
@@ -35,6 +35,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @see org.springframework.web.servlet.support.RequestContext#isDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#isDefaultHtmlEscape
  */
+@SuppressWarnings("serial")
 public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 
 	private Boolean htmlEscape;
@@ -66,7 +67,7 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	/**
 	 * Return the applicable default HTML escape setting for this tag.
 	 * <p>The default implementation checks the RequestContext's setting,
-	 * falling back to <code>false</code> in case of no explicit default given.
+	 * falling back to {@code false} in case of no explicit default given.
 	 * @see #getRequestContext()
 	 */
 	protected boolean isDefaultHtmlEscape() {

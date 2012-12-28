@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
  * <p>Use this {@link BeanDefinitionParser} implementation when you want
  * to parse some arbitrarily complex XML into one or more
  * {@link BeanDefinition BeanDefinitions}. If you just want to parse some
- * XML into a single <code>BeanDefinition</code>, you may wish to consider
+ * XML into a single {@code BeanDefinition}, you may wish to consider
  * the simpler convenience extensions of this class, namely
  * {@link AbstractSingleBeanDefinitionParser} and
  * {@link AbstractSimpleBeanDefinitionParser}.
@@ -121,11 +121,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * {@link BeanDefinitionHolder bean} is actually even registered, or to
 	 * register even more beans.
 	 * <p>The default implementation registers the supplied {@link BeanDefinitionHolder bean}
-	 * with the supplied {@link BeanDefinitionRegistry registry} only if the <code>isNested</code>
-	 * parameter is <code>false</code>, because one typically does not want inner beans
+	 * with the supplied {@link BeanDefinitionRegistry registry} only if the {@code isNested}
+	 * parameter is {@code false}, because one typically does not want inner beans
 	 * to be registered as top level beans.
 	 * @param definition the bean definition to be registered
-	 * @param registry the registry that the bean is to be registered with 
+	 * @param registry the registry that the bean is to be registered with
 	 * @see BeanDefinitionReaderUtils#registerBeanDefinition(BeanDefinitionHolder, BeanDefinitionRegistry)
 	 */
 	protected void registerBeanDefinition(BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
@@ -172,11 +172,11 @@ public abstract class AbstractBeanDefinitionParser implements BeanDefinitionPars
 	 * Controls whether this parser is supposed to fire a
 	 * {@link org.springframework.beans.factory.parsing.BeanComponentDefinition}
 	 * event after parsing the bean definition.
-	 * <p>This implementation returns <code>true</code> by default; that is,
+	 * <p>This implementation returns {@code true} by default; that is,
 	 * an event will be fired when a bean definition has been completely parsed.
-	 * Override this to return <code>false</code> in order to suppress the event.
-	 * @return <code>true</code> in order to fire a component registration event
-	 * after parsing the bean definition; <code>false</code> to suppress the event
+	 * Override this to return {@code false} in order to suppress the event.
+	 * @return {@code true} in order to fire a component registration event
+	 * after parsing the bean definition; {@code false} to suppress the event
 	 * @see #postProcessComponentDefinition
 	 * @see org.springframework.beans.factory.parsing.ReaderContext#fireComponentRegistered
 	 */

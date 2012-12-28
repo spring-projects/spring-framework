@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 15 April 2001
  */
-public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
+public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable<Object> {
 
 	private String beanName;
 
@@ -70,13 +70,13 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Float myFloat = new Float(0.0);
 
-	private Collection friends = new LinkedList();
+	private Collection<? super Object> friends = new LinkedList<>();
 
-	private Set someSet = new HashSet();
+	private Set<?> someSet = new HashSet<>();
 
-	private Map someMap = new HashMap();
+	private Map<?, ?> someMap = new HashMap<>();
 
-	private List someList = new ArrayList();
+	private List<?> someList = new ArrayList<>();
 
 	private Properties someProperties = new Properties();
 
@@ -94,9 +94,9 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Boolean someBoolean;
 
-	private List otherColours;
+	private List<?> otherColours;
 
-	private List pets;
+	private List<?> pets;
 
 
 	public TestBean() {
@@ -120,15 +120,15 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
-	public TestBean(List someList) {
+	public TestBean(List<?> someList) {
 		this.someList = someList;
 	}
 
-	public TestBean(Set someSet) {
+	public TestBean(Set<?> someSet) {
 		this.someSet = someSet;
 	}
 
-	public TestBean(Map someMap) {
+	public TestBean(Map<?, ?> someMap) {
 		this.someMap = someMap;
 	}
 
@@ -137,6 +137,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	}
 
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -145,6 +146,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -161,10 +163,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return postProcessed;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -180,10 +184,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		}
 	}
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
@@ -196,14 +202,17 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.jedi = jedi;
 	}
 
+	@Override
 	public ITestBean getSpouse() {
 		return (spouses != null ? spouses[0] : null);
 	}
 
+	@Override
 	public void setSpouse(ITestBean spouse) {
 		this.spouses = new ITestBean[] {spouse};
 	}
 
+	@Override
 	public ITestBean[] getSpouses() {
 		return spouses;
 	}
@@ -230,10 +239,12 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.country = country;
 	}
 
+	@Override
 	public String[] getStringArray() {
 		return stringArray;
 	}
 
+	@Override
 	public void setStringArray(String[] stringArray) {
 		this.stringArray = stringArray;
 	}
@@ -262,35 +273,35 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.myFloat = myFloat;
 	}
 
-	public Collection getFriends() {
+	public Collection<? super Object> getFriends() {
 		return friends;
 	}
 
-	public void setFriends(Collection friends) {
+	public void setFriends(Collection<? super Object> friends) {
 		this.friends = friends;
 	}
 
-	public Set getSomeSet() {
+	public Set<?> getSomeSet() {
 		return someSet;
 	}
 
-	public void setSomeSet(Set someSet) {
+	public void setSomeSet(Set<?> someSet) {
 		this.someSet = someSet;
 	}
 
-	public Map getSomeMap() {
+	public Map<?, ?> getSomeMap() {
 		return someMap;
 	}
 
-	public void setSomeMap(Map someMap) {
+	public void setSomeMap(Map<?, ?> someMap) {
 		this.someMap = someMap;
 	}
 
-	public List getSomeList() {
+	public List<?> getSomeList() {
 		return someList;
 	}
 
-	public void setSomeList(List someList) {
+	public void setSomeList(List<?> someList) {
 		this.someList = someList;
 	}
 
@@ -302,6 +313,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
+	@Override
 	public INestedTestBean getDoctor() {
 		return doctor;
 	}
@@ -310,6 +322,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.doctor = doctor;
 	}
 
+	@Override
 	public INestedTestBean getLawyer() {
 		return lawyer;
 	}
@@ -342,6 +355,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someBoolean = someBoolean;
 	}
 
+	@Override
 	public IndexedTestBean getNestedIndexedBean() {
 		return nestedIndexedBean;
 	}
@@ -350,19 +364,19 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.nestedIndexedBean = nestedIndexedBean;
 	}
 
-	public List getOtherColours() {
+	public List<?> getOtherColours() {
 		return otherColours;
 	}
 
-	public void setOtherColours(List otherColours) {
+	public void setOtherColours(List<?> otherColours) {
 		this.otherColours = otherColours;
 	}
 
-	public List getPets() {
+	public List<?> getPets() {
 		return pets;
 	}
 
-	public void setPets(List pets) {
+	public void setPets(List<?> pets) {
 		this.pets = pets;
 	}
 
@@ -370,18 +384,21 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	/**
 	 * @see org.springframework.beans.ITestBean#exceptional(Throwable)
 	 */
+	@Override
 	public void exceptional(Throwable t) throws Throwable {
 		if (t != null) {
 			throw t;
 		}
 	}
 
+	@Override
 	public void unreliableFileOperation() throws IOException {
 		throw new IOException();
 	}
 	/**
 	 * @see org.springframework.beans.ITestBean#returnsThis()
 	 */
+	@Override
 	public Object returnsThis() {
 		return this;
 	}
@@ -389,9 +406,11 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 	/**
 	 * @see org.springframework.beans.IOther#absquatulate()
 	 */
+	@Override
 	public void absquatulate() {
 	}
 
+	@Override
 	public int haveBirthday() {
 		return age++;
 	}
@@ -421,6 +440,7 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		return this.age;
 	}
 
+	@Override
 	public int compareTo(Object other) {
 		if (this.name != null && other instanceof TestBean) {
 			return this.name.compareTo(((TestBean) other).getName());

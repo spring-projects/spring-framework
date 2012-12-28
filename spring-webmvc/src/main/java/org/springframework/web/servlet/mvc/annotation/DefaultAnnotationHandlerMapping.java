@@ -83,6 +83,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @deprecated in Spring 3.2 in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping RequestMappingHandlerMapping}
  */
+@Deprecated
 public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
 	static final String USE_DEFAULT_SUFFIX_PATTERN = DefaultAnnotationHandlerMapping.class.getName() + ".useDefaultSuffixPattern";
@@ -96,7 +97,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 * Set whether to register paths using the default suffix pattern as well:
 	 * i.e. whether "/users" should be registered as "/users.*" and "/users/" too.
 	 * <p>Default is "true". Turn this convention off if you intend to interpret
-	 * your <code>@RequestMapping</code> paths strictly.
+	 * your {@code @RequestMapping} paths strictly.
 	 * <p>Note that paths which include a ".xxx" suffix or end with "/" already will not be
 	 * transformed using the default suffix pattern in any case.
 	 */

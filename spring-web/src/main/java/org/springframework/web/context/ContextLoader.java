@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * Called by {@link ContextLoaderListener}.
  *
  * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter
- * at the <code>web.xml</code> context-param level to specify the context
+ * at the {@code web.xml} context-param level to specify the context
  * class type, falling back to the default of
  * {@link org.springframework.web.context.support.XmlWebApplicationContext}
  * if not found. With the default ContextLoader implementation, any context class
@@ -119,14 +119,14 @@ public class ContextLoader {
 	public static final String CONFIG_LOCATION_PARAM = "contextConfigLocation";
 
 	/**
-	 * Optional servlet context parameter (i.e., "<code>locatorFactorySelector</code>")
+	 * Optional servlet context parameter (i.e., "{@code locatorFactorySelector}")
 	 * used only when obtaining a parent context using the default implementation
 	 * of {@link #loadParentContext(ServletContext servletContext)}.
 	 * Specifies the 'selector' used in the
 	 * {@link ContextSingletonBeanFactoryLocator#getInstance(String selector)}
 	 * method call, which is used to obtain the BeanFactoryLocator instance from
 	 * which the parent context is obtained.
-	 * <p>The default is <code>classpath*:beanRefContext.xml</code>,
+	 * <p>The default is {@code classpath*:beanRefContext.xml},
 	 * matching the default applied for the
 	 * {@link ContextSingletonBeanFactoryLocator#getInstance()} method.
 	 * Supplying the "parentContextKey" parameter is sufficient in this case.
@@ -134,14 +134,14 @@ public class ContextLoader {
 	public static final String LOCATOR_FACTORY_SELECTOR_PARAM = "locatorFactorySelector";
 
 	/**
-	 * Optional servlet context parameter (i.e., "<code>parentContextKey</code>")
+	 * Optional servlet context parameter (i.e., "{@code parentContextKey}")
 	 * used only when obtaining a parent context using the default implementation
 	 * of {@link #loadParentContext(ServletContext servletContext)}.
 	 * Specifies the 'factoryKey' used in the
 	 * {@link BeanFactoryLocator#useBeanFactory(String factoryKey)} method call,
 	 * obtaining the parent application context from the BeanFactoryLocator instance.
 	 * <p>Supplying this "parentContextKey" parameter is sufficient when relying
-	 * on the default <code>classpath*:beanRefContext.xml</code> selector for
+	 * on the default {@code classpath*:beanRefContext.xml} selector for
 	 * candidate factory references.
 	 */
 	public static final String LOCATOR_FACTORY_KEY_PARAM = "parentContextKey";
@@ -510,7 +510,7 @@ public class ContextLoader {
 	 * which will be shared by all other users of ContextsingletonBeanFactoryLocator
 	 * which also use the same configuration parameters.
 	 * @param servletContext current servlet context
-	 * @return the parent application context, or <code>null</code> if none
+	 * @return the parent application context, or {@code null} if none
 	 * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
 	 */
 	protected ApplicationContext loadParentContext(ServletContext servletContext) {
@@ -569,7 +569,7 @@ public class ContextLoader {
 	 * Obtain the Spring root web application context for the current thread
 	 * (i.e. for the current thread's context ClassLoader, which needs to be
 	 * the web application's ClassLoader).
-	 * @return the current root web application context, or <code>null</code>
+	 * @return the current root web application context, or {@code null}
 	 * if none found
 	 * @see org.springframework.web.context.support.SpringBeanAutowiringSupport
 	 */

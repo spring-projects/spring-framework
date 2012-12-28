@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Collection of JDK 1.4+ utilities for tests involving transactions. Intended
  * for internal use within the Spring testing suite.
  *
- * <p>All <code>assert*()</code> methods throw {@link AssertionError}s.
+ * <p>All {@code assert*()} methods throw {@link AssertionError}s.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -32,7 +32,7 @@ public abstract class TransactionTestUtils {
 	/**
 	 * Convenience method for determining if a transaction is active for the
 	 * current {@link Thread}.
-	 * @return <code>true</code> if a transaction is currently active
+	 * @return {@code true} if a transaction is currently active
 	 */
 	public static boolean inTransaction() {
 		return TransactionSynchronizationManager.isActualTransactionActive();
@@ -55,22 +55,22 @@ public abstract class TransactionTestUtils {
 	}
 
 	/**
-	 * Fails by throwing an <code>AssertionError</code> with the supplied
-	 * <code>message</code>.
+	 * Fails by throwing an {@code AssertionError} with the supplied
+	 * {@code message}.
 	 * @param message the exception message to use
-	 * @see #assertCondition(boolean,String)
+	 * @see #assertCondition(boolean, String)
 	 */
 	private static void fail(String message) throws AssertionError {
 		throw new AssertionError(message);
 	}
 
 	/**
-	 * Assert the provided boolean <code>condition</code>, throwing
-	 * <code>AssertionError</code> with the supplied <code>message</code> if
-	 * the test result is <code>false</code>.
+	 * Assert the provided boolean {@code condition}, throwing
+	 * {@code AssertionError} with the supplied {@code message} if
+	 * the test result is {@code false}.
 	 * @param condition a boolean expression
 	 * @param message the exception message to use if the assertion fails
-	 * @throws AssertionError if condition is <code>false</code>
+	 * @throws AssertionError if condition is {@code false}
 	 * @see #fail(String)
 	 */
 	private static void assertCondition(boolean condition, String message) throws AssertionError {

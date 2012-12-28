@@ -54,6 +54,7 @@ public abstract class AbstractJasperReportsTests extends TestCase {
 	protected MockHttpServletResponse response;
 
 
+	@Override
 	public void setUp() {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();

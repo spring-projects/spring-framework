@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Return the advisor chain factory to use (never <code>null</code>).
+	 * Return the advisor chain factory to use (never {@code null}).
 	 */
 	public AdvisorChainFactory getAdvisorChainFactory() {
 		return this.advisorChainFactory;
@@ -221,7 +221,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Remove a proxied interface.
 	 * <p>Does nothing if the given interface isn't proxied.
 	 * @param intf the interface to remove from the proxy
-	 * @return <code>true</code> if the interface was removed; <code>false</code>
+	 * @return {@code true} if the interface was removed; {@code false}
 	 * if the interface was not found and hence could not be removed
 	 */
 	public boolean removeInterface(Class intf) {

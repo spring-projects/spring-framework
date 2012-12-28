@@ -24,6 +24,7 @@ public class VelocityViewResolverTests {
 	@Test
 	public void testVelocityViewResolver() throws Exception {
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine("prefix_test_suffix", new Template());
 			}
@@ -57,6 +58,7 @@ public class VelocityViewResolverTests {
 	@Test
 	public void testVelocityViewResolverWithToolbox() throws Exception {
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine("prefix_test_suffix", new Template());
 			}
@@ -83,6 +85,7 @@ public class VelocityViewResolverTests {
 	@Test
 	public void testVelocityViewResolverWithToolboxSubclass() throws Exception {
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				TestVelocityEngine ve = new TestVelocityEngine();
 				ve.addTemplate("prefix_test_suffix", new Template());
@@ -113,6 +116,7 @@ public class VelocityViewResolverTests {
 	@Test
 	public void testVelocityLayoutViewResolver() throws Exception {
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				TestVelocityEngine ve = new TestVelocityEngine();
 				ve.addTemplate("prefix_test_suffix", new Template());

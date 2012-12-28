@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import org.springframework.util.Assert;
  *
  * <p>Should almost always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type-based functionality
- * like <code>LabeledEnumResolver.getLabeledEnumSet(type)</code> in this case.
+ * like {@code LabeledEnumResolver.getLabeledEnumSet(type)} in this case.
  *
  * @author Keith Donald
  * @since 1.2.2
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 
 	/**
@@ -41,7 +42,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	/**
 	 * Create a new LetterCodedLabeledEnum instance.
 	 * @param code the letter code
-	 * @param label the label (can be <code>null</code>)
+	 * @param label the label (can be {@code null})
 	 */
 	public LetterCodedLabeledEnum(char code, String label) {
 		super(label);
@@ -50,7 +51,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 		this.code = new Character(code);
 	}
 
-	
+
 	public Comparable getCode() {
 		return code;
 	}

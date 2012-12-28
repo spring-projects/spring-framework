@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,8 +55,8 @@ public class AspectMetadata {
 	private final Pointcut perClausePointcut;
 
 	/**
-	 * The name of this aspect as defined to Spring (the bean name) - 
-	 * allows us to determine if two pieces of advice come from the 
+	 * The name of this aspect as defined to Spring (the bean name) -
+	 * allows us to determine if two pieces of advice come from the
 	 * same aspect and hence their relative precedence.
 	 */
 	private String aspectName;
@@ -109,7 +109,7 @@ public class AspectMetadata {
 	}
 
 	/**
-	 * Extract contents from String of form <code>pertarget(contents)</code>.
+	 * Extract contents from String of form {@code pertarget(contents)}.
 	 */
 	private String findPerClause(Class<?> aspectClass) {
 		// TODO when AspectJ provides this, we can remove this hack. Hence we don't
@@ -144,7 +144,7 @@ public class AspectMetadata {
 
 	/**
 	 * Return a Spring pointcut expression for a singleton aspect.
-	 * (e.g. <code>Pointcut.TRUE</code> if it's a singleton).
+	 * (e.g. {@code Pointcut.TRUE} if it's a singleton).
 	 */
 	public Pointcut getPerClausePointcut() {
 		return this.perClausePointcut;

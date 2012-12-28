@@ -60,6 +60,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 
 	private MessageSource themeMsgSource;
 
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlWebApplicationContext();
 		MockServletContext sc = new MockServletContext();
@@ -82,6 +83,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 		return wac;
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 14 beans, not " +
 				this.applicationContext.getBeanDefinitionCount(),
@@ -92,6 +94,7 @@ public class ResourceBundleMessageSourceTests extends AbstractApplicationContext
 	 * Overridden as we can't trust superclass method.
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
+	@Override
 	public void testEvents() throws Exception {
 		// Do nothing
 	}

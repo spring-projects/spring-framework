@@ -108,15 +108,15 @@ import org.springframework.web.servlet.ViewResolver;
  * The MultipartResolver bean name is "portletMultipartResolver"; default is none.
  * </ul>
  *
- * <p><b>NOTE: The <code>@RequestMapping</code> annotation will only be processed
- * if a corresponding <code>HandlerMapping</code> (for type level annotations)
- * and/or <code>HandlerAdapter</code> (for method level annotations)
+ * <p><b>NOTE: The {@code @RequestMapping} annotation will only be processed
+ * if a corresponding {@code HandlerMapping} (for type level annotations)
+ * and/or {@code HandlerAdapter} (for method level annotations)
  * is present in the dispatcher.</b> This is the case by default.
- * However, if you are defining custom <code>HandlerMappings</code> or
- * <code>HandlerAdapters</code>, then you need to make sure that a
- * corresponding custom <code>DefaultAnnotationHandlerMapping</code>
- * and/or <code>AnnotationMethodHandlerAdapter</code> is defined as well
- * - provided that you intend to use <code>@RequestMapping</code>.
+ * However, if you are defining custom {@code HandlerMappings} or
+ * {@code HandlerAdapters}, then you need to make sure that a
+ * corresponding custom {@code DefaultAnnotationHandlerMapping}
+ * and/or {@code AnnotationMethodHandlerAdapter} is defined as well
+ * - provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherPortlets.</b>
  * Each portlet will operate in its own namespace, loading its own application
@@ -170,7 +170,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 	/**
 	 * Default URL to ViewRendererServlet. This bridge servlet is used to convert
 	 * portlet render requests to servlet requests in order to leverage the view support
-	 * in the <code>org.springframework.web.view</code> package.
+	 * in the {@code org.springframework.web.view} package.
 	 */
 	public static final String DEFAULT_VIEW_RENDERER_URL = "/WEB-INF/servlet/view";
 
@@ -615,7 +615,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 
 	/**
 	 * Obtain this portlet's PortletMultipartResolver, if any.
-	 * @return the PortletMultipartResolver used by this portlet, or <code>null</code>
+	 * @return the PortletMultipartResolver used by this portlet, or {@code null}
 	 * if none (indicating that no multipart support is available)
 	 */
 	public PortletMultipartResolver getMultipartResolver() {

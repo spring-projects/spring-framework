@@ -44,8 +44,9 @@ public class Spr7766Tests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		adapter.handle(request, response, controller);
 	}
-	
+
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 

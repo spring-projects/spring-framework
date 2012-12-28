@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourc
 	}
 
 	/**
-	 * This implementation returns <code>true</code>: We can guarantee
+	 * This implementation returns {@code true}: We can guarantee
 	 * to receive the same Connection within a transaction, as we are
 	 * exposing a TransactionAwareDataSourceProxy.
 	 */

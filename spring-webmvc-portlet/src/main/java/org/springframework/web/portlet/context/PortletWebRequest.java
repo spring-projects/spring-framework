@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	public Iterator<String> getParameterNames() {
 		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
-	
+
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}
@@ -142,7 +142,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	/**
 	 * Last-modified handling not supported for portlet requests:
-	 * As a consequence, this method always returns <code>false</code>.
+	 * As a consequence, this method always returns {@code false}.
 	 */
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		return false;
@@ -150,7 +150,7 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 
 	/**
 	 * Last-modified handling not supported for portlet requests:
-	 * As a consequence, this method always returns <code>false</code>.
+	 * As a consequence, this method always returns {@code false}.
 	 */
 	public boolean checkNotModified(String eTag) {
 		return false;

@@ -12,11 +12,11 @@
  * or may not be EJBs). This gives us the choice of introducing EJB
  * into an application (or removing EJB from an application) without
  * affecting code using business objects.
- * 
+ *
  * <p>The motivation for the classes in this package are discussed in Chapter 11 of
  * <a href="http://www.amazon.com/exec/obidos/tg/detail/-/0764543857/">Expert One-On-One J2EE Design and Development</a>
  * by Rod Johnson (Wrox, 2002).
- * 
+ *
  * <p>However, the implementation and naming of classes in this package has changed.
  * It now uses FactoryBeans and AOP, rather than the custom bean definitions described in
  * <i>Expert One-on-One J2EE</i>.

@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2007 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,16 +38,16 @@ import org.springframework.web.multipart.MultipartException;
  * as an application might choose to parse its multipart requests itself. To
  * define an implementation, create a bean with the id
  * {@link org.springframework.web.portlet.DispatcherPortlet#MULTIPART_RESOLVER_BEAN_NAME "portletMultipartResolver"}
- * in a <code>DispatcherPortlet's</code> application context. Such a resolver
- * gets applied to all requests handled by that <code>DispatcherPortlet</code>.
+ * in a {@code DispatcherPortlet's} application context. Such a resolver
+ * gets applied to all requests handled by that {@code DispatcherPortlet}.
  *
- * <p>If a <code>DispatcherPortlet</code> detects a multipart request, it will
+ * <p>If a {@code DispatcherPortlet} detects a multipart request, it will
  * resolve it via the configured
  * {@link org.springframework.web.multipart.MultipartResolver} and pass on a
  * wrapped Portlet {@link ActionRequest}.
  * {@link org.springframework.web.portlet.mvc.Controller Controllers} can then
  * cast their given request to the {@link MultipartActionRequest} interface,
- * being able to access <code>MultipartFiles</code>. Note that this cast is
+ * being able to access {@code MultipartFiles}. Note that this cast is
  * only supported in case of an actual multipart request.
  *
  * <pre class="code"> public void handleActionRequest(ActionRequest request, ActionResponse response) {
@@ -63,8 +63,8 @@ import org.springframework.web.multipart.MultipartException;
  * bean properties.
  *
  * <p>Note: There is hardly ever a need to access the
- * <code>MultipartResolver</code> itself from application code. It will simply
- * do its work behind the scenes, making <code>MultipartActionRequests</code>
+ * {@code MultipartResolver} itself from application code. It will simply
+ * do its work behind the scenes, making {@code MultipartActionRequests}
  * available to controllers.
  *
  * @author Juergen Hoeller
@@ -81,7 +81,7 @@ public interface PortletMultipartResolver {
 	/**
 	 * Determine if the given request contains multipart content.
 	 * <p>Will typically check for content type
-	 * "<code>multipart/form-data</code>", but the actually accepted requests
+	 * "{@code multipart/form-data}", but the actually accepted requests
 	 * might depend on the capabilities of the resolver implementation.
 	 * @param request the portlet request to be evaluated
 	 * @return whether the request contains multipart content

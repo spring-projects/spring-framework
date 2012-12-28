@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.jmx.export.metadata;
 /**
  * Metadata indicating that instances of an annotated class
  * are to be registered with a JMX server.
- * Only valid when used on a <code>Class</code>.
+ * Only valid when used on a {@code Class}.
  *
  * @author Rob Harrop
  * @since 1.2

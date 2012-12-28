@@ -73,7 +73,7 @@ public class NoSuchBeanDefinitionException extends BeansException {
 		super("No unique bean of type [" + type.getName() + "] is defined: " + message);
 		this.beanType = type;
 	}
-	
+
 	/**
 	 * Create a new {@code NoSuchBeanDefinitionException}.
 	 * @param type required type of the missing bean

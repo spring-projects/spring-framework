@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.springframework.org/schema/oxm" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.springframework.org/schema/oxm" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+            Defines the elements used in Spring's Object/XML Mapping integration.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="jaxb1-marshaller">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.oxm.jaxb.Jaxb1Marshaller">
+                    Defines a JAXB1 Marshaller.
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <tool:annotation>
+                        <tool:exports type="org.springframework.oxm.jaxb.Jaxb1Marshaller"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="contextPath" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation>The JAXB Context path</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="validating" type="xsd:boolean" default="false">
+                        <xsd:annotation>
+                            <xsd:documentation>Whether incoming XML should be validated.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="jaxb2-marshaller">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.oxm.jaxb.Jaxb2Marshaller">
+                    Defines a JAXB2 Marshaller.
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <tool:annotation>
+                        <tool:exports type="org.springframework.oxm.jaxb.Jaxb2Marshaller"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:sequence>
+                        <xsd:element name="class-to-be-bound" minOccurs="0" maxOccurs="unbounded">
+                            <xsd:complexType>
+                                <xsd:attribute name="name" type="classType" use="required"/>
+                            </xsd:complexType>
+                        </xsd:element>
+                    </xsd:sequence>
+                    <xsd:attribute name="contextPath" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>The JAXB Context path</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="jibx-marshaller">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.oxm.jibx.JibxMarshaller">
+                    Defines a JiBX Marshaller.
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <tool:annotation>
+                        <tool:exports type="org.springframework.oxm.jibx.JibxMarshaller"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="target-class" type="classType" use="required"/>
+                    <xsd:attribute name="bindingName" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation>The binding name used by this marshaller.</xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="xmlbeans-marshaller">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:documentation source="java:org.springframework.oxm.xmlbeans.XmlBeansMarshaller">
+                    Defines a XMLBeans Marshaller.
+                </xsd:documentation>
+                <xsd:appinfo>
+                    <tool:annotation>
+                        <tool:exports type="org.springframework.oxm.xmlbeans.XmlBeansMarshaller"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="options" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:documentation source="java:org.apache.xmlbeans.XmlOptions">
+                                The bean name of the XmlOptions that is to be used for this marshaller. Typically a
+                                XmlOptionsFactoryBean definition.
+                            </xsd:documentation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="org.apache.xmlbeans.XmlOptions"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:simpleType name="classType">
+        <xsd:annotation>
+            <xsd:documentation source="java:java.lang.Class">A class supported by a marshaller.</xsd:documentation>
+            <xsd:appinfo>
+                <tool:annotation kind="direct">
+                    <tool:expected-type type="java.lang.Class"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:union memberTypes="xsd:string"/>
+    </xsd:simpleType>
+
+</xsd:schema>

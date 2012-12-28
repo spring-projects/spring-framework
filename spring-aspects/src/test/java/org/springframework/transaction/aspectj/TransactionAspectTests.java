@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,17 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * @author Ramnivas Laddad
  */
 public class TransactionAspectTests extends AbstractDependencyInjectionSpringContextTests {
-	
+
 	private TransactionAspectSupport transactionAspect;
-	
+
 	private CallCountingTransactionManager txManager;
-	
+
 	private TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface;
-	
+
 	private ClassWithProtectedAnnotatedMember beanWithAnnotatedProtectedMethod;
 
 	private ClassWithPrivateAnnotatedMember beanWithAnnotatedPrivateMethod;
-	
+
 	private MethodAnnotationOnClassWithNoInterface methodAnnotationOnly = new MethodAnnotationOnClassWithNoInterface();
 
 
@@ -49,7 +49,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			TransactionalAnnotationOnlyOnClassWithNoInterface annotationOnlyOnClassWithNoInterface) {
 		this.annotationOnlyOnClassWithNoInterface = annotationOnlyOnClassWithNoInterface;
 	}
-	
+
 	public void setClassWithAnnotatedProtectedMethod(ClassWithProtectedAnnotatedMember aBean) {
 		this.beanWithAnnotatedProtectedMethod = aBean;
 	}
@@ -84,14 +84,14 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		beanWithAnnotatedProtectedMethod.doInTransaction();
-		assertEquals(1, txManager.commits);		
+		assertEquals(1, txManager.commits);
 	}
 
 	public void testCommitOnAnnotatedPrivateMethod() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		beanWithAnnotatedPrivateMethod.doSomething();
-		assertEquals(1, txManager.commits);		
+		assertEquals(1, txManager.commits);
 	}
 
 	public void testNoCommitOnNonAnnotatedNonPublicMethodInTransactionalType() throws Throwable {
@@ -100,28 +100,28 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		annotationOnlyOnClassWithNoInterface.nonTransactionalMethod();
 		assertEquals(0,txManager.begun);
 	}
-	
+
 	public void testCommitOnAnnotatedMethod() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		methodAnnotationOnly.echo(null);
 		assertEquals(1, txManager.commits);
 	}
-	
-	
+
+
 	public static class NotTransactional {
 		public void noop() {
 		}
 	}
-	
+
 	public void testNotTransactional() throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
 		new NotTransactional().noop();
 		assertEquals(0, txManager.begun);
 	}
-	
-	
+
+
 	public void testDefaultCommitOnAnnotatedClass() throws Throwable {
 		testRollback(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -129,7 +129,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, false);
 	}
-	
+
 	public void testDefaultRollbackOnAnnotatedClass() throws Throwable {
 		testRollback(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -137,11 +137,11 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, true);
 	}
-	
-	
+
+
 	public static class SubclassOfClassWithTransactionalAnnotation extends TransactionalAnnotationOnlyOnClassWithNoInterface {
 	}
-	
+
 	public void testDefaultCommitOnSubclassOfAnnotatedClass() throws Throwable {
 		testRollback(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -149,10 +149,10 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, false);
 	}
-	
+
 	public static class SubclassOfClassWithTransactionalMethodAnnotation extends MethodAnnotationOnClassWithNoInterface {
 	}
-	
+
 	public void testDefaultCommitOnSubclassOfClassWithTransactionalMethodAnnotated() throws Throwable {
 		testRollback(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -160,7 +160,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, false);
 	}
-	
+
 	public static class ImplementsAnnotatedInterface implements ITransactional {
 		public Object echo(Throwable t) throws Throwable {
 			if (t != null) {
@@ -169,14 +169,14 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			return t;
 		}
 	}
-	
+
 	public void testDefaultCommitOnImplementationOfAnnotatedInterface() throws Throwable {
 //		testRollback(new TransactionOperationCallback() {
 //			public Object performTransactionalOperation() throws Throwable {
 //				return new ImplementsAnnotatedInterface().echo(new Exception());
 //			}
 //		}, false);
-		
+
 		final Exception ex = new Exception();
 		testNotTransactional(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -184,7 +184,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			}
 		}, ex);
 	}
-	
+
 	/**
 	 * Note: resolution does not occur. Thus we can't make a class transactional if
 	 * it implements a transactionally annotated interface. This behaviour could only
@@ -198,15 +198,15 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		TransactionAttribute ta = atas.getTransactionAttribute(m, ImplementsAnnotatedInterface.class);
 		assertNull(ta);
 	}
-	
-	
+
+
 	public void testDefaultRollbackOnImplementationOfAnnotatedInterface() throws Throwable {
 //		testRollback(new TransactionOperationCallback() {
 //			public Object performTransactionalOperation() throws Throwable {
 //				return new ImplementsAnnotatedInterface().echo(new RuntimeException());
 //			}
 //		}, true);
-		
+
 		final Exception rollbackProvokingException = new RuntimeException();
 		testNotTransactional(new TransactionOperationCallback() {
 			public Object performTransactionalOperation() throws Throwable {
@@ -215,7 +215,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 		}, rollbackProvokingException);
 	}
 
-	
+
 	protected void testRollback(TransactionOperationCallback toc, boolean rollback) throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
@@ -228,13 +228,13 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 				return;
 			}
 		}
-		
+
 		if (rollback) {
 			assertEquals(1, txManager.rollbacks);
 		}
 		assertEquals(1, txManager.begun);
 	}
-	
+
 	protected void testNotTransactional(TransactionOperationCallback toc, Throwable expected) throws Throwable {
 		txManager.clear();
 		assertEquals(0, txManager.begun);
@@ -251,7 +251,7 @@ public class TransactionAspectTests extends AbstractDependencyInjectionSpringCon
 			assertEquals(0, txManager.begun);
 		}
 	}
-	
+
 
 	private interface TransactionOperationCallback {
 

@@ -609,6 +609,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 		public ExtendedResourceInjectionBean() {
 		}
 
+		@Override
 		@Inject @Required
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -662,6 +663,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -708,6 +710,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -779,6 +782,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -938,6 +942,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -949,6 +954,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMethodInjectionBean implements Serializable {
 
 		private Provider<TestBean> testBeanFactory;
@@ -992,6 +998,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryListFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -1007,6 +1014,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryListMethodInjectionBean implements Serializable {
 
 		private Provider<List<TestBean>> testBeanFactory;
@@ -1022,6 +1030,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMapFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -1037,6 +1046,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMapMethodInjectionBean implements Serializable {
 
 		private Provider<Map<String, TestBean>> testBeanFactory;
@@ -1068,14 +1078,17 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 	public static class StringFactoryBean implements FactoryBean<String> {
 
+		@Override
 		public String getObject() throws Exception {
 			return "";
 		}
 
+		@Override
 		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

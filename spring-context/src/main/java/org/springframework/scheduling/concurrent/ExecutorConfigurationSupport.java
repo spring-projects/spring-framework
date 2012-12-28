@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Base class for classes that are setting up a
- * <code>java.util.concurrent.ExecutorService</code>
+ * {@code java.util.concurrent.ExecutorService}
  * (typically a {@link java.util.concurrent.ThreadPoolExecutor}).
  * Defines common configuration settings and common lifecycle handling.
  *
@@ -40,6 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public abstract class ExecutorConfigurationSupport extends CustomizableThreadFactory
 		implements BeanNameAware, InitializingBean, DisposableBean {
 
@@ -100,7 +101,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Calls <code>initialize()</code> after the container applied all property values.
+	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
 	public void afterPropertiesSet() {
@@ -122,7 +123,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 	/**
 	 * Create the target {@link java.util.concurrent.ExecutorService} instance.
-	 * Called by <code>afterPropertiesSet</code>.
+	 * Called by {@code afterPropertiesSet}.
 	 * @param threadFactory the ThreadFactory to use
 	 * @param rejectedExecutionHandler the RejectedExecutionHandler to use
 	 * @return a new ExecutorService instance
@@ -133,7 +134,7 @@ public abstract class ExecutorConfigurationSupport extends CustomizableThreadFac
 
 
 	/**
-	 * Calls <code>shutdown</code> when the BeanFactory destroys
+	 * Calls {@code shutdown} when the BeanFactory destroys
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */

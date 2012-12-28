@@ -1,4 +1,3 @@
-
 /**
  *
  * Package providing integration of
@@ -10,7 +9,7 @@
  * in order to follow native Hibernate recommendations as closely as possible.
  *
  * <p><b>This package supports Hibernate 4.x only.</b>
- * See the <code>org.springframework.orm.hibernate3</code> package for Hibernate 3.x support.
+ * See the {@code org.springframework.orm.hibernate3} package for Hibernate 3.x support.
  *
  */
 package org.springframework.orm.hibernate4;

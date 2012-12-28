@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	 * since there is no fallback available.
 	 * @param className the class name to resolve
 	 * @param ex the original exception thrown when attempting to load the class
-	 * @return the newly resolved class (never <code>null</code>)
+	 * @return the newly resolved class (never {@code null})
 	 */
 	protected Class resolveFallbackIfPossible(String className, ClassNotFoundException ex)
 			throws IOException, ClassNotFoundException{
@@ -140,7 +140,7 @@ public class ConfigurableObjectInputStream extends ObjectInputStream {
 	/**
 	 * Return the fallback ClassLoader to use when no ClassLoader was specified
 	 * and ObjectInputStream's own default ClassLoader failed.
-	 * <p>The default implementation simply returns <code>null</code>.
+	 * <p>The default implementation simply returns {@code null}.
 	 */
 	protected ClassLoader getFallbackClassLoader() throws IOException {
 		return null;

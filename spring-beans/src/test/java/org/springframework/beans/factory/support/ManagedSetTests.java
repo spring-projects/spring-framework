@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class ManagedSetTests extends TestCase {
 		ManagedSet child = new ManagedSet();
 		child.add("three");
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 3, mergedSet.size());
 	}
 
@@ -72,7 +72,7 @@ public class ManagedSetTests extends TestCase {
 		parent.add("two");
 		ManagedSet child = new ManagedSet();
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
 	}
 
@@ -84,7 +84,7 @@ public class ManagedSetTests extends TestCase {
 		ManagedSet child = new ManagedSet();
 		child.add("one");
 		child.setMergeEnabled(true);
-		Set mergedSet = (Set) child.merge(parent);
+		Set mergedSet = child.merge(parent);
 		assertEquals("merge() obviously did not work.", 2, mergedSet.size());
 	}
 

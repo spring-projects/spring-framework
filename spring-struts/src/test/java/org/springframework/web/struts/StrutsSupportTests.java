@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 public class StrutsSupportTests {
 
 	@Test
+	@SuppressWarnings("serial")
 	public void actionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -69,6 +70,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void actionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -95,6 +97,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void dispatchActionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -121,6 +124,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void dispatchActionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -147,6 +151,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void lookupDispatchActionSupportWithContextLoaderPlugIn() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -177,6 +182,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void lookupDispatchActionSupportWithRootContext() throws ServletException {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.addMessage("test", Locale.getDefault(), "testmessage");
@@ -207,6 +213,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testDelegatingActionProxy() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
@@ -247,6 +254,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void delegatingActionProxyWithModule() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/WEB-INF");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();
@@ -289,6 +297,7 @@ public class StrutsSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void delegatingActionProxyWithModuleAndDefaultContext() throws Exception {
 		final MockServletContext servletContext = new MockServletContext("/org/springframework/web/struts/WEB-INF");
 		ContextLoaderPlugIn plugin = new ContextLoaderPlugIn();

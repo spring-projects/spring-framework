@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,15 +60,15 @@ public abstract class Conventions {
 
 	/**
 	 * Determine the conventional variable name for the supplied
-	 * <code>Object</code> based on its concrete type. The convention
-	 * used is to return the uncapitalized short name of the <code>Class</code>,
+	 * {@code Object} based on its concrete type. The convention
+	 * used is to return the uncapitalized short name of the {@code Class},
 	 * according to JavaBeans property naming rules: So,
-	 * <code>com.myapp.Product</code> becomes <code>product</code>;
-	 * <code>com.myapp.MyProduct</code> becomes <code>myProduct</code>;
-	 * <code>com.myapp.UKProduct</code> becomes <code>UKProduct</code>.
+	 * {@code com.myapp.Product} becomes {@code product};
+	 * {@code com.myapp.MyProduct} becomes {@code myProduct};
+	 * {@code com.myapp.UKProduct} becomes {@code UKProduct}.
 	 * <p>For arrays, we use the pluralized version of the array component type.
-	 * For <code>Collection</code>s we attempt to 'peek ahead' in the
-	 * <code>Collection</code> to determine the component type and
+	 * For {@code Collection}s we attempt to 'peek ahead' in the
+	 * {@code Collection} to determine the component type and
 	 * return the pluralized version of that component type.
 	 * @param value the value to generate a variable name for
 	 * @return the generated variable name
@@ -144,9 +144,9 @@ public abstract class Conventions {
 	 * Determine the conventional variable name for the return type of the supplied method,
 	 * taking the generic collection type (if any) into account, falling back to the
 	 * given return value if the method declaration is not specific enough (i.e. in case of
-	 * the return type being declared as <code>Object</code> or as untyped collection).
+	 * the return type being declared as {@code Object} or as untyped collection).
 	 * @param method the method to generate a variable name for
-	 * @param value the return value (may be <code>null</code> if not available)
+	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForReturnType(Method method, Object value) {
@@ -157,10 +157,10 @@ public abstract class Conventions {
 	 * Determine the conventional variable name for the return type of the supplied method,
 	 * taking the generic collection type (if any) into account, falling back to the
 	 * given return value if the method declaration is not specific enough (i.e. in case of
-	 * the return type being declared as <code>Object</code> or as untyped collection).
+	 * the return type being declared as {@code Object} or as untyped collection).
 	 * @param method the method to generate a variable name for
 	 * @param resolvedType the resolved return type of the method
-	 * @param value the return value (may be <code>null</code> if not available)
+	 * @param value the return value (may be {@code null} if not available)
 	 * @return the generated variable name
 	 */
 	public static String getVariableNameForReturnType(Method method, Class resolvedType, Object value) {
@@ -206,9 +206,9 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Convert <code>String</code>s in attribute name format (lowercase, hyphens separating words)
-	 * into property name format (camel-cased). For example, <code>transaction-manager</code> is
-	 * converted into <code>transactionManager</code>.
+	 * Convert {@code String}s in attribute name format (lowercase, hyphens separating words)
+	 * into property name format (camel-cased). For example, {@code transaction-manager} is
+	 * converted into {@code transactionManager}.
 	 */
 	public static String attributeNameToPropertyName(String attributeName) {
 		Assert.notNull(attributeName, "'attributeName' must not be null");
@@ -236,8 +236,8 @@ public abstract class Conventions {
 
 	/**
 	 * Return an attribute name qualified by the supplied enclosing {@link Class}. For example,
-	 * the attribute name '<code>foo</code>' qualified by {@link Class} '<code>com.myapp.SomeClass</code>'
-	 * would be '<code>com.myapp.SomeClass.foo</code>'
+	 * the attribute name '{@code foo}' qualified by {@link Class} '{@code com.myapp.SomeClass}'
+	 * would be '{@code com.myapp.SomeClass.foo}'
 	 */
 	public static String getQualifiedAttributeName(Class enclosingClass, String attributeName) {
 		Assert.notNull(enclosingClass, "'enclosingClass' must not be null");
@@ -281,9 +281,9 @@ public abstract class Conventions {
 	}
 
 	/**
-	 * Retrieves the <code>Class</code> of an element in the <code>Collection</code>.
-	 * The exact element for which the <code>Class</code> is retreived will depend
-	 * on the concrete <code>Collection</code> implementation.
+	 * Retrieves the {@code Class} of an element in the {@code Collection}.
+	 * The exact element for which the {@code Class} is retreived will depend
+	 * on the concrete {@code Collection} implementation.
 	 */
 	private static Object peekAhead(Collection collection) {
 		Iterator it = collection.iterator();

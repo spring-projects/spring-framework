@@ -172,7 +172,7 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 	/**
-	 * Add both keyed and non-keyed entries for the supplied <code>field</code>
+	 * Add both keyed and non-keyed entries for the supplied {@code field}
 	 * to the supplied field list.
 	 */
 	protected void buildFieldList(String field, List<String> fieldList) {

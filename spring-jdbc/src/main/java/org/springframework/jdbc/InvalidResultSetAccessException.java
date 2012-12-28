@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
 /**
  * Exception thrown when a ResultSet has been accessed in an invalid fashion.
- * Such exceptions always have a <code>java.sql.SQLException</code> root cause.
+ * Such exceptions always have a {@code java.sql.SQLException} root cause.
  *
  * <p>This typically happens when an invalid ResultSet column index or name
  * has been specified. Also thrown by disconnected SqlRowSets.
@@ -32,6 +32,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @see BadSqlGrammarException
  * @see org.springframework.jdbc.support.rowset.SqlRowSet
  */
+@SuppressWarnings("serial")
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 
 	private String sql;

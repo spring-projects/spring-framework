@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import javax.portlet.RenderResponse;
 import org.springframework.web.portlet.ModelAndView;
 
 /**
- * Base portlet Controller interface, representing a component that receives 
- * RenderRequest/RenderResponse and ActionRequest/ActionResponse like a 
- * <code>Portlet</code> but is able to participate in an MVC workflow.
+ * Base portlet Controller interface, representing a component that receives
+ * RenderRequest/RenderResponse and ActionRequest/ActionResponse like a
+ * {@code Portlet} but is able to participate in an MVC workflow.
  *
  * <p>Any implementation of the portlet Controller interface should be a
  * <i>reusable, threadsafe</i> class, capable of handling multiple
@@ -46,7 +46,7 @@ import org.springframework.web.portlet.ModelAndView;
  * So actually, these method are the main entrypoint for the
  * {@link org.springframework.web.portlet.DispatcherPortlet DispatcherPortlet}
  * which delegates requests to controllers.</p>
- * 
+ *
  * <p>So basically any <i>direct</i> implementation of the Controller interface
  * just handles RenderRequests/ActionRequests and should return a ModelAndView, to be
  * further used by the DispatcherPortlet. Any additional functionality such as
@@ -74,7 +74,7 @@ public interface Controller {
 
 	/**
 	 * Process the render request and return a ModelAndView object which the DispatcherPortlet
-	 * will render. A <code>null</code> return value is not an error: It indicates that this
+	 * will render. A {@code null} return value is not an error: It indicates that this
 	 * object completed request processing itself, thus there is no ModelAndView to render.
 	 * @param request current portlet render request
 	 * @param response current portlet render response

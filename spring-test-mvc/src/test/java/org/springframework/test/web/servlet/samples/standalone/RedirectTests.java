@@ -52,32 +52,32 @@ public class RedirectTests {
 	public void save() throws Exception {
 		this.mockMvc.perform(post("/persons").param("name", "Andy"))
 			.andExpect(status().isMovedTemporarily())
-            .andExpect(redirectedUrl("/persons/Joe"))
-            .andExpect(model().size(1))
-            .andExpect(model().attributeExists("name"))
-            .andExpect(flash().attributeCount(1))
-            .andExpect(flash().attribute("message", "success!"));
+			.andExpect(redirectedUrl("/persons/Joe"))
+			.andExpect(model().size(1))
+			.andExpect(model().attributeExists("name"))
+			.andExpect(flash().attributeCount(1))
+			.andExpect(flash().attribute("message", "success!"));
 	}
 
 	@Test
 	public void saveWithErrors() throws Exception {
 		this.mockMvc.perform(post("/persons"))
 			.andExpect(status().isOk())
-            .andExpect(forwardedUrl("persons/add"))
-            .andExpect(model().size(1))
-            .andExpect(model().attributeExists("person"))
-            .andExpect(flash().attributeCount(0));
+			.andExpect(forwardedUrl("persons/add"))
+			.andExpect(model().size(1))
+			.andExpect(model().attributeExists("person"))
+			.andExpect(flash().attributeCount(0));
 	}
 
 	@Test
 	public void getPerson() throws Exception {
 		this.mockMvc.perform(get("/persons/Joe").flashAttr("message", "success!"))
 			.andExpect(status().isOk())
-            .andExpect(forwardedUrl("persons/index"))
-            .andExpect(model().size(2))
-            .andExpect(model().attribute("person", new Person("Joe")))
-            .andExpect(model().attribute("message", "success!"))
-            .andExpect(flash().attributeCount(0));
+			.andExpect(forwardedUrl("persons/index"))
+			.andExpect(model().size(2))
+			.andExpect(model().attribute("person", new Person("Joe")))
+			.andExpect(model().attribute("message", "success!"))
+			.andExpect(flash().attributeCount(0));
 	}
 
 

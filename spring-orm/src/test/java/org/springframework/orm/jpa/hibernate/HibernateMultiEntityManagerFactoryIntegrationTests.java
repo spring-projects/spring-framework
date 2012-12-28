@@ -40,6 +40,7 @@ public class HibernateMultiEntityManagerFactoryIntegrationTests extends
 		this.entityManagerFactory2 = entityManagerFactory2;
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {
 			"/org/springframework/orm/jpa/hibernate/hibernate-manager-multi.xml",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  *
  * <p>This is only available with JDBC 4.0 and later drivers when using Java 6 or later.
  * Falls back to a standard {@link SQLStateSQLExceptionTranslator} if the JDBC driver
- * does not actually expose JDBC 4 compliant <code>SQLException</code> subclasses.
+ * does not actually expose JDBC 4 compliant {@code SQLException} subclasses.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

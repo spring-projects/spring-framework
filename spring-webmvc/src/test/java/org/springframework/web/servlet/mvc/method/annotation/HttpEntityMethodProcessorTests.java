@@ -159,10 +159,12 @@ public class HttpEntityMethodProcessorTests {
 		private Long id;
 		private String name;
 
+		@Override
 		public Long getId() {
 			return id;
 		}
 
+		@Override
 		public void setId(Long id) {
 			this.id = id;
 		}
@@ -177,6 +179,7 @@ public class HttpEntityMethodProcessorTests {
 	}
 
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();

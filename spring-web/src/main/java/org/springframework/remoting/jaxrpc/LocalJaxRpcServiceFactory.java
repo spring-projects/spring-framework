@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.beans.BeanUtils;
  * @see LocalJaxRpcServiceFactoryBean
  * @see JaxRpcPortClientInterceptor
  * @see JaxRpcPortProxyFactoryBean
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class LocalJaxRpcServiceFactory {
@@ -100,7 +100,7 @@ public class LocalJaxRpcServiceFactory {
 	}
 
 	/**
-	 * Return the ServiceFactory class to use, or <code>null</code> if default.
+	 * Return the ServiceFactory class to use, or {@code null} if default.
 	 */
 	public Class getServiceFactoryClass() {
 		return this.serviceFactoryClass;

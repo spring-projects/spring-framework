@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,16 +24,16 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
- * Strategy interface for persisting <code>java.util.Properties</code>,
+ * Strategy interface for persisting {@code java.util.Properties},
  * allowing for pluggable parsing strategies.
  *
  * <p>The default implementation is DefaultPropertiesPersister,
- * providing the native parsing of <code>java.util.Properties</code>,
+ * providing the native parsing of {@code java.util.Properties},
  * but allowing for reading from any Reader and writing to any Writer
  * (which allows to specify an encoding for a properties file).
  *
  * <p>As of Spring 1.2.2, this interface also supports properties XML files,
- * through the <code>loadFromXml</code> and <code>storeToXml</code> methods.
+ * through the {@code loadFromXml} and {@code storeToXml} methods.
  * The default implementations delegate to JDK 1.5's corresponding methods.
  *
  * @author Juergen Hoeller

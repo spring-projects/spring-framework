@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import javax.jms.JMSException;
  * as SimpleMessageConverter does for JMS 1.1 providers.
  *
  * <p>The only difference to the default SimpleMessageConverter is that BytesMessage
- * is handled differently: namely, without using the <code>getBodyLength()</code>
+ * is handled differently: namely, without using the {@code getBodyLength()}
  * method which has been introduced in JMS 1.1 and is therefore not available on a
  * JMS 1.0.2 provider.
  *
@@ -46,7 +46,7 @@ public class SimpleMessageConverter102 extends SimpleMessageConverter {
 	/**
 	 * Overrides superclass method to copy bytes from the message into a
 	 * ByteArrayOutputStream, using a buffer, to avoid using the
-	 * <code>getBodyLength()</code> method which has been introduced in
+	 * {@code getBodyLength()} method which has been introduced in
 	 * JMS 1.1 and is therefore not available on a JMS 1.0.2 provider.
 	 * @see javax.jms.BytesMessage#getBodyLength()
 	 */

@@ -41,7 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ModelAndViewResolve
 
 /**
  * Test fixture with {@link ModelAndViewResolverMethodReturnValueHandler}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ModelAndViewResolverMethodReturnValueHandlerTests {
@@ -69,7 +69,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 		TestBean testBean = new TestBean("name");
 
 		handler.handleReturnValue(testBean, returnType, mavContainer, request);
-		
+
 		assertEquals("viewName", mavContainer.getViewName());
 		assertSame(testBean, mavContainer.getModel().get("modelAttrName"));
 		assertFalse(mavContainer.isRequestHandled());
@@ -86,12 +86,12 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	public void handleNull() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(null, returnType, mavContainer, request);
-		
+
 		assertNull(mavContainer.getView());
 		assertNull(mavContainer.getViewName());
 		assertTrue(mavContainer.getModel().isEmpty());
 	}
-	
+
 	@Test(expected=UnsupportedOperationException.class)
 	public void handleSimpleType() throws Exception {
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("intReturnValue"), -1);
@@ -102,7 +102,7 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	public void handleNonSimpleType() throws Exception{
 		MethodParameter returnType = new MethodParameter(getClass().getDeclaredMethod("testBeanReturnValue"), -1);
 		handler.handleReturnValue(new TestBean(), returnType, mavContainer, request);
-		
+
 		assertTrue(mavContainer.containsAttribute("testBean"));
 	}
 
@@ -115,15 +115,16 @@ public class ModelAndViewResolverMethodReturnValueHandlerTests {
 	private TestBean testBeanReturnValue() {
 		return null;
 	}
-	
+
 	private static class TestModelAndViewResolver implements ModelAndViewResolver {
-		
+
 		private Class<?> returnValueType;
-		
+
 		public TestModelAndViewResolver(Class<?> returnValueType) {
 			this.returnValueType = returnValueType;
 		}
 
+		@Override
 		@SuppressWarnings("rawtypes")
 		public ModelAndView resolveModelAndView(Method method, Class handlerType, Object returnValue,
 				ExtendedModelMap model, NativeWebRequest request) {

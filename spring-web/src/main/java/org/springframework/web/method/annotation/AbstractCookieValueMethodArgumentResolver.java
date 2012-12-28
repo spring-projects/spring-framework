@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.CookieValue;
 
 /**
- * A base abstract class to resolve method arguments annotated with 
+ * A base abstract class to resolve method arguments annotated with
  * {@code @CookieValue}. Subclasses extract the cookie value from the request.
- * 
- * <p>An {@code @CookieValue} is a named value that is resolved from a cookie. 
- * It has a required flag and a default value to fall back on when the cookie 
- * does not exist. 
- * 
- * <p>A {@link WebDataBinder} may be invoked to apply type conversion to the 
+ *
+ * <p>An {@code @CookieValue} is a named value that is resolved from a cookie.
+ * It has a required flag and a default value to fall back on when the cookie
+ * does not exist.
+ *
+ * <p>A {@link WebDataBinder} may be invoked to apply type conversion to the
  * resolved cookie value.
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 public abstract class AbstractCookieValueMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
 
 	/**
-	 * @param beanFactory a bean factory to use for resolving  ${...} 
+	 * @param beanFactory a bean factory to use for resolving  ${...}
 	 * placeholder and #{...} SpEL expressions in default values;
 	 * or {@code null} if default values are not expected to contain expressions
 	 */

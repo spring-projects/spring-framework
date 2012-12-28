@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class SystemProfileValueSource implements ProfileValueSource {
 	 * system properties.
 	 * @see System#getProperty(String)
 	 */
+	@Override
 	public String get(String key) {
 		Assert.hasText(key, "'key' must not be empty");
 		return System.getProperty(key);

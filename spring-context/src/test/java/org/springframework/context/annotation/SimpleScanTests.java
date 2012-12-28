@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public class SimpleScanTests {
 	@Test
 	public void testFooService() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigLocations(), getClass());
-		
+
 		FooService fooService = (FooService) ctx.getBean("fooServiceImpl");
 		ServiceInvocationCounter serviceInvocationCounter = (ServiceInvocationCounter) ctx.getBean("serviceInvocationCounter");
-		
+
 		assertEquals(0, serviceInvocationCounter.getCount());
 
 		assertTrue(fooService.isInitCalled());
@@ -50,7 +50,7 @@ public class SimpleScanTests {
 		String value = fooService.foo(1);
 		assertEquals("bar", value);
 		assertEquals(2, serviceInvocationCounter.getCount());
-		
+
 		fooService.foo(1);
 		assertEquals(3, serviceInvocationCounter.getCount());
 	}

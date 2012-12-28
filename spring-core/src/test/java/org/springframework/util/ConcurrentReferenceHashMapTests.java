@@ -490,6 +490,7 @@ public class ConcurrentReferenceHashMapTests {
 		StopWatch mapTime = timeMultiThreaded("SynchronizedMap", synchronizedMap,
 				new ValueFactory<WeakReference<String>>() {
 
+					@Override
 					public WeakReference<String> newValue(int v) {
 						return new WeakReference<String>(String.valueOf(v));
 					}
@@ -500,6 +501,7 @@ public class ConcurrentReferenceHashMapTests {
 		StopWatch cacheTime = timeMultiThreaded("WeakConcurrentCache", this.map,
 				new ValueFactory<String>() {
 
+					@Override
 					public String newValue(int v) {
 						return String.valueOf(v);
 					}
@@ -650,18 +652,22 @@ public class ConcurrentReferenceHashMapTests {
 			this.queue = queue;
 		}
 
+		@Override
 		public Entry<K, V> get() {
 			return this.entry;
 		}
 
+		@Override
 		public int getHash() {
 			return this.hash;
 		}
 
+		@Override
 		public Reference<K, V> getNext() {
 			return this.next;
 		}
 
+		@Override
 		public void release() {
 			this.queue.add(this);
 			this.entry = null;

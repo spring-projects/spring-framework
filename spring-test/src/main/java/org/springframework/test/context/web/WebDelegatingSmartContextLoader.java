@@ -23,7 +23,7 @@ import org.springframework.test.context.support.AbstractDelegatingSmartContextLo
  * {@code WebDelegatingSmartContextLoader} is a concrete implementation of
  * {@link AbstractDelegatingSmartContextLoader} that delegates to a
  * {@link GenericXmlWebContextLoader} and an {@link AnnotationConfigWebContextLoader}.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  * @see SmartContextLoader

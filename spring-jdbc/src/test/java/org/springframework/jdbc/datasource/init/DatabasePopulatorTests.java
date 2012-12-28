@@ -17,15 +17,14 @@
 package org.springframework.jdbc.datasource.init;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.easymock.EasyMock;
-
 import org.junit.After;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -251,25 +250,19 @@ public class DatabasePopulatorTests {
 	}
 
 	/**
-	 * @see SPR-9457
+	 * See SPR-9457
 	 */
 	@Test
 	public void usesBoundConnectionIfAvailable() throws SQLException {
 		TransactionSynchronizationManager.initSynchronization();
 		Connection connection = DataSourceUtils.getConnection(db);
-
-		DatabasePopulator populator = EasyMock.createMock(DatabasePopulator.class);
-		populator.populate(connection);
-		EasyMock.expectLastCall();
-		EasyMock.replay(populator);
-
+		DatabasePopulator populator = mock(DatabasePopulator.class);
 		DatabasePopulatorUtils.execute(populator, db);
-
-		EasyMock.verify(populator);
+		verify(populator).populate(connection);
 	}
 
 	/**
-	 * @see SPR-9781
+	 * See SPR-9781
 	 */
 	@Test(timeout = 1000)
 	public void executesHugeScriptInReasonableTime() throws SQLException {

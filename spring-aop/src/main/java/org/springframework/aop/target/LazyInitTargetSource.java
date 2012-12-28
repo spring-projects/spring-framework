@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import org.springframework.beans.BeansException;
  * the actual target object should not be initialized until first use.
  * When the target bean is defined in an
  * {@link org.springframework.context.ApplicationContext} (or a
- * <code>BeanFactory</code> that is eagerly pre-instantiating singleton beans)
+ * {@code BeanFactory} that is eagerly pre-instantiating singleton beans)
  * it must be marked as "lazy-init" too, else it will be instantiated by said
- * <code>ApplicationContext</code> (or <code>BeanFactory</code>) on startup.
+ * {@code ApplicationContext} (or {@code BeanFactory}) on startup.
  * <p>For example:
  *
  * <pre class="code">
@@ -56,6 +56,7 @@ import org.springframework.beans.BeansException;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see #postProcessTargetObject
  */
+@SuppressWarnings("serial")
 public class LazyInitTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
 	private Object target;

@@ -97,6 +97,7 @@ public class AsyncTests {
 		@ResponseBody
 		public Callable<Person> getCallable(final Model model) {
 			return new Callable<Person>() {
+				@Override
 				public Person call() throws Exception {
 					return new Person("Joe");
 				}

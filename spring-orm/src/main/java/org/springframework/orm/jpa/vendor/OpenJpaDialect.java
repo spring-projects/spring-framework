@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.transaction.TransactionException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OpenJpaDialect extends DefaultJpaDialect {
 
 	@Override
@@ -64,9 +65,9 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 	}
 
 	/**
-	 * Return the OpenJPA-specific interface of <code>EntityManager</code>.
-	 * @param em the generic <code>EntityManager</code> instance
-	 * @return the OpenJPA-specific interface of <code>EntityManager</code>
+	 * Return the OpenJPA-specific interface of {@code EntityManager}.
+	 * @param em the generic {@code EntityManager} instance
+	 * @return the OpenJPA-specific interface of {@code EntityManager}
 	 */
 	protected OpenJPAEntityManager getOpenJPAEntityManager(EntityManager em) {
 		return OpenJPAPersistence.cast(em);
@@ -74,7 +75,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
 
 	/**
-	 * Transaction data Object exposed from <code>beginTransaction</code>,
+	 * Transaction data Object exposed from {@code beginTransaction},
 	 * implementing the SavepointManager interface.
 	 */
 	private static class OpenJpaTransactionData implements SavepointManager {
@@ -106,8 +107,8 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
 	/**
 	 * ConnectionHandle implementation that fetches a new OpenJPA-provided Connection
-	 * for every <code>getConnection</code> call and closes the Connection on
-	 * <code>releaseConnection</code>. This is necessary because OpenJPA requires the
+	 * for every {@code getConnection} call and closes the Connection on
+	 * {@code releaseConnection}. This is necessary because OpenJPA requires the
 	 * fetched Connection to be closed before continuing EntityManager work.
 	 * @see org.apache.openjpa.persistence.OpenJPAEntityManager#getConnection()
 	 */

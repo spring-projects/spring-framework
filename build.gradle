@@ -16,6 +16,14 @@ configure(allprojects) {
 	ext.slf4jVersion    = "1.6.1"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
+	if (rootProject.hasProperty("VERSION_QUALIFIER")) {
+		def qualifier = rootProject.getProperty("VERSION_QUALIFIER")
+		if (qualifier.startsWith("SPR-")) { // topic branch, e.g. SPR-1234
+			// replace 3.2.0.BUILD-SNAPSHOT for 3.2.0.SPR-1234-SNAPSHOT
+			version = version.replace('BUILD', qualifier)
+		}
+	}
+
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "propdeps-eclipse"
@@ -24,10 +32,35 @@ configure(allprojects) {
 
 	group = "org.springframework"
 
-	sourceCompatibility=1.5
-	targetCompatibility=1.5
+	compileJava {
+		sourceCompatibility=1.5
+		targetCompatibility=1.5
+	}
+	compileTestJava {
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
+	}
 
-	[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:none"]
+	[compileJava, compileTestJava]*.options*.compilerArgs = [
+		"-Xlint:serial",
+		"-Xlint:varargs",
+		"-Xlint:cast",
+		"-Xlint:classfile",
+		"-Xlint:dep-ann",
+		"-Xlint:divzero",
+		"-Xlint:empty",
+		"-Xlint:finally",
+		"-Xlint:overrides",
+		"-Xlint:path",
+		"-Xlint:processing",
+		"-Xlint:static",
+		"-Xlint:try",
+		"-Xlint:-options",     // intentionally disabled
+		"-Xlint:-fallthrough", // intentionally disabled
+		"-Xlint:-rawtypes",    // TODO enable and fix warnings
+		"-Xlint:-deprecation", // TODO enable and fix warnings
+		"-Xlint:-unchecked"    // TODO enable and fix warnings
+	]
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
@@ -41,7 +74,7 @@ configure(allprojects) {
 	dependencies {
 		testCompile("junit:junit:${junitVersion}")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.easymock:easymock:${easymockVersion}")
+		testCompile("org.mockito:mockito-core:1.9.5")
 	}
 
 	ext.javadocLinks = [
@@ -67,7 +100,17 @@ configure(allprojects) {
 	] as String[]
 }
 
-configure(subprojects) { subproject ->
+configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
+		"spring-orm-hibernate4", "spring-oxm", "spring-struts", "spring-test",
+		"spring-test-mvc", "spring-tx", "spring-web", "spring-webmvc",
+		"spring-webmvc-portlet", "spring-webmvc-tiles3"]}) {
+	dependencies {
+		testCompile("org.easymock:easymock:${easymockVersion}")
+		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
+	}
+}
+
+configure(subprojects - project(":spring-build-junit")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
@@ -114,6 +157,34 @@ configure(subprojects) { subproject ->
 		archives sourcesJar
 		archives javadocJar
 	}
+}
+
+configure(allprojects - project(":spring-build-junit")) {
+	dependencies {
+		testCompile(project(":spring-build-junit"))
+	}
+
+	eclipse.classpath.file.whenMerged { classpath ->
+		classpath.entries.find{it.path == "/spring-build-junit"}.exported = false
+	}
+
+	test.systemProperties.put("testGroups", properties.get("testGroups"))
+}
+
+project("spring-build-junit") {
+	description = "Build-time JUnit dependencies and utilities"
+
+	// NOTE: This is an internal project and is not published.
+
+	dependencies {
+		compile("commons-logging:commons-logging:1.1.1")
+		compile("junit:junit:${junitVersion}")
+		compile("org.hamcrest:hamcrest-all:1.3")
+		compile("org.easymock:easymock:${easymockVersion}")
+	}
+
+	// Don't actually generate any artifacts
+	configurations.archives.artifacts.clear()
 }
 
 
@@ -297,7 +368,6 @@ project("spring-tx") {
 		optional("javax.resource:connector-api:1.5")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.ejb:ejb-api:3.0")
-		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
 		testCompile("javax.persistence:persistence-api:1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
@@ -306,6 +376,14 @@ project("spring-tx") {
 project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on jibx compilation
+		// see http://jira.codehaus.org/browse/JIBX-465
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
@@ -335,10 +413,11 @@ project("spring-jms") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-oxm"))
 		compile("aopalliance:aopalliance:1.0")
-		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
 		provided("org.apache.geronimo.specs:geronimo-jms_1.1_spec:1.1")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.resource:connector-api:1.5")
+		optional("org.codehaus.jackson:jackson-mapper-asl:1.4.2")
+		optional("com.fasterxml.jackson.core:jackson-databind:2.0.1")
 	}
 }
 
@@ -430,6 +509,14 @@ project("spring-web") {
 
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on toplink compilation
+		// TODO: remove this block when we remove toplink
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.hibernate:hibernate-core:3.3.2.GA")
@@ -628,7 +715,6 @@ project("spring-test-mvc") {
 		testCompile("javax.activation:activation:1.1")
 		testCompile("javax.mail:mail:1.4")
 		testCompile("javax.xml.bind:jaxb-api:2.2.6")
-		testCompile("org.easymock:easymockclassextension:${easymockVersion}")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
 		testCompile("org.apache.tiles:tiles-api:3.0.1")
 		testCompile("org.apache.tiles:tiles-core:3.0.1") {

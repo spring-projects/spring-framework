@@ -48,10 +48,10 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
-	 * supplied <code>name</code>. Searches all superclasses up to {@link Object}.
+	 * supplied {@code name}. Searches all superclasses up to {@link Object}.
 	 * @param clazz the class to introspect
 	 * @param name the name of the field
-	 * @return the corresponding Field object, or <code>null</code> if not found
+	 * @return the corresponding Field object, or {@code null} if not found
 	 */
 	public static Field findField(Class<?> clazz, String name) {
 		return findField(clazz, name, null);
@@ -59,12 +59,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Attempt to find a {@link Field field} on the supplied {@link Class} with the
-	 * supplied <code>name</code> and/or {@link Class type}. Searches all superclasses
+	 * supplied {@code name} and/or {@link Class type}. Searches all superclasses
 	 * up to {@link Object}.
 	 * @param clazz the class to introspect
-	 * @param name the name of the field (may be <code>null</code> if type is specified)
-	 * @param type the type of the field (may be <code>null</code> if name is specified)
-	 * @return the corresponding Field object, or <code>null</code> if not found
+	 * @param name the name of the field (may be {@code null} if type is specified)
+	 * @param type the type of the field (may be {@code null} if name is specified)
+	 * @return the corresponding Field object, or {@code null} if not found
 	 */
 	public static Field findField(Class<?> clazz, String name, Class<?> type) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -84,13 +84,13 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Set the field represented by the supplied {@link Field field object} on the
-	 * specified {@link Object target object} to the specified <code>value</code>.
+	 * specified {@link Object target object} to the specified {@code value}.
 	 * In accordance with {@link Field#set(Object, Object)} semantics, the new value
 	 * is automatically unwrapped if the underlying field has a primitive type.
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
-	 * @param value the value to set; may be <code>null</code>
+	 * @param value the value to set; may be {@code null}
 	 */
 	public static void setField(Field field, Object target, Object value) {
 		try {
@@ -126,11 +126,11 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Attempt to find a {@link Method} on the supplied class with the supplied name
-	 * and no parameters. Searches all superclasses up to <code>Object</code>.
-	 * <p>Returns <code>null</code> if no {@link Method} can be found.
+	 * and no parameters. Searches all superclasses up to {@code Object}.
+	 * <p>Returns {@code null} if no {@link Method} can be found.
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
-	 * @return the Method object, or <code>null</code> if none found
+	 * @return the Method object, or {@code null} if none found
 	 */
 	public static Method findMethod(Class<?> clazz, String name) {
 		return findMethod(clazz, name, new Class[0]);
@@ -138,13 +138,13 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Attempt to find a {@link Method} on the supplied class with the supplied name
-	 * and parameter types. Searches all superclasses up to <code>Object</code>.
-	 * <p>Returns <code>null</code> if no {@link Method} can be found.
+	 * and parameter types. Searches all superclasses up to {@code Object}.
+	 * <p>Returns {@code null} if no {@link Method} can be found.
 	 * @param clazz the class to introspect
 	 * @param name the name of the method
 	 * @param paramTypes the parameter types of the method
-	 * (may be <code>null</code> to indicate any signature)
-	 * @return the Method object, or <code>null</code> if none found
+	 * (may be {@code null} to indicate any signature)
+	 * @return the Method object, or {@code null} if none found
 	 */
 	public static Method findMethod(Class<?> clazz, String name, Class<?>... paramTypes) {
 		Assert.notNull(clazz, "Class must not be null");
@@ -165,7 +165,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Invoke the specified {@link Method} against the supplied target object with no arguments.
-	 * The target object can be <code>null</code> when invoking a static {@link Method}.
+	 * The target object can be {@code null} when invoking a static {@link Method}.
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @param method the method to invoke
 	 * @param target the target object to invoke the method on
@@ -178,12 +178,12 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Invoke the specified {@link Method} against the supplied target object with the
-	 * supplied arguments. The target object can be <code>null</code> when invoking a
+	 * supplied arguments. The target object can be {@code null} when invoking a
 	 * static {@link Method}.
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException}.
 	 * @param method the method to invoke
 	 * @param target the target object to invoke the method on
-	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @param args the invocation arguments (may be {@code null})
 	 * @return the invocation result, if any
 	 */
 	public static Object invokeMethod(Method method, Object target, Object... args) {
@@ -214,7 +214,7 @@ public abstract class ReflectionUtils {
 	 * object with the supplied arguments.
 	 * @param method the method to invoke
 	 * @param target the target object to invoke the method on
-	 * @param args the invocation arguments (may be <code>null</code>)
+	 * @param args the invocation arguments (may be {@code null})
 	 * @return the invocation result, if any
 	 * @throws SQLException the JDBC API SQLException to rethrow (if any)
 	 * @see #invokeMethod(java.lang.reflect.Method, Object, Object[])
@@ -318,8 +318,8 @@ public abstract class ReflectionUtils {
 	 * that type can be propagated as-is within a reflective invocation.
 	 * @param method the declaring method
 	 * @param exceptionType the exception to throw
-	 * @return <code>true</code> if the exception can be thrown as-is;
-	 * <code>false</code> if it needs to be wrapped
+	 * @return {@code true} if the exception can be thrown as-is;
+	 * {@code false} if it needs to be wrapped
 	 */
 	public static boolean declaresException(Method method, Class<?> exceptionType) {
 		Assert.notNull(method, "Method must not be null");
@@ -395,7 +395,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Make the given field accessible, explicitly setting it accessible if
-	 * necessary. The <code>setAccessible(true)</code> method is only called
+	 * necessary. The {@code setAccessible(true)} method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
 	 * SecurityManager (if active).
 	 * @param field the field to make accessible
@@ -410,7 +410,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Make the given method accessible, explicitly setting it accessible if
-	 * necessary. The <code>setAccessible(true)</code> method is only called
+	 * necessary. The {@code setAccessible(true)} method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
 	 * SecurityManager (if active).
 	 * @param method the method to make accessible
@@ -425,7 +425,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Make the given constructor accessible, explicitly setting it accessible
-	 * if necessary. The <code>setAccessible(true)</code> method is only called
+	 * if necessary. The {@code setAccessible(true)} method is only called
 	 * when actually necessary, to avoid unnecessary conflicts with a JVM
 	 * SecurityManager (if active).
 	 * @param ctor the constructor to make accessible
@@ -682,7 +682,7 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods
-	 * which are not declared on <code>java.lang.Object</code>.
+	 * which are not declared on {@code java.lang.Object}.
 	 */
 	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 

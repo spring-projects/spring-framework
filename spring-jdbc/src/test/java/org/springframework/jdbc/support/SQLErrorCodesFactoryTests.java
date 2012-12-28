@@ -16,6 +16,16 @@
 
 package org.springframework.jdbc.support;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -23,14 +33,9 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
-import junit.framework.TestCase;
-
-import org.easymock.MockControl;
+import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Tests for SQLErrorCodes loading.
@@ -38,11 +43,12 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Thomas Risberg
  */
-public class SQLErrorCodesFactoryTests extends TestCase {
+public class SQLErrorCodesFactoryTests {
 
 	/**
 	 * Check that a default instance returns empty error codes for an unknown database.
 	 */
+	@Test
 	public void testDefaultInstanceWithNoSuchDatabase() {
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes("xx");
 		assertTrue(sec.getBadSqlGrammarCodes().length == 0);
@@ -52,6 +58,7 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	/**
 	 * Check that a known database produces recognizable codes.
 	 */
+	@Test
 	public void testDefaultInstanceWithOracle() {
 		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes("Oracle");
 		assertIsOracle(sec);
@@ -119,9 +126,11 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertTrue(Arrays.binarySearch(sec.getBadSqlGrammarCodes(), "-204") >= 0);
 	}
 
+	@Test
 	public void testLookupOrder() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
 			private int lookups = 0;
+			@Override
 			protected Resource loadResource(String path) {
 				++lookups;
 				if (lookups == 1) {
@@ -146,8 +155,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	/**
 	 * Check that user defined error codes take precedence.
 	 */
+	@Test
 	public void testFindUserDefinedCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("test-error-codes.xml", SQLErrorCodesFactoryTests.class);
@@ -164,8 +175,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		assertEquals("2", sf.getErrorCodes("Oracle").getBadSqlGrammarCodes()[1]);
 	}
 
+	@Test
 	public void testInvalidUserDefinedCodeFormat() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					// Guaranteed to be on the classpath, but most certainly NOT XML
@@ -184,8 +197,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	/**
 	 * Check that custom error codes take precedence.
 	 */
+	@Test
 	public void testFindCustomCodes() {
 		class TestSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("custom-error-codes.xml", SQLErrorCodesFactoryTests.class);
@@ -198,48 +213,32 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 		TestSQLErrorCodesFactory sf = new TestSQLErrorCodesFactory();
 		assertEquals(1, sf.getErrorCodes("Oracle").getCustomTranslations().length);
 		CustomSQLErrorCodesTranslation translation =
-				(CustomSQLErrorCodesTranslation) sf.getErrorCodes("Oracle").getCustomTranslations()[0];
+				sf.getErrorCodes("Oracle").getCustomTranslations()[0];
 		assertEquals(CustomErrorCodeException.class, translation.getExceptionClass());
 		assertEquals(1, translation.getErrorCodes().length);
 	}
 
+	@Test
 	public void testDataSourceWithNullMetadata() throws Exception {
+		Connection connection = mock(Connection.class);
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willReturn(connection);
 
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(null);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable();
-		ctrlConnection.replay();
-
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setDefaultReturnValue(mockConnection);
-		ctrlDataSource.replay();
-
-		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
+		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
 
-		ctrlConnection.verify();
-		ctrlDataSource.verify();
+		verify(connection).close();
 	}
 
+	@Test
 	public void testGetFromDataSourceWithSQLException() throws Exception {
-
 		SQLException expectedSQLException = new SQLException();
 
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(expectedSQLException);
-		ctrlDataSource.replay();
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willThrow(expectedSQLException);
 
-		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(mockDataSource);
+		SQLErrorCodes sec = SQLErrorCodesFactory.getInstance().getErrorCodes(dataSource);
 		assertIsEmpty(sec);
-
-		ctrlDataSource.verify();
 	}
 
 	private void assertIsEmpty(SQLErrorCodes sec) {
@@ -249,25 +248,14 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	}
 
 	private SQLErrorCodes getErrorCodesFromDataSource(String productName, SQLErrorCodesFactory factory) throws Exception {
-		MockControl mdControl = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData md = (DatabaseMetaData) mdControl.getMock();
-		md.getDatabaseProductName();
-		mdControl.setReturnValue(productName);
-		mdControl.replay();
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.getDatabaseProductName()).willReturn(productName);
 
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(md);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable();
-		ctrlConnection.replay();
+		Connection connection = mock(Connection.class);
+		given(connection.getMetaData()).willReturn(databaseMetaData);
 
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setDefaultReturnValue(mockConnection);
-		ctrlDataSource.replay();
+		DataSource dataSource = mock(DataSource.class);
+		given(dataSource.getConnection()).willReturn(connection);
 
 		SQLErrorCodesFactory secf = null;
 		if (factory != null) {
@@ -277,33 +265,35 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 			secf = SQLErrorCodesFactory.getInstance();
 		}
 
-		SQLErrorCodes sec = secf.getErrorCodes(mockDataSource);
+		SQLErrorCodes sec = secf.getErrorCodes(dataSource);
 
-		mdControl.verify();
-		ctrlConnection.verify();
-		ctrlDataSource.verify();
 
-		SQLErrorCodes sec2 = secf.getErrorCodes(mockDataSource);
+		SQLErrorCodes sec2 = secf.getErrorCodes(dataSource);
 		assertSame("Cached per DataSource", sec2, sec);
 
+		verify(connection).close();
 		return sec;
 	}
 
+	@Test
 	public void testSQLServerRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("MS-SQL", null);
 		assertIsSQLServer(sec);
 	}
 
+	@Test
 	public void testOracleRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("Oracle", null);
 		assertIsOracle(sec);
 	}
 
+	@Test
 	public void testHsqlRecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("HSQL Database Engine", null);
 		assertIsHsql(sec);
 	}
 
+	@Test
 	public void testDB2RecognizedFromMetadata() throws Exception {
 		SQLErrorCodes sec = getErrorCodesFromDataSource("DB2", null);
 		assertIsDB2(sec);
@@ -316,8 +306,10 @@ public class SQLErrorCodesFactoryTests extends TestCase {
 	/**
 	 * Check that wild card database name works.
 	 */
+	@Test
 	public void testWildCardNameRecognized() throws Exception {
 		class WildcardSQLErrorCodesFactory extends SQLErrorCodesFactory {
+			@Override
 			protected Resource loadResource(String path) {
 				if (SQLErrorCodesFactory.SQL_ERROR_CODE_OVERRIDE_PATH.equals(path)) {
 					return new ClassPathResource("wildcard-error-codes.xml", SQLErrorCodesFactoryTests.class);

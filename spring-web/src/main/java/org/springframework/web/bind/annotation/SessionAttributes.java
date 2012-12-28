@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,13 @@ import java.lang.annotation.Target;
  * specific handler's conversation.
  *
  * <p>For permanent session attributes, e.g. a user authentication object,
- * use the traditional <code>session.setAttribute</code> method instead.
+ * use the traditional {@code session.setAttribute} method instead.
  * Alternatively, consider using the attribute management capabilities of the
  * generic {@link org.springframework.web.context.request.WebRequest} interface.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
  * make sure to consistently put <i>all</i> your mapping annotations - such as
- * <code>@RequestMapping</code> and <code>@SessionAttributes</code> - on
+ * {@code @RequestMapping} and {@code @SessionAttributes} - on
  * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Juergen Hoeller

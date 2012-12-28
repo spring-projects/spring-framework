@@ -19,20 +19,14 @@ package org.springframework.web.servlet.mvc;
 import java.util.List;
 import java.util.Properties;
 
-import junit.framework.TestCase;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.*;
-import static org.junit.Assert.*;
-import static org.junit.Assert.*;
 import static org.junit.Assert.*;
 
 /**
@@ -76,7 +70,7 @@ public class WebContentInterceptorTests {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
 		interceptor.setCacheSeconds(10);
 		interceptor.setCacheMappings(mappings);
-		
+
 		request.setRequestURI("http://localhost:7070/example/adminhandle.vm");
 		interceptor.preHandle(request, response, null);
 

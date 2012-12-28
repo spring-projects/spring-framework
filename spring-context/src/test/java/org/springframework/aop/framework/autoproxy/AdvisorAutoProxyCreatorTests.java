@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import test.mixin.Lockable;
 
 /**
  * Tests for auto proxy creation by advisor recognition.
- * 
- * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorIntegrationTests;
+ *
+ * @see org.springframework.aop.framework.autoproxy.AdvisorAutoProxyCreatorIntegrationTests
  *
  * @author Rod Johnson
  * @author Dave Syer
@@ -51,7 +51,7 @@ public final class AdvisorAutoProxyCreatorTests {
 
 	private static final Class<?> CLASS = AdvisorAutoProxyCreatorTests.class;
 	private static final String CLASSNAME = CLASS.getSimpleName();
-	
+
 	private static final String DEFAULT_CONTEXT = CLASSNAME + "-context.xml";
 	private static final String COMMON_INTERCEPTORS_CONTEXT = CLASSNAME + "-common-interceptors.xml";
 	private static final String CUSTOM_TARGETSOURCE_CONTEXT = CLASSNAME + "-custom-targetsource.xml";
@@ -85,7 +85,7 @@ public final class AdvisorAutoProxyCreatorTests {
 
 		ITestBean test2 = (ITestBean) bf.getBean("test2");
 		Lockable lockable2 = (Lockable) test2;
-		
+
 		// Locking should be independent; nop is shared
 		assertFalse(lockable1.locked());
 		assertFalse(lockable2.locked());
@@ -151,7 +151,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());
-	
+
 		// Now test the pooled one
 		test = (ITestBean) bf.getBean(":test");
 		assertTrue(AopUtils.isAopProxy(test));
@@ -160,7 +160,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());
-		
+
 		// Now test the ThreadLocal one
 		test = (ITestBean) bf.getBean("%test");
 		assertTrue(AopUtils.isAopProxy(test));
@@ -169,7 +169,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		assertEquals("Rod", test.getName());
 		// Check that references survived pooling
 		assertEquals("Kerry", test.getSpouse().getName());
-		
+
 		// Now test the Prototype TargetSource
 		test = (ITestBean) bf.getBean("!test");
 		assertTrue(AopUtils.isAopProxy(test));
@@ -186,7 +186,7 @@ public final class AdvisorAutoProxyCreatorTests {
 		assertEquals("Kerry", test2.getSpouse().getName());
 		bf.close();
 	}
-	
+
 	@Test
 	public void testWithOptimizedProxy() throws Exception {
 		BeanFactory beanFactory = new ClassPathXmlApplicationContext(OPTIMIZED_CONTEXT, CLASS);
@@ -218,6 +218,7 @@ class CountingTestBean extends TestBean {
 
 class SelectivePrototypeTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 
+	@Override
 	protected AbstractBeanFactoryBasedTargetSource createBeanFactoryBasedTargetSource(
 			Class<?> beanClass, String beanName) {
 		if (!beanName.startsWith("prototype")) {

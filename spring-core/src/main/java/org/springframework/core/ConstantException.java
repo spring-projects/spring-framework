@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ package org.springframework.core;
  * @since 28.04.2003
  * @see org.springframework.core.Constants
  */
+@SuppressWarnings("serial")
 public class ConstantException extends IllegalArgumentException {
-	
+
 	/**
 	 * Thrown when an invalid constant name is requested.
 	 * @param className name of the class containing the constant definitions

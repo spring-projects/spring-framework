@@ -136,7 +136,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * the {@code MockServletContext} under the
 	 * {@link WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE} key.</li>
 	 * <li>Finally, the {@code MockServletContext} is set in the
-	 * {@code WebApplicationContext}.</li> 
+	 * {@code WebApplicationContext}.</li>
 	 *
 	 * @param context the web application context for which to configure the web
 	 * resources
@@ -160,7 +160,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * created by this context loader.
 	 *
 	 * <p>The default implementation is empty but can be overridden in subclasses
-	 * to customize <code>DefaultListableBeanFactory</code>'s standard settings.
+	 * to customize {@code DefaultListableBeanFactory}'s standard settings.
 	 *
 	 * @param beanFactory the bean factory created by this context loader
 	 * @param webMergedConfig the merged context configuration to use to load the
@@ -177,7 +177,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 
 	/**
 	 * Load bean definitions into the supplied {@link GenericWebApplicationContext context}
-	 * from the locations or classes in the supplied <code>WebMergedContextConfiguration</code>.
+	 * from the locations or classes in the supplied {@code WebMergedContextConfiguration}.
 	 *
 	 * <p>Concrete subclasses must provide an appropriate implementation.
 	 *

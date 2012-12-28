@@ -233,7 +233,7 @@ public class JdbcTestUtils {
 	}
 
 	/**
-	 * Read a script from the provided {@code LineNumberReader}, using 
+	 * Read a script from the provided {@code LineNumberReader}, using
 	 * "{@code --}" as the comment prefix, and build a {@code String} containing
 	 * the lines.
 	 * @param lineNumberReader the {@code LineNumberReader} containing the script
@@ -295,7 +295,7 @@ public class JdbcTestUtils {
 	/**
 	 * Split an SQL script into separate statements delimited by the provided
 	 * delimiter character. Each individual statement will be added to the
-	 * provided <code>List</code>.
+	 * provided {@code List}.
 	 * <p>Within a statement, "{@code --}" will be used as the comment prefix;
 	 * any text beginning with the comment prefix and extending to the end of
 	 * the line will be omitted from the statement. In addition, multiple adjacent

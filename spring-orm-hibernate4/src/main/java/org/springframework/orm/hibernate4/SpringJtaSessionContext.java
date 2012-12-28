@@ -25,11 +25,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /**
  * Spring-specific subclass of Hibernate's JTASessionContext,
- * setting <code>FlushMode.MANUAL</code> for read-only transactions.
+ * setting {@code FlushMode.MANUAL} for read-only transactions.
  *
  * @author Juergen Hoeller
  * @since 3.1
  */
+@SuppressWarnings("serial")
 public class SpringJtaSessionContext extends JTASessionContext {
 
 	public SpringJtaSessionContext(SessionFactoryImplementor factory) {

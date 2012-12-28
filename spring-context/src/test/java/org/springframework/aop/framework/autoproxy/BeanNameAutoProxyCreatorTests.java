@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class BeanNameAutoProxyCreatorTests {
 		assertEquals(age, tb.getAge());
 		assertTrue("Introduction was made", tb instanceof TimeStamped);
 		assertEquals(0, ((TimeStamped) tb).getTimeStamp());
-		assertEquals(3, nop.getCount());		
+		assertEquals(3, nop.getCount());
 		assertEquals("introductionUsingJdk", tb.getName());
 
 		ITestBean tb2 = (ITestBean) beanFactory.getBean("second-introductionUsingJdk");
@@ -124,10 +124,10 @@ public class BeanNameAutoProxyCreatorTests {
 		assertEquals(age, tb.getAge());
 		assertTrue("Introduction was made", tb instanceof TimeStamped);
 		assertEquals(0, ((TimeStamped) tb).getTimeStamp());
-		assertEquals(3, nop.getCount());		
-	
+		assertEquals(3, nop.getCount());
+
 		ITestBean tb2 = (ITestBean) beanFactory.getBean("second-introductionUsingJdk");
-			
+
 		// Check two per-instance mixins were distinct
 		Lockable lockable1 = (Lockable) tb;
 		Lockable lockable2 = (Lockable) tb2;
@@ -194,7 +194,7 @@ public class BeanNameAutoProxyCreatorTests {
 		tb.setAge(age);
 		assertEquals(age, tb.getAge());
 		assertEquals(2, nop.getCount());
-		assertEquals(2, cba.getCalls());		
+		assertEquals(2, cba.getCalls());
 	}
 
 }
@@ -205,6 +205,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Override
 	public Object getObject() throws Exception {
 		return new TestBean();
 	}
@@ -212,6 +213,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
+	@Override
 	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
@@ -219,6 +221,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

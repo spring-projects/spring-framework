@@ -23,7 +23,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Tests the evaluation of basic literals: boolean, integer, hex integer, long, real, null, date
- * 
+ *
  * @author Andy Clement
  */
 public class LiteralTests extends ExpressionTestCase {
@@ -159,7 +159,7 @@ public class LiteralTests extends ExpressionTestCase {
 		evaluate("new Integer(37).byteValue()", (byte) 37, Byte.class); // calling byteValue() on Integer.class
 		evaluateAndAskForReturnType("new Integer(37)", (byte) 37, Byte.class); // relying on registered type converters
 	}
-	
+
 	@Test
 	public void testNotWritable() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("37");

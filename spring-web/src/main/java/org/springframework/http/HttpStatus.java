@@ -254,15 +254,15 @@ public enum HttpStatus {
 	/**
 	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
-	INSUFFICIENT_SPACE_ON_RESOURCE(419, "Insufficient Space On Resource"),
+	@Deprecated INSUFFICIENT_SPACE_ON_RESOURCE(419, "Insufficient Space On Resource"),
 	/**
 	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
-	METHOD_FAILURE(420, "Method Failure"),
+	@Deprecated METHOD_FAILURE(420, "Method Failure"),
 	/**
 	 * @deprecated See <a href="http://tools.ietf.org/rfcdiff?difftype=--hwdiff&url2=draft-ietf-webdav-protocol-06.txt">WebDAV Draft Changes</a>
 	 */
-	DESTINATION_LOCKED(421, "Destination Locked"),
+	@Deprecated DESTINATION_LOCKED(421, "Destination Locked"),
 	/**
 	 * {@code 422 Unprocessable Entity}.
 	 * @see <a href="http://tools.ietf.org/html/rfc4918#section-11.2">WebDAV</a>

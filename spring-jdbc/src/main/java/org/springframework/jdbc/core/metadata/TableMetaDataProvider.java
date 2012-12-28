@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ public interface TableMetaDataProvider {
 	 * Are we using the meta data for the table columns?
 	 */
  	boolean isTableColumnMetaDataUsed();
-	
+
 	/**
 	 * Does this database support the JDBC 3.0 feature of retreiving generated keys
 	 * {@link java.sql.DatabaseMetaData#supportsGetGeneratedKeys()}

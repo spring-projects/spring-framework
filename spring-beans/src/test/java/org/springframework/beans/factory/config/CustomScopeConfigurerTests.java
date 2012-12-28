@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,24 +45,20 @@ public final class CustomScopeConfigurerTests {
 
 	@Test
 	public void testWithNoScopes() throws Exception {
-		Scope scope = createMock(Scope.class);
-		replay(scope);
+		Scope scope = mock(Scope.class);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.postProcessBeanFactory(factory);
-		verify(scope);
 	}
 
 	@Test
 	public void testSunnyDayWithBonaFideScopeInstance() throws Exception {
-		Scope scope = createMock(Scope.class);
-		replay(scope);
+		Scope scope = mock(Scope.class);
 		factory.registerScope(FOO_SCOPE, scope);
 		Map<String, Object> scopes = new HashMap<String, Object>();
 		scopes.put(FOO_SCOPE, scope);
 		CustomScopeConfigurer figurer = new CustomScopeConfigurer();
 		figurer.setScopes(scopes);
 		figurer.postProcessBeanFactory(factory);
-		verify(scope);
 	}
 
 	@Test

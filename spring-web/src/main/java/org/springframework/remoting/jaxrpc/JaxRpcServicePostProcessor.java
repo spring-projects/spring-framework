@@ -32,14 +32,14 @@ import javax.xml.rpc.Service;
  * @see JaxRpcPortClientInterceptor#setServicePostProcessors
  * @see JaxRpcPortProxyFactoryBean#setServicePostProcessors
  * @see javax.xml.rpc.Service#getTypeMappingRegistry
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public interface JaxRpcServicePostProcessor {
 
 	/**
 	 * Post-process the given JAX-RPC {@link Service}.
-	 * @param service the current JAX-RPC <code>Service</code>
+	 * @param service the current JAX-RPC {@code Service}
 	 * (can be cast to an implementation-specific class if necessary)
 	 */
 	void postProcessJaxRpcService(Service service);

@@ -21,8 +21,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
@@ -224,6 +222,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void addFormatters(FormatterRegistry registry) {
 			registry.addConverter(new Converter<TestBean, String>() {
+				@Override
 				public String convert(TestBean source) {
 					return "converted";
 				}
@@ -238,9 +237,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public Validator getValidator() {
 			return new Validator() {
+				@Override
 				public void validate(Object target, Errors errors) {
 					errors.reject("invalid");
 				}
+				@Override
 				public boolean supports(Class<?> clazz) {
 					return true;
 				}

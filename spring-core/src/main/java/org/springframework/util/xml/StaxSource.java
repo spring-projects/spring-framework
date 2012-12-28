@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,18 +24,18 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 /**
- * Implementation of the <code>Source</code> tagging interface for StAX readers. Can be constructed with a
- * <code>XMLEventReader</code> or a <code>XMLStreamReader</code>.
+ * Implementation of the {@code Source} tagging interface for StAX readers. Can be constructed with a
+ * {@code XMLEventReader} or a {@code XMLStreamReader}.
  *
- * <p>This class is necessary because there is no implementation of <code>Source</code> for StAX Readers in JAXP 1.3.
- * There is a <code>StAXSource</code> in JAXP 1.4 (JDK 1.6), but this class is kept around for back-ward compatibility
+ * <p>This class is necessary because there is no implementation of {@code Source} for StAX Readers in JAXP 1.3.
+ * There is a {@code StAXSource} in JAXP 1.4 (JDK 1.6), but this class is kept around for back-ward compatibility
  * reasons.
  *
- * <p>Even though <code>StaxSource</code> extends from <code>SAXSource</code>, calling the methods of
- * <code>SAXSource</code> is <strong>not supported</strong>. In general, the only supported operation on this class is
- * to use the <code>XMLReader</code> obtained via {@link #getXMLReader()} to parse the input source obtained via {@link
+ * <p>Even though {@code StaxSource} extends from {@code SAXSource}, calling the methods of
+ * {@code SAXSource} is <strong>not supported</strong>. In general, the only supported operation on this class is
+ * to use the {@code XMLReader} obtained via {@link #getXMLReader()} to parse the input source obtained via {@link
  * #getInputSource()}. Calling {@link #setXMLReader(XMLReader)} or {@link #setInputSource(InputSource)} will result in
- * <code>UnsupportedOperationException</code>s.
+ * {@code UnsupportedOperationException}s.
  *
  * @author Arjen Poutsma
  * @see XMLEventReader
@@ -50,11 +50,11 @@ class StaxSource extends SAXSource {
 	private XMLStreamReader streamReader;
 
 	/**
-	 * Constructs a new instance of the <code>StaxSource</code> with the specified <code>XMLStreamReader</code>. The
-	 * supplied stream reader must be in <code>XMLStreamConstants.START_DOCUMENT</code> or
-	 * <code>XMLStreamConstants.START_ELEMENT</code> state.
+	 * Constructs a new instance of the {@code StaxSource} with the specified {@code XMLStreamReader}. The
+	 * supplied stream reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
+	 * {@code XMLStreamConstants.START_ELEMENT} state.
 	 *
-	 * @param streamReader the <code>XMLStreamReader</code> to read from
+	 * @param streamReader the {@code XMLStreamReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxSource(XMLStreamReader streamReader) {
@@ -63,11 +63,11 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Constructs a new instance of the <code>StaxSource</code> with the specified <code>XMLEventReader</code>. The
-	 * supplied event reader must be in <code>XMLStreamConstants.START_DOCUMENT</code> or
-	 * <code>XMLStreamConstants.START_ELEMENT</code> state.
+	 * Constructs a new instance of the {@code StaxSource} with the specified {@code XMLEventReader}. The
+	 * supplied event reader must be in {@code XMLStreamConstants.START_DOCUMENT} or
+	 * {@code XMLStreamConstants.START_ELEMENT} state.
 	 *
-	 * @param eventReader the <code>XMLEventReader</code> to read from
+	 * @param eventReader the {@code XMLEventReader} to read from
 	 * @throws IllegalStateException if the reader is not at the start of a document or element
 	 */
 	StaxSource(XMLEventReader eventReader) {
@@ -76,8 +76,8 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Returns the <code>XMLEventReader</code> used by this <code>StaxSource</code>. If this <code>StaxSource</code> was
-	 * created with an <code>XMLStreamReader</code>, the result will be <code>null</code>.
+	 * Returns the {@code XMLEventReader} used by this {@code StaxSource}. If this {@code StaxSource} was
+	 * created with an {@code XMLStreamReader}, the result will be {@code null}.
 	 *
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
@@ -87,8 +87,8 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Returns the <code>XMLStreamReader</code> used by this <code>StaxSource</code>. If this <code>StaxSource</code> was
-	 * created with an <code>XMLEventReader</code>, the result will be <code>null</code>.
+	 * Returns the {@code XMLStreamReader} used by this {@code StaxSource}. If this {@code StaxSource} was
+	 * created with an {@code XMLEventReader}, the result will be {@code null}.
 	 *
 	 * @return the StAX event reader used by this source
 	 * @see StaxSource#StaxSource(javax.xml.stream.XMLEventReader)
@@ -98,7 +98,7 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Throws a <code>UnsupportedOperationException</code>.
+	 * Throws a {@code UnsupportedOperationException}.
 	 *
 	 * @throws UnsupportedOperationException always
 	 */
@@ -108,7 +108,7 @@ class StaxSource extends SAXSource {
 	}
 
 	/**
-	 * Throws a <code>UnsupportedOperationException</code>.
+	 * Throws a {@code UnsupportedOperationException}.
 	 *
 	 * @throws UnsupportedOperationException always
 	 */

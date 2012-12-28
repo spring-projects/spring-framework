@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public abstract class BridgeMethodResolver {
 	 * Searches for the bridged method in the given candidates.
 	 * @param candidateMethods the List of candidate Methods
 	 * @param bridgeMethod the bridge method
-	 * @return the bridged method, or <code>null</code> if none found
+	 * @return the bridged method, or {@code null} if none found
 	 */
 	private static Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
 		if (candidateMethods.isEmpty()) {
@@ -114,7 +114,7 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Returns <code>true</code> if the supplied '<code>candidateMethod</code>' can be
+	 * Returns {@code true} if the supplied '{@code candidateMethod}' can be
 	 * consider a validate candidate for the {@link Method} that is {@link Method#isBridge() bridged}
 	 * by the supplied {@link Method bridge Method}. This method performs inexpensive
 	 * checks and can be used quickly filter for a set of possible matches.
@@ -166,10 +166,10 @@ public abstract class BridgeMethodResolver {
 	}
 
 	/**
-	 * Returns <code>true</code> if the {@link Type} signature of both the supplied
+	 * Returns {@code true} if the {@link Type} signature of both the supplied
 	 * {@link Method#getGenericParameterTypes() generic Method} and concrete {@link Method}
 	 * are equal after resolving all {@link TypeVariable TypeVariables} using the supplied
-	 * TypeVariable Map, otherwise returns <code>false</code>.
+	 * TypeVariable Map, otherwise returns {@code false}.
 	 */
 	private static boolean isResolvedTypeMatch(
 			Method genericMethod, Method candidateMethod, Map<TypeVariable, Type> typeVariableMap) {
@@ -205,7 +205,7 @@ public abstract class BridgeMethodResolver {
 	/**
 	 * If the supplied {@link Class} has a declared {@link Method} whose signature matches
 	 * that of the supplied {@link Method}, then this matching {@link Method} is returned,
-	 * otherwise <code>null</code> is returned.
+	 * otherwise {@code null} is returned.
 	 */
 	private static Method searchForMatch(Class type, Method bridgeMethod) {
 		return ReflectionUtils.findMethod(type, bridgeMethod.getName(), bridgeMethod.getParameterTypes());

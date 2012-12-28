@@ -51,14 +51,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 
 	/**
 	 * Scope identifier for the standard singleton scope: "singleton".
-	 * Custom scopes can be added via <code>registerScope</code>.
+	 * Custom scopes can be added via {@code registerScope}.
 	 * @see #registerScope
 	 */
 	String SCOPE_SINGLETON = "singleton";
 
 	/**
 	 * Scope identifier for the standard prototype scope: "prototype".
-	 * Custom scopes can be added via <code>registerScope</code>.
+	 * Custom scopes can be added via {@code registerScope}.
 	 * @see #registerScope
 	 */
 	String SCOPE_PROTOTYPE = "prototype";
@@ -83,7 +83,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Spring 2.0 by default: Bean definitions only carry bean class names,
 	 * to be resolved once the factory processes the bean definition.
 	 * @param beanClassLoader the class loader to use,
-	 * or <code>null</code> to suggest the default class loader
+	 * or {@code null} to suggest the default class loader
 	 */
 	void setBeanClassLoader(ClassLoader beanClassLoader);
 
@@ -255,14 +255,14 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * <p>This will only return explicitly registered scopes.
 	 * Built-in scopes such as "singleton" and "prototype" won't be exposed.
 	 * @param scopeName the name of the scope
-	 * @return the registered Scope implementation, or <code>null</code> if none
+	 * @return the registered Scope implementation, or {@code null} if none
 	 * @see #registerScope
 	 */
 	Scope getRegisteredScope(String scopeName);
 
 	/**
 	 * Provides a security access control context relevant to this factory.
-	 * @return the applicable AccessControlContext (never <code>null</code>)
+	 * @return the applicable AccessControlContext (never {@code null})
 	 * @since 3.0
 	 */
 	AccessControlContext getAccessControlContext();
@@ -314,7 +314,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	 * Determine whether the bean with the given name is a FactoryBean.
 	 * @param name the name of the bean to check
 	 * @return whether the bean is a FactoryBean
-	 * (<code>false</code> means the bean exists but is not a FactoryBean)
+	 * ({@code false} means the bean exists but is not a FactoryBean)
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @since 2.5
 	 */

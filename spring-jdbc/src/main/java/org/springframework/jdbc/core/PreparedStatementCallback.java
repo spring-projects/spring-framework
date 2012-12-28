@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.dao.DataAccessException;
 /**
  * Generic callback interface for code that operates on a PreparedStatement.
  * Allows to execute any number of operations on a single PreparedStatement,
- * for example a single <code>executeUpdate</code> call or repeated
- * <code>executeUpdate</code> calls with varying parameters.
+ * for example a single {@code executeUpdate} call or repeated
+ * {@code executeUpdate} calls with varying parameters.
  *
  * <p>Used internally by JdbcTemplate, but also useful for application code.
  * Note that the passed-in PreparedStatement can have been created by the
@@ -43,7 +43,7 @@ import org.springframework.dao.DataAccessException;
 public interface PreparedStatementCallback<T> {
 
 	/**
-	 * Gets called by <code>JdbcTemplate.execute</code> with an active JDBC
+	 * Gets called by {@code JdbcTemplate.execute} with an active JDBC
 	 * PreparedStatement. Does not need to care about closing the Statement
 	 * or the Connection, or about handling transactions: this will all be
 	 * handled by Spring's JdbcTemplate.
@@ -52,7 +52,7 @@ public interface PreparedStatementCallback<T> {
 	 * within the callback implementation. Spring will close the Statement
 	 * object after the callback returned, but this does not necessarily imply
 	 * that the ResultSet resources will be closed: the Statement objects might
-	 * get pooled by the connection pool, with <code>close</code> calls only
+	 * get pooled by the connection pool, with {@code close} calls only
 	 * returning the object to the pool but not physically closing the resources.
 	 *
 	 * <p>If called without a thread-bound JDBC transaction (initiated by
@@ -68,7 +68,7 @@ public interface PreparedStatementCallback<T> {
 	 * propagated to the caller of the template.
 	 *
 	 * @param ps active JDBC PreparedStatement
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws SQLException if thrown by a JDBC method, to be auto-converted
 	 * to a DataAccessException by a SQLExceptionTranslator
 	 * @throws DataAccessException in case of custom exceptions

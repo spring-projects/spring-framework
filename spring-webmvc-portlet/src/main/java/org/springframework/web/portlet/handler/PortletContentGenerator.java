@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 
 	/**
 	 * Check and prepare the given request and response according to the settings
-	 * of this generator. Checks for a required session, and applies the number of 
+	 * of this generator. Checks for a required session, and applies the number of
 	 * cache seconds configured for this generator (if it is a render request/response).
 	 * @param request current portlet request
 	 * @param response current portlet response
@@ -109,7 +109,7 @@ public abstract class PortletContentGenerator extends PortletApplicationObjectSu
 
 	/**
 	 * Check and prepare the given request and response according to the settings
-	 * of this generator. Checks for a required session, and applies the given 
+	 * of this generator. Checks for a required session, and applies the given
 	 * number of cache seconds (if it is a render request/response).
 	 * @param request current portlet request
 	 * @param response current portlet response

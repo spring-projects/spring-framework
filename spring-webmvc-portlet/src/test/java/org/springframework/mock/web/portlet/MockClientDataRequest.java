@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ public class MockClientDataRequest extends MockPortletRequest implements ClientD
 		this.content = content;
 	}
 
+	@Override
 	public InputStream getPortletInputStream() throws IOException {
 		if (this.content != null) {
 			return new ByteArrayInputStream(this.content);
@@ -85,10 +86,12 @@ public class MockClientDataRequest extends MockPortletRequest implements ClientD
 		}
 	}
 
+	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
 	}
 
+	@Override
 	public BufferedReader getReader() throws UnsupportedEncodingException {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
@@ -101,6 +104,7 @@ public class MockClientDataRequest extends MockPortletRequest implements ClientD
 		}
 	}
 
+	@Override
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -109,10 +113,12 @@ public class MockClientDataRequest extends MockPortletRequest implements ClientD
 		this.contentType = contentType;
 	}
 
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
 
+	@Override
 	public int getContentLength() {
 		return (this.content != null ? content.length : -1);
 	}
@@ -121,6 +127,7 @@ public class MockClientDataRequest extends MockPortletRequest implements ClientD
 		this.method = method;
 	}
 
+	@Override
 	public String getMethod() {
 		return this.method;
 	}

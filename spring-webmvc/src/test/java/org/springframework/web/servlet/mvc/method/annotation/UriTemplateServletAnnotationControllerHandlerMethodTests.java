@@ -107,6 +107,7 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 
 		WebApplicationContext wac =
 			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+				@Override
 				public void initialize(GenericWebApplicationContext context) {
 					RootBeanDefinition beanDef = new RootBeanDefinition(ModelValidatingViewResolver.class);
 					beanDef.getConstructorArgumentValues().addGenericArgumentValue(pathVars);
@@ -671,8 +672,10 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 			this.attrsToValidate = attrsToValidate;
 		}
 
+		@Override
 		public View resolveViewName(final String viewName, Locale locale) throws Exception {
 			return new AbstractView () {
+				@Override
 				public String getContentType() {
 					return null;
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Rob Harrop
  * @since 13 May 2001
  */
+@SuppressWarnings("serial")
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	private final List<PropertyValue> propertyValueList;
@@ -46,7 +47,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 	/**
 	 * Creates a new empty MutablePropertyValues object.
-	 * <p>Property values can be added with the <code>add</code> method.
+	 * <p>Property values can be added with the {@code add} method.
 	 * @see #add(String, Object)
 	 */
 	public MutablePropertyValues() {
@@ -176,7 +177,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of <code>addPropertyValue</code> that takes
+	 * Overloaded version of {@code addPropertyValue} that takes
 	 * a property name and a property value.
 	 * <p>Note: As of Spring 3.0, we recommend using the more concise
 	 * and chaining-capable variant {@link #add}.
@@ -234,7 +235,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Overloaded version of <code>removePropertyValue</code> that takes a property name.
+	 * Overloaded version of {@code removePropertyValue} that takes a property name.
 	 * @param propertyName name of the property
 	 * @see #removePropertyValue(PropertyValue)
 	 */
@@ -291,7 +292,7 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	 * Register the specified property as "processed" in the sense
 	 * of some processor calling the corresponding setter method
 	 * outside of the PropertyValue(s) mechanism.
-	 * <p>This will lead to <code>true</code> being returned from
+	 * <p>This will lead to {@code true} being returned from
 	 * a {@link #contains} call for the specified property.
 	 * @param propertyName the name of the property.
 	 */
@@ -311,8 +312,8 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 	}
 
 	/**
-	 * Return whether this holder contains converted values only (<code>true</code>),
-	 * or whether the values still need to be converted (<code>false</code>).
+	 * Return whether this holder contains converted values only ({@code true}),
+	 * or whether the values still need to be converted ({@code false}).
 	 */
 	public boolean isConverted() {
 		return this.converted;

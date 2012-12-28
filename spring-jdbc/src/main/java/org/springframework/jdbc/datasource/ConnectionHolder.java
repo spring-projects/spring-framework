@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,8 +121,8 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
 	 * Override the existing Connection handle with the given Connection.
-	 * Reset the handle if given <code>null</code>.
-	 * <p>Used for releasing the Connection on suspend (with a <code>null</code>
+	 * Reset the handle if given {@code null}.
+	 * <p>Used for releasing the Connection on suspend (with a {@code null}
 	 * argument) and setting a fresh Connection on resume.
 	 */
 	protected void setConnection(Connection connection) {
@@ -140,7 +140,7 @@ public class ConnectionHolder extends ResourceHolderSupport {
 
 	/**
 	 * Return the current Connection held by this ConnectionHolder.
-	 * <p>This will be the same Connection until <code>released</code>
+	 * <p>This will be the same Connection until {@code released}
 	 * gets called on the ConnectionHolder, which will reset the
 	 * held Connection, fetching a new Connection on demand.
 	 * @see ConnectionHandle#getConnection()

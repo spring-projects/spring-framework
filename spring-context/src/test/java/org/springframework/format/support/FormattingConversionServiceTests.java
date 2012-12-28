@@ -86,6 +86,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
+			@Override
 			public LocalDate convert(DateTime source) {
 				return source.toLocalDate();
 			}
@@ -170,11 +171,13 @@ public class FormattingConversionServiceTests {
 	@SuppressWarnings("unchecked")
 	private void doTestFormatFieldForAnnotation(Class<?> modelClass, boolean directFieldAccess) throws Exception {
 		formattingService.addConverter(new Converter<Date, Long>() {
+			@Override
 			public Long convert(Date source) {
 				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<DateTime, Date>() {
+			@Override
 			public Date convert(DateTime source) {
 				return source.toDate();
 			}
@@ -219,7 +222,7 @@ public class FormattingConversionServiceTests {
 			assertEquals(new LocalDate(2009, 10, 2), new LocalDate(dates.get(2)));
 		}
 	}
-	
+
 	@Test
 	public void testPrintNull() throws ParseException {
 		formattingService.addFormatterForFieldType(Number.class, new NumberFormatter());
@@ -277,17 +280,20 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForAnnotationWithSubclassAsFieldType() throws Exception {
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory() {
+			@Override
 			public Printer<?> getPrinter(org.springframework.format.annotation.DateTimeFormat annotation, Class<?> fieldType) {
 				assertEquals(MyDate.class, fieldType);
 				return super.getPrinter(annotation, fieldType);
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Long>() {
+			@Override
 			public Long convert(MyDate source) {
 				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Date>() {
+			@Override
 			public Date convert(MyDate source) {
 				return source;
 			}
@@ -324,7 +330,7 @@ public class FormattingConversionServiceTests {
 
 		@org.springframework.format.annotation.DateTimeFormat(style="S-")
 		public Date date;
-		
+
 		@org.springframework.format.annotation.DateTimeFormat(pattern="M-d-yy")
 		public List<Date> dates;
 
@@ -364,14 +370,16 @@ public class FormattingConversionServiceTests {
 
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
+		@Override
 		public String print(Integer object, Locale locale) {
 			return null;
 		}
 
+		@Override
 		public Integer parse(String text, Locale locale) throws ParseException {
 			return null;
 		}
-		
+
 	}
 
 

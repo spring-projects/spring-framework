@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * Default implementation of Spring's SqlRowSetMetaData interface.
  * Used by ResultSetWrappingSqlRowSet.
  *
- * <p>This implementation wraps a <code>javax.sql.ResultSetMetaData</code>
+ * <p>This implementation wraps a {@code javax.sql.ResultSetMetaData}
  * instance, catching any SQLExceptions and translating them to the
  * appropriate Spring DataAccessException.
  *
@@ -45,7 +45,7 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 	 * Create a new ResultSetWrappingSqlRowSetMetaData object
 	 * for the given ResultSetMetaData instance.
 	 * @param resultSetMetaData a disconnected ResultSetMetaData instance
-	 * to wrap (usually a <code>javax.sql.RowSetMetaData</code> instance)
+	 * to wrap (usually a {@code javax.sql.RowSetMetaData} instance)
 	 * @see java.sql.ResultSet#getMetaData
 	 * @see javax.sql.RowSetMetaData
 	 * @see ResultSetWrappingSqlRowSet#getMetaData
@@ -63,7 +63,7 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 	public String getColumnClassName(int column) throws InvalidResultSetAccessException {
 		try {
 			return this.resultSetMetaData.getColumnClassName(column);
@@ -199,5 +199,5 @@ public class ResultSetWrappingSqlRowSetMetaData implements SqlRowSetMetaData {
 			throw new InvalidResultSetAccessException(se);
 		}
 	}
-	
+
 }

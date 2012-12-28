@@ -23,7 +23,7 @@ import org.springframework.core.Ordered;
  * {@link java.util.Comparator} implementation that checks
  * {@link org.springframework.core.Ordered} as well as the
  * {@link Order} annotation, with an order value provided by an
- * <code>Ordered</code> instance overriding a statically defined
+ * {@code Ordered} instance overriding a statically defined
  * annotation value (if any).
  *
  * @author Juergen Hoeller

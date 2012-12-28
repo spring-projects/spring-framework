@@ -126,12 +126,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.
-	 * <p>For instance, when this flag is <code>true</code> (the default), a request for {@code /hotels.pdf}
+	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
 	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
 	 * browser-defined {@code text/html,application/xhtml+xml}.
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setFavorPathExtension(boolean favorPathExtension) {
 		this.cnManagerFactoryBean.setFavorParameter(favorPathExtension);
 	}
@@ -142,6 +143,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setUseJaf(boolean useJaf) {
 		this.cnManagerFactoryBean.setUseJaf(useJaf);
 	}
@@ -149,12 +151,13 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Indicate whether a request parameter should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code false}.
-	 * <p>For instance, when this flag is <code>true</code>, a request for {@code /hotels?format=pdf} will result
+	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
 	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
 	 * {@code text/html,application/xhtml+xml}.
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setFavorParameter(boolean favorParameter) {
 		this.cnManagerFactoryBean.setFavorParameter(favorParameter);
 	}
@@ -165,6 +168,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setParameterName(String parameterName) {
 		this.cnManagerFactoryBean.setParameterName(parameterName);
 	}
@@ -177,6 +181,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setIgnoreAcceptHeader(boolean ignoreAcceptHeader) {
 		this.cnManagerFactoryBean.setIgnoreAcceptHeader(ignoreAcceptHeader);
 	}
@@ -188,6 +193,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setMediaTypes(Map<String, String> mediaTypes) {
 		if (mediaTypes != null) {
 			this.cnManagerFactoryBean.getMediaTypes().putAll(mediaTypes);
@@ -201,6 +207,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	 *
 	 * @deprecated use {@link #setContentNegotiationManager(ContentNegotiationManager)}
 	 */
+	@Deprecated
 	public void setDefaultContentType(MediaType defaultContentType) {
 		this.cnManagerFactoryBean.setDefaultContentType(defaultContentType);
 	}

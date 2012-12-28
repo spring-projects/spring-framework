@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,6 +47,7 @@ import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
  */
 public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
+	@Override
 	public void refresh() throws BeansException {
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("commandClass", "org.springframework.beans.TestBean");
@@ -75,6 +76,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	public static class LocaleChecker implements Controller, LastModified {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 				throws ServletException, IOException {
 			if (!(RequestContextUtils.getWebApplicationContext(request) instanceof SimpleWebApplicationContext)) {
@@ -89,6 +91,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			return null;
 		}
 
+		@Override
 		public long getLastModified(HttpServletRequest request) {
 			return 98;
 		}
@@ -105,6 +108,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 			this.messageSource.addMessage("themetestArgs", Locale.ENGLISH, "theme test message {0}");
 		}
 
+		@Override
 		public Theme getTheme(String themeName) {
 			if (AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME.equals(themeName)) {
 				return new SimpleTheme(AbstractThemeResolver.ORIGINAL_DEFAULT_THEME_NAME, this.messageSource);

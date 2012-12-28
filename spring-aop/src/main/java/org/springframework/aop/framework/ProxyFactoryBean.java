@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.aop.Advisor
  * @see Advised
  */
+@SuppressWarnings("serial")
 public class ProxyFactoryBean extends ProxyCreatorSupport
 		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware {
 
@@ -100,7 +101,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String[] interceptorNames;
-	
+
 	private String targetName;
 
 	private boolean autodetectInterfaces = true;
@@ -233,7 +234,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
 	 * Create an instance of the AOP proxy to be returned by this factory.
 	 * The instance will be cached for a singleton, and create on each call to
-	 * <code>getObject()</code> for a proxy.
+	 * {@code getObject()} for a proxy.
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
 	public Object getObject() throws BeansException {
@@ -351,7 +352,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 
 	/**
 	 * Return the proxy object to expose.
-	 * <p>The default implementation uses a <code>getProxy</code> call with
+	 * <p>The default implementation uses a {@code getProxy} call with
 	 * the factory's bean class loader. Can be overridden to specify a
 	 * custom class loader.
 	 * @param aopProxy the prepared AopProxy instance to get the proxy from
@@ -392,7 +393,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * which concludes the interceptorNames list, is an Advisor or Advice,
 	 * or may be a target.
 	 * @param beanName bean name to check
-	 * @return <code>true</code> if it's an Advisor or Advice
+	 * @return {@code true} if it's an Advisor or Advice
 	 */
 	private boolean isNamedBeanAnAdvisorOrAdvice(String beanName) {
 		Class namedBeanClass = this.beanFactory.getType(beanName);
@@ -543,10 +544,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		Advisor advisor = namedBeanToAdvisor(next);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Adding advisor with name '" + name + "'");
-		}			
+		}
 		addAdvisor(advisor);
 	}
-	
+
 	/**
 	 * Return a TargetSource to use when creating a proxy. If the target was not
 	 * specified at the end of the interceptorNames list, the TargetSource will be
@@ -627,24 +628,24 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		private final String beanName;
 
 		private final String message;
-		
+
 		public PrototypePlaceholderAdvisor(String beanName) {
 			this.beanName = beanName;
 			this.message = "Placeholder for prototype Advisor/Advice with bean name '" + beanName + "'";
 		}
-		
+
 		public String getBeanName() {
 			return beanName;
 		}
-		
+
 		public Advice getAdvice() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
-		
+
 		public boolean isPerInstance() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
-		
+
 		@Override
 		public String toString() {
 			return this.message;

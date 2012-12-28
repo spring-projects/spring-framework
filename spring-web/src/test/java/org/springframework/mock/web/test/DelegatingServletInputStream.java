@@ -39,7 +39,7 @@ public class DelegatingServletInputStream extends ServletInputStream {
 
 	/**
 	 * Create a DelegatingServletInputStream for the given source stream.
-	 * @param sourceStream the source stream (never <code>null</code>)
+	 * @param sourceStream the source stream (never {@code null})
 	 */
 	public DelegatingServletInputStream(InputStream sourceStream) {
 		Assert.notNull(sourceStream, "Source InputStream must not be null");
@@ -47,17 +47,19 @@ public class DelegatingServletInputStream extends ServletInputStream {
 	}
 
 	/**
-	 * Return the underlying source stream (never <code>null</code>).
+	 * Return the underlying source stream (never {@code null}).
 	 */
 	public final InputStream getSourceStream() {
 		return this.sourceStream;
 	}
 
 
+	@Override
 	public int read() throws IOException {
 		return this.sourceStream.read();
 	}
 
+	@Override
 	public void close() throws IOException {
 		super.close();
 		this.sourceStream.close();

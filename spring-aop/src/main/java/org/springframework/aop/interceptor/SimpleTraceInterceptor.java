@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
 /**
- * Simple AOP Alliance <code>MethodInterceptor</code> that can be introduced
+ * Simple AOP Alliance {@code MethodInterceptor} that can be introduced
  * in a chain to display verbose trace information about intercepted method
  * invocations, with method entry and method exit info.
  *
- * <p>Consider using <code>CustomizableTraceInterceptor</code> for more
+ * <p>Consider using {@code CustomizableTraceInterceptor} for more
  * advanced needs.
  *
  * @author Dmitriy Kopylenko
@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
  * @since 1.2
  * @see CustomizableTraceInterceptor
  */
+@SuppressWarnings("serial")
 public class SimpleTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**

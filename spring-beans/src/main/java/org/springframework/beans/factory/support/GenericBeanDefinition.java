@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * constructor argument values and property values. Additionally, deriving from a
  * parent bean definition can be flexibly configured through the "parentName" property.
  *
- * <p>In general, use this <code>GenericBeanDefinition</code> class for the purpose of
+ * <p>In general, use this {@code GenericBeanDefinition} class for the purpose of
  * registering user-visible bean definitions (which a post-processor might operate on,
- * potentially even reconfiguring the parent name). Use <code>RootBeanDefinition</code> /
- * <code>ChildBeanDefinition</code> where parent/child relationships happen to be pre-determined.
+ * potentially even reconfiguring the parent name). Use {@code RootBeanDefinition} /
+ * {@code ChildBeanDefinition} where parent/child relationships happen to be pre-determined.
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -35,6 +35,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
+@SuppressWarnings("serial")
 public class GenericBeanDefinition extends AbstractBeanDefinition {
 
 	private String parentName;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @since 10.03.2003
  */
 public class DummyFactory
-		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
-	
+		implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+
 	public static final String SINGLETON_NAME = "Factory singleton";
 
 	private static boolean prototypeCreated;
@@ -74,6 +74,7 @@ public class DummyFactory
 	 * Return if the bean managed by this factory is a singleton.
 	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
@@ -85,6 +86,7 @@ public class DummyFactory
 		this.singleton = singleton;
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -93,6 +95,7 @@ public class DummyFactory
 		return beanName;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = (AutowireCapableBeanFactory) beanFactory;
 		this.beanFactory.applyBeanPostProcessorsBeforeInitialization(this.testBean, this.beanName);
@@ -119,13 +122,14 @@ public class DummyFactory
 		return otherTestBean;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (initialized) {
 			throw new RuntimeException("Cannot call afterPropertiesSet twice on the one bean");
 		}
 		this.initialized = true;
 	}
-	
+
 	/**
 	 * Was this initialized by invocation of the
 	 * afterPropertiesSet() method from the InitializingBean interface?
@@ -144,6 +148,7 @@ public class DummyFactory
 	 * and prototype mode.
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Override
 	public Object getObject() throws BeansException {
 		if (isSingleton()) {
 			return this.testBean;
@@ -158,11 +163,13 @@ public class DummyFactory
 		}
 	}
 
-	public Class getObjectType() {
+	@Override
+	public Class<TestBean> getObjectType() {
 		return TestBean.class;
 	}
 
 
+	@Override
 	public void destroy() {
 		if (this.testBean != null) {
 			this.testBean.setName(null);

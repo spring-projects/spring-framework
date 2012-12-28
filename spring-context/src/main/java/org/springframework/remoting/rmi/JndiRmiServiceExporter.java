@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ import org.springframework.jndi.JndiTemplate;
  *
  * <p>With an RMI invoker, RMI communication works on the {@link RmiInvocationHandler}
  * level, needing only one stub for any service. Service interfaces do not have to
- * extend <code>java.rmi.Remote</code> or throw <code>java.rmi.RemoteException</code>
+ * extend {@code java.rmi.Remote} or throw {@code java.rmi.RemoteException}
  * on all methods, but in and out parameters have to be serializable.
  *
  * <p>The JNDI environment can be specified as "jndiEnvironment" bean property,
- * or be configured in a <code>jndi.properties</code> file or as system properties.
+ * or be configured in a {@code jndi.properties} file or as system properties.
  * For example:
  *
  * <pre class="code">&lt;property name="jndiEnvironment"&gt;

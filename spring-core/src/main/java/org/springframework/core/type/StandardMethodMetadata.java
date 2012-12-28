@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link MethodMetadata} implementation that uses standard reflection
- * to introspect a given <code>Method</code>.
+ * to introspect a given {@code Method}.
  *
  * @author Juergen Hoeller
  * @author Mark Pollack
@@ -67,11 +67,11 @@ public class StandardMethodMetadata implements MethodMetadata {
 		return this.introspectedMethod;
 	}
 
-	
+
 	public String getMethodName() {
 		return this.introspectedMethod.getName();
 	}
-	
+
 	public String getDeclaringClassName() {
 		return this.introspectedMethod.getDeclaringClass().getName();
 	}

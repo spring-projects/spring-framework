@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,15 @@ public interface SQLExceptionTranslator {
 	/**
 	 * Translate the given {@link SQLException} into a generic {@link DataAccessException}.
 	 * <p>The returned DataAccessException is supposed to contain the original
-	 * <code>SQLException</code> as root cause. However, client code may not generally
+	 * {@code SQLException} as root cause. However, client code may not generally
 	 * rely on this due to DataAccessExceptions possibly being caused by other resource
-	 * APIs as well. That said, a <code>getRootCause() instanceof SQLException</code>
+	 * APIs as well. That said, a {@code getRootCause() instanceof SQLException}
 	 * check (and subsequent cast) is considered reliable when expecting JDBC-based
 	 * access to have happened.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem (may be <code>null</code>)
-	 * @param ex the offending <code>SQLException</code>
-	 * @return the DataAccessException, wrapping the <code>SQLException</code>
+	 * @param sql SQL query or update that caused the problem (may be {@code null})
+	 * @param ex the offending {@code SQLException}
+	 * @return the DataAccessException, wrapping the {@code SQLException}
 	 * @see org.springframework.dao.DataAccessException#getRootCause()
 	 */
 	DataAccessException translate(String task, String sql, SQLException ex);

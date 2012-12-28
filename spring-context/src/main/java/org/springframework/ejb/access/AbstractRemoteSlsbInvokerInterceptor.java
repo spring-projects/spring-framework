@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.remoting.rmi.RmiClientInterceptorUtils;
  * @author Juergen Hoeller
  */
 public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbInvokerInterceptor {
-	
+
 	private Class homeInterface;
 
 	private boolean refreshHomeOnConnectFailure = false;
@@ -53,10 +53,10 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 	/**
 	 * Set a home interface that this invoker will narrow to before performing
-	 * the parameterless SLSB <code>create()</code> call that returns the actual
+	 * the parameterless SLSB {@code create()} call that returns the actual
 	 * SLSB proxy.
 	 * <p>Default is none, which will work on all J2EE servers that are not based
-	 * on CORBA. A plain <code>javax.ejb.EJBHome</code> interface is known to be
+	 * on CORBA. A plain {@code javax.ejb.EJBHome} interface is known to be
 	 * sufficient to make a WebSphere 5.0 Remote SLSB work. On other servers,
 	 * the specific home interface for the target SLSB might be necessary.
 	 */
@@ -128,7 +128,7 @@ public abstract class AbstractRemoteSlsbInvokerInterceptor extends AbstractSlsbI
 
 
 	/**
-	 * Fetches an EJB home object and delegates to <code>doInvoke</code>.
+	 * Fetches an EJB home object and delegates to {@code doInvoke}.
 	 * <p>If configured to refresh on connect failure, it will call
 	 * {@link #refreshAndRetry} on corresponding RMI exceptions.
 	 * @see #getHome

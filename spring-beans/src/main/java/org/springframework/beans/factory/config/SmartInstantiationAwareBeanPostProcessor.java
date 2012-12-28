@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,16 +41,16 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	 * processor's {@link #postProcessBeforeInstantiation} callback.
 	 * @param beanClass the raw class of the bean
 	 * @param beanName the name of the bean
-	 * @return the type of the bean, or <code>null</code> if not predictable
+	 * @return the type of the bean, or {@code null} if not predictable
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
 	Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException;
 
 	/**
 	 * Determine the candidate constructors to use for the given bean.
-	 * @param beanClass the raw class of the bean (never <code>null</code>)
+	 * @param beanClass the raw class of the bean (never {@code null})
 	 * @param beanName the name of the bean
-	 * @return the candidate constructors, or <code>null</code> if none specified
+	 * @return the candidate constructors, or {@code null} if none specified
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 */
 	Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException;

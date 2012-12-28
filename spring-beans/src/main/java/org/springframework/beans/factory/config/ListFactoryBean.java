@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class ListFactoryBean extends AbstractFactoryBean<List> {
 	/**
 	 * Set the class to use for the target List. Can be populated with a fully
 	 * qualified class name when defined in a Spring application context.
-	 * <p>Default is a <code>java.util.ArrayList</code>.
+	 * <p>Default is a {@code java.util.ArrayList}.
 	 * @see java.util.ArrayList
 	 */
 	public void setTargetListClass(Class targetListClass) {

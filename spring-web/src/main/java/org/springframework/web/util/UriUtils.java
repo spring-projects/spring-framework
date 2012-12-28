@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * <ul>
  * <li>Valid characters for the specific URI component as defined in RFC 3986 stay the same.</li>
  * <li>All other characters are converted into one or more bytes in the given encoding scheme. Each of the
- * resulting bytes is written as a hexadecimal string in the "<code>%<i>xy</i></code>" format.</li>
+ * resulting bytes is written as a hexadecimal string in the "{@code %<i>xy</i>}" format.</li>
  * </ul>
  *
  * @author Arjen Poutsma
@@ -70,8 +70,8 @@ public abstract class UriUtils {
 	/**
 	 * Encodes the given source URI into an encoded String. All various URI components are
 	 * encoded according to their respective valid character sets.
-	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
-	 * characters in query parameter names and query parameter values because they cannot 
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
+	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
 	 * <pre>
 	 * UriComponents uriComponents = UriComponentsBuilder.fromUri("/path?name={value}").buildAndExpand("a=b");
@@ -111,8 +111,8 @@ public abstract class UriUtils {
 	 * encoded according to their respective valid character sets.
 	 * <p><strong>Note</strong> that this method does not support fragments ({@code #}),
 	 * as these are not supposed to be sent to the server, but retained by the client.
-	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&" 
-	 * characters in query parameter names and query parameter values because they cannot 
+	 * <p><strong>Note</strong> that this method does not attempt to encode "=" and "&"
+	 * characters in query parameter names and query parameter values because they cannot
 	 * be parsed in a reliable way. Instead use:
 	 * <pre>
 	 * UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl("/path?name={value}").buildAndExpand("a=b");
@@ -338,7 +338,7 @@ public abstract class UriUtils {
 	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"}, and
 	 * {@code "0"} through {@code "9"} stay the same.</li>
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
-	 * <li>A sequence "<code>%<i>xy</i></code>" is interpreted as a hexadecimal representation of the character.</li>
+	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
 	 * </ul>
 	 * @param source the source string
 	 * @param encoding the encoding

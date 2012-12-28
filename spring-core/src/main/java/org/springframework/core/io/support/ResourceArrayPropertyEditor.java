@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ import org.springframework.core.io.Resource;
 
 /**
  * Editor for {@link org.springframework.core.io.Resource} arrays, to
- * automatically convert <code>String</code> location patterns
- * (e.g. <code>"file:C:/my*.txt"</code> or <code>"classpath*:myfile.txt"</code>)
- * to <code>Resource</code> array properties. Can also translate a collection
+ * automatically convert {@code String} location patterns
+ * (e.g. {@code "file:C:/my*.txt"} or {@code "classpath*:myfile.txt"})
+ * to {@code Resource} array properties. Can also translate a collection
  * or array of location patterns into a merged Resource array.
  *
- * <p>A path may contain <code>${...}</code> placeholders, to be
+ * <p>A path may contain {@code ${...}} placeholders, to be
  * resolved as {@link org.springframework.core.env.Environment} properties:
- * e.g. <code>${user.dir}</code>. Unresolvable placeholders are ignored by default.
+ * e.g. {@code ${user.dir}}. Unresolvable placeholders are ignored by default.
  *
  * <p>Delegates to a {@link ResourcePatternResolver},
  * by default using a {@link PathMatchingResourcePatternResolver}.

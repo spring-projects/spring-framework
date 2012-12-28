@@ -78,7 +78,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * classes. In this case, bean methods may reference other {@code @Bean} methods
  * in the same class by calling them <i>directly</i>. This ensures that references between
  * beans are strongly typed and navigable. Such so-called <em>'inter-bean references'</em> are
- * guaranteed to respect scoping and AOP semantics, just like <code>getBean()</code> lookups
+ * guaranteed to respect scoping and AOP semantics, just like {@code getBean()} lookups
  * would. These are the semantics known from the original 'Spring JavaConfig' project
  * which require CGLIB subclassing of each such configuration class at runtime. As a
  * consequence, {@code @Configuration} classes and their factory methods must not be
@@ -118,7 +118,7 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
  * the invocation via a CGLIB proxy. This is analogous to inter-{@code @Transactional}
  * method calls where in proxy mode, Spring does not intercept the invocation &mdash;
  * Spring does so only in AspectJ mode.
- * 
+ *
  * <p>For example:
  *
  * <pre class="code">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Interface for looking up <code>LabeledEnum</code> instances.
+ * Interface for looking up {@code LabeledEnum} instances.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
@@ -42,16 +42,16 @@ public interface LabeledEnumResolver {
 	/**
 	 * Return a map of enumerations of a particular type. Each element in the
 	 * map should be a key/value pair, where the key is the enum code, and the
-	 * value is the <code>LabeledEnum</code> instance.
+	 * value is the {@code LabeledEnum} instance.
 	 * @param type the enum type
 	 * @return a Map of localized enumeration instances,
-	 * with enum code as key and <code>LabeledEnum</code> instance as value
+	 * with enum code as key and {@code LabeledEnum} instance as value
 	 * @throws IllegalArgumentException if the type is not supported
 	 */
 	public Map getLabeledEnumMap(Class type) throws IllegalArgumentException;
 
 	/**
-	 * Resolve a single <code>LabeledEnum</code> by its identifying code.
+	 * Resolve a single {@code LabeledEnum} by its identifying code.
 	 * @param type the enum type
 	 * @param code the enum code
 	 * @return the enum
@@ -60,7 +60,7 @@ public interface LabeledEnumResolver {
 	public LabeledEnum getLabeledEnumByCode(Class type, Comparable code) throws IllegalArgumentException;
 
 	/**
-	 * Resolve a single <code>LabeledEnum</code> by its identifying code.
+	 * Resolve a single {@code LabeledEnum} by its identifying code.
 	 * @param type the enum type
 	 * @param label the enum label
 	 * @return the enum

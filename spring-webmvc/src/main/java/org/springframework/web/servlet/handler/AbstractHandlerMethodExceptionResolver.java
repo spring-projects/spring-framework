@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,10 +69,10 @@ public abstract class AbstractHandlerMethodExceptionResolver extends AbstractHan
 	 * with its actual exception handling.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handlerMethod the executed handler method, or <code>null</code> if none chosen at the time
+	 * @param handlerMethod the executed handler method, or {@code null} if none chosen at the time
 	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
+	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
 	 */
 	protected abstract ModelAndView doResolveHandlerMethodException(
 			HttpServletRequest request, HttpServletResponse response,

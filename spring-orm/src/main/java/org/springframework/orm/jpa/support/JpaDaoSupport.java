@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.orm.jpa.JpaTemplate;
  *
  * <p>This class will create its own JpaTemplate if an EntityManagerFactory
  * or EntityManager reference is passed in. A custom JpaTemplate instance
- * can be used through overriding <code>createJpaTemplate</code>.
+ * can be used through overriding {@code createJpaTemplate}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -44,7 +44,7 @@ import org.springframework.orm.jpa.JpaTemplate;
  * @see #setJpaTemplate
  * @see org.springframework.orm.jpa.JpaTemplate
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  */
 @Deprecated
 public abstract class JpaDaoSupport extends DaoSupport {

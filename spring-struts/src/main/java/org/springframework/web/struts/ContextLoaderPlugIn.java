@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,8 +277,8 @@ public class ContextLoaderPlugIn implements PlugIn {
 	/**
 	 * Initialize and publish the WebApplicationContext for the ActionServlet.
 	 * <p>Delegates to {@link #createWebApplicationContext} for actual creation.
-	 * <p>Can be overridden in subclasses. Call <code>getActionServlet()</code>
-	 * and/or <code>getModuleConfig()</code> to access the Struts configuration
+	 * <p>Can be overridden in subclasses. Call {@code getActionServlet()}
+	 * and/or {@code getModuleConfig()} to access the Struts configuration
 	 * that this PlugIn is associated with.
 	 * @throws org.springframework.beans.BeansException if the context couldn't be initialized
 	 * @throws IllegalStateException if there is already a context for the Struts ActionServlet
@@ -305,7 +305,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 			logger.debug("Published WebApplicationContext of Struts ActionServlet '" + getServletName() +
 					"', module '" + getModulePrefix() + "' as ServletContext attribute with name [" + attrName + "]");
 		}
-		
+
 		return wac;
 	}
 
@@ -340,7 +340,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		wac.setNamespace(getNamespace());
 		if (getContextConfigLocation() != null) {
 			wac.setConfigLocations(
-			    StringUtils.tokenizeToStringArray(
+				StringUtils.tokenizeToStringArray(
 							getContextConfigLocation(), ConfigurableWebApplicationContext.CONFIG_LOCATION_DELIMITERS));
 		}
 		wac.addBeanFactoryPostProcessor(

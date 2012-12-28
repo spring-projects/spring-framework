@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ package org.springframework.core.enums;
  * @since 1.2.6
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
+@Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 
 	/**
@@ -33,7 +35,7 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 
 	/**
 	 * Create a new StaticLabeledEnum instance.
-	 * @param label the label; if <code>null</code>), the enum's code
+	 * @param label the label; if {@code null}), the enum's code
 	 * will be used as label
 	 */
 	protected AbstractGenericLabeledEnum(String label) {
@@ -48,6 +50,6 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 		else {
 			return getCode().toString();
 		}
-	}	
+	}
 
 }

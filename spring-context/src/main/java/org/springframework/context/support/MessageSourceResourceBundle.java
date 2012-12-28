@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 
 	/**
 	 * This implementation resolves the code in the MessageSource.
-	 * Returns <code>null</code> if the message could not be resolved.
+	 * Returns {@code null} if the message could not be resolved.
 	 */
 	@Override
 	protected Object handleGetObject(String code) {
@@ -80,7 +80,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 	}
 
 	/**
-	 * This implementation returns <code>null</code>, as a MessageSource does
+	 * This implementation returns {@code null}, as a MessageSource does
 	 * not allow for enumerating the defined message codes.
 	 */
 	@Override
@@ -90,7 +90,7 @@ public class MessageSourceResourceBundle extends ResourceBundle {
 
 	/**
 	 * This implementation exposes the specified Locale for introspection
-	 * through the standard <code>ResourceBundle.getLocale()</code> method.
+	 * through the standard {@code ResourceBundle.getLocale()} method.
 	 */
 	@Override
 	public Locale getLocale() {

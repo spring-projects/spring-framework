@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,28 @@ import javax.servlet.jsp.JspException;
 /**
  * Abstract base class to provide common methods for implementing
  * databinding-aware JSP tags for rendering a <i>single</i>
- * HTML '<code>input</code>' element with a '<code>type</code>'
- * of '<code>checkbox</code>' or '<code>radio</code>'.
+ * HTML '{@code input}' element with a '{@code type}'
+ * of '{@code checkbox}' or '{@code radio}'.
  *
  * @author Juergen Hoeller
  * @since 2.5.2
  */
+@SuppressWarnings("serial")
 public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedElementTag {
 
 	/**
-	 * The value of the '<code>value</code>' attribute.
+	 * The value of the '{@code value}' attribute.
 	 */
 	private Object value;
 
 	/**
-	 * The value of the '<code>label</code>' attribute.
+	 * The value of the '{@code label}' attribute.
 	 */
 	private Object label;
 
 
 	/**
-	 * Set the value of the '<code>value</code>' attribute.
+	 * Set the value of the '{@code value}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setValue(Object value) {
@@ -49,14 +50,14 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	}
 
 	/**
-	 * Get the value of the '<code>value</code>' attribute.
+	 * Get the value of the '{@code value}' attribute.
 	 */
 	protected Object getValue() {
 		return this.value;
 	}
 
 	/**
-	 * Set the value of the '<code>label</code>' attribute.
+	 * Set the value of the '{@code label}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setLabel(Object label) {
@@ -64,7 +65,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 	}
 
 	/**
-	 * Get the value of the '<code>label</code>' attribute.
+	 * Get the value of the '{@code label}' attribute.
 	 */
 	protected Object getLabel() {
 		return this.label;
@@ -72,7 +73,7 @@ public abstract class AbstractSingleCheckedElementTag extends AbstractCheckedEle
 
 
 	/**
-	 * Renders the '<code>input(radio)</code>' element with the configured
+	 * Renders the '{@code input(radio)}' element with the configured
 	 * {@link #setValue(Object) value}. Marks the element as checked if the
 	 * value matches the {@link #getValue bound value}.
 	 */

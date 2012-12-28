@@ -198,7 +198,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 
 	/**
 	 * Template method to convert a null source.
-	 * <p>Default implementation returns <code>null</code>.
+	 * <p>Default implementation returns {@code null}.
 	 * Subclasses may override to return custom null objects for specific target types.
 	 * @param sourceType the sourceType to convert from
 	 * @param targetType the targetType to convert to
@@ -244,7 +244,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	/**
 	 * Return the default converter if no converter is found for the given sourceType/targetType pair.
 	 * Returns a NO_OP Converter if the sourceType is assignable to the targetType.
-	 * Returns <code>null</code> otherwise, indicating no suitable converter could be found.
+	 * Returns {@code null} otherwise, indicating no suitable converter could be found.
 	 * Subclasses may override.
 	 * @param sourceType the source type to convert from
 	 * @param targetType the target type to convert to

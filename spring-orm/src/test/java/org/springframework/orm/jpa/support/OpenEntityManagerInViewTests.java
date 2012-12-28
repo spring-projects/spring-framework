@@ -163,6 +163,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}
@@ -228,8 +229,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);
@@ -257,6 +258,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -264,8 +266,9 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 			}
@@ -292,8 +295,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);
@@ -323,6 +326,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		final AtomicInteger count = new AtomicInteger(0);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -333,8 +337,9 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		final AtomicInteger count2 = new AtomicInteger(0);
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
-			    throws IOException, ServletException {
+				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(factory2));
 				filter.doFilter(servletRequest, servletResponse, filterChain);
 				count2.incrementAndGet();
@@ -355,6 +360,7 @@ public class OpenEntityManagerInViewTests extends TestCase {
 		asyncManager.setTaskExecutor(new SyncTaskExecutor());
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.startCallableProcessing(new Callable<String>() {
+			@Override
 			public String call() throws Exception {
 				return "anything";
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
  * @since 1.1
  */
 public interface MethodReplacer {
-	
+
 	/**
 	 * Reimplement the given method.
 	 * @param obj the instance we're reimplementing the method for

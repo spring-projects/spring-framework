@@ -249,8 +249,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -287,8 +289,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -432,6 +436,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);
@@ -453,6 +458,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);
@@ -485,13 +491,13 @@ public class ViewResolverTests {
 		InternalResourceViewResolver vr = new InternalResourceViewResolver();
 		vr.setViewClass(JstlView.class);
 		vr.setApplicationContext(wac);
-	
-		View view = vr.resolveViewName("example1", Locale.getDefault());		
+
+		View view = vr.resolveViewName("example1", Locale.getDefault());
 		View cached = vr.resolveViewName("example1", Locale.getDefault());
 		if (view != cached) {
 			fail("Caching doesn't work");
 		}
-		
+
 		vr.removeFromCache("example1", Locale.getDefault());
 		cached = vr.resolveViewName("example1", Locale.getDefault());
 		if (view == cached) {
@@ -515,11 +521,11 @@ public class ViewResolverTests {
 
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
-		
+
 		assertEquals(2, count.intValue());
 
 		viewResolver.setCacheUnresolved(true);
-		
+
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());
 		viewResolver.resolveViewName("view", Locale.getDefault());

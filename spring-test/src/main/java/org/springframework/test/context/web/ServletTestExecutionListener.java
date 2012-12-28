@@ -38,7 +38,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * {@code TestExecutionListener} which provides mock Servlet API support to
  * {@link WebApplicationContext WebApplicationContexts} loaded by the <em>Spring
  * TestContext Framework</em>.
- * 
+ *
  * <p>Specifically, {@code ServletTestExecutionListener} sets up thread-local
  * state via Spring Web's {@link RequestContextHolder} during {@linkplain
  * #prepareTestInstance(TestContext) test instance preparation} and {@linkplain
@@ -61,7 +61,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
-	
+
 	/**
 	 * Sets up thread-local state during the <em>test instance preparation</em>
 	 * callback phase via Spring Web's {@link RequestContextHolder}.
@@ -126,7 +126,6 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 				RequestContextHolder.setRequestAttributes(servletWebRequest);
 
 				if (wac instanceof ConfigurableApplicationContext) {
-					@SuppressWarnings("resource")
 					ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) wac;
 					ConfigurableListableBeanFactory bf = configurableApplicationContext.getBeanFactory();
 					bf.registerResolvableDependency(MockHttpServletResponse.class, response);

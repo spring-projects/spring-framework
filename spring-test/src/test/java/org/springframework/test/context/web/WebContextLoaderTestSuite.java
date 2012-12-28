@@ -26,7 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Convenience test suite for integration tests that verify support for
  * {@link WebApplicationContext} {@linkplain ContextLoader context loaders}
  * in the TestContext framework.
- * 
+ *
  * @author Sam Brannen
  * @since 3.2
  */

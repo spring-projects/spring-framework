@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public final class TargetPointcutSelectionTests {
 	public TestAspect testAspectForTestImpl1;
 	public TestAspect testAspectForAbstractTestImpl;
 	public TestInterceptor testInterceptor;
-	
+
 
 	@Before
 	public void setUp() {
@@ -49,12 +49,12 @@ public final class TargetPointcutSelectionTests {
 		testAspectForTestImpl1 = (TestAspect) ctx.getBean("testAspectForTestImpl1");
 		testAspectForAbstractTestImpl = (TestAspect) ctx.getBean("testAspectForAbstractTestImpl");
 		testInterceptor = (TestInterceptor) ctx.getBean("testInterceptor");
-		
+
 		testAspectForTestImpl1.count = 0;
 		testAspectForAbstractTestImpl.count = 0;
 		testInterceptor.count = 0;
 	}
-	
+
 	@Test
 	public void testTargetSelectionForMatchedType() {
 		testImpl1.interfaceMethod();
@@ -76,16 +76,17 @@ public final class TargetPointcutSelectionTests {
 
 		public void interfaceMethod();
 	}
-	
+
 
 	// Reproducing bug requires that the class specified in target() pointcut doesn't
 	// include the advised method's implementation (instead a base class should include it)
 	public static abstract class AbstractTestImpl implements TestInterface {
 
+		@Override
 		public void interfaceMethod() {
 		}
 	}
-	
+
 
 	public static class TestImpl1 extends AbstractTestImpl {
 	}
@@ -98,15 +99,16 @@ public final class TargetPointcutSelectionTests {
 	public static class TestAspect {
 
 		public int count;
-		
+
 		public void increment() {
 			count++;
 		}
 	}
-	
+
 
 	public static class TestInterceptor extends TestAspect implements MethodInterceptor {
 
+		@Override
 		public Object invoke(MethodInvocation mi) throws Throwable {
 			increment();
 			return mi.proceed();

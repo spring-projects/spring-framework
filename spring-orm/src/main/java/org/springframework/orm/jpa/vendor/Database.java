@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ package org.springframework.orm.jpa.vendor;
  * the strategy class can still be specified using the fully-qualified class name.
  * This enumeration is merely a convenience. The database products listed here
  * are the same as those explicitly supported for Spring JDBC exception translation
- * in <code>sql-error-codes.xml</code>.
+ * in {@code sql-error-codes.xml}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -49,7 +49,7 @@ public enum Database {
 
 	ORACLE,
 
-	POSTGRESQL, 
+	POSTGRESQL,
 
 	SQL_SERVER,
 

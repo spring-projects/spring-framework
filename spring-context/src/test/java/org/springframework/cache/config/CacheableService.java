@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.cache.config;
 
 /**
  * Basic service interface.
- * 
+ *
  * @author Costin Leau
  */
 public interface CacheableService<T> {
@@ -59,11 +59,11 @@ public interface CacheableService<T> {
 
 	// multi annotations
 	T multiCache(Object arg1);
-	
+
 	T multiEvict(Object arg1);
 
 	T multiCacheAndEvict(Object arg1);
-	
+
 	T multiConditionalCacheAndEvict(Object arg1);
 
 	T multiUpdate(Object arg1);

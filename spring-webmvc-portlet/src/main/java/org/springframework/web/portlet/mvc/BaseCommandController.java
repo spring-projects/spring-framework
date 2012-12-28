@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * <p>This controller is the base for all controllers wishing to populate
  * JavaBeans based on request parameters, validate the content of such
  * JavaBeans using {@link Validator Validators} and use custom editors (in the form of
- * {@link java.beans.PropertyEditor PropertyEditors}) to transform 
+ * {@link java.beans.PropertyEditor PropertyEditors}) to transform
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
@@ -54,18 +54,18 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * Upon receiving a request, any BaseCommandController will attempt to fill the
  * command object using the request parameters. This is done using the typical
  * and well-known JavaBeans property notation. When a request parameter named
- * <code>'firstName'</code> exists, the framework will attempt to call 
- * <code>setFirstName([value])</code> passing the value of the parameter. Nested properties
- * are of course supported. For instance a parameter named <code>'address.city'</code>
- * will result in a <code>getAddress().setCity([value])</code> call on the
+ * {@code 'firstName'} exists, the framework will attempt to call
+ * {@code setFirstName([value])} passing the value of the parameter. Nested properties
+ * are of course supported. For instance a parameter named {@code 'address.city'}
+ * will result in a {@code getAddress().setCity([value])} call on the
  * command class.</p>
  *
  * <p>It's important to realize that you are not limited to String arguments in
  * your JavaBeans. Using the PropertyEditor-notion as supplied by the
  * java.beans package, you will be able to transform Strings to Objects and
- * the other way around. For instance <code>setLocale(Locale loc)</code> is
- * perfectly possible for a request parameter named <code>locale</code> having
- * a value of <code>en</code>, as long as you register the appropriate
+ * the other way around. For instance {@code setLocale(Locale loc)} is
+ * perfectly possible for a request parameter named {@code locale} having
+ * a value of {@code en}, as long as you register the appropriate
  * PropertyEditor in the Controller (see {@link #initBinder initBinder()}
  * for more information on that matter).</p>
  *
@@ -79,7 +79,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
  * <p><b><a name="workflow">Workflow
  * (<a href="AbstractController.html#workflow">and that defined by superclass</a>):</b><br>
  * Since this class is an abstract base class for more specific implementation,
- * it does not override the <code>handleRequestInternal()</code> methods and also has no
+ * it does not override the {@code handleRequestInternal()} methods and also has no
  * actual workflow. Implementing classes like
  * {@link AbstractFormController AbstractFormController},
  * {@link AbstractCommandController AbstractCommandController},
@@ -155,14 +155,14 @@ public abstract class BaseCommandController extends AbstractController {
 	 * session is that we have no way of knowing when we are done re-rendering
 	 * the request and so we don't know when we can remove the objects from
 	 * the session. So we will end up polluting the session with old objects
-	 * when we finally leave the render of this controller and move on to 
+	 * when we finally leave the render of this controller and move on to
 	 * somthing else. To minimize the pollution, we will use a static string
 	 * value as the session attribute name. At least this way we are only ever
 	 * leaving one orphaned set behind. The methods that return these names
 	 * can be overridden if you want to use a different method, but be aware
 	 * of the session pollution that may occur.
 	 */
-	private static final String RENDER_COMMAND_SESSION_ATTRIBUTE = 
+	private static final String RENDER_COMMAND_SESSION_ATTRIBUTE =
 			"org.springframework.web.portlet.mvc.RenderCommand";
 
 	private static final String RENDER_ERRORS_SESSION_ATTRIBUTE =
@@ -172,13 +172,13 @@ public abstract class BaseCommandController extends AbstractController {
 
 
 	private String commandName = DEFAULT_COMMAND_NAME;
-	
+
 	private Class commandClass;
-	
+
 	private Validator[] validators;
-	
+
 	private boolean validateOnBinding = true;
-	
+
 	private MessageCodesResolver messageCodesResolver;
 
 	private BindingErrorProcessor bindingErrorProcessor;
@@ -268,7 +268,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is <code>null</code>, i.e. using the default strategy of the data binder.
+	 * <p>Default is {@code null}, i.e. using the default strategy of the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
@@ -285,8 +285,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
-	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * required field errors and {@code PropertyAccessException}s.
+	 * <p>Default is {@code null}, i.e. using the default strategy of
 	 * the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
@@ -306,7 +306,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Specify a single PropertyEditorRegistrar to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
-	 * to separate objects, as an alternative to <code>initBinder</code>.
+	 * to separate objects, as an alternative to {@code initBinder}.
 	 * @see #initBinder
 	 */
 	public final void setPropertyEditorRegistrar(PropertyEditorRegistrar propertyEditorRegistrar) {
@@ -317,7 +317,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Specify one or more PropertyEditorRegistrars to be applied
 	 * to every DataBinder that this controller uses.
 	 * <p>Allows for factoring out the registration of PropertyEditors
-	 * to separate objects, as alternative to <code>initBinder</code>.
+	 * to separate objects, as alternative to {@code initBinder}.
 	 * @see #initBinder
 	 */
 	public final void setPropertyEditorRegistrars(PropertyEditorRegistrar[] propertyEditorRegistrars) {
@@ -378,7 +378,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new command instance for the command class of this controller.
-	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
+	 * <p>This implementation uses {@code BeanUtils.instantiateClass},
 	 * so the command needs to have a no-arg constructor (supposed to be
 	 * public, but not required to).
 	 * @return the new command instance
@@ -405,7 +405,7 @@ public abstract class BaseCommandController extends AbstractController {
 	protected final boolean checkCommand(Object command) {
 		return (this.commandClass == null || this.commandClass.isInstance(command));
 	}
-	
+
 
 	/**
 	 * Bind the parameters of the given request to the given command object.
@@ -416,7 +416,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected final PortletRequestDataBinder bindAndValidate(PortletRequest request, Object command)
 			throws Exception {
-				
+
 		PortletRequestDataBinder binder = createBinder(request, command);
 		if (!suppressBinding(request)) {
 			binder.bind(request);
@@ -434,7 +434,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress binding for the given request.
-	 * <p>The default implementation always returns <code>false</code>.
+	 * <p>The default implementation always returns {@code false}.
 	 * Can be overridden in subclasses to suppress validation:
 	 * for example, if a special request parameter is set.
 	 * @param request current portlet request
@@ -447,11 +447,11 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new binder instance for the given command and request.
-	 * <p>Called by <code>bindAndValidate</code>. Can be overridden to plug in
+	 * <p>Called by {@code bindAndValidate}. Can be overridden to plug in
 	 * custom PortletRequestDataBinder instances.
 	 * <p>The default implementation creates a standard PortletRequestDataBinder and
-	 * invokes <code>prepareBinder</code> and <code>initBinder</code>.
-	 * <p>Note that neither <code>prepareBinder</code> nor <code>initBinder</code>
+	 * invokes {@code prepareBinder} and {@code initBinder}.
+	 * <p>Note that neither {@code prepareBinder} nor {@code initBinder}
 	 * will be invoked automatically if you override this method! Call those methods
 	 * at appropriate points of your overridden method.
 	 * @param request current portlet request
@@ -464,7 +464,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 */
 	protected PortletRequestDataBinder createBinder(PortletRequest request, Object command)
 			throws Exception {
-			
+
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(command, getCommandName());
 		prepareBinder(binder);
 		initBinder(request, binder);
@@ -474,7 +474,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Prepare the given binder, applying the specified MessageCodesResolver,
 	 * BindingErrorProcessor and PropertyEditorRegistrars (if any).
-	 * Called by <code>createBinder</code>.
+	 * Called by {@code createBinder}.
 	 * @param binder the new binder instance
 	 * @see #createBinder
 	 * @see #setMessageCodesResolver
@@ -499,8 +499,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Determine whether to use direct field access instead of bean property access.
-	 * Applied by <code>prepareBinder</code>.
-	 * <p>The default is <code>false</code>. Can be overridden in subclasses.
+	 * Applied by {@code prepareBinder}.
+	 * <p>The default is {@code false}. Can be overridden in subclasses.
 	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 */
@@ -510,7 +510,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Initialize the given binder instance, for example with custom editors.
-	 * Called by <code>createBinder</code>.
+	 * Called by {@code createBinder}.
 	 * <p>This method allows you to register custom editors for certain fields of your
 	 * command class. For instance, you will be able to transform Date objects into a
 	 * String pattern and back, in order to allow your JavaBeans to have Date properties
@@ -532,7 +532,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Callback for custom post-processing in terms of binding.
 	 * Called on each submit, after standard binding but before validation.
-	 * <p>The default implementation delegates to <code>onBind(request, command)</code>.
+	 * <p>The default implementation delegates to {@code onBind(request, command)}.
 	 * @param request current portlet request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -547,7 +547,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Callback for custom post-processing in terms of binding.
-	 * Called by the default implementation of the <code>onBind</code> version with
+	 * Called by the default implementation of the {@code onBind} version with
 	 * all parameters, after standard binding but before validation.
 	 * <p>The default implementation is empty.
 	 * @param request current portlet request
@@ -560,7 +560,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Return whether to suppress validation for the given request.
-	 * <p>The default implementation always returns <code>false</code>.
+	 * <p>The default implementation always returns {@code false}.
 	 * Can be overridden in subclasses to suppress validation:
 	 * for example, if a special request parameter is set.
 	 * @param request current portlet request
@@ -598,7 +598,7 @@ public abstract class BaseCommandController extends AbstractController {
 		return RENDER_COMMAND_SESSION_ATTRIBUTE;
 	}
 
-	/** 
+	/**
 	 * Return the name of the session attribute that holds
 	 * the render phase command object for this form controller.
 	 * @return the name of the render phase command object session attribute

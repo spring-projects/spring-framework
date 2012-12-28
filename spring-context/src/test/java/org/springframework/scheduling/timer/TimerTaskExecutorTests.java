@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ public final class TimerTaskExecutorTests {
 
 		TimerTaskExecutor executor = new TimerTaskExecutor() {
 
+			@Override
 			protected Timer createTimer() {
 				return timer;
 			}
@@ -129,6 +130,7 @@ public final class TimerTaskExecutorTests {
 			return this.createTimerWasCalled;
 		}
 
+		@Override
 		protected Timer createTimer() {
 			this.createTimerWasCalled = true;
 			return super.createTimer();
@@ -146,6 +148,7 @@ public final class TimerTaskExecutorTests {
 		}
 
 
+		@Override
 		public void cancel() {
 			this.cancelWasCalled = true;
 			super.cancel();
@@ -166,6 +169,7 @@ public final class TimerTaskExecutorTests {
 		}
 
 
+		@Override
 		public void run() {
 			this.runWasCalled = true;
 			synchronized (monitor) {
@@ -176,6 +180,7 @@ public final class TimerTaskExecutorTests {
 
 	private static final class NoOpRunnable implements Runnable {
 
+		@Override
 		public void run() {
 			// explicit no-op
 		}

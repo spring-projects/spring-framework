@@ -97,6 +97,7 @@ public class RequestLoggingFilterTests {
 		request.setContent(requestBody);
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
@@ -122,6 +123,7 @@ public class RequestLoggingFilterTests {
 		request.setContent(requestBody.getBytes("UTF-8"));
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
@@ -148,6 +150,7 @@ public class RequestLoggingFilterTests {
 		request.setContent(requestBody);
 		FilterChain filterChain = new FilterChain() {
 
+			@Override
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				((HttpServletResponse) filterResponse).setStatus(HttpServletResponse.SC_OK);
@@ -182,6 +185,7 @@ public class RequestLoggingFilterTests {
 
 	private static class NoopFilterChain implements FilterChain {
 
+		@Override
 		public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 		}
 	}

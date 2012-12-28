@@ -134,7 +134,7 @@ public class HeadersRequestConditionTests {
 		assertTrue("Invalid comparison result: " + result, result > 0);
 	}
 
-	
+
 	@Test
 	public void combine() {
 		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=bar");

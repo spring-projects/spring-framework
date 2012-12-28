@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * <p>Note that ResourceBundle names are effectively classpath locations: As a
 	 * consequence, the JDK's standard ResourceBundle treats dots as package separators.
 	 * This means that "test.theme" is effectively equivalent to "test/theme",
-	 * just like it is for programmatic <code>java.util.ResourceBundle</code> usage.
+	 * just like it is for programmatic {@code java.util.ResourceBundle} usage.
 	 * @see java.util.ResourceBundle#getBundle(String)
 	 */
 	public void setBasenamePrefix(String basenamePrefix) {

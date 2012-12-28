@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * which accesses shared Spring {@link BeanFactory} instances.</p>
  *
  * <p>Please see the warning in BeanFactoryLocator's javadoc about appropriate usage
- * of singleton style BeanFactoryLocator implementations. It is the opinion of the 
+ * of singleton style BeanFactoryLocator implementations. It is the opinion of the
  * Spring team that the use of this class and similar classes is unnecessary except
  * (sometimes) for a small amount of glue code. Excessive usage will lead to code
  * that is more tightly coupled, and harder to modify or test.</p>
@@ -50,11 +50,11 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * searched for is 'classpath*:beanRefFactory.xml', with the Spring-standard
  * 'classpath*:' prefix ensuring that if the classpath contains multiple copies
  * of this file (perhaps one in each component jar) they will be combined. To
- * override the default resource name, instead of using the no-arg 
+ * override the default resource name, instead of using the no-arg
  * {@link #getInstance()} method, use the {@link #getInstance(String selector)}
  * variant, which will treat the 'selector' argument as the resource name to
  * search for.</p>
- * 
+ *
  * <p>The purpose of this 'outer' BeanFactory is to create and hold a copy of one
  * or more 'inner' BeanFactory or ApplicationContext instances, and allow those
  * to be obtained either directly or via an alias. As such, this class provides
@@ -66,12 +66,12 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * <p>Consider an example application scenario:
  *
  * <ul>
- * <li><code>com.mycompany.myapp.util.applicationContext.xml</code> -
+ * <li>{@code com.mycompany.myapp.util.applicationContext.xml} -
  * ApplicationContext definition file which defines beans for 'util' layer.
- * <li><code>com.mycompany.myapp.dataaccess-applicationContext.xml</code> -
+ * <li>{@code com.mycompany.myapp.dataaccess-applicationContext.xml} -
  * ApplicationContext definition file which defines beans for 'data access' layer.
  * Depends on the above.
- * <li><code>com.mycompany.myapp.services.applicationContext.xml</code> -
+ * <li>{@code com.mycompany.myapp.services.applicationContext.xml} -
  * ApplicationContext definition file which defines beans for 'services' layer.
  * Depends on the above.
  * </ul>
@@ -80,10 +80,10 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * or created as three hierarchical ApplicationContexts, by one piece of code
  * somewhere at application startup (perhaps a Servlet filter), from which all other
  * code in the application would flow, obtained as beans from the context(s). However
- * when third party code enters into the picture, things can get problematic. If the 
+ * when third party code enters into the picture, things can get problematic. If the
  * third party code needs to create user classes, which should normally be obtained
  * from a Spring BeanFactory/ApplicationContext, but can handle only newInstance()
- * style object creation, then some extra work is required to actually access and 
+ * style object creation, then some extra work is required to actually access and
  * use object from a BeanFactory/ApplicationContext. One solutions is to make the
  * class created by the third party code be just a stub or proxy, which gets the
  * real object from a BeanFactory/ApplicationContext, and delegates to it. However,
@@ -101,19 +101,19 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *
  * <p>Another use of SingletonBeanFactoryLocator, is to demand-load/use one or more
  * BeanFactories/ApplicationContexts. Because the definition can contain one of more
- * BeanFactories/ApplicationContexts, which can be independent or in a hierarchy, if 
+ * BeanFactories/ApplicationContexts, which can be independent or in a hierarchy, if
  * they are set to lazy-initialize, they will only be created when actually requested
  * for use.
  *
  * <p>Given the above-mentioned three ApplicationContexts, consider the simplest
  * SingletonBeanFactoryLocator usage scenario, where there is only one single
- * <code>beanRefFactory.xml</code> definition file:
+ * {@code beanRefFactory.xml} definition file:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
- * 
+ *
  *   &lt;bean id="com.mycompany.myapp"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
@@ -124,7 +124,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *       &lt;/list>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
- * 
+ *
  * &lt;/beans>
  * </pre>
  *
@@ -133,24 +133,24 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * <pre class="code">
  * BeanFactoryLocator bfl = SingletonBeanFactoryLocator.getInstance();
  * BeanFactoryReference bf = bfl.useBeanFactory("com.mycompany.myapp");
- * // now use some bean from factory 
+ * // now use some bean from factory
  * MyClass zed = bf.getFactory().getBean("mybean");
  * </pre>
  *
- * Another relatively simple variation of the <code>beanRefFactory.xml</code> definition file could be:
+ * Another relatively simple variation of the {@code beanRefFactory.xml} definition file could be:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
- * 
+ *
  *   &lt;bean id="com.mycompany.myapp.util" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
  *     &lt;constructor-arg>
  *       &lt;value>com/mycompany/myapp/util/applicationContext.xml&lt;/value>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
- * 
+ *
  *   &lt;!-- child of above -->
  *   &lt;bean id="com.mycompany.myapp.dataaccess" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
@@ -161,7 +161,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *       &lt;ref bean="com.mycompany.myapp.util"/>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
- * 
+ *
  *   &lt;!-- child of above -->
  *   &lt;bean id="com.mycompany.myapp.services" lazy-init="true"
  *         class="org.springframework.context.support.ClassPathXmlApplicationContext">
@@ -172,7 +172,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *       &lt;ref bean="com.mycompany.myapp.dataaccess"/>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
- * 
+ *
  *   &lt;!-- define an alias -->
  *   &lt;bean id="com.mycompany.myapp.mypackage"
  *         class="java.lang.String">
@@ -180,7 +180,7 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *       &lt;value>com.mycompany.myapp.services&lt;/value>
  *     &lt;/constructor-arg>
  *   &lt;/bean>
- * 
+ *
  * &lt;/beans>
  * </pre>
  *
@@ -193,14 +193,14 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  * actual definition file(s) for the SingletonBeanFactoryLocator maps that id to
  * a real context id.
  *
- * <p>A final example is more complex, with a <code>beanRefFactory.xml</code> for every module.
+ * <p>A final example is more complex, with a {@code beanRefFactory.xml} for every module.
  * All the files are automatically combined to create the final definition.
  *
- * <p><code>beanRefFactory.xml</code> file inside jar for util module:
+ * <p>{@code beanRefFactory.xml} file inside jar for util module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
  *   &lt;bean id="com.mycompany.myapp.util" lazy-init="true"
  *        class="org.springframework.context.support.ClassPathXmlApplicationContext">
@@ -210,12 +210,12 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *   &lt;/bean>
  * &lt;/beans>
  * </pre>
- * 
- * <code>beanRefFactory.xml</code> file inside jar for data-access module:<br>
+ *
+ * {@code beanRefFactory.xml} file inside jar for data-access module:<br>
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
  *   &lt;!-- child of util -->
  *   &lt;bean id="com.mycompany.myapp.dataaccess" lazy-init="true"
@@ -229,12 +229,12 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *   &lt;/bean>
  * &lt;/beans>
  * </pre>
- * 
- * <code>beanRefFactory.xml</code> file inside jar for services module:
+ *
+ * {@code beanRefFactory.xml} file inside jar for services module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
  *   &lt;!-- child of data-access -->
  *   &lt;bean id="com.mycompany.myapp.services" lazy-init="true"
@@ -248,20 +248,20 @@ import org.springframework.core.io.support.ResourcePatternUtils;
  *   &lt;/bean>
  * &lt;/beans>
  * </pre>
- * 
- * <code>beanRefFactory.xml</code> file inside jar for mypackage module. This doesn't
+ *
+ * {@code beanRefFactory.xml} file inside jar for mypackage module. This doesn't
  * create any of its own contexts, but allows the other ones to be referred to be
  * a name known to this module:
  *
  * <pre class="code">&lt;?xml version="1.0" encoding="UTF-8"?>
  * &lt;!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
- * 
+ *
  * &lt;beans>
  *   &lt;!-- define an alias for "com.mycompany.myapp.services" -->
  *   &lt;alias name="com.mycompany.myapp.services" alias="com.mycompany.myapp.mypackage"/&gt;
  * &lt;/beans>
  * </pre>
- *   
+ *
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
@@ -280,7 +280,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	/**
 	 * Returns an instance which uses the default "classpath*:beanRefFactory.xml",
 	 * as the name of the definition file(s). All resources returned by calling the
-	 * current thread context ClassLoader's <code>getResources</code> method with
+	 * current thread context ClassLoader's {@code getResources} method with
 	 * this name will be combined to create a BeanFactory definition set.
 	 * @return the corresponding BeanFactoryLocator instance
 	 * @throws BeansException in case of factory loading failure
@@ -293,7 +293,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 	 * Returns an instance which uses the the specified selector, as the name of the
 	 * definition file(s). In the case of a name with a Spring 'classpath*:' prefix,
 	 * or with no prefix, which is treated the same, the current thread context
-	 * ClassLoader's <code>getResources</code> method will be called with this value
+	 * ClassLoader's {@code getResources} method will be called with this value
 	 * to get all resources having that name. These resources will then be combined to
 	 * form a definition. In the case where the name uses a Spring 'classpath:' prefix,
 	 * or a standard URL prefix, then only one resource file will be loaded as the
@@ -362,7 +362,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 					logger.trace("Factory group with resource name [" + this.resourceLocation +
 							"] requested. Creating new instance.");
 				}
-				
+
 				// Create the BeanFactory but don't initialize it.
 				BeanFactory groupContext = createDefinition(this.resourceLocation, factoryKey);
 
@@ -446,7 +446,7 @@ public class SingletonBeanFactoryLocator implements BeanFactoryLocator {
 
 		return factory;
 	}
-	
+
 	/**
 	 * Instantiate singletons and do any other normal initialization of the factory.
 	 * Subclasses that override {@link #createDefinition createDefinition()} should

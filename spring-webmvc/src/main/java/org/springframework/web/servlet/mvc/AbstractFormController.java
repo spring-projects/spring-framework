@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.web.servlet.ModelAndView;
 /**
  * <p>Form controller that auto-populates a form bean from the request.
  * This, either using a new bean instance per request, or using the same bean
- * when the <code>sessionForm</code> property has been set to <code>true</code>.</p>
+ * when the {@code sessionForm} property has been set to {@code true}.</p>
  *
  * <p>This class is the base class for both framework subclasses such as
  * {@link SimpleFormController} and {@link AbstractWizardFormController}
@@ -42,19 +42,19 @@ import org.springframework.web.servlet.ModelAndView;
  * programmatically. To provide those views using configuration properties,
  * use the {@link SimpleFormController}.</p>
  *
- * <p>Subclasses need to override <code>showForm</code> to prepare the form view,
- * and <code>processFormSubmission</code> to handle submit requests. For the latter,
+ * <p>Subclasses need to override {@code showForm} to prepare the form view,
+ * and {@code processFormSubmission} to handle submit requests. For the latter,
  * binding errors like type mismatches will be reported via the given "errors" holder.
  * For additional custom form validation, a validator (property inherited from
  * BaseCommandController) can be used, reporting via the same "errors" instance.</p>
  *
- * <p>Comparing this Controller to the Struts notion of the <code>Action</code>
+ * <p>Comparing this Controller to the Struts notion of the {@code Action}
  * shows us that with Spring, you can use any ordinary JavaBeans or database-
  * backed JavaBeans without having to implement a framework-specific class
- * (like Struts' <code>ActionForm</code>). More complex properties of JavaBeans
+ * (like Struts' {@code ActionForm}). More complex properties of JavaBeans
  * (Dates, Locales, but also your own application-specific or compound types)
  * can be represented and submitted to the controller, by using the notion of
- * a <code>java.beans.PropertyEditor</code>. For more information on that
+ * a {@code java.beans.PropertyEditor}. For more information on that
  * subject, see the workflow of this controller and the explanation of the
  * {@link BaseCommandController}.</p>
  *
@@ -71,12 +71,12 @@ import org.springframework.web.servlet.ModelAndView;
  *      custom editors for certain fields (often properties of non-primitive
  *      or non-String types) of the command class. This will render appropriate
  *      Strings for those property values, e.g. locale-specific date strings.</li>
- *  <li><em>Only if <code>bindOnNewForm</code> is set to <code>true</code></em>, then
+ *  <li><em>Only if {@code bindOnNewForm} is set to {@code true}</em>, then
  *      {@link org.springframework.web.bind.ServletRequestDataBinder ServletRequestDataBinder}
  *      gets applied to populate the new form object with initial request parameters and the
  *      {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} callback method is
  *      called. <em>Note:</em> any defined Validators are not applied at this point, to allow
- *      partial binding. However be aware that any Binder customizations applied via 
+ *      partial binding. However be aware that any Binder customizations applied via
  *      initBinder() (such as
  *      {@link org.springframework.validation.DataBinder#setRequiredFields(String[])} will
  *      still apply. As such, if using bindOnNewForm=true and initBinder() customizations are
@@ -97,7 +97,7 @@ import org.springframework.web.servlet.ModelAndView;
  *      To use a different way of detecting a form submission, override the
  *      {@link #isFormSubmission isFormSubmission} method.
  *      </li>
- *  <li>If <code>sessionForm</code> is not set, {@link #formBackingObject formBackingObject()}
+ *  <li>If {@code sessionForm} is not set, {@link #formBackingObject formBackingObject()}
  *      is called to retrieve a form object. Otherwise, the controller tries to
  *      find the command object which is already bound in the session. If it cannot
  *      find the object, it does a call to {@link #handleInvalidSubmit handleInvalidSubmit}
@@ -107,7 +107,7 @@ import org.springframework.web.servlet.ModelAndView;
  *  <li>Call to {@link #onBind onBind(HttpServletRequest, Object, Errors)} which allows
  *      you to do custom processing after binding but before validation (e.g. to manually
  *      bind request parameters to bean properties, to be seen by the Validator).</li>
- *  <li>If <code>validateOnBinding</code> is set, a registered Validator will be invoked.
+ *  <li>If {@code validateOnBinding} is set, a registered Validator will be invoked.
  *      The Validator will check the form object properties, and register corresponding
  *      errors via the given {@link org.springframework.validation.Errors Errors}</li> object.
  *  <li>Call to {@link #onBindAndValidate onBindAndValidate()} which allows you
@@ -203,7 +203,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	}
 
 	/**
-	 * Return <code>true</code> if request parameters should be bound in case of a new form.
+	 * Return {@code true} if request parameters should be bound in case of a new form.
 	 */
 	public final boolean isBindOnNewForm() {
 		return this.bindOnNewForm;
@@ -231,14 +231,14 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <a href="http://www.springframework.org/webflow">Spring WebFlow</a>,
 	 * which has full support for conversations and has a much more flexible
 	 * usage model overall.
-	 * @param sessionForm <code>true</code> if session form mode is to be activated
+	 * @param sessionForm {@code true} if session form mode is to be activated
 	 */
 	public final void setSessionForm(boolean sessionForm) {
 		this.sessionForm = sessionForm;
 	}
 
 	/**
-	 * Return <code>true</code> if session form mode is activated.
+	 * Return {@code true} if session form mode is activated.
 	 */
 	public final boolean isSessionForm() {
 		return this.sessionForm;
@@ -302,7 +302,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>The default implementation delegates to the {@link #getFormSessionAttributeName()}
 	 * variant without arguments.
 	 * @param request current HTTP request
-	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
+	 * @return the name of the form session attribute, or {@code null} if not in session form mode
 	 * @see #getFormSessionAttributeName
 	 * @see javax.servlet.http.HttpSession#getAttribute
 	 */
@@ -382,8 +382,8 @@ public abstract class AbstractFormController extends BaseCommandController {
 
 	/**
 	 * Callback for custom post-processing in terms of binding for a new form.
-	 * Called when preparing a new form if <code>bindOnNewForm</code> is <code>true</code>.
-	 * <p>The default implementation delegates to <code>onBindOnNewForm(request, command)</code>.
+	 * Called when preparing a new form if {@code bindOnNewForm} is {@code true}.
+	 * <p>The default implementation delegates to {@code onBindOnNewForm(request, command)}.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
 	 * @param errors validation errors holder, allowing for additional
@@ -403,7 +403,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * <p>Called by the default implementation of the
 	 * {@link #onBindOnNewForm(HttpServletRequest, Object, BindException)} variant
 	 * with all parameters, after standard binding when displaying the form view.
-	 * Only called if <code>bindOnNewForm</code> is set to <code>true</code>.
+	 * Only called if {@code bindOnNewForm} is set to {@code true}.
 	 * <p>The default implementation is empty.
 	 * @param request current HTTP request
 	 * @param command the command object to perform further binding on
@@ -500,10 +500,10 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * Prepare the form model and view, including reference and error data.
 	 * Can show a configured form page, or generate a form view programmatically.
 	 * <p>A typical implementation will call
-	 * <code>showForm(request, errors, "myView")</code>
+	 * {@code showForm(request, errors, "myView")}
 	 * to prepare the form view for a specific view name, returning the
 	 * ModelAndView provided there.
-	 * <p>For building a custom ModelAndView, call <code>errors.getModel()</code>
+	 * <p>For building a custom ModelAndView, call {@code errors.getModel()}
 	 * to populate the ModelAndView model with the command and the Errors instance,
 	 * under the specified command name, as expected by the "spring:bind" tag.
 	 * You also need to include the model returned by {@link #referenceData}.
@@ -512,7 +512,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param errors validation errors holder
-	 * @return the prepared form view, or <code>null</code> if handled directly
+	 * @return the prepared form view, or {@code null} if handled directly
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #showForm(HttpServletRequest, BindException, String)
 	 * @see org.springframework.validation.Errors
@@ -592,12 +592,12 @@ public abstract class AbstractFormController extends BaseCommandController {
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>The default implementation returns <code>null</code>.
+	 * <p>The default implementation returns {@code null}.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param command form object with request parameters bound onto it
 	 * @param errors validation errors holder
-	 * @return a Map with reference data entries, or <code>null</code> if none
+	 * @return a Map with reference data entries, or {@code null} if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
@@ -615,7 +615,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * triggering a custom action. They can also provide custom validation and call
 	 * {@link #showForm(HttpServletRequest, HttpServletResponse, BindException)}
 	 * or proceed with the submission accordingly.
-	 * <p>For a success view, call <code>errors.getModel()</code> to populate the
+	 * <p>For a success view, call {@code errors.getModel()} to populate the
 	 * ModelAndView model with the command and the Errors instance, under the
 	 * specified command name, as expected by the "spring:bind" tag. For a form view,
 	 * simply return the ModelAndView object provided by
@@ -624,7 +624,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * @param response current servlet response
 	 * @param command form object with request parameters bound onto it
 	 * @param errors holder without errors (subclass can add errors if it wants to)
-	 * @return the prepared model and view, or <code>null</code>
+	 * @return the prepared model and view, or {@code null}
 	 * @throws Exception in case of errors
 	 * @see #handleRequestInternal
 	 * @see #isFormSubmission
@@ -659,7 +659,7 @@ public abstract class AbstractFormController extends BaseCommandController {
 	 * }</pre>
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a prepared view, or <code>null</code> if handled directly
+	 * @return a prepared view, or {@code null} if handled directly
 	 * @throws Exception in case of errors
 	 * @see #showNewForm
 	 * @see #getErrorsForNewForm

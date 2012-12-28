@@ -81,7 +81,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * the persistence unit name will be matched against the Spring bean name,
 	 * assuming that the EntityManagerFactory bean names follow that convention.
 	 * @param beanFactory the ListableBeanFactory to search
-	 * @param unitName the name of the persistence unit (may be <code>null</code> or empty,
+	 * @param unitName the name of the persistence unit (may be {@code null} or empty,
 	 * in which case a single bean of type EntityManagerFactory will be searched for)
 	 * @return the EntityManagerFactory
 	 * @throws NoSuchBeanDefinitionException if there is no such EntityManagerFactory in the context
@@ -116,9 +116,9 @@ public abstract class EntityManagerFactoryUtils {
 	 * Obtain a JPA EntityManager from the given factory. Is aware of a
 	 * corresponding EntityManager bound to the current thread,
 	 * for example when using JpaTransactionManager.
-	 * <p>Note: Will return <code>null</code> if no thread-bound EntityManager found!
+	 * <p>Note: Will return {@code null} if no thread-bound EntityManager found!
 	 * @param emf EntityManagerFactory to create the EntityManager with
-	 * @return the EntityManager, or <code>null</code> if none found
+	 * @return the EntityManager, or {@code null} if none found
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
@@ -132,11 +132,11 @@ public abstract class EntityManagerFactoryUtils {
 	 * Obtain a JPA EntityManager from the given factory. Is aware of a
 	 * corresponding EntityManager bound to the current thread,
 	 * for example when using JpaTransactionManager.
-	 * <p>Note: Will return <code>null</code> if no thread-bound EntityManager found!
+	 * <p>Note: Will return {@code null} if no thread-bound EntityManager found!
 	 * @param emf EntityManagerFactory to create the EntityManager with
-	 * @param properties the properties to be passed into the <code>createEntityManager</code>
-	 * call (may be <code>null</code>)
-	 * @return the EntityManager, or <code>null</code> if none found
+	 * @param properties the properties to be passed into the {@code createEntityManager}
+	 * call (may be {@code null})
+	 * @return the EntityManager, or {@code null} if none found
 	 * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained
 	 * @see JpaTransactionManager
 	 */
@@ -154,11 +154,11 @@ public abstract class EntityManagerFactoryUtils {
 	 * Obtain a JPA EntityManager from the given factory. Is aware of a
 	 * corresponding EntityManager bound to the current thread,
 	 * for example when using JpaTransactionManager.
-	 * <p>Same as <code>getEntityManager</code>, but throwing the original PersistenceException.
+	 * <p>Same as {@code getEntityManager}, but throwing the original PersistenceException.
 	 * @param emf EntityManagerFactory to create the EntityManager with
-	 * @param properties the properties to be passed into the <code>createEntityManager</code>
-	 * call (may be <code>null</code>)
-	 * @return the EntityManager, or <code>null</code> if none found
+	 * @param properties the properties to be passed into the {@code createEntityManager}
+	 * call (may be {@code null})
+	 * @return the EntityManager, or {@code null} if none found
 	 * @throws javax.persistence.PersistenceException if the EntityManager couldn't be created
 	 * @see #getTransactionalEntityManager(javax.persistence.EntityManagerFactory)
 	 * @see JpaTransactionManager
@@ -273,7 +273,7 @@ public abstract class EntityManagerFactoryUtils {
 
 	/**
 	 * Convert the given runtime exception to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * {@code org.springframework.dao} hierarchy.
 	 * Return null if no translation is appropriate: any other exception may
 	 * have resulted from user code, and should not be translated.
 	 * <p>The most important cases like object not found or optimistic locking failure
@@ -281,7 +281,7 @@ public abstract class EntityManagerFactoryUtils {
 	 * support sophisticated translation of exceptions via a JpaDialect.
 	 * @param ex runtime exception that occurred
 	 * @return the corresponding DataAccessException instance,
-	 * or <code>null</code> if the exception should not be translated
+	 * or {@code null} if the exception should not be translated
 	 */
 	public static DataAccessException convertJpaAccessExceptionIfPossible(RuntimeException ex) {
 		// Following the JPA specification, a persistence provider can also
@@ -317,17 +317,17 @@ public abstract class EntityManagerFactoryUtils {
 		if (ex instanceof PersistenceException) {
 			return new JpaSystemException((PersistenceException) ex);
 		}
-		
+
 		// If we get here, we have an exception that resulted from user code,
 		// rather than the persistence provider, so we return null to indicate
 		// that translation should not occur.
-		return null;				
+		return null;
 	}
 
 	/**
 	 * Close the given JPA EntityManager,
 	 * catching and logging any cleanup exceptions thrown.
-	 * @param em the JPA EntityManager to close (may be <code>null</code>)
+	 * @param em the JPA EntityManager to close (may be {@code null})
 	 * @see javax.persistence.EntityManager#close()
 	 */
 	public static void closeEntityManager(EntityManager em) {

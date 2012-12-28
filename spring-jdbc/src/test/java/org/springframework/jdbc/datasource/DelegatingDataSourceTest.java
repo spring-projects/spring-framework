@@ -18,6 +18,9 @@ package org.springframework.jdbc.datasource;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -25,7 +28,6 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,100 +44,78 @@ public class DelegatingDataSourceTest {
 
 	@Before
 	public void setup() {
-		this.delegate = EasyMock.createMock(DataSource.class);
+		this.delegate = mock(DataSource.class);
 		this.dataSource = new DelegatingDataSource(delegate);
 	}
 
 	@Test
 	public void shouldDelegateGetConnection() throws Exception {
-		Connection connection = EasyMock.createMock(Connection.class);
-		EasyMock.expect(delegate.getConnection()).andReturn(connection);
-		EasyMock.replay(delegate);
+		Connection connection = mock(Connection.class);
+		given(delegate.getConnection()).willReturn(connection);
 		assertThat(dataSource.getConnection(), is(connection));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateGetConnectionWithUsernameAndPassword() throws Exception {
-		Connection connection = EasyMock.createMock(Connection.class);
+		Connection connection = mock(Connection.class);
 		String username = "username";
 		String password = "password";
-		EasyMock.expect(delegate.getConnection(username, password)).andReturn(connection);
-		EasyMock.replay(delegate);
+		given(delegate.getConnection(username, password)).willReturn(connection);
 		assertThat(dataSource.getConnection(username, password), is(connection));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateGetLogWriter() throws Exception {
 		PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());
-		EasyMock.expect(delegate.getLogWriter()).andReturn(writer);
-		EasyMock.replay(delegate);
+		given(delegate.getLogWriter()).willReturn(writer);
 		assertThat(dataSource.getLogWriter(), is(writer));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateSetLogWriter() throws Exception {
 		PrintWriter writer = new PrintWriter(new ByteArrayOutputStream());
-		delegate.setLogWriter(writer);
-		EasyMock.expectLastCall();
-		EasyMock.replay(delegate);
 		dataSource.setLogWriter(writer);
-		EasyMock.verify(delegate);
+		verify(delegate).setLogWriter(writer);
 	}
 
 	@Test
 	public void shouldDelegateGetLoginTimeout() throws Exception {
 		int timeout = 123;
-		EasyMock.expect(delegate.getLoginTimeout()).andReturn(timeout);
-		EasyMock.replay(delegate);
+		given(delegate.getLoginTimeout()).willReturn(timeout);
 		assertThat(dataSource.getLoginTimeout(), is(timeout));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateSetLoginTimeoutWithSeconds() throws Exception {
 		int timeout = 123;
-		delegate.setLoginTimeout(timeout);
-		EasyMock.expectLastCall();
-		EasyMock.replay(delegate);
 		dataSource.setLoginTimeout(timeout);
-		EasyMock.verify(delegate);
+		verify(delegate).setLoginTimeout(timeout);
 	}
 
 	@Test
 	public void shouldDelegateUnwrapWithoutImplementing() throws Exception {
-		ExampleWrapper wrapper = EasyMock.createMock(ExampleWrapper.class);
-		EasyMock.expect(delegate.unwrap(ExampleWrapper.class)).andReturn(wrapper);
-		EasyMock.replay(delegate);
+		ExampleWrapper wrapper = mock(ExampleWrapper.class);
+		given(delegate.unwrap(ExampleWrapper.class)).willReturn(wrapper);
 		assertThat(dataSource.unwrap(ExampleWrapper.class), is(wrapper));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateUnwrapImplementing() throws Exception {
 		dataSource = new DelegatingDataSourceWithWrapper();
-		EasyMock.replay(delegate);
 		assertThat(dataSource.unwrap(ExampleWrapper.class),
 				is((ExampleWrapper) dataSource));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateIsWrapperForWithoutImplementing() throws Exception {
-		EasyMock.expect(delegate.isWrapperFor(ExampleWrapper.class)).andReturn(true);
-		EasyMock.replay(delegate);
+		given(delegate.isWrapperFor(ExampleWrapper.class)).willReturn(true);
 		assertThat(dataSource.isWrapperFor(ExampleWrapper.class), is(true));
-		EasyMock.verify(delegate);
 	}
 
 	@Test
 	public void shouldDelegateIsWrapperForImplementing() throws Exception {
 		dataSource = new DelegatingDataSourceWithWrapper();
-		EasyMock.replay(delegate);
 		assertThat(dataSource.isWrapperFor(ExampleWrapper.class), is(true));
-		EasyMock.verify(delegate);
 	}
 
 	public static interface ExampleWrapper {

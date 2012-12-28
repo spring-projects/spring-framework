@@ -120,10 +120,12 @@ public class DefaultMvcResultTests {
 			this.asyncStarted = asyncStarted;
 		}
 
+		@Override
 		public boolean isAsyncStarted() {
 			return this.asyncStarted;
 		}
 
+		@Override
 		public AsyncContext getAsyncContext() {
 			return asyncContext;
 		}

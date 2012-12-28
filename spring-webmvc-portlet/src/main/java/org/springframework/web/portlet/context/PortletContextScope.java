@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The associated destruction mechanism relies on a
  * {@link org.springframework.web.context.ContextCleanupListener} being registered in
- * <code>web.xml</code>. Note that {@link org.springframework.web.context.ContextLoaderListener}
+ * {@code web.xml}. Note that {@link org.springframework.web.context.ContextLoaderListener}
  * includes ContextCleanupListener's functionality.
  *
  * <p>This scope is registered as default scope with key

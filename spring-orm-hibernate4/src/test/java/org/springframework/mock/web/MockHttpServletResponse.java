@@ -51,7 +51,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-	
+
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
 	private static final String LOCATION_HEADER = "Location";
@@ -108,7 +108,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getOutputStream()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setOutputStreamAccessAllowed(boolean outputStreamAccessAllowed) {
 		this.outputStreamAccessAllowed = outputStreamAccessAllowed;
@@ -123,7 +123,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getWriter()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setWriterAccessAllowed(boolean writerAccessAllowed) {
 		this.writerAccessAllowed = writerAccessAllowed;
@@ -136,12 +136,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.writerAccessAllowed;
 	}
 
+	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
 		this.charset = true;
 		updateContentTypeHeader();
 	}
-	
+
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
@@ -152,10 +153,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 	}
 
+	@Override
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
 
+	@Override
 	public ServletOutputStream getOutputStream() {
 		if (!this.outputStreamAccessAllowed) {
 			throw new IllegalStateException("OutputStream access not allowed");
@@ -163,6 +166,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.outputStream;
 	}
 
+	@Override
 	public PrintWriter getWriter() throws UnsupportedEncodingException {
 		if (!this.writerAccessAllowed) {
 			throw new IllegalStateException("Writer access not allowed");
@@ -186,6 +190,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 				this.content.toString(this.characterEncoding) : this.content.toString();
 	}
 
+	@Override
 	public void setContentLength(int contentLength) {
 		this.contentLength = contentLength;
 		doAddHeaderValue(CONTENT_LENGTH_HEADER, contentLength, true);
@@ -195,6 +200,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.contentLength;
 	}
 
+	@Override
 	public void setContentType(String contentType) {
 		this.contentType = contentType;
 		if (contentType != null) {
@@ -208,22 +214,27 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 	}
 
+	@Override
 	public String getContentType() {
 		return this.contentType;
 	}
 
+	@Override
 	public void setBufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 	}
 
+	@Override
 	public int getBufferSize() {
 		return this.bufferSize;
 	}
 
+	@Override
 	public void flushBuffer() {
 		setCommitted(true);
 	}
 
+	@Override
 	public void resetBuffer() {
 		if (isCommitted()) {
 			throw new IllegalStateException("Cannot reset buffer - response is already committed");
@@ -242,10 +253,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.committed = committed;
 	}
 
+	@Override
 	public boolean isCommitted() {
 		return this.committed;
 	}
 
+	@Override
 	public void reset() {
 		resetBuffer();
 		this.characterEncoding = null;
@@ -258,10 +271,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.errorMessage = null;
 	}
 
+	@Override
 	public void setLocale(Locale locale) {
 		this.locale = locale;
 	}
 
+	@Override
 	public Locale getLocale() {
 		return this.locale;
 	}
@@ -271,6 +286,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	// HttpServletResponse interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void addCookie(Cookie cookie) {
 		Assert.notNull(cookie, "Cookie must not be null");
 		this.cookies.add(cookie);
@@ -290,6 +306,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return null;
 	}
 
+	@Override
 	public boolean containsHeader(String name) {
 		return (HeaderValueHolder.getByName(this.headers, name) != null);
 	}
@@ -297,7 +314,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
 	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
-	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
+	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
 	public Set<String> getHeaderNames() {
 		return this.headers.keySet();
@@ -310,7 +327,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -339,7 +356,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return the primary value for the given header, if any.
 	 * <p>Will return the first value in case of multiple values.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public Object getHeaderValue(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -365,6 +382,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * The default implementation returns the given URL String as-is.
 	 * <p>Can be overridden in subclasses, appending a session id or the like.
 	 */
+	@Override
 	public String encodeURL(String url) {
 		return url;
 	}
@@ -377,18 +395,22 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * override the common {@link #encodeURL} method instead, applying
 	 * to redirect URLs as well as to general URLs.
 	 */
+	@Override
 	public String encodeRedirectURL(String url) {
 		return encodeURL(url);
 	}
 
+	@Override
 	public String encodeUrl(String url) {
 		return encodeURL(url);
 	}
 
+	@Override
 	public String encodeRedirectUrl(String url) {
 		return encodeRedirectURL(url);
 	}
 
+	@Override
 	public void sendError(int status, String errorMessage) throws IOException {
 		if (isCommitted()) {
 			throw new IllegalStateException("Cannot set error status - response is already committed");
@@ -398,6 +420,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setCommitted(true);
 	}
 
+	@Override
 	public void sendError(int status) throws IOException {
 		if (isCommitted()) {
 			throw new IllegalStateException("Cannot set error status - response is already committed");
@@ -406,6 +429,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		setCommitted(true);
 	}
 
+	@Override
 	public void sendRedirect(String url) throws IOException {
 		if (isCommitted()) {
 			throw new IllegalStateException("Cannot send redirect - response is already committed");
@@ -420,26 +444,32 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return getHeader(LOCATION_HEADER);
 	}
 
+	@Override
 	public void setDateHeader(String name, long value) {
 		setHeaderValue(name, value);
 	}
 
+	@Override
 	public void addDateHeader(String name, long value) {
 		addHeaderValue(name, value);
 	}
 
+	@Override
 	public void setHeader(String name, String value) {
 		setHeaderValue(name, value);
 	}
 
+	@Override
 	public void addHeader(String name, String value) {
 		addHeaderValue(name, value);
 	}
 
+	@Override
 	public void setIntHeader(String name, int value) {
 		setHeaderValue(name, value);
 	}
 
+	@Override
 	public void addIntHeader(String name, int value) {
 		addHeaderValue(name, value);
 	}
@@ -457,7 +487,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		doAddHeaderValue(name, value, false);
 	}
-	
+
 	private boolean setSpecialHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
 			setContentType((String) value);
@@ -487,10 +517,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 	}
 
+	@Override
 	public void setStatus(int status) {
 		this.status = status;
 	}
 
+	@Override
 	public void setStatus(int status, String errorMessage) {
 		this.status = status;
 		this.errorMessage = errorMessage;
@@ -553,12 +585,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			super(out);
 		}
 
+		@Override
 		public void write(int b) throws IOException {
 			super.write(b);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();
 		}
 
+		@Override
 		public void flush() throws IOException {
 			super.flush();
 			setCommitted(true);
@@ -576,24 +610,28 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			super(out, true);
 		}
 
+		@Override
 		public void write(char buf[], int off, int len) {
 			super.write(buf, off, len);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();
 		}
 
+		@Override
 		public void write(String s, int off, int len) {
 			super.write(s, off, len);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();
 		}
 
+		@Override
 		public void write(int c) {
 			super.write(c);
 			super.flush();
 			setCommittedIfBufferSizeExceeded();
 		}
 
+		@Override
 		public void flush() {
 			super.flush();
 			setCommitted(true);

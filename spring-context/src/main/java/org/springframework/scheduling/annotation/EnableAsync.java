@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the 'async' annotation type to be detected at either class
 	 * or method level. By default, both the {@link Async} annotation and
-	 * the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation will be
+	 * the EJB 3.1 {@code javax.ejb.Asynchronous} annotation will be
 	 * detected. <p>This setter property exists so that developers can provide
 	 * their own (non-Spring-specific) annotation type to indicate that a method
 	 * (or all methods of a given class) should be invoked asynchronously.

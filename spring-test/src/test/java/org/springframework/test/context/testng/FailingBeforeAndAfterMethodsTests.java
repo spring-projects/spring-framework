@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import org.testng.TestNG;
  * and {@link TestExecutionListener#afterTestClass(TestContext)
  * afterTestClass()} lifecycle callback methods.
  * </p>
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -123,27 +123,34 @@ public class FailingBeforeAndAfterMethodsTests {
 		int failedConfigurationsCount = 0;
 
 
+		@Override
 		public void onFinish(ITestContext testContext) {
 			this.failedConfigurationsCount += testContext.getFailedConfigurations().size();
 		}
 
+		@Override
 		public void onStart(ITestContext testContext) {
 		}
 
+		@Override
 		public void onTestFailedButWithinSuccessPercentage(ITestResult testResult) {
 		}
 
+		@Override
 		public void onTestFailure(ITestResult testResult) {
 			this.testFailureCount++;
 		}
 
+		@Override
 		public void onTestSkipped(ITestResult testResult) {
 		}
 
+		@Override
 		public void onTestStart(ITestResult testResult) {
 			this.testStartCount++;
 		}
 
+		@Override
 		public void onTestSuccess(ITestResult testResult) {
 			this.testSuccessCount++;
 		}

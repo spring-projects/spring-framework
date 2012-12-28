@@ -23,7 +23,7 @@ import org.springframework.expression.spel.ExpressionState;
 
 /**
  * The power operator.
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */
@@ -37,7 +37,7 @@ public class OperatorPower extends Operator {
 	public TypedValue getValueInternal(ExpressionState state) throws EvaluationException {
 		SpelNodeImpl leftOp = getLeftOperand();
 		SpelNodeImpl rightOp = getRightOperand();
-	
+
 		Object operandOne = leftOp.getValueInternal(state).getValue();
 		Object operandTwo = rightOp.getValueInternal(state).getValue();
 		if (operandOne instanceof Number && operandTwo instanceof Number) {

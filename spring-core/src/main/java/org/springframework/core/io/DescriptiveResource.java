@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.io.InputStream;
  * Simple {@link Resource} implementation that holds a resource description
  * but does not point to an actually readable resource.
  *
- * <p>To be used as placeholder if a <code>Resource</code> argument is
+ * <p>To be used as placeholder if a {@code Resource} argument is
  * expected by an API but not necessarily used for actual reading.
  *
  * @author Juergen Hoeller
@@ -70,7 +70,7 @@ public class DescriptiveResource extends AbstractResource {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
+			(obj instanceof DescriptiveResource && ((DescriptiveResource) obj).description.equals(this.description)));
 	}
 
 	/**

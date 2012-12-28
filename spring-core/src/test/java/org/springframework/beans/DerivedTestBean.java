@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.io.Serializable;
  * @author Juergen Hoeller
  * @since 21.08.2003
  */
+@SuppressWarnings("serial")
 public class DerivedTestBean extends TestBean implements Serializable {
 
 	private String beanName;
@@ -47,12 +48,14 @@ public class DerivedTestBean extends TestBean implements Serializable {
 	}
 
 
+	@Override
 	public void setBeanName(String beanName) {
 		if (this.beanName == null || beanName == null) {
 			this.beanName = beanName;
 		}
 	}
 
+	@Override
 	public String getBeanName() {
 		return beanName;
 	}
@@ -71,10 +74,12 @@ public class DerivedTestBean extends TestBean implements Serializable {
 	}
 
 
+	@Override
 	public void destroy() {
 		this.destroyed = true;
 	}
 
+	@Override
 	public boolean wasDestroyed() {
 		return destroyed;
 	}

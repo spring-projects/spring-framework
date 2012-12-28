@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,6 +264,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	/** Servlet that sets the given status code. */
+	@SuppressWarnings("serial")
 	private static class StatusCodeServlet extends GenericServlet {
 
 		private final int sc;
@@ -279,6 +280,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	/** Servlet that returns an error message for a given status code. */
+	@SuppressWarnings("serial")
 	private static class ErrorServlet extends GenericServlet {
 
 		private final int sc;
@@ -293,6 +295,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class GetServlet extends HttpServlet {
 
 		private final byte[] buf;
@@ -315,6 +318,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class PostServlet extends HttpServlet {
 
 		private final String s;
@@ -347,6 +351,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class UriServlet extends HttpServlet {
 
 		@Override
@@ -357,6 +362,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class MultipartServlet extends HttpServlet {
 
 		@Override

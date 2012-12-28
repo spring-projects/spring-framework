@@ -32,14 +32,12 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.context.request.async.WebAsyncManager;
-import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * {@link javax.servlet.Filter} that generates an <code>ETag</code> value based on the content on the response.
- * This ETag is compared to the <code>If-None-Match</code> header of the request. If these headers are equal,
- * the response content is not sent, but rather a <code>304 "Not Modified"</code> status instead.
+ * {@link javax.servlet.Filter} that generates an {@code ETag} value based on the content on the response.
+ * This ETag is compared to the {@code If-None-Match} header of the request. If these headers are equal,
+ * the response content is not sent, but rather a {@code 304 "Not Modified"} status instead.
  *
  * <p>Since the ETag is based on the response content, the response (or {@link org.springframework.web.servlet.View})
  * is still rendered. As such, this filter only saves bandwidth, not server performance.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,20 +95,23 @@ public class MockPortletConfig implements PortletConfig {
 		this.portletName = portletName;
 	}
 
-	
+
+	@Override
 	public String getPortletName() {
 		return this.portletName;
 	}
-	
+
+	@Override
 	public PortletContext getPortletContext() {
 		return this.portletContext;
 	}
-	
+
 	public void setResourceBundle(Locale locale, ResourceBundle resourceBundle) {
 		Assert.notNull(locale, "Locale must not be null");
 		this.resourceBundles.put(locale, resourceBundle);
 	}
 
+	@Override
 	public ResourceBundle getResourceBundle(Locale locale) {
 		Assert.notNull(locale, "Locale must not be null");
 		return this.resourceBundles.get(locale);
@@ -119,11 +122,13 @@ public class MockPortletConfig implements PortletConfig {
 		this.initParameters.put(name, value);
 	}
 
+	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}
@@ -132,6 +137,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.publicRenderParameterNames.add(name);
 	}
 
+	@Override
 	public Enumeration<String> getPublicRenderParameterNames() {
 		return Collections.enumeration(this.publicRenderParameterNames);
 	}
@@ -140,6 +146,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.defaultNamespace = defaultNamespace;
 	}
 
+	@Override
 	public String getDefaultNamespace() {
 		return this.defaultNamespace;
 	}
@@ -148,6 +155,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.publishingEventQNames.add(name);
 	}
 
+	@Override
 	public Enumeration<QName> getPublishingEventQNames() {
 		return Collections.enumeration(this.publishingEventQNames);
 	}
@@ -156,6 +164,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.processingEventQNames.add(name);
 	}
 
+	@Override
 	public Enumeration<QName> getProcessingEventQNames() {
 		return Collections.enumeration(this.processingEventQNames);
 	}
@@ -164,6 +173,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.supportedLocales.add(locale);
 	}
 
+	@Override
 	public Enumeration<Locale> getSupportedLocales() {
 		return Collections.enumeration(this.supportedLocales);
 	}
@@ -176,6 +186,7 @@ public class MockPortletConfig implements PortletConfig {
 		this.containerRuntimeOptions.put(key, values);
 	}
 
+	@Override
 	public Map<String, String[]> getContainerRuntimeOptions() {
 		return Collections.unmodifiableMap(this.containerRuntimeOptions);
 	}

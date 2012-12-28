@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Simple {@link ProblemReporter} implementation that exhibits fail-fast
  * behavior when errors are encountered.
- * 
+ *
  * <p>The first error encountered results in a {@link BeanDefinitionParsingException}
  * being thrown.
  *
@@ -41,7 +41,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 
 	/**
 	 * Set the {@link Log logger} that is to be used to report warnings.
-	 * <p>If set to <code>null</code> then a default {@link Log logger} set to
+	 * <p>If set to {@code null} then a default {@link Log logger} set to
 	 * the name of the instance class will be used.
 	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
@@ -69,7 +69,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	}
 
 	/**
-	 * Writes the supplied {@link Problem} to the {@link Log} at <code>WARN</code> level.
+	 * Writes the supplied {@link Problem} to the {@link Log} at {@code WARN} level.
 	 * @param problem the source of the warning
 	 */
 	public void warning(Problem problem) {

@@ -29,7 +29,6 @@ import javax.resource.spi.work.WorkManager;
 import javax.resource.spi.work.WorkRejectedException;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.TaskTimeoutException;
 import org.springframework.jca.context.BootstrapContextAware;
@@ -56,7 +55,7 @@ import org.springframework.util.Assert;
  * This is for example appropriate on the Geronimo application server, where
  * WorkManager GBeans (e.g. Geronimo's default "DefaultWorkManager" GBean)
  * can be linked into the J2EE environment through "gbean-ref" entries
- * in the <code>geronimo-web.xml</code> deployment descriptor.
+ * in the {@code geronimo-web.xml} deployment descriptor.
  *
  * <p><b>On JBoss and GlassFish, obtaining the default JCA WorkManager
  * requires special lookup steps.</b> See the
@@ -131,8 +130,8 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	/**
 	 * Set whether to let {@link #execute} block until the work
 	 * has been actually started.
-	 * <p>Uses the JCA <code>startWork</code> operation underneath,
-	 * instead of the default <code>scheduleWork</code>.
+	 * <p>Uses the JCA {@code startWork} operation underneath,
+	 * instead of the default {@code scheduleWork}.
 	 * @see javax.resource.spi.work.WorkManager#startWork
 	 * @see javax.resource.spi.work.WorkManager#scheduleWork
 	 */
@@ -143,8 +142,8 @@ public class WorkManagerTaskExecutor extends JndiLocatorSupport
 	/**
 	 * Set whether to let {@link #execute} block until the work
 	 * has been completed.
-	 * <p>Uses the JCA <code>doWork</code> operation underneath,
-	 * instead of the default <code>scheduleWork</code>.
+	 * <p>Uses the JCA {@code doWork} operation underneath,
+	 * instead of the default {@code scheduleWork}.
 	 * @see javax.resource.spi.work.WorkManager#doWork
 	 * @see javax.resource.spi.work.WorkManager#scheduleWork
 	 */

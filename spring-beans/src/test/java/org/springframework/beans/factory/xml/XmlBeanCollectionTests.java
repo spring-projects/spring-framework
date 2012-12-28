@@ -454,7 +454,7 @@ public class XmlBeanCollectionTests {
  * @since 05.06.2003
  */
 class HasMap {
-	
+
 	private Map map;
 
 	private IdentityHashMap identityMap;
@@ -464,11 +464,11 @@ class HasMap {
 	private CopyOnWriteArraySet concurrentSet;
 
 	private Properties props;
-	
+
 	private Object[] objectArray;
-	
+
 	private Class[] classArray;
-	
+
 	private Integer[] intArray;
 
 	public Map getMap() {

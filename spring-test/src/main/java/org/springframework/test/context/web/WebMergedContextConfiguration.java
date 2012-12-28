@@ -62,11 +62,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * supplied test class, resource locations, annotated classes, context
 	 * initializers, active profiles, resource base path, and {@code ContextLoader}.
 	 *
-	 * <p>If a <code>null</code> value is supplied for <code>locations</code>,
-	 * <code>classes</code>, or <code>activeProfiles</code> an empty array will
-	 * be stored instead. If a <code>null</code> value is supplied for the
-	 * <code>contextInitializerClasses</code> an empty set will be stored instead.
-	 * If an <em>empty</em> value is supplied for the <code>resourceBasePath</code>
+	 * <p>If a {@code null} value is supplied for {@code locations},
+	 * {@code classes}, or {@code activeProfiles} an empty array will
+	 * be stored instead. If a {@code null} value is supplied for the
+	 * {@code contextInitializerClasses} an empty set will be stored instead.
+	 * If an <em>empty</em> value is supplied for the {@code resourceBasePath}
 	 * an empty string will be used. Furthermore, active profiles will be sorted,
 	 * and duplicate profiles will be removed.
 	 *
@@ -76,7 +76,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param contextInitializerClasses the merged context initializer classes
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param resourceBasePath the resource path to the root directory of the web application
-	 * @param contextLoader the resolved <code>ContextLoader</code>
+	 * @param contextLoader the resolved {@code ContextLoader}
 	 */
 	public WebMergedContextConfiguration(
 			Class<?> testClass,
@@ -117,7 +117,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * instance by comparing both object's {@linkplain #getLocations() locations},
 	 * {@linkplain #getClasses() annotated classes},
 	 * {@linkplain #getContextInitializerClasses() context initializer classes},
-	 * {@linkplain #getActiveProfiles() active profiles}, 
+	 * {@linkplain #getActiveProfiles() active profiles},
 	 * {@linkplain #getResourceBasePath() resource base path}, and the fully
 	 * qualified names of their {@link #getContextLoader() ContextLoaders}.
 	 */

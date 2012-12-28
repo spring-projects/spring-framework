@@ -67,7 +67,7 @@ public class RequestContextTests {
 		map.put("spam", "bucket");
 		assertEquals("foo/bar?spam=bucket", context.getContextUrl("{foo}?spam={spam}", map));
 	}
-	
+
 	@Test
 	public void testGetContextUrlWithMapEscaping() throws Exception {
 		request.setContextPath("foo/");
@@ -83,12 +83,12 @@ public class RequestContextTests {
 		request.setContextPath("/app");
 		request.setServletPath("/servlet");
 		RequestContext context = new RequestContext(request, response, servletContext, model);
-		
+
 		assertEquals("/app/servlet", context.getPathToServlet());
 
 		request.setAttribute(WebUtils.FORWARD_CONTEXT_PATH_ATTRIBUTE, "/origApp");
 		request.setAttribute(WebUtils.FORWARD_SERVLET_PATH_ATTRIBUTE, "/origServlet");
-		
+
 		assertEquals("/origApp/origServlet", context.getPathToServlet());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import org.springframework.util.PropertyPlaceholderHelper.PlaceholderResolver;
 /**
  * Helper class for resolving placeholders in texts. Usually applied to file paths.
  *
- * <p>A text may contain <code>${...}</code> placeholders, to be resolved as system properties: e.g.
- * <code>${user.dir}</code>.  Default values can be supplied using the ":" separator between key 
+ * <p>A text may contain {@code ${...}} placeholders, to be resolved as system properties: e.g.
+ * {@code ${user.dir}}.  Default values can be supplied using the ":" separator between key
  * and value.
  *
  * @author Juergen Hoeller

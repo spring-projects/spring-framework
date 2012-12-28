@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletRequest} interface.
- * 
+ *
  * @author John A. Lewis
  * @author Juergen Hoeller
  * @since 2.0
@@ -103,7 +103,7 @@ public class MockPortletRequest implements PortletRequest {
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}
 	 * and a default {@link MockPortletContext}.
-	 * 
+	 *
 	 * @see MockPortalContext
 	 * @see MockPortletContext
 	 */
@@ -113,7 +113,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest with a default {@link MockPortalContext}.
-	 * 
+	 *
 	 * @param portletContext the PortletContext that the request runs in
 	 * @see MockPortalContext
 	 */
@@ -123,7 +123,7 @@ public class MockPortletRequest implements PortletRequest {
 
 	/**
 	 * Create a new MockPortletRequest.
-	 * 
+	 *
 	 * @param portalContext the PortalContext that the request runs in
 	 * @param portletContext the PortletContext that the request runs in
 	 */
@@ -269,7 +269,7 @@ public class MockPortletRequest implements PortletRequest {
 	public String getProperty(String key) {
 		Assert.notNull(key, "Property key must not be null");
 		List<String> list = this.properties.get(key);
-		return (list != null && list.size() > 0 ? (String) list.get(0) : null);
+		return (list != null && list.size() > 0 ? list.get(0) : null);
 	}
 
 	public Enumeration<String> getProperties(String key) {

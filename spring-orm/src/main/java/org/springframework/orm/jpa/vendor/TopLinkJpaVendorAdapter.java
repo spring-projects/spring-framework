@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	/**
 	 * Determine the TopLink target database name for the given database.
 	 * @param database the specified database
-	 * @return the TopLink target database name, or <code>null<code> if none found
+	 * @return the TopLink target database name, or {@code null} if none found
 	 */
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {

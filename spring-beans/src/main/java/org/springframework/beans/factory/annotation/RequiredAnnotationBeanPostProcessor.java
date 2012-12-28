@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  * still be desirable), because all that this class does is enforce that a
  * 'required' property has actually been configured with a value. It does
  * <b>not</b> check anything else... In particular, it does not check that a
- * configured value is not <code>null</code>.
+ * configured value is not {@code null}.
  *
  * <p>Note: A default RequiredAnnotationBeanPostProcessor will be registered
  * by the "context:annotation-config" and "context:component-scan" XML tags.
@@ -163,7 +163,7 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * {@link #SKIP_REQUIRED_CHECK_ATTRIBUTE} attribute in the bean definition, if any.
 	 * @param beanFactory the BeanFactory to check against
 	 * @param beanName the name of the bean to check against
-	 * @return <code>true</code> to skip the bean; <code>false</code> to process it
+	 * @return {@code true} to skip the bean; {@code false} to process it
 	 */
 	protected boolean shouldSkip(ConfigurableListableBeanFactory beanFactory, String beanName) {
 		if (beanFactory == null || !beanFactory.containsBeanDefinition(beanName)) {
@@ -178,9 +178,9 @@ public class RequiredAnnotationBeanPostProcessor extends InstantiationAwareBeanP
 	 * <p>This implementation looks for the existence of a
 	 * {@link #setRequiredAnnotationType "required" annotation}
 	 * on the supplied {@link PropertyDescriptor property}.
-	 * @param propertyDescriptor the target PropertyDescriptor (never <code>null</code>)
-	 * @return <code>true</code> if the supplied property has been marked as being required;
-	 * <code>false</code> if not, or if the supplied property does not have a setter method
+	 * @param propertyDescriptor the target PropertyDescriptor (never {@code null})
+	 * @return {@code true} if the supplied property has been marked as being required;
+	 * {@code false} if not, or if the supplied property does not have a setter method
 	 */
 	protected boolean isRequiredProperty(PropertyDescriptor propertyDescriptor) {
 		Method setter = propertyDescriptor.getWriteMethod();

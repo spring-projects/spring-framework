@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import org.springframework.util.ClassUtils;
  * Simple implementation of a JNDI naming context builder.
  *
  * <p>Mainly targeted at test environments, where each test case can
- * configure JNDI appropriately, so that <code>new InitialContext()</code>
+ * configure JNDI appropriately, so that {@code new InitialContext()}
  * will expose the required objects. Also usable for standalone applications,
  * e.g. for binding a JDBC DataSource to a well-known JNDI location, to be
  * able to use traditional J2EE data access code outside of a J2EE container.
@@ -52,7 +52,7 @@ import org.springframework.util.ClassUtils;
  * DataSource ds = new DriverManagerDataSource(...);
  * builder.bind("java:comp/env/jdbc/myds", ds);
  * builder.activate();</pre>
- * 
+ *
  * Note that it's impossible to activate multiple builders within the same JVM,
  * due to JNDI restrictions. Thus to configure a fresh builder repeatedly, use
  * the following code to get a reference to either an already activated builder
@@ -63,7 +63,7 @@ import org.springframework.util.ClassUtils;
  * DataSource ds = new DriverManagerDataSource(...);
  * builder.bind("java:comp/env/jdbc/myds", ds);</pre>
  *
- * Note that you <i>should not</i> call <code>activate()</code> on a builder from
+ * Note that you <i>should not</i> call {@code activate()} on a builder from
  * this factory method, as there will already be an activated one in any case.
  *
  * <p>An instance of this class is only necessary at setup time.
@@ -74,7 +74,7 @@ import org.springframework.util.ClassUtils;
  * @see #emptyActivatedContextBuilder()
  * @see #bind(String, Object)
  * @see #activate()
- * @see org.springframework.mock.jndi.SimpleNamingContext
+ * @see SimpleNamingContext
  * @see org.springframework.jdbc.datasource.SingleConnectionDataSource
  * @see org.springframework.jdbc.datasource.DriverManagerDataSource
  * @see org.apache.commons.dbcp.BasicDataSource
@@ -92,7 +92,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	/**
 	 * Checks if a SimpleNamingContextBuilder is active.
 	 * @return the current SimpleNamingContextBuilder instance,
-	 * or <code>null</code> if none
+	 * or {@code null} if none
 	 */
 	public static SimpleNamingContextBuilder getCurrentContextBuilder() {
 		return activated;
@@ -129,8 +129,8 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 
 	/**
 	 * Register the context builder by registering it with the JNDI NamingManager.
-	 * Note that once this has been done, <code>new InitialContext()</code> will always
-	 * return a context from this factory. Use the <code>emptyActivatedContextBuilder()</code>
+	 * Note that once this has been done, {@code new InitialContext()} will always
+	 * return a context from this factory. Use the {@code emptyActivatedContextBuilder()}
 	 * static method to get an empty context (for example, in test methods).
 	 * @throws IllegalStateException if there's already a naming context builder
 	 * registered with the JNDI NamingManager
@@ -156,7 +156,7 @@ public class SimpleNamingContextBuilder implements InitialContextFactoryBuilder 
 	 * Temporarily deactivate this context builder. It will remain registered with
 	 * the JNDI NamingManager but will delegate to the standard JNDI InitialContextFactory
 	 * (if configured) instead of exposing its own bound objects.
-	 * <p>Call <code>activate()</code> again in order to expose this context builder's own
+	 * <p>Call {@code activate()} again in order to expose this context builder's own
 	 * bound objects again. Such activate/deactivate sequences can be applied any number
 	 * of times (e.g. within a larger integration test suite running in the same VM).
 	 * @see #activate()

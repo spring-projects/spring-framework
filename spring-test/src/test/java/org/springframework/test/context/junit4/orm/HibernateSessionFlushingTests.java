@@ -37,7 +37,7 @@ import org.springframework.test.context.junit4.orm.service.PersonService;
 /**
  * Transactional integration tests regarding <i>manual</i> session flushing with
  * Hibernate.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

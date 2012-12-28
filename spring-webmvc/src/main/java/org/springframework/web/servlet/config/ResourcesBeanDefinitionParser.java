@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String resourceRequestPath = element.getAttribute("mapping");
 		if (!StringUtils.hasText(resourceRequestPath)) {
 			parserContext.getReaderContext().error("The 'mapping' attribute is required.", parserContext.extractSource(element));
-	        return null;
+			return null;
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
 
@@ -85,7 +85,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String locationAttr = element.getAttribute("location");
 		if (!StringUtils.hasText(locationAttr)) {
 			parserContext.getReaderContext().error("The 'location' attribute is required.", parserContext.extractSource(element));
-	        return null;
+			return null;
 		}
 
 		ManagedList<String> locations = new ManagedList<String>();

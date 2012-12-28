@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class ScriptingDefaultsTests extends TestCase {
 	public void testDefaultRefreshCheckDelay() throws Exception {
 		ApplicationContext context = new ClassPathXmlApplicationContext(CONFIG);
 		Advised advised = (Advised) context.getBean("testBean");
-		AbstractRefreshableTargetSource targetSource = 
+		AbstractRefreshableTargetSource targetSource =
 				((AbstractRefreshableTargetSource) advised.getTargetSource());
 		Field field = AbstractRefreshableTargetSource.class.getDeclaredField("refreshCheckDelay");
 		field.setAccessible(true);

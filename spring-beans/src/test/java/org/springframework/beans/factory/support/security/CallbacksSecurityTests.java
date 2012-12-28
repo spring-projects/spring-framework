@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,11 +63,11 @@ import org.springframework.core.io.Resource;
 /**
  * Security test case. Checks whether the container uses its privileges for its
  * internal work but does not leak them when touching/calling user code.
- * 
+ *
  *t The first half of the test case checks that permissions are downgraded when
  * calling user code while the second half that the caller code permission get
  * through and Spring doesn't override the permission stack.
- * 
+ *
  * @author Costin Leau
  */
 public class CallbacksSecurityTests {
@@ -97,7 +97,7 @@ public class CallbacksSecurityTests {
 		public void setProperty(Object value) {
 			checkCurrentContext();
 		}
-		
+
 		public Object getProperty() {
 			checkCurrentContext();
 			return null;
@@ -111,7 +111,7 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 			return null;
 		}
-		
+
 		private void checkCurrentContext() {
 			assertEquals(expectedName, getCurrentSubjectName());
 		}
@@ -129,23 +129,28 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void destroy() {
 			checkCurrentContext();
 			destroyed = true;
 		}
 
+		@Override
 		public void setBeanName(String name) {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void setBeanClassLoader(ClassLoader classLoader) {
 			checkCurrentContext();
 		}
 
+		@Override
 		public void setBeanFactory(BeanFactory beanFactory)
 				throws BeansException {
 			checkCurrentContext();
@@ -164,26 +169,31 @@ public class CallbacksSecurityTests {
 			checkCurrentContext();
 		}
 
+		@Override
 		public boolean isEagerInit() {
 			checkCurrentContext();
 			return false;
 		}
 
+		@Override
 		public boolean isPrototype() {
 			checkCurrentContext();
 			return true;
 		}
 
+		@Override
 		public Object getObject() throws Exception {
 			checkCurrentContext();
 			return new Object();
 		}
 
+		@Override
 		public Class getObjectType() {
 			checkCurrentContext();
 			return Object.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			checkCurrentContext();
 			return false;
@@ -219,6 +229,7 @@ public class CallbacksSecurityTests {
 
 		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 
+			@Override
 			public String run() {
 				Subject subject = Subject.getSubject(acc);
 				if (subject == null) {
@@ -246,6 +257,7 @@ public class CallbacksSecurityTests {
 			this.name = name;
 		}
 
+		@Override
 		public String getName() {
 			return this.name;
 		}
@@ -291,6 +303,7 @@ public class CallbacksSecurityTests {
 			private final AccessControlContext acc = new AccessControlContext(
 					new ProtectionDomain[] { empty });
 
+			@Override
 			public AccessControlContext getAccessControlContext() {
 				return acc;
 			}
@@ -314,14 +327,15 @@ public class CallbacksSecurityTests {
 		}
 
 		final CustomCallbackBean bean = new CustomCallbackBean();
-		final Method method = bean.getClass().getMethod("destroy", null);
+		final Method method = bean.getClass().getMethod("destroy");
 		method.setAccessible(true);
 
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
+				@Override
 				public Object run() throws Exception {
-					method.invoke(bean, null);
+					method.invoke(bean);
 					return null;
 				}
 			}, acc);
@@ -334,6 +348,7 @@ public class CallbacksSecurityTests {
 			AccessController.doPrivileged(
 					new PrivilegedExceptionAction<Object>() {
 
+						@Override
 						public Object run() throws Exception {
 							return cl.newInstance();
 						}
@@ -352,7 +367,7 @@ public class CallbacksSecurityTests {
 			assertTrue(ex.getCause() instanceof SecurityException);
 		}
 	}
-	
+
 	@Test
 	public void testCustomInitBean() throws Exception {
 		try {
@@ -444,6 +459,7 @@ public class CallbacksSecurityTests {
 
 		AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
+			@Override
 			public Object run() throws Exception {
 				beanFactory.getBean("working-factory-method");
 				beanFactory.getBean("container-execution");
@@ -478,6 +494,7 @@ public class CallbacksSecurityTests {
 
 		NonPrivilegedBean bean = Subject.doAsPrivileged(
 				subject, new PrivilegedAction<NonPrivilegedBean>() {
+					@Override
 					public NonPrivilegedBean run() {
 						return lbf.getBean("test", NonPrivilegedBean.class);
 					}
@@ -502,6 +519,7 @@ public class CallbacksSecurityTests {
 		// request the beans from non-privileged code
 		Subject.doAsPrivileged(subject, new PrivilegedAction<Object>() {
 
+			@Override
 			public Object run() {
 				// sanity check
 				assertEquals("user1", getCurrentSubjectName());

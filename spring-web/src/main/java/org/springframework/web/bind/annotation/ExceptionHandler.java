@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import java.lang.annotation.Target;
  * <li>Session object (Servlet API or Portlet API): either
  * {@link javax.servlet.http.HttpSession} or {@link javax.portlet.PortletSession}.
  * An argument of this type will enforce the presence of a corresponding session.
- * As a consequence, such an argument will never be <code>null</code>.
+ * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
  * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
@@ -68,14 +68,14 @@ import java.lang.annotation.Target;
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
- * <li>A <code>ModelAndView</code> object (Servlet MVC or Portlet MVC).
+ * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC).
  * <li>A {@link org.springframework.ui.Model Model} object, with the view name
  * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
  * <li>A {@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
  * <li>A {@link org.springframework.web.servlet.View} object.
- * <li>A {@link java.lang.String} value which is interpreted as view name.
+ * <li>A {@link String} value which is interpreted as view name.
  * <li>{@link ResponseBody @ResponseBody} annotated methods (Servlet-only)
  * to set the response content. The return value will be converted to the
  * response stream using
@@ -85,7 +85,7 @@ import java.lang.annotation.Target;
  * (Servlet-only) to set response headers and content. The ResponseEntity body
  * will be converted and written to the response stream using
  * {@linkplain org.springframework.http.converter.HttpMessageConverter message converters}.
- * <li><code>void</code> if the method handles the response itself (by
+ * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
  * {@link javax.servlet.ServletResponse} / {@link javax.servlet.http.HttpServletResponse}
  * / {@link javax.portlet.RenderResponse} for that purpose)

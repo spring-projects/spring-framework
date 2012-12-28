@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,22 @@ import org.springframework.web.servlet.support.BindStatus;
 public class OptionTagEnumTests extends AbstractHtmlElementTagTests {
 
 	private OptionTag tag;
-	
+
 	private SelectTag parentTag;
 
+	@Override
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
 		};
 		this.parentTag = new SelectTag() {
+			@Override
 			public String getName() {
-				// Should not be used other than to delegate to 
+				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
 				return "testName";
 			}

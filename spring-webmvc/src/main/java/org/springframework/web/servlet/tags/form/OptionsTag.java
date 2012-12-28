@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -27,33 +25,34 @@ import org.springframework.web.util.TagUtils;
 
 /**
  * Convenient tag that allows one to supply a collection of objects
- * that are to be rendered as '<code>option</code>' tags within a
- * '<code>select</code>' tag.
- * 
+ * that are to be rendered as '{@code option}' tags within a
+ * '{@code select}' tag.
+ *
  * <p><i>Must</i> be used within a {@link SelectTag 'select' tag}.
- * 
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OptionsTag extends AbstractHtmlElementTag {
-	
+
 	/**
 	 * The {@link java.util.Collection}, {@link java.util.Map} or array of
-	 * objects used to generate the inner '<code>option</code>' tags.
+	 * objects used to generate the inner '{@code option}' tags.
 	 */
 	private Object items;
 
 	/**
-	 * The name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>option</code>' tag.
+	 * The name of the property mapped to the '{@code value}' attribute
+	 * of the '{@code option}' tag.
 	 */
 	private String itemValue;
 
 	/**
 	 * The name of the property mapped to the inner text of the
-	 * '<code>option</code>' tag.
+	 * '{@code option}' tag.
 	 */
 	private String itemLabel;
 
@@ -62,8 +61,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the inner '<code>option</code>' tags.
-	 * <p>Required when wishing to render '<code>option</code>' tags from an
+	 * of objects used to generate the inner '{@code option}' tags.
+	 * <p>Required when wishing to render '{@code option}' tags from an
 	 * array, {@link java.util.Collection} or {@link java.util.Map}.
 	 * <p>Typically a runtime expression.
 	 */
@@ -73,7 +72,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the {@link java.util.Collection}, {@link java.util.Map} or array
-	 * of objects used to generate the inner '<code>option</code>' tags.
+	 * of objects used to generate the inner '{@code option}' tags.
 	 * <p>Typically a runtime expression.
 	 */
 	protected Object getItems() {
@@ -81,9 +80,9 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the name of the property mapped to the '<code>value</code>'
-	 * attribute of the '<code>option</code>' tag.
-	 * <p>Required when wishing to render '<code>option</code>' tags from
+	 * Set the name of the property mapped to the '{@code value}'
+	 * attribute of the '{@code option}' tag.
+	 * <p>Required when wishing to render '{@code option}' tags from
 	 * an array or {@link java.util.Collection}.
 	 * <p>May be a runtime expression.
 	 */
@@ -93,8 +92,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Return the name of the property mapped to the '<code>value</code>'
-	 * attribute of the '<code>option</code>' tag.
+	 * Return the name of the property mapped to the '{@code value}'
+	 * attribute of the '{@code option}' tag.
 	 */
 	protected String getItemValue() {
 		return this.itemValue;
@@ -102,7 +101,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Set the name of the property mapped to the label (inner text) of the
-	 * '<code>option</code>' tag.
+	 * '{@code option}' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -112,7 +111,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Get the name of the property mapped to the label (inner text) of the
-	 * '<code>option</code>' tag.
+	 * '{@code option}' tag.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
@@ -120,16 +119,16 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '{@code disabled}' attribute.
 	 * <p>May be a runtime expression.
-	 * @param disabled the value of the '<code>disabled</code>' attribute
+	 * @param disabled the value of the '{@code disabled}' attribute
 	 */
 	public void setDisabled(String disabled) {
 		this.disabled = disabled;
 	}
 
 	/**
-	 * Get the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '{@code disabled}' attribute.
 	 */
 	protected String getDisabled() {
 		return this.disabled;
@@ -137,7 +136,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**
 	 * Is the current HTML tag disabled?
-	 * @return <code>true</code> if this tag is disabled
+	 * @return {@code true} if this tag is disabled
 	 */
 	protected boolean isDisabled() throws JspException {
 		return evaluateBoolean("disabled", getDisabled());
@@ -200,8 +199,8 @@ public class OptionsTag extends AbstractHtmlElementTag {
 	 * Inner class that adapts OptionWriter for multiple options to be rendered.
 	 */
 	private class OptionsWriter extends OptionWriter {
-		
-		private final String selectName; 
+
+		private final String selectName;
 
 		public OptionsWriter(String selectName, Object optionSource, String valueProperty, String labelProperty) {
 			super(optionSource, getBindStatus(), valueProperty, labelProperty, isHtmlEscape());
@@ -223,7 +222,7 @@ public class OptionsTag extends AbstractHtmlElementTag {
 		protected String processOptionValue(String value) {
 			return processFieldValue(this.selectName, value, "option");
 		}
-		
+
 	}
 
 }

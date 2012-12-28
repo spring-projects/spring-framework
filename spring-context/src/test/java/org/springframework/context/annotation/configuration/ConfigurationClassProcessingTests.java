@@ -230,7 +230,7 @@ public class ConfigurationClassProcessingTests {
 		public @Bean Object stringBean() {
 			return "foo";
 		}
-		public @Bean FactoryBean factoryBean() {
+		public @Bean FactoryBean<?> factoryBean() {
 			ListFactoryBean fb = new ListFactoryBean();
 			fb.setSourceList(Arrays.asList("element1", "element2"));
 			return fb;
@@ -284,12 +284,14 @@ public class ConfigurationClassProcessingTests {
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
+				@Override
 				public Object postProcessBeforeInitialization(Object bean, String beanName) {
 					if (bean instanceof ITestBean) {
 						((ITestBean) bean).setName(((ITestBean) bean).getName() + nameSuffix);
 					}
 					return bean;
 				}
+				@Override
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
 				}
@@ -302,6 +304,7 @@ public class ConfigurationClassProcessingTests {
 		//@Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 					BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
 					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed-" + myProp);
@@ -334,6 +337,7 @@ public class ConfigurationClassProcessingTests {
 			super.setSpouse(spouse);
 		}
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			this.refreshed = true;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class VelocityLayoutViewResolver extends VelocityViewResolver {
 	 * of the default layout. Screen content templates can override the layout
 	 * template that they wish to be wrapped with by setting this value in the
 	 * template, for example:<br>
-	 * <code>#set( $layout = "MyLayout.vm" )</code>
+	 * {@code #set($layout = "MyLayout.vm" )}
 	 * <p>The default key is "layout", as illustrated above.
 	 * @param layoutKey the name of the key you wish to use in your
 	 * screen content templates to override the layout template
@@ -80,7 +80,7 @@ public class VelocityLayoutViewResolver extends VelocityViewResolver {
 	 * the screen within the layout template. This key must be present
 	 * in the layout template for the current screen to be rendered.
 	 * <p>Default is "screen_content": accessed in VTL as
-	 * <code>$screen_content</code>.
+	 * {@code $screen_content}.
 	 * @param screenContentKey the name of the screen content key to use
 	 * @see VelocityLayoutView#setScreenContentKey
 	 */

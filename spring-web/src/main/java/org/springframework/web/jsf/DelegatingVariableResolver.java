@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * JSF 1.1 <code>VariableResolver</code> that first delegates to the
+ * JSF 1.1 {@code VariableResolver} that first delegates to the
  * original resolver of the underlying JSF implementation (for resolving
- * managed-bean objects as defined in <code>faces-config.xml</code>
+ * managed-bean objects as defined in {@code faces-config.xml}
  * as well as well-known implicit EL attributes), then to the Spring
- * root <code>WebApplicationContext</code> (for resolving Spring beans).
+ * root {@code WebApplicationContext} (for resolving Spring beans).
  *
- * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
+ * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre>
  * &lt;application>
@@ -148,11 +148,11 @@ public class DelegatingVariableResolver extends VariableResolver {
 
 	/**
 	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
-	 * <p>The default implementation delegates to <code>getWebApplicationContext</code>.
+	 * <p>The default implementation delegates to {@code getWebApplicationContext}.
 	 * Can be overridden to provide an arbitrary BeanFactory reference to resolve
 	 * against; usually, this will be a full Spring ApplicationContext.
 	 * @param facesContext the current JSF context
-	 * @return the Spring BeanFactory (never <code>null</code>)
+	 * @return the Spring BeanFactory (never {@code null})
 	 * @see #getWebApplicationContext
 	 */
 	protected BeanFactory getBeanFactory(FacesContext facesContext) {
@@ -163,7 +163,7 @@ public class DelegatingVariableResolver extends VariableResolver {
 	 * Retrieve the web application context to delegate bean name resolution to.
 	 * <p>The default implementation delegates to FacesContextUtils.
 	 * @param facesContext the current JSF context
-	 * @return the Spring web application context (never <code>null</code>)
+	 * @return the Spring web application context (never {@code null})
 	 * @see FacesContextUtils#getRequiredWebApplicationContext
 	 */
 	protected WebApplicationContext getWebApplicationContext(FacesContext facesContext) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 /**
  * Hold the various kinds of primitive array for access through the test evaluation context.
- * 
+ *
  * @author Andy Clement
  */
 public class ArrayContainer {
@@ -29,7 +29,7 @@ public class ArrayContainer {
 	public short[] shorts = new short[3];
 	public boolean[] booleans = new boolean[3];
 	public float[] floats = new float[3];
-	
+
 	public ArrayContainer() {
 		// setup some values
 		ints[0] = 42;

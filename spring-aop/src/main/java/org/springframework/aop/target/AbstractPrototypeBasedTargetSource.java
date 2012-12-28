@@ -33,7 +33,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * new-instance-per-invocation strategy.
  *
  * <p>Such TargetSources must run in a {@link BeanFactory}, as it needs to
- * call the <code>getBean</code> method to create a new prototype instance.
+ * call the {@code getBean} method to create a new prototype instance.
  * Therefore, this base class extends {@link AbstractBeanFactoryBasedTargetSource}.
  *
  * @author Rod Johnson
@@ -102,7 +102,7 @@ public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFac
 	/**
 	 * Replaces this object with a SingletonTargetSource on serialization.
 	 * Protected as otherwise it won't be invoked for subclasses.
-	 * (The <code>writeReplace()</code> method must be visible to the class
+	 * (The {@code writeReplace()} method must be visible to the class
 	 * being serialized.)
 	 * <p>With this implementation of this method, there is no need to mark
 	 * non-serializable fields in this class or subclasses as transient.

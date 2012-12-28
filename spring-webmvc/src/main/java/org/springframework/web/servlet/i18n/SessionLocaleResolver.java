@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.web.util.WebUtils;
  * that is, when the HttpSession does not have to be created for the locale.
  *
  * <p>Custom controllers can override the user's locale by calling
- * <code>setLocale</code>, e.g. responding to a locale change request.
+ * {@code setLocale}, e.g. responding to a locale change request.
  *
  * @author Juergen Hoeller
  * @since 27.02.2003
@@ -44,13 +44,13 @@ public class SessionLocaleResolver extends AbstractLocaleResolver {
 	/**
 	 * Name of the session attribute that holds the locale.
 	 * Only used internally by this implementation.
-	 * Use <code>RequestContext(Utils).getLocale()</code>
+	 * Use {@code RequestContext(Utils).getLocale()}
 	 * to retrieve the current locale in controllers or views.
 	 * @see org.springframework.web.servlet.support.RequestContext#getLocale
 	 * @see org.springframework.web.servlet.support.RequestContextUtils#getLocale
 	 */
 	public static final String LOCALE_SESSION_ATTRIBUTE_NAME = SessionLocaleResolver.class.getName() + ".LOCALE";
-	
+
 
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale locale = (Locale) WebUtils.getSessionAttribute(request, LOCALE_SESSION_ATTRIBUTE_NAME);
@@ -66,7 +66,7 @@ public class SessionLocaleResolver extends AbstractLocaleResolver {
 	 * <p>The default implementation returns the specified default locale,
 	 * if any, else falls back to the request's accept-header locale.
 	 * @param request the request to resolve the locale for
-	 * @return the default locale (never <code>null</code>)
+	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
