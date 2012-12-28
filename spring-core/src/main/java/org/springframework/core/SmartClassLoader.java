@@ -36,7 +36,7 @@ public interface SmartClassLoader {
 	 * ClassLoader) or whether it should be reobtained every time.
 	 * @param clazz the class to check (usually loaded from this ClassLoader)
 	 * @return whether the class should be expected to appear in a reloaded
-	 * version (with a different <code>Class</code> object) later on
+	 * version (with a different {@code Class} object) later on
 	 */
 	boolean isClassReloadable(Class clazz);
 

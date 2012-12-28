@@ -70,7 +70,7 @@ public interface ResourceLoader {
 	 * <p>Clients which need to access the ClassLoader directly can do so
 	 * in a uniform manner with the ResourceLoader, rather than relying
 	 * on the thread context ClassLoader.
-	 * @return the ClassLoader (never <code>null</code>)
+	 * @return the ClassLoader (never {@code null})
 	 */
 	ClassLoader getClassLoader();
 

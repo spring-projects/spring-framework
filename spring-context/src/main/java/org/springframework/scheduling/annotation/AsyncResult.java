@@ -20,12 +20,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A pass-through <code>Future</code> handle that can be used for method signatures
+ * A pass-through {@code Future} handle that can be used for method signatures
  * which are declared with a Future return type for asynchronous execution.
  *
  * @author Juergen Hoeller
  * @since 3.0
- * @see org.springframework.scheduling.annotation.Async
+ * @see Async
  */
 public class AsyncResult<V> implements Future<V> {
 

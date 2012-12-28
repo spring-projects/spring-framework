@@ -50,7 +50,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * implementation for a single Hibernate {@link org.hibernate.SessionFactory}.
  * Binds a Hibernate Session from the specified factory to the thread,
  * potentially allowing for one thread-bound Session per factory.
- * <code>SessionFactory.getCurrentSession()</code> is required for Hibernate
+ * {@code SessionFactory.getCurrentSession()} is required for Hibernate
  * access code that needs to support this transaction handling mechanism,
  * with the SessionFactory being configured with {@link SpringSessionContext}.
  *
@@ -188,7 +188,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Set whether to autodetect a JDBC DataSource used by the Hibernate SessionFactory,
-	 * if set via SessionFactoryBuilder's <code>setDataSource</code>. Default is "true".
+	 * if set via SessionFactoryBuilder's {@code setDataSource}. Default is "true".
 	 * <p>Can be turned off to deliberately ignore an available DataSource, in order
 	 * to not expose Hibernate transactions as JDBC transactions for that DataSource.
 	 * @see #setDataSource
@@ -204,7 +204,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * JDBC Connection.
 	 * <p>Default is "true". If you turn this flag off, the transaction manager
 	 * will not support per-transaction isolation levels anymore. It will not
-	 * call <code>Connection.setReadOnly(true)</code> for read-only transactions
+	 * call {@code Connection.setReadOnly(true)} for read-only transactions
 	 * anymore either. If this flag is turned off, no cleanup of a JDBC Connection
 	 * is required after a transaction, since no Connection settings will get modified.
 	 * @see java.sql.Connection#setTransactionIsolation
@@ -227,14 +227,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * <p>Switch this flag to "true" in order to enforce use of a Hibernate-managed Session.
 	 * Note that this requires {@link org.hibernate.SessionFactory#getCurrentSession()}
 	 * to always return a proper Session when called for a Spring-managed transaction;
-	 * transaction begin will fail if the <code>getCurrentSession()</code> call fails.
+	 * transaction begin will fail if the {@code getCurrentSession()} call fails.
 	 * <p>This mode will typically be used in combination with a custom Hibernate
 	 * {@link org.hibernate.context.CurrentSessionContext} implementation that stores
 	 * Sessions in a place other than Spring's TransactionSynchronizationManager.
 	 * It may also be used in combination with Spring's Open-Session-in-View support
 	 * (using Spring's default {@link SpringSessionContext}), in which case it subtly
 	 * differs from the Spring-managed Session mode: The pre-bound Session will <i>not</i>
-	 * receive a <code>clear()</code> call (on rollback) or a <code>disconnect()</code>
+	 * receive a {@code clear()} call (on rollback) or a {@code disconnect()}
 	 * call (on transaction completion) in such a scenario; this is rather left up
 	 * to a custom CurrentSessionContext implementation (if desired).
 	 */
@@ -583,7 +583,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception
-	 * from the <code>org.springframework.dao</code> hierarchy.
+	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
 	 * @param ex HibernateException that occured
@@ -671,7 +671,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Holder for suspended resources.
-	 * Used internally by <code>doSuspend</code> and <code>doResume</code>.
+	 * Used internally by {@code doSuspend} and {@code doResume}.
 	 */
 	private static class SuspendedResourcesHolder {
 

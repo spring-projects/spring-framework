@@ -59,7 +59,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Connection and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param con the JDBC Connection to close (may be <code>null</code>)
+	 * @param con the JDBC Connection to close (may be {@code null})
 	 */
 	public static void closeConnection(Connection con) {
 		if (con != null) {
@@ -79,7 +79,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC Statement and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param stmt the JDBC Statement to close (may be <code>null</code>)
+	 * @param stmt the JDBC Statement to close (may be {@code null})
 	 */
 	public static void closeStatement(Statement stmt) {
 		if (stmt != null) {
@@ -99,7 +99,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Close the given JDBC ResultSet and ignore any thrown exception.
 	 * This is useful for typical finally blocks in manual JDBC code.
-	 * @param rs the JDBC ResultSet to close (may be <code>null</code>)
+	 * @param rs the JDBC ResultSet to close (may be {@code null})
 	 */
 	public static void closeResultSet(ResultSet rs) {
 		if (rs != null) {
@@ -125,7 +125,7 @@ public abstract class JdbcUtils {
 	 * with this case appropriately, e.g. throwing a corresponding exception.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
-	 * @param requiredType the required value type (may be <code>null</code>)
+	 * @param requiredType the required value type (may be {@code null})
 	 * @return the value object
 	 * @throws SQLException if thrown by the JDBC API
 	 */
@@ -209,11 +209,11 @@ public abstract class JdbcUtils {
 	 * value type. The returned value should be a detached value object, not having
 	 * any ties to the active ResultSet: in particular, it should not be a Blob or
 	 * Clob object but rather a byte array respectively String representation.
-	 * <p>Uses the <code>getObject(index)</code> method, but includes additional "hacks"
+	 * <p>Uses the {@code getObject(index)} method, but includes additional "hacks"
 	 * to get around Oracle 10g returning a non-standard object for its TIMESTAMP
-	 * datatype and a <code>java.sql.Date</code> for DATE columns leaving out the
+	 * datatype and a {@code java.sql.Date} for DATE columns leaving out the
 	 * time portion: These columns will explicitly be extracted as standard
-	 * <code>java.sql.Timestamp</code> object.
+	 * {@code java.sql.Timestamp} object.
 	 * @param rs is the ResultSet holding the data
 	 * @param index is the column index
 	 * @return the value object
@@ -269,7 +269,7 @@ public abstract class JdbcUtils {
 	 * @param dataSource the DataSource to extract metadata for
 	 * @param action callback that will do the actual work
 	 * @return object containing the extracted information, as returned by
-	 * the DatabaseMetaDataCallback's <code>processMetaData</code> method
+	 * the DatabaseMetaDataCallback's {@code processMetaData} method
 	 * @throws MetaDataAccessException if meta data access failed
 	 */
 	public static Object extractDatabaseMetaData(DataSource dataSource, DatabaseMetaDataCallback action)
@@ -349,7 +349,7 @@ public abstract class JdbcUtils {
 	 * to decide whether the set of SQL statements should be executed through
 	 * the JDBC 2.0 batch mechanism or simply in a traditional one-by-one fashion.
 	 * <p>Logs a warning if the "supportsBatchUpdates" methods throws an exception
-	 * and simply returns <code>false</code> in that case.
+	 * and simply returns {@code false} in that case.
 	 * @param con the Connection to check
 	 * @return whether JDBC 2.0 batch updates are supported
 	 * @see java.sql.DatabaseMetaData#supportsBatchUpdates()

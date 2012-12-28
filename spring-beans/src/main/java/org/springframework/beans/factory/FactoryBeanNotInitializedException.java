@@ -19,7 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Exception to be thrown from a FactoryBean's <code>getObject()</code> method
+ * Exception to be thrown from a FactoryBean's {@code getObject()} method
  * if the bean is not fully initialized yet, for example because it is involved
  * in a circular reference.
  *

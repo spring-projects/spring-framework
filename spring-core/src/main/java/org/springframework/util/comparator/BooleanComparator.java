@@ -47,8 +47,8 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	 * Create a BooleanComparator that sorts boolean values based on
 	 * the provided flag.
 	 * <p>Alternatively, you can use the default shared instances:
-	 * <code>BooleanComparator.TRUE_LOW</code> and
-	 * <code>BooleanComparator.TRUE_HIGH</code>.
+	 * {@code BooleanComparator.TRUE_LOW} and
+	 * {@code BooleanComparator.TRUE_HIGH}.
 	 * @param trueLow whether to treat true as lower or higher than false
 	 * @see #TRUE_LOW
 	 * @see #TRUE_HIGH

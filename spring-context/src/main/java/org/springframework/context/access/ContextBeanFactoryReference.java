@@ -25,9 +25,9 @@ import org.springframework.context.ConfigurableApplicationContext;
  * ApplicationContext-specific implementation of BeanFactoryReference,
  * wrapping a newly created ApplicationContext, closing it on release.
  *
- * <p>As per BeanFactoryReference contract, <code>release</code> may be called
+ * <p>As per BeanFactoryReference contract, {@code release} may be called
  * more than once, with subsequent calls not doing anything. However, calling
- * <code>getFactory</code> after a <code>release</code> call will cause an exception.
+ * {@code getFactory} after a {@code release} call will cause an exception.
  *
  * @author Juergen Hoeller
  * @author Colin Sampaleanu

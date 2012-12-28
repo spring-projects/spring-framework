@@ -68,7 +68,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Constructor to allow use as a JavaBean.
 	 * A DataSource, SQL and any parameters must be supplied before
-	 * invoking the <code>compile</code> method and using this object.
+	 * invoking the {@code compile} method and using this object.
 	 * @see #setDataSource
 	 * @see #setSql
 	 * @see #compile
@@ -179,7 +179,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with this parameters.
-	 * @param inParams parameters. May be <code>null</code>.
+	 * @param inParams parameters. May be {@code null}.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(Map<String, ?> inParams) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParams);
@@ -188,7 +188,7 @@ public abstract class SqlCall extends RdbmsOperation {
 	/**
 	 * Return a CallableStatementCreator to perform an operation
 	 * with the parameters returned from this ParameterMapper.
-	 * @param inParamMapper parametermapper. May not be <code>null</code>.
+	 * @param inParamMapper parametermapper. May not be {@code null}.
 	 */
 	protected CallableStatementCreator newCallableStatementCreator(ParameterMapper inParamMapper) {
 		return this.callableStatementFactory.newCallableStatementCreator(inParamMapper);

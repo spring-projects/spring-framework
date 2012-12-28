@@ -30,14 +30,14 @@ import org.springframework.core.NestedIOException;
  * VelocityLayoutView emulates the functionality offered by Velocity's
  * VelocityLayoutServlet to ease page composition from different templates.
  *
- * <p>The <code>url</code> property should be set to the content template
+ * <p>The {@code url} property should be set to the content template
  * for the view, and the layout template location should be specified as
- * <code>layoutUrl</code> property. A view can override the configured
+ * {@code layoutUrl} property. A view can override the configured
  * layout template location by setting the appropriate key (the default
  * is "layout") in the content template.
  *
  * <p>When the view is rendered, the VelocityContext is first merged with
- * the content template (specified by the <code>url</code> property) and
+ * the content template (specified by the {@code url} property) and
  * then merged with the layout template to produce the final output.
  *
  * <p>The layout template can include the screen content through a
@@ -90,7 +90,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * of the default layout. Screen content templates can override the layout
 	 * template that they wish to be wrapped with by setting this value in the
 	 * template, for example:<br>
-	 * <code>#set( $layout = "MyLayout.vm" )</code>
+	 * {@code #set($layout = "MyLayout.vm" )}
 	 * <p>Default key is {@link #DEFAULT_LAYOUT_KEY "layout"}, as illustrated above.
 	 * @param layoutKey the name of the key you wish to use in your
 	 * screen content templates to override the layout template
@@ -104,7 +104,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 	 * the screen within the layout template. This key must be present
 	 * in the layout template for the current screen to be rendered.
 	 * <p>Default is {@link #DEFAULT_SCREEN_CONTENT_KEY "screen_content"}:
-	 * accessed in VTL as <code>$screen_content</code>.
+	 * accessed in VTL as {@code $screen_content}.
 	 * @param screenContentKey the name of the screen content key to use
 	 */
 	public void setScreenContentKey(String screenContentKey) {
@@ -113,7 +113,7 @@ public class VelocityLayoutView extends VelocityToolboxView {
 
 
 	/**
-	 * Overrides <code>VelocityView.checkTemplate()</code> to additionally check
+	 * Overrides {@code VelocityView.checkTemplate()} to additionally check
 	 * that both the layout template and the screen content template can be loaded.
 	 * Note that during rendering of the screen content, the layout template
 	 * can be changed which may invalidate any early checking done here.

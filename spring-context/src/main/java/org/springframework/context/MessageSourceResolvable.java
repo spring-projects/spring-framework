@@ -46,7 +46,7 @@ public interface MessageSourceResolvable {
 
 	/**
 	 * Return the default message to be used to resolve this message.
-	 * @return the default message, or <code>null</code> if no default
+	 * @return the default message, or {@code null} if no default
 	 */
 	String getDefaultMessage();
 

@@ -37,7 +37,7 @@ class JBossMCTranslatorAdapter implements InvocationHandler {
 	/**
 	 * Creates a new {@link JBossMCTranslatorAdapter}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
-	 * not be <code>null</code>)
+	 * not be {@code null})
 	 */
 	public JBossMCTranslatorAdapter(ClassFileTransformer transformer) {
 		this.transformer = transformer;

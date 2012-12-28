@@ -32,32 +32,32 @@ import javax.servlet.jsp.JspException;
 public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag {
 
 	/**
-	 * The name of the '<code>onfocus</code>' attribute.
+	 * The name of the '{@code onfocus}' attribute.
 	 */
 	public static final String ONFOCUS_ATTRIBUTE = "onfocus";
 
 	/**
-	 * The name of the '<code>onblur</code>' attribute.
+	 * The name of the '{@code onblur}' attribute.
 	 */
 	public static final String ONBLUR_ATTRIBUTE = "onblur";
 
 	/**
-	 * The name of the '<code>onchange</code>' attribute.
+	 * The name of the '{@code onchange}' attribute.
 	 */
 	public static final String ONCHANGE_ATTRIBUTE = "onchange";
 
 	/**
-	 * The name of the '<code>accesskey</code>' attribute.
+	 * The name of the '{@code accesskey}' attribute.
 	 */
 	public static final String ACCESSKEY_ATTRIBUTE = "accesskey";
 
 	/**
-	 * The name of the '<code>disabled</code>' attribute.
+	 * The name of the '{@code disabled}' attribute.
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
 	/**
-	 * The name of the '<code>readonly</code>' attribute.
+	 * The name of the '{@code readonly}' attribute.
 	 */
 	public static final String READONLY_ATTRIBUTE = "readonly";
 
@@ -76,7 +76,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 
 
 	/**
-	 * Set the value of the '<code>onfocus</code>' attribute.
+	 * Set the value of the '{@code onfocus}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnfocus(String onfocus) {
@@ -84,14 +84,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Get the value of the '<code>onfocus</code>' attribute.
+	 * Get the value of the '{@code onfocus}' attribute.
 	 */
 	protected String getOnfocus() {
 		return this.onfocus;
 	}
 
 	/**
-	 * Set the value of the '<code>onblur</code>' attribute.
+	 * Set the value of the '{@code onblur}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnblur(String onblur) {
@@ -99,14 +99,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Get the value of the '<code>onblur</code>' attribute.
+	 * Get the value of the '{@code onblur}' attribute.
 	 */
 	protected String getOnblur() {
 		return this.onblur;
 	}
 
 	/**
-	 * Set the value of the '<code>onchange</code>' attribute.
+	 * Set the value of the '{@code onchange}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnchange(String onchange) {
@@ -114,14 +114,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Get the value of the '<code>onchange</code>' attribute.
+	 * Get the value of the '{@code onchange}' attribute.
 	 */
 	protected String getOnchange() {
 		return this.onchange;
 	}
 
 	/**
-	 * Set the value of the '<code>accesskey</code>' attribute.
+	 * Set the value of the '{@code accesskey}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAccesskey(String accesskey) {
@@ -129,14 +129,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Get the value of the '<code>accesskey</code>' attribute.
+	 * Get the value of the '{@code accesskey}' attribute.
 	 */
 	protected String getAccesskey() {
 		return this.accesskey;
 	}
 
 	/**
-	 * Set the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '{@code disabled}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setDisabled(String disabled) {
@@ -144,14 +144,14 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Get the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '{@code disabled}' attribute.
 	 */
 	protected String getDisabled() {
 		return this.disabled;
 	}
 
 	/**
-	 * Sets the value of the '<code>readonly</code>' attribute.
+	 * Sets the value of the '{@code readonly}' attribute.
 	 * May be a runtime expression.
 	 * @see #isReadonly()
 	 */
@@ -160,7 +160,7 @@ public abstract class AbstractHtmlInputElementTag extends AbstractHtmlElementTag
 	}
 
 	/**
-	 * Gets the value of the '<code>readonly</code>' attribute.
+	 * Gets the value of the '{@code readonly}' attribute.
 	 * May be a runtime expression.
 	 * @see #isReadonly()
 	 */

@@ -105,7 +105,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	/**
 	 * Read a RemoteInvocation from the given JMS message.
 	 * @param requestMessage current request message
-	 * @return the RemoteInvocation object (or <code>null</code>
+	 * @return the RemoteInvocation object (or {@code null}
 	 * in case of an invalid message that will simply be ignored)
 	 * @throws javax.jms.JMSException in case of message access failure
 	 */
@@ -170,7 +170,7 @@ public class JmsInvokerServiceExporter extends RemoteInvocationBasedExporter
 	 * flag, which is set to "true" (that is, discard invalid messages) by default.
 	 * @param requestMessage the invalid request message
 	 * @return the RemoteInvocation to expose for the invalid request (typically
-	 * <code>null</code> in case of an invalid message that will simply be ignored)
+	 * {@code null} in case of an invalid message that will simply be ignored)
 	 * @throws javax.jms.JMSException in case of the invalid request supposed
 	 * to lead to an exception (instead of ignoring it)
 	 * @see #readRemoteInvocation

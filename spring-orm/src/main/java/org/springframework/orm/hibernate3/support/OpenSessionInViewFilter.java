@@ -53,11 +53,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
+ * with the flush mode set to {@code FlushMode.NEVER}. It assumes to be used
  * in combination with service layer transactions that care for the flushing: The
  * active transaction manager will temporarily change the flush mode to
- * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
- * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
+ * {@code FlushMode.AUTO} during a read-write transaction, with the flush
+ * mode reset to {@code FlushMode.NEVER} at the end of each transaction.
  * If you intend to use this filter without transactions, consider changing
  * the default flush mode (through the "flushMode" property).
  *
@@ -74,13 +74,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * for deferred close, though, actually processed at request completion.
  *
  * <p>A single session per request allows for most efficient first-level caching,
- * but can cause side effects, for example on <code>saveOrUpdate</code> or when
+ * but can cause side effects, for example on {@code saveOrUpdate} or when
  * continuing after a rolled-back transaction. The deferred close strategy is as safe
  * as no Open Session in View in that respect, while still allowing for lazy loading
  * in views (but not providing a first-level cache for the entire request).
  *
  * <p>Looks up the SessionFactory in Spring's root web application context.
- * Supports a "sessionFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports a "sessionFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "sessionFactory". Looks up the SessionFactory on each
  * request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
@@ -282,8 +282,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	 * Get a Session for the SessionFactory that this filter uses.
 	 * Note that this just applies in single session mode!
 	 * <p>The default implementation delegates to the
-	 * <code>SessionFactoryUtils.getSession</code> method and
-	 * sets the <code>Session</code>'s flush mode to "MANUAL".
+	 * {@code SessionFactoryUtils.getSession} method and
+	 * sets the {@code Session}'s flush mode to "MANUAL".
 	 * <p>Can be overridden in subclasses for creating a Session with a
 	 * custom entity interceptor or JDBC exception translator.
 	 * @param sessionFactory the SessionFactory that this filter uses

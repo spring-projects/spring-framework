@@ -52,11 +52,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * as well as for non-transactional execution (if configured appropriately).
  *
  * <p><b>NOTE</b>: This filter will by default <i>not</i> flush the Hibernate Session,
- * with the flush mode set to <code>FlushMode.NEVER</code>. It assumes to be used
+ * with the flush mode set to {@code FlushMode.NEVER}. It assumes to be used
  * in combination with service layer transactions that care for the flushing: The
  * active transaction manager will temporarily change the flush mode to
- * <code>FlushMode.AUTO</code> during a read-write transaction, with the flush
- * mode reset to <code>FlushMode.NEVER</code> at the end of each transaction.
+ * {@code FlushMode.AUTO} during a read-write transaction, with the flush
+ * mode reset to {@code FlushMode.NEVER} at the end of each transaction.
  *
  * <p><b>WARNING:</b> Applying this filter to existing logic can cause issues that
  * have not appeared before, through the use of a single Hibernate Session for the
@@ -65,7 +65,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * processing, to avoid clashes with already loaded instances of the same objects.
  *
  * <p>Looks up the SessionFactory in Spring's root web application context.
- * Supports a "sessionFactoryBeanName" filter init-param in <code>web.xml</code>;
+ * Supports a "sessionFactoryBeanName" filter init-param in {@code web.xml};
  * the default bean name is "sessionFactory". Looks up the SessionFactory on each
  * request, to avoid initialization order issues (when using ContextLoaderServlet,
  * the root application context will get initialized <i>after</i> this filter).
@@ -194,8 +194,8 @@ public class OpenSessionInViewFilter extends OncePerRequestFilter {
 	/**
 	 * Open a Session for the SessionFactory that this filter uses.
 	 * <p>The default implementation delegates to the
-	 * <code>SessionFactory.openSession</code> method and
-	 * sets the <code>Session</code>'s flush mode to "MANUAL".
+	 * {@code SessionFactory.openSession} method and
+	 * sets the {@code Session}'s flush mode to "MANUAL".
 	 * @param sessionFactory the SessionFactory that this filter uses
 	 * @return the Session to use
 	 * @throws DataAccessResourceFailureException if the Session could not be created

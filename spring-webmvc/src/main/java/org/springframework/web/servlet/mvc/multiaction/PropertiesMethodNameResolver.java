@@ -26,14 +26,14 @@ import org.springframework.util.PathMatcher;
 
 /**
  * The most flexible out-of-the-box implementation of the {@link MethodNameResolver}
- * interface. Uses <code>java.util.Properties</code> to define the mapping
+ * interface. Uses {@code java.util.Properties} to define the mapping
  * between the URL of incoming requests and the corresponding method name.
  * Such properties can be held in an XML document.
  *
  * <p>Properties format is
- * <code>
+ * {@code
  * /welcome.html=displayGenresPage
- * </code>
+ * }
  * Note that method overloading isn't allowed, so there's no need to
  * specify arguments.
  *

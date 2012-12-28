@@ -78,8 +78,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	/**
 	 * Set whether to use direct field access instead of bean property access.
-	 * <p>Default is <code>false</code>, using bean property access.
-	 * Switch this to <code>true</code> in order to enforce direct field access.
+	 * <p>Default is {@code false}, using bean property access.
+	 * Switch this to {@code true} in order to enforce direct field access.
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 * @see org.springframework.validation.DataBinder#initBeanPropertyAccess()
 	 */
@@ -97,7 +97,7 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * <p>Default is {@code null}, i.e. using the default strategy of
 	 * the data binder.
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
 	 */
@@ -114,8 +114,8 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
-	 * <p>Default is <code>null</code>, that is, using the default strategy
+	 * required field errors and {@code PropertyAccessException}s.
+	 * <p>Default is {@code null}, that is, using the default strategy
 	 * of the data binder.
 	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
 	 */

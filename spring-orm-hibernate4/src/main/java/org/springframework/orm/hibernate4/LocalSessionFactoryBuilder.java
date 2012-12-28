@@ -79,7 +79,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource) {
 		this(dataSource, new PathMatchingResourcePatternResolver());
@@ -88,7 +88,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param classLoader the ClassLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ClassLoader classLoader) {
@@ -98,7 +98,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
 	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {

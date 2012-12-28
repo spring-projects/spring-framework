@@ -48,12 +48,12 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	//-------------------------------------------------------------------------
 
 	/**
-	 * This implementation invokes the standard JPA <code>Transaction.begin</code>
+	 * This implementation invokes the standard JPA {@code Transaction.begin}
 	 * method. Throws an InvalidIsolationLevelException if a non-default isolation
 	 * level is set.
 	 * <p>This implementation does not return any transaction data Object, since there
 	 * is no state to be kept for a standard JPA transaction. Hence, subclasses do not
-	 * have to care about the return value (<code>null</code>) of this implementation
+	 * have to care about the return value ({@code null}) of this implementation
 	 * and are free to return their own transaction data Object.
 	 * @see javax.persistence.EntityTransaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
@@ -78,7 +78,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	}
 
 	/**
-	 * This implementation does nothing, since the default <code>beginTransaction</code>
+	 * This implementation does nothing, since the default {@code beginTransaction}
 	 * implementation does not require any cleanup.
 	 * @see #beginTransaction
 	 */
@@ -86,7 +86,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	}
 
 	/**
-	 * This implementation always returns <code>null</code>,
+	 * This implementation always returns {@code null},
 	 * indicating that no JDBC Connection can be provided.
 	 */
 	public ConnectionHandle getJdbcConnection(EntityManager entityManager, boolean readOnly)
@@ -100,7 +100,7 @@ public class DefaultJpaDialect implements JpaDialect, Serializable {
 	 * will implicitly be closed with the EntityManager.
 	 * <p>If the JPA implementation returns a Connection handle that it expects
 	 * the application to close after use, the dialect implementation needs to invoke
-	 * <code>Connection.close()</code> (or some other method with similar effect) here.
+	 * {@code Connection.close()} (or some other method with similar effect) here.
 	 * @see java.sql.Connection#close()
 	 */
 	public void releaseJdbcConnection(ConnectionHandle conHandle, EntityManager em)

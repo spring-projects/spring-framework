@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScanBeanDefinitionParser;
 
 /**
  * {@link org.springframework.beans.factory.xml.NamespaceHandler}
- * for the '<code>context</code>' namespace.
+ * for the '{@code context}' namespace.
  *
  * @author Mark Fisher
  * @author Juergen Hoeller

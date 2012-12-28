@@ -73,7 +73,7 @@ public abstract class RemoteInvocationBasedAccessor extends UrlBasedRemoteAccess
 
 	/**
 	 * Recreate the invocation result contained in the given RemoteInvocationResult object.
-	 * <p>The default implementation calls the default <code>recreate()</code> method.
+	 * <p>The default implementation calls the default {@code recreate()} method.
 	 * This can be overridden in subclass to provide custom recreation, potentially
 	 * processing the returned result object.
 	 * @param result the RemoteInvocationResult to recreate

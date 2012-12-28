@@ -119,7 +119,7 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the 'async' annotation type to be detected at either class
 	 * or method level. By default, both the {@link Async} annotation and
-	 * the EJB 3.1 <code>javax.ejb.Asynchronous</code> annotation will be
+	 * the EJB 3.1 {@code javax.ejb.Asynchronous} annotation will be
 	 * detected. <p>This setter property exists so that developers can provide
 	 * their own (non-Spring-specific) annotation type to indicate that a method
 	 * (or all methods of a given class) should be invoked asynchronously.

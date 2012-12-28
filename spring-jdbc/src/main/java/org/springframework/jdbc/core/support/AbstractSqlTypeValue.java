@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.SqlTypeValue;
 /**
  * Abstract implementation of the SqlTypeValue interface, for convenient
  * creation of type values that are supposed to be passed into the
- * <code>PreparedStatement.setObject</code> method. The <code>createTypeValue</code>
+ * {@code PreparedStatement.setObject} method. The {@code createTypeValue}
  * callback method has access to the underlying Connection, if that should
  * be needed to create any database-specific objects.
  *
@@ -65,7 +65,7 @@ public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 	}
 
 	/**
-	 * Create the type value to be passed into <code>PreparedStatement.setObject</code>.
+	 * Create the type value to be passed into {@code PreparedStatement.setObject}.
 	 * @param con the JDBC Connection, if needed to create any database-specific objects
 	 * @param sqlType SQL type of the parameter we are setting
 	 * @param typeName the type name of the parameter

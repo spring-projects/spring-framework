@@ -22,7 +22,7 @@ import org.springframework.util.Assert;
 
 /**
  * Simple implementation of the {@link LocaleContext} interface,
- * always returning a specified <code>Locale</code>.
+ * always returning a specified {@code Locale}.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -34,7 +34,7 @@ public class SimpleLocaleContext implements LocaleContext {
 
 	/**
 	 * Create a new SimpleLocaleContext that exposes the specified Locale.
-	 * Every <code>getLocale()</code> will return this Locale.
+	 * Every {@code getLocale()} will return this Locale.
 	 * @param locale the Locale to expose
 	 */
 	public SimpleLocaleContext(Locale locale) {

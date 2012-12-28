@@ -46,8 +46,8 @@ public class WebSphereLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * Create a new instance of the {@link WebSphereLoadTimeWeaver} class using
 	 * the supplied {@link ClassLoader}.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for weaving
-	 * (must not be <code>null</code>)
+	 * @param classLoader the {@code ClassLoader} to delegate to for weaving
+	 * (must not be {@code null})
 	 */
 	public WebSphereLoadTimeWeaver(ClassLoader classLoader) {
 		Assert.notNull(classLoader, "ClassLoader must not be null");

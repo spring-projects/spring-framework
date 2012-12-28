@@ -59,7 +59,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return the unique id of this application context.
-	 * @return the unique id of the context, or <code>null</code> if none
+	 * @return the unique id of the context, or {@code null} if none
 	 */
 	String getId();
 
@@ -71,8 +71,8 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 
 	/**
 	 * Return a friendly name for this context.
-	 * @return a display name for this context (never <code>null</code>)
-	*/
+	 * @return a display name for this context (never {@code null})
+	 */
 	String getDisplayName();
 
 	/**
@@ -82,9 +82,9 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	long getStartupDate();
 
 	/**
-	 * Return the parent context, or <code>null</code> if there is no parent
+	 * Return the parent context, or {@code null} if there is no parent
 	 * and this is the root of the context hierarchy.
-	 * @return the parent context, or <code>null</code> if there is no parent
+	 * @return the parent context, or {@code null} if there is no parent
 	 */
 	ApplicationContext getParent();
 
@@ -101,7 +101,7 @@ public interface ApplicationContext extends EnvironmentCapable, ListableBeanFact
 	 * @return the AutowireCapableBeanFactory for this context
 	 * @throws IllegalStateException if the context does not support
 	 * the AutowireCapableBeanFactory interface or does not hold an autowire-capable
-	 * bean factory yet (usually if <code>refresh()</code> has never been called)
+	 * bean factory yet (usually if {@code refresh()} has never been called)
 	 * @see ConfigurableApplicationContext#refresh()
 	 * @see ConfigurableApplicationContext#getBeanFactory()
 	 */

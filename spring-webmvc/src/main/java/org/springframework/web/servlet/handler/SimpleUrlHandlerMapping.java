@@ -32,12 +32,12 @@ import org.springframework.util.CollectionUtils;
  * bean references, e.g. via the map element in XML bean definitions.
  *
  * <p>Mappings to bean names can be set via the "mappings" property, in a form
- * accepted by the <code>java.util.Properties</code> class, like as follows:<br>
- * <code>
+ * accepted by the {@code java.util.Properties} class, like as follows:<br>
+ * {@code
  * /welcome.html=ticketController
  * /show.html=ticketController
- * </code><br>
- * The syntax is <code>PATH=HANDLER_BEAN_NAME</code>.
+ * }<br>
+ * The syntax is {@code PATH=HANDLER_BEAN_NAME}.
  * If the path doesn't begin with a slash, one is prepended.
  *
  * <p>Supports direct matches (given "/test" -> registered "/test") and "*"

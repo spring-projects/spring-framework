@@ -21,8 +21,8 @@ import java.util.Set;
 /**
  * A factory that creates formatters to format values of fields annotated with a particular {@link Annotation}.
  *
- * <p>For example, a <code>DateTimeFormatAnnotationFormatterFactory</code> might create a formatter
- * that formats <code>Date</code> values set on fields annotated with <code>@DateTimeFormat</code>.
+ * <p>For example, a {@code DateTimeFormatAnnotationFormatterFactory} might create a formatter
+ * that formats {@code Date} values set on fields annotated with {@code @DateTimeFormat}.
  *
  * @author Keith Donald
  * @since 3.0
@@ -36,8 +36,8 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 	Set<Class<?>> getFieldTypes();
 
 	/**
-	 * Get the Printer to print the value of a field of <code>fieldType</code> annotated with <code>annotation</code>.
-	 * If the type &lt;T&gt; the printer accepts is not assignable to <code>fieldType</code>, a coersion from <code>fieldType</code> to &lt;T&gt; will be attempted before the Printer is invoked.
+	 * Get the Printer to print the value of a field of {@code fieldType} annotated with {@code annotation}.
+	 * If the type &lt;T&gt; the printer accepts is not assignable to {@code fieldType}, a coersion from {@code fieldType} to &lt;T&gt; will be attempted before the Printer is invoked.
 	 * @param annotation the annotation instance
 	 * @param fieldType the type of field that was annotated
 	 * @return the printer
@@ -45,8 +45,8 @@ public interface AnnotationFormatterFactory<A extends Annotation> {
 	Printer<?> getPrinter(A annotation, Class<?> fieldType);
 
 	/**
-	 * Get the Parser to parse a submitted value for a field of <code>fieldType</code> annotated with <code>annotation</code>.
-	 * If the object the parser returns is not assignable to <code>fieldType</code>, a coersion to <code>fieldType</code> will be attempted before the field is set.
+	 * Get the Parser to parse a submitted value for a field of {@code fieldType} annotated with {@code annotation}.
+	 * If the object the parser returns is not assignable to {@code fieldType}, a coersion to {@code fieldType} will be attempted before the field is set.
 	 * @param annotation the annotation instance
 	 * @param fieldType the type of field that was annotated
 	 * @return the parser

@@ -67,10 +67,10 @@ import org.springframework.util.ReflectionUtils;
  * Spring's {@link Autowired @Autowired} and {@link Value @Value} annotations.
  *
  * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
- * if available, as a direct alternative to Spring's own <code>@Autowired</code>.
+ * if available, as a direct alternative to Spring's own {@code @Autowired}.
  *
  * <p>Only one constructor (at max) of any given bean class may carry this
- * annotation with the 'required' parameter set to <code>true</code>,
+ * annotation with the 'required' parameter set to {@code true},
  * indicating <i>the</i> constructor to autowire when used as a Spring bean.
  * If multiple <i>non-required</i> constructors carry the annotation, they
  * will be considered as candidates for autowiring. The constructor with
@@ -187,8 +187,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	/**
 	 * Set the boolean value that marks a dependency as required
 	 * <p>For example if using 'required=true' (the default),
-	 * this value should be <code>true</code>; but if using
-	 * 'optional=false', this value should be <code>false</code>.
+	 * this value should be {@code true}; but if using
+	 * 'optional=false', this value should be {@code false}.
 	 * @see #setRequiredParameterName(String)
 	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
@@ -292,7 +292,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	/**
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
-	 * resolving all of its fields and methods which are annotated with <code>@Autowired</code>.
+	 * resolving all of its fields and methods which are annotated with {@code @Autowired}.
 	 * @param bean the target instance to process
 	 * @throws BeansException if autowiring failed
 	 */

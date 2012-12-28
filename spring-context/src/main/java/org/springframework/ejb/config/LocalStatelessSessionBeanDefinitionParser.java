@@ -22,7 +22,7 @@ import org.springframework.ejb.access.LocalStatelessSessionProxyFactoryBean;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser}
- * implementation for parsing '<code>local-slsb</code>' tags and
+ * implementation for parsing '{@code local-slsb}' tags and
  * creating {@link LocalStatelessSessionProxyFactoryBean} definitions.
  *
  * @author Rob Harrop

@@ -40,7 +40,7 @@ import org.springframework.dao.support.DataAccessUtils;
  * @see JpaInterceptor
  * @see JpaDialect
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>)
+ * (typically obtained through {@code @PersistenceContext})
  */
 @Deprecated
 public abstract class JpaAccessor extends EntityManagerFactoryAccessor implements InitializingBean {
@@ -141,7 +141,7 @@ public abstract class JpaAccessor extends EntityManagerFactoryAccessor implement
 
 	/**
 	 * Convert the given runtime exception to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy if necessary, or
+	 * {@code org.springframework.dao} hierarchy if necessary, or
 	 * return the exception itself if it is not persistence related
 	 * <p>Default implementation delegates to the JpaDialect.
 	 * May be overridden in subclasses.

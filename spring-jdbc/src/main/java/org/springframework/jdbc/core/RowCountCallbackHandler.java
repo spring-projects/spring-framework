@@ -66,7 +66,7 @@ public class RowCountCallbackHandler implements RowCallbackHandler {
 	 * Implementation of ResultSetCallbackHandler.
 	 * Work out column size if this is the first row, otherwise just count rows.
 	 * <p>Subclasses can perform custom extraction or processing
-	 * by overriding the <code>processRow(ResultSet, int)</code> method.
+	 * by overriding the {@code processRow(ResultSet, int)} method.
 	 * @see #processRow(java.sql.ResultSet, int)
 	 */
 	public final void processRow(ResultSet rs) throws SQLException {

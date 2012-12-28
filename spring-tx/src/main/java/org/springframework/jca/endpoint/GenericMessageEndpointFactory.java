@@ -144,7 +144,7 @@ public class GenericMessageEndpointFactory extends AbstractMessageEndpointFactor
 	 * Internal exception thrown when a ResourceExeption has been encountered
 	 * during the endpoint invocation.
 	 * <p>Will only be used if the ResourceAdapter does not invoke the
-	 * endpoint's <code>beforeDelivery</code> and <code>afterDelivery</code>
+	 * endpoint's {@code beforeDelivery} and {@code afterDelivery}
 	 * directly, leavng it up to the concrete endpoint to apply those -
 	 * and to handle any ResourceExceptions thrown from them.
 	 */

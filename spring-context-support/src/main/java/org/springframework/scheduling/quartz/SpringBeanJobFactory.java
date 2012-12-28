@@ -53,7 +53,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 
 	/**
 	 * Specify the unknown properties (not found in the bean) that should be ignored.
-	 * <p>Default is <code>null</code>, indicating that all unknown properties
+	 * <p>Default is {@code null}, indicating that all unknown properties
 	 * should be ignored. Specify an empty array to throw an exception in case
 	 * of any unknown properties, or a list of property names that should be
 	 * ignored if there is no corresponding property found on the particular

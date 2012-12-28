@@ -164,7 +164,7 @@ public abstract class AbstractEnvironment implements ConfigurableEnvironment {
 	 * </pre>
 	 * The search order is now C, D, A, B as desired.
 	 *
-	 * <p>Beyond these recommendations, subclasses may use any of the <code>add&#42;</code>,
+	 * <p>Beyond these recommendations, subclasses may use any of the {@code add&#42;},
 	 * {@code remove}, or {@code replace} methods exposed by {@link MutablePropertySources}
 	 * in order to create the exact arrangement of property sources desired.
 	 *

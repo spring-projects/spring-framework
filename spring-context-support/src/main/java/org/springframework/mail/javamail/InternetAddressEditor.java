@@ -24,7 +24,7 @@ import javax.mail.internet.InternetAddress;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.mail.internet.InternetAddress</code>,
+ * Editor for {@code java.mail.internet.InternetAddress},
  * to directly populate an InternetAddress property.
  *
  * <p>Expects the same syntax as InternetAddress's constructor with

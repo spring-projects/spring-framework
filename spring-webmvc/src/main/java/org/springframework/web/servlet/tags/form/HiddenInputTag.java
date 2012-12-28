@@ -19,7 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Data-binding aware JSP tag for rendering a hidden HTML '<code>input</code>' field
+ * Data-binding aware JSP tag for rendering a hidden HTML '{@code input}' field
  * containing the databound value.
  *
  * <p>Example (binding to 'name' property of form backing object):
@@ -36,21 +36,21 @@ import javax.servlet.jsp.JspException;
 public class HiddenInputTag extends AbstractHtmlElementTag {
 
 	/**
-	 * The name of the '<code>disabled</code>' attribute.
+	 * The name of the '{@code disabled}' attribute.
 	 */
 	public static final String DISABLED_ATTRIBUTE = "disabled";
 
 	private String disabled;
 
 	/**
-	 * Get the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '{@code disabled}' attribute.
 	 */
 	public String getDisabled() {
 		return this.disabled;
 	}
 
 	/**
-	 * Set the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '{@code disabled}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setDisabled(String disabled) {
@@ -66,7 +66,7 @@ public class HiddenInputTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Writes the HTML '<code>input</code>' tag to the supplied {@link TagWriter} including the
+	 * Writes the HTML '{@code input}' tag to the supplied {@link TagWriter} including the
 	 * databound value.
 	 * @see #writeDefaultAttributes(TagWriter)
 	 * @see #getBoundValue()

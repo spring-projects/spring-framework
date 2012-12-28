@@ -30,7 +30,7 @@ import org.springframework.web.util.WebUtils;
  * This is particularly useful for stateless applications without user sessions.
  *
  * <p>Custom controllers can thus override the user's theme by calling
- * <code>setThemeName</code>, e.g. responding to a certain theme change request.
+ * {@code setThemeName}, e.g. responding to a certain theme change request.
  *
  * @author Jean-Pierre Pawlak
  * @author Juergen Hoeller

@@ -46,7 +46,7 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	 * Return location information about the pointcut expression
 	 * if available. This is useful in debugging.
 	 * @return location information as a human-readable String,
-	 * or <code>null</code> if none is available
+	 * or {@code null} if none is available
 	 */
 	public String getLocation() {
 		return this.location;

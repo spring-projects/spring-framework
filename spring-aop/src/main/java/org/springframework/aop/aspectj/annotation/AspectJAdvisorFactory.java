@@ -40,7 +40,7 @@ public interface AspectJAdvisorFactory {
 	/**
 	 * Determine whether or not the given class is an aspect, as reported
 	 * by AspectJ's {@link org.aspectj.lang.reflect.AjTypeSystem}.
-	 * <p>Will simply return <code>false</code> if the supposed aspect is
+	 * <p>Will simply return {@code false} if the supposed aspect is
 	 * invalid (such as an extension of a concrete aspect class).
 	 * Will return true for some aspects that Spring AOP cannot process,
 	 * such as those with unsupported instantiation models.
@@ -75,7 +75,7 @@ public interface AspectJAdvisorFactory {
 	 * @param aif the aspect instance factory
 	 * @param declarationOrderInAspect the declaration order within the aspect
 	 * @param aspectName the name of the aspect
-	 * @return <code>null</code> if the method is not an AspectJ advice method
+	 * @return {@code null} if the method is not an AspectJ advice method
 	 * or if it is a pointcut that will be used by other advice but will not
 	 * create a Spring advice in its own right
 	 */
@@ -89,7 +89,7 @@ public interface AspectJAdvisorFactory {
 	 * @param aif the aspect instance factory
 	 * @param declarationOrderInAspect the declaration order within the aspect
 	 * @param aspectName the name of the aspect
-	 * @return <code>null</code> if the method is not an AspectJ advice method
+	 * @return {@code null} if the method is not an AspectJ advice method
 	 * or if it is a pointcut that will be used by other advice but will not
 	 * create a Spring advice in its own right
 	 * @see org.springframework.aop.aspectj.AspectJAroundAdvice

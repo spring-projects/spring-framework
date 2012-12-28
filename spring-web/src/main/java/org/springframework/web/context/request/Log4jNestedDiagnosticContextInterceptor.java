@@ -64,7 +64,7 @@ public class Log4jNestedDiagnosticContextInterceptor implements AsyncWebRequestI
 
 	/**
 	 * Determine the message to be pushed onto the Log4J nested diagnostic context.
-	 * <p>Default is the request object's <code>getDescription</code> result.
+	 * <p>Default is the request object's {@code getDescription} result.
 	 * @param request current HTTP request
 	 * @return the message to be pushed onto the Log4J NDC
 	 * @see WebRequest#getDescription

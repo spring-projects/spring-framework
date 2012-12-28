@@ -25,7 +25,7 @@ package org.springframework.oxm;
 public class ValidationFailureException extends XmlMappingException {
 
 	/**
-	 * Construct a <code>ValidationFailureException</code> with the specified detail message.
+	 * Construct a {@code ValidationFailureException} with the specified detail message.
 	 * @param msg the detail message
 	 */
 	public ValidationFailureException(String msg) {
@@ -33,7 +33,7 @@ public class ValidationFailureException extends XmlMappingException {
 	}
 
 	/**
-	 * Construct a <code>ValidationFailureException</code> with the specified detail message
+	 * Construct a {@code ValidationFailureException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

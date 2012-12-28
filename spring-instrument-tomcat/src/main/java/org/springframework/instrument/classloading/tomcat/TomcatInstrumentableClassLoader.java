@@ -29,9 +29,9 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * to loaded classes without the need to use a VM-wide agent.
  *
  * <p>To be registered using a
- * <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a></code> tag
- * in Tomcat's <code><a href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">Context</a></code>
- * definition in the <code>server.xml</code> file, with the Spring-provided
+ * {@code <a href="http://tomcat.apache.org/tomcat-5.5-doc/config/loader.html">Loader</a>} tag
+ * in Tomcat's {@code <a href="http://tomcat.apache.org/tomcat-5.5-doc/config/context.html">Context</a>}
+ * definition in the {@code server.xml} file, with the Spring-provided
  * "spring-tomcat-weaver.jar" file deployed into Tomcat's "server/lib" (for Tomcat 5.x) or "lib" (for Tomcat 6.x) directory.
  * The required configuration tag looks as follows:
  *
@@ -39,8 +39,8 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  *
  * <p>Typically used in combination with a
  * {@link org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver}
- * defined in the Spring application context. The <code>addTransformer</code> and
- * <code>getThrowawayClassLoader</code> methods mirror the corresponding methods
+ * defined in the Spring application context. The {@code addTransformer} and
+ * {@code getThrowawayClassLoader} methods mirror the corresponding methods
  * in the LoadTimeWeaver interface, as expected by ReflectiveLoadTimeWeaver.
  *
  * <p>See the PetClinic sample application for a full example of this
@@ -63,7 +63,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
 
 	/**
-	 * Create a new <code>TomcatInstrumentableClassLoader</code> using the
+	 * Create a new {@code TomcatInstrumentableClassLoader} using the
 	 * current context class loader.
 	 * @see #TomcatInstrumentableClassLoader(ClassLoader)
 	 */
@@ -73,7 +73,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 	/**
-	 * Create a new <code>TomcatInstrumentableClassLoader</code> with the
+	 * Create a new {@code TomcatInstrumentableClassLoader} with the
 	 * supplied class loader as parent.
 	 * @param parent the parent {@link ClassLoader} to be used
 	 */
@@ -84,7 +84,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 
 
 	/**
-	 * Delegate for LoadTimeWeaver's <code>addTransformer</code> method.
+	 * Delegate for LoadTimeWeaver's {@code addTransformer} method.
 	 * Typically called through ReflectiveLoadTimeWeaver.
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver#addTransformer
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
@@ -94,7 +94,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 	/**
-	 * Delegate for LoadTimeWeaver's <code>getThrowawayClassLoader</code> method.
+	 * Delegate for LoadTimeWeaver's {@code getThrowawayClassLoader} method.
 	 * Typically called through ReflectiveLoadTimeWeaver.
 	 * @see org.springframework.instrument.classloading.LoadTimeWeaver#getThrowawayClassLoader
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
@@ -139,7 +139,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	 * or a subclass, copy all fields, including inherited fields. Designed to
 	 * work on objects with public no-arg constructors.
 	 * @throws IllegalArgumentException if arguments are incompatible or either
-	 * is <code>null</code>
+	 * is {@code null}
 	 */
 	private static void shallowCopyFieldState(final Object src, final Object dest) throws IllegalArgumentException {
 		if (src == null) {

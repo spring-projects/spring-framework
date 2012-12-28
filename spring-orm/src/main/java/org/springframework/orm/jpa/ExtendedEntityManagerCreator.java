@@ -48,7 +48,7 @@ import org.springframework.util.CollectionUtils;
  * semantics for "extended" EntityManagers.
  *
  * <p>Supports explicit joining of a transaction through the
- * <code>joinTransaction()</code> method ("application-managed extended
+ * {@code joinTransaction()} method ("application-managed extended
  * EntityManager") as well as automatic joining on each operation
  * ("container-managed extended EntityManager").
  *
@@ -60,11 +60,11 @@ public abstract class ExtendedEntityManagerCreator {
 
 	/**
 	 * Create an EntityManager that can join transactions with the
-	 * <code>joinTransaction()</code> method, but is not automatically
+	 * {@code joinTransaction()} method, but is not automatically
 	 * managed by the container.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * interface, if those operations should be exposed (may be {@code null})
 	 * @return an application-managed EntityManager that can join transactions
 	 * but does not participate in them automatically
 	 */
@@ -76,14 +76,14 @@ public abstract class ExtendedEntityManagerCreator {
 
 	/**
 	 * Create an EntityManager that can join transactions with the
-	 * <code>joinTransaction()</code> method, but is not automatically
+	 * {@code joinTransaction()} method, but is not automatically
 	 * managed by the container.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * interface, if those operations should be exposed (may be {@code null})
 	 * @param exceptionTranslator the exception translator to use for translating
 	 * JPA commit/rollback exceptions during transaction synchronization
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return an application-managed EntityManager that can join transactions
 	 * but does not participate in them automatically
 	 */
@@ -96,7 +96,7 @@ public abstract class ExtendedEntityManagerCreator {
 
 	/**
 	 * Create an EntityManager that can join transactions with the
-	 * <code>joinTransaction()</code> method, but is not automatically
+	 * {@code joinTransaction()} method, but is not automatically
 	 * managed by the container.
 	 * @param rawEntityManager raw EntityManager
 	 * @param emfInfo the EntityManagerFactoryInfo to obtain the
@@ -116,7 +116,7 @@ public abstract class ExtendedEntityManagerCreator {
 	 * operation in a transaction.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * interface, if those operations should be exposed (may be {@code null})
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
 	 */
@@ -131,10 +131,10 @@ public abstract class ExtendedEntityManagerCreator {
 	 * operation in a transaction.
 	 * @param rawEntityManager raw EntityManager
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * interface, if those operations should be exposed (may be {@code null})
 	 * @param exceptionTranslator the exception translator to use for translating
 	 * JPA commit/rollback exceptions during transaction synchronization
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
 	 */
@@ -183,8 +183,8 @@ public abstract class ExtendedEntityManagerCreator {
 	 * If this implements the EntityManagerFactoryInfo interface, appropriate handling
 	 * of the native EntityManagerFactory and available EntityManagerPlusOperations
 	 * will automatically apply.
-	 * @param properties the properties to be passed into the <code>createEntityManager</code>
-	 * call (may be <code>null</code>)
+	 * @param properties the properties to be passed into the {@code createEntityManager}
+	 * call (may be {@code null})
 	 * @return a container-managed EntityManager that will automatically participate
 	 * in any managed transaction
 	 * @see javax.persistence.EntityManagerFactory#createEntityManager(java.util.Map)
@@ -234,12 +234,12 @@ public abstract class ExtendedEntityManagerCreator {
 	 * Actually create the EntityManager proxy.
 	 * @param rawEm raw EntityManager
 	 * @param emIfc the (potentially vendor-specific) EntityManager
-	 * interface to proxy, or <code>null</code> for default detection of all interfaces
+	 * interface to proxy, or {@code null} for default detection of all interfaces
 	 * @param plusOperations an implementation of the EntityManagerPlusOperations
-	 * interface, if those operations should be exposed (may be <code>null</code>)
+	 * interface, if those operations should be exposed (may be {@code null})
 	 * @param exceptionTranslator the PersistenceException translator to use
 	 * @param jta whether to create a JTA-aware EntityManager
-	 * (or <code>null</code> if not known in advance)
+	 * (or {@code null} if not known in advance)
 	 * @param containerManaged whether to follow container-managed EntityManager
 	 * or application-managed EntityManager semantics
 	 * @return the EntityManager proxy

@@ -24,8 +24,8 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 /**
- * Abstract base class for SAX <code>ContentHandler</code> implementations that use StAX as a basis. All methods
- * delegate to internal template methods, capable of throwing a <code>XMLStreamException</code>. Additionally, an
+ * Abstract base class for SAX {@code ContentHandler} implementations that use StAX as a basis. All methods
+ * delegate to internal template methods, capable of throwing a {@code XMLStreamException}. Additionally, an
  * namespace context is used to keep track of declared namespaces.
  *
  * @author Arjen Poutsma
@@ -152,8 +152,8 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	}
 
 	/**
-	 * Convert a namespace URI and DOM or SAX qualified name to a <code>QName</code>. The qualified name can have the form
-	 * <code>prefix:localname</code> or <code>localName</code>.
+	 * Convert a namespace URI and DOM or SAX qualified name to a {@code QName}. The qualified name can have the form
+	 * {@code prefix:localname} or {@code localName}.
 	 *
 	 * @param namespaceUri  the namespace URI
 	 * @param qualifiedName the qualified name

@@ -19,8 +19,8 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Databinding-aware JSP tag for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>radio</code>'.
+ * Databinding-aware JSP tag for rendering an HTML '{@code input}'
+ * element with a '{@code type}' of '{@code radio}'.
  *
  * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setValue(Object) value} matches the {@link #getValue bound value}.

@@ -31,10 +31,10 @@ import org.springframework.util.StringUtils;
 /**
  * PortletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
- * via Portlet API's <code>PortletContext.getResourcePaths</code>.
+ * via Portlet API's {@code PortletContext.getResourcePaths}.
  * Falls back to the superclass' file system checking for other resources.
  *
- * <p>The advantage of using <code>PortletContext.getResourcePaths</code> to
+ * <p>The advantage of using {@code PortletContext.getResourcePaths} to
  * find matching files is that it will work in a WAR file which has not been
  * expanded too.
  *
@@ -65,11 +65,11 @@ public class PortletContextResourcePatternResolver extends PathMatchingResourceP
 
 	/**
 	 * Overridden version which checks for PortletContextResource
-	 * and uses <code>PortletContext.getResourcePaths</code> to find
+	 * and uses {@code PortletContext.getResourcePaths} to find
 	 * matching resources below the web application root directory.
 	 * In case of other resources, delegates to the superclass version.
 	 * @see #doRetrieveMatchingPortletContextResources
-	 * @see org.springframework.web.portlet.context.PortletContextResource
+	 * @see PortletContextResource
 	 * @see javax.portlet.PortletContext#getResourcePaths
 	 */
 	@Override

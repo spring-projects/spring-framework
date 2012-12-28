@@ -73,7 +73,7 @@ public class ScriptCompilationException extends NestedRuntimeException {
 
 	/**
 	 * Return the source for the offending script.
-	 * @return the source, or <code>null</code> if not available
+	 * @return the source, or {@code null} if not available
 	 */
 	public ScriptSource getScriptSource() {
 		return this.scriptSource;

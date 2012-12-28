@@ -65,14 +65,14 @@ public @interface ActiveProfiles {
 	 * Whether or not bean definition profiles from superclasses should be
 	 * <em>inherited</em>.
 	 *
-	 * <p>The default value is <code>true</code>, which means that a test
+	 * <p>The default value is {@code true}, which means that a test
 	 * class will <em>inherit</em> bean definition profiles defined by a
 	 * test superclass. Specifically, the bean definition profiles for a test
 	 * class will be appended to the list of bean definition profiles
 	 * defined by a test superclass. Thus, subclasses have the option of
 	 * <em>extending</em> the list of bean definition profiles.
 	 *
-	 * <p>If <code>inheritProfiles</code> is set to <code>false</code>, the bean
+	 * <p>If {@code inheritProfiles} is set to {@code false}, the bean
 	 * definition profiles for the test class will <em>shadow</em> and
 	 * effectively replace any bean definition profiles defined by a superclass.
 	 *

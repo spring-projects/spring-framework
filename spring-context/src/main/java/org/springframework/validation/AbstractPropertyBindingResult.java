@@ -131,7 +131,7 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 	/**
 	 * Retrieve the custom PropertyEditor for the given field, if any.
 	 * @param fixedField the fully qualified field name
-	 * @return the custom PropertyEditor, or <code>null</code>
+	 * @return the custom PropertyEditor, or {@code null}
 	 */
 	protected PropertyEditor getCustomEditor(String fixedField) {
 		Class<?> targetType = getPropertyAccessor().getPropertyType(fixedField);

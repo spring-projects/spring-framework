@@ -28,8 +28,8 @@ import org.springframework.context.ApplicationEventPublisherAware;
 
 /**
  * {@link MethodInterceptor Interceptor} that publishes an
- * <code>ApplicationEvent</code> to all <code>ApplicationListeners</code>
- * registered with an <code>ApplicationEventPublisher</code> after each
+ * {@code ApplicationEvent} to all {@code ApplicationListeners}
+ * registered with an {@code ApplicationEventPublisher} after each
  * <i>successful</i> method invocation.
  *
  * <p>Note that this interceptor is only capable of publishing <i>stateless</i>
@@ -56,11 +56,11 @@ public class EventPublicationInterceptor
 	/**
 	 * Set the application event class to publish.
 	 * <p>The event class <b>must</b> have a constructor with a single
-	 * <code>Object</code> argument for the event source. The interceptor
+	 * {@code Object} argument for the event source. The interceptor
 	 * will pass in the invoked object.
-	 * @throws IllegalArgumentException if the supplied <code>Class</code> is
-	 * <code>null</code> or if it is not an <code>ApplicationEvent</code> subclass or
-	 * if it does not expose a constructor that takes a single <code>Object</code> argument
+	 * @throws IllegalArgumentException if the supplied {@code Class} is
+	 * {@code null} or if it is not an {@code ApplicationEvent} subclass or
+	 * if it does not expose a constructor that takes a single {@code Object} argument
 	 */
 	public void setApplicationEventClass(Class applicationEventClass) {
 		if (ApplicationEvent.class.equals(applicationEventClass) ||

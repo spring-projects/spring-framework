@@ -42,7 +42,7 @@ public class GenericPropertiesContextLoader extends AbstractGenericContextLoader
 	}
 
 	/**
-	 * Returns &quot;<code>-context.properties</code>&quot;.
+	 * Returns &quot;{@code -context.properties}&quot;.
 	 */
 	@Override
 	public String getResourceSuffix() {

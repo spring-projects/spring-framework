@@ -108,7 +108,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getOutputStream()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setOutputStreamAccessAllowed(boolean outputStreamAccessAllowed) {
 		this.outputStreamAccessAllowed = outputStreamAccessAllowed;
@@ -123,7 +123,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getWriter()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setWriterAccessAllowed(boolean writerAccessAllowed) {
 		this.writerAccessAllowed = writerAccessAllowed;
@@ -297,7 +297,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
 	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
-	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
+	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
 	public Set<String> getHeaderNames() {
 		return this.headers.keySet();
@@ -310,7 +310,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -339,7 +339,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return the primary value for the given header, if any.
 	 * <p>Will return the first value in case of multiple values.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public Object getHeaderValue(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);

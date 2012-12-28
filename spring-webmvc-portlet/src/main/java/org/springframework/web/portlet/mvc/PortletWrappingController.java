@@ -102,7 +102,7 @@ public class PortletWrappingController extends AbstractController
 
 	/**
 	 * Set whether to use the shared PortletConfig object passed in
-	 * through <code>setPortletConfig</code>, if available.
+	 * through {@code setPortletConfig}, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
 	 * a mock PortletConfig object with the bean name as portlet name,
 	 * holding the current PortletContext.
@@ -123,7 +123,7 @@ public class PortletWrappingController extends AbstractController
 
 	/**
 	 * Set the class of the Portlet to wrap.
-	 * Needs to implement <code>javax.portlet.Portlet</code>.
+	 * Needs to implement {@code javax.portlet.Portlet}.
 	 * @see javax.portlet.Portlet
 	 */
 	public void setPortletClass(Class portletClass) {

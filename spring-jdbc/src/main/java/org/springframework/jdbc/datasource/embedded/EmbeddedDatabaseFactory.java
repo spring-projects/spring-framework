@@ -156,7 +156,7 @@ public class EmbeddedDatabaseFactory {
 
 	/**
 	 * Hook that gets the DataSource that provides the connectivity to the embedded database.
-	 * <p>Returns <code>null</code> if the DataSource has not been initialized or the database
+	 * <p>Returns {@code null} if the DataSource has not been initialized or the database
 	 * has been shut down. Subclasses may call to access the DataSource instance directly.
 	 */
 	protected final DataSource getDataSource() {

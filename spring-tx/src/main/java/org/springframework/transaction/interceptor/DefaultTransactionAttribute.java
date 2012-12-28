@@ -97,7 +97,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	/**
 	 * Return an identifying description for this transaction attribute.
-	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
+	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();

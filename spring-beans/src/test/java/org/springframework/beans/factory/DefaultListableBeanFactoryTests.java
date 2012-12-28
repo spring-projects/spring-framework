@@ -1310,7 +1310,7 @@ public class DefaultListableBeanFactoryTests {
 	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
 	 * be autowired <em>by name</em>, as &amp; is an illegal character in
 	 * Java method names. In other words, you can't name a method
-	 * <code>set&amp;FactoryBean(...)</code>.
+	 * {@code set&amp;FactoryBean(...)}.
 	 */
 	@Test(expected=TypeMismatchException.class)
 	public void testAutowireBeanWithFactoryBeanByName() {

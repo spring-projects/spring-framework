@@ -71,8 +71,8 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	/**
 	 * Create a new StringArrayPropertyEditor with the given separator.
 	 * @param separator the separator to use for splitting a {@link String}
-	 * @param emptyArrayAsNull <code>true</code> if an empty String array
-	 * is to be transformed into <code>null</code>
+	 * @param emptyArrayAsNull {@code true} if an empty String array
+	 * is to be transformed into {@code null}
 	 */
 	public StringArrayPropertyEditor(String separator, boolean emptyArrayAsNull) {
 		this(separator, null, emptyArrayAsNull);
@@ -81,9 +81,9 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	/**
 	 * Create a new StringArrayPropertyEditor with the given separator.
 	 * @param separator the separator to use for splitting a {@link String}
-	 * @param emptyArrayAsNull <code>true</code> if an empty String array
-	 * is to be transformed into <code>null</code>
-	 * @param trimValues <code>true</code> if the values in the parsed arrays
+	 * @param emptyArrayAsNull {@code true} if an empty String array
+	 * is to be transformed into {@code null}
+	 * @param trimValues {@code true} if the values in the parsed arrays
 	 * are to be be trimmed of whitespace (default is true).
 	 */
 	public StringArrayPropertyEditor(String separator, boolean emptyArrayAsNull, boolean trimValues) {
@@ -96,8 +96,8 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param charsToDelete a set of characters to delete, in addition to
 	 * trimming an input String. Useful for deleting unwanted line breaks:
 	 * e.g. "\r\n\f" will delete all new lines and line feeds in a String.
-	 * @param emptyArrayAsNull <code>true</code> if an empty String array
-	 * is to be transformed into <code>null</code>
+	 * @param emptyArrayAsNull {@code true} if an empty String array
+	 * is to be transformed into {@code null}
 	 */
 	public StringArrayPropertyEditor(String separator, String charsToDelete, boolean emptyArrayAsNull) {
 		this(separator, charsToDelete, emptyArrayAsNull, true);
@@ -109,9 +109,9 @@ public class StringArrayPropertyEditor extends PropertyEditorSupport {
 	 * @param charsToDelete a set of characters to delete, in addition to
 	 * trimming an input String. Useful for deleting unwanted line breaks:
 	 * e.g. "\r\n\f" will delete all new lines and line feeds in a String.
-	 * @param emptyArrayAsNull <code>true</code> if an empty String array
-	 * is to be transformed into <code>null</code>
-	 * @param trimValues <code>true</code> if the values in the parsed arrays
+	 * @param emptyArrayAsNull {@code true} if an empty String array
+	 * is to be transformed into {@code null}
+	 * @param trimValues {@code true} if the values in the parsed arrays
 	 * are to be be trimmed of whitespace (default is true).
 	 */
 	public StringArrayPropertyEditor(String separator, String charsToDelete, boolean emptyArrayAsNull, boolean trimValues) {

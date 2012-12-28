@@ -29,7 +29,7 @@ import org.springframework.util.ObjectUtils;
  * with a specific encoding to be used for reading from the resource.
  *
  * <p>Used as argument for operations that support to read content with
- * a specific encoding (usually through a <code>java.io.Reader</code>.
+ * a specific encoding (usually through a {@code java.io.Reader}.
  *
  * @author Juergen Hoeller
  * @since 1.2.6
@@ -73,14 +73,14 @@ public class EncodedResource {
 
 	/**
 	 * Return the encoding to use for reading from the resource,
-	 * or <code>null</code> if none specified.
+	 * or {@code null} if none specified.
 	 */
 	public final String getEncoding() {
 		return this.encoding;
 	}
 
 	/**
-	 * Open a <code>java.io.Reader</code> for the specified resource,
+	 * Open a {@code java.io.Reader} for the specified resource,
 	 * using the specified encoding (if any).
 	 * @throws IOException if opening the Reader failed
 	 */

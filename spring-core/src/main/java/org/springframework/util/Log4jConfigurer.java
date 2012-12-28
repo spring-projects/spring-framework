@@ -34,7 +34,7 @@ import org.apache.log4j.xml.DOMConfigurator;
  *
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
  * in the web package, reading in its configuration from context-params in
- * <code>web.xml</code>. In a J2EE web application, log4j is usually set up
+ * {@code web.xml}. In a J2EE web application, log4j is usually set up
  * via Log4jConfigListener or Log4jConfigServlet, delegating to
  * Log4jWebConfigurer underneath.
  *

@@ -25,7 +25,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 /**
  * Servlet 2.4+ listener that exposes the request to the current thread,
  * through both {@link org.springframework.context.i18n.LocaleContextHolder} and
- * {@link RequestContextHolder}. To be registered as listener in <code>web.xml</code>.
+ * {@link RequestContextHolder}. To be registered as listener in {@code web.xml}.
  *
  * <p>Alternatively, Spring's {@link org.springframework.web.filter.RequestContextFilter}
  * and Spring's {@link org.springframework.web.servlet.DispatcherServlet} also expose
@@ -39,7 +39,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
  * @since 2.0
  * @see javax.servlet.ServletRequestListener
  * @see org.springframework.context.i18n.LocaleContextHolder
- * @see org.springframework.web.context.request.RequestContextHolder
+ * @see RequestContextHolder
  * @see org.springframework.web.filter.RequestContextFilter
  * @see org.springframework.web.servlet.DispatcherServlet
  */

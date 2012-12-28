@@ -50,7 +50,7 @@ public abstract class UiApplicationContextUtils {
 	 * autodetecting a bean with the name "themeSource". If no such
 	 * bean is found, a default (empty) ThemeSource will be used.
 	 * @param context current application context
-	 * @return the initialized theme source (will never be <code>null</code>)
+	 * @return the initialized theme source (will never be {@code null})
 	 * @see #THEME_SOURCE_BEAN_NAME
 	 */
 	public static ThemeSource initThemeSource(ApplicationContext context) {

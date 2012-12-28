@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * <ul>
  * <li>Valid characters for the specific URI component as defined in RFC 3986 stay the same.</li>
  * <li>All other characters are converted into one or more bytes in the given encoding scheme. Each of the
- * resulting bytes is written as a hexadecimal string in the "<code>%<i>xy</i></code>" format.</li>
+ * resulting bytes is written as a hexadecimal string in the "{@code %<i>xy</i>}" format.</li>
  * </ul>
  *
  * @author Arjen Poutsma
@@ -338,7 +338,7 @@ public abstract class UriUtils {
 	 * <li>Alphanumeric characters {@code "a"} through {@code "z"}, {@code "A"} through {@code "Z"}, and
 	 * {@code "0"} through {@code "9"} stay the same.</li>
 	 * <li>Special characters {@code "-"}, {@code "_"}, {@code "."}, and {@code "*"} stay the same.</li>
-	 * <li>A sequence "<code>%<i>xy</i></code>" is interpreted as a hexadecimal representation of the character.</li>
+	 * <li>A sequence "{@code %<i>xy</i>}" is interpreted as a hexadecimal representation of the character.</li>
 	 * </ul>
 	 * @param source the source string
 	 * @param encoding the encoding

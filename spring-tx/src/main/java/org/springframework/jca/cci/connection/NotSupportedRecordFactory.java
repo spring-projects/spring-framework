@@ -28,7 +28,7 @@ import javax.resource.cci.RecordFactory;
  *
  * <p>Useful as a placeholder for a RecordFactory argument (for example as
  * defined by the RecordCreator callback), in particular when the connector's
- * <code>ConnectionFactory.getRecordFactory()</code> implementation happens to
+ * {@code ConnectionFactory.getRecordFactory()} implementation happens to
  * throw NotSupportedException early rather than throwing the exception from
  * RecordFactory's methods.
  *

@@ -27,16 +27,16 @@ import java.util.Map;
 import org.springframework.jdbc.InvalidResultSetAccessException;
 
 /**
- * Mirror interface for <code>javax.sql.RowSet</code>, representing
- * disconnected <code>java.sql.ResultSet</code> data.
+ * Mirror interface for {@code javax.sql.RowSet}, representing
+ * disconnected {@code java.sql.ResultSet} data.
  *
  * <p>The main difference to the standard JDBC RowSet is that an SQLException
  * is never thrown here. This allows a SqlRowSet to be used without having
  * to deal with checked exceptions. A SqlRowSet will throw Spring's
- * <code>org.springframework.jdbc.InvalidResultSetAccessException</code>
+ * {@code org.springframework.jdbc.InvalidResultSetAccessException}
  * instead (when appropriate).
  *
- * <p>Note: This interface extends the <code>java.io.Serializable</code>
+ * <p>Note: This interface extends the {@code java.io.Serializable}
  * marker interface. Implementations, which typically hold disconnected data,
  * are encouraged to be actually serializable (as far as possible).
  *
@@ -477,10 +477,10 @@ public interface SqlRowSet extends Serializable {
 	boolean relative(int rows) throws InvalidResultSetAccessException;
 
 	/**
-	 * Reports whether the last column read had a value of SQL <code>NULL</code>.
+	 * Reports whether the last column read had a value of SQL {@code NULL}.
 	 * Note that you must first call one of the getter methods and then call
-	 * the <code>wasNull</code> method.
-	 * @return true if the most recent coumn retrieved was SQL <code>NULL</code>,
+	 * the {@code wasNull} method.
+	 * @return true if the most recent coumn retrieved was SQL {@code NULL},
 	 * false otherwise
 	 * @see java.sql.ResultSet#wasNull()
 	 */

@@ -21,7 +21,7 @@ package org.springframework.jdbc.core;
  * such as the SQL type and the scale for numeric values.
  *
  * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of
- * argument values: Each such argument value may be a <code>SqlParameterValue</code>,
+ * argument values: Each such argument value may be a {@code SqlParameterValue},
  * indicating the SQL type (and optionally the scale) instead of letting the
  * template guess a default type. Note that this only applies to the operations with
  * a 'plain' argument array, not to the overloaded variants with an explicit type array.
@@ -41,7 +41,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param value the value object
 	 */
 	public SqlParameterValue(int sqlType, Object value) {
@@ -51,7 +51,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param typeName the type name of the parameter (optional)
 	 * @param value the value object
 	 */
@@ -62,7 +62,7 @@ public class SqlParameterValue extends SqlParameter {
 
 	/**
 	 * Create a new SqlParameterValue, supplying the SQL type.
-	 * @param sqlType SQL type of the parameter according to <code>java.sql.Types</code>
+	 * @param sqlType SQL type of the parameter according to {@code java.sql.Types}
 	 * @param scale the number of digits after the decimal point
 	 * (for DECIMAL and NUMERIC types)
 	 * @param value the value object

@@ -103,7 +103,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 	/**
 	 * This is only of interest for Spring AOP: AspectJ instantiation semantics
-	 * are much richer. In AspectJ terminology, all a return of <code>true</code>
+	 * are much richer. In AspectJ terminology, all a return of {@code true}
 	 * means here is that the aspect is not a SINGLETON.
 	 */
 	public boolean isPerInstance() {

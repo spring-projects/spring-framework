@@ -126,10 +126,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	/**
 	 * Specify the {@link PropertyEditorRegistrar PropertyEditorRegistrars}
 	 * to apply to beans defined within the current application context.
-	 * <p>This allows for sharing <code>PropertyEditorRegistrars</code> with
+	 * <p>This allows for sharing {@code PropertyEditorRegistrars} with
 	 * {@link org.springframework.validation.DataBinder DataBinders}, etc.
 	 * Furthermore, it avoids the need for synchronization on custom editors:
-	 * A <code>PropertyEditorRegistrar</code> will always create fresh editor
+	 * A {@code PropertyEditorRegistrar} will always create fresh editor
 	 * instances for each bean creation attempt.
 	 * @see ConfigurableListableBeanFactory#addPropertyEditorRegistrar
 	 */

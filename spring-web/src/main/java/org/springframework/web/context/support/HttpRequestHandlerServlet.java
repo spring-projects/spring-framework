@@ -32,7 +32,7 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * Simple HttpServlet that delegates to an {@link HttpRequestHandler} bean defined
  * in Spring's root web application context. The target bean name must match the
- * HttpRequestHandlerServlet servlet-name as defined in <code>web.xml</code>.
+ * HttpRequestHandlerServlet servlet-name as defined in {@code web.xml}.
  *
  * <p>This can for example be used to expose a single Spring remote exporter,
  * such as {@link org.springframework.remoting.httpinvoker.HttpInvokerServiceExporter}

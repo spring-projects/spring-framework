@@ -54,7 +54,7 @@ public abstract class DaoSupport implements InitializingBean {
 
 	/**
 	 * Abstract subclasses must override this to check their configuration.
-	 * <p>Implementors should be marked as <code>final</code if concrete subclasses
+	 * <p>Implementors should be marked as {@code final} if concrete subclasses
 	 * are not supposed to override this template method themselves.
 	 * @throws IllegalArgumentException in case of illegal configuration
 	 */

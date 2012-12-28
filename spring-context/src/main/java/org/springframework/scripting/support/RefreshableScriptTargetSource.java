@@ -63,7 +63,7 @@ public class RefreshableScriptTargetSource extends BeanFactoryRefreshableTargetS
 
 	/**
 	 * Determine whether a refresh is required through calling
-	 * ScriptFactory's <code>requiresScriptedObjectRefresh</code> method.
+	 * ScriptFactory's {@code requiresScriptedObjectRefresh} method.
 	 * @see ScriptFactory#requiresScriptedObjectRefresh(ScriptSource)
 	 */
 	@Override

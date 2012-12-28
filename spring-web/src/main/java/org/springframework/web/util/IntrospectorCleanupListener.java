@@ -25,7 +25,7 @@ import org.springframework.beans.CachedIntrospectionResults;
 
 /**
  * Listener that flushes the JDK's {@link java.beans.Introspector JavaBeans Introspector}
- * cache on web app shutdown. Register this listener in your <code>web.xml</code> to
+ * cache on web app shutdown. Register this listener in your {@code web.xml} to
  * guarantee proper release of the web application class loader and its loaded classes.
  *
  * <p><b>If the JavaBeans Introspector has been used to analyze application classes,
@@ -59,7 +59,7 @@ import org.springframework.beans.CachedIntrospectionResults;
  * you will see all the application's static class resources (like singletons)
  * around after web app shutdown, which is not the fault of those classes!
  *
- * <p><b>This listener should be registered as the first one in <code>web.xml</code>,
+ * <p><b>This listener should be registered as the first one in {@code web.xml},
  * before any application listeners such as Spring's ContextLoaderListener.</b>
  * This allows the listener to take full effect at the right time of the lifecycle.
  *

@@ -115,7 +115,7 @@ public interface ConfigurableListableBeanFactory
 	/**
 	 * Return whether this factory's bean definitions are frozen,
 	 * i.e. are not supposed to be modified or post-processed any further.
-	 * @return <code>true</code> if the factory's configuration is considered frozen
+	 * @return {@code true} if the factory's configuration is considered frozen
 	 */
 	boolean isConfigurationFrozen();
 

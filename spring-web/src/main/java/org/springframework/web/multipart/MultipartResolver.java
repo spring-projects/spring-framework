@@ -40,12 +40,12 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p>If a {@link org.springframework.web.servlet.DispatcherServlet} detects
  * a multipart request, it will resolve it via the configured
- * {@link org.springframework.web.multipart.MultipartResolver} and pass on a
+ * {@link MultipartResolver} and pass on a
  * wrapped {@link javax.servlet.http.HttpServletRequest}.
  * Controllers can then cast their given request to the
- * {@link org.springframework.web.multipart.MultipartHttpServletRequest}
+ * {@link MultipartHttpServletRequest}
  * interface, which permits access to any
- * {@link org.springframework.web.multipart.MultipartFile MultipartFiles}.
+ * {@link MultipartFile MultipartFiles}.
  * Note that this cast is only supported in case of an actual multipart request.
  *
  * <pre class="code">
@@ -62,19 +62,19 @@ import javax.servlet.http.HttpServletRequest;
  * bean properties.
  *
  * <p>As an alternative to using a
- * {@link org.springframework.web.multipart.MultipartResolver} with a
+ * {@link MultipartResolver} with a
  * {@link org.springframework.web.servlet.DispatcherServlet},
  * a {@link org.springframework.web.multipart.support.MultipartFilter} can be
- * registered in <code>web.xml</code>. It will delegate to a corresponding
- * {@link org.springframework.web.multipart.MultipartResolver} bean in the root
+ * registered in {@code web.xml}. It will delegate to a corresponding
+ * {@link MultipartResolver} bean in the root
  * application context. This is mainly intended for applications that do not
  * use Spring's own web MVC framework.
  *
  * <p>Note: There is hardly ever a need to access the
- * {@link org.springframework.web.multipart.MultipartResolver} itself
+ * {@link MultipartResolver} itself
  * from application code. It will simply do its work behind the scenes,
  * making
- * {@link org.springframework.web.multipart.MultipartHttpServletRequest MultipartHttpServletRequests}
+ * {@link MultipartHttpServletRequest MultipartHttpServletRequests}
  * available to controllers.
  *
  * @author Juergen Hoeller

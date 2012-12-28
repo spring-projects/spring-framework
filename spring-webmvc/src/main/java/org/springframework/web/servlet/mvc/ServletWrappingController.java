@@ -38,7 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
  * <p>Useful to invoke an existing servlet via Spring's dispatching infrastructure,
  * for example to apply Spring HandlerInterceptors to its requests.
  *
- * <p>Note that Struts has a special requirement in that it parses <code>web.xml</code>
+ * <p>Note that Struts has a special requirement in that it parses {@code web.xml}
  * to find its servlet mapping. Therefore, you need to specify the DispatcherServlet's
  * servlet name as "servletName" on this controller, so that Struts finds the
  * DispatcherServlet's mapping (thinking that it refers to the ActionServlet).
@@ -100,7 +100,7 @@ public class ServletWrappingController extends AbstractController
 
 	/**
 	 * Set the class of the servlet to wrap.
-	 * Needs to implement <code>javax.servlet.Servlet</code>.
+	 * Needs to implement {@code javax.servlet.Servlet}.
 	 * @see javax.servlet.Servlet
 	 */
 	public void setServletClass(Class servletClass) {

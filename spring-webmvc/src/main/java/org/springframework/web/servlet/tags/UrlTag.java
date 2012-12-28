@@ -61,7 +61,7 @@ import org.springframework.web.util.UriUtils;
  *
  * <p>URLs can be HTML/XML escaped by setting the {@link #setHtmlEscape(String)
  * 'htmlEscape'} attribute to 'true'.  Detects an HTML escaping setting, either on
- * this tag instance, the page level, or the <code>web.xml</code> level. The default
+ * this tag instance, the page level, or the {@code web.xml} level. The default
  * is 'false'.  When setting the URL value into a variable, escaping is not recommended.
  *
  * <p>Example usage:
@@ -69,7 +69,7 @@ import org.springframework.web.util.UriUtils;
  *   &lt;spring:param name="variableName" value="more than JSTL c:url" /&gt;
  * &lt;/spring:url&gt;</pre>
  * Results in:
- * <code>/currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl</code>
+ * {@code /currentApplicationContext/url/path/more%20than%20JSTL%20c%3Aurl}
  *
  * @author Scott Andrews
  * @since 3.0

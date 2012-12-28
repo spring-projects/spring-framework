@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 
 /**
  * {@link ClassMetadata} implementation that uses standard reflection
- * to introspect a given <code>Class</code>.
+ * to introspect a given {@code Class}.
  *
  * @author Juergen Hoeller
  * @since 2.5

@@ -22,7 +22,7 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
 
 /**
  * Subclass of {@link AbstractJpaTests} that activates AspectJ load-time weaving and
- * allows for specifying a custom location for AspectJ's <code>aop.xml</code> file.
+ * allows for specifying a custom location for AspectJ's {@code aop.xml} file.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -34,7 +34,7 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
 public abstract class AbstractAspectjJpaTests extends AbstractJpaTests {
 
 	/**
-	 * Default location of the <code>aop.xml</code> file in the class path:
+	 * Default location of the {@code aop.xml} file in the class path:
 	 * "META-INF/aop.xml"
 	 */
 	public static final String DEFAULT_AOP_XML_LOCATION = "META-INF/aop.xml";
@@ -48,9 +48,9 @@ public abstract class AbstractAspectjJpaTests extends AbstractJpaTests {
 	}
 
 	/**
-	 * Return the actual location of the <code>aop.xml</code> file
+	 * Return the actual location of the {@code aop.xml} file
 	 * in the class path. The default is "META-INF/aop.xml".
-	 * <p>Override this method to point to a specific <code>aop.xml</code>
+	 * <p>Override this method to point to a specific {@code aop.xml}
 	 * file within your test suite, allowing for different config files
 	 * to co-exist within the same class path.
 	 */

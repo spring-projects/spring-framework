@@ -106,7 +106,7 @@ public abstract aspect AbstractMethodMockingControl percflow(mockStaticsTestMeth
 		 * Validate the call and provide the expected return value
 		 * @param lastSig
 		 * @param args
-		 * @return
+		 * @return the return value
 		 */
 		public Object respond(String lastSig, Object[] args) {
 			Call call = nextCall();

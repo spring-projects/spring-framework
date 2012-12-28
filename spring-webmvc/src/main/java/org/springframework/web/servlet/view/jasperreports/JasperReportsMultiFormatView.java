@@ -32,32 +32,32 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>This view works on the concept of a format key and a mapping key.
  * The format key is used to pass the mapping key from your
- * <code>Controller</code> to Spring through as part of the model and the
+ * {@code Controller} to Spring through as part of the model and the
  * mapping key is used to map a logical format to an actual JasperReports
  * view class. For example you might add the following code to your
- * <code>Controller</code>:
+ * {@code Controller}:
  *
  * <pre>
  * Map<String, Object> model = new HashMap<String, Object>();
  * model.put("format", "pdf");</pre>
  *
- * Here <code>format</code> is the format key and <code>pdf</code> is
+ * Here {@code format} is the format key and {@code pdf} is
  * the mapping key. When rendering a report, this class looks for a
  * model parameter under the format key, which by default is
- * <code>format</code>. It then uses the value of this parameter to lookup
- * the actual <code>View</code> class to use. The default mappings for this
+ * {@code format}. It then uses the value of this parameter to lookup
+ * the actual {@code View} class to use. The default mappings for this
  * lookup are:
  *
  * <p><ul>
- * <li><code>csv</code> - <code>JasperReportsCsvView</code></li>
- * <li><code>html</code> - <code>JasperReportsHtmlView</code></li>
- * <li><code>pdf</code> - <code>JasperReportsPdfView</code></li>
- * <li><code>xls</code> - <code>JasperReportsXlsView</code></li>
+ * <li>{@code csv} - {@code JasperReportsCsvView}</li>
+ * <li>{@code html} - {@code JasperReportsHtmlView}</li>
+ * <li>{@code pdf} - {@code JasperReportsPdfView}</li>
+ * <li>{@code xls} - {@code JasperReportsXlsView}</li>
  * </ul>
  *
- * <p>The format key can be changed using the <code>formatKey</code>
+ * <p>The format key can be changed using the {@code formatKey}
  * property and the mapping key to view class mappings can be changed using the
- * <code>formatMappings</code> property.
+ * {@code formatMappings} property.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -91,9 +91,9 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 
 
   /**
-	 * Creates a new <code>JasperReportsMultiFormatView</code> instance
-	 * with a default set of mappings.
-	 */
+   * Creates a new {@code JasperReportsMultiFormatView} instance
+   * with a default set of mappings.
+   */
 	public JasperReportsMultiFormatView() {
 		this.formatMappings = new HashMap<String, Class<? extends AbstractJasperReportsView>>(4);
 		this.formatMappings.put("csv", JasperReportsCsvView.class);
@@ -114,10 +114,10 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	 * Set the mappings of format discriminators to view class names.
 	 * The default mappings are:
 	 * <p><ul>
-	 * <li><code>csv</code> - <code>JasperReportsCsvView</code></li>
-	 * <li><code>html</code> - <code>JasperReportsHtmlView</code></li>
-	 * <li><code>pdf</code> - <code>JasperReportsPdfView</code></li>
-	 * <li><code>xls</code> - <code>JasperReportsXlsView</code></li>
+	 * <li>{@code csv} - {@code JasperReportsCsvView}</li>
+	 * <li>{@code html} - {@code JasperReportsHtmlView}</li>
+	 * <li>{@code pdf} - {@code JasperReportsPdfView}</li>
+	 * <li>{@code xls} - {@code JasperReportsXlsView}</li>
 	 * </ul>
 	 */
 	public void setFormatMappings(Map<String, Class<? extends AbstractJasperReportsView>> formatMappings) {
@@ -128,9 +128,9 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 	/**
-	 * Set the mappings of <code>Content-Disposition</code> header values to
+	 * Set the mappings of {@code Content-Disposition} header values to
 	 * mapping keys. If specified, Spring will look at these mappings to determine
-	 * the value of the <code>Content-Disposition</code> header for a given
+	 * the value of the {@code Content-Disposition} header for a given
 	 * format mapping.
 	 */
 	public void setContentDispositionMappings(Properties mappings) {
@@ -138,7 +138,7 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 	/**
-	 * Return the mappings of <code>Content-Disposition</code> header values to
+	 * Return the mappings of {@code Content-Disposition} header values to
 	 * mapping keys. Mainly available for configuration through property paths
 	 * that specify individual keys.
 	 */
@@ -194,9 +194,9 @@ public class JasperReportsMultiFormatView extends AbstractJasperReportsView {
 	}
 
 	/**
-	 * Adds/overwrites the <code>Content-Disposition</code> header value with the format-specific
+	 * Adds/overwrites the {@code Content-Disposition} header value with the format-specific
 	 * value if the mappings have been specified and a valid one exists for the given format.
-	 * @param response the <code>HttpServletResponse</code> to set the header in
+	 * @param response the {@code HttpServletResponse} to set the header in
 	 * @param format the format key of the mapping
 	 * @see #setContentDispositionMappings
 	 */

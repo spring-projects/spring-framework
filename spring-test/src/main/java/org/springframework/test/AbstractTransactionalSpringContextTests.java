@@ -182,7 +182,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * <p>Override {@link #onSetUpBeforeTransaction()} and/or
 	 * {@link #onSetUpInTransaction()} to add custom set-up behavior for
 	 * transactional execution. Alternatively, override this method for general
-	 * set-up behavior, calling <code>super.onSetUp()</code> as part of your
+	 * set-up behavior, calling {@code super.onSetUp()} as part of your
 	 * method implementation.
 	 * @throws Exception simply let any exception propagate
 	 * @see #onTearDown()
@@ -241,7 +241,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * <p>Override {@link #onTearDownInTransaction()} and/or
 	 * {@link #onTearDownAfterTransaction()} to add custom tear-down behavior
 	 * for transactional execution. Alternatively, override this method for
-	 * general tear-down behavior, calling <code>super.onTearDown()</code> as
+	 * general tear-down behavior, calling {@code super.onTearDown()} as
 	 * part of your method implementation.
 	 * <p>Note that {@link #onTearDownInTransaction()} will only be called if a
 	 * transaction is still active at the time of the test shutdown. In
@@ -305,7 +305,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 
 	/**
 	 * Immediately force a commit or rollback of the transaction, according to
-	 * the <code>complete</code> and {@link #isRollback() rollback} flags.
+	 * the {@code complete} and {@link #isRollback() rollback} flags.
 	 * <p>Can be used to explicitly let the transaction end early, for example to
 	 * check whether lazy associations of persistent objects work outside of a
 	 * transaction (that is, have been initialized properly).

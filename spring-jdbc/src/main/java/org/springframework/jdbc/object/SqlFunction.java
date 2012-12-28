@@ -36,16 +36,16 @@ import org.springframework.jdbc.core.SingleColumnRowMapper;
  *
  * <p>This is a concrete class, which there is often no need to subclass.
  * Code using this package can create an object of this type, declaring SQL
- * and parameters, and then invoke the appropriate <code>run</code> method
+ * and parameters, and then invoke the appropriate {@code run} method
  * repeatedly to execute the function. Subclasses are only supposed to add
- * specialized <code>run</code> methods for specific parameter and return types.
+ * specialized {@code run} methods for specific parameter and return types.
  *
  * <p>Like all RdbmsOperation objects, SqlFunction objects are thread-safe.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Jean-Pierre Pawlak
- * @see org.springframework.jdbc.object.StoredProcedure
+ * @see StoredProcedure
  */
 public class SqlFunction<T> extends MappingSqlQuery<T> {
 
@@ -55,7 +55,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	/**
 	 * Constructor to allow use as a JavaBean.
 	 * A DataSource, SQL and any parameters must be supplied before
-	 * invoking the <code>compile</code> method and using this object.
+	 * invoking the {@code compile} method and using this object.
 	 * @see #setDataSource
 	 * @see #setSql
 	 * @see #compile
@@ -81,7 +81,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * @param ds DataSource to obtain connections from
 	 * @param sql SQL to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
 	public SqlFunction(DataSource ds, String sql, int[] types) {
@@ -96,7 +96,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	 * @param ds DataSource to obtain connections from
 	 * @param sql SQL to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @param resultType the type that the result object is required to match
 	 * @see #setResultType(Class)
 	 * @see java.sql.Types
@@ -182,7 +182,7 @@ public class SqlFunction<T> extends MappingSqlQuery<T> {
 	}
 
 	/**
-	 * Analogous to the <code>SqlQuery.findObject(Object[])</code> method.
+	 * Analogous to the {@code SqlQuery.findObject(Object[])} method.
 	 * This is a generic method to execute a query, taken a number of arguments.
 	 * @param parameters array of parameters. These will be objects or
 	 * object wrapper types for primitives.

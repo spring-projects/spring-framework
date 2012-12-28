@@ -34,7 +34,7 @@ public interface EditorAwareTag {
 	/**
 	 * Retrieve the PropertyEditor for the property that this tag is
 	 * currently bound to. Intended for cooperating nesting tags.
-	 * @return the current PropertyEditor, or <code>null</code> if none
+	 * @return the current PropertyEditor, or {@code null} if none
 	 * @throws JspException if resolving the editor failed
 	 */
 	PropertyEditor getEditor() throws JspException;

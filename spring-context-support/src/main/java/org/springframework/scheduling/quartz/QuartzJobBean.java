@@ -92,7 +92,7 @@ public abstract class QuartzJobBean implements Job {
 
 	/**
 	 * This implementation applies the passed-in job data map as bean property
-	 * values, and delegates to <code>executeInternal</code> afterwards.
+	 * values, and delegates to {@code executeInternal} afterwards.
 	 * @see #executeInternal
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {

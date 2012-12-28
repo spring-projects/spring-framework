@@ -43,7 +43,7 @@ public @interface ActionMapping {
 	 * <p>If not specified, the method will be used as default handler:
 	 * i.e. for action requests where no specific action mapping was found.
 	 * <p>Note that all such annotated action methods only apply within the
-	 * <code>@RequestMapping</code> constraints of the containing handler class.
+	 * {@code @RequestMapping} constraints of the containing handler class.
 	 * @see javax.portlet.ActionRequest#ACTION_NAME
 	 */
 	String value() default "";

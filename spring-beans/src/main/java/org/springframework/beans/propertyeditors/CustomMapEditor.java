@@ -40,7 +40,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new CustomMapEditor for the given target type,
-	 * keeping an incoming <code>null</code> as-is.
+	 * keeping an incoming {@code null} as-is.
 	 * @param mapType the target type, which needs to be a
 	 * sub-interface of Map or a concrete Map class
 	 * @see java.util.Map
@@ -63,7 +63,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 	 * and LinkedHashMap for Map.
 	 * @param mapType the target type, which needs to be a
 	 * sub-interface of Map or a concrete Map class
-	 * @param nullAsEmptyMap ap whether to convert an incoming <code>null</code>
+	 * @param nullAsEmptyMap ap whether to convert an incoming {@code null}
 	 * value to an empty Map (of the appropriate type)
 	 * @see java.util.Map
 	 * @see java.util.TreeMap
@@ -189,7 +189,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * This implementation returns <code>null</code> to indicate that
+	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
 	 */
 	@Override

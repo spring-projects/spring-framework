@@ -34,7 +34,7 @@ import java.sql.SQLException;
  *
  * <p>Alternatively, consider subclassing
  * {@link org.springframework.jdbc.object.MappingSqlQuery} from the
- * <code>jdbc.object</code> package: Instead of working with separate
+ * {@code jdbc.object} package: Instead of working with separate
  * JdbcTemplate and RowMapper objects, you can build executable query
  * objects (containing row-mapping logic) in that style.
  *
@@ -49,7 +49,7 @@ public interface RowMapper<T> {
 
 	/**
 	 * Implementations must implement this method to map each row of data
-	 * in the ResultSet. This method should not call <code>next()</code> on
+	 * in the ResultSet. This method should not call {@code next()} on
 	 * the ResultSet; it is only supposed to map values of the current row.
 	 * @param rs the ResultSet to map (pre-initialized for the current row)
 	 * @param rowNum the number of the current row

@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  * extensible. The DispatcherServlet accesses all installed handlers through this
  * interface, meaning that it does not contain code specific to any handler type.
  *
- * <p>Note that a handler can be of type <code>Object</code>. This is to enable
+ * <p>Note that a handler can be of type {@code Object}. This is to enable
  * handlers from other frameworks to be integrated with this framework without
  * custom coding, as well as to allow for annotation handler objects that do
  * not obey any specific Java interface.
@@ -52,9 +52,9 @@ public interface HandlerAdapter {
 	 * support it. Typical HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will usually only support one handler type each.
 	 * <p>A typical implementation:
-	 * <p><code>
+	 * <p>{@code
 	 * return (handler instanceof MyHandler);
-	 * </code>
+	 * }
 	 * @param handler handler object to check
 	 * @return whether or not this object can use the given handler
 	 */
@@ -66,16 +66,16 @@ public interface HandlerAdapter {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the <code>supports</code> method of this interface, which must have
-	 * returned <code>true</code>.
+	 * to the {@code supports} method of this interface, which must have
+	 * returned {@code true}.
 	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
-	 * model data, or <code>null</code> if the request has been handled directly
+	 * model data, or {@code null} if the request has been handled directly
 	 */
 	ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
 
 	/**
-	 * Same contract as for HttpServlet's <code>getLastModified</code> method.
+	 * Same contract as for HttpServlet's {@code getLastModified} method.
 	 * Can simply return -1 if there's no support in the handler class.
 	 * @param request current HTTP request
 	 * @param handler handler to use

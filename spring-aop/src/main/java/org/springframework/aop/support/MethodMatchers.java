@@ -82,10 +82,10 @@ public abstract class MethodMatchers {
 	 * (if applicable).
 	 * @param mm the MethodMatcher to apply (may be an IntroductionAwareMethodMatcher)
 	 * @param method the candidate method
-	 * @param targetClass the target class (may be <code>null</code>, in which case
+	 * @param targetClass the target class (may be {@code null}, in which case
 	 * the candidate class must be taken to be the method's declaring class)
-	 * @param hasIntroductions <code>true</code> if the object on whose behalf we are
-	 * asking is the subject on one or more introductions; <code>false</code> otherwise
+	 * @param hasIntroductions {@code true} if the object on whose behalf we are
+	 * asking is the subject on one or more introductions; {@code false} otherwise
 	 * @return whether or not this method matches statically
 	 */
 	public static boolean matches(MethodMatcher mm, Method method, Class targetClass, boolean hasIntroductions) {

@@ -138,7 +138,7 @@ public abstract class HandlerInterceptorAdapter implements HandlerInterceptor {
 
 	/**
 	 * Default callback that all "pre*" methods delegate to.
-	 * <p>This implementation always returns <code>true</code>.
+	 * <p>This implementation always returns {@code true}.
 	 */
 	protected boolean preHandle(PortletRequest request, PortletResponse response, Object handler)
 			throws Exception {

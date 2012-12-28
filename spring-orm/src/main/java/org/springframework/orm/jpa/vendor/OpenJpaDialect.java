@@ -64,9 +64,9 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 	}
 
 	/**
-	 * Return the OpenJPA-specific interface of <code>EntityManager</code>.
-	 * @param em the generic <code>EntityManager</code> instance
-	 * @return the OpenJPA-specific interface of <code>EntityManager</code>
+	 * Return the OpenJPA-specific interface of {@code EntityManager}.
+	 * @param em the generic {@code EntityManager} instance
+	 * @return the OpenJPA-specific interface of {@code EntityManager}
 	 */
 	protected OpenJPAEntityManager getOpenJPAEntityManager(EntityManager em) {
 		return OpenJPAPersistence.cast(em);
@@ -74,7 +74,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
 
 	/**
-	 * Transaction data Object exposed from <code>beginTransaction</code>,
+	 * Transaction data Object exposed from {@code beginTransaction},
 	 * implementing the SavepointManager interface.
 	 */
 	private static class OpenJpaTransactionData implements SavepointManager {
@@ -106,8 +106,8 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 
 	/**
 	 * ConnectionHandle implementation that fetches a new OpenJPA-provided Connection
-	 * for every <code>getConnection</code> call and closes the Connection on
-	 * <code>releaseConnection</code>. This is necessary because OpenJPA requires the
+	 * for every {@code getConnection} call and closes the Connection on
+	 * {@code releaseConnection}. This is necessary because OpenJPA requires the
 	 * fetched Connection to be closed before continuing EntityManager work.
 	 * @see org.apache.openjpa.persistence.OpenJPAEntityManager#getConnection()
 	 */

@@ -29,7 +29,7 @@ import org.springframework.beans.factory.NamedBean;
 /**
  * Convenient methods for creating advisors that may be used when autoproxying beans
  * created with the Spring IoC container, binding the bean name to the current
- * invocation. May support a <code>bean()</code> pointcut designator with AspectJ.
+ * invocation. May support a {@code bean()} pointcut designator with AspectJ.
  *
  * <p>Typically used in Spring auto-proxying, where the bean name is known
  * at proxy creation time.
@@ -52,7 +52,7 @@ public abstract class ExposeBeanNameAdvisors {
 	 * Find the bean name for the current invocation. Assumes that an ExposeBeanNameAdvisor
 	 * has been included in the interceptor chain, and that the invocation is exposed
 	 * with ExposeInvocationInterceptor.
-	 * @return the bean name (never <code>null</code>)
+	 * @return the bean name (never {@code null})
 	 * @throws IllegalStateException if the bean name has not been exposed
 	 */
 	public static String getBeanName() throws IllegalStateException {
@@ -63,7 +63,7 @@ public abstract class ExposeBeanNameAdvisors {
 	 * Find the bean name for the given invocation. Assumes that an ExposeBeanNameAdvisor
 	 * has been included in the interceptor chain.
 	 * @param mi MethodInvocation that should contain the bean name as an attribute
-	 * @return the bean name (never <code>null</code>)
+	 * @return the bean name (never {@code null})
 	 * @throws IllegalStateException if the bean name has not been exposed
 	 */
 	public static String getBeanName(MethodInvocation mi) throws IllegalStateException {

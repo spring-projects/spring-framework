@@ -24,16 +24,16 @@ import java.io.Writer;
 import java.util.Properties;
 
 /**
- * Strategy interface for persisting <code>java.util.Properties</code>,
+ * Strategy interface for persisting {@code java.util.Properties},
  * allowing for pluggable parsing strategies.
  *
  * <p>The default implementation is DefaultPropertiesPersister,
- * providing the native parsing of <code>java.util.Properties</code>,
+ * providing the native parsing of {@code java.util.Properties},
  * but allowing for reading from any Reader and writing to any Writer
  * (which allows to specify an encoding for a properties file).
  *
  * <p>As of Spring 1.2.2, this interface also supports properties XML files,
- * through the <code>loadFromXml</code> and <code>storeToXml</code> methods.
+ * through the {@code loadFromXml} and {@code storeToXml} methods.
  * The default implementations delegate to JDK 1.5's corresponding methods.
  *
  * @author Juergen Hoeller

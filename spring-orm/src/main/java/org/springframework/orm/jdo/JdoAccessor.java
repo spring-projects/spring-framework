@@ -158,7 +158,7 @@ public abstract class JdoAccessor implements InitializingBean {
 
 	/**
 	 * Convert the given JDOException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy.
+	 * {@code org.springframework.dao} hierarchy.
 	 * <p>Default implementation delegates to the JdoDialect.
 	 * May be overridden in subclasses.
 	 * @param ex JDOException that occured

@@ -26,7 +26,7 @@ import org.springframework.core.type.classreading.MetadataReader;
  * A simple filter which matches classes with a given annotation,
  * checking inherited annotations as well.
  *
- * <p>The matching logic mirrors that of <code>Class.isAnnotationPresent()</code>.
+ * <p>The matching logic mirrors that of {@code Class.isAnnotationPresent()}.
  *
  * @author Mark Fisher
  * @author Ramnivas Laddad
@@ -44,7 +44,7 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	 * Create a new AnnotationTypeFilter for the given annotation type.
 	 * This filter will also match meta-annotations. To disable the
 	 * meta-annotation matching, use the constructor that accepts a
-	 * '<code>considerMetaAnnotations</code>' argument. The filter will
+	 * '{@code considerMetaAnnotations}' argument. The filter will
 	 * not match interfaces.
 	 * @param annotationType the annotation type to match
 	 */

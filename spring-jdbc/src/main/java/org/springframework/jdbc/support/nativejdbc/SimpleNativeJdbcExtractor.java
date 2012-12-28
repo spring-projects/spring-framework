@@ -20,14 +20,14 @@ package org.springframework.jdbc.support.nativejdbc;
  * Simple implementation of the {@link NativeJdbcExtractor} interface.
  * Assumes a pool that wraps Connection handles but not DatabaseMetaData:
  * In this case, the underlying native Connection can be retrieved by simply
- * calling <code>conHandle.getMetaData().getConnection()</code>.
+ * calling {@code conHandle.getMetaData().getConnection()}.
  * All other JDBC objects will be returned as passed in.
  *
  * <p>This extractor should work with any pool that does not wrap DatabaseMetaData,
  * and will also work with any plain JDBC driver. Note that a pool can still wrap
  * Statements, PreparedStatements, etc: The only requirement of this extractor is
- * that <code>java.sql.DatabaseMetaData</code> does not get wrapped, returning the
- * native Connection of the JDBC driver on <code>metaData.getConnection()</code>.
+ * that {@code java.sql.DatabaseMetaData} does not get wrapped, returning the
+ * native Connection of the JDBC driver on {@code metaData.getConnection()}.
  *
  * <p>Customize this extractor by setting the "nativeConnectionNecessaryForXxx"
  * flags accordingly: If Statements, PreparedStatements, and/or CallableStatements

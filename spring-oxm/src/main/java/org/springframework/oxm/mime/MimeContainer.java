@@ -30,7 +30,7 @@ public interface MimeContainer {
 
 	/**
 	 * Indicate whether this container is a XOP package.
-	 * @return <code>true</code> when the constraints specified in
+	 * @return {@code true} when the constraints specified in
 	 * <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#identifying_xop_documents">Identifying XOP Documents</a>
 	 * are met
 	 * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
@@ -39,7 +39,7 @@ public interface MimeContainer {
 
 	/**
 	 * Turn this message into a XOP package.
-	 * @return <code>true</code> when the message actually is a XOP package
+	 * @return {@code true} when the message actually is a XOP package
 	 * @see <a href="http://www.w3.org/TR/2005/REC-xop10-20050125/#xop_packages">XOP Packages</a>
 	 */
 	boolean convertToXopPackage();
@@ -52,7 +52,7 @@ public interface MimeContainer {
 	void addAttachment(String contentId, DataHandler dataHandler);
 
 	/**
-	 * Return the attachment with the given content id, or <code>null</code> if not found.
+	 * Return the attachment with the given content id, or {@code null} if not found.
 	 * @param contentId the content id
 	 * @return the attachment, as a data handler
 	 */

@@ -80,8 +80,8 @@ public class RemoteInvocationResult implements Serializable {
 
 	/**
 	 * Return whether this invocation result holds an exception.
-	 * If this returns <code>false</code>, the result value applies
-	 * (even if <code>null</code>).
+	 * If this returns {@code false}, the result value applies
+	 * (even if {@code null}).
 	 * @see #getValue
 	 * @see #getException
 	 */

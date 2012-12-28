@@ -37,8 +37,8 @@ import org.springframework.scheduling.support.MethodInvokingRunnable;
  * @see ScheduledTimerTask#setRunnable
  * @see org.springframework.scheduling.support.MethodInvokingRunnable
  * @see org.springframework.beans.factory.config.MethodInvokingFactoryBean
- * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
- * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
+ * @deprecated as of Spring 3.0, in favor of the {@code scheduling.concurrent}
+ * package which is based on Java 5's {@code java.util.concurrent.ExecutorService}
  */
 @Deprecated
 public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable implements FactoryBean<TimerTask> {

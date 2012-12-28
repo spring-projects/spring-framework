@@ -27,13 +27,13 @@ import org.springframework.context.ApplicationContext;
  * bean definition profiles, and application context initializers.
  *
  * <p>Clients of a ContextLoader should call
- * {@link #processLocations(Class,String...) processLocations()} prior to
+ * {@link #processLocations(Class, String...) processLocations()} prior to
  * calling {@link #loadContext(String...) loadContext()} in case the
  * ContextLoader provides custom support for modifying or generating locations.
- * The results of {@link #processLocations(Class,String...) processLocations()}
+ * The results of {@link #processLocations(Class, String...) processLocations()}
  * should then be supplied to {@link #loadContext(String...) loadContext()}.
  *
- * <p>Concrete implementations must provide a <code>public</code> no-args
+ * <p>Concrete implementations must provide a {@code public} no-args
  * constructor.
  *
  * <p>Spring provides the following out-of-the-box implementations:
@@ -59,14 +59,14 @@ public interface ContextLoader {
 	 * @param clazz the class with which the locations are associated: used to
 	 * determine how to process the supplied locations
 	 * @param locations the unmodified locations to use for loading the
-	 * application context (can be <code>null</code> or empty)
+	 * application context (can be {@code null} or empty)
 	 * @return an array of application context resource locations
 	 */
 	String[] processLocations(Class<?> clazz, String... locations);
 
 	/**
 	 * Loads a new {@link ApplicationContext context} based on the supplied
-	 * <code>locations</code>, configures the context, and finally returns
+	 * {@code locations}, configures the context, and finally returns
 	 * the context in fully <em>refreshed</em> state.
 	 *
 	 * <p>Configuration locations are generally considered to be classpath

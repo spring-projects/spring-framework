@@ -81,7 +81,7 @@ class HeaderValueHolder {
 	 * @param headers the Map of header names to HeaderValueHolders
 	 * @param name the name of the desired header
 	 * @return the corresponding HeaderValueHolder,
-	 * or <code>null</code> if none found
+	 * or {@code null} if none found
 	 */
 	public static HeaderValueHolder getByName(Map<String, HeaderValueHolder> headers, String name) {
 		Assert.notNull(name, "Header name must not be null");

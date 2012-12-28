@@ -27,7 +27,7 @@ import org.springframework.remoting.soap.SoapFaultException;
  *
  * @author Juergen Hoeller
  * @since 2.5
- * @deprecated in favor of JAX-WS support in <code>org.springframework.remoting.jaxws</code>
+ * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
 public class JaxRpcSoapFaultException extends SoapFaultException {

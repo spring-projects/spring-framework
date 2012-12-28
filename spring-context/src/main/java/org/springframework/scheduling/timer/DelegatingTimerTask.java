@@ -25,15 +25,15 @@ import org.springframework.util.Assert;
 
 /**
  * Simple {@link java.util.TimerTask} adapter that delegates to a
- * given {@link java.lang.Runnable}.
+ * given {@link Runnable}.
  *
  * <p>This is often preferable to deriving from TimerTask, to be able to
  * implement an interface rather than extend an abstract base class.
  *
  * @author Juergen Hoeller
  * @since 1.2.4
- * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
- * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
+ * @deprecated as of Spring 3.0, in favor of the {@code scheduling.concurrent}
+ * package which is based on Java 5's {@code java.util.concurrent.ExecutorService}
  */
 @Deprecated
 public class DelegatingTimerTask extends TimerTask {

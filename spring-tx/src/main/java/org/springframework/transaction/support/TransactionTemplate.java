@@ -71,7 +71,7 @@ public class TransactionTemplate extends DefaultTransactionDefinition
 	/**
 	 * Construct a new TransactionTemplate for bean usage.
 	 * <p>Note: The PlatformTransactionManager needs to be set before
-	 * any <code>execute</code> calls.
+	 * any {@code execute} calls.
 	 * @see #setTransactionManager
 	 */
 	public TransactionTemplate() {

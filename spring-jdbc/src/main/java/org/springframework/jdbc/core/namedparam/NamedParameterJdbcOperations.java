@@ -64,7 +64,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql SQL to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
 	<T> T execute(String sql, SqlParameterSource paramSource, PreparedStatementCallback<T> action)
@@ -82,7 +82,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param action callback object that specifies the action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException if there is any problem
 	 */
 	<T> T execute(String sql, Map<String, ?> paramMap, PreparedStatementCallback<T> action)
@@ -207,7 +207,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @param requiredType the type that the result object is expected to match
-	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
+	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
@@ -226,7 +226,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param requiredType the type that the result object is expected to match
-	 * @return the result object of the required type, or <code>null</code> in case of SQL NULL
+	 * @return the result object of the required type, or {@code null} in case of SQL NULL
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException
 	 * if the query does not return exactly one row, or does not return exactly
 	 * one column in that row
@@ -346,7 +346,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param sql SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @param elementType the required type of element in the result list
-	 * (for example, <code>Integer.class</code>)
+	 * (for example, {@code Integer.class})
 	 * @return a List of objects that match the specified element type
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
@@ -364,7 +364,7 @@ public interface NamedParameterJdbcOperations {
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @param elementType the required type of element in the result list
-	 * (for example, <code>Integer.class</code>)
+	 * (for example, {@code Integer.class})
 	 * @return a List of objects that match the specified element type
 	 * @throws org.springframework.dao.DataAccessException if the query fails
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForList(String, Class)
@@ -410,13 +410,13 @@ public interface NamedParameterJdbcOperations {
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
-	 * be available at runtime: by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code>
+	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @param paramSource container of arguments to bind to the query
 	 * @return a SqlRowSet representation (possibly a wrapper around a
-	 * <code>javax.sql.rowset.CachedRowSet</code>)
+	 * {@code javax.sql.rowset.CachedRowSet})
 	 * @throws org.springframework.dao.DataAccessException if there is any problem executing the query
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet(String)
 	 * @see org.springframework.jdbc.core.SqlRowSetResultSetExtractor
@@ -430,14 +430,14 @@ public interface NamedParameterJdbcOperations {
 	 * <p>The results will be mapped to an SqlRowSet which holds the data in a
 	 * disconnected fashion. This wrapper will translate any SQLExceptions thrown.
 	 * <p>Note that that, for the default implementation, JDBC RowSet support needs to
-	 * be available at runtime: by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code>
+	 * be available at runtime: by default, Sun's {@code com.sun.rowset.CachedRowSetImpl}
 	 * class is used, which is part of JDK 1.5+ and also available separately as part of
 	 * Sun's JDBC RowSet Implementations download (rowset.jar).
 	 * @param sql SQL query to execute
 	 * @param paramMap map of parameters to bind to the query
 	 * (leaving it to the PreparedStatement to guess the corresponding SQL type)
 	 * @return a SqlRowSet representation (possibly a wrapper around a
-	 * <code>javax.sql.rowset.CachedRowSet</code>)
+	 * {@code javax.sql.rowset.CachedRowSet})
 	 * @throws org.springframework.dao.DataAccessException if there is any problem executing the query
 	 * @see org.springframework.jdbc.core.JdbcTemplate#queryForRowSet(String)
 	 * @see org.springframework.jdbc.core.SqlRowSetResultSetExtractor

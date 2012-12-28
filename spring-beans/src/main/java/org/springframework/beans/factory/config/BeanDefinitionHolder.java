@@ -57,7 +57,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Create a new BeanDefinitionHolder.
 	 * @param beanDefinition the BeanDefinition to wrap
 	 * @param beanName the name of the bean, as specified for the bean definition
-	 * @param aliases alias names for the bean, or <code>null</code> if none
+	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
 	public BeanDefinitionHolder(BeanDefinition beanDefinition, String beanName, String[] aliases) {
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
@@ -71,7 +71,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 	 * Copy constructor: Create a new BeanDefinitionHolder with the
 	 * same contents as the given BeanDefinitionHolder instance.
 	 * <p>Note: The wrapped BeanDefinition reference is taken as-is;
-	 * it is <code>not</code> deeply copied.
+	 * it is {@code not} deeply copied.
 	 * @param beanDefinitionHolder the BeanDefinitionHolder to copy
 	 */
 	public BeanDefinitionHolder(BeanDefinitionHolder beanDefinitionHolder) {
@@ -98,7 +98,7 @@ public class BeanDefinitionHolder implements BeanMetadataElement {
 
 	/**
 	 * Return the alias names for the bean, as specified directly for the bean definition.
-	 * @return the array of alias names, or <code>null</code> if none
+	 * @return the array of alias names, or {@code null} if none
 	 */
 	public String[] getAliases() {
 		return this.aliases;

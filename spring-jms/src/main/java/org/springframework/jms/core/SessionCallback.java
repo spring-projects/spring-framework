@@ -35,8 +35,8 @@ public interface SessionCallback<T> {
 	/**
 	 * Execute any number of operations against the supplied JMS
 	 * {@link Session}, possibly returning a result.
-	 * @param session the JMS <code>Session</code>
-	 * @return a result object from working with the <code>Session</code>, if any (so can be <code>null</code>)
+	 * @param session the JMS {@code Session}
+	 * @return a result object from working with the {@code Session}, if any (so can be {@code null})
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	T doInJms(Session session) throws JMSException;

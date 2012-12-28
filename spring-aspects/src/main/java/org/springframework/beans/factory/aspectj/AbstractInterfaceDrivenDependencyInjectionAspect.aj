@@ -29,8 +29,8 @@ import java.io.Serializable;
  * <p>
  * There are two cases that needs to be handled:
  * <ol>
- *   <li>Normal object creation via the '<code>new</code>' operator: this is
- *       taken care of by advising <code>initialization()</code> join points.</li>
+ *   <li>Normal object creation via the '{@code new}' operator: this is
+ *       taken care of by advising {@code initialization()} join points.</li>
  *   <li>Object creation through deserialization: since no constructor is
  *       invoked during deserialization, the aspect needs to advise a method that a
  *       deserialization mechanism is going to invoke. Ideally, we should not
@@ -41,21 +41,21 @@ import java.io.Serializable;
  *       introduced implementation). There are a few choices for the chosen method:
  *       <ul>
  *       <li>readObject(ObjectOutputStream): Java requires that the method must be
- *           <code>private</p>. Since aspects cannot introduce a private member,
+ *           {@code private}. Since aspects cannot introduce a private member,
  *           while preserving its name, this option is ruled out.</li>
- * 		 <li>readResolve(): Java doesn't pose any restriction on an access specifier.
+ *       <li>readResolve(): Java doesn't pose any restriction on an access specifier.
  *           Problem solved! There is one (minor) limitation of this approach in
  *           that if a user class already has this method, that method must be
- *           <code>public</code>. However, this shouldn't be a big burden, since
+ *           {@code public}. However, this shouldn't be a big burden, since
  *           use cases that need classes to implement readResolve() (custom enums,
  *           for example) are unlikely to be marked as &#64;Configurable, and
- *           in any case asking to make that method <code>public</code> should not
+ *           in any case asking to make that method {@code public} should not
  *           pose any undue burden.</li>
  *       </ul>
  *       The minor collaboration needed by user classes (i.e., that the
- *       implementation of <code>readResolve()</code>, if any, must be
- *       <code>public</code>) can be lifted as well if we were to use an
- *       experimental feature in AspectJ - the <code>hasmethod()</code> PCD.</li>
+ *       implementation of {@code readResolve()}, if any, must be
+ *       {@code public}) can be lifted as well if we were to use an
+ *       experimental feature in AspectJ - the {@code hasmethod()} PCD.</li>
  * </ol>
 
  * <p>
@@ -103,17 +103,17 @@ public abstract aspect AbstractInterfaceDrivenDependencyInjectionAspect extends 
 		ConfigurableObject+ && Serializable+	implements ConfigurableDeserializationSupport;
 
 	/**
-	 * A marker interface to which the <code>readResolve()</code> is introduced.
+	 * A marker interface to which the {@code readResolve()} is introduced.
 	 */
 	static interface ConfigurableDeserializationSupport extends Serializable {
 	}
 
 	/**
-	 * Introduce the <code>readResolve()</code> method so that we can advise its
+	 * Introduce the {@code readResolve()} method so that we can advise its
 	 * execution to configure the object.
 	 *
 	 * <p>Note if a method with the same signature already exists in a
-	 * <code>Serializable</code> class of ConfigurableObject type,
+	 * {@code Serializable} class of ConfigurableObject type,
 	 * that implementation will take precedence (a good thing, since we are
 	 * merely interested in an opportunity to detect deserialization.)
 	 */

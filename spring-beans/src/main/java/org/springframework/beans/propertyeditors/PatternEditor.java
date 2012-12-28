@@ -20,8 +20,8 @@ import java.beans.PropertyEditorSupport;
 import java.util.regex.Pattern;
 
 /**
- * Editor for <code>java.util.regex.Pattern</code>, to directly populate a Pattern property.
- * Expects the same syntax as Pattern's <code>compile</code> method.
+ * Editor for {@code java.util.regex.Pattern}, to directly populate a Pattern property.
+ * Expects the same syntax as Pattern's {@code compile} method.
  *
  * @author Juergen Hoeller
  * @since 2.0.1
@@ -42,7 +42,7 @@ public class PatternEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new PatternEditor with the given settings.
-	 * @param flags the <code>java.util.regex.Pattern</code> flags to apply
+	 * @param flags the {@code java.util.regex.Pattern} flags to apply
 	 * @see java.util.regex.Pattern#compile(String, int)
 	 * @see java.util.regex.Pattern#CASE_INSENSITIVE
 	 * @see java.util.regex.Pattern#MULTILINE

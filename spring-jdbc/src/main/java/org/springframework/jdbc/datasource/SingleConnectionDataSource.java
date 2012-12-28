@@ -32,15 +32,15 @@ import org.springframework.util.ObjectUtils;
  * which is not closed after use. Obviously, this is not multi-threading capable.
  *
  * <p>Note that at shutdown, someone should close the underlying Connection
- * via the <code>close()</code> method. Client code will never call close
+ * via the {@code close()} method. Client code will never call close
  * on the Connection handle if it is SmartDataSource-aware (e.g. uses
- * <code>DataSourceUtils.releaseConnection</code>).
+ * {@code DataSourceUtils.releaseConnection}).
  *
- * <p>If client code will call <code>close()</code> in the assumption of a pooled
+ * <p>If client code will call {@code close()} in the assumption of a pooled
  * Connection, like when using persistence tools, set "suppressClose" to "true".
  * This will return a close-suppressing proxy instead of the physical Connection.
  * Be aware that you will not be able to cast this to a native
- * <code>OracleConnection</code> or the like anymore; you need to use a
+ * {@code OracleConnection} or the like anymore; you need to use a
  * {@link org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor} then.
  *
  * <p>This is primarily intended for testing. For example, it enables easy testing
@@ -134,7 +134,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * Create a new SingleConnectionDataSource with a given Connection.
 	 * @param target underlying target Connection
 	 * @param suppressClose if the Connection should be wrapped with a Connection that
-	 * suppresses <code>close()</code> calls (to allow for normal <code>close()</code>
+	 * suppresses {@code close()} calls (to allow for normal {@code close()}
 	 * usage in applications that expect a pooled Connection but do not know our
 	 * SmartDataSource interface)
 	 */
@@ -171,7 +171,7 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 
 	/**
 	 * Return whether the returned Connection's "autoCommit" setting should be overridden.
-	 * @return the "autoCommit" value, or <code>null</code> if none to be applied
+	 * @return the "autoCommit" value, or {@code null} if none to be applied
 	 */
 	protected Boolean getAutoCommitValue() {
 		return this.autoCommit;

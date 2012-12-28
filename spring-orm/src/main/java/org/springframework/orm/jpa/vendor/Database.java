@@ -24,7 +24,7 @@ package org.springframework.orm.jpa.vendor;
  * the strategy class can still be specified using the fully-qualified class name.
  * This enumeration is merely a convenience. The database products listed here
  * are the same as those explicitly supported for Spring JDBC exception translation
- * in <code>sql-error-codes.xml</code>.
+ * in {@code sql-error-codes.xml}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

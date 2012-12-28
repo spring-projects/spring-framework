@@ -142,9 +142,9 @@ public class ConstructorArgumentValues {
 	/**
 	 * Get argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
-	 * @param requiredType the type to match (can be <code>null</code> to match
+	 * @param requiredType the type to match (can be {@code null} to match
 	 * untyped values only)
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getIndexedArgumentValue(int index, Class requiredType) {
 		return getIndexedArgumentValue(index, requiredType, null);
@@ -153,11 +153,11 @@ public class ConstructorArgumentValues {
 	/**
 	 * Get argument value for the given index in the constructor argument list.
 	 * @param index the index in the constructor argument list
-	 * @param requiredType the type to match (can be <code>null</code> to match
+	 * @param requiredType the type to match (can be {@code null} to match
 	 * untyped values only)
-	 * @param requiredName the type to match (can be <code>null</code> to match
+	 * @param requiredName the type to match (can be {@code null} to match
 	 * unnamed values only)
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getIndexedArgumentValue(int index, Class requiredType, String requiredName) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
@@ -245,7 +245,7 @@ public class ConstructorArgumentValues {
 	/**
 	 * Look for a generic argument value that matches the given type.
 	 * @param requiredType the type to match
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType) {
 		return getGenericArgumentValue(requiredType, null, null);
@@ -255,7 +255,7 @@ public class ConstructorArgumentValues {
 	 * Look for a generic argument value that matches the given type.
 	 * @param requiredType the type to match
 	 * @param requiredName the name to match
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, String requiredName) {
 		return getGenericArgumentValue(requiredType, requiredName, null);
@@ -265,13 +265,13 @@ public class ConstructorArgumentValues {
 	 * Look for the next generic argument value that matches the given type,
 	 * ignoring argument values that have already been used in the current
 	 * resolution process.
-	 * @param requiredType the type to match (can be <code>null</code> to find
+	 * @param requiredType the type to match (can be {@code null} to find
 	 * an arbitrary next generic argument value)
-	 * @param requiredName the name to match (can be <code>null</code> to not
+	 * @param requiredName the name to match (can be {@code null} to not
 	 * match argument values by name)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already been used
 	 * in the current resolution process and should therefore not be returned again
-	 * @return the ValueHolder for the argument, or <code>null</code> if none found
+	 * @return the ValueHolder for the argument, or {@code null} if none found
 	 */
 	public ValueHolder getGenericArgumentValue(Class requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
 		for (ValueHolder valueHolder : this.genericArgumentValues) {
@@ -310,7 +310,7 @@ public class ConstructorArgumentValues {
 	 * in the constructor argument list or generically matches by type.
 	 * @param index the index in the constructor argument list
 	 * @param requiredType the type to match
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType) {
 		return getArgumentValue(index, requiredType, null, null);
@@ -322,7 +322,7 @@ public class ConstructorArgumentValues {
 	 * @param index the index in the constructor argument list
 	 * @param requiredType the type to match
 	 * @param requiredName the name to match
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType, String requiredName) {
 		return getArgumentValue(index, requiredType, requiredName, null);
@@ -332,13 +332,13 @@ public class ConstructorArgumentValues {
 	 * Look for an argument value that either corresponds to the given index
 	 * in the constructor argument list or generically matches by type.
 	 * @param index the index in the constructor argument list
-	 * @param requiredType the type to match (can be <code>null</code> to find
+	 * @param requiredType the type to match (can be {@code null} to find
 	 * an untyped argument value)
 	 * @param usedValueHolders a Set of ValueHolder objects that have already
 	 * been used in the current resolution process and should therefore not
 	 * be returned again (allowing to return the next generic argument match
 	 * in case of multiple generic argument values of the same type)
-	 * @return the ValueHolder for the argument, or <code>null</code> if none set
+	 * @return the ValueHolder for the argument, or {@code null} if none set
 	 */
 	public ValueHolder getArgumentValue(int index, Class requiredType, String requiredName, Set<ValueHolder> usedValueHolders) {
 		Assert.isTrue(index >= 0, "Index must not be negative");
@@ -512,7 +512,7 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Set the configuration source <code>Object</code> for this metadata element.
+		 * Set the configuration source {@code Object} for this metadata element.
 		 * <p>The exact type of the object will depend on the configuration mechanism used.
 		 */
 		public void setSource(Object source) {
@@ -524,8 +524,8 @@ public class ConstructorArgumentValues {
 		}
 
 		/**
-		 * Return whether this holder contains a converted value already (<code>true</code>),
-		 * or whether the value still needs to be converted (<code>false</code>).
+		 * Return whether this holder contains a converted value already ({@code true}),
+		 * or whether the value still needs to be converted ({@code false}).
 		 */
 		public synchronized boolean isConverted() {
 			return this.converted;
@@ -551,7 +551,7 @@ public class ConstructorArgumentValues {
 		/**
 		 * Determine whether the content of this ValueHolder is equal
 		 * to the content of the given other ValueHolder.
-		 * <p>Note that ValueHolder does not implement <code>equals</code>
+		 * <p>Note that ValueHolder does not implement {@code equals}
 		 * directly, to allow for multiple ValueHolder instances with the
 		 * same content to reside in the same Set.
 		 */
@@ -562,7 +562,7 @@ public class ConstructorArgumentValues {
 
 		/**
 		 * Determine whether the hash code of the content of this ValueHolder.
-		 * <p>Note that ValueHolder does not implement <code>hashCode</code>
+		 * <p>Note that ValueHolder does not implement {@code hashCode}
 		 * directly, to allow for multiple ValueHolder instances with the
 		 * same content to reside in the same Set.
 		 */

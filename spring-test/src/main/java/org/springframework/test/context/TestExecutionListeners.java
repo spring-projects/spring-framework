@@ -24,10 +24,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <code>TestExecutionListeners</code> defines class-level metadata for
+ * {@code TestExecutionListeners} defines class-level metadata for
  * configuring which {@link TestExecutionListener TestExecutionListeners} should
  * be registered with a {@link TestContextManager}. Typically,
- * <code>&#064;TestExecutionListeners</code> will be used in conjunction with
+ * {@code &#064;TestExecutionListeners} will be used in conjunction with
  * {@link ContextConfiguration &#064;ContextConfiguration}.
  *
  * @author Sam Brannen
@@ -65,23 +65,23 @@ public @interface TestExecutionListeners {
 	 * should be <em>inherited</em>.
 	 * </p>
 	 * <p>
-	 * The default value is <code>true</code>, which means that an annotated
+	 * The default value is {@code true}, which means that an annotated
 	 * class will <em>inherit</em> the listeners defined by an annotated
 	 * superclass. Specifically, the listeners for an annotated class will be
 	 * appended to the list of listeners defined by an annotated superclass.
 	 * Thus, subclasses have the option of <em>extending</em> the list of
-	 * listeners. In the following example, <code>AbstractBaseTest</code> will
-	 * be configured with <code>DependencyInjectionTestExecutionListener</code>
-	 * and <code>DirtiesContextTestExecutionListener</code>; whereas,
-	 * <code>TransactionalTest</code> will be configured with
-	 * <code>DependencyInjectionTestExecutionListener</code>,
-	 * <code>DirtiesContextTestExecutionListener</code>, <strong>and</strong>
-	 * <code>TransactionalTestExecutionListener</code>, in that order.
+	 * listeners. In the following example, {@code AbstractBaseTest} will
+	 * be configured with {@code DependencyInjectionTestExecutionListener}
+	 * and {@code DirtiesContextTestExecutionListener}; whereas,
+	 * {@code TransactionalTest} will be configured with
+	 * {@code DependencyInjectionTestExecutionListener},
+	 * {@code DirtiesContextTestExecutionListener}, <strong>and</strong>
+	 * {@code TransactionalTestExecutionListener}, in that order.
 	 * </p>
 	 *
 	 * <pre class="code">
 	 * &#064;TestExecutionListeners({ DependencyInjectionTestExecutionListener.class,
-     *    DirtiesContextTestExecutionListener.class })
+	 *    DirtiesContextTestExecutionListener.class })
 	 * public abstract class AbstractBaseTest {
 	 * 	// ...
 	 * }
@@ -91,9 +91,9 @@ public @interface TestExecutionListeners {
 	 * 	// ...
 	 * }
 	 * </pre>
-     *
+	 *
 	 * <p>
-	 * If <code>inheritListeners</code> is set to <code>false</code>, the
+	 * If {@code inheritListeners} is set to {@code false}, the
 	 * listeners for the annotated class will <em>shadow</em> and effectively
 	 * replace any listeners defined by a superclass.
 	 * </p>

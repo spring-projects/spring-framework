@@ -30,7 +30,7 @@ import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
 /**
- * <code>MethodInterceptor</code> implementation that allows for highly customizable
+ * {@code MethodInterceptor} implementation that allows for highly customizable
  * method-level tracing, using placeholders.
  *
  * <p>Trace messages are written on method entry, and if the method invocation succeeds
@@ -40,19 +40,19 @@ import org.springframework.util.StringUtils;
  * messages. The placeholders available are:
  *
  * <p><ul>
- * <li><code>$[methodName]</code> - replaced with the name of the method being invoked</li>
- * <li><code>$[targetClassName]</code> - replaced with the name of the class that is
+ * <li>{@code $[methodName]} - replaced with the name of the method being invoked</li>
+ * <li>{@code $[targetClassName]} - replaced with the name of the class that is
  * the target of the invocation</li>
- * <li><code>$[targetClassShortName]</code> - replaced with the short name of the class
+ * <li>{@code $[targetClassShortName]} - replaced with the short name of the class
  * that is the target of the invocation</li>
- * <li><code>$[returnValue]</code> - replaced with the value returned by the invocation</li>
- * <li><code>$[argumentTypes]</code> - replaced with a comma-separated list of the
+ * <li>{@code $[returnValue]} - replaced with the value returned by the invocation</li>
+ * <li>{@code $[argumentTypes]} - replaced with a comma-separated list of the
  * short class names of the method arguments</li>
- * <li><code>$[arguments]</code> - replaced with a comma-separated list of the
- * <code>String</code> representation of the method arguments</li>
- * <li><code>$[exception]</code> - replaced with the <code>String</code> representation
- * of any <code>Throwable</code> raised during the invocation</li>
- * <li><code>$[invocationTime]</code> - replaced with the time, in milliseconds,
+ * <li>{@code $[arguments]} - replaced with a comma-separated list of the
+ * {@code String} representation of the method arguments</li>
+ * <li>{@code $[exception]} - replaced with the {@code String} representation
+ * of any {@code Throwable} raised during the invocation</li>
+ * <li>{@code $[invocationTime]} - replaced with the time, in milliseconds,
  * taken by the method invocation</li>
  * </ul>
  *
@@ -70,56 +70,56 @@ import org.springframework.util.StringUtils;
 public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
-	 * The <code>$[methodName]</code> placeholder.
+	 * The {@code $[methodName]} placeholder.
 	 * Replaced with the name of the method being invoked.
 	 */
 	public static final String PLACEHOLDER_METHOD_NAME = "$[methodName]";
 
 	/**
-	 * The <code>$[targetClassName]</code> placeholder.
-	 * Replaced with the fully-qualifed name of the <code>Class</code>
+	 * The {@code $[targetClassName]} placeholder.
+	 * Replaced with the fully-qualifed name of the {@code Class}
 	 * of the method invocation target.
 	 */
 	public static final String PLACEHOLDER_TARGET_CLASS_NAME = "$[targetClassName]";
 
 	/**
-	 * The <code>$[targetClassShortName]</code> placeholder.
-	 * Replaced with the short name of the <code>Class</code> of the
+	 * The {@code $[targetClassShortName]} placeholder.
+	 * Replaced with the short name of the {@code Class} of the
 	 * method invocation target.
 	 */
 	public static final String PLACEHOLDER_TARGET_CLASS_SHORT_NAME = "$[targetClassShortName]";
 
 	/**
-	 * The <code>$[returnValue]</code> placeholder.
-	 * Replaced with the <code>String</code> representation of the value
+	 * The {@code $[returnValue]} placeholder.
+	 * Replaced with the {@code String} representation of the value
 	 * returned by the method invocation.
 	 */
 	public static final String PLACEHOLDER_RETURN_VALUE = "$[returnValue]";
 
 	/**
-	 * The <code>$[argumentTypes]</code> placeholder.
+	 * The {@code $[argumentTypes]} placeholder.
 	 * Replaced with a comma-separated list of the argument types for the
 	 * method invocation. Argument types are written as short class names.
 	 */
 	public static final String PLACEHOLDER_ARGUMENT_TYPES = "$[argumentTypes]";
 
 	/**
-	 * The <code>$[arguments]</code> placeholder.
+	 * The {@code $[arguments]} placeholder.
 	 * Replaced with a comma separated list of the argument values for the
-	 * method invocation. Relies on the <code>toString()</code> method of
+	 * method invocation. Relies on the {@code toString()} method of
 	 * each argument type.
 	 */
 	public static final String PLACEHOLDER_ARGUMENTS = "$[arguments]";
 
 	/**
-	 * The <code>$[exception]</code> placeholder.
-	 * Replaced with the <code>String</code> representation of any
-	 * <code>Throwable</code> raised during method invocation.
+	 * The {@code $[exception]} placeholder.
+	 * Replaced with the {@code String} representation of any
+	 * {@code Throwable} raised during method invocation.
 	 */
 	public static final String PLACEHOLDER_EXCEPTION = "$[exception]";
 
 	/**
-	 * The <code>$[invocationTime]</code> placeholder.
+	 * The {@code $[invocationTime]} placeholder.
 	 * Replaced with the time taken by the invocation (in milliseconds).
 	 */
 	public static final String PLACEHOLDER_INVOCATION_TIME = "$[invocationTime]";
@@ -143,12 +143,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 			"Exception thrown in method '" + PLACEHOLDER_METHOD_NAME + "' of class [" + PLACEHOLDER_TARGET_CLASS_NAME + "]";
 
 	/**
-	 * The <code>Pattern</code> used to match placeholders.
+	 * The {@code Pattern} used to match placeholders.
 	 */
 	private static final Pattern PATTERN = Pattern.compile("\\$\\[\\p{Alpha}+\\]");
 
 	/**
-	 * The <code>Set</code> of allowed placeholders.
+	 * The {@code Set} of allowed placeholders.
 	 */
 	private static final Set ALLOWED_PLACEHOLDERS =
 			new Constants(CustomizableTraceInterceptor.class).getValues("PLACEHOLDER_");
@@ -174,10 +174,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Set the template used for method entry log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>$[targetClassName]</code></li>
-	 * <li><code>$[targetClassShortName]</code></li>
-	 * <li><code>$[argumentTypes]</code></li>
-	 * <li><code>$[arguments]</code></li>
+	 * <li>{@code $[targetClassName]}</li>
+	 * <li>{@code $[targetClassShortName]}</li>
+	 * <li>{@code $[argumentTypes]}</li>
+	 * <li>{@code $[arguments]}</li>
 	 * </ul>
 	 */
 	public void setEnterMessage(String enterMessage) throws IllegalArgumentException {
@@ -196,12 +196,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Set the template used for method exit log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>$[targetClassName]</code></li>
-	 * <li><code>$[targetClassShortName]</code></li>
-	 * <li><code>$[argumentTypes]</code></li>
-	 * <li><code>$[arguments]</code></li>
-	 * <li><code>$[returnValue]</code></li>
-	 * <li><code>$[invocationTime]</code></li>
+	 * <li>{@code $[targetClassName]}</li>
+	 * <li>{@code $[targetClassShortName]}</li>
+	 * <li>{@code $[argumentTypes]}</li>
+	 * <li>{@code $[arguments]}</li>
+	 * <li>{@code $[returnValue]}</li>
+	 * <li>{@code $[invocationTime]}</li>
 	 * </ul>
 	 */
 	public void setExitMessage(String exitMessage) {
@@ -216,11 +216,11 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Set the template used for method exception log messages.
 	 * This template can contain any of the following placeholders:
 	 * <ul>
-	 * <li><code>$[targetClassName]</code></li>
-	 * <li><code>$[targetClassShortName]</code></li>
-	 * <li><code>$[argumentTypes]</code></li>
-	 * <li><code>$[arguments]</code></li>
-	 * <li><code>$[exception]</code></li>
+	 * <li>{@code $[targetClassName]}</li>
+	 * <li>{@code $[targetClassShortName]}</li>
+	 * <li>{@code $[argumentTypes]}</li>
+	 * <li>{@code $[arguments]}</li>
+	 * <li>{@code $[exception]}</li>
 	 * </ul>
 	 */
 	public void setExceptionMessage(String exceptionMessage) {
@@ -235,10 +235,10 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 
 	/**
-	 * Writes a log message before the invocation based on the value of <code>enterMessage</code>.
+	 * Writes a log message before the invocation based on the value of {@code enterMessage}.
 	 * If the invocation succeeds, then a log message is written on exit based on the value
-	 * <code>exitMessage</code>. If an exception occurs during invocation, then a message is
-	 * written based on the value of <code>exceptionMessage</code>.
+	 * {@code exitMessage}. If an exception occurs during invocation, then a message is
+	 * written based on the value of {@code exceptionMessage}.
 	 * @see #setEnterMessage
 	 * @see #setExitMessage
 	 * @see #setExceptionMessage
@@ -277,7 +277,7 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Writes the supplied message to the supplied <code>Log</code> instance.
+	 * Writes the supplied message to the supplied {@code Log} instance.
 	 * @see #writeToLog(org.apache.commons.logging.Log, String, Throwable)
 	 */
 	protected void writeToLog(Log logger, String message) {
@@ -286,8 +286,8 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**
 	 * Writes the supplied message and {@link Throwable} to the
-	 * supplied <code>Log</code> instance. By default messages are written
-	 * at <code>TRACE</code> level. Sub-classes can override this method
+	 * supplied {@code Log} instance. By default messages are written
+	 * at {@code TRACE} level. Sub-classes can override this method
 	 * to control which level the message is written at.
 	 */
 	protected void writeToLog(Log logger, String message, Throwable ex) {
@@ -303,16 +303,16 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	 * Replace the placeholders in the given message with the supplied values,
 	 * or values derived from those supplied.
 	 * @param message the message template containing the placeholders to be replaced
-	 * @param methodInvocation the <code>MethodInvocation</code> being logged.
-	 * Used to derive values for all placeholders except <code>$[exception]</code>
-	 * and <code>$[returnValue]</code>.
+	 * @param methodInvocation the {@code MethodInvocation} being logged.
+	 * Used to derive values for all placeholders except {@code $[exception]}
+	 * and {@code $[returnValue]}.
 	 * @param returnValue any value returned by the invocation.
-	 * Used to replace the <code>$[returnValue]</code> placeholder. May be <code>null</code>.
-	 * @param throwable any <code>Throwable</code> raised during the invocation.
-	 * The value of <code>Throwable.toString()</code> is replaced for the
-	 * <code>$[exception]</code> placeholder. May be <code>null</code>.
+	 * Used to replace the {@code $[returnValue]} placeholder. May be {@code null}.
+	 * @param throwable any {@code Throwable} raised during the invocation.
+	 * The value of {@code Throwable.toString()} is replaced for the
+	 * {@code $[exception]} placeholder. May be {@code null}.
 	 * @param invocationTime the value to write in place of the
-	 * <code>$[invocationTime]</code> placeholder
+	 * {@code $[invocationTime]} placeholder
 	 * @return the formatted output to write to the log
 	 */
 	protected String replacePlaceholders(String message, MethodInvocation methodInvocation,
@@ -360,12 +360,12 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Adds the <code>String</code> representation of the method return value
-	 * to the supplied <code>StringBuffer</code>. Correctly handles
-	 * <code>null</code> and <code>void</code> results.
-	 * @param methodInvocation the <code>MethodInvocation</code> that returned the value
-	 * @param matcher the <code>Matcher</code> containing the matched placeholder
-	 * @param output the <code>StringBuffer</code> to write output to
+	 * Adds the {@code String} representation of the method return value
+	 * to the supplied {@code StringBuffer}. Correctly handles
+	 * {@code null} and {@code void} results.
+	 * @param methodInvocation the {@code MethodInvocation} that returned the value
+	 * @param matcher the {@code Matcher} containing the matched placeholder
+	 * @param output the {@code StringBuffer} to write output to
 	 * @param returnValue the value returned by the method invocation.
 	 */
 	private void appendReturnValue(
@@ -383,14 +383,14 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Adds a comma-separated list of the short <code>Class</code> names of the
+	 * Adds a comma-separated list of the short {@code Class} names of the
 	 * method argument types to the output. For example, if a method has signature
-	 * <code>put(java.lang.String, java.lang.Object)</code> then the value returned
-	 * will be <code>String, Object</code>.
-	 * @param methodInvocation the <code>MethodInvocation</code> being logged.
-	 * Arguments will be retrieved from the corresponding <code>Method</code>.
-	 * @param matcher the <code>Matcher</code> containing the state of the output
-	 * @param output the <code>StringBuffer</code> containing the output
+	 * {@code put(java.lang.String, java.lang.Object)} then the value returned
+	 * will be {@code String, Object}.
+	 * @param methodInvocation the {@code MethodInvocation} being logged.
+	 * Arguments will be retrieved from the corresponding {@code Method}.
+	 * @param matcher the {@code Matcher} containing the state of the output
+	 * @param output the {@code StringBuffer} containing the output
 	 */
 	private void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuffer output) {
 		Class[] argumentTypes = methodInvocation.getMethod().getParameterTypes();
@@ -402,9 +402,9 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Checks to see if the supplied <code>String</code> has any placeholders
+	 * Checks to see if the supplied {@code String} has any placeholders
 	 * that are not specified as constants on this class and throws an
-	 * <code>IllegalArgumentException</code> if so.
+	 * {@code IllegalArgumentException} if so.
 	 */
 	private void checkForInvalidPlaceholders(String message) throws IllegalArgumentException {
 		Matcher matcher = PATTERN.matcher(message);
@@ -417,8 +417,8 @@ public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 	}
 
 	/**
-	 * Replaces <code>$</code> in inner class names with <code>\$</code>.
-	 * <p>This code is equivalent to JDK 1.5's <code>quoteReplacement</code>
+	 * Replaces {@code $} in inner class names with {@code \$}.
+	 * <p>This code is equivalent to JDK 1.5's {@code quoteReplacement}
 	 * method in the Matcher class itself. We're keeping our own version
 	 * here for JDK 1.4 compliance reasons only.
 	 */

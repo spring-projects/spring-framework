@@ -54,7 +54,7 @@ public class BlobByteArrayType extends AbstractLobType  {
 
 	/**
 	 * Constructor used for testing: takes an explicit LobHandler
-	 * and an explicit JTA TransactionManager (can be <code>null</code>).
+	 * and an explicit JTA TransactionManager (can be {@code null}).
 	 */
 	protected BlobByteArrayType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		super(lobHandler, jtaTransactionManager);

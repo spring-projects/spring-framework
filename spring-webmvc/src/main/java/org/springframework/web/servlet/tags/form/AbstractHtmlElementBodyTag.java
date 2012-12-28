@@ -106,7 +106,7 @@ public abstract class AbstractHtmlElementBodyTag extends AbstractHtmlElementTag 
 	}
 
 	/**
-	 * Should rendering of this tag proceed at all. Returns '<code>true</code>' by default
+	 * Should rendering of this tag proceed at all. Returns '{@code true}' by default
 	 * causing rendering to occur always, Subclasses can override this if they
 	 * provide conditional rendering.
 	 */

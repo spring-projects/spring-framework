@@ -31,7 +31,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>Returns underlying native Connections to application code instead of C3P0's
  * wrapper implementations; unwraps the Connection for native Statements.
  * The returned JDBC classes can then safely be cast, e.g. to
- * <code>oracle.jdbc.OracleConnection</code>.
+ * {@code oracle.jdbc.OracleConnection}.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a C3P0 DataSource: If a given object is not a C3P0 wrapper, it will be
@@ -87,8 +87,8 @@ public class C3P0NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via C3P0's <code>rawConnectionOperation</code> API,
-	 * using the <code>getRawConnection</code> as callback to get access to the
+	 * Retrieve the Connection via C3P0's {@code rawConnectionOperation} API,
+	 * using the {@code getRawConnection} as callback to get access to the
 	 * raw Connection (which is otherwise not directly supported by C3P0).
 	 * @see #getRawConnection
 	 */

@@ -47,7 +47,7 @@ public interface NativeWebRequest extends WebRequest {
 	/**
 	 * Return the underlying native request object, if available.
 	 * @param requiredType the desired type of request object
-	 * @return the matching request object, or <code>null</code> if none
+	 * @return the matching request object, or {@code null} if none
 	 * of that type is available
 	 * @see javax.servlet.http.HttpServletRequest
 	 * @see javax.portlet.ActionRequest
@@ -58,7 +58,7 @@ public interface NativeWebRequest extends WebRequest {
 	/**
 	 * Return the underlying native request object, if available.
 	 * @param requiredType the desired type of response object
-	 * @return the matching response object, or <code>null</code> if none
+	 * @return the matching response object, or {@code null} if none
 	 * of that type is available
 	 * @see javax.servlet.http.HttpServletRequest
 	 * @see javax.portlet.ActionRequest

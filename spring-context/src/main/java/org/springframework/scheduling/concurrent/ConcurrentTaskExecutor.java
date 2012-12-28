@@ -29,9 +29,9 @@ import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.Executor</code> and
+ * Adapter that takes a JDK 1.5 {@code java.util.concurrent.Executor} and
  * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.
- * Also detects an extended <code>java.util.concurrent.ExecutorService</code>, adapting
+ * Also detects an extended {@code java.util.concurrent.ExecutorService}, adapting
  * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.
  *
  * <p>Note that there is a pre-built {@link ThreadPoolTaskExecutor} that allows for

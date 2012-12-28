@@ -29,11 +29,11 @@ import org.springframework.core.NamedThreadLocal;
 /**
  * Thread-backed {@link Scope} implementation.
  *
- * <p><strong>Note</strong> that the <code>SimpleThreadScope</code> <em>does not clean up any objects</em> associated
+ * <p><strong>Note</strong> that the {@code SimpleThreadScope} <em>does not clean up any objects</em> associated
  * with it. As such, it's typically preferable to use the {@link org.springframework.web.context.request.RequestScope}
  * in Web environments.
  *
- * <p>For a implementation of a thread-based <code>Scope</code> with support for destruction callbacks, refer to <a
+ * <p>For a implementation of a thread-based {@code Scope} with support for destruction callbacks, refer to <a
  * href="http://www.springbyexample.org/twiki/bin/view/Example/CustomThreadScopeModule">this module</a>.
  *
  * <p>Thanks to Eugene Kuleshov for submitting the original prototype for a thread scope!

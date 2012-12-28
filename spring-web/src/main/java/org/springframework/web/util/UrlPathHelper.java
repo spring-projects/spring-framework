@@ -116,7 +116,7 @@ public class UrlPathHelper {
 	 * <p>If the request specifies a character encoding itself, the request
 	 * encoding will override this setting. This also allows for generically
 	 * overriding the character encoding in a filter that invokes the
-	 * <code>ServletRequest.setCharacterEncoding</code> method.
+	 * {@code ServletRequest.setCharacterEncoding} method.
 	 * @param defaultEncoding the character encoding to use
 	 * @see #determineEncoding
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
@@ -249,7 +249,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the request URI for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getRequestURI()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getRequestURI()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * <p>The URI that the web container resolves <i>should</i> be correct, but some
 	 * containers like JBoss/Jetty incorrectly include ";" strings like ";jsessionid"
@@ -268,7 +268,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -288,7 +288,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the servlet path for the given request, regarding an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getServletPath()</code> is already
+	 * <p>As the value returned by {@code request.getServletPath()} is already
 	 * decoded by the servlet container, this method will not attempt to decode it.
 	 * @param request current HTTP request
 	 * @return the servlet path
@@ -327,7 +327,7 @@ public class UrlPathHelper {
 	/**
 	 * Return the context path for the given request, detecting an include request
 	 * URL if called within a RequestDispatcher include.
-	 * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>
+	 * <p>As the value returned by {@code request.getContextPath()} is <i>not</i>
 	 * decoded by the servlet container, this method will decode it.
 	 * @param request current HTTP request
 	 * @return the context path
@@ -382,7 +382,7 @@ public class UrlPathHelper {
 	/**
 	 * Decode the given source string with a URLDecoder. The encoding will be taken
 	 * from the request, falling back to the default "ISO-8859-1".
-	 * <p>The default implementation uses <code>URLDecoder.decode(input, enc)</code>.
+	 * <p>The default implementation uses {@code URLDecoder.decode(input, enc)}.
 	 * @param request current HTTP request
 	 * @param source the String to decode
 	 * @return the decoded String
@@ -418,7 +418,7 @@ public class UrlPathHelper {
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current HTTP request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.servlet.ServletRequest#getCharacterEncoding()
 	 * @see #setDefaultEncoding
 	 */

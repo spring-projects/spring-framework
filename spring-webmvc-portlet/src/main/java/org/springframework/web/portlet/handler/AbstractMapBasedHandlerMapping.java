@@ -96,7 +96,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 	/**
 	 * Build a lookup key for the given request.
 	 * @param request current portlet request
-	 * @return the lookup key (never <code>null</code>)
+	 * @return the lookup key (never {@code null})
 	 * @throws Exception if key computation failed
 	 */
 	protected abstract K getLookupKey(PortletRequest request) throws Exception;
@@ -131,7 +131,7 @@ public abstract class AbstractMapBasedHandlerMapping<K> extends AbstractHandlerM
 	 * @param lookupKey the key to map the handler onto
 	 * @param handler the handler instance or handler bean name String
 	 * (a bean name will automatically be resolved into the corresponding handler bean)
-	 * @param predicate a predicate object for this handler (may be <code>null</code>),
+	 * @param predicate a predicate object for this handler (may be {@code null}),
 	 * determining a match with the primary lookup key
 	 * @throws BeansException if the handler couldn't be registered
 	 * @throws IllegalStateException if there is a conflicting handler registered

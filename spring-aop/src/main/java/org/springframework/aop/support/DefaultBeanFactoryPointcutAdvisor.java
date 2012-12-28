@@ -39,7 +39,7 @@ public class DefaultBeanFactoryPointcutAdvisor extends AbstractBeanFactoryPointc
 
 	/**
 	 * Specify the pointcut targeting the advice.
-	 * <p>Default is <code>Pointcut.TRUE</code>.
+	 * <p>Default is {@code Pointcut.TRUE}.
 	 * @see #setAdviceBeanName
 	 */
 	public void setPointcut(Pointcut pointcut) {

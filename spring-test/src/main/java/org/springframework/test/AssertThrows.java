@@ -46,21 +46,21 @@ package org.springframework.test;
  *    }
  * }</pre>
  *
- * This will result in the test passing if the <code>Foo.someBusinessLogic(..)</code>
- * method threw an {@link java.lang.IllegalArgumentException}; if it did not, the
+ * This will result in the test passing if the {@code Foo.someBusinessLogic(..)}
+ * method threw an {@link IllegalArgumentException}; if it did not, the
  * test would fail with the following message:
  *
  * <pre class="code">
  * "Must have thrown a [class java.lang.IllegalArgumentException]"</pre>
  *
- * If the <b>wrong</b> type of {@link java.lang.Exception} was thrown, the
+ * If the <b>wrong</b> type of {@link Exception} was thrown, the
  * test will also fail, this time with a message similar to the following:
  *
  * <pre class="code">
  * "junit.framework.AssertionFailedError: Was expecting a [class java.lang.UnsupportedOperationException] to be thrown, but instead a [class java.lang.IllegalArgumentException] was thrown"</pre>
  *
- * The test for the correct {@link java.lang.Exception} respects polymorphism,
- * so you can test that any old {@link java.lang.Exception} is thrown like so:
+ * The test for the correct {@link Exception} respects polymorphism,
+ * so you can test that any old {@link Exception} is thrown like so:
  *
  * <pre class="code">
  * public class FooTest {
@@ -96,10 +96,10 @@ public abstract class AssertThrows {
 
 	/**
 	 * Create a new instance of the {@link AssertThrows} class.
-	 * @param expectedException the {@link java.lang.Exception} expected to be
+	 * @param expectedException the {@link Exception} expected to be
 	 * thrown during the execution of the surrounding test
-	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is
-	 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
+	 * @throws IllegalArgumentException if the supplied {@code expectedException} is
+	 * {@code null}; or if said argument is not an {@link Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException) {
 		this(expectedException, null);
@@ -107,12 +107,12 @@ public abstract class AssertThrows {
 
 	/**
 	 * Create a new instance of the {@link AssertThrows} class.
-	 * @param expectedException the {@link java.lang.Exception} expected to be
+	 * @param expectedException the {@link Exception} expected to be
 	 * thrown during the execution of the surrounding test
 	 * @param failureMessage the extra, contextual failure message that will be
-	 * included in the failure text if the text fails (can be <code>null</code>)
-	 * @throws IllegalArgumentException if the supplied <code>expectedException</code> is
-	 * <code>null</code>; or if said argument is not an {@link java.lang.Exception}-derived class
+	 * included in the failure text if the text fails (can be {@code null})
+	 * @throws IllegalArgumentException if the supplied {@code expectedException} is
+	 * {@code null}; or if said argument is not an {@link Exception}-derived class
 	 */
 	public AssertThrows(Class expectedException, String failureMessage) {
 		if (expectedException == null) {
@@ -153,7 +153,7 @@ public abstract class AssertThrows {
 
 
 	/**
-	 * Subclass must override this <code>abstract</code> method and
+	 * Subclass must override this {@code abstract} method and
 	 * provide the test logic.
 	 * @throws Exception if an error occurs during the execution of the
 	 * aformentioned test logic
@@ -212,13 +212,13 @@ public abstract class AssertThrows {
 
 	/**
 	 * Does the donkey work of checking (verifying) that the
-	 * {@link java.lang.Exception} that was thrown in the body of a test is
+	 * {@link Exception} that was thrown in the body of a test is
 	 * an instance of the {@link #getExpectedException()} class (or an
 	 * instance of a subclass).
 	 * <p>If you want to customise the failure message, consider overriding
 	 * {@link #createMessageForWrongThrownExceptionType(Exception)}.
-	 * @param actualException the {@link java.lang.Exception} that has been thrown
-	 * in the body of a test method (will never be <code>null</code>)
+	 * @param actualException the {@link Exception} that has been thrown
+	 * in the body of a test method (will never be {@code null})
 	 */
 	protected void checkExceptionExpectations(Exception actualException) {
 		if (!getExpectedException().isAssignableFrom(actualException.getClass())) {
@@ -246,7 +246,7 @@ public abstract class AssertThrows {
 
 	/**
 	 * Expose the actual exception thrown from {@link #test}, if any.
-	 * @return the actual exception, or <code>null</code> if none
+	 * @return the actual exception, or {@code null} if none
 	 */
 	public final Exception getActualException() {
 		return this.actualException;

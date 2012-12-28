@@ -90,7 +90,7 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	/**
 	 * Determine the EclipseLink target database name for the given database.
 	 * @param database the specified database
-	 * @return the EclipseLink target database name, or <code>null<code> if none found
+	 * @return the EclipseLink target database name, or {@code null} if none found
 	 */
 	protected String determineTargetDatabaseName(Database database) {
 		switch (database) {

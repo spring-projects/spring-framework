@@ -26,12 +26,12 @@ package org.springframework.validation;
  * of an application, and supports the encapsulation of validation
  * logic as a first-class citizen in its own right.
  *
- * <p>Find below a simple but complete <code>Validator</code>
+ * <p>Find below a simple but complete {@code Validator}
  * implementation, which validates that the various {@link String}
- * properties of a <code>UserLogin</code> instance are not empty
- * (that is they are not <code>null</code> and do not consist
+ * properties of a {@code UserLogin} instance are not empty
+ * (that is they are not {@code null} and do not consist
  * wholly of whitespace), and that any password that is present is
- * at least <code>'MINIMUM_PASSWORD_LENGTH'</code> characters in length.
+ * at least {@code 'MINIMUM_PASSWORD_LENGTH'} characters in length.
  *
  * <pre class="code"> public class UserLoginValidator implements Validator {
  *
@@ -55,7 +55,7 @@ package org.springframework.validation;
  * }</pre>
  *
  * <p>See also the Spring reference manual for a fuller discussion of
- * the <code>Validator</code> interface and it's role in an enterprise
+ * the {@code Validator} interface and it's role in an enterprise
  * application.
  *
  * @author Rod Johnson
@@ -66,27 +66,27 @@ public interface Validator {
 
 	/**
 	 * Can this {@link Validator} {@link #validate(Object, Errors) validate}
-	 * instances of the supplied <code>clazz</code>?
+	 * instances of the supplied {@code clazz}?
 	 * <p>This method is <i>typically</i> implemented like so:
 	 * <pre class="code">return Foo.class.isAssignableFrom(clazz);</pre>
-	 * (Where <code>Foo</code> is the class (or superclass) of the actual
+	 * (Where {@code Foo} is the class (or superclass) of the actual
 	 * object instance that is to be {@link #validate(Object, Errors) validated}.)
 	 * @param clazz the {@link Class} that this {@link Validator} is
 	 * being asked if it can {@link #validate(Object, Errors) validate}
-	 * @return <code>true</code> if this {@link Validator} can indeed
+	 * @return {@code true} if this {@link Validator} can indeed
 	 * {@link #validate(Object, Errors) validate} instances of the
-	 * supplied <code>clazz</code>
+	 * supplied {@code clazz}
 	 */
 	boolean supports(Class<?> clazz);
 
 	/**
-	 * Validate the supplied <code>target</code> object, which must be
+	 * Validate the supplied {@code target} object, which must be
 	 * of a {@link Class} for which the {@link #supports(Class)} method
-	 * typically has (or would) return <code>true</code>.
+	 * typically has (or would) return {@code true}.
 	 * <p>The supplied {@link Errors errors} instance can be used to report
 	 * any resulting validation errors.
-	 * @param target the object that is to be validated (can be <code>null</code>)
-	 * @param errors contextual state about the validation process (never <code>null</code>)
+	 * @param target the object that is to be validated (can be {@code null})
+	 * @param errors contextual state about the validation process (never {@code null})
 	 * @see ValidationUtils
 	 */
 	void validate(Object target, Errors errors);

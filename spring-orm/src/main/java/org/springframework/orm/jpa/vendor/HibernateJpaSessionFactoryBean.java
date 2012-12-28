@@ -26,7 +26,7 @@ import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
 import org.springframework.util.Assert;
 
 /**
- * Simple <code>FactoryBean</code> that exposes the underlying {@link SessionFactory}
+ * Simple {@code FactoryBean} that exposes the underlying {@link SessionFactory}
  * behind a Hibernate-backed JPA {@link EntityManagerFactory}.
  *
  * <p>Primarily available for resolving a SessionFactory by JPA persistence unit name

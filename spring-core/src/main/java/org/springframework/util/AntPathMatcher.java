@@ -33,13 +33,13 @@ import java.util.regex.Pattern;
  * <p>The mapping matches URLs using the following rules:<br> <ul> <li>? matches one character</li> <li>* matches zero
  * or more characters</li> <li>** matches zero or more 'directories' in a path</li> </ul>
  *
- * <p>Some examples:<br> <ul> <li><code>com/t?st.jsp</code> - matches <code>com/test.jsp</code> but also
- * <code>com/tast.jsp</code> or <code>com/txst.jsp</code></li> <li><code>com/*.jsp</code> - matches all
- * <code>.jsp</code> files in the <code>com</code> directory</li> <li><code>com/&#42;&#42;/test.jsp</code> - matches all
- * <code>test.jsp</code> files underneath the <code>com</code> path</li> <li><code>org/springframework/&#42;&#42;/*.jsp</code>
- * - matches all <code>.jsp</code> files underneath the <code>org/springframework</code> path</li>
- * <li><code>org/&#42;&#42;/servlet/bla.jsp</code> - matches <code>org/springframework/servlet/bla.jsp</code> but also
- * <code>org/springframework/testing/servlet/bla.jsp</code> and <code>org/servlet/bla.jsp</code></li> </ul>
+ * <p>Some examples:<br> <ul> <li>{@code com/t?st.jsp} - matches {@code com/test.jsp} but also
+ * {@code com/tast.jsp} or {@code com/txst.jsp}</li> <li>{@code com/*.jsp} - matches all
+ * {@code .jsp} files in the {@code com} directory</li> <li>{@code com/&#42;&#42;/test.jsp} - matches all
+ * {@code test.jsp} files underneath the {@code com} path</li> <li>{@code org/springframework/&#42;&#42;/*.jsp}
+ * - matches all {@code .jsp} files underneath the {@code org/springframework} path</li>
+ * <li>{@code org/&#42;&#42;/servlet/bla.jsp} - matches {@code org/springframework/servlet/bla.jsp} but also
+ * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li> </ul>
  *
  * @author Alef Arendsen
  * @author Juergen Hoeller
@@ -81,12 +81,12 @@ public class AntPathMatcher implements PathMatcher {
 
 
 	/**
-	 * Actually match the given <code>path</code> against the given <code>pattern</code>.
+	 * Actually match the given {@code path} against the given {@code pattern}.
 	 * @param pattern the pattern to match against
 	 * @param path the path String to test
 	 * @param fullMatch whether a full pattern match is required (else a pattern match
 	 * as far as the given base path goes is sufficient)
-	 * @return <code>true</code> if the supplied <code>path</code> matched, <code>false</code> if it didn't
+	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
 	protected boolean doMatch(String pattern, String path, boolean fullMatch,
 			Map<String, String> uriTemplateVariables) {
@@ -219,9 +219,9 @@ public class AntPathMatcher implements PathMatcher {
 	 * Tests whether or not a string matches against a pattern. The pattern may contain two special characters:
 	 * <br>'*' means zero or more characters
 	 * <br>'?' means one and only one character
-	 * @param pattern pattern to match against. Must not be <code>null</code>.
-	 * @param str string which must be matched against the pattern. Must not be <code>null</code>.
-	 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
+	 * @param pattern pattern to match against. Must not be {@code null}.
+	 * @param str string which must be matched against the pattern. Must not be {@code null}.
+	 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 	 */
 	private boolean matchStrings(String pattern, String str, Map<String, String> uriTemplateVariables) {
 		AntPathStringMatcher matcher = this.stringMatcherCache.get(pattern);
@@ -234,15 +234,15 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a pattern and a full path, determine the pattern-mapped part. <p>For example: <ul>
-	 * <li>'<code>/docs/cvs/commit.html</code>' and '<code>/docs/cvs/commit.html</code> -> ''</li>
-	 * <li>'<code>/docs/*</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/cvs/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>commit.html</code>'</li>
-	 * <li>'<code>/docs/**</code>' and '<code>/docs/cvs/commit</code> -> '<code>cvs/commit</code>'</li>
-	 * <li>'<code>/docs/**\/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>cvs/commit.html</code>'</li>
-	 * <li>'<code>/*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*.html</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li>
-	 * <li>'<code>*</code>' and '<code>/docs/cvs/commit.html</code> -> '<code>/docs/cvs/commit.html</code>'</li> </ul>
-	 * <p>Assumes that {@link #match} returns <code>true</code> for '<code>pattern</code>' and '<code>path</code>', but
+	 * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
+	 * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
+	 * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
+	 * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code cvs/commit.html}'</li>
+	 * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -> '{@code docs/cvs/commit.html}'</li>
+	 * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
+	 * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li> </ul>
+	 * <p>Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but
 	 * does <strong>not</strong> enforce this.
 	 */
 	public String extractPathWithinPattern(String pattern, String path) {
@@ -369,10 +369,10 @@ public class AntPathMatcher implements PathMatcher {
 
 	/**
 	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 * <p>The returned <code>Comparator</code> will {@linkplain java.util.Collections#sort(java.util.List,
+	 * <p>The returned {@code Comparator} will {@linkplain java.util.Collections#sort(java.util.List,
 	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns: <ol> <li><code>/hotels/new</code></li>
-	 * <li><code>/hotels/{hotel}</code></li> <li><code>/hotels/*</code></li> </ol> the returned comparator will sort this
+	 * generic patterns. So given a list with the following patterns: <ol> <li>{@code /hotels/new}</li>
+	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li> </ol> the returned comparator will sort this
 	 * list so that the order will be as indicated.
 	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
 	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
@@ -525,7 +525,7 @@ public class AntPathMatcher implements PathMatcher {
 
 		/**
 		 * Main entry point.
-		 * @return <code>true</code> if the string matches against the pattern, or <code>false</code> otherwise.
+		 * @return {@code true} if the string matches against the pattern, or {@code false} otherwise.
 		 */
 		public boolean matchStrings(String str, Map<String, String> uriTemplateVariables) {
 			Matcher matcher = this.pattern.matcher(str);

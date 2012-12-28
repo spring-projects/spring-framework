@@ -41,7 +41,7 @@ public abstract class BshScriptUtils {
 
 	/**
 	 * Create a new BeanShell-scripted object from the given script source.
-	 * <p>With this <code>createBshObject</code> variant, the script needs to
+	 * <p>With this {@code createBshObject} variant, the script needs to
 	 * declare a full class or return an actual instance of the scripted object.
 	 * @param scriptSource the script source text
 	 * @return the scripted Java object
@@ -60,7 +60,7 @@ public abstract class BshScriptUtils {
 	 * specified interfaces, if any, need to be implemented by that class/instance).
 	 * @param scriptSource the script source text
 	 * @param scriptInterfaces the interfaces that the scripted Java object is
-	 * supposed to implement (may be <code>null</code> or empty if the script itself
+	 * supposed to implement (may be {@code null} or empty if the script itself
 	 * declares a full class or returns an actual instance of the scripted object)
 	 * @return the scripted Java object
 	 * @throws EvalError in case of BeanShell parsing failure
@@ -78,7 +78,7 @@ public abstract class BshScriptUtils {
 	 * specified interfaces, if any, need to be implemented by that class/instance).
 	 * @param scriptSource the script source text
 	 * @param scriptInterfaces the interfaces that the scripted Java object is
-	 * supposed to implement (may be <code>null</code> or empty if the script itself
+	 * supposed to implement (may be {@code null} or empty if the script itself
 	 * declares a full class or returns an actual instance of the scripted object)
 	 * @param classLoader the ClassLoader to create the script proxy with
 	 * @return the scripted Java object
@@ -108,9 +108,9 @@ public abstract class BshScriptUtils {
 	 * returning the Class defined by the script.
 	 * <p>The script may either declare a full class or return an actual instance of
 	 * the scripted object (in which case the Class of the object will be returned).
-	 * In any other case, the returned Class will be <code>null</code>.
+	 * In any other case, the returned Class will be {@code null}.
 	 * @param scriptSource the script source text
-	 * @return the scripted Java class, or <code>null</code> if none could be determined
+	 * @return the scripted Java class, or {@code null} if none could be determined
 	 * @throws EvalError in case of BeanShell parsing failure
 	 */
 	static Class determineBshObjectType(String scriptSource) throws EvalError {
@@ -137,7 +137,7 @@ public abstract class BshScriptUtils {
 	 * specified interfaces, if any, need to be implemented by that class/instance).
 	 * @param scriptSource the script source text
 	 * @param scriptInterfaces the interfaces that the scripted Java object is
-	 * supposed to implement (may be <code>null</code> or empty if the script itself
+	 * supposed to implement (may be {@code null} or empty if the script itself
 	 * declares a full class or returns an actual instance of the scripted object)
 	 * @param classLoader the ClassLoader to create the script proxy with
 	 * @return the scripted Java class or Java object

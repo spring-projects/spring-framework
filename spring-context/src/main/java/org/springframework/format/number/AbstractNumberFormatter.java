@@ -67,7 +67,7 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 	/**
 	 * Obtain a concrete NumberFormat for the specified locale.
 	 * @param locale the current locale
-	 * @return the NumberFormat instance (never <code>null</code>)
+	 * @return the NumberFormat instance (never {@code null})
 	 */
 	protected abstract NumberFormat getNumberFormat(Locale locale);
 

@@ -24,10 +24,10 @@ import java.util.List;
 
 /**
  * ParameterNameDiscoverer implementation that tries several ParameterNameDiscoverers
- * in succession. Those added first in the <code>addDiscoverer</code> method have
- * highest priority. If one returns <code>null</code>, the next will be tried.
+ * in succession. Those added first in the {@code addDiscoverer} method have
+ * highest priority. If one returns {@code null}, the next will be tried.
  *
- * <p>The default behavior is always to return <code>null</code>
+ * <p>The default behavior is always to return {@code null}
  * if no discoverer matches.
  *
  * @author Rod Johnson

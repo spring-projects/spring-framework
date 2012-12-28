@@ -21,7 +21,7 @@ import org.springframework.core.convert.TypeDescriptor;
 /**
  * Encapsulates an object and a type descriptor that describes it.
  * The type descriptor can hold generic information that would not be
- * accessible through a simple <code>getClass()</code> call on the object.
+ * accessible through a simple {@code getClass()} call on the object.
  *
  * @author Andy Clement
  * @author Juergen Hoeller

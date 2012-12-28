@@ -190,7 +190,7 @@ public class BindStatus {
 
 	/**
 	 * Return a bind expression that can be used in HTML forms as input name
-	 * for the respective field, or <code>null</code> if not field-specific.
+	 * for the respective field, or {@code null} if not field-specific.
 	 * <p>Returns a bind path appropriate for resubmission, e.g. "address.street".
 	 * Note that the complete bind path as required by the bind tag is
 	 * "customer.address.street", if bound to a "customer" bean.
@@ -201,7 +201,7 @@ public class BindStatus {
 
 	/**
 	 * Return the current value of the field, i.e. either the property value
-	 * or a rejected update, or <code>null</code> if not field-specific.
+	 * or a rejected update, or {@code null} if not field-specific.
 	 * <p>This value will be an HTML-escaped String if the original value
 	 * already was a String.
 	 */
@@ -210,9 +210,9 @@ public class BindStatus {
 	}
 
 	/**
-	 * Get the '<code>Class</code>' type of the field. Favor this instead of
-	 * '<code>getValue().getClass()</code>' since '<code>getValue()</code>' may
-	 * return '<code>null</code>'.
+	 * Get the '{@code Class}' type of the field. Favor this instead of
+	 * '{@code getValue().getClass()}' since '{@code getValue()}' may
+	 * return '{@code null}'.
 	 */
 	public Class getValueType() {
 		return this.valueType;
@@ -220,7 +220,7 @@ public class BindStatus {
 
 	/**
 	 * Return the actual value of the field, i.e. the raw property value,
-	 * or <code>null</code> if not available.
+	 * or {@code null} if not available.
 	 */
 	public Object getActualValue() {
 		return this.actualValue;
@@ -230,7 +230,7 @@ public class BindStatus {
 	 * Return a suitable display value for the field, i.e. the stringified
 	 * value if not null, and an empty string in case of a null value.
 	 * <p>This value will be an HTML-escaped String if the original value
-	 * was non-null: the <code>toString</code> result of the original value
+	 * was non-null: the {@code toString} result of the original value
 	 * will get HTML-escaped.
 	 */
 	public String getDisplayValue() {
@@ -296,7 +296,7 @@ public class BindStatus {
 	/**
 	 * Return the Errors instance (typically a BindingResult) that this
 	 * bind status is currently associated with.
-	 * @return the current Errors instance, or <code>null</code> if none
+	 * @return the current Errors instance, or {@code null} if none
 	 * @see org.springframework.validation.BindingResult
 	 */
 	public Errors getErrors() {
@@ -306,7 +306,7 @@ public class BindStatus {
 	/**
 	 * Return the PropertyEditor for the property that this bind status
 	 * is currently bound to.
-	 * @return the current PropertyEditor, or <code>null</code> if none
+	 * @return the current PropertyEditor, or {@code null} if none
 	 */
 	public PropertyEditor getEditor() {
 		return this.editor;
@@ -316,7 +316,7 @@ public class BindStatus {
 	 * Find a PropertyEditor for the given value class, associated with
 	 * the property that this bound status is currently bound to.
 	 * @param valueClass the value class that an editor is needed for
-	 * @return the associated PropertyEditor, or <code>null</code> if none
+	 * @return the associated PropertyEditor, or {@code null} if none
 	 */
 	public PropertyEditor findEditor(Class valueClass) {
 		return (this.bindingResult != null ? this.bindingResult.findEditor(this.expression, valueClass) : null);

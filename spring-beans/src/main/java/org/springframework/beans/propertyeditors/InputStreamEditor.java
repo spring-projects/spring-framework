@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
 
 /**
  * One-way PropertyEditor which can convert from a text String to a
- * <code>java.io.InputStream</code>, interpreting the given String
+ * {@code java.io.InputStream}, interpreting the given String
  * as Spring resource location (e.g. a URL String).
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
@@ -79,7 +79,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * This implementation returns <code>null</code> to indicate that
+	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
 	 */
 	@Override

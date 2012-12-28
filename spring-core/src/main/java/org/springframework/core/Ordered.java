@@ -51,7 +51,7 @@ public interface Ordered {
 	/**
 	 * Return the order value of this object, with a
 	 * higher value meaning greater in terms of sorting.
-	 * <p>Normally starting with 0, with <code>Integer.MAX_VALUE</code>
+	 * <p>Normally starting with 0, with {@code Integer.MAX_VALUE}
 	 * indicating the greatest value. Same order values will result
 	 * in arbitrary positions for the affected objects.
 	 * <p>Higher values can be interpreted as lower priority. As a

@@ -65,7 +65,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 	/**
 	 * Set the name of the DateTool helper object to expose in the Velocity context
-	 * of this view, or <code>null</code> if not needed. DateTool is part of Velocity Tools 1.0.
+	 * of this view, or {@code null} if not needed. DateTool is part of Velocity Tools 1.0.
 	 * @see org.apache.velocity.tools.generic.DateTool
 	 * @see VelocityView#setDateToolAttribute
 	 */
@@ -75,7 +75,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 	/**
 	 * Set the name of the NumberTool helper object to expose in the Velocity context
-	 * of this view, or <code>null</code> if not needed. NumberTool is part of Velocity Tools 1.1.
+	 * of this view, or {@code null} if not needed. NumberTool is part of Velocity Tools 1.1.
 	 * @see org.apache.velocity.tools.generic.NumberTool
 	 * @see VelocityView#setNumberToolAttribute
 	 */

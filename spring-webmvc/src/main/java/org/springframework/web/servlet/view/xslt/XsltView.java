@@ -117,7 +117,7 @@ public class XsltView extends AbstractUrlBasedView {
 
 	/**
 	 * Set the URIResolver used in the transform.
-	 * <p>The URIResolver handles calls to the XSLT <code>document()</code> function.
+	 * <p>The URIResolver handles calls to the XSLT {@code document()} function.
 	 */
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
@@ -139,7 +139,7 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Set whether the XSLT transformer may add additional whitespace when
 	 * outputting the result tree.
-	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
+	 * <p>Default is {@code true} (on); set this to {@code false} (off)
 	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
@@ -211,7 +211,7 @@ public class XsltView extends AbstractUrlBasedView {
 
 	/**
 	 * Return the TransformerFactory that this XsltView uses.
-	 * @return the TransformerFactory (never <code>null</code>)
+	 * @return the TransformerFactory (never {@code null})
 	 */
 	protected final TransformerFactory getTransformerFactory() {
 		return this.transformerFactory;
@@ -263,7 +263,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * {@link #setSourceKey source key}, if any, before attempting to locate
 	 * an object of {@link #getSourceTypes() supported type}.
 	 * @param model the merged model Map
-	 * @return the XSLT Source object (or <code>null</code> if none found)
+	 * @return the XSLT Source object (or {@code null} if none found)
 	 * @throws Exception if an error occured during locating the source
 	 * @see #setSourceKey
 	 * @see #convertSource
@@ -326,7 +326,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * This implementation also copies the {@link #setOutputProperties output properties}
 	 * into the {@link Transformer} {@link Transformer#setOutputProperty output properties}.
 	 * Indentation properties are set as well.
-	 * @param model merged output Map (never <code>null</code>)
+	 * @param model merged output Map (never {@code null})
 	 * @param response current HTTP response
 	 * @param transformer the target transformer
 	 * @see #copyModelParameters(Map, Transformer)
@@ -374,7 +374,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * Copy all entries from the supplied Map into the
 	 * {@link Transformer#setParameter(String, Object) parameter set}
 	 * of the supplied {@link Transformer}.
-	 * @param model merged output Map (never <code>null</code>)
+	 * @param model merged output Map (never {@code null})
 	 * @param transformer the target transformer
 	 */
 	protected final void copyModelParameters(Map<String, Object> model, Transformer transformer) {
@@ -390,7 +390,7 @@ public class XsltView extends AbstractUrlBasedView {
 	 * {@link HttpServletResponse#setCharacterEncoding encoding}
 	 * from the "media-type" and "encoding" output properties
 	 * specified in the {@link Transformer}.
-	 * @param model merged output Map (never <code>null</code>)
+	 * @param model merged output Map (never {@code null})
 	 * @param response current HTTP response
 	 * @param transformer the target transformer
 	 */
@@ -467,7 +467,7 @@ public class XsltView extends AbstractUrlBasedView {
 	/**
 	 * Close the underlying resource managed by the supplied {@link Source} if applicable.
 	 * <p>Only works for {@link StreamSource StreamSources}.
-	 * @param source the XSLT Source to close (may be <code>null</code>)
+	 * @param source the XSLT Source to close (may be {@code null})
 	 */
 	private void closeSourceIfNecessary(Source source) {
 		if (source instanceof StreamSource) {

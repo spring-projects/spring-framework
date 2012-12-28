@@ -36,8 +36,8 @@ import org.springframework.util.ClassUtils;
  * {@link org.springframework.remoting.support.RemoteInvocationResult} objects,
  * for example Spring's HTTP invoker.
  *
- * <p>Provides template methods for <code>ObjectInputStream</code> and
- * <code>ObjectOutputStream</code> handling.
+ * <p>Provides template methods for {@code ObjectInputStream} and
+ * {@code ObjectOutputStream} handling.
  *
  * @author Juergen Hoeller
  * @since 2.5.1

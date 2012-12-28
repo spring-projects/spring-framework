@@ -47,7 +47,7 @@ public abstract class SoapFaultException extends RemoteInvocationFailureExceptio
 	public abstract String getFaultCode();
 
 	/**
-	 * Return the SOAP fault code as a <code>QName</code> object.
+	 * Return the SOAP fault code as a {@code QName} object.
 	 */
 	public abstract QName getFaultCodeAsQName();
 

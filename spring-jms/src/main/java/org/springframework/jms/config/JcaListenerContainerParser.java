@@ -25,7 +25,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 
 /**
- * Parser for the JMS <code>&lt;jca-listener-container&gt;</code> element.
+ * Parser for the JMS {@code &lt;jca-listener-container&gt;} element.
  *
  * @author Juergen Hoeller
  * @since 2.5

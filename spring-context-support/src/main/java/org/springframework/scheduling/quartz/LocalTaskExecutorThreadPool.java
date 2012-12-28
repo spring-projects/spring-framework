@@ -83,8 +83,8 @@ public class LocalTaskExecutorThreadPool implements ThreadPool {
 		// The present implementation always returns 1, making Quartz (1.6)
 		// always schedule any tasks that it feels like scheduling.
 		// This could be made smarter for specific TaskExecutors,
-		// for example calling <code>getMaximumPoolSize() - getActiveCount()</code>
-		// on a <code>java.util.concurrent.ThreadPoolExecutor</code>.
+		// for example calling {@code getMaximumPoolSize() - getActiveCount()}
+		// on a {@code java.util.concurrent.ThreadPoolExecutor}.
 		return 1;
 	}
 

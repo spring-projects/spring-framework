@@ -66,7 +66,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 
 
 	/**
-	 * Set the <code>MBeanServerConnection</code> used to connect to the
+	 * Set the {@code MBeanServerConnection} used to connect to the
 	 * MBean which all invocations are routed to.
 	 */
 	public void setServer(MBeanServerConnection server) {
@@ -93,14 +93,14 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	}
 
 	/**
-	 * Set the service URL of the remote <code>MBeanServer</code>.
+	 * Set the service URL of the remote {@code MBeanServer}.
 	 */
 	public void setServiceUrl(String url) throws MalformedURLException {
 		this.serviceUrl = new JMXServiceURL(url);
 	}
 
 	/**
-	 * Set the agent id of the <code>MBeanServer</code> to locate.
+	 * Set the agent id of the {@code MBeanServer} to locate.
 	 * <p>Default is none. If specified, this will result in an
 	 * attempt being made to locate the attendant MBeanServer, unless
 	 * the {@link #setServiceUrl "serviceUrl"} property has been set.
@@ -123,8 +123,8 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	}
 
 	/**
-	 * Registers the specified <code>NotificationListener</code>.
-	 * <p>Ensures that an <code>MBeanServerConnection</code> is configured and attempts
+	 * Registers the specified {@code NotificationListener}.
+	 * <p>Ensures that an {@code MBeanServerConnection} is configured and attempts
 	 * to detect a local connection if one is not supplied.
 	 */
 	public void prepare() {
@@ -151,7 +151,7 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	}
 
 	/**
-	 * Unregisters the specified <code>NotificationListener</code>.
+	 * Unregisters the specified {@code NotificationListener}.
 	 */
 	public void destroy() {
 		try {

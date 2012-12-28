@@ -57,7 +57,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Determine whether the specified property is readable.
-	 * <p>Returns <code>false</code> if the property doesn't exist.
+	 * <p>Returns {@code false} if the property doesn't exist.
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is readable
@@ -66,7 +66,7 @@ public interface PropertyAccessor {
 
 	/**
 	 * Determine whether the specified property is writable.
-	 * <p>Returns <code>false</code> if the property doesn't exist.
+	 * <p>Returns {@code false} if the property doesn't exist.
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return whether the property is writable
@@ -80,7 +80,7 @@ public interface PropertyAccessor {
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
-	 * or <code>null</code> if not determinable
+	 * or {@code null} if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
 	 * @throws PropertyAccessException if the property was valid but the
@@ -94,7 +94,7 @@ public interface PropertyAccessor {
 	 * @param propertyName the property to check
 	 * (may be a nested path and/or an indexed/mapped property)
 	 * @return the property type for the particular property,
-	 * or <code>null</code> if not determinable
+	 * or {@code null} if not determinable
 	 * @throws InvalidPropertyException if there is no such property or
 	 * if the property isn't readable
 	 */

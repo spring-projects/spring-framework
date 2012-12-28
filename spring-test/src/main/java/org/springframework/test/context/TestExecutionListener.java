@@ -18,12 +18,12 @@ package org.springframework.test.context;
 
 /**
  * <p>
- * <code>TestExecutionListener</code> defines a <em>listener</em> API for
+ * {@code TestExecutionListener} defines a <em>listener</em> API for
  * reacting to test execution events published by the {@link TestContextManager}
  * with which the listener is registered.
  * </p>
  * <p>
- * Concrete implementations must provide a <code>public</code> no-args
+ * Concrete implementations must provide a {@code public} no-args
  * constructor, so that listeners can be instantiated transparently by tools and
  * configuration mechanisms.
  * </p>
@@ -59,7 +59,7 @@ public interface TestExecutionListener {
 	 * <em>before class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
 	 *
-	 * @param testContext the test context for the test; never <code>null</code>
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestClass(TestContext testContext) throws Exception;
@@ -71,7 +71,7 @@ public interface TestExecutionListener {
 	 * This method should be called immediately after instantiation of the test
 	 * instance but prior to any framework-specific lifecycle callbacks.
 	 *
-	 * @param testContext the test context for the test; never <code>null</code>
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void prepareTestInstance(TestContext testContext) throws Exception;
@@ -86,7 +86,7 @@ public interface TestExecutionListener {
 	 * <em>before</em> lifecycle callbacks.
 	 *
 	 * @param testContext the test context in which the test method will be
-	 * executed; never <code>null</code>
+	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void beforeTestMethod(TestContext testContext) throws Exception;
@@ -101,7 +101,7 @@ public interface TestExecutionListener {
 	 * <em>after</em> lifecycle callbacks.
 	 *
 	 * @param testContext the test context in which the test method was
-	 * executed; never <code>null</code>
+	 * executed; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestMethod(TestContext testContext) throws Exception;
@@ -117,7 +117,7 @@ public interface TestExecutionListener {
 	 * <em>after class</em> lifecycle callbacks, this method will not be called
 	 * for that framework.
 	 *
-	 * @param testContext the test context for the test; never <code>null</code>
+	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
 	 */
 	void afterTestClass(TestContext testContext) throws Exception;

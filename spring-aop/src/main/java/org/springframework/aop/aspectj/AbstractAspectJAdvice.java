@@ -347,8 +347,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 * on subsequent advice invocations can be as fast as possible.
 	 * <p>If the first argument is of type JoinPoint or ProceedingJoinPoint then we
 	 * pass a JoinPoint in that position (ProceedingJoinPoint for around advice).
-	 * <p>If the first argument is of type <code>JoinPoint.StaticPart</code>
-	 * then we pass a <code>JoinPoint.StaticPart</code> in that position.
+	 * <p>If the first argument is of type {@code JoinPoint.StaticPart}
+	 * then we pass a {@code JoinPoint.StaticPart} in that position.
 	 * <p>Remaining arguments have to be bound by pointcut evaluation at
 	 * a given join point. We will get back a map from argument name to
 	 * value. We need to calculate which advice parameter needs to be bound

@@ -30,7 +30,7 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
 /**
  * Integration tests which verify that the same custom {@link ContextLoader} can
  * be used at all levels within a test class hierarchy when the
- * <code>loader</code> is explicitly declared via {@link ContextConfiguration
+ * {@code loader} is explicitly declared via {@link ContextConfiguration
  * &#064;ContextConfiguration}.
  *
  * @author Sam Brannen

@@ -64,9 +64,9 @@ public class AnnotationMatchingPointcut implements Pointcut {
 	/**
 	 * Create a new AnnotationMatchingPointcut for the given annotation type.
 	 * @param classAnnotationType the annotation type to look for at the class level
-	 * (can be <code>null</code>)
+	 * (can be {@code null})
 	 * @param methodAnnotationType the annotation type to look for at the method level
-	 * (can be <code>null</code>)
+	 * (can be {@code null})
 	 */
 	public AnnotationMatchingPointcut(
 			Class<? extends Annotation> classAnnotationType, Class<? extends Annotation> methodAnnotationType) {

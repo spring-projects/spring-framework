@@ -25,9 +25,9 @@ import java.util.List;
  * {@link Comparator} implementation for {@link Ordered} objects,
  * sorting by order value ascending (resp. by priority descending).
  *
- * <p>Non-<code>Ordered</code> objects are treated as greatest order
+ * <p>Non-{@code Ordered} objects are treated as greatest order
  * values, thus ending up at the end of the list, in arbitrary order
- * (just like same order values of <code>Ordered</code> objects).
+ * (just like same order values of {@code Ordered} objects).
  *
  * @author Juergen Hoeller
  * @since 07.04.2003
@@ -64,7 +64,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * <p>The default implementation checks against the {@link Ordered}
 	 * interface. Can be overridden in subclasses.
 	 * @param obj the object to check
-	 * @return the order value, or <code>Ordered.LOWEST_PRECEDENCE</code> as fallback
+	 * @return the order value, or {@code Ordered.LOWEST_PRECEDENCE} as fallback
 	 */
 	protected int getOrder(Object obj) {
 		return (obj instanceof Ordered ? ((Ordered) obj).getOrder() : Ordered.LOWEST_PRECEDENCE);

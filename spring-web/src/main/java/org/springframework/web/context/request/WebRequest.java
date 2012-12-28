@@ -33,7 +33,7 @@ import java.util.Map;
 public interface WebRequest extends RequestAttributes {
 
 	/**
-	 * Return the request header of the given name, or <code>null</code> if none.
+	 * Return the request header of the given name, or {@code null} if none.
 	 * <p>Retrieves the first header value in case of a multi-value header.
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeader(String)
@@ -42,7 +42,7 @@ public interface WebRequest extends RequestAttributes {
 
 	/**
 	 * Return the request header values for the given header name,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 * <p>A single-value header will be exposed as an array with a single element.
 	 * @since 3.0
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
@@ -57,7 +57,7 @@ public interface WebRequest extends RequestAttributes {
 	Iterator<String> getHeaderNames();
 
 	/**
-	 * Return the request parameter of the given name, or <code>null</code> if none.
+	 * Return the request parameter of the given name, or {@code null} if none.
 	 * <p>Retrieves the first parameter value in case of a multi-value parameter.
 	 * @see javax.servlet.http.HttpServletRequest#getParameter(String)
 	 */
@@ -65,7 +65,7 @@ public interface WebRequest extends RequestAttributes {
 
 	/**
 	 * Return the request parameter values for the given parameter name,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 * <p>A single-value parameter will be exposed as an array with a single element.
 	 * @see javax.servlet.http.HttpServletRequest#getParameterValues(String)
 	 */

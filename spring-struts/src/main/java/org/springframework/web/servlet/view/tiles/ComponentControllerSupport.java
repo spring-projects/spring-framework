@@ -43,7 +43,7 @@ import org.springframework.web.util.WebUtils;
  * <p>Derives from the Tiles {@link ControllerSupport} class rather than
  * implementing the Tiles {@link org.apache.struts.tiles.Controller} interface
  * in order to be compatible with Struts 1.1 and 1.2. Implements both Struts 1.1's
- * <code>perform</code> and Struts 1.2's <code>execute</code> method accordingly.
+ * {@code perform} and Struts 1.2's {@code execute} method accordingly.
  *
  * @author Juergen Hoeller
  * @author Alef Arendsen
@@ -60,7 +60,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 
 
 	/**
-	 * This implementation delegates to <code>execute</code>,
+	 * This implementation delegates to {@code execute},
 	 * converting non-Servlet/IO Exceptions to ServletException.
 	 * <p>This is the only execution method available in Struts 1.1.
 	 * @see #execute
@@ -86,10 +86,10 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	}
 
 	/**
-	 * This implementation delegates to <code>doPerform</code>,
+	 * This implementation delegates to {@code doPerform},
 	 * lazy-initializing the application context reference if necessary.
 	 * <p>This is the preferred execution method in Struts 1.2.
-	 * When running with Struts 1.1, it will be called by <code>perform</code>.
+	 * When running with Struts 1.1, it will be called by {@code perform}.
 	 * @see #perform
 	 * @see #doPerform
 	 */
@@ -162,7 +162,7 @@ public abstract class ComponentControllerSupport extends ControllerSupport {
 	 * The ServletContext can be retrieved via getServletContext, if necessary.
 	 * The Spring WebApplicationContext can be accessed via getWebApplicationContext.
 	 * <p>This method will be called both in the Struts 1.1 and Struts 1.2 case,
-	 * by <code>perform</code> or <code>execute</code>, respectively.
+	 * by {@code perform} or {@code execute}, respectively.
 	 * @param componentContext current Tiles component context
 	 * @param request current HTTP request
 	 * @param response current HTTP response

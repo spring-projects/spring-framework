@@ -62,7 +62,7 @@ public class DefaultIntroductionAdvisor implements IntroductionAdvisor, ClassFil
 	 * Create a DefaultIntroductionAdvisor for the given advice.
 	 * @param advice the Advice to apply
 	 * @param introductionInfo the IntroductionInfo that describes
-	 * the interface to introduce (may be <code>null</code>)
+	 * the interface to introduce (may be {@code null})
 	 */
 	public DefaultIntroductionAdvisor(Advice advice, IntroductionInfo introductionInfo) {
 		Assert.notNull(advice, "Advice must not be null");

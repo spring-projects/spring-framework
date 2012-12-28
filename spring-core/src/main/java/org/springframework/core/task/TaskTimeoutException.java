@@ -28,7 +28,7 @@ package org.springframework.core.task;
 public class TaskTimeoutException extends TaskRejectedException {
 
 	/**
-	 * Create a new <code>TaskTimeoutException</code>
+	 * Create a new {@code TaskTimeoutException}
 	 * with the specified detail message and no root cause.
 	 * @param msg the detail message
 	 */
@@ -37,11 +37,11 @@ public class TaskTimeoutException extends TaskRejectedException {
 	}
 
 	/**
-	 * Create a new <code>TaskTimeoutException</code>
+	 * Create a new {@code TaskTimeoutException}
 	 * with the specified detail message and the given root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause (usually from using an underlying
-	 * API such as the <code>java.util.concurrent</code> package)
+	 * API such as the {@code java.util.concurrent} package)
 	 * @see java.util.concurrent.RejectedExecutionException
 	 */
 	public TaskTimeoutException(String msg, Throwable cause) {

@@ -81,8 +81,8 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	/**
 	 * Retrieves the URL path to use for lookup and delegates to
-	 * <code>getHandlerMethodNameForUrlPath</code>.
-	 * Converts <code>null</code> values to NoSuchRequestHandlingMethodExceptions.
+	 * {@code getHandlerMethodNameForUrlPath}.
+	 * Converts {@code null} values to NoSuchRequestHandlingMethodExceptions.
 	 * @see #getHandlerMethodNameForUrlPath
 	 */
 	public final String getHandlerMethodName(HttpServletRequest request)
@@ -101,7 +101,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 
 	/**
 	 * Return a method name that can handle this request, based on the
-	 * given lookup path. Called by <code>getHandlerMethodName</code>.
+	 * given lookup path. Called by {@code getHandlerMethodName}.
 	 * @param urlPath the URL path to use for lookup,
 	 * according to the settings in this class
 	 * @return a method name that can handle this request.

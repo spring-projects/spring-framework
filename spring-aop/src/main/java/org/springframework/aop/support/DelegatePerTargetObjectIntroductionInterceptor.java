@@ -34,7 +34,7 @@ import org.springframework.aop.ProxyMethodInvocation;
  * object will have its <i>own</i> delegate (whereas DelegatingIntroductionInterceptor
  * shares the same delegate, and hence the same state across all targets).
  *
- * <p>The <code>suppressInterface</code> method can be used to suppress interfaces
+ * <p>The {@code suppressInterface} method can be used to suppress interfaces
  * implemented by the delegate class but which should not be introduced to the
  * owning AOP proxy.
  *

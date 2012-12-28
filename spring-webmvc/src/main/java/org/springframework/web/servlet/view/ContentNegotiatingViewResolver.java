@@ -126,7 +126,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.
-	 * <p>For instance, when this flag is <code>true</code> (the default), a request for {@code /hotels.pdf}
+	 * <p>For instance, when this flag is {@code true} (the default), a request for {@code /hotels.pdf}
 	 * will result in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the
 	 * browser-defined {@code text/html,application/xhtml+xml}.
 	 *
@@ -149,7 +149,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	/**
 	 * Indicate whether a request parameter should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code false}.
-	 * <p>For instance, when this flag is <code>true</code>, a request for {@code /hotels?format=pdf} will result
+	 * <p>For instance, when this flag is {@code true}, a request for {@code /hotels?format=pdf} will result
 	 * in an {@code AbstractPdfView} being resolved, while the {@code Accept} header can be the browser-defined
 	 * {@code text/html,application/xhtml+xml}.
 	 *

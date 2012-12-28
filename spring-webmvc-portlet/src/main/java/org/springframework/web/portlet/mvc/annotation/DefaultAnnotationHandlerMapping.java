@@ -93,7 +93,7 @@ import org.springframework.web.portlet.handler.PortletRequestMethodNotSupportedE
 public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapping<PortletMode> {
 
 	/**
-	 * Calls the <code>registerHandlers</code> method in addition
+	 * Calls the {@code registerHandlers} method in addition
 	 * to the superclass's initialization.
 	 * @see #detectHandlers
 	 */
@@ -140,8 +140,8 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 	 * @param handlerType the handler type to introspect
 	 * @param beanName the name of the bean introspected
 	 * @param typeMapping the type level mapping (if any)
-	 * @return <code>true</code> if at least 1 handler method has been registered;
-	 * <code>false</code> otherwise
+	 * @return {@code true} if at least 1 handler method has been registered;
+	 * {@code false} otherwise
 	 */
 	protected boolean detectHandlerMethods(Class<?> handlerType, final String beanName, final RequestMapping typeMapping) {
 		final Set<Boolean> handlersRegistered = new HashSet<Boolean>(1);

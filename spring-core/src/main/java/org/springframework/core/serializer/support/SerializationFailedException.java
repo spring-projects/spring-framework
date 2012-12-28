@@ -31,7 +31,7 @@ import org.springframework.core.NestedRuntimeException;
 public class SerializationFailedException extends NestedRuntimeException {
 
 	/**
-	 * Construct a <code>SerializationException</code> with the specified detail message.
+	 * Construct a {@code SerializationException} with the specified detail message.
 	 * @param message the detail message
 	 */
 	public SerializationFailedException(String message) {
@@ -39,7 +39,7 @@ public class SerializationFailedException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Construct a <code>SerializationException</code> with the specified detail message
+	 * Construct a {@code SerializationException} with the specified detail message
 	 * and nested exception.
 	 * @param message the detail message
 	 * @param cause the nested exception

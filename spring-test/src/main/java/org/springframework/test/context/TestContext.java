@@ -26,7 +26,7 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
 
 /**
- * <code>TestContext</code> encapsulates the context in which a test is executed,
+ * {@code TestContext} encapsulates the context in which a test is executed,
  * agnostic of the actual testing framework in use.
  *
  * @author Sam Brannen
@@ -54,7 +54,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Delegates to {@link #TestContext(Class, ContextCache, String)} with a
-	 * value of <code>null</code> for the default {@code ContextLoader} class name.
+	 * value of {@code null} for the default {@code ContextLoader} class name.
 	 */
 	TestContext(Class<?> testClass, ContextCache contextCache) {
 		this(testClass, contextCache, null);
@@ -66,18 +66,18 @@ public class TestContext extends AttributeAccessorSupport {
 	 * {@link ContextConfiguration &#064;ContextConfiguration} annotation, if
 	 * present.
 	 * <p>If the supplied class name for the default {@code ContextLoader}
-	 * is <code>null</code> or <em>empty</em> and no concrete {@code ContextLoader}
+	 * is {@code null} or <em>empty</em> and no concrete {@code ContextLoader}
 	 * class is explicitly supplied via the {@code @ContextConfiguration}
 	 * annotation, a
 	 * {@link org.springframework.test.context.support.DelegatingSmartContextLoader
 	 * DelegatingSmartContextLoader} will be used instead.
 	 * @param testClass the test class for which the test context should be
-	 * constructed (must not be <code>null</code>)
+	 * constructed (must not be {@code null})
 	 * @param contextCache the context cache from which the constructed test
 	 * context should retrieve application contexts (must not be
-	 * <code>null</code>)
+	 * {@code null})
 	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use (may be <code>null</code>)
+	 * {@code ContextLoader} class to use (may be {@code null})
 	 */
 	TestContext(Class<?> testClass, ContextCache contextCache, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Test class must not be null");
@@ -107,7 +107,7 @@ public class TestContext extends AttributeAccessorSupport {
 	}
 
 	/**
-	 * Load an <code>ApplicationContext</code> for this test context using the
+	 * Load an {@code ApplicationContext} for this test context using the
 	 * configured {@code ContextLoader} and merged context configuration. Supports
 	 * both the {@link SmartContextLoader} and {@link ContextLoader} SPIs.
 	 * @throws Exception if an error occurs while loading the application context
@@ -170,7 +170,7 @@ public class TestContext extends AttributeAccessorSupport {
 
 	/**
 	 * Get the {@link Class test class} for this test context.
-	 * @return the test class (never <code>null</code>)
+	 * @return the test class (never {@code null})
 	 */
 	public final Class<?> getTestClass() {
 		return testClass;
@@ -179,8 +179,8 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Get the current {@link Object test instance} for this test context.
 	 * <p>Note: this is a mutable property.
-	 * @return the current test instance (may be <code>null</code>)
-	 * @see #updateState(Object,Method,Throwable)
+	 * @return the current test instance (may be {@code null})
+	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Object getTestInstance() {
 		return testInstance;
@@ -189,7 +189,7 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Get the current {@link Method test method} for this test context.
 	 * <p>Note: this is a mutable property.
-	 * @return the current test method (may be <code>null</code>)
+	 * @return the current test method (may be {@code null})
 	 * @see #updateState(Object, Method, Throwable)
 	 */
 	public final Method getTestMethod() {
@@ -200,7 +200,7 @@ public class TestContext extends AttributeAccessorSupport {
 	 * Get the {@link Throwable exception} that was thrown during execution of
 	 * the {@link #getTestMethod() test method}.
 	 * <p>Note: this is a mutable property.
-	 * @return the exception that was thrown, or <code>null</code> if no
+	 * @return the exception that was thrown, or {@code null} if no
 	 * exception was thrown
 	 * @see #updateState(Object, Method, Throwable)
 	 */
@@ -223,10 +223,10 @@ public class TestContext extends AttributeAccessorSupport {
 	/**
 	 * Update this test context to reflect the state of the currently executing
 	 * test.
-	 * @param testInstance the current test instance (may be <code>null</code>)
-	 * @param testMethod the current test method (may be <code>null</code>)
+	 * @param testInstance the current test instance (may be {@code null})
+	 * @param testMethod the current test method (may be {@code null})
 	 * @param testException the exception that was thrown in the test method, or
-	 * <code>null</code> if no exception was thrown
+	 * {@code null} if no exception was thrown
 	 */
 	void updateState(Object testInstance, Method testMethod, Throwable testException) {
 		this.testInstance = testInstance;

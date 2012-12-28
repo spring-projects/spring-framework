@@ -103,7 +103,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	/**
 	 * Convenient method to delete all rows from these tables.
 	 * Calling this method will make avoidance of rollback by calling
-	 * <code>setComplete()</code> impossible.
+	 * {@code setComplete()} impossible.
 	 * @see #setComplete
 	 */
 	protected void deleteFromTables(String[] names) {

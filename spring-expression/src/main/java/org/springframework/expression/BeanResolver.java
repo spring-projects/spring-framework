@@ -18,7 +18,7 @@ package org.springframework.expression;
 
 /**
  * A bean resolver can be registered with the evaluation context
- * and will kick in for <code>@myBeanName</code> still expressions.
+ * and will kick in for {@code @myBeanName} still expressions.
  *
  * @author Andy Clement
  * @since 3.0.3

@@ -42,7 +42,7 @@ public class CallableStatementCreatorFactory {
 	/** The SQL call string, which won't change when the parameters change. */
 	private final String callString;
 
-	/** List of SqlParameter objects. May not be <code>null</code>. */
+	/** List of SqlParameter objects. May not be {@code null}. */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -110,7 +110,7 @@ public class CallableStatementCreatorFactory {
 
 	/**
 	 * Return a new CallableStatementCreator instance given this parameters.
-	 * @param params list of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be {@code null})
 	 */
 	public CallableStatementCreator newCallableStatementCreator(Map<String, ?> params) {
 		return new CallableStatementCreatorImpl(params != null ? params : new HashMap<String, Object>());

@@ -134,7 +134,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 *
 	 * @param configAttributes the context configuration attributes to process
 	 * @throws IllegalArgumentException if the supplied configuration attributes are
-	 * <code>null</code>, or if the supplied configuration attributes include both
+	 * {@code null}, or if the supplied configuration attributes include both
 	 * resource locations and annotated classes
 	 * @throws IllegalStateException if the XML-based loader detects default
 	 * configuration classes; if the annotation-based loader detects default
@@ -232,7 +232,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 	 * </ul>
 	 *
 	 * @param mergedConfig the merged context configuration to use to load the application context
-	 * @throws IllegalArgumentException if the supplied merged configuration is <code>null</code>
+	 * @throws IllegalArgumentException if the supplied merged configuration is {@code null}
 	 * @throws IllegalStateException if neither candidate loader is capable of loading an
 	 * {@code ApplicationContext} from the supplied merged context configuration
 	 */

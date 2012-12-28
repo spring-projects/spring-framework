@@ -38,7 +38,7 @@ public class ExpectedLookupTemplate extends JndiTemplate {
 
 	/**
 	 * Construct a new JndiTemplate that will always return given objects
-	 * for given names. To be populated through <code>addObject</code> calls.
+	 * for given names. To be populated through {@code addObject} calls.
 	 * @see #addObject(String, Object)
 	 */
 	public ExpectedLookupTemplate() {

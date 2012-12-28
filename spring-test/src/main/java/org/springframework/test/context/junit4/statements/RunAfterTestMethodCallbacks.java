@@ -25,7 +25,7 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * <code>RunAfterTestMethodCallbacks</code> is a custom JUnit 4.5+
+ * {@code RunAfterTestMethodCallbacks} is a custom JUnit 4.5+
  * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
  * be plugged into the JUnit execution chain by calling
  * {@link TestContextManager#afterTestMethod(Object, Method, Throwable) afterTestMethod()}
@@ -49,14 +49,14 @@ public class RunAfterTestMethodCallbacks extends Statement {
 
 
 	/**
-	 * Constructs a new <code>RunAfterTestMethodCallbacks</code> statement.
+	 * Constructs a new {@code RunAfterTestMethodCallbacks} statement.
 	 *
-	 * @param next the next <code>Statement</code> in the execution chain
-	 * @param testInstance the current test instance (never <code>null</code>)
+	 * @param next the next {@code Statement} in the execution chain
+	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which has just been executed on the
 	 * test instance
 	 * @param testContextManager the TestContextManager upon which to call
-	 * <code>afterTestMethod()</code>
+	 * {@code afterTestMethod()}
 	 */
 	public RunAfterTestMethodCallbacks(Statement next, Object testInstance, Method testMethod,
 			TestContextManager testContextManager) {
@@ -71,7 +71,7 @@ public class RunAfterTestMethodCallbacks extends Statement {
 	 * instance of {@link org.junit.internal.runners.statements.RunAfters
 	 * RunAfters}), catching any exceptions thrown, and then calls
 	 * {@link TestContextManager#afterTestMethod(Object, Method, Throwable)} with the first
-	 * caught exception (if any). If the call to <code>afterTestMethod()</code>
+	 * caught exception (if any). If the call to {@code afterTestMethod()}
 	 * throws an exception, it will also be tracked. Multiple exceptions will be
 	 * combined into a {@link MultipleFailureException}.
 	 */

@@ -1,8 +1,7 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.beans.factory</code> package.
- * Contains abstract base classes for <code>BeanFactory</code> implementations.
+ * Classes supporting the {@code org.springframework.beans.factory} package.
+ * Contains abstract base classes for {@code BeanFactory} implementations.
  *
  *
  */

@@ -26,9 +26,9 @@ import org.springframework.beans.BeansException;
  * the actual target object should not be initialized until first use.
  * When the target bean is defined in an
  * {@link org.springframework.context.ApplicationContext} (or a
- * <code>BeanFactory</code> that is eagerly pre-instantiating singleton beans)
+ * {@code BeanFactory} that is eagerly pre-instantiating singleton beans)
  * it must be marked as "lazy-init" too, else it will be instantiated by said
- * <code>ApplicationContext</code> (or <code>BeanFactory</code>) on startup.
+ * {@code ApplicationContext} (or {@code BeanFactory}) on startup.
  * <p>For example:
  *
  * <pre class="code">

@@ -60,7 +60,7 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 	/**
 	 * Create a new StaticLabeledEnum instance.
 	 * @param code the short code
-	 * @param label the label (can be <code>null</code>)
+	 * @param label the label (can be {@code null})
 	 */
 	protected StaticLabeledEnum(int code, String label) {
 		this.code = new Short((short) code);

@@ -145,7 +145,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * <p>The default implementation checks against the specified mapped handlers
 	 * and handler classes, if any.
 	 * @param request current HTTP request
-	 * @param handler the executed handler, or <code>null</code> if none chosen
+	 * @param handler the executed handler, or {@code null} if none chosen
 	 * at the time of the exception (for example, if multipart resolution failed)
 	 * @return whether this resolved should proceed with resolving the exception
 	 * for the given request and handler
@@ -213,7 +213,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	/**
 	 * Prevents the response from being cached, through setting corresponding
-	 * HTTP headers. See <code>http://www.mnot.net/cache_docs</code>.
+	 * HTTP headers. See {@code http://www.mnot.net/cache_docs}.
 	 * @param response current HTTP response
 	 */
 	protected void preventCaching(HttpServletResponse response) {
@@ -233,10 +233,10 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * with its actual exception handling.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the time
+	 * @param handler the executed handler, or {@code null} if none chosen at the time
 	 * of the exception (for example, if multipart resolution failed)
 	 * @param ex the exception that got thrown during handler execution
-	 * @return a corresponding ModelAndView to forward to, or <code>null</code> for default processing
+	 * @return a corresponding ModelAndView to forward to, or {@code null} for default processing
 	 */
 	protected abstract ModelAndView doResolveException(HttpServletRequest request,
 			HttpServletResponse response, Object handler, Exception ex);

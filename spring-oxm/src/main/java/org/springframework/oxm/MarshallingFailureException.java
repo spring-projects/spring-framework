@@ -25,7 +25,7 @@ package org.springframework.oxm;
 public class MarshallingFailureException extends MarshallingException {
 
 	/**
-	 * Construct a <code>MarshallingFailureException</code> with the specified detail message.
+	 * Construct a {@code MarshallingFailureException} with the specified detail message.
 	 * @param msg the detail message
 	 */
 	public MarshallingFailureException(String msg) {
@@ -33,7 +33,7 @@ public class MarshallingFailureException extends MarshallingException {
 	}
 
 	/**
-	 * Construct a <code>MarshallingFailureException</code> with the specified detail message
+	 * Construct a {@code MarshallingFailureException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

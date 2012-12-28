@@ -27,7 +27,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.io.File</code>, to directly populate a File property
+ * Editor for {@code java.io.File}, to directly populate a File property
  * from a Spring resource location.
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL

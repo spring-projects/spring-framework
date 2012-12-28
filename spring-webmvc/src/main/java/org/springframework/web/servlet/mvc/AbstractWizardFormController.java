@@ -60,7 +60,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <p>Note that a validator's default validate method is not executed when using
  * this class! Rather, the {@link #validatePage} implementation should call
- * special <code>validateXXX</code> methods that the validator needs to provide,
+ * special {@code validateXXX} methods that the validator needs to provide,
  * validating certain pieces of the object. These can be combined to validate
  * the elements of individual pages.
  *
@@ -161,8 +161,8 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>Note that a concrete wizard form controller might override
 	 * {@link #getPageCount(HttpServletRequest, Object)} to determine
 	 * the page count dynamically. The default implementation of that extended
-	 * <code>getPageCount</code> variant returns the static page count as
-	 * determined by this <code>getPageCount()</code> method.
+	 * {@code getPageCount} variant returns the static page count as
+	 * determined by this {@code getPageCount()} method.
 	 * @see #getPageCount(javax.servlet.http.HttpServletRequest, Object)
 	 */
 	protected final int getPageCount() {
@@ -280,7 +280,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * @param command form object with request parameters bound onto it
 	 * @param errors validation errors holder
 	 * @param page current wizard page
-	 * @return a Map with reference data entries, or <code>null</code> if none
+	 * @return a Map with reference data entries, or {@code null} if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see #referenceData(HttpServletRequest, int)
 	 * @see ModelAndView
@@ -294,11 +294,11 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Create a reference data map for the given request, consisting of
 	 * bean name/bean instance pairs as expected by ModelAndView.
-	 * <p>The default implementation returns <code>null</code>.
+	 * <p>The default implementation returns {@code null}.
 	 * Subclasses can override this to set reference data used in the view.
 	 * @param request current HTTP request
 	 * @param page current wizard page
-	 * @return a Map with reference data entries, or <code>null</code> if none
+	 * @return a Map with reference data entries, or {@code null} if none
 	 * @throws Exception in case of invalid state or arguments
 	 * @see ModelAndView
 	 */
@@ -420,7 +420,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>The default implementation delegates to the {@link #getPageSessionAttributeName()}
 	 * variant without arguments.
 	 * @param request current HTTP request
-	 * @return the name of the form session attribute, or <code>null</code> if not in session form mode
+	 * @return the name of the form session attribute, or {@code null} if not in session form mode
 	 * @see #getPageSessionAttributeName
 	 * @see #getFormSessionAttributeName(javax.servlet.http.HttpServletRequest)
 	 * @see javax.servlet.http.HttpSession#getAttribute
@@ -452,7 +452,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * to override this method.
 	 * @param request current HTTP request
 	 * @param response current HTTP response
-	 * @return a prepared view, or <code>null</code> if handled directly
+	 * @return a prepared view, or {@code null} if handled directly
 	 * @throws Exception in case of errors
 	 * @see #showNewForm
 	 * @see #setBindOnNewForm
@@ -562,9 +562,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Determine whether the incoming request is a request to finish the
 	 * processing of the current form.
-	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * <p>By default, this method returns {@code true} if a parameter
 	 * matching the "_finish" key is present in the request, otherwise it
-	 * returns <code>false</code>. Subclasses may override this method
+	 * returns {@code false}. Subclasses may override this method
 	 * to provide custom logic to detect a finish request.
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_finish") or when triggered by an image button ("_finish.x").
@@ -579,9 +579,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Determine whether the incoming request is a request to cancel the
 	 * processing of the current form.
-	 * <p>By default, this method returns <code>true</code> if a parameter
+	 * <p>By default, this method returns {@code true} if a parameter
 	 * matching the "_cancel" key is present in the request, otherwise it
-	 * returns <code>false</code>. Subclasses may override this method
+	 * returns {@code false}. Subclasses may override this method
 	 * to provide custom logic to detect a cancel request.
 	 * <p>The parameter is recognized both when sent as a plain parameter
 	 * ("_cancel") or when triggered by an image button ("_cancel.x").
@@ -654,9 +654,9 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	/**
 	 * Template method for custom validation logic for individual pages.
 	 * The default implementation calls {@link #validatePage(Object, Errors, int)}.
-	 * <p>Implementations will typically call fine-granular <code>validateXXX</code>
+	 * <p>Implementations will typically call fine-granular {@code validateXXX}
 	 * methods of this instance's Validator, combining them to validation of the
-	 * corresponding pages. The Validator's default <code>validate</code> method
+	 * corresponding pages. The Validator's default {@code validate} method
 	 * will not be called by a wizard form controller!
 	 * @param command form object with the current wizard state
 	 * @param errors validation errors holder
@@ -675,7 +675,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * The default implementation is empty.
 	 * <p>Implementations will typically call fine-granular validateXXX methods of this
 	 * instance's validator, combining them to validation of the corresponding pages.
-	 * The validator's default <code>validate</code> method will not be called by a
+	 * The validator's default {@code validate} method will not be called by a
 	 * wizard form controller!
 	 * @param command form object with the current wizard state
 	 * @param errors validation errors holder
@@ -703,7 +703,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 
 	/**
 	 * Template method for processing the final action of this wizard.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * <p>You can call the {@link #showPage} method to return back to the wizard,
@@ -728,7 +728,7 @@ public abstract class AbstractWizardFormController extends AbstractFormControlle
 	 * <p>The default implementation throws a ServletException, saying that a cancel
 	 * operation is not supported by this controller. Thus, you do not need to
 	 * implement this template method if you do not support a cancel operation.
-	 * <p>Call <code>errors.getModel()</code> to populate the ModelAndView model
+	 * <p>Call {@code errors.getModel()} to populate the ModelAndView model
 	 * with the command and the Errors instance, under the specified command name,
 	 * as expected by the "spring:bind" tag.
 	 * @param request current HTTP request

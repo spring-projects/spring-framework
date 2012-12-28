@@ -102,7 +102,7 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	/**
 	 * Return the given object to the pool.
 	 * @param target object that must have been acquired from the pool
-	 * via a call to <code>getTarget()</code>
+	 * via a call to {@code getTarget()}
 	 * @throws Exception to allow pooling APIs to throw exception
 	 * @see #getTarget
 	 */

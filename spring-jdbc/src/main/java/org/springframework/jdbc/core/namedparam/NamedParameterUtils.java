@@ -304,7 +304,7 @@ public abstract class NamedParameterUtils {
 	 * @param parsedSql the parsed SQL statement
 	 * @param paramSource the source for named parameters
 	 * @param declaredParams the List of declared SqlParameter objects
-	 * (may be <code>null</code>). If specified, the parameter metadata will
+	 * (may be {@code null}). If specified, the parameter metadata will
 	 * be built into the value array in the form of SqlParameterValue objects.
 	 * @return the array of values
 	 */
@@ -340,7 +340,7 @@ public abstract class NamedParameterUtils {
 	 * @param declaredParams the declared SqlParameter objects
 	 * @param paramName the name of the desired parameter
 	 * @param paramIndex the index of the desired parameter
-	 * @return the declared SqlParameter, or <code>null</code> if none found
+	 * @return the declared SqlParameter, or {@code null} if none found
 	 */
 	private static SqlParameter findParameter(List<SqlParameter> declaredParams, String paramName, int paramIndex) {
 		if (declaredParams != null) {

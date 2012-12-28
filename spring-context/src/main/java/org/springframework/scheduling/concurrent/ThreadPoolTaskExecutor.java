@@ -105,7 +105,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
@@ -164,7 +164,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see java.util.concurrent.LinkedBlockingQueue
@@ -210,7 +210,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport impleme
 
 	/**
 	 * Return the underlying ThreadPoolExecutor for native access.
-	 * @return the underlying ThreadPoolExecutor (never <code>null</code>)
+	 * @return the underlying ThreadPoolExecutor (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskExecutor hasn't been initialized yet
 	 */
 	public ThreadPoolExecutor getThreadPoolExecutor() throws IllegalStateException {

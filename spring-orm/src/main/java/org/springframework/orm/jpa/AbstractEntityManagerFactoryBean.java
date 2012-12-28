@@ -163,7 +163,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Specify JPA properties, to be passed into
-	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a String "value" (parsed via PropertiesEditor) or a
 	 * "props" element in XML bean definitions.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
@@ -175,7 +175,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Specify JPA properties as a Map, to be passed into
-	 * <code>Persistence.createEntityManagerFactory</code> (if any).
+	 * {@code Persistence.createEntityManagerFactory} (if any).
 	 * <p>Can be populated with a "map" or "props" element in XML bean definitions.
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
@@ -200,7 +200,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManagerFactory interface
 	 * that this EntityManagerFactory proxy is supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard <code>javax.persistence.EntityManagerFactory</code>
+	 * or set to the standard {@code javax.persistence.EntityManagerFactory}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerFactoryInterface()
 	 */
@@ -213,7 +213,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 	 * Specify the (potentially vendor-specific) EntityManager interface
 	 * that this factory's EntityManagers are supposed to implement.
 	 * <p>The default will be taken from the specific JpaVendorAdapter, if any,
-	 * or set to the standard <code>javax.persistence.EntityManager</code>
+	 * or set to the standard {@code javax.persistence.EntityManager}
 	 * interface else.
 	 * @see JpaVendorAdapter#getEntityManagerInterface()
 	 * @see EntityManagerFactoryInfo#getEntityManagerInterface()
@@ -254,7 +254,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Return the JpaVendorAdapter implementation for this
-	 * EntityManagerFactory, or <code>null</code> if not known.
+	 * EntityManagerFactory, or {@code null} if not known.
 	 */
 	public JpaVendorAdapter getJpaVendorAdapter() {
 		return this.jpaVendorAdapter;
@@ -383,7 +383,7 @@ public abstract class AbstractEntityManagerFactoryBean implements
 
 	/**
 	 * Subclasses must implement this method to create the EntityManagerFactory
-	 * that will be returned by the <code>getObject()</code> method.
+	 * that will be returned by the {@code getObject()} method.
 	 * @return EntityManagerFactory instance returned by this FactoryBean
 	 * @throws PersistenceException if the EntityManager cannot be created
 	 */

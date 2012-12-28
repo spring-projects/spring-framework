@@ -29,15 +29,15 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>This class ensures that subclasses have access to the
  * MessageDrivenContext provided by the EJB container, and implement
- * a no-arg <code>ejbCreate()</code> method as required by the EJB
- * specification. This <code>ejbCreate()</code> method loads a BeanFactory,
- * before invoking the <code>onEjbCreate()</code> method, which is
+ * a no-arg {@code ejbCreate()} method as required by the EJB
+ * specification. This {@code ejbCreate()} method loads a BeanFactory,
+ * before invoking the {@code onEjbCreate()} method, which is
  * supposed to contain subclass-specific initialization.
  *
  * <p>NB: We cannot use final methods to implement EJB API methods,
  * as this violates the EJB specification. However, there should be
- * no need to override the <code>setMessageDrivenContext</code> or
- * <code>ejbCreate()</code> methods.
+ * no need to override the {@code setMessageDrivenContext} or
+ * {@code ejbCreate()} methods.
  *
  * @author Rod Johnson
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
@@ -83,10 +83,10 @@ public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
 
 	/**
 	 * Subclasses must implement this method to do any initialization they would
-	 * otherwise have done in an <code>ejbCreate()</code> method. In contrast
-	 * to <code>ejbCreate()</code>, the BeanFactory will have been loaded here.
+	 * otherwise have done in an {@code ejbCreate()} method. In contrast
+	 * to {@code ejbCreate()}, the BeanFactory will have been loaded here.
 	 * <p>The same restrictions apply to the work of this method as
-	 * to an <code>ejbCreate()</code> method.
+	 * to an {@code ejbCreate()} method.
 	 */
 	protected abstract void onEjbCreate();
 

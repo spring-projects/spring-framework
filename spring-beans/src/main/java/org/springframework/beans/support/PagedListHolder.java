@@ -288,9 +288,9 @@ public class PagedListHolder<E> implements Serializable {
 
 
 	/**
-	 * Resort the list if necessary, i.e. if the current <code>sort</code> instance
-	 * isn't equal to the backed-up <code>sortUsed</code> instance.
-	 * <p>Calls <code>doSort</code> to trigger actual sorting.
+	 * Resort the list if necessary, i.e. if the current {@code sort} instance
+	 * isn't equal to the backed-up {@code sortUsed} instance.
+	 * <p>Calls {@code doSort} to trigger actual sorting.
 	 * @see #doSort
 	 */
 	public void resort() {
@@ -309,7 +309,7 @@ public class PagedListHolder<E> implements Serializable {
 	 * Can be overridden in subclasses, in particular in case of custom
 	 * extensions to the SortDefinition interface. Is allowed to return
 	 * null, which means that no sort state will be held, triggering
-	 * actual sorting for each <code>resort</code> call.
+	 * actual sorting for each {@code resort} call.
 	 * @param sort the current SortDefinition object
 	 * @return a deep copy of the SortDefinition object
 	 * @see MutableSortDefinition#MutableSortDefinition(SortDefinition)

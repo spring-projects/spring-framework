@@ -20,7 +20,7 @@ import org.springframework.transaction.TransactionStatus;
 
 /**
  * Callback interface for transactional code. Used with {@link TransactionTemplate}'s
- * <code>execute</code> method, often as anonymous class within a method implementation.
+ * {@code execute} method, often as anonymous class within a method implementation.
  *
  * <p>Typically used to assemble various calls to transaction-unaware data access
  * services into a higher-level service method with transaction demarcation. As an
@@ -48,7 +48,7 @@ public interface TransactionCallback<T> {
 	 * thrown.
 	 *
 	 * @param status associated transaction status
-	 * @return a result object, or <code>null</code>
+	 * @return a result object, or {@code null}
 	 * @see TransactionTemplate#execute
 	 * @see CallbackPreferringPlatformTransactionManager#execute
 	 */

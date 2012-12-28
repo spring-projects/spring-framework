@@ -35,20 +35,20 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
 
 /**
- * Base class for <code>Filter</code>s that perform logging operations before and after a request is processed.
+ * Base class for {@code Filter}s that perform logging operations before and after a request is processed.
  *
- * <p>Subclasses should override the <code>beforeRequest(HttpServletRequest, String)</code> and
- * <code>afterRequest(HttpServletRequest, String)</code> methods to perform the actual logging around the request.
+ * <p>Subclasses should override the {@code beforeRequest(HttpServletRequest, String)} and
+ * {@code afterRequest(HttpServletRequest, String)} methods to perform the actual logging around the request.
  *
- * <p>Subclasses are passed the message to write to the log in the <code>beforeRequest</code> and
- * <code>afterRequest</code> methods. By default, only the URI of the request is logged. However, setting the
- * <code>includeQueryString</code> property to <code>true</code> will cause the query string of the request to be
- * included also. The payload (body) of the request can be logged via the <code>includePayload</code> flag. Note that
+ * <p>Subclasses are passed the message to write to the log in the {@code beforeRequest} and
+ * {@code afterRequest} methods. By default, only the URI of the request is logged. However, setting the
+ * {@code includeQueryString} property to {@code true} will cause the query string of the request to be
+ * included also. The payload (body) of the request can be logged via the {@code includePayload} flag. Note that
  * this will only log that which is read, which might not be the entire payload.
  *
  * <p>Prefixes and suffixes for the before and after messages can be configured using the
- * <code>beforeMessagePrefix</code>, <code>afterMessagePrefix</code>, <code>beforeMessageSuffix</code> and
- * <code>afterMessageSuffix</code> properties,
+ * {@code beforeMessagePrefix}, {@code afterMessagePrefix}, {@code beforeMessageSuffix} and
+ * {@code afterMessageSuffix} properties,
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -87,8 +87,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether or not the query string should be included in the log message. <p>Should be configured using an
-	 * <code>&lt;init-param&gt;</code> for parameter name "includeQueryString" in the filter definition in
-	 * <code>web.xml</code>.
+	 * {@code &lt;init-param&gt;} for parameter name "includeQueryString" in the filter definition in
+	 * {@code web.xml}.
 	 */
 	public void setIncludeQueryString(boolean includeQueryString) {
 		this.includeQueryString = includeQueryString;
@@ -103,8 +103,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether or not the client address and session id should be included in the log message. <p>Should be configured
-	 * using an <code>&lt;init-param&gt;</code> for parameter name "includeClientInfo" in the filter definition in
-	 * <code>web.xml</code>.
+	 * using an {@code &lt;init-param&gt;} for parameter name "includeClientInfo" in the filter definition in
+	 * {@code web.xml}.
 	 */
 	public void setIncludeClientInfo(boolean includeClientInfo) {
 		this.includeClientInfo = includeClientInfo;
@@ -119,8 +119,8 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether or not the request payload (body) should be included in the log message. <p>Should be configured using
-	 * an <code>&lt;init-param&gt;</code> for parameter name "includePayload" in the filter definition in
-	 * <code>web.xml</code>.
+	 * an {@code &lt;init-param&gt;} for parameter name "includePayload" in the filter definition in
+	 * {@code web.xml}.
 	 */
 
 	public void setIncludePayload(boolean includePayload) {
@@ -238,9 +238,9 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	}
 
 	/**
-	 * Create a log message for the given request, prefix and suffix. <p>If <code>includeQueryString</code> is
-	 * <code>true</code> then the inner part of the log message will take the form <code>request_uri?query_string</code>
-	 * otherwise the message will simply be of the form <code>request_uri</code>. <p>The final message is composed of the
+	 * Create a log message for the given request, prefix and suffix. <p>If {@code includeQueryString} is
+	 * {@code true} then the inner part of the log message will take the form {@code request_uri?query_string}
+	 * otherwise the message will simply be of the form {@code request_uri}. <p>The final message is composed of the
 	 * inner part as described and the supplied prefix and suffix.
 	 */
 	protected String createMessage(HttpServletRequest request, String prefix, String suffix) {

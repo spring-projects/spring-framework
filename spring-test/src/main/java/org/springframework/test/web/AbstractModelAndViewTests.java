@@ -29,7 +29,7 @@ import org.springframework.web.servlet.ModelAndView;
  * Convenient JUnit 3.8 base class for tests dealing with Spring Web MVC
  * {@link org.springframework.web.servlet.ModelAndView ModelAndView} objects.
  *
- * <p>All <code>assert*()</code> methods throw {@link AssertionFailedError}s.
+ * <p>All {@code assert*()} methods throw {@link AssertionFailedError}s.
  *
  * <p>Consider the use of {@link ModelAndViewAssert} with JUnit 4 and TestNG.
  *
@@ -47,12 +47,12 @@ import org.springframework.web.servlet.ModelAndView;
 public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
-	 * Checks whether the model value under the given <code>modelName</code>
-	 * exists and checks it type, based on the <code>expectedType</code>. If
+	 * Checks whether the model value under the given {@code modelName}
+	 * exists and checks it type, based on the {@code expectedType}. If
 	 * the model entry exists and the type matches, the model value is returned.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param modelName name of the object to add to the model (never
-	 * <code>null</code>)
+	 * {@code null})
 	 * @param expectedType expected type of the model value
 	 * @return the model value
 	 */
@@ -67,9 +67,9 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Compare each individual entry in a list, without first sorting the lists.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param modelName name of the object to add to the model (never
-	 * <code>null</code>)
+	 * {@code null})
 	 * @param expectedList the expected list
 	 */
 	@SuppressWarnings("rawtypes")
@@ -84,9 +84,9 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Assert whether or not a model attribute is available.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param modelName name of the object to add to the model (never
-	 * <code>null</code>)
+	 * {@code null})
 	 */
 	protected void assertModelAttributeAvailable(ModelAndView mav, String modelName) {
 		try {
@@ -98,11 +98,11 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	}
 
 	/**
-	 * Compare a given <code>expectedValue</code> to the value from the model
-	 * bound under the given <code>modelName</code>.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * Compare a given {@code expectedValue} to the value from the model
+	 * bound under the given {@code modelName}.
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param modelName name of the object to add to the model (never
-	 * <code>null</code>)
+	 * {@code null})
 	 * @param expectedValue the model value
 	 */
 	protected void assertModelAttributeValue(ModelAndView mav, String modelName, Object expectedValue) {
@@ -115,9 +115,9 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	}
 
 	/**
-	 * Inspect the <code>expectedModel</code> to see if all elements in the
+	 * Inspect the {@code expectedModel} to see if all elements in the
 	 * model appear and are equal.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param expectedModel the expected model
 	 */
 	protected void assertModelAttributeValues(ModelAndView mav, Map<String, Object> expectedModel) {
@@ -132,11 +132,11 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 	/**
 	 * Compare each individual entry in a list after having sorted both lists
 	 * (optionally using a comparator).
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param modelName name of the object to add to the model (never
-	 * <code>null</code>)
+	 * {@code null})
 	 * @param expectedList the expected list
-	 * @param comparator the comparator to use (may be <code>null</code>). If
+	 * @param comparator the comparator to use (may be {@code null}). If
 	 * not specifying the comparator, both lists will be sorted not using
 	 * any comparator.
 	 */
@@ -153,8 +153,8 @@ public abstract class AbstractModelAndViewTests extends TestCase {
 
 	/**
 	 * Check to see if the view name in the ModelAndView matches the given
-	 * <code>expectedName</code>.
-	 * @param mav ModelAndView to test against (never <code>null</code>)
+	 * {@code expectedName}.
+	 * @param mav ModelAndView to test against (never {@code null})
 	 * @param expectedName the name of the model value
 	 */
 	protected void assertViewName(ModelAndView mav, String expectedName) {

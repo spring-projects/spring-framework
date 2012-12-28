@@ -109,7 +109,7 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * Set whether to lazily initialize the SQLExceptionTranslator for this accessor,
 	 * on first encounter of a SQLException. Default is "true"; can be switched to
 	 * "false" for initialization on startup.
-	 * <p>Early initialization just applies if <code>afterPropertiesSet()</code> is called.
+	 * <p>Early initialization just applies if {@code afterPropertiesSet()} is called.
 	 * @see #getExceptionTranslator()
 	 * @see #afterPropertiesSet()
 	 */

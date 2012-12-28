@@ -39,11 +39,11 @@ import org.springframework.web.portlet.context.PortletContextAware;
  * Bean post-processor that applies initialization and destruction callbacks
  * to beans that implement the Portlet interface.
  *
- * <p>After initialization of the bean instance, the Portlet <code>init</code>
+ * <p>After initialization of the bean instance, the Portlet {@code init}
  * method will be called with a PortletConfig that contains the bean name
  * of the Portlet and the PortletContext that it is running in.
  *
- * <p>Before destruction of the bean instance, the Portlet <code>destroy</code>
+ * <p>Before destruction of the bean instance, the Portlet {@code destroy}
  * will be called.
  *
  * <p><b>Note that this post-processor does not support Portlet initialization
@@ -82,7 +82,7 @@ public class SimplePortletPostProcessor
 
 	/**
 	 * Set whether to use the shared PortletConfig object passed in
-	 * through <code>setPortletConfig</code>, if available.
+	 * through {@code setPortletConfig}, if available.
 	 * <p>Default is "true". Turn this setting to "false" to pass in
 	 * a mock PortletConfig object with the bean name as portlet name,
 	 * holding the current PortletContext.

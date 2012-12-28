@@ -25,7 +25,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * pointcut in subaspects.
  *
  * <p>Subaspects may also need a metadata resolution strategy, in the
- * <code>BeanWiringInfoResolver</code> interface. The default implementation
+ * {@code BeanWiringInfoResolver} interface. The default implementation
  * looks for a bean with the same name as the FQN. This is the default name
  * of a bean in a Spring container if the id value is not supplied explicitly.
  *

@@ -167,7 +167,7 @@ public class TilesView extends InternalResourceView {
 	 * given Tiles definition, if any.
 	 * @param definition the Tiles definition to render
 	 * @param request current HTTP request
-	 * @return the component controller to execute, or <code>null</code> if none
+	 * @return the component controller to execute, or {@code null} if none
 	 * @throws Exception if preparations failed
 	 */
 	protected Controller getController(ComponentDefinition definition, HttpServletRequest request)

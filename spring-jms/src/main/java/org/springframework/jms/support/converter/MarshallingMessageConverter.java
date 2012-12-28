@@ -59,7 +59,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 
 
 	/**
-	 * Construct a new <code>MarshallingMessageConverter</code> with no {@link Marshaller}
+	 * Construct a new {@code MarshallingMessageConverter} with no {@link Marshaller}
 	 * or {@link Unmarshaller} set. The marshaller must be set after construction by invoking
 	 * {@link #setMarshaller(Marshaller)} and {@link #setUnmarshaller(Unmarshaller)} .
 	 */
@@ -67,13 +67,13 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	}
 
 	/**
-	 * Construct a new <code>MarshallingMessageConverter</code> with the given {@link Marshaller} set.
+	 * Construct a new {@code MarshallingMessageConverter} with the given {@link Marshaller} set.
 	 * <p>If the given {@link Marshaller} also implements the {@link Unmarshaller} interface,
 	 * it is used for both marshalling and unmarshalling. Otherwise, an exception is thrown.
 	 * <p>Note that all {@link Marshaller} implementations in Spring also implement the
 	 * {@link Unmarshaller} interface, so that you can safely use this constructor.
 	 * @param marshaller object used as marshaller and unmarshaller
-	 * @throws IllegalArgumentException when <code>marshaller</code> does not implement the
+	 * @throws IllegalArgumentException when {@code marshaller} does not implement the
 	 * {@link Unmarshaller} interface as well
 	 */
 	public MarshallingMessageConverter(Marshaller marshaller) {
@@ -91,7 +91,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	}
 
 	/**
-	 * Construct a new <code>MarshallingMessageConverter</code> with the
+	 * Construct a new {@code MarshallingMessageConverter} with the
 	 * given Marshaller and Unmarshaller.
 	 * @param marshaller the Marshaller to use
 	 * @param unmarshaller the Unmarshaller to use

@@ -44,7 +44,7 @@ public class TransactionAwareDataSourceConnectionProvider extends LocalDataSourc
 	}
 
 	/**
-	 * This implementation returns <code>true</code>: We can guarantee
+	 * This implementation returns {@code true}: We can guarantee
 	 * to receive the same Connection within a transaction, as we are
 	 * exposing a TransactionAwareDataSourceProxy.
 	 */

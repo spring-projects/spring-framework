@@ -48,9 +48,9 @@ import javax.jdo.PersistenceManager;
 public interface JdoCallback<T> {
 
 	/**
-	 * Gets called by <code>JdoTemplate.execute</code> with an active JDO
-	 * <code>PersistenceManager</code>. Does not need to care about activating
-	 * or closing the <code>PersistenceManager</code>, or handling transactions.
+	 * Gets called by {@code JdoTemplate.execute} with an active JDO
+	 * {@code PersistenceManager}. Does not need to care about activating
+	 * or closing the {@code PersistenceManager}, or handling transactions.
 	 *
 	 * <p>Note that JDO callback code will not flush any modifications to the
 	 * database if not executed within a transaction. Thus, you need to make
@@ -63,7 +63,7 @@ public interface JdoCallback<T> {
 	 * It gets propagated to the caller of the template.
 	 *
 	 * @param pm active PersistenceManager
-	 * @return a result object, or <code>null</code> if none
+	 * @return a result object, or {@code null} if none
 	 * @throws JDOException if thrown by the JDO API
 	 * @see JdoTemplate#execute
 	 * @see JdoTemplate#executeFind

@@ -90,7 +90,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementSetter to perform an operation
 	 * with the given parameters.
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementSetter(params);
@@ -99,7 +99,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	/**
 	 * Return a PreparedStatementCreator to perform an operation
 	 * with the given parameters.
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(params);
@@ -110,7 +110,7 @@ public abstract class SqlOperation extends RdbmsOperation {
 	 * with the given parameters.
 	 * @param sqlToUse the actual SQL statement to use (if different from
 	 * the factory's, for example because of named parameter expanding)
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	protected final PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
 		return this.preparedStatementFactory.newPreparedStatementCreator(sqlToUse, params);

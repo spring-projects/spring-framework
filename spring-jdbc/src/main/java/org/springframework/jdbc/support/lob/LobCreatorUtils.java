@@ -48,7 +48,7 @@ public abstract class LobCreatorUtils {
 	 * plain JTA transaction synchronization.
 	 * @param lobCreator the LobCreator to close after transaction completion
 	 * @param jtaTransactionManager the JTA TransactionManager to fall back to
-	 * when no Spring transaction synchronization is active (may be <code>null</code>)
+	 * when no Spring transaction synchronization is active (may be {@code null})
 	 * @throws IllegalStateException if there is neither active Spring transaction
 	 * synchronization nor active JTA transaction synchronization
 	 */

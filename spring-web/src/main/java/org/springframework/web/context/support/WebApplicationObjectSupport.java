@@ -27,8 +27,8 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Convenient superclass for application objects running in a WebApplicationContext.
- * Provides <code>getWebApplicationContext()</code>, <code>getServletContext()</code>,
- * and <code>getTempDir()</code> methods.
+ * Provides {@code getWebApplicationContext()}, {@code getServletContext()},
+ * and {@code getTempDir()} methods.
  *
  * @author Juergen Hoeller
  * @since 28.08.2003
@@ -85,7 +85,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * {@link #initApplicationContext(org.springframework.context.ApplicationContext)}
 	 * as well as {@link #setServletContext(javax.servlet.ServletContext)}.
 	 * @param servletContext the ServletContext that this application object runs in
-	 * (never <code>null</code>)
+	 * (never {@code null})
 	 */
 	protected void initServletContext(ServletContext servletContext) {
 	}
@@ -94,7 +94,7 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	 * Return the current application context as WebApplicationContext.
 	 * <p><b>NOTE:</b> Only use this if you actually need to access
 	 * WebApplicationContext-specific functionality. Preferably use
-	 * <code>getApplicationContext()</code> or <code>getServletContext()</code>
+	 * {@code getApplicationContext()} or {@code getServletContext()}
 	 * else, to be able to run in non-WebApplicationContext environments as well.
 	 * @throws IllegalStateException if not running in a WebApplicationContext
 	 * @see #getApplicationContext()

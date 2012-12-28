@@ -121,8 +121,8 @@ public final class AspectJExpressionPointcutTests {
 
 	/**
 	 * This and target are equivalent. Really instanceof pointcuts.
-	 * @throws Exception
 	 * @param which this or target
+	 * @throws Exception
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 */

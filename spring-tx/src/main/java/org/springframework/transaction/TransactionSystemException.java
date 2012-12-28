@@ -66,7 +66,7 @@ public class TransactionSystemException extends TransactionException {
 	/**
 	 * Return the application exception that was thrown before this transaction exception,
 	 * if any.
-	 * @return the application exception, or <code>null</code> if none set
+	 * @return the application exception, or {@code null} if none set
 	 */
 	public final Throwable getApplicationException() {
 		return this.applicationException;
@@ -75,7 +75,7 @@ public class TransactionSystemException extends TransactionException {
 	/**
 	 * Return the exception that was the first to be thrown within the failed transaction:
 	 * i.e. the application exception, if any, or the TransactionSystemException's own cause.
-	 * @return the original exception, or <code>null</code> if there was none
+	 * @return the original exception, or {@code null} if there was none
 	 */
 	public Throwable getOriginalException() {
 		return (this.applicationException != null ? this.applicationException : getCause());

@@ -22,7 +22,7 @@ import org.springframework.jdbc.core.SqlParameterValue;
 
 /**
  * Class that provides helper methods for the use of {@link SqlParameterSource}
- * with <code>SimpleJdbc</code> classes.
+ * with {@code SimpleJdbc} classes.
  *
  * @author Thomas Risberg
  * @since 2.5

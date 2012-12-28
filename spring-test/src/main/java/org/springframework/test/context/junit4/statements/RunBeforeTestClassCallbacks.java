@@ -20,7 +20,7 @@ import org.junit.runners.model.Statement;
 import org.springframework.test.context.TestContextManager;
 
 /**
- * <code>RunBeforeTestClassCallbacks</code> is a custom JUnit 4.5+
+ * {@code RunBeforeTestClassCallbacks} is a custom JUnit 4.5+
  * {@link Statement} which allows the <em>Spring TestContext Framework</em> to
  * be plugged into the JUnit execution chain by calling
  * {@link TestContextManager#beforeTestClass() beforeTestClass()} on the
@@ -39,11 +39,11 @@ public class RunBeforeTestClassCallbacks extends Statement {
 
 
 	/**
-	 * Constructs a new <code>RunBeforeTestClassCallbacks</code> statement.
+	 * Constructs a new {@code RunBeforeTestClassCallbacks} statement.
 	 *
-	 * @param next the next <code>Statement</code> in the execution chain
+	 * @param next the next {@code Statement} in the execution chain
 	 * @param testContextManager the TestContextManager upon which to call
-	 * <code>beforeTestClass()</code>
+	 * {@code beforeTestClass()}
 	 */
 	public RunBeforeTestClassCallbacks(Statement next, TestContextManager testContextManager) {
 		this.next = next;

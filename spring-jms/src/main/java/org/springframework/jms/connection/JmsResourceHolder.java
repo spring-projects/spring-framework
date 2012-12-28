@@ -72,7 +72,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	/**
 	 * Create a new JmsResourceHolder that is open for resources to be added.
 	 * @param connectionFactory the JMS ConnectionFactory that this
-	 * resource holder is associated with (may be <code>null</code>)
+	 * resource holder is associated with (may be {@code null})
 	 */
 	public JmsResourceHolder(ConnectionFactory connectionFactory) {
 		this.connectionFactory = connectionFactory;
@@ -101,7 +101,7 @@ public class JmsResourceHolder extends ResourceHolderSupport {
 	/**
 	 * Create a new JmsResourceHolder for the given JMS resources.
 	 * @param connectionFactory the JMS ConnectionFactory that this
-	 * resource holder is associated with (may be <code>null</code>)
+	 * resource holder is associated with (may be {@code null})
 	 * @param connection the JMS Connection
 	 * @param session the JMS Session
 	 */

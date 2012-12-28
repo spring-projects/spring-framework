@@ -60,7 +60,7 @@ abstract class TransactionAttributeSourcePointcut extends StaticMethodMatcherPoi
 
 
 	/**
-	 * Obtain the underlying TransactionAttributeSource (may be <code>null</code>).
+	 * Obtain the underlying TransactionAttributeSource (may be {@code null}).
 	 * To be implemented by subclasses.
 	 */
 	protected abstract TransactionAttributeSource getTransactionAttributeSource();

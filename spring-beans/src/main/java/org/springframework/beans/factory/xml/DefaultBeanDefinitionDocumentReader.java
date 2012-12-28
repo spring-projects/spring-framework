@@ -46,7 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The structure, elements and attribute names of the required XML document
  * are hard-coded in this class. (Of course a transform could be run if necessary
- * to produce this format). <code>&lt;beans&gt;</code> doesn't need to be the root
+ * to produce this format). {@code &lt;beans&gt;} doesn't need to be the root
  * element of the XML document: This class will parse all bean definition elements
  * in the XML file, not regarding the actual root element.
  *

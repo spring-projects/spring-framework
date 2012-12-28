@@ -79,11 +79,11 @@ import org.springframework.util.StringUtils;
  *
  * <p>This factory bean will by default expose a transaction-aware SessionFactory
  * proxy, letting data access code work with the plain Hibernate SessionFactory
- * and its <code>getCurrentSession()</code> method, while still being able to
+ * and its {@code getCurrentSession()} method, while still being able to
  * participate in current Spring-managed transactions: with any transaction
  * management strategy, either local or JTA / EJB CMT, and any transaction
  * synchronization mechanism, either Spring or JTA. Furthermore,
- * <code>getCurrentSession()</code> will also seamlessly work with
+ * {@code getCurrentSession()} will also seamlessly work with
  * a request-scoped Session managed by
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewFilter} /
  * {@link org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor}.
@@ -384,7 +384,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * <p>As of Hibernate 3.3, this is the preferred mechanism for configuring
 	 * caches, superseding the {@link #setCacheProvider CacheProvider SPI}.
 	 * For Hibernate 3.2 compatibility purposes, the accepted reference is of type
-	 * Object: the actual type is <code>org.hibernate.cache.RegionFactory</code>.
+	 * Object: the actual type is {@code org.hibernate.cache.RegionFactory}.
 	 * <p>Note: If this is set, the Hibernate settings should not define a
 	 * cache provider to avoid meaningless double configuration.
 	 * @see org.hibernate.cache.RegionFactory
@@ -825,7 +825,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * To be implemented by subclasses that want to to register further mappings
 	 * on the Configuration object after this FactoryBean registered its specified
 	 * mappings.
-	 * <p>Invoked <i>before</i> the <code>Configuration.buildMappings()</code> call,
+	 * <p>Invoked <i>before</i> the {@code Configuration.buildMappings()} call,
 	 * so that it can still extend and modify the mapping information.
 	 * @param config the current Configuration object
 	 * @throws HibernateException in case of Hibernate initialization errors
@@ -838,7 +838,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * To be implemented by subclasses that want to to perform custom
 	 * post-processing of the Configuration object after this FactoryBean
 	 * performed its default initialization.
-	 * <p>Invoked <i>after</i> the <code>Configuration.buildMappings()</code> call,
+	 * <p>Invoked <i>after</i> the {@code Configuration.buildMappings()} call,
 	 * so that it can operate on the completed and fully parsed mapping information.
 	 * @param config the current Configuration object
 	 * @throws HibernateException in case of Hibernate initialization errors
@@ -917,7 +917,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * on application startup. Can also be invoked manually.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * {@code LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");}.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a
 	 * JDBC connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
@@ -963,7 +963,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * SchemaValidator class, to be invoked after application startup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * {@code LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");}.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a
 	 * JDBC connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
@@ -1007,7 +1007,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * SchemaExport class, to be invoked on application setup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * {@code LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");}.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a
 	 * JDBC connection to perform the script.
 	 * @throws org.springframework.dao.DataAccessException in case of script execution errors
@@ -1038,7 +1038,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	 * SchemaExport class, to be invoked on application setup.
 	 * <p>Fetch the LocalSessionFactoryBean itself rather than the exposed
 	 * SessionFactory to be able to invoke this method, e.g. via
-	 * <code>LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");</code>.
+	 * {@code LocalSessionFactoryBean lsfb = (LocalSessionFactoryBean) ctx.getBean("&mySessionFactory");}.
 	 * <p>Uses the SessionFactory that this bean generates for accessing a
 	 * JDBC connection to perform the script.
 	 * @throws DataAccessException in case of script execution errors
@@ -1078,7 +1078,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	/**
 	 * Execute the given schema script on the given JDBC Connection.
 	 * <p>Note that the default implementation will log unsuccessful statements
-	 * and continue to execute. Override the <code>executeSchemaStatement</code>
+	 * and continue to execute. Override the {@code executeSchemaStatement}
 	 * method to treat failures differently.
 	 * @param con the JDBC Connection to execute the script on
 	 * @param sql the SQL statements to execute

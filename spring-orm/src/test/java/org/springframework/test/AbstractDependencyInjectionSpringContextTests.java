@@ -46,7 +46,7 @@ import org.springframework.util.Assert;
  * which match named beans in the context. This is autowire by name, rather than
  * type. This approach is based on an approach originated by Ara Abrahmian.
  * Setter Dependency Injection is the default: set the
- * <code>populateProtectedVariables</code> property to <code>true</code> in
+ * {@code populateProtectedVariables} property to {@code true} in
  * the constructor to switch on Field Injection.
  * </ul>
  *
@@ -113,7 +113,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 
 	/**
 	 * Set whether to populate protected variables of this test case. Default is
-	 * <code>false</code>.
+	 * {@code false}.
 	 */
 	public final void setPopulateProtectedVariables(boolean populateFields) {
 		this.populateProtectedVariables = populateFields;
@@ -148,7 +148,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	/**
 	 * Set whether or not dependency checking should be performed for test
 	 * properties set by Dependency Injection.
-	 * <p>The default is <code>true</code>, meaning that tests cannot be run
+	 * <p>The default is {@code true}, meaning that tests cannot be run
 	 * unless all properties are populated.
 	 */
 	public final void setDependencyCheck(final boolean dependencyCheck) {
@@ -167,7 +167,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * Prepare this test instance, injecting dependencies into its protected
 	 * fields and its bean properties.
 	 * <p>Note: if the {@link ApplicationContext} for this test instance has not
-	 * been configured (e.g., is <code>null</code>), dependency injection
+	 * been configured (e.g., is {@code null}), dependency injection
 	 * will naturally <strong>not</strong> be performed, but an informational
 	 * message will be written to the log.
 	 * @see #injectDependencies()

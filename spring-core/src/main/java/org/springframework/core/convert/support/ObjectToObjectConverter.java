@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * Generic Converter that attempts to convert a source Object to a target type
  * by delegating to methods on the target type.
  *
- * <p>Calls the static <code>valueOf(sourceType)</code> method on the target type
+ * <p>Calls the static {@code valueOf(sourceType)} method on the target type
  * to perform the conversion, if such a method exists. Else calls the target type's
  * Constructor that accepts a single sourceType argument, if such a Constructor exists.
  * Else throws a ConversionFailedException.

@@ -32,7 +32,7 @@ import org.springframework.aop.BeforeAdvice;
 public abstract class AspectJAopUtils {
 
 	/**
-	 * Return <code>true</code> if the advisor is a form of before advice.
+	 * Return {@code true} if the advisor is a form of before advice.
 	 */
 	public static boolean isBeforeAdvice(Advisor anAdvisor) {
 		AspectJPrecedenceInformation precedenceInfo = getAspectJPrecedenceInformationFor(anAdvisor);
@@ -43,7 +43,7 @@ public abstract class AspectJAopUtils {
 	}
 
 	/**
-	 * Return <code>true</code> if the advisor is a form of after advice.
+	 * Return {@code true} if the advisor is a form of after advice.
 	 */
 	public static boolean isAfterAdvice(Advisor anAdvisor) {
 		AspectJPrecedenceInformation precedenceInfo = getAspectJPrecedenceInformationFor(anAdvisor);
@@ -56,7 +56,7 @@ public abstract class AspectJAopUtils {
 	/**
 	 * Return the AspectJPrecedenceInformation provided by this advisor or its advice.
 	 * If neither the advisor nor the advice have precedence information, this method
-	 * will return <code>null</code>.
+	 * will return {@code null}.
 	 */
 	public static AspectJPrecedenceInformation getAspectJPrecedenceInformationFor(Advisor anAdvisor) {
 		if (anAdvisor instanceof AspectJPrecedenceInformation) {

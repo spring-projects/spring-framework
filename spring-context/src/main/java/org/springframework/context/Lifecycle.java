@@ -68,7 +68,7 @@ public interface Lifecycle {
 
 	/**
 	 * Check whether this component is currently running.
-	 * <p>In the case of a container, this will return <code>true</code>
+	 * <p>In the case of a container, this will return {@code true}
 	 * only if <i>all</i> components that apply are currently running.
 	 * @return whether the component is currently running
 	 */

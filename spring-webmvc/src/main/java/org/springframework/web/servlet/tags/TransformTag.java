@@ -28,7 +28,7 @@ import org.springframework.web.util.TagUtils;
 
 /**
  * Tag for transforming reference data values from form controllers and
- * other objects inside a <code>spring:bind</code> tag (or a data-bound
+ * other objects inside a {@code spring:bind} tag (or a data-bound
  * form element tag from Spring's form tag library).
  *
  * <p>The BindTag has a PropertyEditor that it uses to transform properties of

@@ -20,7 +20,7 @@ import javax.jms.MessageListener;
 
 /**
  * Convenient base class for JMS-based EJB 2.x MDBs. Requires subclasses
- * to implement the JMS <code>javax.jms.MessageListener</code> interface.
+ * to implement the JMS {@code javax.jms.MessageListener} interface.
  *
  * @author Rod Johnson
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
@@ -29,6 +29,6 @@ import javax.jms.MessageListener;
 public abstract class AbstractJmsMessageDrivenBean extends AbstractMessageDrivenBean implements MessageListener {
 
 	// Empty: The purpose of this class is to ensure
-	// that subclasses implement <code>javax.jms.MessageListener</code>.
+	// that subclasses implement {@code javax.jms.MessageListener}.
 
 }

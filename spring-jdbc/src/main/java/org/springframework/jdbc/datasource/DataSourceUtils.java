@@ -234,7 +234,7 @@ public abstract class DataSourceUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param con the Connection to check
 	 * @param dataSource the DataSource that the Connection was obtained from
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
 	public static boolean isConnectionTransactional(Connection con, DataSource dataSource) {
@@ -284,9 +284,9 @@ public abstract class DataSourceUtils {
 	 * Close the given Connection, obtained from the given DataSource,
 	 * if it is not managed externally (that is, not bound to the thread).
 	 * @param con the Connection to close if necessary
-	 * (if this is <code>null</code>, the call will be ignored)
+	 * (if this is {@code null}, the call will be ignored)
 	 * @param dataSource the DataSource that the Connection was obtained from
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @see #getConnection
 	 */
 	public static void releaseConnection(Connection con, DataSource dataSource) {
@@ -306,9 +306,9 @@ public abstract class DataSourceUtils {
 	 * Same as {@link #releaseConnection}, but throwing the original SQLException.
 	 * <p>Directly accessed by {@link TransactionAwareDataSourceProxy}.
 	 * @param con the Connection to close if necessary
-	 * (if this is <code>null</code>, the call will be ignored)
+	 * (if this is {@code null}, the call will be ignored)
 	 * @param dataSource the DataSource that the Connection was obtained from
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #doGetConnection
 	 */

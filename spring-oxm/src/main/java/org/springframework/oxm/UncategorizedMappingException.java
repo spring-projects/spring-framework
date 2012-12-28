@@ -25,7 +25,7 @@ package org.springframework.oxm;
 public class UncategorizedMappingException extends XmlMappingException {
 
 	/**
-	 * Construct an <code>UncategorizedMappingException</code> with the specified detail message
+	 * Construct an {@code UncategorizedMappingException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

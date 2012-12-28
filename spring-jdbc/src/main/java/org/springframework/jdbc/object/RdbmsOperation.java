@@ -41,12 +41,12 @@ import org.springframework.jdbc.core.SqlParameter;
  *
  * <p>This class and subclasses throw runtime exceptions, defined in the
  * <codeorg.springframework.dao package</code> (and as thrown by the
- * <code>org.springframework.jdbc.core</code> package, which the classes
+ * {@code org.springframework.jdbc.core} package, which the classes
  * in this package use under the hood to perform raw JDBC operations).
  *
  * <p>Subclasses should set SQL and add parameters before invoking the
  * {@link #compile()} method. The order in which parameters are added is
- * significant. The appropriate <code>execute</code> or <code>update</code>
+ * significant. The appropriate {@code execute} or {@code update}
  * method can then be invoked.
  *
  * @author Rod Johnson
@@ -243,11 +243,11 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Add anonymous parameters, specifying only their SQL types
-	 * as defined in the <code>java.sql.Types</code> class.
+	 * as defined in the {@code java.sql.Types} class.
 	 * <p>Parameter ordering is significant. This method is an alternative
 	 * to the {@link #declareParameter} method, which should normally be preferred.
 	 * @param types array of SQL types as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @throws InvalidDataAccessApiUsageException if the operation is already compiled
 	 */
 	public void setTypes(int[] types) throws InvalidDataAccessApiUsageException {
@@ -358,7 +358,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Check whether this operation has been compiled already;
 	 * lazily compile it if not already compiled.
-	 * <p>Automatically called by <code>validateParameters</code>.
+	 * <p>Automatically called by {@code validateParameters}.
 	 * @see #validateParameters
 	 */
 	protected void checkCompiled() {
@@ -370,9 +370,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Validate the parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every <code>executeQuery()</code>
-	 * or <code>update()</code> method.
-	 * @param parameters parameters supplied (may be <code>null</code>)
+	 * Subclasses should invoke this method before every {@code executeQuery()}
+	 * or {@code update()} method.
+	 * @param parameters parameters supplied (may be {@code null})
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateParameters(Object[] parameters) throws InvalidDataAccessApiUsageException {
@@ -393,9 +393,9 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Validate the named parameters passed to an execute method based on declared parameters.
-	 * Subclasses should invoke this method before every <code>executeQuery()</code> or
-	 * <code>update()</code> method.
-	 * @param parameters parameter Map supplied. May be <code>null</code>.
+	 * Subclasses should invoke this method before every {@code executeQuery()} or
+	 * {@code update()} method.
+	 * @param parameters parameter Map supplied. May be {@code null}.
 	 * @throws InvalidDataAccessApiUsageException if the parameters are invalid
 	 */
 	protected void validateNamedParameters(Map<String, ?> parameters) throws InvalidDataAccessApiUsageException {
@@ -447,7 +447,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 
 	/**
 	 * Return whether BLOB/CLOB parameters are supported for this kind of operation.
-	 * <p>The default is <code>true</code>.
+	 * <p>The default is {@code true}.
 	 */
 	protected boolean supportsLobParameters() {
 		return true;
@@ -456,7 +456,7 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Return whether this operation accepts additional parameters that are
 	 * given but not actually used. Applies in particular to parameter Maps.
-	 * <p>The default is <code>false</code>.
+	 * <p>The default is {@code false}.
 	 * @see StoredProcedure
 	 */
 	protected boolean allowsUnusedParameters() {

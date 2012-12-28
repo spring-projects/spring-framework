@@ -94,7 +94,7 @@ public abstract class AbstractDetectingUrlHandlerMapping extends AbstractUrlHand
 	 * Determine the URLs for the given handler bean.
 	 * @param beanName the name of the candidate bean
 	 * @return the URLs determined for the bean,
-	 * or <code>null</code> or an empty array if none
+	 * or {@code null} or an empty array if none
 	 */
 	protected abstract String[] determineUrlsForHandler(String beanName);
 

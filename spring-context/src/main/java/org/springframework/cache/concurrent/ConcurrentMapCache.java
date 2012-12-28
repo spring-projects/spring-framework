@@ -73,7 +73,7 @@ public class ConcurrentMapCache implements Cache {
 	 * given internal ConcurrentMap to use.
 	 * @param name the name of the cache
 	 * @param store the ConcurrentMap to use as an internal store
-	 * @param allowNullValues whether to allow <code>null</code> values
+	 * @param allowNullValues whether to allow {@code null} values
 	 * (adapting them to an internal null holder value)
 	 */
 	public ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store, boolean allowNullValues) {
@@ -115,7 +115,7 @@ public class ConcurrentMapCache implements Cache {
 
 	/**
 	 * Convert the given value from the internal store to a user value
-	 * returned from the get method (adapting <code>null</code>).
+	 * returned from the get method (adapting {@code null}).
 	 * @param storeValue the store value
 	 * @return the value to return to the user
 	 */
@@ -128,7 +128,7 @@ public class ConcurrentMapCache implements Cache {
 
 	/**
 	 * Convert the given user value, as passed into the put method,
-	 * to a value in the internal store (adapting <code>null</code>).
+	 * to a value in the internal store (adapting {@code null}).
 	 * @param userValue the given user value
 	 * @return the value to store
 	 */

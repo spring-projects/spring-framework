@@ -56,7 +56,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	 * Set the delay between refresh checks, in milliseconds.
 	 * Default is -1, indicating no refresh checks at all.
 	 * <p>Note that an actual refresh will only happen when
-	 * {@link #requiresRefresh()} returns <code>true</code>.
+	 * {@link #requiresRefresh()} returns {@code true}.
 	 */
 	public void setRefreshCheckDelay(long refreshCheckDelay) {
 		this.refreshCheckDelay = refreshCheckDelay;
@@ -131,7 +131,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/**
 	 * Determine whether a refresh is required.
 	 * Invoked for each refresh check, after the refresh check delay has elapsed.
-	 * <p>The default implementation always returns <code>true</code>, triggering
+	 * <p>The default implementation always returns {@code true}, triggering
 	 * a refresh every time the delay has elapsed. To be overridden by subclasses
 	 * with an appropriate check of the underlying target resource.
 	 * @return whether a refresh is required
@@ -143,7 +143,7 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/**
 	 * Obtain a fresh target object.
 	 * <p>Only invoked if a refresh check has found that a refresh is required
-	 * (that is, {@link #requiresRefresh()} has returned <code>true</code>).
+	 * (that is, {@link #requiresRefresh()} has returned {@code true}).
 	 * @return the fresh target object
 	 */
 	protected abstract Object freshTarget();

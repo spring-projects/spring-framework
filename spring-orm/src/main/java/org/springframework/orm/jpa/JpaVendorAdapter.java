@@ -54,7 +54,7 @@ public interface JpaVendorAdapter {
 	 * the EntityManagerFactory bean, which might potentially override
 	 * individual JPA property values specified here.
 	 * @return a Map of JPA properties, as as accepted by the standard
-	 * JPA bootstrap facilities, or <code>null</code> or an empty Map
+	 * JPA bootstrap facilities, or {@code null} or an empty Map
 	 * if there are no such properties to expose
 	 * @see javax.persistence.Persistence#createEntityManagerFactory(String, java.util.Map)
 	 * @see javax.persistence.spi.PersistenceProvider#createContainerEntityManagerFactory(javax.persistence.spi.PersistenceUnitInfo, java.util.Map)
@@ -63,7 +63,7 @@ public interface JpaVendorAdapter {
 
 	/**
 	 * Return the vendor-specific JpaDialect implementation for this
-	 * provider, or <code>null</code> if there is none.
+	 * provider, or {@code null} if there is none.
 	 */
 	JpaDialect getJpaDialect();
 

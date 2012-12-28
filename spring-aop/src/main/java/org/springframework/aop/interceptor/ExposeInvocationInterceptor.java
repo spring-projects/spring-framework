@@ -101,7 +101,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	/**
 	 * Required to support serialization. Replaces with canonical instance
 	 * on deserialization, protecting Singleton pattern.
-	 * <p>Alternative to overriding the <code>equals</code> method.
+	 * <p>Alternative to overriding the {@code equals} method.
 	 */
 	private Object readResolve() {
 		return INSTANCE;

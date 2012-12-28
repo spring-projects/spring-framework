@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Extend this parser class when you want to create a single
  * bean definition from a relatively simple custom XML element. The
- * resulting <code>BeanDefinition</code> will be automatically
+ * resulting {@code BeanDefinition} will be automatically
  * registered with the relevant
  * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}.
  *
@@ -55,7 +55,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>All that is required of the Java developer tasked with writing
  * the parser to parse the above XML tag into an actual
- * <code>SimpleCache</code> bean definition is the following:
+ * {@code SimpleCache} bean definition is the following:
  *
  * <pre class="code">public class SimpleCacheBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
  *
@@ -64,7 +64,7 @@ import org.springframework.util.StringUtils;
  *     }
  * }</pre>
  *
- * <p>Please note that the <code>AbstractSimpleBeanDefinitionParser</code>
+ * <p>Please note that the {@code AbstractSimpleBeanDefinitionParser}
  * is limited to populating the created bean definition with property values.
  * if you want to parse constructor arguments and nested elements from the
  * supplied XML element, then you will have to implement the
@@ -74,7 +74,7 @@ import org.springframework.util.StringUtils;
  * classes directly.
  *
  * <p>The process of actually registering the
- * <code>SimpleCacheBeanDefinitionParser</code> with the Spring XML parsing
+ * {@code SimpleCacheBeanDefinitionParser} with the Spring XML parsing
  * infrastructure is described in the Spring Framework reference documentation
  * (in one of the appendices).
  *
@@ -83,21 +83,21 @@ import org.springframework.util.StringUtils;
  * {@link org.springframework.beans.factory.xml.UtilNamespaceHandler.PropertiesBeanDefinitionParser};
  * the observant (and even not so observant) reader will immediately notice that
  * there is next to no code in the implementation. The
- * <code>PropertiesBeanDefinitionParser</code> populates a
+ * {@code PropertiesBeanDefinitionParser} populates a
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean}
  * from an XML element that looks like this:
  *
  * <pre class="code">&lt;util:properties location="jdbc.properties"/&gt;</pre>
  *
  * <p>The observant reader will notice that the sole attribute on the
- * <code>&lt;util:properties/&gt;</code> element matches the
+ * {@code &lt;util:properties/&gt;} element matches the
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean#setLocation(org.springframework.core.io.Resource)}
- * method name on the <code>PropertiesFactoryBean</code> (the general
+ * method name on the {@code PropertiesFactoryBean} (the general
  * usage thus illustrated holds true for any number of attributes).
- * All that the <code>PropertiesBeanDefinitionParser</code> needs
+ * All that the {@code PropertiesBeanDefinitionParser} needs
  * actually do is supply an implementation of the
  * {@link #getBeanClass(org.w3c.dom.Element)} method to return the
- * <code>PropertiesFactoryBean</code> type.
+ * {@code PropertiesFactoryBean} type.
  *
  * @author Rob Harrop
  * @author Rick Evans
@@ -120,7 +120,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * reconcile the name of an attribute with the name of a JavaBean
 	 * property.
 	 * @param element the XML element being parsed
-	 * @param builder used to define the <code>BeanDefinition</code>
+	 * @param builder used to define the {@code BeanDefinition}
 	 * @see #extractPropertyName(String)
 	 */
 	@Override
@@ -144,7 +144,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * <p>The default implementation considers any attribute as eligible,
 	 * except for the "id" attribute and namespace declaration attributes.
 	 * @param attribute the XML attribute to check
-	 * @param parserContext the <code>ParserContext</code>
+	 * @param parserContext the {@code ParserContext}
 	 * @see #isEligibleAttribute(String)
 	 */
 	protected boolean isEligibleAttribute(Attr attribute, ParserContext parserContext) {
@@ -177,7 +177,7 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * <p>The default implementation considers any attribute as eligible,
 	 * except for the "id" attribute.
 	 * @param attributeName the attribute name taken straight from the
-	 * XML element being parsed (never <code>null</code>)
+	 * XML element being parsed (never {@code null})
 	 */
 	protected boolean isEligibleAttribute(String attributeName) {
 		return !ID_ATTRIBUTE.equals(attributeName);
@@ -190,11 +190,11 @@ public abstract class AbstractSimpleBeanDefinitionParser extends AbstractSingleB
 	 * method to perform the extraction.
 	 * <p>The name returned must obey the standard JavaBean property name
 	 * conventions. For example for a class with a setter method
-	 * '<code>setBingoHallFavourite(String)</code>', the name returned had
-	 * better be '<code>bingoHallFavourite</code>' (with that exact casing).
+	 * '{@code setBingoHallFavourite(String)}', the name returned had
+	 * better be '{@code bingoHallFavourite}' (with that exact casing).
 	 * @param attributeName the attribute name taken straight from the
-	 * XML element being parsed (never <code>null</code>)
-	 * @return the extracted JavaBean property name (must never be <code>null</code>)
+	 * XML element being parsed (never {@code null})
+	 * @return the extracted JavaBean property name (must never be {@code null})
 	 */
 	protected String extractPropertyName(String attributeName) {
 		return Conventions.attributeNameToPropertyName(attributeName);

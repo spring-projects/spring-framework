@@ -52,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
  * <li>{@link TransactionalTestExecutionListener}</li>
  * </ul>
  * <p>
- * This class specifically tests usage of <code>&#064;Transactional</code>
+ * This class specifically tests usage of {@code &#064;Transactional}
  * defined at the <strong>class level</strong>.
  * </p>
  *

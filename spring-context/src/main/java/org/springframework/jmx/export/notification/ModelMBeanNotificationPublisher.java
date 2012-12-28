@@ -42,7 +42,7 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 
 	/**
 	 * The {@link ModelMBean} instance wrapping the managed resource into which this
-	 * <code>NotificationPublisher</code> will be injected.
+	 * {@code NotificationPublisher} will be injected.
 	 */
 	private final ModelMBeanNotificationBroadcaster modelMBean;
 
@@ -61,10 +61,10 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	 * Create a new instance of the {@link ModelMBeanNotificationPublisher} class
 	 * that will publish all {@link javax.management.Notification Notifications}
 	 * to the supplied {@link ModelMBean}.
-	 * @param modelMBean the target {@link ModelMBean}; must not be <code>null</code>
+	 * @param modelMBean the target {@link ModelMBean}; must not be {@code null}
 	 * @param objectName the {@link ObjectName} of the source {@link ModelMBean}
 	 * @param managedResource the managed resource exposed by the supplied {@link ModelMBean}
-	 * @throws IllegalArgumentException if any of the parameters is <code>null</code>
+	 * @throws IllegalArgumentException if any of the parameters is {@code null}
 	 */
 	public ModelMBeanNotificationPublisher(
 			ModelMBeanNotificationBroadcaster modelMBean, ObjectName objectName, Object managedResource) {
@@ -82,8 +82,8 @@ public class ModelMBeanNotificationPublisher implements NotificationPublisher {
 	 * Send the supplied {@link Notification} using the wrapped
 	 * {@link ModelMBean} instance.
 	 * @param notification the {@link Notification} to be sent
-	 * @throws IllegalArgumentException if the supplied <code>notification</code> is <code>null</code>
-	 * @throws UnableToSendNotificationException if the supplied <code>notification</code> could not be sent
+	 * @throws IllegalArgumentException if the supplied {@code notification} is {@code null}
+	 * @throws UnableToSendNotificationException if the supplied {@code notification} could not be sent
 	 */
 	public void sendNotification(Notification notification) {
 		Assert.notNull(notification, "Notification must not be null");

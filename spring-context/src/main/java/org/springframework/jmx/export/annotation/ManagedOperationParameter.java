@@ -18,8 +18,8 @@ package org.springframework.jmx.export.annotation;
 
 /**
  * JDK 1.5+ method-level annotation used to provide metadata about operation
- * parameters, corresponding to a <code>ManagedOperationParameter</code> attribute.
- * Used as part of a <code>ManagedOperationParameters</code> annotation.
+ * parameters, corresponding to a {@code ManagedOperationParameter} attribute.
+ * Used as part of a {@code ManagedOperationParameters} annotation.
  *
  * @author Rob Harrop
  * @since 1.2

@@ -25,7 +25,7 @@ import java.sql.Statement;
 
 /**
  * {@link NativeJdbcExtractor} implementation that delegates to JDBC 4.0's
- * <code>unwrap</code> method, as defined by {@link java.sql.Wrapper}.
+ * {@code unwrap} method, as defined by {@link java.sql.Wrapper}.
  * You will typically need to specify a vendor {@link #setConnectionType Connection type}
  * / {@link #setStatementType Statement type} / {@link #setResultSetType ResultSet type}
  * to extract, since JDBC 4.0 only actually unwraps to a given target type.
@@ -58,35 +58,35 @@ public class Jdbc4NativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 
 	/**
-	 * Set the vendor's Connection type, e.g. <code>oracle.jdbc.OracleConnection</code>.
+	 * Set the vendor's Connection type, e.g. {@code oracle.jdbc.OracleConnection}.
 	 */
 	public void setConnectionType(Class<? extends Connection> connectionType) {
 		this.connectionType = connectionType;
 	}
 
 	/**
-	 * Set the vendor's Statement type, e.g. <code>oracle.jdbc.OracleStatement</code>.
+	 * Set the vendor's Statement type, e.g. {@code oracle.jdbc.OracleStatement}.
 	 */
 	public void setStatementType(Class<? extends Statement> statementType) {
 		this.statementType = statementType;
 	}
 
 	/**
-	 * Set the vendor's PreparedStatement type, e.g. <code>oracle.jdbc.OraclePreparedStatement</code>.
+	 * Set the vendor's PreparedStatement type, e.g. {@code oracle.jdbc.OraclePreparedStatement}.
 	 */
 	public void setPreparedStatementType(Class<? extends PreparedStatement> preparedStatementType) {
 		this.preparedStatementType = preparedStatementType;
 	}
 
 	/**
-	 * Set the vendor's CallableStatement type, e.g. <code>oracle.jdbc.OracleCallableStatement</code>.
+	 * Set the vendor's CallableStatement type, e.g. {@code oracle.jdbc.OracleCallableStatement}.
 	 */
 	public void setCallableStatementType(Class<? extends CallableStatement> callableStatementType) {
 		this.callableStatementType = callableStatementType;
 	}
 
 	/**
-	 * Set the vendor's ResultSet type, e.g. <code>oracle.jdbc.OracleResultSet</code>.
+	 * Set the vendor's ResultSet type, e.g. {@code oracle.jdbc.OracleResultSet}.
 	 */
 	public void setResultSetType(Class<? extends ResultSet> resultSetType) {
 		this.resultSetType = resultSetType;

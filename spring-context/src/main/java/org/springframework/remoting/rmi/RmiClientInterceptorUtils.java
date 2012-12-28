@@ -62,7 +62,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * implement the invoked method. This typically happens when a non-RMI service
 	 * interface is used for an RMI service. The methods of such a service interface
 	 * have to match the RMI stub methods, but they typically don't declare
-	 * <code>java.rmi.RemoteException</code>: A RemoteException thrown by the RMI stub
+	 * {@code java.rmi.RemoteException}: A RemoteException thrown by the RMI stub
 	 * will be automatically converted to Spring's RemoteAccessException.
 	 * @deprecated as of Spring 2.5, in favor of {@link #invokeRemoteMethod}
 	 */
@@ -199,7 +199,7 @@ public abstract class RmiClientInterceptorUtils {
 	 * Determine whether the given RMI exception indicates a connect failure.
 	 * <p>Treats RMI's ConnectException, ConnectIOException, UnknownHostException,
 	 * NoSuchObjectException and StubNotFoundException as connect failure,
-	 * as well as Oracle's OC4J <code>com.evermind.server.rmi.RMIConnectionException</code>
+	 * as well as Oracle's OC4J {@code com.evermind.server.rmi.RMIConnectionException}
 	 * (which doesn't derive from from any well-known RMI connect exception).
 	 * @param ex the RMI exception to check
 	 * @return whether the exception should be treated as connect failure

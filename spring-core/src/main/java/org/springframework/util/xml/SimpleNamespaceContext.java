@@ -28,9 +28,9 @@ import javax.xml.namespace.NamespaceContext;
 import org.springframework.util.Assert;
 
 /**
- * Simple <code>javax.xml.namespace.NamespaceContext</code> implementation. Follows the standard
- * <code>NamespaceContext</code> contract, and is loadable via a <code>java.util.Map</code> or
- * <code>java.util.Properties</code> object
+ * Simple {@code javax.xml.namespace.NamespaceContext} implementation. Follows the standard
+ * {@code NamespaceContext} contract, and is loadable via a {@code java.util.Map} or
+ * {@code java.util.Properties} object
  *
  * @author Arjen Poutsma
  * @since 3.0

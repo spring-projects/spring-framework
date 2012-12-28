@@ -84,7 +84,7 @@ public interface HandlerInterceptor {
 	 * @param request current HTTP request
 	 * @param response current HTTP response
 	 * @param handler chosen handler to execute, for type and/or instance evaluation
-	 * @return <code>true</code> if the execution chain should proceed with the
+	 * @return {@code true} if the execution chain should proceed with the
 	 * next interceptor or the handler itself. Else, DispatcherServlet assumes
 	 * that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
@@ -104,8 +104,8 @@ public interface HandlerInterceptor {
 	 * @param response current HTTP response
 	 * @param handler handler (or {@link HandlerMethod}) that started async
 	 * execution, for type and/or instance examination
-	 * @param modelAndView the <code>ModelAndView</code> that the handler returned
-	 * (can also be <code>null</code>)
+	 * @param modelAndView the {@code ModelAndView} that the handler returned
+	 * (can also be {@code null})
 	 * @throws Exception in case of errors
 	 */
 	void postHandle(
@@ -116,8 +116,8 @@ public interface HandlerInterceptor {
 	 * Callback after completion of request processing, that is, after rendering
 	 * the view. Will be called on any outcome of handler execution, thus allows
 	 * for proper resource cleanup.
-	 * <p>Note: Will only be called if this interceptor's <code>preHandle</code>
-	 * method has successfully completed and returned <code>true</code>!
+	 * <p>Note: Will only be called if this interceptor's {@code preHandle}
+	 * method has successfully completed and returned {@code true}!
 	 * <p>As with the {@code postHandle} method, the method will be invoked on each
 	 * interceptor in the chain in reverse order, so the first interceptor will be
 	 * the last to be invoked.

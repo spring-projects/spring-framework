@@ -74,8 +74,8 @@ public abstract class TimerManagerAccessor extends JndiLocatorSupport
 	 * <p>Default is "false", i.e. managing an independent TimerManager instance.
 	 * This is what the CommonJ specification suggests that application servers
 	 * are supposed to offer via JNDI lookups, typically declared as a
-	 * <code>resource-ref</code> of type <code>commonj.timers.TimerManager</code>
-	 * in <code>web.xml<code>, with <code>res-sharing-scope</code> set to 'Unshareable'.
+	 * {@code resource-ref} of type {@code commonj.timers.TimerManager}
+	 * in {@code web.xml}, with {@code res-sharing-scope} set to 'Unshareable'.
 	 * <p>Switch this flag to "true" if you are obtaining a shared TimerManager,
 	 * typically through specifying the JNDI location of a TimerManager that
 	 * has been explicitly declared as 'Shareable'. Note that WebLogic's

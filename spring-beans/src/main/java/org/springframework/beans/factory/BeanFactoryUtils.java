@@ -133,7 +133,7 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanNamesForTypeIncludingAncestors</code> automatically
+	 * <p>This version of {@code beanNamesForTypeIncludingAncestors} automatically
 	 * includes prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type the type that beans must match
@@ -300,7 +300,7 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanOfTypeIncludingAncestors</code> automatically includes
+	 * <p>This version of {@code beanOfTypeIncludingAncestors} automatically includes
 	 * prototypes and FactoryBeans.
 	 * <p><b>Note: Beans of the same name will take precedence at the 'lowest' factory level,
 	 * i.e. such beans will be returned from the lowest factory that they are being found in,
@@ -310,7 +310,7 @@ public abstract class BeanFactoryUtils {
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * @throws NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */
@@ -375,12 +375,12 @@ public abstract class BeanFactoryUtils {
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
 	 * will get initialized. If the object created by the FactoryBean doesn't match,
 	 * the raw FactoryBean itself will be matched against the type.
-	 * <p>This version of <code>beanOfType</code> automatically includes
+	 * <p>This version of {@code beanOfType} automatically includes
 	 * prototypes and FactoryBeans.
 	 * @param lbf the bean factory
 	 * @param type type of bean to match
 	 * @return the matching bean instance
-	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
+	 * @throws NoSuchBeanDefinitionException
 	 * if 0 or more than 1 beans of the given type were found
 	 * @throws BeansException if the bean could not be created
 	 */

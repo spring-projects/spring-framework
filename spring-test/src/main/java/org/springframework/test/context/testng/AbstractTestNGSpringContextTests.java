@@ -145,7 +145,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 
 	/**
 	 * Delegates to the {@link IHookCallBack#runTestMethod(ITestResult) test
-	 * method} in the supplied <code>callback</code> to execute the actual test
+	 * method} in the supplied {@code callback} to execute the actual test
 	 * and then tracks the exception thrown during test execution, if any.
 	 *
 	 * @see org.testng.IHookable#run(org.testng.IHookCallBack,

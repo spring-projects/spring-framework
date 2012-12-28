@@ -118,7 +118,7 @@ public abstract class PropertiesLoaderSupport {
 
 	/**
 	 * Set the encoding to use for parsing properties files.
-	 * <p>Default is none, using the <code>java.util.Properties</code>
+	 * <p>Default is none, using the {@code java.util.Properties}
 	 * default encoding.
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @see org.springframework.util.PropertiesPersister#load

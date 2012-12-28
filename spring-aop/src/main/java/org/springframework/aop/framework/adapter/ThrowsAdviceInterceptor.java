@@ -32,10 +32,10 @@ import org.springframework.util.Assert;
 /**
  * Interceptor to wrap an after-throwing advice.
  *
- * <p>The signatures on handler methods on the <code>ThrowsAdvice</code>
+ * <p>The signatures on handler methods on the {@code ThrowsAdvice}
  * implementation method argument must be of the form:<br>
  *
- * <code>void afterThrowing([Method, args, target], ThrowableSubclass);</code>
+ * {@code void afterThrowing([Method, args, target], ThrowableSubclass);}
  *
  * <p>Only the last argument is required.
  *

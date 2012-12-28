@@ -57,7 +57,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 
 	/**
 	 * Implementation of the superclass template method. This invokes the subclass's
-	 * implementation of the <code>updateRow()</code> method.
+	 * implementation of the {@code updateRow()} method.
 	 */
 	@Override
 	protected RowMapper<T> newRowMapper(Object[] parameters, Map context) {
@@ -70,7 +70,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 	 * @param rs ResultSet we're working through
 	 * @param rowNum row number (from 0) we're up to
 	 * @param context passed to the execute() method.
-	 * It can be <code>null</code> if no contextual information is need.  If you
+	 * It can be {@code null} if no contextual information is need.  If you
 	 * need to pass in data for each row, you can pass in a HashMap with
 	 * the primary key of the row being the key for the HashMap.  That way
 	 * it is easy to locate the updates for each row
@@ -84,7 +84,7 @@ public abstract class UpdatableSqlQuery<T> extends SqlQuery<T> {
 
 	/**
 	 * Implementation of RowMapper that calls the enclosing
-	 * class's <code>updateRow()</code> method for each row.
+	 * class's {@code updateRow()} method for each row.
 	 */
 	protected class RowMapperImpl implements RowMapper<T> {
 

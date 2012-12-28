@@ -291,8 +291,8 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * bean definition needs to be registered or conflicts with an existing definition.
 	 * @param beanName the suggested name for the bean
 	 * @param beanDefinition the corresponding bean definition
-	 * @return <code>true</code> if the bean can be registered as-is;
-	 * <code>false</code> if it should be skipped because there is an
+	 * @return {@code true} if the bean can be registered as-is;
+	 * {@code false} if it should be skipped because there is an
 	 * existing, compatible bean definition for the specified name
 	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
 	 * bean definition has been found for the specified name

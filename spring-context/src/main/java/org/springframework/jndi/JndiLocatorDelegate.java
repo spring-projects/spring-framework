@@ -41,7 +41,7 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 
 	/**
 	 * Configure a {@code JndiLocatorDelegate} with its "resourceRef" property set to
-	 * <code>true</code>, meaning that all names will be prefixed with "java:comp/env/".
+	 * {@code true}, meaning that all names will be prefixed with "java:comp/env/".
 	 * @see #setResourceRef
 	 */
 	public static JndiLocatorDelegate createDefaultResourceRefLocator() {
@@ -53,8 +53,8 @@ public class JndiLocatorDelegate extends JndiLocatorSupport {
 	/**
 	 * Check whether a default JNDI environment, as in a J2EE environment,
 	 * is available on this JVM.
-	 * @return <code>true</code> if a default InitialContext can be used,
-	 * <code>false</code> if not
+	 * @return {@code true} if a default InitialContext can be used,
+	 * {@code false} if not
 	 */
 	public static boolean isDefaultJndiEnvironmentAvailable() {
 		try {

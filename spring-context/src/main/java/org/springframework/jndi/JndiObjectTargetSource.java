@@ -22,7 +22,7 @@ import org.springframework.aop.TargetSource;
 
 /**
  * AOP {@link org.springframework.aop.TargetSource} that provides
- * configurable JNDI lookups for <code>getTarget()</code> calls.
+ * configurable JNDI lookups for {@code getTarget()} calls.
  *
  * <p>Can be used as alternative to {@link JndiObjectFactoryBean}, to allow for
  * relocating a JNDI object lazily or for each operation (see "lookupOnStartup"
@@ -42,9 +42,9 @@ import org.springframework.aop.TargetSource;
  *   &lt;property name="targetSource" ref="queueConnectionFactoryTarget"/&gt;
  * &lt;/bean&gt;</pre>
  *
- * A <code>createQueueConnection</code> call on the "queueConnectionFactory" proxy will
+ * A {@code createQueueConnection} call on the "queueConnectionFactory" proxy will
  * cause a lazy JNDI lookup for "JmsQueueConnectionFactory" and a subsequent delegating
- * call to the retrieved QueueConnectionFactory's <code>createQueueConnection</code>.
+ * call to the retrieved QueueConnectionFactory's {@code createQueueConnection}.
  *
  * <p><b>Alternatively, use a {@link JndiObjectFactoryBean} with a "proxyInterface".</b>
  * "lookupOnStartup" and "cache" can then be specified on the JndiObjectFactoryBean,

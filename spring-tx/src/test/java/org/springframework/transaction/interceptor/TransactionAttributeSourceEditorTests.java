@@ -24,7 +24,7 @@ import org.springframework.transaction.TransactionDefinition;
 
 /**
  * Format is
- * <code>FQN.Method=tx attribute representation</code>
+ * {@code FQN.Method=tx attribute representation}
  *
  * @author Rod Johnson
  * @since 26.04.2003

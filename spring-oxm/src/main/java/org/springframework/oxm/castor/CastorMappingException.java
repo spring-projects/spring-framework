@@ -27,7 +27,7 @@ import org.springframework.oxm.XmlMappingException;
 public class CastorMappingException extends XmlMappingException {
 
 	/**
-	 * Construct a <code>CastorMappingException</code> with the specified detail message
+	 * Construct a {@code CastorMappingException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

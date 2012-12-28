@@ -23,14 +23,14 @@ import javax.jms.Session;
 /**
  * Creates a JMS message given a {@link Session}.
  *
- * <p>The <code>Session</code> typically is provided by an instance
+ * <p>The {@code Session} typically is provided by an instance
  * of the {@link JmsTemplate} class.
  *
  * <p>Implementations <i>do not</i> need to concern themselves with
- * checked <code>JMSExceptions</code> (from the '<code>javax.jms</code>'
+ * checked {@code JMSExceptions} (from the '{@code javax.jms}'
  * package) that may be thrown from operations they attempt. The
- * <code>JmsTemplate</code> will catch and handle these
- * <code>JMSExceptions</code> appropriately.
+ * {@code JmsTemplate} will catch and handle these
+ * {@code JMSExceptions} appropriately.
  *
  * @author Mark Pollack
  * @since 1.1
@@ -40,8 +40,8 @@ public interface MessageCreator {
 	/**
 	 * Create a {@link Message} to be sent.
 	 * @param session the JMS {@link Session} to be used to create the
-	 * <code>Message</code> (never <code>null</code>)
-	 * @return the <code>Message</code> to be sent
+	 * {@code Message} (never {@code null})
+	 * @return the {@code Message} to be sent
 	 * @throws javax.jms.JMSException if thrown by JMS API methods
 	 */
 	Message createMessage(Session session) throws JMSException;

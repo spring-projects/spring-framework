@@ -40,7 +40,7 @@ public class GenericXmlContextLoader extends AbstractGenericContextLoader {
 	}
 
 	/**
-	 * Returns &quot;<code>-context.xml</code>&quot;.
+	 * Returns &quot;{@code -context.xml}&quot;.
 	 */
 	@Override
 	public String getResourceSuffix() {

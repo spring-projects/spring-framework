@@ -251,7 +251,7 @@ public class DatabasePopulatorTests {
 	}
 
 	/**
-	 * @see SPR-9457
+	 * See SPR-9457
 	 */
 	@Test
 	public void usesBoundConnectionIfAvailable() throws SQLException {
@@ -269,7 +269,7 @@ public class DatabasePopulatorTests {
 	}
 
 	/**
-	 * @see SPR-9781
+	 * See SPR-9781
 	 */
 	@Test(timeout = 1000)
 	public void executesHugeScriptInReasonableTime() throws SQLException {

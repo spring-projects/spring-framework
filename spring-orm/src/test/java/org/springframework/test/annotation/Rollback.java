@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 /**
  * Test annotation to indicate whether or not the transaction for the annotated
  * test method should be <em>rolled back</em> after the test method has
- * completed. If <code>true</code>, the transaction will be rolled back;
+ * completed. If {@code true}, the transaction will be rolled back;
  * otherwise, the transaction will be committed.
  *
  * @author Sam Brannen

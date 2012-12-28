@@ -27,19 +27,19 @@ import org.springframework.core.Constants;
  * TargetSource implementation that holds objects in a configurable
  * Jakarta Commons Pool.
  *
- * <p>By default, an instance of <code>GenericObjectPool</code> is created.
- * Subclasses may change the type of <code>ObjectPool</code> used by
- * overriding the <code>createObjectPool()</code> method.
+ * <p>By default, an instance of {@code GenericObjectPool} is created.
+ * Subclasses may change the type of {@code ObjectPool} used by
+ * overriding the {@code createObjectPool()} method.
  *
  * <p>Provides many configuration properties mirroring those of the Commons Pool
- * <code>GenericObjectPool</code> class; these properties are passed to the
- * <code>GenericObjectPool</code> during construction. If creating a subclass of this
- * class to change the <code>ObjectPool</code> implementation type, pass in the values
+ * {@code GenericObjectPool} class; these properties are passed to the
+ * {@code GenericObjectPool} during construction. If creating a subclass of this
+ * class to change the {@code ObjectPool} implementation type, pass in the values
  * of configuration properties that are relevant to your chosen implementation.
  *
- * <p>The <code>testOnBorrow</code>, <code>testOnReturn</code> and <code>testWhileIdle</code>
+ * <p>The {@code testOnBorrow}, {@code testOnReturn} and {@code testWhileIdle}
  * properties are explictly not mirrored because the implementation of
- * <code>PoolableObjectFactory</code> used by this class does not implement
+ * {@code PoolableObjectFactory} used by this class does not implement
  * meaningful validation. All exposed Commons Pool properties use the corresponding
  * Commons Pool defaults: for example,
  *
@@ -74,7 +74,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	private byte whenExhaustedAction = GenericObjectPool.DEFAULT_WHEN_EXHAUSTED_ACTION;
 
 	/**
-	 * The Jakarta Commons <code>ObjectPool</code> used to pool target objects
+	 * The Jakarta Commons {@code ObjectPool} used to pool target objects
 	 */
 	private ObjectPool pool;
 
@@ -217,7 +217,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	 * Subclasses can override this if they want to return a specific Commons pool.
 	 * They should apply any configuration properties to the pool here.
 	 * <p>Default is a GenericObjectPool instance with the given pool size.
-	 * @return an empty Commons <code>ObjectPool</code>.
+	 * @return an empty Commons {@code ObjectPool}.
 	 * @see org.apache.commons.pool.impl.GenericObjectPool
 	 * @see #setMaxSize
 	 */
@@ -235,7 +235,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 
 	/**
-	 * Borrow an object from the <code>ObjectPool</code>.
+	 * Borrow an object from the {@code ObjectPool}.
 	 */
 	@Override
 	public Object getTarget() throws Exception {
@@ -243,7 +243,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	}
 
 	/**
-	 * Returns the specified object to the underlying <code>ObjectPool</code>.
+	 * Returns the specified object to the underlying {@code ObjectPool}.
 	 */
 	@Override
 	public void releaseTarget(Object target) throws Exception {
@@ -260,7 +260,7 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 
 
 	/**
-	 * Closes the underlying <code>ObjectPool</code> when destroying this object.
+	 * Closes the underlying {@code ObjectPool} when destroying this object.
 	 */
 	public void destroy() throws Exception {
 		logger.debug("Closing Commons ObjectPool");

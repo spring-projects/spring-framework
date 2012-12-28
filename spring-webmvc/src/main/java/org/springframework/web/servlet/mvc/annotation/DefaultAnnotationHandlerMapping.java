@@ -96,7 +96,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractDetectingUrlHandler
 	 * Set whether to register paths using the default suffix pattern as well:
 	 * i.e. whether "/users" should be registered as "/users.*" and "/users/" too.
 	 * <p>Default is "true". Turn this convention off if you intend to interpret
-	 * your <code>@RequestMapping</code> paths strictly.
+	 * your {@code @RequestMapping} paths strictly.
 	 * <p>Note that paths which include a ".xxx" suffix or end with "/" already will not be
 	 * transformed using the default suffix pattern in any case.
 	 */

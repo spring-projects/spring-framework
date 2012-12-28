@@ -77,7 +77,7 @@ public class JndiTemplate {
 	/**
 	 * Execute the given JNDI context callback implementation.
 	 * @param contextCallback JndiCallback implementation
-	 * @return a result object returned by the callback, or <code>null</code>
+	 * @return a result object returned by the callback, or {@code null}
 	 * @throws NamingException thrown by the callback implementation
 	 * @see #createInitialContext
 	 */
@@ -95,7 +95,7 @@ public class JndiTemplate {
 	 * Obtain a JNDI context corresponding to this template's configuration.
 	 * Called by {@link #execute}; may also be called directly.
 	 * <p>The default implementation delegates to {@link #createInitialContext()}.
-	 * @return the JNDI context (never <code>null</code>)
+	 * @return the JNDI context (never {@code null})
 	 * @throws NamingException if context retrieval failed
 	 * @see #releaseContext
 	 */
@@ -105,7 +105,7 @@ public class JndiTemplate {
 
 	/**
 	 * Release a JNDI context as obtained from {@link #getContext()}.
-	 * @param ctx the JNDI context to release (may be <code>null</code>)
+	 * @param ctx the JNDI context to release (may be {@code null})
 	 * @see #getContext
 	 */
 	public void releaseContext(Context ctx) {
@@ -140,7 +140,7 @@ public class JndiTemplate {
 	/**
 	 * Look up the object with the given name in the current JNDI context.
 	 * @param name the JNDI name of the object
-	 * @return object found (cannot be <code>null</code>; if a not so well-behaved
+	 * @return object found (cannot be {@code null}; if a not so well-behaved
 	 * JNDI implementations returns null, a NamingException gets thrown)
 	 * @throws NamingException if there is no object with the given
 	 * name bound to JNDI
@@ -165,10 +165,10 @@ public class JndiTemplate {
 	 * Look up the object with the given name in the current JNDI context.
 	 * @param name the JNDI name of the object
 	 * @param requiredType type the JNDI object must match. Can be an interface or
-	 * superclass of the actual class, or <code>null</code> for any match. For example,
-	 * if the value is <code>Object.class</code>, this method will succeed whatever
+	 * superclass of the actual class, or {@code null} for any match. For example,
+	 * if the value is {@code Object.class}, this method will succeed whatever
 	 * the class of the returned instance.
-	 * @return object found (cannot be <code>null</code>; if a not so well-behaved
+	 * @return object found (cannot be {@code null}; if a not so well-behaved
 	 * JNDI implementations returns null, a NamingException gets thrown)
 	 * @throws NamingException if there is no object with the given
 	 * name bound to JNDI

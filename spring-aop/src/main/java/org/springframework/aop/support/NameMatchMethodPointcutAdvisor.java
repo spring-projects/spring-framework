@@ -53,7 +53,7 @@ public class NameMatchMethodPointcutAdvisor extends AbstractGenericPointcutAdvis
 
 	/**
 	 * Convenience method when we have only a single method name to match.
-	 * Use either this method or <code>setMappedNames</code>, not both.
+	 * Use either this method or {@code setMappedNames}, not both.
 	 * @see #setMappedNames
 	 * @see NameMatchMethodPointcut#setMappedName
 	 */

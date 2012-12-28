@@ -26,17 +26,17 @@ import org.springframework.dao.DataAccessException;
  * implemented by {@link JpaTemplate}. Not often used, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Defines <code>JpaTemplate</code>'s data access methods that mirror
+ * <p>Defines {@code JpaTemplate}'s data access methods that mirror
  * various {@link javax.persistence.EntityManager} methods. Users are
- * strongly encouraged to read the JPA <code>EntityManager</code>
+ * strongly encouraged to read the JPA {@code EntityManager}
  * javadocs for details on the semantics of those methods.
  *
  * <p>Note that lazy loading will just work with an open JPA
- * <code>EntityManager</code>, either within a managed transaction or within
+ * {@code EntityManager}, either within a managed transaction or within
  * {@link org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter}/
  * {@link org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>flush</code>, <code>clear</code>.
+ * for example: {@code flush}, {@code clear}.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -47,7 +47,7 @@ import org.springframework.dao.DataAccessException;
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
  * @see org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor
  * @deprecated as of Spring 3.1, in favor of native EntityManager usage
- * (typically obtained through <code>@PersistenceContext</code>).
+ * (typically obtained through {@code @PersistenceContext}).
  * Note that this interface did not get upgraded to JPA 2.0 and never will.
  */
 @Deprecated

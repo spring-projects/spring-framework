@@ -20,11 +20,11 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 
 /**
- * Simple AOP Alliance <code>MethodInterceptor</code> that can be introduced
+ * Simple AOP Alliance {@code MethodInterceptor} that can be introduced
  * in a chain to display verbose trace information about intercepted method
  * invocations, with method entry and method exit info.
  *
- * <p>Consider using <code>CustomizableTraceInterceptor</code> for more
+ * <p>Consider using {@code CustomizableTraceInterceptor} for more
  * advanced needs.
  *
  * @author Dmitriy Kopylenko

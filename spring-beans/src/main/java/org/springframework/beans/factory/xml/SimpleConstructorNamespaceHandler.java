@@ -29,21 +29,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Simple <code>NamespaceHandler</code> implementation that maps custom
+ * Simple {@code NamespaceHandler} implementation that maps custom
  * attributes directly through to bean properties. An important point to note is
- * that this <code>NamespaceHandler</code> does not have a corresponding schema
+ * that this {@code NamespaceHandler} does not have a corresponding schema
  * since there is no way to know in advance all possible attribute names.
  *
  * <p>
- * An example of the usage of this <code>NamespaceHandler</code> is shown below:
+ * An example of the usage of this {@code NamespaceHandler} is shown below:
  *
  * <pre class="code">
  * &lt;bean id=&quot;author&quot; class=&quot;..TestBean&quot; c:name=&quot;Enescu&quot; c:work-ref=&quot;compositions&quot;/&gt;
  * </pre>
  *
- * Here the '<code>c:name</code>' corresponds directly to the '<code>name</code>
- * ' argument declared on the constructor of class '<code>TestBean</code>'. The
- * '<code>c:work-ref</code>' attributes corresponds to the '<code>work</code>'
+ * Here the '{@code c:name}' corresponds directly to the '{@code name}
+ * ' argument declared on the constructor of class '{@code TestBean}'. The
+ * '{@code c:work-ref}' attributes corresponds to the '{@code work}'
  * argument and, rather than being the concrete value, it contains the name of
  * the bean that will be considered as a parameter.
  *

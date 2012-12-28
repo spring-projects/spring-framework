@@ -26,7 +26,7 @@ package org.springframework.jmx.export;
 public class UnableToRegisterMBeanException extends MBeanExportException {
 
 	/**
-	 * Create a new <code>UnableToRegisterMBeanException</code> with the
+	 * Create a new {@code UnableToRegisterMBeanException} with the
 	 * specified error message.
 	 * @param msg the detail message
 	 */
@@ -35,7 +35,7 @@ public class UnableToRegisterMBeanException extends MBeanExportException {
 	}
 
 	/**
-	 * Create a new <code>UnableToRegisterMBeanException</code> with the
+	 * Create a new {@code UnableToRegisterMBeanException} with the
 	 * specified error message and root cause.
 	 * @param msg the detail message
 	 * @param cause the root caus

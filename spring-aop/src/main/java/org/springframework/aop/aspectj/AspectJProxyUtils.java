@@ -37,7 +37,7 @@ public abstract class AspectJProxyUtils {
 	 * and make available the current AspectJ JoinPoint. The call will have no effect if there are no
 	 * AspectJ advisors in the advisor chain.
 	 * @param advisors Advisors available
-	 * @return <code>true</code> if any special {@link Advisor Advisors} were added, otherwise <code>false</code>.
+	 * @return {@code true} if any special {@link Advisor Advisors} were added, otherwise {@code false}.
 	 */
 	public static boolean makeAdvisorChainAspectJCapableIfNecessary(List<Advisor> advisors) {
 		// Don't add advisors to an empty list; may indicate that proxying is just not required

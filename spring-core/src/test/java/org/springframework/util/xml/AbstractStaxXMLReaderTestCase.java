@@ -144,7 +144,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 
 	protected abstract AbstractStaxXMLReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException;
 
-	/** Easymock <code>ArgumentMatcher</code> implementation that matches SAX arguments. */
+	/** Easymock {@code AbstractMatcher} implementation that matches SAX arguments. */
 	protected static class SaxArgumentMatcher extends AbstractMatcher {
 
 		@Override

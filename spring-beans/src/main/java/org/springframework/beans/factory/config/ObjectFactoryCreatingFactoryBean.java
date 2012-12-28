@@ -57,7 +57,7 @@ import org.springframework.util.Assert;
  *
  *&lt;/beans&gt;</pre>
  *
- * <p>The attendant <code>MyClientBean</code> class implementation might look
+ * <p>The attendant {@code MyClientBean} class implementation might look
  * something like this:
  *
  * <pre class="code">package a.b.c;

@@ -62,7 +62,7 @@ public abstract class PortletApplicationContextUtils {
 	 * <p>Will rethrow an exception that happened on root context startup,
 	 * to differentiate between a failed context startup and no context at all.
 	 * @param pc PortletContext to find the web application context for
-	 * @return the root WebApplicationContext for this web app, or <code>null</code> if none
+	 * @return the root WebApplicationContext for this web app, or {@code null} if none
 	 * (typed to ApplicationContext to avoid a Servlet API dependency; can usually
 	 * be casted to WebApplicationContext, but there shouldn't be a need to)
 	 * @see org.springframework.web.context.WebApplicationContext#ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE

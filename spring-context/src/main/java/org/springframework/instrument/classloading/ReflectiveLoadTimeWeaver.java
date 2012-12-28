@@ -32,9 +32,9 @@ import org.springframework.util.ReflectionUtils;
  * support the following weaving methods (as defined in the {@link LoadTimeWeaver}
  * interface):
  * <ul>
- * <li><code>public void addTransformer(java.lang.instrument.ClassFileTransformer)</code>:
+ * <li>{@code public void addTransformer(java.lang.instrument.ClassFileTransformer)}:
  * for registering the given ClassFileTransformer on this ClassLoader
- * <li><code>public ClassLoader getThrowawayClassLoader()</code>:
+ * <li>{@code public ClassLoader getThrowawayClassLoader()}:
  * for obtaining a throwaway class loader for this ClassLoader (optional;
  * ReflectiveLoadTimeWeaver will fall back to a SimpleThrowawayClassLoader if
  * that method isn't available)
@@ -88,9 +88,9 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 
 	/**
 	 * Create a new SimpleLoadTimeWeaver for the given class loader.
-	 * @param classLoader the <code>ClassLoader</code> to delegate to for
+	 * @param classLoader the {@code ClassLoader} to delegate to for
 	 * weaving (<i>must</i> support the required weaving methods).
-	 * @throws IllegalStateException if the supplied <code>ClassLoader</code>
+	 * @throws IllegalStateException if the supplied {@code ClassLoader}
 	 * does not support the required weaving methods
 	 */
 	public ReflectiveLoadTimeWeaver(ClassLoader classLoader) {

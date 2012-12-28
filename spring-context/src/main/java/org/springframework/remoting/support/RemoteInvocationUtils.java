@@ -36,11 +36,11 @@ public abstract class RemoteInvocationUtils {
 	 * <p>The given exception is typically thrown on the server and serialized
 	 * as-is, with the client wanting it to contain the client-side portion
 	 * of the stack trace as well. What we can do here is to update the
-	 * <code>StackTraceElement</code> array with the current client-side stack
+	 * {@code StackTraceElement} array with the current client-side stack
 	 * trace, provided that we run on JDK 1.4+.
 	 * @param ex the exception to update
-	 * @see java.lang.Throwable#getStackTrace()
-	 * @see java.lang.Throwable#setStackTrace(StackTraceElement[])
+	 * @see Throwable#getStackTrace()
+	 * @see Throwable#setStackTrace(StackTraceElement[])
 	 */
 	public static void fillInClientStackTraceIfPossible(Throwable ex) {
 		if (ex != null) {

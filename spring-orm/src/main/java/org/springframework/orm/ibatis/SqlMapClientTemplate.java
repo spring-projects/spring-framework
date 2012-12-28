@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * Helper class that simplifies data access via the iBATIS
  * {@link com.ibatis.sqlmap.client.SqlMapClient} API, converting checked
  * SQLExceptions into unchecked DataAccessExceptions, following the
- * <code>org.springframework.dao</code> exception hierarchy.
+ * {@code org.springframework.dao} exception hierarchy.
  * Uses the same {@link org.springframework.jdbc.support.SQLExceptionTranslator}
  * mechanism as {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
@@ -61,7 +61,7 @@ import org.springframework.util.Assert;
  * 		 executor.update("insertSomethingElse", "myOtherParamValue");
  * 		 executor.executeBatch();
  * 		 return null;
- * 	 }
+ *      }
  * });</pre>
  *
  * The template needs a SqlMapClient to work on, passed in via the "sqlMapClient"
@@ -152,7 +152,7 @@ public class SqlMapClientTemplate extends JdbcAccessor implements SqlMapClientOp
 	/**
 	 * Execute the given data access action on a SqlMapExecutor.
 	 * @param action callback object that specifies the data access action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws DataAccessException in case of SQL Maps errors
 	 */
 	public <T> T execute(SqlMapClientCallback<T> action) throws DataAccessException {

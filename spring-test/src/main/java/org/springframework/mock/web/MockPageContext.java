@@ -46,8 +46,8 @@ import org.springframework.util.Assert;
  * applications when testing custom JSP tags.
  *
  * <p>Note: Expects initialization via the constructor rather than via the
- * <code>PageContext.initialize</code> method. Does not support writing to
- * a JspWriter, request dispatching, and <code>handlePageException</code> calls.
+ * {@code PageContext.initialize} method. Does not support writing to
+ * a JspWriter, request dispatching, and {@code handlePageException} calls.
  *
  * @author Juergen Hoeller
  * @since 1.0.2

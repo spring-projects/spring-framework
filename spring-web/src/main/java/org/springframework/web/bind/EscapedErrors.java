@@ -27,7 +27,7 @@ import org.springframework.web.util.HtmlUtils;
 /**
  * Errors wrapper that adds automatic HTML escaping to the wrapped instance,
  * for convenient usage in HTML views. Can be retrieved easily via
- * RequestContext's <code>getErrors</code> method.
+ * RequestContext's {@code getErrors} method.
  *
  * <p>Note that BindTag does <i>not</i> use this class to avoid unnecessary
  * creation of ObjectError instances. It just escapes the messages and values

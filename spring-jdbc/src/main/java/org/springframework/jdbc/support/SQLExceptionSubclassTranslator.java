@@ -47,7 +47,7 @@ import org.springframework.jdbc.BadSqlGrammarException;
  *
  * <p>This is only available with JDBC 4.0 and later drivers when using Java 6 or later.
  * Falls back to a standard {@link SQLStateSQLExceptionTranslator} if the JDBC driver
- * does not actually expose JDBC 4 compliant <code>SQLException</code> subclasses.
+ * does not actually expose JDBC 4 compliant {@code SQLException} subclasses.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

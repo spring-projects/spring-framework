@@ -54,7 +54,7 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	 * Create a new BeanComponentDefinition for the given bean.
 	 * @param beanDefinition the BeanDefinition
 	 * @param beanName the name of the bean
-	 * @param aliases alias names for the bean, or <code>null</code> if none
+	 * @param aliases alias names for the bean, or {@code null} if none
 	 */
 	public BeanComponentDefinition(BeanDefinition beanDefinition, String beanName, String[] aliases) {
 		super(beanDefinition, beanName, aliases);

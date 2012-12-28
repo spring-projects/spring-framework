@@ -29,7 +29,7 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.render.RenderKit;
 
 /**
- * Mock implementation of the <code>FacesContext</code> class to facilitate
+ * Mock implementation of the {@code FacesContext} class to facilitate
  * standalone Action unit tests.
  *
  * @author Ulrik Sandberg

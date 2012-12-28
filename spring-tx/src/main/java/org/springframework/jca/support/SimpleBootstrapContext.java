@@ -28,7 +28,7 @@ import javax.resource.spi.work.WorkManager;
  * interface, used for bootstrapping a JCA ResourceAdapter in a local environment.
  *
  * <p>Delegates to the given WorkManager and XATerminator, if any. Creates simple
- * local instances of <code>java.util.Timer</code>.
+ * local instances of {@code java.util.Timer}.
  *
  * @author Juergen Hoeller
  * @since 2.0.3
@@ -45,7 +45,7 @@ public class SimpleBootstrapContext implements BootstrapContext {
 	/**
 	 * Create a new SimpleBootstrapContext for the given WorkManager,
 	 * with no XATerminator available.
-	 * @param workManager the JCA WorkManager to use (may be <code>null</code>)
+	 * @param workManager the JCA WorkManager to use (may be {@code null})
 	 */
 	public SimpleBootstrapContext(WorkManager workManager) {
 		this.workManager = workManager;
@@ -53,8 +53,8 @@ public class SimpleBootstrapContext implements BootstrapContext {
 
 	/**
 	 * Create a new SimpleBootstrapContext for the given WorkManager and XATerminator.
-	 * @param workManager the JCA WorkManager to use (may be <code>null</code>)
-	 * @param xaTerminator the JCA XATerminator to use (may be <code>null</code>)
+	 * @param workManager the JCA WorkManager to use (may be {@code null})
+	 * @param xaTerminator the JCA XATerminator to use (may be {@code null})
 	 */
 	public SimpleBootstrapContext(WorkManager workManager, XATerminator xaTerminator) {
 		this.workManager = workManager;

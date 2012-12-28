@@ -23,7 +23,7 @@ import org.springframework.web.context.ServletContextAware;
 
 /**
  * {@link FactoryBean} that retrieves a specific ServletContext init parameter
- * (that is, a "context-param" defined in <code>web.xml</code>).
+ * (that is, a "context-param" defined in {@code web.xml}).
  * Exposes that ServletContext init parameter when used as bean reference,
  * effectively making it available as named Spring bean instance.
  *

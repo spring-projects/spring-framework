@@ -38,7 +38,7 @@ public interface SchedulingAwareRunnable extends Runnable {
 
 	/**
 	 * Return whether the Runnable's operation is long-lived
-	 * (<code>true</code>) versus short-lived (<code>false</code>).
+	 * ({@code true}) versus short-lived ({@code false}).
 	 * <p>In the former case, the task will not allocate a thread from the thread
 	 * pool (if any) but rather be considered as long-running background thread.
 	 * <p>This should be considered a hint. Of course TaskExecutor implementations

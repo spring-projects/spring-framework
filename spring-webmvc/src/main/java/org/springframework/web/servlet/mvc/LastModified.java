@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Supports last-modified HTTP requests to facilitate content caching.
- * Same contract as for the Servlet API's <code>getLastModified</code> method.
+ * Same contract as for the Servlet API's {@code getLastModified} method.
  *
  * <p>Delegated to by a {@link org.springframework.web.servlet.HandlerAdapter#getLastModified}
  * implementation. By default, any Controller or HttpRequestHandler within Spring's
@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  * <p><b>Note:</b> Alternative handler implementation approaches have different
  * last-modified handling styles. For example, Spring 2.5's annotated controller
- * approach (using <code>@RequestMapping</code>) provides last-modified support
+ * approach (using {@code @RequestMapping}) provides last-modified support
  * through the {@link org.springframework.web.context.request.WebRequest#checkNotModified}
  * method, allowing for last-modified checking within the main handler method.
  *
@@ -43,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface LastModified {
 
 	/**
-	 * Same contract as for HttpServlet's <code>getLastModified</code> method.
+	 * Same contract as for HttpServlet's {@code getLastModified} method.
 	 * Invoked <b>before</b> request processing.
 	 * <p>The return value will be sent to the HTTP client as Last-Modified header,
 	 * and compared with If-Modified-Since headers that the client sends back.

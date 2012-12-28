@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.tags.form;
 
 /**
- * Databinding-aware JSP tag for rendering multiple HTML '<code>input</code>'
- * elements with a '<code>type</code>' of '<code>radio</code>'.
+ * Databinding-aware JSP tag for rendering multiple HTML '{@code input}'
+ * elements with a '{@code type}' of '{@code radio}'.
  *
  * <p>Rendered elements are marked as 'checked' if the configured
  * {@link #setItems(Object) value} matches the bound value.

@@ -38,7 +38,7 @@ public interface AdvisorAdapter {
 
 	/**
 	 * Does this adapter understand this advice object? Is it valid to
-	 * invoke the <code>getInterceptors</code> method with an Advisor that
+	 * invoke the {@code getInterceptors} method with an Advisor that
 	 * contains this advice as an argument?
 	 * @param advice an Advice such as a BeforeAdvice
 	 * @return whether this adapter understands the given advice object

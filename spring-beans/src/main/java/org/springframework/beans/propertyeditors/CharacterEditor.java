@@ -21,22 +21,22 @@ import java.beans.PropertyEditorSupport;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for a {@link java.lang.Character}, to populate a property
- * of type <code>Character</code> or <code>char</code> from a String value.
+ * Editor for a {@link Character}, to populate a property
+ * of type {@code Character} or {@code char} from a String value.
  *
  * <p>Note that the JDK does not contain a default
- * {@link java.beans.PropertyEditor property editor} for <code>char</code>!
+ * {@link java.beans.PropertyEditor property editor} for {@code char}!
  * {@link org.springframework.beans.BeanWrapperImpl} will register this
  * editor by default.
  *
  * <p>Also supports conversion from a Unicode character sequence; e.g.
- * <code>u0041</code> ('A').
+ * {@code u0041} ('A').
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Rick Evans
  * @since 1.2
- * @see java.lang.Character
+ * @see Character
  * @see org.springframework.beans.BeanWrapperImpl
  */
 public class CharacterEditor extends PropertyEditorSupport {
@@ -58,9 +58,9 @@ public class CharacterEditor extends PropertyEditorSupport {
 	/**
 	 * Create a new CharacterEditor instance.
 	 * <p>The "allowEmpty" parameter controls whether an empty String is
-	 * to be allowed in parsing, i.e. be interpreted as the <code>null</code>
+	 * to be allowed in parsing, i.e. be interpreted as the {@code null}
 	 * value when {@link #setAsText(String) text is being converted}. If
-	 * <code>false</code>, an {@link IllegalArgumentException} will be thrown
+	 * {@code false}, an {@link IllegalArgumentException} will be thrown
 	 * at that time.
 	 * @param allowEmpty if empty strings are to be allowed
 	 */

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
  * implementations, taking care of the padding.
  *
  * <p>'Padding' in the context of this class means default implementations
- * for certain methods from the <code>DataSource</code> interface, such as
+ * for certain methods from the {@code DataSource} interface, such as
  * {@link #getLoginTimeout()}, {@link #setLoginTimeout(int)}, and so forth.
  *
  * @author Juergen Hoeller

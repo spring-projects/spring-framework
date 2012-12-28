@@ -129,7 +129,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 	/**
 	 * Return whether this throttle is currently active.
-	 * @return <code>true</code> if the concurrency limit for this instance is active
+	 * @return {@code true} if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
 	 * @see #setConcurrencyLimit
 	 */
@@ -195,7 +195,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 	/**
 	 * Subclass of the general ConcurrencyThrottleSupport class,
-	 * making <code>beforeAccess()</code> and <code>afterAccess()</code>
+	 * making {@code beforeAccess()} and {@code afterAccess()}
 	 * visible to the surrounding class.
 	 */
 	private static class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
@@ -213,7 +213,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 
 	/**
-	 * This Runnable calls <code>afterAccess()</code> after the
+	 * This Runnable calls {@code afterAccess()} after the
 	 * target Runnable has finished its execution.
 	 */
 	private class ConcurrencyThrottlingRunnable implements Runnable {

@@ -97,7 +97,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 	/**
-	 * Initialize the underlying <code>org.apache.commons.fileupload.portlet.PortletFileUpload</code>
+	 * Initialize the underlying {@code org.apache.commons.fileupload.portlet.PortletFileUpload}
 	 * instance. Can be overridden to use a custom subclass, e.g. for testing purposes.
 	 * @return the new PortletFileUpload instance
 	 */
@@ -165,7 +165,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * <p>The default implementation checks the request encoding,
 	 * falling back to the default encoding specified for this resolver.
 	 * @param request current portlet request
-	 * @return the encoding for the request (never <code>null</code>)
+	 * @return the encoding for the request (never {@code null})
 	 * @see javax.portlet.ActionRequest#getCharacterEncoding
 	 * @see #setDefaultEncoding
 	 */

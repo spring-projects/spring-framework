@@ -40,7 +40,7 @@ class WebSphereClassPreDefinePlugin implements InvocationHandler {
 	/**
 	 * Create a new {@link WebSphereClassPreDefinePlugin}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted
-	 * (must not be <code>null</code>)
+	 * (must not be {@code null})
 	 */
 	public WebSphereClassPreDefinePlugin(ClassFileTransformer transformer) {
 		this.transformer = transformer;

@@ -21,7 +21,7 @@ import javax.mail.internet.MimeMessage;
 /**
  * Callback interface for the preparation of JavaMail MIME messages.
  *
- * <p>The corresponding <code>send</code> methods of {@link JavaMailSender}
+ * <p>The corresponding {@code send} methods of {@link JavaMailSender}
  * will take care of the actual creation of a {@link MimeMessage} instance,
  * and of proper exception conversion.
  *

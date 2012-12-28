@@ -110,7 +110,7 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	}
 
 	/**
-	 * This implementation returns <code>false</code>: We cannot guarantee
+	 * This implementation returns {@code false}: We cannot guarantee
 	 * to receive the same Connection within a transaction, not even when
 	 * dealing with a JNDI DataSource.
 	 */

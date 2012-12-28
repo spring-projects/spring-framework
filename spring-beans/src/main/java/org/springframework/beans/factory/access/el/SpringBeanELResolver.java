@@ -30,7 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 
 /**
- * Unified EL <code>ELResolver</code> that delegates to a Spring BeanFactory,
+ * Unified EL {@code ELResolver} that delegates to a Spring BeanFactory,
  * resolving name references to Spring-defined beans.
  *
  * @author Juergen Hoeller
@@ -110,7 +110,7 @@ public abstract class SpringBeanELResolver extends ELResolver {
 	/**
 	 * Retrieve the Spring BeanFactory to delegate bean name resolution to.
 	 * @param elContext the current ELContext
-	 * @return the Spring BeanFactory (never <code>null</code>)
+	 * @return the Spring BeanFactory (never {@code null})
 	 */
 	protected abstract BeanFactory getBeanFactory(ELContext elContext);
 

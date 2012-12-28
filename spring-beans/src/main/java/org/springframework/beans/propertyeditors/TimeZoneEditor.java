@@ -20,7 +20,7 @@ import java.beans.PropertyEditorSupport;
 import java.util.TimeZone;
 
 /**
- * Editor for <code>java.util.TimeZone</code>, translating timezone IDs into
+ * Editor for {@code java.util.TimeZone}, translating timezone IDs into
  * TimeZone objects. Does not expose a text representation for TimeZone objects.
  *
  * @author Juergen Hoeller
@@ -35,7 +35,7 @@ public class TimeZoneEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * This implementation returns <code>null</code> to indicate that
+	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
 	 */
 	@Override

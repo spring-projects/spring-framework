@@ -62,7 +62,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	 * Specify the EntityManager interface to expose.
 	 * <p>Default is the EntityManager interface as defined by the
 	 * EntityManagerFactoryInfo, if available. Else, the standard
-	 * <code>javax.persistence.EntityManager</code> interface will be used.
+	 * {@code javax.persistence.EntityManager} interface will be used.
 	 * @see org.springframework.orm.jpa.EntityManagerFactoryInfo#getEntityManagerInterface()
 	 * @see javax.persistence.EntityManager
 	 */

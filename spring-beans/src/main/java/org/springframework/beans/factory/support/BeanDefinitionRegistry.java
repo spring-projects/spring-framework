@@ -71,7 +71,7 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	/**
 	 * Return the BeanDefinition for the given bean name.
 	 * @param beanName name of the bean to find a definition for
-	 * @return the BeanDefinition for the given name (never <code>null</code>)
+	 * @return the BeanDefinition for the given name (never {@code null})
 	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
 	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;

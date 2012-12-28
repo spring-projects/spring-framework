@@ -73,7 +73,7 @@ public class ByteArrayResource extends AbstractResource {
 
 
 	/**
-	 * This implementation always returns <code>true</code>.
+	 * This implementation always returns {@code true}.
 	 */
 	@Override
 	public boolean exists() {

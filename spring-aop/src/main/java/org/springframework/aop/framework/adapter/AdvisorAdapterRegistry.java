@@ -38,7 +38,7 @@ public interface AdvisorAdapterRegistry {
 	 * {@link org.springframework.aop.AfterReturningAdvice},
 	 * {@link org.springframework.aop.ThrowsAdvice}.
 	 * @param advice object that should be an advice
-	 * @return an Advisor wrapping the given advice. Never returns <code>null</code>.
+	 * @return an Advisor wrapping the given advice. Never returns {@code null}.
 	 * If the advice parameter is an Advisor, return it.
 	 * @throws UnknownAdviceTypeException if no registered advisor adapter
 	 * can wrap the supposed advice

@@ -82,8 +82,8 @@ import org.springframework.web.portlet.util.PortletUtils;
  *  <tr>
  *      <td>synchronizeOnSession</td>
  *      <td>false</td>
- *      <td>whether the calls to <code>handleRenderRequestInternal</code> and
- *          <code>handleRenderRequestInternal</code> should be
+ *      <td>whether the calls to {@code handleRenderRequestInternal} and
+ *          {@code handleRenderRequestInternal} should be
  *          synchronized around the PortletSession, to serialize invocations
  *          from the same client. No effect if there is no PortletSession.
  *      </td>
@@ -112,10 +112,10 @@ import org.springframework.web.portlet.util.PortletUtils;
  * criteria your mapping is using, such as portlet mode or a request parameter, during the
  * action phase of your controller.  This is very handy since redirects within the portlet
  * are apparently impossible.  Before doing this, it is usually wise to call
- * <code>clearAllRenderParameters</code> and then explicitly set all the parameters that
+ * {@code clearAllRenderParameters} and then explicitly set all the parameters that
  * you want the new controller to see.  This avoids unexpected parameters from being passed
  * to the render phase of the second controller, such as the parameter indicating a form
- * submit ocurred in an <code>AbstractFormController</code>.
+ * submit ocurred in an {@code AbstractFormController}.
  *
  * <p>Thanks to Rainer Schmitz and Nick Lothian for their suggestions!
  *
@@ -135,13 +135,13 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleActionRequestInternal</code>
+	 * <p>More specifically, the execution of the {@code handleActionRequestInternal}
 	 * method will get synchronized if this flag is "true". The best available
 	 * session mutex will be used for the synchronization; ideally, this will
 	 * be a mutex exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the PortletSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
@@ -226,7 +226,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	/**
 	 * Subclasses are meant to override this method if the controller
 	 * is expected to handle action requests. The contract is the same as
-	 * for <code>handleActionRequest</code>.
+	 * for {@code handleActionRequest}.
 	 * <p>The default implementation throws a PortletException.
 	 * @see #handleActionRequest
 	 * @see #handleRenderRequestInternal
@@ -240,7 +240,7 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	/**
 	 * Subclasses are meant to override this method if the controller
 	 * is expected to handle render requests. The contract is the same as
-	 * for <code>handleRenderRequest</code>.
+	 * for {@code handleRenderRequest}.
 	 * <p>The default implementation throws a PortletException.
 	 * @see #handleRenderRequest
 	 * @see #handleActionRequestInternal

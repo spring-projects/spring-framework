@@ -33,24 +33,24 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
 /**
  * Default implementation of Spring's {@link SqlRowSet} interface.
  *
- * <p>This implementation wraps a <code>javax.sql.ResultSet</code>, catching any SQLExceptions
+ * <p>This implementation wraps a {@code javax.sql.ResultSet}, catching any SQLExceptions
  * and translating them to the appropriate Spring {@link InvalidResultSetAccessException}.
  *
  * <p>The passed-in ResultSets should already be disconnected if the SqlRowSet is supposed
  * to be usable in a disconnected fashion. This means that you will usually pass in a
- * <code>javax.sql.rowset.CachedRowSet</code>, which implements the ResultSet interface.
+ * {@code javax.sql.rowset.CachedRowSet}, which implements the ResultSet interface.
  *
  * <p>Note: Since JDBC 4.0, it has been clarified that any methods using a String to identify
  * the column should be using the column label. The column label is assigned using the ALIAS
  * keyword in the SQL query string. When the query doesn't use an ALIAS, the default label is
  * the column name. Most JDBC ResultSet implementations follow this new pattern but there are
- * exceptions such as the <code>com.sun.rowset.CachedRowSetImpl</code> class which only uses
+ * exceptions such as the {@code com.sun.rowset.CachedRowSetImpl} class which only uses
  * the column name, ignoring any column labels. As of Spring 3.0.5, ResultSetWrappingSqlRowSet
  * will translate column labels to the correct column index to provide better support for the
- * <code>com.sun.rowset.CachedRowSetImpl</code> which is the default implementation used by
+ * {@code com.sun.rowset.CachedRowSetImpl} which is the default implementation used by
  * {@link org.springframework.jdbc.core.JdbcTemplate} when working with RowSets.
  *
- * <p>Note: This class implements the <code>java.io.Serializable</code> marker interface
+ * <p>Note: This class implements the {@code java.io.Serializable} marker interface
  * through the SqlRowSet interface, but is only actually serializable if the disconnected
  * ResultSet/RowSet contained in it is serializable. Most CachedRowSet implementations
  * are actually serializable, so this should usually work out.
@@ -78,7 +78,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 	/**
 	 * Create a new ResultSetWrappingSqlRowSet for the given ResultSet.
 	 * @param resultSet a disconnected ResultSet to wrap
-	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>)
+	 * (usually a {@code javax.sql.rowset.CachedRowSet})
 	 * @throws InvalidResultSetAccessException if extracting
 	 * the ResultSetMetaData failed
 	 * @see javax.sql.rowset.CachedRowSet
@@ -115,7 +115,7 @@ public class ResultSetWrappingSqlRowSet implements SqlRowSet {
 
 	/**
 	 * Return the underlying ResultSet
-	 * (usually a <code>javax.sql.rowset.CachedRowSet</code>).
+	 * (usually a {@code javax.sql.rowset.CachedRowSet}).
 	 * @see javax.sql.rowset.CachedRowSet
 	 */
 	public final ResultSet getResultSet() {

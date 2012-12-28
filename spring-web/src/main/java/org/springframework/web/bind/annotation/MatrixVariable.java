@@ -49,11 +49,11 @@ public @interface MatrixVariable {
 
 	/**
 	 * Whether the matrix variable is required.
-	 * <p>Default is <code>true</code>, leading to an exception thrown in case
-	 * of the variable missing in the request. Switch this to <code>false</code>
-	 * if you prefer a <code>null</value> in case of the variable missing.
+	 * <p>Default is {@code true}, leading to an exception thrown in case
+	 * of the variable missing in the request. Switch this to {@code false}
+	 * if you prefer a {@code null} in case of the variable missing.
 	 * <p>Alternatively, provide a {@link #defaultValue() defaultValue},
-	 * which implicitly sets this flag to <code>false</code>.
+	 * which implicitly sets this flag to {@code false}.
 	 */
 	boolean required() default true;
 

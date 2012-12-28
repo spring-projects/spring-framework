@@ -91,7 +91,7 @@ public abstract class RequestContextUtils {
 	 * Return the LocaleResolver that has been bound to the request by the
 	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current LocaleResolver, or <code>null</code> if not found
+	 * @return the current LocaleResolver, or {@code null} if not found
 	 */
 	public static LocaleResolver getLocaleResolver(HttpServletRequest request) {
 		return (LocaleResolver) request.getAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE);
@@ -121,7 +121,7 @@ public abstract class RequestContextUtils {
 	 * Return the ThemeResolver that has been bound to the request by the
 	 * DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current ThemeResolver, or <code>null</code> if not found
+	 * @return the current ThemeResolver, or {@code null} if not found
 	 */
 	public static ThemeResolver getThemeResolver(HttpServletRequest request) {
 		return (ThemeResolver) request.getAttribute(DispatcherServlet.THEME_RESOLVER_ATTRIBUTE);
@@ -141,7 +141,7 @@ public abstract class RequestContextUtils {
 	 * Retrieves the current theme from the given request, using the ThemeResolver
 	 * and ThemeSource bound to the request by the DispatcherServlet.
 	 * @param request current HTTP request
-	 * @return the current theme, or <code>null</code> if not found
+	 * @return the current theme, or {@code null} if not found
 	 * @see #getThemeResolver
 	 */
 	public static Theme getTheme(HttpServletRequest request) {

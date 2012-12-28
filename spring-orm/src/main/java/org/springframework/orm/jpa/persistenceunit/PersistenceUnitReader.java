@@ -43,7 +43,7 @@ import org.springframework.util.xml.DomUtils;
 import org.springframework.util.xml.SimpleSaxErrorHandler;
 
 /**
- * Internal helper class for reading JPA-compliant <code>persistence.xml</code> files.
+ * Internal helper class for reading JPA-compliant {@code persistence.xml} files.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -93,7 +93,7 @@ class PersistenceUnitReader {
 	 * Create a new PersistenceUnitReader.
 	 * @param resourcePatternResolver the ResourcePatternResolver to use for loading resources
 	 * @param dataSourceLookup the DataSourceLookup to resolve DataSource names in
-	 * <code>persistence.xml</code> files against
+	 * {@code persistence.xml} files against
 	 */
 	public PersistenceUnitReader(ResourcePatternResolver resourcePatternResolver, DataSourceLookup dataSourceLookup) {
 		Assert.notNull(resourcePatternResolver, "ResourceLoader must not be null");
@@ -185,7 +185,7 @@ class PersistenceUnitReader {
 
 	/**
 	 * Determine the persistence unit root URL based on the given resource
-	 * (which points to the <code>persistence.xml</code> file we're reading).
+	 * (which points to the {@code persistence.xml} file we're reading).
 	 * @param resource the resource to check
 	 * @return the corresponding persistence unit root URL
 	 * @throws IOException if the checking failed
@@ -291,7 +291,7 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Parse the <code>property</code> XML elements.
+	 * Parse the {@code property} XML elements.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseProperties(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
@@ -308,7 +308,7 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Parse the <code>class</code> XML elements.
+	 * Parse the {@code class} XML elements.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseManagedClasses(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
@@ -321,7 +321,7 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Parse the <code>mapping-file</code> XML elements.
+	 * Parse the {@code mapping-file} XML elements.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
@@ -335,7 +335,7 @@ class PersistenceUnitReader {
 	}
 
 	/**
-	 * Parse the <code>jar-file</code> XML elements.
+	 * Parse the {@code jar-file} XML elements.
 	 */
 	@SuppressWarnings("unchecked")
 	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {

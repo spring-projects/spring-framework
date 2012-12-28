@@ -63,10 +63,10 @@ import org.springframework.util.xml.StaxUtils;
 /**
  * Implementation of the {@link Marshaller} interface for Apache XMLBeans.
  *
- * <p>Options can be set by setting the <code>xmlOptions</code> property.
+ * <p>Options can be set by setting the {@code xmlOptions} property.
  * The {@link XmlOptionsFactoryBean} is provided to easily set up an {@link XmlOptions} instance.
  *
- * <p>Unmarshalled objects can be validated by setting the <code>validating</code> property,
+ * <p>Unmarshalled objects can be validated by setting the {@code validating} property,
  * or by calling the {@link #validate(XmlObject)} method directly. Invalid objects will
  * result in an {@link ValidationFailureException}.
  *
@@ -87,7 +87,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 
 	/**
-	 * Set the <code>XmlOptions</code>.
+	 * Set the {@code XmlOptions}.
 	 * @see XmlOptionsFactoryBean
 	 */
 	public void setXmlOptions(XmlOptions xmlOptions) {
@@ -95,7 +95,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	}
 
 	/**
-	 * Return the <code>XmlOptions</code>.
+	 * Return the {@code XmlOptions}.
 	 */
 	public XmlOptions getXmlOptions() {
 		return this.xmlOptions;
@@ -103,7 +103,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	/**
 	 * Set whether this marshaller should validate in- and outgoing documents.
-	 * Default is <code>false</code>.
+	 * Default is {@code false}.
 	 */
 	public void setValidating(boolean validating) {
 		this.validating = validating;
@@ -262,7 +262,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 
 	/**
-	 * Validate the given <code>XmlObject</code>.
+	 * Validate the given {@code XmlObject}.
 	 * @param object the xml object to validate
 	 * @throws ValidationFailureException if the given object is not valid
 	 */
@@ -288,13 +288,13 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	/**
 	 * Convert the given XMLBeans exception to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
+	 * {@code org.springframework.oxm} hierarchy.
 	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
 	 * unmarshalling, since XMLBeans itself does not make this distinction in its exception hierarchy.
 	 * @param ex XMLBeans Exception that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
-	 * @return the corresponding <code>XmlMappingException</code>
+	 * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+	 * or unmarshalling ({@code false})
+	 * @return the corresponding {@code XmlMappingException}
 	 */
 	protected XmlMappingException convertXmlBeansException(Exception ex, boolean marshalling) {
 		if (ex instanceof XMLStreamValidationException) {

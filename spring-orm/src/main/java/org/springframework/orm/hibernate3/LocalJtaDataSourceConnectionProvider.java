@@ -27,7 +27,7 @@ package org.springframework.orm.hibernate3;
 public class LocalJtaDataSourceConnectionProvider extends LocalDataSourceConnectionProvider {
 
 	/**
-	 * This implementation returns <code>true</code>,
+	 * This implementation returns {@code true},
 	 * since we're assuming a JTA DataSource.
 	 */
 	@Override

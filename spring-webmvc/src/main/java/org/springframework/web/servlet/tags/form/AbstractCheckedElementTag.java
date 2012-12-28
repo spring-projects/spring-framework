@@ -20,8 +20,8 @@ import javax.servlet.jsp.JspException;
 
 /**
  * Abstract base class to provide common methods for
- * implementing databinding-aware JSP tags for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>checkbox</code>' or '<code>radio</code>'.
+ * implementing databinding-aware JSP tags for rendering an HTML '{@code input}'
+ * element with a '{@code type}' of '{@code checkbox}' or '{@code radio}'.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -31,8 +31,8 @@ import javax.servlet.jsp.JspException;
 public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElementTag {
 
 	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
-	 * '<code>input</code>' element as 'checked' if the supplied value matches the
+	 * Render the '{@code input(checkbox)}' with the supplied value, marking the
+	 * '{@code input}' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
 	protected void renderFromValue(Object value, TagWriter tagWriter) throws JspException {
@@ -40,8 +40,8 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	}
 
 	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking the
-	 * '<code>input</code>' element as 'checked' if the supplied value matches the
+	 * Render the '{@code input(checkbox)}' with the supplied value, marking the
+	 * '{@code input}' element as 'checked' if the supplied value matches the
 	 * bound value.
 	 */
 	protected void renderFromValue(Object item, Object value, TagWriter tagWriter) throws JspException {
@@ -61,9 +61,9 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 	}
 
 	/**
-	 * Render the '<code>input(checkbox)</code>' with the supplied value, marking
-	 * the '<code>input</code>' element as 'checked' if the supplied Boolean is
-	 * <code>true</code>.
+	 * Render the '{@code input(checkbox)}' with the supplied value, marking
+	 * the '{@code input}' element as 'checked' if the supplied Boolean is
+	 * {@code true}.
 	 */
 	protected void renderFromBoolean(Boolean boundValue, TagWriter tagWriter) throws JspException {
 		tagWriter.writeAttribute("value", processFieldValue(getName(), "true", getInputType()));
@@ -82,8 +82,8 @@ public abstract class AbstractCheckedElementTag extends AbstractHtmlInputElement
 
 
 	/**
-	 * Writes the '<code>input</code>' element to the supplied
-	 * {@link org.springframework.web.servlet.tags.form.TagWriter},
+	 * Writes the '{@code input}' element to the supplied
+	 * {@link TagWriter},
 	 * marking it as 'checked' if appropriate.
 	 */
 	@Override

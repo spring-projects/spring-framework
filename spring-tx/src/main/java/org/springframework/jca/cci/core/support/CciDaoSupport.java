@@ -34,7 +34,7 @@ import org.springframework.jca.cci.core.CciTemplate;
  *
  * <p>This base class is mainly intended for CciTemplate usage but can
  * also be used when working with a Connection directly or when using
- * <code>org.springframework.jca.cci.object</code> classes.
+ * {@code org.springframework.jca.cci.object} classes.
  *
  * @author Thierry Templier
  * @author Juergen Hoeller

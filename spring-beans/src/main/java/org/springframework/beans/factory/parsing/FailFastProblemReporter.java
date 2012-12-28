@@ -41,7 +41,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 
 	/**
 	 * Set the {@link Log logger} that is to be used to report warnings.
-	 * <p>If set to <code>null</code> then a default {@link Log logger} set to
+	 * <p>If set to {@code null} then a default {@link Log logger} set to
 	 * the name of the instance class will be used.
 	 * @param logger the {@link Log logger} that is to be used to report warnings
 	 */
@@ -69,7 +69,7 @@ public class FailFastProblemReporter implements ProblemReporter {
 	}
 
 	/**
-	 * Writes the supplied {@link Problem} to the {@link Log} at <code>WARN</code> level.
+	 * Writes the supplied {@link Problem} to the {@link Log} at {@code WARN} level.
 	 * @param problem the source of the warning
 	 */
 	public void warning(Problem problem) {

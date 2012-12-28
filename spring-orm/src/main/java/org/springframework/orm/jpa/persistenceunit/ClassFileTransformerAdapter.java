@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 
 /**
- * Simple adapter that implements the <code>java.lang.instrument.ClassFileTransformer</code>
+ * Simple adapter that implements the {@code java.lang.instrument.ClassFileTransformer}
  * interface based on a JPA ClassTransformer which a JPA PersistenceProvider asks the
  * PersistenceUnitInfo to install in the current runtime.
  *

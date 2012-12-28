@@ -112,7 +112,7 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	 * <p>A further benefit of this option is that <i>plain Sessions opened directly
 	 * via the SessionFactory</i>, outside of Spring's Hibernate support, will still
 	 * participate in active Spring-managed transactions. However, consider using
-	 * Hibernate's <code>getCurrentSession()</code> method instead (see javadoc of
+	 * Hibernate's {@code getCurrentSession()} method instead (see javadoc of
 	 * "exposeTransactionAwareSessionFactory" property).
 	 * <p><b>WARNING:</b> When using a transaction-aware JDBC DataSource in combination
 	 * with OpenSessionInViewFilter/Interceptor, whether participating in JTA or
@@ -147,17 +147,17 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 
 	/**
 	 * Set whether to expose a transaction-aware current Session from the
-	 * SessionFactory's <code>getCurrentSession()</code> method, returning the
+	 * SessionFactory's {@code getCurrentSession()} method, returning the
 	 * Session that's associated with the current Spring-managed transaction, if any.
 	 * <p>Default is "true", letting data access code work with the plain
-	 * Hibernate SessionFactory and its <code>getCurrentSession()</code> method,
+	 * Hibernate SessionFactory and its {@code getCurrentSession()} method,
 	 * while still being able to participate in current Spring-managed transactions:
 	 * with any transaction management strategy, either local or JTA / EJB CMT,
 	 * and any transaction synchronization mechanism, either Spring or JTA.
-	 * Furthermore, <code>getCurrentSession()</code> will also seamlessly work with
+	 * Furthermore, {@code getCurrentSession()} will also seamlessly work with
 	 * a request-scoped Session managed by OpenSessionInViewFilter/Interceptor.
 	 * <p>Turn this flag off to expose the plain Hibernate SessionFactory with
-	 * Hibernate's default <code>getCurrentSession()</code> behavior, supporting
+	 * Hibernate's default {@code getCurrentSession()} behavior, supporting
 	 * plain JTA synchronization only. Alternatively, simply override the
 	 * corresponding Hibernate property "hibernate.current_session_context_class".
 	 * @see SpringSessionContext
@@ -206,7 +206,7 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	/**
 	 * Return the exposed SessionFactory.
 	 * Will throw an exception if not initialized yet.
-	 * @return the SessionFactory (never <code>null</code>)
+	 * @return the SessionFactory (never {@code null})
 	 * @throws IllegalStateException if the SessionFactory has not been initialized yet
 	 */
 	protected final SessionFactory getSessionFactory() {
@@ -257,7 +257,7 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	/**
 	 * Hook that allows post-processing after the SessionFactory has been
 	 * successfully created. The SessionFactory is already available through
-	 * <code>getSessionFactory()</code> at this point.
+	 * {@code getSessionFactory()} at this point.
 	 * <p>This implementation is empty.
 	 * @throws Exception in case of initialization failure
 	 * @see #getSessionFactory()
@@ -268,7 +268,7 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	/**
 	 * Hook that allows shutdown processing before the SessionFactory
 	 * will be closed. The SessionFactory is still available through
-	 * <code>getSessionFactory()</code> at this point.
+	 * {@code getSessionFactory()} at this point.
 	 * <p>This implementation is empty.
 	 * @see #getSessionFactory()
 	 */

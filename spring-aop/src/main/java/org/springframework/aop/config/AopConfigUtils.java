@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * <p>Only a single auto-proxy creator can be registered yet multiple concrete
  * implementations are available. Therefore this class wraps a simple escalation
  * protocol, allowing classes to request a particular auto-proxy creator and know
- * that class, <code>or a subclass thereof</code>, will eventually be resident
+ * that class, {@code or a subclass thereof}, will eventually be resident
  * in the application context.
  *
  * @author Rob Harrop

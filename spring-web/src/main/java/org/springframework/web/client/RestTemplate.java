@@ -466,8 +466,8 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * RequestCallback}; the response with the {@link ResponseExtractor}.
 	 * @param url the fully-expanded URL to connect to
 	 * @param method the HTTP method to execute (GET, POST, etc.)
-	 * @param requestCallback object that prepares the request (can be <code>null</code>)
-	 * @param responseExtractor object that extracts the return value from the response (can be <code>null</code>)
+	 * @param requestCallback object that prepares the request (can be {@code null})
+	 * @param responseExtractor object that extracts the return value from the response (can be {@code null})
 	 * @return an arbitrary object, as returned by the {@link ResponseExtractor}
 	 */
 	protected <T> T doExecute(URI url, HttpMethod method, RequestCallback requestCallback,

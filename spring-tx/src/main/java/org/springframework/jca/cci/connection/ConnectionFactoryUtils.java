@@ -79,7 +79,7 @@ public abstract class ConnectionFactoryUtils {
 	 * when using {@link CciLocalTransactionManager}. Will bind a Connection to the thread
 	 * if transaction synchronization is active (e.g. if in a JTA transaction).
 	 * @param cf the ConnectionFactory to obtain Connection from
-	 * @param spec the ConnectionSpec for the desired Connection (may be <code>null</code>).
+	 * @param spec the ConnectionSpec for the desired Connection (may be {@code null}).
 	 * Note: If this is specified, a new Connection will be obtained for every call,
 	 * without participating in a shared transactional Connection.
 	 * @return a CCI Connection from the given ConnectionFactory
@@ -142,7 +142,7 @@ public abstract class ConnectionFactoryUtils {
 	 * bound to the current thread by Spring's transaction facilities.
 	 * @param con the Connection to check
 	 * @param cf the ConnectionFactory that the Connection was obtained from
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 * @return whether the Connection is transactional
 	 */
 	public static boolean isConnectionTransactional(Connection con, ConnectionFactory cf) {
@@ -157,9 +157,9 @@ public abstract class ConnectionFactoryUtils {
 	 * Close the given Connection, obtained from the given ConnectionFactory,
 	 * if it is not managed externally (that is, not bound to the thread).
 	 * @param con the Connection to close if necessary
-	 * (if this is <code>null</code>, the call will be ignored)
+	 * (if this is {@code null}, the call will be ignored)
 	 * @param cf the ConnectionFactory that the Connection was obtained from
-	 * (can be <code>null</code>)
+	 * (can be {@code null})
 	 * @see #getConnection
 	 */
 	public static void releaseConnection(Connection con, ConnectionFactory cf) {
@@ -180,9 +180,9 @@ public abstract class ConnectionFactoryUtils {
 	 * Same as {@link #releaseConnection}, but throwing the original ResourceException.
 	 * <p>Directly accessed by {@link TransactionAwareConnectionFactoryProxy}.
 	 * @param con the Connection to close if necessary
-	 * (if this is <code>null</code>, the call will be ignored)
+	 * (if this is {@code null}, the call will be ignored)
 	 * @param cf the ConnectionFactory that the Connection was obtained from
-	 * (can be <code>null</code>)
+	 * (can be {@code null})
 	 * @throws ResourceException if thrown by JCA CCI methods
 	 * @see #doGetConnection
 	 */

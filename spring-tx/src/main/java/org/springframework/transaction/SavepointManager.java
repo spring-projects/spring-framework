@@ -38,8 +38,8 @@ public interface SavepointManager {
 
 	/**
 	 * Create a new savepoint. You can roll back to a specific savepoint
-	 * via <code>rollbackToSavepoint</code>, and explicitly release a
-	 * savepoint that you don't need anymore via <code>releaseSavepoint</code>.
+	 * via {@code rollbackToSavepoint}, and explicitly release a
+	 * savepoint that you don't need anymore via {@code releaseSavepoint}.
 	 * <p>Note that most transaction managers will automatically release
 	 * savepoints at transaction completion.
 	 * @return a savepoint object, to be passed into rollbackToSavepoint

@@ -32,7 +32,7 @@ public interface TargetClassAware {
 	/**
 	 * Return the target class behind the implementing object
 	 * (typically a proxy configuration or an actual proxy).
-	 * @return the target Class, or <code>null</code> if not known
+	 * @return the target Class, or {@code null} if not known
 	 */
 	Class<?> getTargetClass();
 

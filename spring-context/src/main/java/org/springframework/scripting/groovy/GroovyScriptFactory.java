@@ -90,7 +90,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	 * Interpreted by the post-processor that actually creates the script.
 	 * @param groovyObjectCustomizer a customizer that can set a custom metaclass
 	 * or make other changes to the GroovyObject created by this factory
-	 * (may be <code>null</code>)
+	 * (may be {@code null})
 	 */
 	public GroovyScriptFactory(String scriptSourceLocator, GroovyObjectCustomizer groovyObjectCustomizer) {
 		Assert.hasText(scriptSourceLocator, "'scriptSourceLocator' must not be empty");
@@ -129,7 +129,7 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	/**
 	 * Groovy scripts determine their interfaces themselves,
 	 * hence we don't need to explicitly expose interfaces here.
-	 * @return <code>null</code> always
+	 * @return {@code null} always
 	 */
 	public Class[] getScriptInterfaces() {
 		return null;

@@ -23,7 +23,7 @@ import org.apache.xmlbeans.XmlOptions;
 import org.springframework.beans.factory.FactoryBean;
 
 /**
- * {@link FactoryBean} that configures an XMLBeans <code>XmlOptions</code> object
+ * {@link FactoryBean} that configures an XMLBeans {@code XmlOptions} object
  * and provides it as a bean reference.
  *
  * <p>Typical usage will be to set XMLBeans options on this bean, and refer to it
@@ -41,10 +41,10 @@ public class XmlOptionsFactoryBean implements FactoryBean<XmlOptions> {
 
 
 	/**
-	 * Set options on the underlying <code>XmlOptions</code> object.
+	 * Set options on the underlying {@code XmlOptions} object.
 	 * <p>The keys of the supplied map should be one of the String constants
-	 * defined in <code>XmlOptions</code>, the values vary per option.
-	 * @see XmlOptions#put(Object,Object)
+	 * defined in {@code XmlOptions}, the values vary per option.
+	 * @see XmlOptions#put(Object, Object)
 	 * @see XmlOptions#SAVE_PRETTY_PRINT
 	 * @see XmlOptions#LOAD_STRIP_COMMENTS
 	 */

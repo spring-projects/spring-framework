@@ -164,7 +164,7 @@ public class DefaultJmsActivationSpecFactory extends StandardJmsActivationSpecFa
 	}
 
 	/**
-	 * This implementation maps <code>SESSION_TRANSACTED</code> onto an
+	 * This implementation maps {@code SESSION_TRANSACTED} onto an
 	 * ActivationSpec property named "useRAManagedTransaction", if available
 	 * (following ActiveMQ's naming conventions).
 	 */

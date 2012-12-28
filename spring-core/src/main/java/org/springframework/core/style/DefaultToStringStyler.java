@@ -21,9 +21,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Spring's default <code>toString()</code> styler.
+ * Spring's default {@code toString()} styler.
  *
- * <p>This class is used by {@link ToStringCreator} to style <code>toString()</code>
+ * <p>This class is used by {@link ToStringCreator} to style {@code toString()}
  * output in a consistent manner according to Spring conventions.
  *
  * @author Keith Donald

@@ -23,14 +23,14 @@ import javax.management.Notification;
  * without being aware of how those notifications are being transmitted to the
  * {@link javax.management.MBeanServer}.
  *
- * <p>Managed resources can access a <code>NotificationPublisher</code> by
+ * <p>Managed resources can access a {@code NotificationPublisher} by
  * implementing the {@link NotificationPublisherAware} interface. After a particular
  * managed resource instance is registered with the {@link javax.management.MBeanServer},
- * Spring will inject a <code>NotificationPublisher</code> instance into it if that
+ * Spring will inject a {@code NotificationPublisher} instance into it if that
  * resource implements the {@link NotificationPublisherAware} inteface.
  *
  * <p>Each managed resource instance will have a distinct instance of a
- * <code>NotificationPublisher</code> implementation. This instance will keep
+ * {@code NotificationPublisher} implementation. This instance will keep
  * track of all the {@link javax.management.NotificationListener NotificationListeners}
  * registered for a particular mananaged resource.
  *

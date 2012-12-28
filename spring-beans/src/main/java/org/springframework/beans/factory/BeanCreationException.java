@@ -135,7 +135,7 @@ public class BeanCreationException extends FatalBeanException {
 
 	/**
 	 * Return the related causes, if any.
-	 * @return the array of related causes, or <code>null</code> if none
+	 * @return the array of related causes, or {@code null} if none
 	 */
 	public Throwable[] getRelatedCauses() {
 		if (this.relatedCauses == null) {

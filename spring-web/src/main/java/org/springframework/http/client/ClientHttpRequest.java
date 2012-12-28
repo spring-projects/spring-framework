@@ -25,7 +25,7 @@ import org.springframework.http.HttpRequest;
 /**
  * Represents a client-side HTTP request. Created via an implementation of the {@link ClientHttpRequestFactory}.
  *
- * <p>A <code>HttpRequest</code> can be {@linkplain #execute() executed}, getting a {@link ClientHttpResponse}
+ * <p>A {@code HttpRequest} can be {@linkplain #execute() executed}, getting a {@link ClientHttpResponse}
  * which can be read from.
  *
  * @author Arjen Poutsma

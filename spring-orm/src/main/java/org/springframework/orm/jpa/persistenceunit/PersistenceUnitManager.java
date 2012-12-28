@@ -38,7 +38,7 @@ public interface PersistenceUnitManager {
 
 	/**
 	 * Obtain the default PersistenceUnitInfo from this manager.
-	 * @return the PersistenceUnitInfo (never <code>null</code>)
+	 * @return the PersistenceUnitInfo (never {@code null})
 	 * @throws IllegalStateException if there is no default PersistenceUnitInfo defined
 	 * or it has already been obtained
 	 */
@@ -47,7 +47,7 @@ public interface PersistenceUnitManager {
 	/**
 	 * Obtain the specified PersistenceUnitInfo from this manager.
 	 * @param persistenceUnitName the name of the desired persistence unit
-	 * @return the PersistenceUnitInfo (never <code>null</code>)
+	 * @return the PersistenceUnitInfo (never {@code null})
 	 * @throws IllegalArgumentException if no PersistenceUnitInfo with the given
 	 * name is defined
 	 * @throws IllegalStateException if the PersistenceUnitInfo with the given

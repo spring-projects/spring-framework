@@ -31,12 +31,12 @@ import org.springframework.context.ApplicationContextAware;
  * Convenience subclass of Quartz's {@link org.quartz.JobDetail} class,
  * making bean-style usage easier.
  *
- * <p><code>JobDetail</code> itself is already a JavaBean but lacks
+ * <p>{@code JobDetail} itself is already a JavaBean but lacks
  * sensible defaults. This class uses the Spring bean name as job name,
  * and the Quartz default group ("DEFAULT") as job group if not specified.
  *
  * <p><b>NOTE: This convenience subclass does not work against Quartz 2.0.</b>
- * Use Quartz 2.0's native <code>JobDetailImpl</code> class or the new Quartz 2.0
+ * Use Quartz 2.0's native {@code JobDetailImpl} class or the new Quartz 2.0
  * builder API instead. Alternatively, switch to Spring's {@link JobDetailFactoryBean}
  * which largely is a drop-in replacement for this class and its properties and
  * consistently works against Quartz 1.x as well as Quartz 2.0/2.1.

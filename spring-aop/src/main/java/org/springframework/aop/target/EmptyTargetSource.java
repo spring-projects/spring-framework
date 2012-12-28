@@ -22,7 +22,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Canonical <code>TargetSource</code> when there is no target
+ * Canonical {@code TargetSource} when there is no target
  * (or just the target class known), and behavior is supplied
  * by interfaces and advisors only.
  *
@@ -47,7 +47,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 
 	/**
 	 * Return an EmptyTargetSource for the given target Class.
-	 * @param targetClass the target Class (may be <code>null</code>)
+	 * @param targetClass the target Class (may be {@code null})
 	 * @see #getTargetClass()
 	 */
 	public static EmptyTargetSource forClass(Class targetClass) {
@@ -56,7 +56,7 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 
 	/**
 	 * Return an EmptyTargetSource for the given target Class.
-	 * @param targetClass the target Class (may be <code>null</code>)
+	 * @param targetClass the target Class (may be {@code null})
 	 * @param isStatic whether the TargetSource should be marked as static
 	 * @see #getTargetClass()
 	 */
@@ -76,9 +76,9 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 
 	/**
 	 * Create a new instance of the {@link EmptyTargetSource} class.
-	 * <p>This constructor is <code>private</code> to enforce the
+	 * <p>This constructor is {@code private} to enforce the
 	 * Singleton pattern / factory method pattern.
-	 * @param targetClass the target class to expose (may be <code>null</code>)
+	 * @param targetClass the target class to expose (may be {@code null})
 	 * @param isStatic whether the TargetSource is marked as static
 	 */
 	private EmptyTargetSource(Class targetClass, boolean isStatic) {
@@ -87,21 +87,21 @@ public class EmptyTargetSource implements TargetSource, Serializable {
 	}
 
 	/**
-	 * Always returns the specified target Class, or <code>null</code> if none.
+	 * Always returns the specified target Class, or {@code null} if none.
 	 */
 	public Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
 	/**
-	 * Always returns <code>true</code>.
+	 * Always returns {@code true}.
 	 */
 	public boolean isStatic() {
 		return this.isStatic;
 	}
 
 	/**
-	 * Always returns <code>null</code>.
+	 * Always returns {@code null}.
 	 */
 	public Object getTarget() {
 		return null;

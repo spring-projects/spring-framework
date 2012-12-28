@@ -34,7 +34,7 @@ import org.springframework.util.SystemPropertyUtils;
  * don't need application-specific log files within the WAR directory, don't use
  * log4j setup within the application (thus, don't use Log4jConfigListener or
  * Log4jConfigServlet). Instead, use a global, VM-wide log4j setup (for example,
- * in JBoss) or JDK 1.4's <code>java.util.logging</code> (which is global too).
+ * in JBoss) or JDK 1.4's {@code java.util.logging} (which is global too).
  *
  * <p>Supports three init parameters at the servlet context level (that is,
  * context-param entries in web.xml):
@@ -57,7 +57,7 @@ import org.springframework.util.SystemPropertyUtils;
  * below for details on how to use this system property in log file locations.
  * </ul>
  *
- * <p>Note: <code>initLogging</code> should be called before any other Spring activity
+ * <p>Note: {@code initLogging} should be called before any other Spring activity
  * (when using log4j), for proper initialization before any Spring logging attempts.
  *
  * <p>Log4j's watchdog thread will asynchronously check whether the timestamp
@@ -76,12 +76,12 @@ import org.springframework.util.SystemPropertyUtils;
  * The default system property key is "webapp.root", to be used in a log4j config
  * file like as follows:
  *
- * <p><code>log4j.appender.myfile.File=${webapp.root}/WEB-INF/demo.log</code>
+ * <p>{@code log4j.appender.myfile.File=${webapp.root}/WEB-INF/demo.log}
  *
  * <p>Alternatively, specify a unique context-param "webAppRootKey" per web application.
  * For example, with "webAppRootKey = "demo.root":
  *
- * <p><code>log4j.appender.myfile.File=${demo.root}/WEB-INF/demo.log</code>
+ * <p>{@code log4j.appender.myfile.File=${demo.root}/WEB-INF/demo.log}
  *
  * <p><b>WARNING:</b> Some containers (like Tomcat) do <i>not</i> keep system properties
  * separate per web app. You have to use unique "webAppRootKey" context-params per web

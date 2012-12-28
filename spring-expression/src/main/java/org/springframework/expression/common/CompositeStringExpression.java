@@ -30,7 +30,7 @@ import org.springframework.expression.Expression;
  *
  * which will be represented as a CompositeStringExpression of two parts. The first part being a
  * LiteralExpression representing 'Hello ' and the second part being a real expression that will
- * call <code>getName()</code> when invoked.
+ * call {@code getName()} when invoked.
  *
  * @author Andy Clement
  * @author Juergen Hoeller

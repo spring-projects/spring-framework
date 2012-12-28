@@ -37,7 +37,7 @@ import org.springframework.core.NamedThreadLocal;
  * for example, if one caller makes repeated calls on the AOP proxy.
  *
  * <p>Cleanup of thread-bound objects is performed on BeanFactory destruction,
- * calling their <code>DisposableBean.destroy()</code> method if available.
+ * calling their {@code DisposableBean.destroy()} method if available.
  * Be aware that many thread-bound objects can be around until the application
  * actually shuts down.
  *

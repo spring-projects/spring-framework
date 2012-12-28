@@ -54,7 +54,7 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	/**
 	 * Check whether the aspect class carries an
 	 * {@link org.springframework.core.annotation.Order} annotation,
-	 * falling back to <code>Ordered.LOWEST_PRECEDENCE</code>.
+	 * falling back to {@code Ordered.LOWEST_PRECEDENCE}.
 	 * @see org.springframework.core.annotation.Order
 	 */
 	@Override

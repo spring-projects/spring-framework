@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  *
  * <p>Delegates to {@link ConnectionFactoryUtils} for automatically participating
  * in thread-bound transactions, for example managed by {@link JmsTransactionManager}.
- * <code>createSession</code> calls and <code>close</code> calls on returned Sessions
+ * {@code createSession} calls and {@code close} calls on returned Sessions
  * will behave properly within a transaction, that is, always work on the transactional
  * Session. If not within a transaction, normal ConnectionFactory behavior applies.
  *
