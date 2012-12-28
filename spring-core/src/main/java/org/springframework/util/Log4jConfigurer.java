@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.apache.log4j.xml.DOMConfigurator;
  *
  * <p>For web environments, the analogous Log4jWebConfigurer class can be found
  * in the web package, reading in its configuration from context-params in
- * <code>web.xml</code>. In a J2EE web application, log4j is usually set up
+ * {@code web.xml}. In a J2EE web application, log4j is usually set up
  * via Log4jConfigListener or Log4jConfigServlet, delegating to
  * Log4jWebConfigurer underneath.
  *

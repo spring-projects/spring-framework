@@ -32,8 +32,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
  *
  * <p>The default implementation uses a standard JDBC CachedRowSet underneath.
  * This means that JDBC RowSet support needs to be available at runtime:
- * by default, Sun's <code>com.sun.rowset.CachedRowSetImpl</code> class on Java 5 and 6,
- * or the <code>javax.sql.rowset.RowSetProvider</code> mechanism on Java 7 / JDBC 4.1.
+ * by default, Sun's {@code com.sun.rowset.CachedRowSetImpl} class on Java 5 and 6,
+ * or the {@code javax.sql.rowset.RowSetProvider} mechanism on Java 7 / JDBC 4.1.
  *
  * @author Juergen Hoeller
  * @since 1.2
@@ -82,10 +82,10 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 
 	/**
 	 * Create a new CachedRowSet instance, to be populated by
-	 * the <code>createSqlRowSet</code> implementation.
+	 * the {@code createSqlRowSet} implementation.
 	 * <p>The default implementation uses JDBC 4.1's RowSetProvider
 	 * when running on JDK 7 or higher, falling back to Sun's
-	 * <code>com.sun.rowset.CachedRowSetImpl</code> class on older JDKs.
+	 * {@code com.sun.rowset.CachedRowSetImpl} class on older JDKs.
 	 * @return a new CachedRowSet instance
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see #createSqlRowSet

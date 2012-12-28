@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public interface PersistenceUnitManager {
 
 	/**
 	 * Obtain the default PersistenceUnitInfo from this manager.
-	 * @return the PersistenceUnitInfo (never <code>null</code>)
+	 * @return the PersistenceUnitInfo (never {@code null})
 	 * @throws IllegalStateException if there is no default PersistenceUnitInfo defined
 	 * or it has already been obtained
 	 */
@@ -47,7 +47,7 @@ public interface PersistenceUnitManager {
 	/**
 	 * Obtain the specified PersistenceUnitInfo from this manager.
 	 * @param persistenceUnitName the name of the desired persistence unit
-	 * @return the PersistenceUnitInfo (never <code>null</code>)
+	 * @return the PersistenceUnitInfo (never {@code null})
 	 * @throws IllegalArgumentException if no PersistenceUnitInfo with the given
 	 * name is defined
 	 * @throws IllegalStateException if the PersistenceUnitInfo with the given

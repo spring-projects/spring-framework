@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.transaction.TransactionException;
  * interface, exposing a method for executing a given callback within a transaction.
  *
  * <p>Implementors of this interface automatically express a preference for
- * callbacks over programmatic <code>getTransaction</code>, <code>commit</code>
- * and <code>rollback</code> calls. Calling code may check whether a given
+ * callbacks over programmatic {@code getTransaction}, {@code commit}
+ * and {@code rollback} calls. Calling code may check whether a given
  * transaction manager implements this interface to choose to prepare a
  * callback instead of explicit transaction demarcation control.
  *
@@ -36,7 +36,7 @@ import org.springframework.transaction.TransactionException;
  *
  * @author Juergen Hoeller
  * @since 2.0
- * @see org.springframework.transaction.support.TransactionTemplate
+ * @see TransactionTemplate
  * @see org.springframework.transaction.interceptor.TransactionInterceptor
  */
 public interface CallbackPreferringPlatformTransactionManager extends PlatformTransactionManager {
@@ -49,7 +49,7 @@ public interface CallbackPreferringPlatformTransactionManager extends PlatformTr
 	 * Such an exception gets propagated to the caller of the template.
 	 * @param definition the definition for the transaction to wrap the callback in
 	 * @param callback the callback object that specifies the transactional action
-	 * @return a result object returned by the callback, or <code>null</code> if none
+	 * @return a result object returned by the callback, or {@code null} if none
 	 * @throws TransactionException in case of initialization, rollback, or system errors
 	 * @throws RuntimeException if thrown by the TransactionCallback
 	 */

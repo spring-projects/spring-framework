@@ -144,7 +144,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 	 * for the given introduction field.
 	 * <p>Resulting Advisors will need to be evaluated for targets.
 	 * @param introductionField the field to introspect
-	 * @return <code>null</code> if not an Advisor
+	 * @return {@code null} if not an Advisor
 	 */
 	private Advisor getDeclareParentsAdvisor(Field introductionField) {
 		DeclareParents declareParents = introductionField.getAnnotation(DeclareParents.class);
@@ -203,7 +203,7 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 			return null;
 		}
 
-		// If we get here, we know we have an AspectJ method. 
+		// If we get here, we know we have an AspectJ method.
 		// Check that it's an AspectJ-annotated class
 		if (!isAspect(candidateAspectClass)) {
 			throw new AopConfigException("Advice must be declared inside an aspect type: " +

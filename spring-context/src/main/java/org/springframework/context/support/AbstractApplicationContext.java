@@ -264,14 +264,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return a friendly name for this context.
-	 * @return a display name for this context (never <code>null</code>)
+	 * @return a display name for this context (never {@code null})
 	 */
 	public String getDisplayName() {
 		return this.displayName;
 	}
 
 	/**
-	 * Return the parent context, or <code>null</code> if there is no parent
+	 * Return the parent context, or {@code null} if there is no parent
 	 * (that is, this context is the root of the context hierarchy).
 	 */
 	public ApplicationContext getParent() {
@@ -339,7 +339,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal ApplicationEventMulticaster used by the context.
-	 * @return the internal ApplicationEventMulticaster (never <code>null</code>)
+	 * @return the internal ApplicationEventMulticaster (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
@@ -352,7 +352,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal LifecycleProcessor used by the context.
-	 * @return the internal LifecycleProcessor (never <code>null</code>)
+	 * @return the internal LifecycleProcessor (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private LifecycleProcessor getLifecycleProcessor() {
@@ -371,7 +371,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Can be overridden in subclasses, for extended resolution strategies,
 	 * for example in a web environment.
 	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
-	 * Call the context's <code>getResources</code> method instead, which
+	 * Call the context's {@code getResources} method instead, which
 	 * will delegate to the ResourcePatternResolver.
 	 * @return the ResourcePatternResolver for this context
 	 * @see #getResources
@@ -952,7 +952,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
-	 * Cancel this context's refresh attempt, resetting the <code>active</code> flag
+	 * Cancel this context's refresh attempt, resetting the {@code active} flag
 	 * after an exception got thrown.
 	 * @param ex the exception that led to the cancellation
 	 */
@@ -966,8 +966,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Register a shutdown hook with the JVM runtime, closing this context
 	 * on JVM shutdown unless it has already been closed at that time.
-	 * <p>Delegates to <code>doClose()</code> for the actual closing procedure.
-	 * @see java.lang.Runtime#addShutdownHook
+	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
+	 * @see Runtime#addShutdownHook
 	 * @see #close()
 	 * @see #doClose()
 	 */
@@ -989,7 +989,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * Only called when the ApplicationContext itself is running
 	 * as a bean in another BeanFactory or ApplicationContext,
 	 * which is rather unusual.
-	 * <p>The <code>close</code> method is the native way to
+	 * <p>The {@code close} method is the native way to
 	 * shut down an ApplicationContext.
 	 * @see #close()
 	 * @see org.springframework.beans.factory.access.SingletonBeanFactoryLocator
@@ -1000,7 +1000,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Close this application context, destroying all beans in its bean factory.
-	 * <p>Delegates to <code>doClose()</code> for the actual closing procedure.
+	 * <p>Delegates to {@code doClose()} for the actual closing procedure.
 	 * Also removes a JVM shutdown hook, if registered, as it's not needed anymore.
 	 * @see #doClose()
 	 * @see #registerShutdownHook()
@@ -1024,7 +1024,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Actually performs context closing: publishes a ContextClosedEvent and
 	 * destroys the singletons in the bean factory of this application context.
-	 * <p>Called by both <code>close()</code> and a JVM shutdown hook, if any.
+	 * <p>Called by both {@code close()} and a JVM shutdown hook, if any.
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 * @see #destroyBeans()
 	 * @see #close()
@@ -1078,7 +1078,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	/**
 	 * Template method for destroying all beans that this context manages.
 	 * The default implementation destroy all cached singletons in this context,
-	 * invoking <code>DisposableBean.destroy()</code> and/or the specified
+	 * invoking {@code DisposableBean.destroy()} and/or the specified
 	 * "destroy-method".
 	 * <p>Can be overridden to add context-specific bean destruction steps
 	 * right before or right after standard singleton destruction,
@@ -1240,7 +1240,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	/**
 	 * Return the internal MessageSource used by the context.
-	 * @return the internal MessageSource (never <code>null</code>)
+	 * @return the internal MessageSource (never {@code null})
 	 * @throws IllegalStateException if the context has not been initialized yet
 	 */
 	private MessageSource getMessageSource() throws IllegalStateException {
@@ -1257,7 +1257,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected MessageSource getInternalParentMessageSource() {
 		return (getParent() instanceof AbstractApplicationContext) ?
-		    ((AbstractApplicationContext) getParent()).messageSource : getParent();
+			((AbstractApplicationContext) getParent()).messageSource : getParent();
 	}
 
 
@@ -1318,7 +1318,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p>Note: Subclasses should check whether the context is still active before
 	 * returning the internal bean factory. The internal factory should generally be
 	 * considered unavailable once the context has been closed.
-	 * @return this application context's internal bean factory (never <code>null</code>)
+	 * @return this application context's internal bean factory (never {@code null})
 	 * @throws IllegalStateException if the context does not hold an internal bean factory yet
 	 * (usually if {@link #refresh()} has never been called) or if the context has been
 	 * closed already

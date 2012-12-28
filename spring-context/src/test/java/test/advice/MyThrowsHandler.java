@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package test.advice;
 
@@ -19,7 +19,7 @@ public class MyThrowsHandler extends MethodCounter implements ThrowsAdvice {
 	public void afterThrowing(RemoteException ex) throws Throwable {
 		count("remoteException");
 	}
-	
+
 	/** Not valid, wrong number of arguments */
 	public void afterThrowing(Method m, Exception ex) throws Throwable {
 		throw new UnsupportedOperationException("Shouldn't be called");

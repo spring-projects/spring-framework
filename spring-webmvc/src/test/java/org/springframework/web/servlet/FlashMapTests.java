@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * Test fixture for {@link FlashMap} tests.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class FlashMapTests {
@@ -78,7 +78,7 @@ public class FlashMapTests {
 		flashMap.addTargetRequestParam("text", "abc");
 		flashMap.addTargetRequestParam("empty", " ");
 		flashMap.addTargetRequestParam("null", null);
-		
+
 		assertEquals(1, flashMap.getTargetRequestParams().size());
 		assertEquals("abc", flashMap.getTargetRequestParams().getFirst("text"));
 	}
@@ -89,10 +89,10 @@ public class FlashMapTests {
 		params.add("key", "abc");
 		params.add("key", " ");
 		params.add("key", null);
-		
+
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParams(params);
-		
+
 		assertEquals(1, flashMap.getTargetRequestParams().size());
 		assertEquals(1, flashMap.getTargetRequestParams().get("key").size());
 		assertEquals("abc", flashMap.getTargetRequestParams().getFirst("key"));
@@ -103,7 +103,7 @@ public class FlashMapTests {
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParam(" ", "abc");
 		flashMap.addTargetRequestParam(null, "abc");
-		
+
 		assertTrue(flashMap.getTargetRequestParams().isEmpty());
 	}
 
@@ -112,11 +112,11 @@ public class FlashMapTests {
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
 		params.add(" ", "abc");
 		params.add(null, " ");
-		
+
 		FlashMap flashMap = new FlashMap();
 		flashMap.addTargetRequestParams(params);
-		
+
 		assertTrue(flashMap.getTargetRequestParams().isEmpty());
 	}
-	
+
 }

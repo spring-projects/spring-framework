@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link Resource} implementation for <code>java.io.File</code> handles.
+ * {@link Resource} implementation for {@code java.io.File} handles.
  * Obviously supports resolution as File, and also as URL.
  * Implements the extended {@link WritableResource} interface.
  *
@@ -204,7 +204,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	@Override
 	public boolean equals(Object obj) {
 		return (obj == this ||
-		    (obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
+			(obj instanceof FileSystemResource && this.path.equals(((FileSystemResource) obj).path)));
 	}
 
 	/**

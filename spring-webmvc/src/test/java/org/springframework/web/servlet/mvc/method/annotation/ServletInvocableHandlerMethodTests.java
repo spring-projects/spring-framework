@@ -185,10 +185,12 @@ public class ServletInvocableHandlerMethodTests {
 
 	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
+		@Override
 		public boolean supportsReturnType(MethodParameter returnType) {
 			return true;
 		}
 
+		@Override
 		public void handleReturnValue(Object returnValue, MethodParameter returnType,
 				ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 			throw new HttpMessageNotWritableException("oops, can't write");

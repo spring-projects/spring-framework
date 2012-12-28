@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 	 * <p>The default implementation returns the specified default locale,
 	 * if any, else falls back to the request's accept-header locale.
 	 * @param request the request to resolve the locale for
-	 * @return the default locale (never <code>null</code>)
+	 * @return the default locale (never {@code null})
 	 * @see #setDefaultLocale
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */

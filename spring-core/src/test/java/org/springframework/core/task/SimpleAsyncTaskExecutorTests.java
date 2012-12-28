@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 	public void testThreadFactoryOverridesDefaults() throws Exception {
 		final Object monitor = new Object();
 		SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor(new ThreadFactory() {
+			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "test");
 			}
@@ -88,6 +89,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 
 	private static final class NoOpRunnable implements Runnable {
 
+		@Override
 		public void run() {
 			// no-op
 		}
@@ -102,6 +104,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 			this.monitor = monitor;
 		}
 
+		@Override
 		public final void run() {
 			synchronized (this.monitor) {
 				try {
@@ -129,6 +132,7 @@ public final class SimpleAsyncTaskExecutorTests extends TestCase {
 			return this.threadName;
 		}
 
+		@Override
 		protected void doRun() {
 			this.threadName = Thread.currentThread().getName();
 		}

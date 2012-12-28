@@ -50,7 +50,7 @@ public class Log4jWebConfigurerTests {
 	public void initLoggingWithClasspathResourceAndRefreshInterval() {
 		initLogging(CLASSPATH_RESOURCE, true);
 	}
-	
+
 	@Test
 	public void initLoggingWithRelativeFilePath() {
 		initLogging(RELATIVE_PATH, false);
@@ -119,11 +119,11 @@ public class Log4jWebConfigurerTests {
 	@Test
 	public void testLog4jConfigListener() {
 		Log4jConfigListener listener = new Log4jConfigListener();
-		
+
 		MockServletContext sc = new MockServletContext("", new FileSystemResourceLoader());
 		sc.addInitParameter(Log4jWebConfigurer.CONFIG_LOCATION_PARAM, RELATIVE_PATH);
 		listener.contextInitialized(new ServletContextEvent(sc));
-		
+
 		try {
 			assertLogOutput();
 		} finally {

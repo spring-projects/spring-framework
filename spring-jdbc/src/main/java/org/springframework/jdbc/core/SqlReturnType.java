@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import java.sql.SQLException;
 
 /**
  * Interface to be implemented for retrieving values for more complex database-specific
- * types not supported by the standard <code>CallableStatement.getObject</code> method.
+ * types not supported by the standard {@code CallableStatement.getObject} method.
  *
  * <p>Implementations perform the actual work of getting the actual values. They must
- * implement the callback method <code>getTypeValue</code> which can throw SQLExceptions
+ * implement the callback method {@code getTypeValue} which can throw SQLExceptions
  * that will be caught and translated by the calling code. This callback method has
  * access to the underlying Connection via the given CallableStatement object, if that
  * should be needed to create any database-specific objects.

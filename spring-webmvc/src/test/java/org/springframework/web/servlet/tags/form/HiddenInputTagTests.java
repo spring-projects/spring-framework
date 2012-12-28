@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,11 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -73,7 +75,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "type", "hidden");
 		assertContainsAttribute(output, "value", "12.34f");
 	}
-	
+
 	public void testDynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
@@ -86,7 +88,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	public void testDisabledTrue() throws Exception {
 		this.tag.setDisabled("true");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 
@@ -98,10 +100,10 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 	}
 
 	// SPR-8661
-	
+
 	public void testDisabledFalse() throws Exception {
 		this.tag.setDisabled("false");
-		
+
 		this.tag.doStartTag();
 		this.tag.doEndTag();
 
@@ -111,7 +113,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 		assertAttributeNotPresent(output, "disabled");
 	}
-	
+
 	private void assertTagClosed(String output) {
 		assertTrue(output.endsWith("/>"));
 	}
@@ -120,6 +122,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertTrue(output.startsWith("<input "));
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setName("Sally Greenwood");

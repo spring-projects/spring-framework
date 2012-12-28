@@ -44,6 +44,7 @@ public class TopLinkMultiEntityManagerFactoryIntegrationTests extends
 		this.entityManagerFactory2 = entityManagerFactory2;
 	}
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {
 			"/org/springframework/orm/jpa/toplink/toplink-manager-multi.xml",

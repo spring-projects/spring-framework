@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class PropertiesBasedSpr3350SingleSpringContextTests extends AbstractSpr3
 	 *
 	 * @see org.springframework.test.AbstractSingleSpringContextTests#createBeanDefinitionReader(org.springframework.context.support.GenericApplicationContext)
 	 */
+	@Override
 	protected final BeanDefinitionReader createBeanDefinitionReader(GenericApplicationContext context) {
 		return new PropertiesBeanDefinitionReader(context);
 	}
@@ -52,6 +53,7 @@ public class PropertiesBasedSpr3350SingleSpringContextTests extends AbstractSpr3
 	 * Returns
 	 * &quot;PropertiesBasedSpr3350SingleSpringContextTests-context.properties&quot;.
 	 */
+	@Override
 	protected final String getConfigPath() {
 		return "PropertiesBasedSpr3350SingleSpringContextTests-context.properties";
 	}

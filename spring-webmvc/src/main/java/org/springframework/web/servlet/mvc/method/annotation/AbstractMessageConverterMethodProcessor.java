@@ -82,8 +82,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 * {@link #writeWithMessageConverters(Object, MethodParameter, ServletServerHttpRequest, ServletServerHttpResponse)}
 	 */
 	protected <T> void writeWithMessageConverters(T returnValue,
-												  MethodParameter returnType,
-												  NativeWebRequest webRequest)
+												MethodParameter returnType,
+												NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
@@ -103,9 +103,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	 */
 	@SuppressWarnings("unchecked")
 	protected <T> void writeWithMessageConverters(T returnValue,
-												  MethodParameter returnType,
-												  ServletServerHttpRequest inputMessage,
-												  ServletServerHttpResponse outputMessage)
+												MethodParameter returnType,
+												ServletServerHttpRequest inputMessage,
+												ServletServerHttpResponse outputMessage)
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		Class<?> returnValueClass = returnValue.getClass();
@@ -173,11 +173,11 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		}
 		else if (!allSupportedMediaTypes.isEmpty()) {
 			List<MediaType> result = new ArrayList<MediaType>();
-            for (HttpMessageConverter<?> converter : messageConverters) {
-                if (converter.canWrite(returnValueClass, null)) {
-                	result.addAll(converter.getSupportedMediaTypes());
-                }
-            }
+			for (HttpMessageConverter<?> converter : messageConverters) {
+				if (converter.canWrite(returnValueClass, null)) {
+					result.addAll(converter.getSupportedMediaTypes());
+				}
+			}
 			return result;
 		}
 		else {

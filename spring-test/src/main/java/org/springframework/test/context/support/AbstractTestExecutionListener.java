@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.test.context.TestExecutionListener;
  * Abstract implementation of the {@link TestExecutionListener} interface which
  * provides empty method stubs. Subclasses can extend this class and override
  * only those methods suitable for the task at hand.
- * 
+ *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5

@@ -38,7 +38,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * relative paths within the portlet application root directory.
  *
  * <p>Always supports stream access and URL access, but only allows
- * <code>java.io.File</code> access when the portlet application archive
+ * {@code java.io.File} access when the portlet application archive
  * is expanded.
  *
  * @author Juergen Hoeller
@@ -93,7 +93,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 
 
 	/**
-	 * This implementation checks <code>PortletContext.getResource</code>.
+	 * This implementation checks {@code PortletContext.getResource}.
 	 * @see javax.portlet.PortletContext#getResource(String)
 	 */
 	@Override
@@ -108,8 +108,8 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>PortletContext.getResourceAsStream</code>,
-	 * which returns <code>null</code> in case of a non-readable resource (e.g. a directory).
+	 * This implementation delegates to {@code PortletContext.getResourceAsStream},
+	 * which returns {@code null} in case of a non-readable resource (e.g. a directory).
 	 * @see javax.portlet.PortletContext#getResourceAsStream(String)
 	 */
 	@Override
@@ -130,7 +130,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>PortletContext.getResourceAsStream</code>,
+	 * This implementation delegates to {@code PortletContext.getResourceAsStream},
 	 * but throws a FileNotFoundException if not found.
 	 * @see javax.portlet.PortletContext#getResourceAsStream(String)
 	 */
@@ -143,7 +143,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 	}
 
 	/**
-	 * This implementation delegates to <code>PortletContext.getResource</code>,
+	 * This implementation delegates to {@code PortletContext.getResource},
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.portlet.PortletContext#getResource(String)
 	 */
@@ -159,7 +159,7 @@ public class PortletContextResource extends AbstractFileResolvingResource implem
 
 	/**
 	 * This implementation resolves "file:" URLs or alternatively delegates to
-	 * <code>PortletContext.getRealPath</code>, throwing a FileNotFoundException
+	 * {@code PortletContext.getRealPath}, throwing a FileNotFoundException
 	 * if not found or not resolvable.
 	 * @see javax.portlet.PortletContext#getResource(String)
 	 * @see javax.portlet.PortletContext#getRealPath(String)

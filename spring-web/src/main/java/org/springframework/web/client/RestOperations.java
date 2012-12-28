@@ -136,40 +136,40 @@ public interface RestOperations {
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template, and returns the value of the
-	 * <code>Location</code> header. This header typically indicates where the new resource is stored.
+	 * {@code Location} header. This header typically indicates where the new resource is stored.
 	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param uriVariables the variables to expand the template
-	 * @return the value for the <code>Location</code> header
+	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
 	URI postForLocation(String url, Object request, Object... uriVariables) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template, and returns the value of the
-	 * <code>Location</code> header. This header typically indicates where the new resource is stored.
+	 * {@code Location} header. This header typically indicates where the new resource is stored.
 	 * <p>URI Template variables are expanded using the given map.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param uriVariables the variables to expand the template
-	 * @return the value for the <code>Location</code> header
+	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
 	URI postForLocation(String url, Object request, Map<String, ?> uriVariables) throws RestClientException;
 
 	/**
 	 * Create a new resource by POSTing the given object to the URL, and returns the value of the
-	 * <code>Location</code> header. This header typically indicates where the new resource is stored.
+	 * {@code Location} header. This header typically indicates where the new resource is stored.
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
-	 * @return the value for the <code>Location</code> header
+	 * @param request the Object to be POSTed, may be {@code null}
+	 * @return the value for the {@code Location} header
 	 * @see HttpEntity
 	 */
 	URI postForLocation(URI url, Object request) throws RestClientException;
@@ -181,7 +181,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
@@ -197,7 +197,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param responseType the type of the return value
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
@@ -212,7 +212,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param responseType the type of the return value
 	 * @return the converted object
 	 * @see HttpEntity
@@ -226,7 +226,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 * @see HttpEntity
@@ -242,7 +242,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @return the converted object
 	 * @see HttpEntity
@@ -257,7 +257,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be POSTed, may be <code>null</code>
+	 * @param request the Object to be POSTed, may be {@code null}
 	 * @return the converted object
 	 * @see HttpEntity
 	 * @since 3.0.2
@@ -272,7 +272,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PUT, may be <code>null</code>
+	 * @param request the Object to be PUT, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
@@ -284,7 +284,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PUT, may be <code>null</code>
+	 * @param request the Object to be PUT, may be {@code null}
 	 * @param uriVariables the variables to expand the template
 	 * @see HttpEntity
 	 */
@@ -295,7 +295,7 @@ public interface RestOperations {
 	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to
 	 * add additional HTTP headers to the request.
 	 * @param url the URL
-	 * @param request the Object to be PUT, may be <code>null</code>
+	 * @param request the Object to be PUT, may be {@code null}
 	 * @see HttpEntity
 	 */
 	void put(URI url, Object request) throws RestClientException;

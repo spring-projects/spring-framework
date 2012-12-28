@@ -36,19 +36,19 @@ import static org.junit.Assert.*;
 public class RequestPartServletServerHttpRequestTests {
 
 	private RequestPartServletServerHttpRequest request;
-	
+
 	private MockMultipartHttpServletRequest mockRequest;
 
 	private MockMultipartFile mockFile;
-	
+
 	@Before
 	public void create() throws Exception {
 		mockFile = new MockMultipartFile("part", "", "application/json" ,"Part Content".getBytes("UTF-8"));
 		mockRequest = new MockMultipartHttpServletRequest();
 		mockRequest.addFile(mockFile);
 		request = new RequestPartServletServerHttpRequest(mockRequest, "part");
-	}	
-	
+	}
+
 	@Test
 	public void getMethod() throws Exception {
 		mockRequest.setMethod("POST");
@@ -80,5 +80,5 @@ public class RequestPartServletServerHttpRequestTests {
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertArrayEquals("Invalid content returned", mockFile.getBytes(), result);
 	}
-	
+
 }

@@ -26,17 +26,17 @@ import org.springframework.dao.DataAccessException;
  * implemented by {@link JdoTemplate}. Not often used, but a useful
  * option to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Defines <code>JdoTemplate</code>'s data access methods that mirror
+ * <p>Defines {@code JdoTemplate}'s data access methods that mirror
  * various JDO {@link javax.jdo.PersistenceManager} methods. Users are
- * strongly encouraged to read the JDO <code>PersistenceManager</code>
+ * strongly encouraged to read the JDO {@code PersistenceManager}
  * javadocs for details on the semantics of those methods.
  *
  * <p>Note that lazy loading will just work with an open JDO
- * <code>PersistenceManager</code>, either within a managed transaction or within
+ * {@code PersistenceManager}, either within a managed transaction or within
  * {@link org.springframework.orm.jdo.support.OpenPersistenceManagerInViewFilter}/
  * {@link org.springframework.orm.jdo.support.OpenPersistenceManagerInViewInterceptor}.
  * Furthermore, some operations just make sense within transactions,
- * for example: <code>evict</code>, <code>evictAll</code>, <code>flush</code>.
+ * for example: {@code evict}, {@code evictAll}, {@code flush}.
  *
  * <p>Updated to build on JDO 2.0 or higher, as of Spring 2.5.
  *
@@ -64,7 +64,7 @@ public interface JdoOperations {
 	 * <p>Note: Callback code is not supposed to handle transactions itself!
 	 * Use an appropriate transaction manager like JdoTransactionManager.
 	 * @param action callback object that specifies the JDO action
-	 * @return a result object returned by the action, or <code>null</code>
+	 * @return a result object returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see JdoTransactionManager
 	 * @see javax.jdo.PersistenceManager
@@ -76,7 +76,7 @@ public interface JdoOperations {
 	 * Collection. This is a convenience method for executing JDO queries
 	 * within an action.
 	 * @param action callback object that specifies the JDO action
-	 * @return a Collection result returned by the action, or <code>null</code>
+	 * @return a Collection result returned by the action, or {@code null}
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 */
 	Collection executeFind(JdoCallback<?> action) throws DataAccessException;
@@ -247,7 +247,7 @@ public interface JdoOperations {
 	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter.
 	 * @param entityClass a persistent class
-	 * @param filter the JDOQL filter to match (or <code>null</code> if none)
+	 * @param filter the JDOQL filter to match (or {@code null} if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -258,8 +258,8 @@ public interface JdoOperations {
 	 * Find all persistent instances of the given class that match the given
 	 * JDOQL filter, with the given result ordering.
 	 * @param entityClass a persistent class
-	 * @param filter the JDOQL filter to match (or <code>null</code> if none)
-	 * @param ordering the ordering of the result (or <code>null</code> if none)
+	 * @param filter the JDOQL filter to match (or {@code null} if none)
+	 * @param ordering the ordering of the result (or {@code null} if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -291,7 +291,7 @@ public interface JdoOperations {
 	 * @param filter the JDOQL filter to match
 	 * @param parameters the JDOQL parameter declarations
 	 * @param values the corresponding parameter values
-	 * @param ordering the ordering of the result (or <code>null</code> if none)
+	 * @param ordering the ordering of the result (or {@code null} if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -327,7 +327,7 @@ public interface JdoOperations {
 	 * @param filter the JDOQL filter to match
 	 * @param parameters the JDOQL parameter declarations
 	 * @param values a Map with parameter names as keys and parameter values
-	 * @param ordering the ordering of the result (or <code>null</code> if none)
+	 * @param ordering the ordering of the result (or {@code null} if none)
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors
 	 * @see javax.jdo.PersistenceManager#newQuery(Class, String)
@@ -342,8 +342,8 @@ public interface JdoOperations {
 	/**
 	 * Find persistent instances through the given query object
 	 * in the specified query language.
-	 * @param language the query language (<code>javax.jdo.Query#JDOQL</code>
-	 * or <code>javax.jdo.Query#SQL</code>, for example)
+	 * @param language the query language ({@code javax.jdo.Query#JDOQL}
+	 * or {@code javax.jdo.Query#SQL}, for example)
 	 * @param queryObject the query object for the specified language
 	 * @return the persistent instances
 	 * @throws org.springframework.dao.DataAccessException in case of JDO errors

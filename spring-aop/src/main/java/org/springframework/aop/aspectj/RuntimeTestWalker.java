@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,12 +39,12 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * This class encapsulates some AspectJ internal knowledge that should be
- * pushed back into the AspectJ project in a future release. 
+ * pushed back into the AspectJ project in a future release.
  *
  * <p>It relies on implementation specific knowledge in AspectJ to break
  * encapsulation and do something AspectJ was not designed to do: query
  * the types of runtime tests that will be performed. The code here should
- * migrate to <code>ShadowMatch.getVariablesInvolvedInRuntimeTest()</code>
+ * migrate to {@code ShadowMatch.getVariablesInvolvedInRuntimeTest()}
  * or some similar operation.
  *
  * <p>See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=151593"/>.
@@ -137,7 +137,7 @@ class RuntimeTestWalker {
 
 		public void visit(MatchingContextBasedTest matchingContextTest) {
 		}
-		
+
 		protected int getVarType(ReflectionVar v) {
 			try {
 				Field varTypeField = ReflectionVar.class.getDeclaredField("varType");
@@ -169,7 +169,7 @@ class RuntimeTestWalker {
 			this.matches = defaultMatches;
 			this.matchVarType = matchVarType;
 		}
-		
+
 		public boolean instanceOfMatches(Test test) {
 			test.accept(this);
 			return matches;
@@ -236,7 +236,7 @@ class RuntimeTestWalker {
 			aTest.accept(this);
 			return this.testsSubtypeSensitiveVars;
 		}
-		
+
 		@Override
 		public void visit(Instanceof i) {
 			ReflectionVar v = (ReflectionVar) i.getVar();

@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>Used by Spring's {@link SQLErrorCodeSQLExceptionTranslator}.
  * The file "sql-error-codes.xml" in this package contains default
- * <code>SQLErrorCodes</code> instances for various databases.
+ * {@code SQLErrorCodes} instances for various databases.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller
@@ -174,7 +174,7 @@ public class SQLErrorCodes {
 	public void setCannotSerializeTransactionCodes(String[] cannotSerializeTransactionCodes) {
 		this.cannotSerializeTransactionCodes = StringUtils.sortStringArray(cannotSerializeTransactionCodes);
 	}
-	
+
 	public String[] getCannotSerializeTransactionCodes() {
 		return this.cannotSerializeTransactionCodes;
 	}

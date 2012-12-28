@@ -227,7 +227,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	/**
 	 * This default implementation determines the type based on the actual
 	 * field value, if any. Subclasses should override this to determine
-	 * the type from a descriptor, even for <code>null</code> values.
+	 * the type from a descriptor, even for {@code null} values.
 	 * @see #getActualFieldValue
 	 */
 	@Override
@@ -295,7 +295,7 @@ public abstract class AbstractBindingResult extends AbstractErrors implements Bi
 	}
 
 	/**
-	 * This implementation returns <code>null</code>.
+	 * This implementation returns {@code null}.
 	 */
 	public PropertyEditorRegistry getPropertyEditorRegistry() {
 		return null;

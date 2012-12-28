@@ -142,6 +142,7 @@ import org.springframework.web.util.WebUtils;
  * @deprecated in Spring 3.2 in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
  */
+@Deprecated
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		implements HandlerAdapter, Ordered, BeanFactoryAware {
 
@@ -247,7 +248,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	/**
 	 * Set the MethodNameResolver to use for resolving default handler methods
-	 * (carrying an empty <code>@RequestMapping</code> annotation).
+	 * (carrying an empty {@code @RequestMapping} annotation).
 	 * <p>Will only kick in when the handler method cannot be resolved uniquely
 	 * through the annotation metadata already.
 	 */
@@ -274,11 +275,11 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	}
 
 	/**
-	 * Cache content produced by <code>@SessionAttributes</code> annotated handlers
+	 * Cache content produced by {@code @SessionAttributes} annotated handlers
 	 * for the given number of seconds. Default is 0, preventing caching completely.
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general handlers
-	 * (but not to <code>@SessionAttributes</code> annotated handlers), this setting will
-	 * apply to <code>@SessionAttributes</code> annotated handlers only.
+	 * (but not to {@code @SessionAttributes} annotated handlers), this setting will
+	 * apply to {@code @SessionAttributes} annotated handlers only.
 	 * @see #setCacheSeconds
 	 * @see org.springframework.web.bind.annotation.SessionAttributes
 	 */
@@ -289,13 +290,13 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
-	 * <p>More specifically, the execution of the <code>handleRequestInternal</code>
+	 * <p>More specifically, the execution of the {@code handleRequestInternal}
 	 * method will get synchronized if this flag is "true". The best available
 	 * session mutex will be used for the synchronization; ideally, this will
 	 * be a mutex exposed by HttpSessionMutexListener.
 	 * <p>The session mutex is guaranteed to be the same object during
 	 * the entire lifetime of the session, available under the key defined
-	 * by the <code>SESSION_MUTEX_ATTRIBUTE</code> constant. It serves as a
+	 * by the {@code SESSION_MUTEX_ATTRIBUTE} constant. It serves as a
 	 * safe reference to synchronize on for locking on the current session.
 	 * <p>In many cases, the HttpSession reference itself is a safe mutex
 	 * as well, since it will always be the same object reference for the
@@ -370,7 +371,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	/**
 	 * Specify the order value for this HandlerAdapter bean.
-	 * <p>Default value is <code>Integer.MAX_VALUE</code>, meaning that it's non-ordered.
+	 * <p>Default value is {@code Integer.MAX_VALUE}, meaning that it's non-ordered.
 	 * @see org.springframework.core.Ordered#getOrder()
 	 */
 	public void setOrder(int order) {
@@ -480,7 +481,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * <p>The default implementation creates a standard ServletRequestDataBinder.
 	 * This can be overridden for custom ServletRequestDataBinder subclasses.
 	 * @param request current HTTP request
-	 * @param target the target object to bind onto (or <code>null</code>
+	 * @param target the target object to bind onto (or {@code null}
 	 * if the binder is just used to convert a plain parameter value)
 	 * @param objectName the objectName of the target object
 	 * @return the ServletRequestDataBinder instance to use
@@ -500,7 +501,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @return the HttpInputMessage instance to use
 	 * @throws Exception in case of errors
 	 */
-    protected HttpInputMessage createHttpInputMessage(HttpServletRequest servletRequest) throws Exception {
+	protected HttpInputMessage createHttpInputMessage(HttpServletRequest servletRequest) throws Exception {
 		return new ServletServerHttpRequest(servletRequest);
 	}
 
@@ -512,7 +513,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 	 * @return the HttpInputMessage instance to use
 	 * @throws Exception in case of errors
 	 */
-    protected HttpOutputMessage createHttpOutputMessage(HttpServletResponse servletResponse) throws Exception {
+	protected HttpOutputMessage createHttpOutputMessage(HttpServletResponse servletResponse) throws Exception {
 		return new ServletServerHttpResponse(servletResponse);
 	}
 
@@ -803,7 +804,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			return AnnotationMethodHandlerAdapter.this.createHttpInputMessage(servletRequest);
 		}
 
-        @Override
+		@Override
 		protected HttpOutputMessage createHttpOutputMessage(NativeWebRequest webRequest) throws Exception {
 			HttpServletResponse servletResponse = (HttpServletResponse) webRequest.getNativeResponse();
 			return AnnotationMethodHandlerAdapter.this.createHttpOutputMessage(servletResponse);

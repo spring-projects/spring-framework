@@ -1,4 +1,3 @@
-
 /**
  *
  * Package providing integration of
@@ -10,7 +9,7 @@
  * for local Hibernate transactions.
  *
  * <p><b>This package supports Hibernate 3.x only.</b>
- * See the <code>org.springframework.orm.hibernate4</code> package for Hibernate 4.x support.
+ * See the {@code org.springframework.orm.hibernate4} package for Hibernate 4.x support.
  *
  */
 package org.springframework.orm.hibernate3;

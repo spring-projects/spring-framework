@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.jdbc.InvalidResultSetAccessException;
  * defining error code mappings for database names from database metadata.
  * <li>Fallback to a fallback translator. {@link SQLStateSQLExceptionTranslator} is the
  * default fallback translator, analyzing the exception's SQL state only. On Java 6
- * which introduces its own <code>SQLException</code> subclass hierarchy, we will
+ * which introduces its own {@code SQLException} subclass hierarchy, we will
  * use {@link SQLExceptionSubclassTranslator} by default, which in turns falls back
  * to Spring's own SQL state translation when not encountering specific subclasses.
  * </ul>
@@ -290,7 +290,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Subclasses can override this method to attempt a custom mapping from SQLException
 	 * to DataAccessException.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be <code>null</code>.
+	 * @param sql SQL query or update that caused the problem. May be {@code null}.
 	 * @param sqlEx the offending SQLException
 	 * @return null if no custom translation was possible, otherwise a DataAccessException
 	 * resulting from custom translation. This exception should include the sqlEx parameter
@@ -305,7 +305,7 @@ public class SQLErrorCodeSQLExceptionTranslator extends AbstractFallbackSQLExcep
 	 * Create a custom DataAccessException, based on a given exception
 	 * class from a CustomSQLErrorCodesTranslation definition.
 	 * @param task readable text describing the task being attempted
-	 * @param sql SQL query or update that caused the problem. May be <code>null</code>.
+	 * @param sql SQL query or update that caused the problem. May be {@code null}.
 	 * @param sqlEx the offending SQLException
 	 * @param exceptionClass the exception class to use, as defined in the
 	 * CustomSQLErrorCodesTranslation definition

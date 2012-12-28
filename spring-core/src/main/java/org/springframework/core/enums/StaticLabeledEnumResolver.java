@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ import org.springframework.util.Assert;
 public class StaticLabeledEnumResolver extends AbstractCachingLabeledEnumResolver {
 
 	/**
-	 * Shared <code>StaticLabeledEnumResolver</code> singleton instance.
+	 * Shared {@code StaticLabeledEnumResolver} singleton instance.
 	 */
 	private static final StaticLabeledEnumResolver INSTANCE = new StaticLabeledEnumResolver();
 
 
 	/**
-	 * Return the shared <code>StaticLabeledEnumResolver</code> singleton instance.
+	 * Return the shared {@code StaticLabeledEnumResolver} singleton instance.
 	 * Mainly for resolving unique StaticLabeledEnum references on deserialization.
 	 * @see StaticLabeledEnum
 	 */

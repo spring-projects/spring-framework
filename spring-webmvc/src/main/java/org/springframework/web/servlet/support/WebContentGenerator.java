@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,9 +90,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Create a new WebContentGenerator.
-	 * @param restrictDefaultSupportedMethods <code>true</code> if this
+	 * @param restrictDefaultSupportedMethods {@code true} if this
 	 * generator should support HTTP methods GET, HEAD and POST by default,
-	 * or <code>false</code> if it should be unrestricted
+	 * or {@code false} if it should be unrestricted
 	 */
 	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
 		if (restrictDefaultSupportedMethods) {
@@ -265,7 +265,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Prevent the response from being cached.
-	 * See <code>http://www.mnot.net/cache_docs</code>.
+	 * See {@code http://www.mnot.net/cache_docs}.
 	 */
 	protected final void preventCaching(HttpServletResponse response) {
 		response.setHeader(HEADER_PRAGMA, "no-cache");
@@ -298,7 +298,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set HTTP headers to allow caching for the given number of seconds.
 	 * Tells the browser to revalidate the resource if mustRevalidate is
-	 * <code>true</code>.
+	 * {@code true}.
 	 * @param response the current HTTP response
 	 * @param seconds number of seconds into the future that the response
 	 * should be cacheable for

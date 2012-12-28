@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,27 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	private static final String OBJECT_NAME = "bean:name=testBean5";
 
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 9;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 4;
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/methodExclusionAssembler.xml";
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		assembler.setIgnoredMethods(new String[] {"dontExposeMe", "setSuperman"});
@@ -67,12 +72,12 @@ public class MethodExclusionMBeanInfoAssemblerTests extends AbstractJmxAssembler
 	 * http://opensource.atlassian.com/projects/spring/browse/SPR-2754
 	 */
 	public void testIsNotIgnoredDoesntIgnoreUnspecifiedBeanMethods() throws Exception {
-		final String beanKey = "myTestBean";	
+		final String beanKey = "myTestBean";
 		MethodExclusionMBeanInfoAssembler assembler = new MethodExclusionMBeanInfoAssembler();
 		Properties ignored = new Properties();
 		ignored.setProperty(beanKey, "dontExposeMe,setSuperman");
 		assembler.setIgnoredMethodMappings(ignored);
-		Method method = JmxTestBean.class.getMethod("dontExposeMe", null);
+		Method method = JmxTestBean.class.getMethod("dontExposeMe");
 		assertFalse(assembler.isNotIgnored(method, beanKey));
 		// this bean does not have any ignored methods on it, so must obviously not be ignored...
 		assertTrue(assembler.isNotIgnored(method, "someOtherBeanKey"));

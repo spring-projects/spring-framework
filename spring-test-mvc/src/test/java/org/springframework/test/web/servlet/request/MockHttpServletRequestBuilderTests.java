@@ -228,9 +228,9 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("bar=baz", request.getParameter("foo"));
 	}
 
-    @Test
-    public void acceptHeader() throws Exception {
-        this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);
+	@Test
+	public void acceptHeader() throws Exception {
+		this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 		List<String> accept = Collections.list(request.getHeaders("Accept"));
@@ -392,6 +392,7 @@ public class MockHttpServletRequestBuilderTests {
 
 	private final class User implements Principal {
 
+		@Override
 		public String getName() {
 			return "Foo";
 		}

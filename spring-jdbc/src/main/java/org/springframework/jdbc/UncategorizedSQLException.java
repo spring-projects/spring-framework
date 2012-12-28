@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.sql.SQLException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
- * Exception thrown when we can't classify a SQLException into 
+ * Exception thrown when we can't classify a SQLException into
  * one of our generic data access exceptions.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class UncategorizedSQLException extends UncategorizedDataAccessException {
 
 	/** SQL that led to the problem */

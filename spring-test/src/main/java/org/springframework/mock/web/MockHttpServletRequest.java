@@ -52,7 +52,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
  * <p>Compatible with Servlet 2.5 and partially with Servlet 3.0 (notable exceptions:
- * the <code>getPart(s)</code> and <code>startAsync</code> families of methods).
+ * the {@code getPart(s)} and {@code startAsync} families of methods).
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -195,8 +195,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Create a new {@code MockHttpServletRequest} with a default
 	 * {@link MockServletContext}.
-	 * @param method the request method (may be <code>null</code>)
-	 * @param requestURI the request URI (may be <code>null</code>)
+	 * @param method the request method (may be {@code null})
+	 * @param requestURI the request URI (may be {@code null})
 	 * @see #setMethod
 	 * @see #setRequestURI
 	 * @see #MockHttpServletRequest(ServletContext, String, String)
@@ -208,7 +208,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	/**
 	 * Create a new {@code MockHttpServletRequest} with the supplied {@link ServletContext}.
 	 * @param servletContext the ServletContext that the request runs in (may be
-	 * <code>null</code> to use a default {@link MockServletContext})
+	 * {@code null} to use a default {@link MockServletContext})
 	 * @see #MockHttpServletRequest(ServletContext, String, String)
 	 */
 	public MockHttpServletRequest(ServletContext servletContext) {
@@ -220,9 +220,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * {@code method}, and {@code requestURI}.
 	 * <p>The preferred locale will be set to {@link Locale#ENGLISH}.
 	 * @param servletContext the ServletContext that the request runs in (may be
-	 * <code>null</code> to use a default {@link MockServletContext})
-	 * @param method the request method (may be <code>null</code>)
-	 * @param requestURI the request URI (may be <code>null</code>)
+	 * {@code null} to use a default {@link MockServletContext})
+	 * @param method the request method (may be {@code null})
+	 * @param requestURI the request URI (may be {@code null})
 	 * @see #setMethod
 	 * @see #setRequestURI
 	 * @see #setPreferredLocales
@@ -662,8 +662,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * adding the given value (more specifically, its toString representation)
 	 * as further element.
 	 * <p>Multiple values can only be stored as list of Strings, following the
-	 * Servlet spec (see <code>getHeaders</code> accessor). As alternative to
-	 * repeated <code>addHeader</code> calls for individual elements, you can
+	 * Servlet spec (see {@code getHeaders} accessor). As alternative to
+	 * repeated {@code addHeader} calls for individual elements, you can
 	 * use a single call with an entire array or Collection of values as
 	 * parameter.
 	 * @see #getHeaderNames
@@ -747,7 +747,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			return -1;
 		}
 	}
-	
+
 	public void setMethod(String method) {
 		this.method = method;
 	}

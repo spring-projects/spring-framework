@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,8 +132,8 @@ public abstract class PropertyAccessorUtils {
 	/**
 	 * Determine the canonical name for the given property path.
 	 * Removes surrounding quotes from map keys:<br>
-	 * <code>map['key']</code> -> <code>map[key]</code><br>
-	 * <code>map["key"]</code> -> <code>map[key]</code>
+	 * {@code map['key']} -> {@code map[key]}<br>
+	 * {@code map["key"]} -> {@code map[key]}
 	 * @param propertyName the bean property path
 	 * @return the canonical representation of the property path
 	 */

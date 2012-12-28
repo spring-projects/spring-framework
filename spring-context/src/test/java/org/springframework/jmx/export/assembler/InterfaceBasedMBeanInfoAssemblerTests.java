@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,22 +21,27 @@ package org.springframework.jmx.export.assembler;
  */
 public class InterfaceBasedMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
+	@Override
 	protected String getObjectName() {
 		return "bean:name=testBean4";
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 2;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		return new InterfaceBasedMBeanInfoAssembler();
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssembler.xml";
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public abstract class RemotingSupport implements BeanClassLoaderAware {
 	 * Override the thread context ClassLoader with the environment's bean ClassLoader
 	 * if necessary, i.e. if the bean ClassLoader is not equivalent to the thread
 	 * context ClassLoader already.
-	 * @return the original thread context ClassLoader, or <code>null</code> if not overridden
+	 * @return the original thread context ClassLoader, or {@code null} if not overridden
 	 */
 	protected ClassLoader overrideThreadContextClassLoader() {
 		return ClassUtils.overrideThreadContextClassLoader(getBeanClassLoader());
@@ -63,7 +63,7 @@ public abstract class RemotingSupport implements BeanClassLoaderAware {
 	/**
 	 * Reset the original thread context ClassLoader if necessary.
 	 * @param original the original thread context ClassLoader,
-	 * or <code>null</code> if not overridden (and hence nothing to reset)
+	 * or {@code null} if not overridden (and hence nothing to reset)
 	 */
 	protected void resetThreadContextClassLoader(ClassLoader original) {
 		if (original != null) {

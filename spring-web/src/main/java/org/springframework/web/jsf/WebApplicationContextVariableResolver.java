@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Special JSF 1.1 <code>VariableResolver</code> that exposes the Spring
- * <code>WebApplicationContext</code> instance under a variable named
+ * Special JSF 1.1 {@code VariableResolver} that exposes the Spring
+ * {@code WebApplicationContext} instance under a variable named
  * "webApplicationContext".
  *
  * <p>In contrast to {@link DelegatingVariableResolver}, this VariableResolver
@@ -34,7 +34,7 @@ import org.springframework.web.context.WebApplicationContext;
  * JSF-managed beans can then use Spring's WebApplicationContext API to retrieve
  * Spring-managed beans, access resources, etc.
  *
- * <p>Configure this resolver in your <code>faces-config.xml</code> file as follows:
+ * <p>Configure this resolver in your {@code faces-config.xml} file as follows:
  *
  * <pre>
  * &lt;application>
@@ -105,7 +105,7 @@ public class WebApplicationContextVariableResolver extends VariableResolver {
 	/**
 	 * Retrieve the WebApplicationContext reference to expose.
 	 * <p>The default implementation delegates to FacesContextUtils,
-	 * returning <code>null</code> if no WebApplicationContext found.
+	 * returning {@code null} if no WebApplicationContext found.
 	 * @param facesContext the current JSF context
 	 * @return the Spring web application context
 	 * @see FacesContextUtils#getWebApplicationContext

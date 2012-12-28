@@ -1,12 +1,12 @@
 /*
  * Copyright 2002-2012 the original author or authors.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,6 +57,7 @@ public class ExcelViewTests extends TestCase {
 	private MockHttpServletResponse response;
 	private StaticWebApplicationContext webAppCtx;
 
+	@Override
 	public void setUp() {
 		servletCtx = new MockServletContext("org/springframework/web/servlet/view/document");
 		request = new MockHttpServletRequest(servletCtx);
@@ -67,6 +68,7 @@ public class ExcelViewTests extends TestCase {
 
 	public void testExcel() throws Exception {
 		AbstractExcelView excelView = new AbstractExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response)
 					throws Exception {
@@ -101,11 +103,12 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("nl", "nl"));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response)
 					throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-				
+
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -135,11 +138,12 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("en", "US"));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response)
 					throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-				
+
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -169,11 +173,12 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("de", ""));
 
 		AbstractExcelView excelView = new AbstractExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model, HSSFWorkbook wb,
 					HttpServletRequest request, HttpServletResponse response)
 					throws Exception {
 				HSSFSheet sheet = wb.getSheet("Sheet1");
-				
+
 				// test all possible permutation of row or column not existing
 				HSSFCell cell = getCell(sheet, 2, 4);
 				cell.setCellValue("Test Value");
@@ -200,6 +205,7 @@ public class ExcelViewTests extends TestCase {
 
 	public void testJExcel() throws Exception {
 		AbstractJExcelView excelView = new AbstractJExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model,
 					WritableWorkbook wb,
 					HttpServletRequest request,
@@ -229,6 +235,7 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("nl", "nl"));
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model,
 					WritableWorkbook wb,
 					HttpServletRequest request,
@@ -259,6 +266,7 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("en", "US"));
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model,
 					WritableWorkbook wb,
 					HttpServletRequest request,
@@ -289,6 +297,7 @@ public class ExcelViewTests extends TestCase {
 				newDummyLocaleResolver("de", ""));
 
 		AbstractJExcelView excelView = new AbstractJExcelView() {
+			@Override
 			protected void buildExcelDocument(Map model,
 					WritableWorkbook wb,
 					HttpServletRequest request,
@@ -316,10 +325,12 @@ public class ExcelViewTests extends TestCase {
 
 	private LocaleResolver newDummyLocaleResolver(final String lang, final String country) {
 		return new LocaleResolver() {
+			@Override
 			public Locale resolveLocale(HttpServletRequest request) {
 				return new Locale(lang, country);
 			}
 
+			@Override
 			public void setLocale(HttpServletRequest request,
 					HttpServletResponse response, Locale locale) {
 				// not supported!

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.hibernate.persister.entity.EntityPersister;
 /**
  * Extension of Hibernate's DefaultMergeEventListener, transferring the ids
  * of newly saved objects to the corresponding original objects (that are part
- * of the detached object graph passed into the <code>merge</code> method).
+ * of the detached object graph passed into the {@code merge} method).
  *
  * <p>Transferring newly assigned ids to the original graph allows for continuing
  * to use the original object graph, despite merged copies being registered with
@@ -37,10 +37,10 @@ import org.hibernate.persister.entity.EntityPersister;
  *
  * <p>The merge behavior given by this MergeEventListener is nearly identical
  * to TopLink's merge behavior. See PetClinic for an example, which relies on
- * ids being available for newly saved objects: the <code>HibernateClinic</code>
- * and <code>TopLinkClinic</code> DAO implementations both use straight merge
+ * ids being available for newly saved objects: the {@code HibernateClinic}
+ * and {@code TopLinkClinic} DAO implementations both use straight merge
  * calls, with the Hibernate SessionFactory configuration specifying an
- * <code>IdTransferringMergeEventListener</code>.
+ * {@code IdTransferringMergeEventListener}.
  *
  * <p>Typically specified as entry for LocalSessionFactoryBean's "eventListeners"
  * map, with key "merge".
@@ -49,6 +49,7 @@ import org.hibernate.persister.entity.EntityPersister;
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setEventListeners(java.util.Map)
  */
+@SuppressWarnings("serial")
 public class IdTransferringMergeEventListener extends DefaultMergeEventListener {
 
 	/**

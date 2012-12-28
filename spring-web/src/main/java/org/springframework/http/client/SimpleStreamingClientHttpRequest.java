@@ -73,38 +73,38 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 			else {
 				this.connection.setChunkedStreamingMode(this.chunkSize);
 			}
-            writeHeaders(headers);
-            this.connection.connect();
+			writeHeaders(headers);
+			this.connection.connect();
 			this.body = this.connection.getOutputStream();
 		}
 		return new NonClosingOutputStream(this.body);
 	}
 
-    private void writeHeaders(HttpHeaders headers) {
-        for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
-            String headerName = entry.getKey();
-            for (String headerValue : entry.getValue()) {
-                this.connection.addRequestProperty(headerName, headerValue);
-            }
-        }
-    }
+	private void writeHeaders(HttpHeaders headers) {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				this.connection.addRequestProperty(headerName, headerValue);
+			}
+		}
+	}
 
-    @Override
+	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
-        try {
-            if (this.body != null) {
-                this.body.close();
-            }
-            else {
-                writeHeaders(headers);
-                this.connection.connect();
-            }
-        }
-        catch (IOException ex) {
-            // ignore
-        }
-        return new SimpleClientHttpResponse(this.connection);
-    }
+		try {
+			if (this.body != null) {
+				this.body.close();
+			}
+			else {
+				writeHeaders(headers);
+				this.connection.connect();
+			}
+		}
+		catch (IOException ex) {
+			// ignore
+		}
+		return new SimpleClientHttpResponse(this.connection);
+	}
 
 
 	private static class NonClosingOutputStream extends FilterOutputStream {

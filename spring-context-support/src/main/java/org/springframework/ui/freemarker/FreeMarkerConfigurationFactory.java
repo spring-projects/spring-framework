@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,12 @@ import org.springframework.util.CollectionUtils;
  * <p>The optional "configLocation" property sets the location of a FreeMarker
  * properties file, within the current application. FreeMarker properties can be
  * overridden via "freemarkerSettings". All of these properties will be set by
- * calling FreeMarker's <code>Configuration.setSettings()</code> method and are
+ * calling FreeMarker's {@code Configuration.setSettings()} method and are
  * subject to constraints set by FreeMarker.
  *
  * <p>The "freemarkerVariables" property can be used to specify a Map of
  * shared variables that will be applied to the Configuration via the
- * <code>setAllSharedVariables()</code> method. Like <code>setSettings()</code>,
+ * {@code setAllSharedVariables()} method. Like {@code setSettings()},
  * these entries are subject to FreeMarker constraints.
  *
  * <p>The simplest way to use this class is to specify a "templateLoaderPath";
@@ -109,7 +109,7 @@ public class FreeMarkerConfigurationFactory {
 
 	/**
 	 * Set properties that contain well-known FreeMarker keys which will be
-	 * passed to FreeMarker's <code>Configuration.setSettings</code> method.
+	 * passed to FreeMarker's {@code Configuration.setSettings} method.
 	 * @see freemarker.template.Configuration#setSettings
 	 */
 	public void setFreemarkerSettings(Properties settings) {
@@ -118,7 +118,7 @@ public class FreeMarkerConfigurationFactory {
 
 	/**
 	 * Set a Map that contains well-known FreeMarker objects which will be passed
-	 * to FreeMarker's <code>Configuration.setAllSharedVariables()</code> method.
+	 * to FreeMarker's {@code Configuration.setAllSharedVariables()} method.
 	 * @see freemarker.template.Configuration#setAllSharedVariables
 	 */
 	public void setFreemarkerVariables(Map<String, Object> variables) {
@@ -138,7 +138,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set a List of <code>TemplateLoader<code>s that will be used to search
+	 * Set a List of {@code TemplateLoader}s that will be used to search
 	 * for templates. For example, one or more custom loaders such as database
 	 * loaders could be configured and injected here.
 	 * @deprecated as of Spring 2.0.1, in favor of the "preTemplateLoaders"
@@ -154,7 +154,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set a List of <code>TemplateLoader<code>s that will be used to search
+	 * Set a List of {@code TemplateLoader}s that will be used to search
 	 * for templates. For example, one or more custom loaders such as database
 	 * loaders could be configured and injected here.
 	 * <p>The {@link TemplateLoader TemplateLoaders} specified here will be
@@ -169,7 +169,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * Set a List of <code>TemplateLoader<code>s that will be used to search
+	 * Set a List of {@code TemplateLoader}s that will be used to search
 	 * for templates. For example, one or more custom loaders such as database
 	 * loaders can be configured.
 	 * <p>The {@link TemplateLoader TemplateLoaders} specified here will be
@@ -198,13 +198,13 @@ public class FreeMarkerConfigurationFactory {
 	 * pseudo URLs are supported, as understood by ResourceEditor. Allows for
 	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default FreeMarker template loader.
-	 * If a specified resource cannot be resolved to a <code>java.io.File</code>,
+	 * If a specified resource cannot be resolved to a {@code java.io.File},
 	 * a generic SpringTemplateLoader will be used, without modification detection.
 	 * <p>To enforce the use of SpringTemplateLoader, i.e. to not resolve a path
 	 * as file system resource in any case, turn off the "preferFileSystemAccess"
 	 * flag. See the latter's javadoc for details.
 	 * <p>If you wish to specify your own list of TemplateLoaders, do not set this
-	 * property and instead use <code>setTemplateLoaders(List templateLoaders)</code>
+	 * property and instead use {@code setTemplateLoaders(List templateLoaders)}
 	 * @see org.springframework.core.io.ResourceEditor
 	 * @see org.springframework.context.ApplicationContext#getResource
 	 * @see freemarker.template.Configuration#setDirectoryForTemplateLoading
@@ -323,7 +323,7 @@ public class FreeMarkerConfigurationFactory {
 	/**
 	 * Return a new Configuration object. Subclasses can override this for
 	 * custom initialization, or for using a mock object for testing.
-	 * <p>Called by <code>createConfiguration()</code>.
+	 * <p>Called by {@code createConfiguration()}.
 	 * @return the Configuration object
 	 * @throws IOException if a config file wasn't found
 	 * @throws TemplateException on FreeMarker initialization failure
@@ -374,7 +374,7 @@ public class FreeMarkerConfigurationFactory {
 	 * To be overridden by subclasses that want to to register custom
 	 * TemplateLoader instances after this factory created its default
 	 * template loaders.
-	 * <p>Called by <code>createConfiguration()</code>. Note that specified
+	 * <p>Called by {@code createConfiguration()}. Note that specified
 	 * "postTemplateLoaders" will be registered <i>after</i> any loaders
 	 * registered by this callback; as a consequence, they are are <i>not</i>
 	 * included in the given List.
@@ -411,7 +411,7 @@ public class FreeMarkerConfigurationFactory {
 	 * To be overridden by subclasses that want to to perform custom
 	 * post-processing of the Configuration object after this factory
 	 * performed its default initialization.
-	 * <p>Called by <code>createConfiguration()</code>.
+	 * <p>Called by {@code createConfiguration()}.
 	 * @param config the current Configuration object
 	 * @throws IOException if a config file wasn't found
 	 * @throws TemplateException on FreeMarker initialization failure

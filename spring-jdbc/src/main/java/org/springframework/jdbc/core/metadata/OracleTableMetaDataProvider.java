@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * <p>Thanks to Mike Youngstrom and Bruce Campbell for submitting the original suggestion for the Oracle
  * current schema lookup implementation.
- * 
+ *
  * @author Thomas Risberg
  * @author Juergen Hoeller
  * @since 3.0
@@ -42,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
 public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 
 	private final boolean includeSynonyms;
-	
+
 	private String defaultSchema;
 
 
@@ -124,10 +124,10 @@ public class OracleTableMetaDataProvider extends GenericTableMetaDataProvider {
 			throw new InvalidDataAccessApiUsageException("Couldn't reset Oracle Connection", ex);
 		}
 	}
-	
+
 	/*
 	 * Oracle implementation for detecting current schema
-	 * 
+	 *
 	 * @param databaseMetaData
 	 */
 	private void lookupDefaultSchema(DatabaseMetaData databaseMetaData) {

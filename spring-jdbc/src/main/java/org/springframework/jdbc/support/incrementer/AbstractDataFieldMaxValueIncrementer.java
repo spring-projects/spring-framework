@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
 
 /**
  * Base implementation of {@link DataFieldMaxValueIncrementer} that delegates
- * to a single {@link #getNextKey} template method that returns a <code>long</code>.
+ * to a single {@link #getNextKey} template method that returns a {@code long}.
  * Uses longs for String values, padding with zeroes if required.
  *
  * @author Dmitriy Kopylenko

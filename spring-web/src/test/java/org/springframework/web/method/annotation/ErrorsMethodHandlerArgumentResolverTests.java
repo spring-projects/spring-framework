@@ -32,7 +32,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Test fixture with {@link ErrorsMethodArgumentResolver}.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ErrorsMethodHandlerArgumentResolverTests {
@@ -66,7 +66,7 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		mavContainer.addAttribute("ignore4", "value4");
 		mavContainer.addAttribute("ignore5", "value5");
 		mavContainer.addAllAttributes(bindingResult.getModel());
-		
+
 		Object actual = resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 
 		assertSame(actual, bindingResult);
@@ -77,10 +77,10 @@ public class ErrorsMethodHandlerArgumentResolverTests {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(bindingResult.getModel());
 		mavContainer.addAttribute("ignore1", "value1");
-		
+
 		resolver.resolveArgument(paramErrors, mavContainer, webRequest, null);
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void noBindingResult() throws Exception {
 		resolver.resolveArgument(paramErrors, new ModelAndViewContainer(), webRequest, null);

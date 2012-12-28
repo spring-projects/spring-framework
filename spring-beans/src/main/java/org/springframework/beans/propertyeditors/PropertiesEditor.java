@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.util.Properties;
 /**
  * Custom {@link java.beans.PropertyEditor} for {@link Properties} objects.
  *
- * <p>Handles conversion from content {@link String} to <code>Properties</code> object.
- * Also handles {@link Map} to <code>Properties</code> conversion, for populating
- * a <code>Properties</code> object via XML "map" entries.
+ * <p>Handles conversion from content {@link String} to {@code Properties} object.
+ * Also handles {@link Map} to {@code Properties} conversion, for populating
+ * a {@code Properties} object via XML "map" entries.
  *
- * <p>The required format is defined in the standard <code>Properties</code>
+ * <p>The required format is defined in the standard {@code Properties}
  * documentation. Each property must be on a new line.
  *
  * @author Rod Johnson
@@ -61,7 +61,7 @@ public class PropertiesEditor extends PropertyEditorSupport {
 	}
 
 	/**
-	 * Take {@link Properties} as-is; convert {@link Map} into <code>Properties</code>.
+	 * Take {@link Properties} as-is; convert {@link Map} into {@code Properties}.
 	 */
 	@Override
 	public void setValue(Object value) {

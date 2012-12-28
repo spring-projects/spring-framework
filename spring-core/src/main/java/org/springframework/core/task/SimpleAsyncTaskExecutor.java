@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.util.CustomizableThreadCreator;
  * @see org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
  * @see org.springframework.scheduling.commonj.WorkManagerTaskExecutor
  */
+@SuppressWarnings("serial")
 public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implements AsyncTaskExecutor, Serializable {
 
 	/**
@@ -129,7 +130,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 	/**
 	 * Return whether this throttle is currently active.
-	 * @return <code>true</code> if the concurrency limit for this instance is active
+	 * @return {@code true} if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
 	 * @see #setConcurrencyLimit
 	 */
@@ -195,7 +196,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 	/**
 	 * Subclass of the general ConcurrencyThrottleSupport class,
-	 * making <code>beforeAccess()</code> and <code>afterAccess()</code>
+	 * making {@code beforeAccess()} and {@code afterAccess()}
 	 * visible to the surrounding class.
 	 */
 	private static class ConcurrencyThrottleAdapter extends ConcurrencyThrottleSupport {
@@ -213,7 +214,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 
 
 	/**
-	 * This Runnable calls <code>afterAccess()</code> after the
+	 * This Runnable calls {@code afterAccess()} after the
 	 * target Runnable has finished its execution.
 	 */
 	private class ConcurrencyThrottlingRunnable implements Runnable {

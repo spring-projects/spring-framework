@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,15 @@ import org.springframework.jdbc.support.KeyHolder;
 /**
  * Reusable operation object representing a SQL update.
  *
- * <p>This class provides a number of <code>update</code> methods,
- * analogous to the <code>execute</code> methods of query objects.
+ * <p>This class provides a number of {@code update} methods,
+ * analogous to the {@code execute} methods of query objects.
  *
  * <p>This class is concrete. Although it can be subclassed (for example
  * to add a custom update method) it can easily be parameterized by setting
  * SQL and declaring parameters.
  *
- * <p>Like all <code>RdbmsOperation</code> classes that ship with the Spring
- * Framework, <code>SqlQuery</code> instances are thread-safe after their
+ * <p>Like all {@code RdbmsOperation} classes that ship with the Spring
+ * Framework, {@code SqlQuery} instances are thread-safe after their
  * initialization is complete. That is, after they are constructed and configured
  * via their setter methods, they can be used safely from multiple threads.
  *
@@ -87,7 +87,7 @@ public class SqlUpdate extends SqlOperation {
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
 	public SqlUpdate(DataSource ds, String sql, int[] types) {
@@ -103,7 +103,7 @@ public class SqlUpdate extends SqlOperation {
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @param maxRowsAffected the maximum number of rows that may
 	 * be affected by the update
 	 * @see java.sql.Types
@@ -171,7 +171,7 @@ public class SqlUpdate extends SqlOperation {
 	}
 
 	/**
-	 * Method to execute the update given arguments and 
+	 * Method to execute the update given arguments and
 	 * retrieve the generated keys using a KeyHolder.
 	 * @param params array of parameter objects
 	 * @param generatedKeyHolder KeyHolder that will hold the generated keys

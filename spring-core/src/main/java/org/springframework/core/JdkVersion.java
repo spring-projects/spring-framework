@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public abstract class JdkVersion {
 
 	/**
 	 * Return the full Java version string, as returned by
-	 * <code>System.getProperty("java.version")</code>.
+	 * {@code System.getProperty("java.version")}.
 	 * @return the full Java version string
 	 * @see System#getProperty(String)
 	 */
@@ -87,7 +87,7 @@ public abstract class JdkVersion {
 
 	/**
 	 * Get the major version code. This means we can do things like
-	 * <code>if (getMajorJavaVersion() < JAVA_14)</code>.
+	 * {@code if (getMajorJavaVersion() < JAVA_14)}.
 	 * @return a code comparable to the JAVA_XX codes in this class
 	 * @see #JAVA_13
 	 * @see #JAVA_14
@@ -102,7 +102,7 @@ public abstract class JdkVersion {
 
 	/**
 	 * Convenience method to determine if the current JVM is at least Java 1.4.
-	 * @return <code>true</code> if the current JVM is at least Java 1.4
+	 * @return {@code true} if the current JVM is at least Java 1.4
 	 * @deprecated as of Spring 3.0 which requires Java 1.5+
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_14
@@ -118,7 +118,7 @@ public abstract class JdkVersion {
 	/**
 	 * Convenience method to determine if the current JVM is at least
 	 * Java 1.5 (Java 5).
-	 * @return <code>true</code> if the current JVM is at least Java 1.5
+	 * @return {@code true} if the current JVM is at least Java 1.5
 	 * @deprecated as of Spring 3.0 which requires Java 1.5+
 	 * @see #getMajorJavaVersion()
 	 * @see #JAVA_15
@@ -133,7 +133,7 @@ public abstract class JdkVersion {
 	/**
 	 * Convenience method to determine if the current JVM is at least
 	 * Java 1.6 (Java 6).
-	 * @return <code>true</code> if the current JVM is at least Java 1.6
+	 * @return {@code true} if the current JVM is at least Java 1.6
 	 * @deprecated as of Spring 3.0, in favor of reflective checks for
 	 * the specific Java 1.6 classes of interest
 	 * @see #getMajorJavaVersion()

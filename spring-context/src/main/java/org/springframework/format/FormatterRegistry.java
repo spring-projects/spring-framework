@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ public interface FormatterRegistry extends ConverterRegistry {
 
 	/**
 	 * Adds a Formatter to format fields of the given type.
-	 * <p>On print, if the Formatter's type T is declared and <code>fieldType</code> is not assignable to T,
-	 * a coersion to T will be attempted before delegating to <code>formatter</code> to print a field value.
-	 * On parse, if the parsed object returned by <code>formatter</code> is not assignable to the runtime field type,
+	 * <p>On print, if the Formatter's type T is declared and {@code fieldType} is not assignable to T,
+	 * a coersion to T will be attempted before delegating to {@code formatter} to print a field value.
+	 * On parse, if the parsed object returned by {@code formatter} is not assignable to the runtime field type,
 	 * a coersion to the field type will be attempted before returning the parsed field value.
 	 * @param fieldType the field type to format
 	 * @param formatter the formatter to add
@@ -51,10 +51,10 @@ public interface FormatterRegistry extends ConverterRegistry {
 
 	/**
 	 * Adds a Printer/Parser pair to format fields of a specific type.
-	 * The formatter will delegate to the specified <code>printer</code> for printing
-	 * and the specified <code>parser</code> for parsing.
-	 * <p>On print, if the Printer's type T is declared and <code>fieldType</code> is not assignable to T,
-	 * a coersion to T will be attempted before delegating to <code>printer</code> to print a field value.
+	 * The formatter will delegate to the specified {@code printer} for printing
+	 * and the specified {@code parser} for parsing.
+	 * <p>On print, if the Printer's type T is declared and {@code fieldType} is not assignable to T,
+	 * a coersion to T will be attempted before delegating to {@code printer} to print a field value.
 	 * On parse, if the object returned by the Parser is not assignable to the runtime field type,
 	 * a coersion to the field type will be attempted before returning the parsed field value.
 	 * @param fieldType the field type to format

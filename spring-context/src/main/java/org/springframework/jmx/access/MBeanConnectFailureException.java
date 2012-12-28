@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import org.springframework.jmx.JmxException;
  * @since 2.5.6
  * @see MBeanClientInterceptor
  */
+@SuppressWarnings("serial")
 public class MBeanConnectFailureException extends JmxException {
 
 	/**
-	 * Create a new <code>MBeanConnectFailureException</code>
+	 * Create a new {@code MBeanConnectFailureException}
 	 * with the specified error message and root cause.
 	 * @param msg the detail message
 	 * @param cause the root cause

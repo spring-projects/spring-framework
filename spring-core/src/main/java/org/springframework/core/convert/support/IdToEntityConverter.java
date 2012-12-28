@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.ReflectionUtils;
  * on the target entity type.
  *
  * <p>For this converter to match, the finder method must be public, static, have the signature
- * <code>find[EntityName]([IdType])</code>, and return an instance of the desired entity type.
+ * {@code find[EntityName]([IdType])}, and return an instance of the desired entity type.
  *
  * @author Keith Donald
  * @since 3.0

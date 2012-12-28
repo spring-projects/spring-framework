@@ -38,12 +38,12 @@ import org.springframework.util.CollectionUtils;
  * local {@link ClassPathResource classpath resources} using a set of mappings files.
  *
  * <p>By default, this class will look for mapping files in the classpath using the pattern:
- * <code>META-INF/spring.schemas</code> allowing for multiple files to exist on the
+ * {@code META-INF/spring.schemas} allowing for multiple files to exist on the
  * classpath at any one time.
  *
- * The format of <code>META-INF/spring.schemas</code> is a properties
- * file where each line should be of the form <code>systemId=schema-location</code>
- * where <code>schema-location</code> should also be a schema file in the classpath.
+ * The format of {@code META-INF/spring.schemas} is a properties
+ * file where each line should be of the form {@code systemId=schema-location}
+ * where {@code schema-location} should also be a schema file in the classpath.
  * Since systemId is commonly a URL, one must be careful to escape any ':' characters
  * which are treated as delimiters in properties files.
  *
@@ -77,7 +77,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Loads the schema URL -> schema file location mappings using the default
 	 * mapping file pattern "META-INF/spring.schemas".
 	 * @param classLoader the ClassLoader to use for loading
-	 * (can be <code>null</code>) to use the default ClassLoader)
+	 * (can be {@code null}) to use the default ClassLoader)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)
 	 */
 	public PluggableSchemaResolver(ClassLoader classLoader) {
@@ -89,7 +89,7 @@ public class PluggableSchemaResolver implements EntityResolver {
 	 * Loads the schema URL -> schema file location mappings using the given
 	 * mapping file pattern.
 	 * @param classLoader the ClassLoader to use for loading
-	 * (can be <code>null</code>) to use the default ClassLoader)
+	 * (can be {@code null}) to use the default ClassLoader)
 	 * @param schemaMappingsLocation the location of the file that defines schema mappings
 	 * (must not be empty)
 	 * @see PropertiesLoaderUtils#loadAllProperties(String, ClassLoader)

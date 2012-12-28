@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
 
 /**
  * Subclass of ShadowingClassLoader that overrides attempts to
- * locate <code>orm.xml</code>.
+ * locate {@code orm.xml}.
  *
  * <p>This class must <b>not</b> be an inner class of AbstractJpaTests
  * to avoid it being loaded until first used.
@@ -31,9 +31,9 @@ import org.springframework.instrument.classloading.ResourceOverridingShadowingCl
  * @since 2.0
  */
 class OrmXmlOverridingShadowingClassLoader extends ResourceOverridingShadowingClassLoader {
-	
+
 	/**
-	 * Default location of the <code>orm.xml</code> file in the class path:
+	 * Default location of the {@code orm.xml} file in the class path:
 	 * "META-INF/orm.xml"
 	 */
 	public static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";

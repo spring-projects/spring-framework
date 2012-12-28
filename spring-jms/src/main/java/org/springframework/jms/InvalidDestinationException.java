@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ package org.springframework.jms;
  * @since 1.1
  * @see javax.jms.InvalidDestinationException
  */
+@SuppressWarnings("serial")
 public class InvalidDestinationException extends JmsException {
 
 	public InvalidDestinationException(javax.jms.InvalidDestinationException cause) {

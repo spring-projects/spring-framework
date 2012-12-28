@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,7 @@ public class MockPortalContext implements PortalContext {
 	}
 
 
+	@Override
 	public String getPortalInfo() {
 		return "MockPortal/1.0";
 	}
@@ -82,18 +83,22 @@ public class MockPortalContext implements PortalContext {
 		this.properties.put(name, value);
 	}
 
+	@Override
 	public String getProperty(String name) {
 		return this.properties.get(name);
 	}
 
+	@Override
 	public Enumeration<String> getPropertyNames() {
 		return Collections.enumeration(this.properties.keySet());
 	}
 
+	@Override
 	public Enumeration<PortletMode> getSupportedPortletModes() {
 		return Collections.enumeration(this.portletModes);
 	}
 
+	@Override
 	public Enumeration<WindowState> getSupportedWindowStates() {
 		return Collections.enumeration(this.windowStates);
 	}

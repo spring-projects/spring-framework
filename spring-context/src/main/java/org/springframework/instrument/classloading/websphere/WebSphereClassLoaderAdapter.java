@@ -28,11 +28,11 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * 
+ *
  * Reflective wrapper around a WebSphere 7 class loader. Used to
  * encapsulate the classloader-specific methods (discovered and
  * called through reflection) from the load-time weaver.
- * 
+ *
  * @author Costin Leau
  * @since 3.1
  */
@@ -93,7 +93,7 @@ class WebSphereClassLoaderAdapter {
 
 	public ClassLoader getThrowawayClassLoader() {
 		try {
-			ClassLoader loader = (ClassLoader) cloneConstructor.newInstance(getClassLoader());
+			ClassLoader loader = cloneConstructor.newInstance(getClassLoader());
 			// clear out the transformers (copied as well)
 			List<?> list = (List<?>) transformerList.get(loader);
 			list.clear();

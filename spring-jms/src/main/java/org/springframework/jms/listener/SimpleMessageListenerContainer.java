@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
 
 /**
  * Message listener container that uses the plain JMS client API's
- * <code>MessageConsumer.setMessageListener()</code> method to
+ * {@code MessageConsumer.setMessageListener()} method to
  * create concurrent MessageConsumers for the specified listeners.
  *
  * <p>This is the simplest form of a message listener container.
@@ -48,7 +48,7 @@ import org.springframework.util.Assert;
  * on acknowledge modes and transaction options.
  *
  * <p>For a different style of MessageListener handling, through looped
- * <code>MessageConsumer.receive()</code> calls that also allow for
+ * {@code MessageConsumer.receive()} calls that also allow for
  * transactional reception of messages (registering them with XA transactions),
  * see {@link DefaultMessageListenerContainer}.
  *

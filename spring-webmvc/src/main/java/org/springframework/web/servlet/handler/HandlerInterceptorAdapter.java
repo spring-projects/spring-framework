@@ -32,10 +32,10 @@ import org.springframework.web.servlet.ModelAndView;
 public abstract class HandlerInterceptorAdapter implements AsyncHandlerInterceptor {
 
 	/**
-	 * This implementation always returns <code>true</code>.
+	 * This implementation always returns {@code true}.
 	 */
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-	    throws Exception {
+		throws Exception {
 		return true;
 	}
 

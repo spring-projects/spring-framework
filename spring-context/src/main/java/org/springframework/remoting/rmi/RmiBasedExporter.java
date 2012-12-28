@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.remoting.support.RemoteInvocationBasedExporter;
  *
  * <p>Using the RMI invoker mechanism, RMI communication operates at the {@link RmiInvocationHandler}
  * level, sharing a common invoker stub for any number of services. Service interfaces are <i>not</i>
- * required to extend <code>java.rmi.Remote</code> or declare <code>java.rmi.RemoteException</code>
+ * required to extend {@code java.rmi.Remote} or declare {@code java.rmi.RemoteException}
  * on all service methods. However, in and out parameters still have to be serializable.
  *
  * @author Juergen Hoeller

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.ClassUtils;
 /**
  * {@link BeanFactoryPostProcessor} implementation that allows for convenient
  * registration of custom {@link PropertyEditor property editors}.
- * 
+ *
  * <p>
  * In case you want to register {@link PropertyEditor} instances, the
  * recommended usage as of Spring 2.0 is to use custom
@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
  * desired editor instances on a given
  * {@link org.springframework.beans.PropertyEditorRegistry registry}. Each
  * PropertyEditorRegistrar can register any number of custom editors.
- * 
+ *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="propertyEditorRegistrars"&gt;
@@ -54,12 +54,12 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
+ *
  * <p>
  * It's perfectly fine to register {@link PropertyEditor} <em>classes</em> via
  * the {@code customEditors} property. Spring will create fresh instances of
  * them for each editing attempt then:
- * 
+ *
  * <pre class="code">
  * &lt;bean id="customEditorConfigurer" class="org.springframework.beans.factory.config.CustomEditorConfigurer"&gt;
  *   &lt;property name="customEditors"&gt;
@@ -70,7 +70,7 @@ import org.springframework.util.ClassUtils;
  *   &lt;/property&gt;
  * &lt;/bean&gt;
  * </pre>
- * 
+ *
  * <p>
  * Note, that you shouldn't register {@link PropertyEditor} bean instances via
  * the {@code customEditors} property as {@link PropertyEditor}s are stateful
@@ -78,7 +78,7 @@ import org.springframework.util.ClassUtils;
  * attempt. In case you need control over the instantiation process of
  * {@link PropertyEditor}s, use a {@link PropertyEditorRegistrar} to register
  * them.
- * 
+ *
  * <p>
  * Also supports "java.lang.String[]"-style array class names and primitive
  * class names (e.g. "boolean"). Delegates to {@link ClassUtils} for actual
@@ -126,10 +126,10 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	/**
 	 * Specify the {@link PropertyEditorRegistrar PropertyEditorRegistrars}
 	 * to apply to beans defined within the current application context.
-	 * <p>This allows for sharing <code>PropertyEditorRegistrars</code> with
+	 * <p>This allows for sharing {@code PropertyEditorRegistrars} with
 	 * {@link org.springframework.validation.DataBinder DataBinders}, etc.
 	 * Furthermore, it avoids the need for synchronization on custom editors:
-	 * A <code>PropertyEditorRegistrar</code> will always create fresh editor
+	 * A {@code PropertyEditorRegistrar} will always create fresh editor
 	 * instances for each bean creation attempt.
 	 * @see ConfigurableListableBeanFactory#addPropertyEditorRegistrar
 	 */
@@ -197,7 +197,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 					else if (value instanceof String) {
 						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
 						Assert.isAssignable(PropertyEditor.class, editorClass);
-						beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
+						beanFactory.registerCustomEditor(requiredType, editorClass);
 					}
 					else {
 						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +

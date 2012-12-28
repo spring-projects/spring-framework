@@ -55,11 +55,13 @@ public class ResponseStatusExceptionResolverTests {
 	}
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@SuppressWarnings("serial")
 	private static class StatusCodeException extends Exception {
 
 	}
 
 	@ResponseStatus(value = HttpStatus.GONE, reason = "You suck!")
+	@SuppressWarnings("serial")
 	private static class StatusCodeAndReasonException extends Exception {
 
 	}

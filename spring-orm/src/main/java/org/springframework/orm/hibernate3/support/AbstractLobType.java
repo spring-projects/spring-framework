@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.transaction.Status;
 import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
@@ -31,14 +30,10 @@ import org.hibernate.HibernateException;
 import org.hibernate.usertype.UserType;
 import org.hibernate.util.EqualsHelper;
 
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.jdbc.support.lob.JtaLobCreatorSynchronization;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.jdbc.support.lob.SpringLobCreatorSynchronization;
 import org.springframework.jdbc.support.lob.LobCreatorUtils;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Abstract base class for Hibernate UserType implementations that map to LOBs.
@@ -76,12 +71,12 @@ public abstract class AbstractLobType implements UserType {
 	 */
 	protected AbstractLobType() {
 		this(LocalSessionFactoryBean.getConfigTimeLobHandler(),
-		    LocalSessionFactoryBean.getConfigTimeTransactionManager());
+			LocalSessionFactoryBean.getConfigTimeTransactionManager());
 	}
 
 	/**
 	 * Constructor used for testing: takes an explicit LobHandler
-	 * and an explicit JTA TransactionManager (can be <code>null</code>).
+	 * and an explicit JTA TransactionManager (can be {@code null}).
 	 */
 	protected AbstractLobType(LobHandler lobHandler, TransactionManager jtaTransactionManager) {
 		this.lobHandler = lobHandler;
@@ -150,7 +145,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on LocalSessionFactoryBean");
+				"lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		try {
@@ -172,7 +167,7 @@ public abstract class AbstractLobType implements UserType {
 
 		if (this.lobHandler == null) {
 			throw new IllegalStateException("No LobHandler found for configuration - " +
-			    "lobHandler property must be set on LocalSessionFactoryBean");
+				"lobHandler property must be set on LocalSessionFactoryBean");
 		}
 
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
@@ -211,7 +206,7 @@ public abstract class AbstractLobType implements UserType {
 	 * @throws HibernateException in case of any other exceptions
 	 */
 	protected abstract void nullSafeSetInternal(
-	    PreparedStatement ps, int index, Object value, LobCreator lobCreator)
+		PreparedStatement ps, int index, Object value, LobCreator lobCreator)
 			throws SQLException, IOException, HibernateException;
 
 }

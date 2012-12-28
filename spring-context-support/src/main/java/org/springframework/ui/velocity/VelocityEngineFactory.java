@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class VelocityEngineFactory {
 	 * pseudo URLs are supported, as understood by ResourceLoader. Allows for
 	 * relative paths when running in an ApplicationContext.
 	 * <p>Will define a path for the default Velocity resource loader with the name
-	 * "file". If the specified resource cannot be resolved to a <code>java.io.File</code>,
+	 * "file". If the specified resource cannot be resolved to a {@code java.io.File},
 	 * a generic SpringResourceLoader will be used under the name "spring", without
 	 * modification detection.
 	 * <p>Note that resource caching will be enabled in any case. With the file
@@ -270,7 +270,7 @@ public class VelocityEngineFactory {
 	/**
 	 * Return a new VelocityEngine. Subclasses can override this for
 	 * custom initialization, or for using a mock object for testing.
-	 * <p>Called by <code>createVelocityEngine()</code>.
+	 * <p>Called by {@code createVelocityEngine()}.
 	 * @return the VelocityEngine instance
 	 * @throws IOException if a config file wasn't found
 	 * @throws VelocityException on Velocity initialization failure
@@ -283,7 +283,7 @@ public class VelocityEngineFactory {
 	/**
 	 * Initialize a Velocity resource loader for the given VelocityEngine:
 	 * either a standard Velocity FileResourceLoader or a SpringResourceLoader.
-	 * <p>Called by <code>createVelocityEngine()</code>.
+	 * <p>Called by {@code createVelocityEngine()}.
 	 * @param velocityEngine the VelocityEngine to configure
 	 * @param resourceLoaderPath the path to load Velocity resources from
 	 * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
@@ -334,7 +334,7 @@ public class VelocityEngineFactory {
 
 	/**
 	 * Initialize a SpringResourceLoader for the given VelocityEngine.
-	 * <p>Called by <code>initVelocityResourceLoader</code>.
+	 * <p>Called by {@code initVelocityResourceLoader}.
 	 * @param velocityEngine the VelocityEngine to configure
 	 * @param resourceLoaderPath the path to load Velocity resources from
 	 * @see SpringResourceLoader
@@ -357,7 +357,7 @@ public class VelocityEngineFactory {
 	 * To be implemented by subclasses that want to to perform custom
 	 * post-processing of the VelocityEngine after this FactoryBean
 	 * performed its default configuration (but before VelocityEngine.init).
-	 * <p>Called by <code>createVelocityEngine()</code>.
+	 * <p>Called by {@code createVelocityEngine()}.
 	 * @param velocityEngine the current VelocityEngine
 	 * @throws IOException if a config file wasn't found
 	 * @throws VelocityException on Velocity initialization failure

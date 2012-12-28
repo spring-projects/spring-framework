@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ServletRequestBindingException} subclass that indicates an unsatisfied
- * parameter condition, as typically expressed using an <code>@RequestMapping</code>
- * annotation at the <code>@Controller</code> type level.
+ * parameter condition, as typically expressed using an {@code @RequestMapping}
+ * annotation at the {@code @Controller} type level.
  *
  * @author Juergen Hoeller
  * @since 3.0
  * @see org.springframework.web.bind.annotation.RequestMapping#params()
  */
+@SuppressWarnings("serial")
 public class UnsatisfiedServletRequestParameterException extends ServletRequestBindingException {
 
 	private final String[] paramConditions;
@@ -47,7 +48,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map actualParams) {
 		super("");
 		this.paramConditions = paramConditions;
-		this.actualParams = (Map<String, String[]>) actualParams;
+		this.actualParams = actualParams;
 	}
 
 

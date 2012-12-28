@@ -28,6 +28,7 @@ public class TestProxyFactoryBean extends AbstractSingletonProxyFactoryBean impl
 		return new NoOpAdvice();
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 	}
 

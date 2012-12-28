@@ -13,6 +13,7 @@ import org.w3c.dom.Element;
 
 public class ComponentBeanDefinitionParser extends AbstractBeanDefinitionParser {
 
+	@Override
 	protected AbstractBeanDefinition parseInternal(Element element,
 			ParserContext parserContext) {
 		return parseComponentElement(element);

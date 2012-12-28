@@ -64,6 +64,7 @@ public class VelocityRenderTests {
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine("test.vm", expectedTemplate);
 			}
@@ -106,9 +107,11 @@ public class VelocityRenderTests {
 		thrown.expect(NestedServletException.class);
 
 		thrown.expect(new TypeSafeMatcher<Exception>() {
+			@Override
 			public boolean matchesSafely(Exception item) {
 				return item.getCause() instanceof MethodInvocationException;
 			}
+			@Override
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of MethodInvocationException");
 
@@ -138,9 +141,11 @@ public class VelocityRenderTests {
 		thrown.expect(NestedServletException.class);
 
 		thrown.expect(new TypeSafeMatcher<Exception>() {
+			@Override
 			public boolean matchesSafely(Exception item) {
 				return item.getCause() instanceof IOException;
 			}
+			@Override
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of IOException");
 

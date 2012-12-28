@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ScriptCompilationException extends NestedRuntimeException {
 
 	private ScriptSource scriptSource;
@@ -73,7 +74,7 @@ public class ScriptCompilationException extends NestedRuntimeException {
 
 	/**
 	 * Return the source for the offending script.
-	 * @return the source, or <code>null</code> if not available
+	 * @return the source, or {@code null} if not available
 	 */
 	public ScriptSource getScriptSource() {
 		return this.scriptSource;

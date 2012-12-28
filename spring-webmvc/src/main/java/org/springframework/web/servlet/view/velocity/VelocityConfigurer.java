@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.web.context.ServletContextAware;
  * This allows to share a VelocityEngine for web and email usage, for example.
  *
  * <p>This configurer registers the "spring.vm" Velocimacro library for web views
- * (contained in this package and thus in <code>spring.jar</code>), which makes
+ * (contained in this package and thus in {@code spring.jar}), which makes
  * all of Spring's default Velocity macros available to the views.
  * This allows for using the Spring-provided macros such as follows:
  *
@@ -95,7 +95,7 @@ public class VelocityConfigurer extends VelocityEngineFactory
 	 * {@link org.springframework.ui.velocity.VelocityEngineFactoryBean}.
 	 * <p>Note that the Spring macros will <i>not</i> be enabled automatically in
 	 * case of an external VelocityEngine passed in here. Make sure to include
-	 * <code>spring.vm</code> in your template loader path in such a scenario
+	 * {@code spring.vm} in your template loader path in such a scenario
 	 * (if there is an actual need to use those macros).
 	 * <p>If this is not set, VelocityEngineFactory's properties
 	 * (inherited by this class) have to be specified.

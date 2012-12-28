@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,13 +34,13 @@ public interface AspectInstanceFactory extends Ordered {
 
 	/**
 	 * Create an instance of this factory's aspect.
-	 * @return the aspect instance (never <code>null</code>)
+	 * @return the aspect instance (never {@code null})
 	 */
 	Object getAspectInstance();
 
 	/**
 	 * Expose the aspect class loader that this factory uses.
-	 * @return the aspect class loader (never <code>null</code>)
+	 * @return the aspect class loader (never {@code null})
 	 */
 	ClassLoader getAspectClassLoader();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.springframework.beans.TestBean;
  */
 public class ClassUtilsTests extends TestCase {
 
+	@Override
 	public void setUp() {
 		InnerClass.noArgCalled = false;
 		InnerClass.argCalled = false;
@@ -171,14 +172,14 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testHasMethod() throws Exception {
-		assertTrue(ClassUtils.hasMethod(Collection.class, "size", null));
-		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", new Class[] {Object.class}));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "remove", null));
-		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod", null));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "size"));
+		assertTrue(ClassUtils.hasMethod(Collection.class, "remove", Object.class));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "remove"));
+		assertFalse(ClassUtils.hasMethod(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodIfAvailable() throws Exception {
-		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size", null);
+		Method method = ClassUtils.getMethodIfAvailable(Collection.class, "size");
 		assertNotNull(method);
 		assertEquals("size", method.getName());
 
@@ -186,8 +187,8 @@ public class ClassUtilsTests extends TestCase {
 		assertNotNull(method);
 		assertEquals("remove", method.getName());
 
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove", null));
-		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod", null));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "remove"));
+		assertNull(ClassUtils.getMethodIfAvailable(Collection.class, "someOtherMethod"));
 	}
 
 	public void testGetMethodCountForName() {

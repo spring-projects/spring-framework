@@ -96,8 +96,8 @@ public class EmbeddedDatabaseBuilder {
 
 	/**
 	 * Add default scripts to execute to populate the database.
-	 * <p>The default scripts are <code>schema.sql</code> to create the db
-	 * schema and <code>data.sql</code> to populate the db with data.
+	 * <p>The default scripts are {@code schema.sql} to create the db
+	 * schema and {@code data.sql} to populate the db with data.
 	 * @return this, to facilitate method chaining
 	 */
 	public EmbeddedDatabaseBuilder addDefaultScripts() {
@@ -105,7 +105,7 @@ public class EmbeddedDatabaseBuilder {
 		addScript("data.sql");
 		return this;
 	}
-	
+
 	/**
 	 * Build the embedded database.
 	 * @return the embedded database

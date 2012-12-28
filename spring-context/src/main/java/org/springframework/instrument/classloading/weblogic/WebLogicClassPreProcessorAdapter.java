@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class WebLogicClassPreProcessorAdapter implements InvocationHandler {
 	/**
 	 * Creates a new {@link WebLogicClassPreProcessorAdapter}.
 	 * @param transformer the {@link ClassFileTransformer} to be adapted (must
-	 * not be <code>null</code>)
+	 * not be {@code null})
 	 */
 	public WebLogicClassPreProcessorAdapter(ClassFileTransformer transformer, ClassLoader loader) {
 		this.transformer = transformer;

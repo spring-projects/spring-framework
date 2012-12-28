@@ -39,7 +39,7 @@ public class ParameterizableViewControllerTests {
 	private ParameterizableViewController controller;
 
 	private MockHttpServletRequest request;
-	
+
 	@Before
 	public void setup() {
 		this.controller = new ParameterizableViewController();
@@ -54,7 +54,7 @@ public class ParameterizableViewControllerTests {
 		assertEquals(viewName, mav.getViewName());
 		assertTrue(mav.getModel().isEmpty());
 	}
-	
+
 	@Test
 	public void handleRequestWithoutViewName() throws Exception {
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());

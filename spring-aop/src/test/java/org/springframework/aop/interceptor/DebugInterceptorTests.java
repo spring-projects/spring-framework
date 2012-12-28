@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
@@ -33,40 +38,29 @@ public final class DebugInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
-		
-		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
 
-		expect(log.isTraceEnabled()).andReturn(true);
-		log.trace(isA(String.class));
-		expect(methodInvocation.proceed()).andReturn(null);
-		log.trace(isA(String.class));
+		MethodInvocation methodInvocation = mock(MethodInvocation.class);
 
-		replay(methodInvocation);
-		replay(log);
+		Log log = mock(Log.class);
+		given(log.isTraceEnabled()).willReturn(true);
 
 		DebugInterceptor interceptor = new StubDebugInterceptor(log);
 		interceptor.invoke(methodInvocation);
 		checkCallCountTotal(interceptor);
 
-		verify(methodInvocation);
-		verify(log);
+		verify(log, times(2)).trace(anyString());
 	}
 
 	@Test
 	public void testExceptionPathStillLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
-		
-		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
 
-		expect(log.isTraceEnabled()).andReturn(true);
-		log.trace(isA(String.class));
+		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+
 		IllegalArgumentException exception = new IllegalArgumentException();
-		expect(methodInvocation.proceed()).andThrow(exception);
-		log.trace(isA(String.class), eq(exception));
+		given(methodInvocation.proceed()).willThrow(exception);
 
-		replay(methodInvocation);
-		replay(log);
+		Log log = mock(Log.class);
+		given(log.isTraceEnabled()).willReturn(true);
 
 		DebugInterceptor interceptor = new StubDebugInterceptor(log);
 		try {
@@ -76,8 +70,8 @@ public final class DebugInterceptorTests {
 		}
 		checkCallCountTotal(interceptor);
 
-		verify(methodInvocation);
-		verify(log);
+		verify(log).trace(anyString());
+		verify(log).trace(anyString(), eq(exception));
 	}
 
 	private void checkCallCountTotal(DebugInterceptor interceptor) {
@@ -96,6 +90,7 @@ public final class DebugInterceptorTests {
 			this.log = log;
 		}
 
+		@Override
 		protected Log getLoggerForInvocation(MethodInvocation invocation) {
 			return log;
 		}

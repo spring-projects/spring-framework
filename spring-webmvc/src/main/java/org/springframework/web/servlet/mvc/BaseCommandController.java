@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * JavaBeans based on request parameters, validate the content of such
  * JavaBeans using {@link org.springframework.validation.Validator Validators}
  * and use custom editors (in the form of
- * {@link java.beans.PropertyEditor PropertyEditors}) to transform 
+ * {@link java.beans.PropertyEditor PropertyEditors}) to transform
  * objects into strings and vice versa, for example. Three notions are mentioned here:</p>
  *
  * <p><b>Command class:</b><br>
@@ -50,18 +50,18 @@ import org.springframework.web.context.request.ServletWebRequest;
  * Upon receiving a request, any BaseCommandController will attempt to fill the
  * command object using the request parameters. This is done using the typical
  * and well-known JavaBeans property notation. When a request parameter named
- * <code>'firstName'</code> exists, the framework will attempt to call 
- * <code>setFirstName([value])</code> passing the value of the parameter. Nested properties
- * are of course supported. For instance a parameter named <code>'address.city'</code>
- * will result in a <code>getAddress().setCity([value])</code> call on the
+ * {@code 'firstName'} exists, the framework will attempt to call
+ * {@code setFirstName([value])} passing the value of the parameter. Nested properties
+ * are of course supported. For instance a parameter named {@code 'address.city'}
+ * will result in a {@code getAddress().setCity([value])} call on the
  * command class.</p>
  *
  * <p>It's important to realise that you are not limited to String arguments in
  * your JavaBeans. Using the PropertyEditor-notion as supplied by the
  * java.beans package, you will be able to transform Strings to Objects and
- * the other way around. For instance <code>setLocale(Locale loc)</code> is
- * perfectly possible for a request parameter named <code>locale</code> having
- * a value of <code>en</code>, as long as you register the appropriate
+ * the other way around. For instance {@code setLocale(Locale loc)} is
+ * perfectly possible for a request parameter named {@code locale} having
+ * a value of {@code en}, as long as you register the appropriate
  * PropertyEditor in the Controller (see {@link #initBinder initBinder()}
  * for more information on that matter.</p>
  *
@@ -237,7 +237,7 @@ public abstract class BaseCommandController extends AbstractController {
 	/**
 	 * Set the strategy to use for resolving errors into message codes.
 	 * Applies the given strategy to all data binders used by this controller.
-	 * <p>Default is <code>null</code>, i.e. using the default strategy of
+	 * <p>Default is {@code null}, i.e. using the default strategy of
 	 * the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setMessageCodesResolver
@@ -255,8 +255,8 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Set the strategy to use for processing binding errors, that is,
-	 * required field errors and <code>PropertyAccessException</code>s.
-	 * <p>Default is <code>null</code>, that is, using the default strategy
+	 * required field errors and {@code PropertyAccessException}s.
+	 * <p>Default is {@code null}, that is, using the default strategy
 	 * of the data binder.
 	 * @see #createBinder
 	 * @see org.springframework.validation.DataBinder#setBindingErrorProcessor
@@ -349,7 +349,7 @@ public abstract class BaseCommandController extends AbstractController {
 
 	/**
 	 * Create a new command instance for the command class of this controller.
-	 * <p>This implementation uses <code>BeanUtils.instantiateClass</code>,
+	 * <p>This implementation uses {@code BeanUtils.instantiateClass},
 	 * so the command needs to have a no-arg constructor (supposed to be
 	 * public, but not required to).
 	 * @return the new command instance
@@ -434,7 +434,7 @@ public abstract class BaseCommandController extends AbstractController {
 	 * @see #initBinder
 	 */
 	protected ServletRequestDataBinder createBinder(HttpServletRequest request, Object command)
-	    throws Exception {
+		throws Exception {
 
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(command, getCommandName());
 		prepareBinder(binder);
@@ -472,8 +472,8 @@ public abstract class BaseCommandController extends AbstractController {
 	 * Determine whether to use direct field access instead of bean property access.
 	 * Applied by {@link #prepareBinder}.
 	 * <p>Default is "false". Can be overridden in subclasses.
-	 * @return whether to use direct field access (<code>true</code>)
-	 * or bean property access (<code>false</code>)
+	 * @return whether to use direct field access ({@code true})
+	 * or bean property access ({@code false})
 	 * @see #prepareBinder
 	 * @see org.springframework.validation.DataBinder#initDirectFieldAccess()
 	 */

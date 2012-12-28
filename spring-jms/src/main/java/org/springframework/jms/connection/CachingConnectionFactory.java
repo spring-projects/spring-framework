@@ -59,8 +59,8 @@ import org.springframework.util.ObjectUtils;
  *
  * <p>When using the JMS 1.0.2 API, this ConnectionFactory will switch
  * into queue/topic mode according to the JMS API methods used at runtime:
- * <code>createQueueConnection</code> and <code>createTopicConnection</code> will
- * lead to queue/topic mode, respectively; generic <code>createConnection</code>
+ * {@code createQueueConnection} and {@code createTopicConnection} will
+ * lead to queue/topic mode, respectively; generic {@code createConnection}
  * calls will lead to a JMS 1.1 connection which is able to serve both modes.
  *
  * <p><b>NOTE: This ConnectionFactory requires explicit closing of all Sessions
@@ -71,7 +71,7 @@ import org.springframework.util.ObjectUtils;
  * <p>Note also that MessageConsumers obtained from a cached Session won't get
  * closed until the Session will eventually be removed from the pool. This may
  * lead to semantic side effects in some cases. For a durable subscriber, the
- * logical <code>Session.close()</code> call will also close the subscription.
+ * logical {@code Session.close()} call will also close the subscription.
  * Re-registering a durable consumer for the same subscription on the same
  * Session handle is not supported; close and reobtain a cached Session first.
  *

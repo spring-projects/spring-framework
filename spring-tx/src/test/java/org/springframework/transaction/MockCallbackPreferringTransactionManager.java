@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 	private TransactionStatus status;
 
 
+	@Override
 	public Object execute(TransactionDefinition definition, TransactionCallback callback) throws TransactionException {
 		this.definition = definition;
 		this.status = new SimpleTransactionStatus();
@@ -45,14 +46,17 @@ public class MockCallbackPreferringTransactionManager implements CallbackPreferr
 	}
 
 
+	@Override
 	public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void commit(TransactionStatus status) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void rollback(TransactionStatus status) throws TransactionException {
 		throw new UnsupportedOperationException();
 	}

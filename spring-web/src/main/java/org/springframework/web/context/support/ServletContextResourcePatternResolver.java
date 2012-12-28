@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 /**
  * ServletContext-aware subclass of {@link PathMatchingResourcePatternResolver},
  * able to find matching resources below the web application root directory
- * via Servlet 2.3's <code>ServletContext.getResourcePaths</code>.
+ * via Servlet 2.3's {@code ServletContext.getResourcePaths}.
  * Falls back to the superclass' file system checking for other resources.
  *
  * @author Juergen Hoeller
@@ -69,7 +69,7 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 
 	/**
 	 * Overridden version which checks for ServletContextResource
-	 * and uses <code>ServletContext.getResourcePaths</code> to find
+	 * and uses {@code ServletContext.getResourcePaths} to find
 	 * matching resources below the web application root directory.
 	 * In case of other resources, delegates to the superclass version.
 	 * @see #doRetrieveMatchingServletContextResources
@@ -156,7 +156,6 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @param result the Set of matching Resources to add to
 	 * @throws IOException if jar contents could not be retrieved
 	 */
-	@SuppressWarnings("unchecked")
 	private void doRetrieveMatchingJarEntries(String jarFilePath, String entryPattern, Set<Resource> result) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching jar file [" + jarFilePath + "] for entries matching [" + entryPattern + "]");

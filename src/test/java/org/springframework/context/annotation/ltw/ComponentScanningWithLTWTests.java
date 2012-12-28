@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.test.jpa.AbstractJpaTests;
 /**
  * Test to ensure that component scanning work with load-time weaver.
  * See SPR-3873 for more details.
- * 
+ *
  * @author Ramnivas Laddad
  */
 public class ComponentScanningWithLTWTests extends AbstractJpaTests {
@@ -29,7 +29,7 @@ public class ComponentScanningWithLTWTests extends AbstractJpaTests {
 	public ComponentScanningWithLTWTests() {
 		setDependencyCheck(false);
 	}
-	
+
 	@Override
 	protected String getConfigPath() {
 		return "ComponentScanningWithLTWTests.xml";

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.io.IOException;
  * @see org.springframework.core.NestedCheckedException
  * @see org.springframework.core.NestedRuntimeException
  */
+@SuppressWarnings("serial")
 public class NestedIOException extends IOException {
 
 	static {
@@ -45,7 +46,7 @@ public class NestedIOException extends IOException {
 
 
 	/**
-	 * Construct a <code>NestedIOException</code> with the specified detail message.
+	 * Construct a {@code NestedIOException} with the specified detail message.
 	 * @param msg the detail message
 	 */
 	public NestedIOException(String msg) {
@@ -53,7 +54,7 @@ public class NestedIOException extends IOException {
 	}
 
 	/**
-	 * Construct a <code>NestedIOException</code> with the specified detail message
+	 * Construct a {@code NestedIOException} with the specified detail message
 	 * and nested exception.
 	 * @param msg the detail message
 	 * @param cause the nested exception

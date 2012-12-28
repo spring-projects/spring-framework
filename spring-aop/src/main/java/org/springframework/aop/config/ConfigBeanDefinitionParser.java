@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * {@link BeanDefinitionParser} for the <code>&lt;aop:config&gt;</code> tag.
+ * {@link BeanDefinitionParser} for the {@code &lt;aop:config&gt;} tag.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
@@ -93,7 +93,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	private static final int ASPECT_INSTANCE_FACTORY_INDEX = 2;
 
 	private ParseState parseState = new ParseState();
-	
+
 
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compositeDef =
@@ -122,8 +122,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * Configures the auto proxy creator needed to support the {@link BeanDefinition BeanDefinitions}
-	 * created by the '<code>&lt;aop:config/&gt;</code>' tag. Will force class proxying if the
-	 * '<code>proxy-target-class</code>' attribute is set to '<code>true</code>'.
+	 * created by the '{@code &lt;aop:config/&gt;}' tag. Will force class proxying if the
+	 * '{@code proxy-target-class}' attribute is set to '{@code true}'.
 	 * @see AopNamespaceUtils
 	 */
 	private void configureAutoProxyCreator(ParserContext parserContext, Element element) {
@@ -131,7 +131,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the supplied <code>&lt;advisor&gt;</code> element and registers the resulting
+	 * Parses the supplied {@code &lt;advisor&gt;} element and registers the resulting
 	 * {@link org.springframework.aop.Advisor} and any resulting {@link org.springframework.aop.Pointcut}
 	 * with the supplied {@link BeanDefinitionRegistry}.
 	 */
@@ -168,7 +168,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 
 	/**
 	 * Create a {@link RootBeanDefinition} for the advisor described in the supplied. Does <strong>not</strong>
-	 * parse any associated '<code>pointcut</code>' or '<code>pointcut-ref</code>' attributes.
+	 * parse any associated '{@code pointcut}' or '{@code pointcut-ref}' attributes.
 	 */
 	private AbstractBeanDefinition createAdvisorBeanDefinition(Element advisorElement, ParserContext parserContext) {
 		RootBeanDefinition advisorDefinition = new RootBeanDefinition(DefaultBeanFactoryPointcutAdvisor.class);
@@ -257,9 +257,9 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Return <code>true</code> if the supplied node describes an advice type. May be one of:
-	 * '<code>before</code>', '<code>after</code>', '<code>after-returning</code>',
-	 * '<code>after-throwing</code>' or '<code>around</code>'.
+	 * Return {@code true} if the supplied node describes an advice type. May be one of:
+	 * '{@code before}', '{@code after}', '{@code after-returning}',
+	 * '{@code after-throwing}' or '{@code around}'.
 	 */
 	private boolean isAdviceNode(Node aNode, ParserContext parserContext) {
 		if (!(aNode instanceof Element)) {
@@ -273,7 +273,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parse a '<code>declare-parents</code>' element and register the appropriate
+	 * Parse a '{@code declare-parents}' element and register the appropriate
 	 * DeclareParentsAdvisor with the BeanDefinitionRegistry encapsulated in the
 	 * supplied ParserContext.
 	 */
@@ -281,10 +281,10 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DeclareParentsAdvisor.class);
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(IMPLEMENT_INTERFACE));
 		builder.addConstructorArgValue(declareParentsElement.getAttribute(TYPE_PATTERN));
-		
+
 		String defaultImpl = declareParentsElement.getAttribute(DEFAULT_IMPL);
 		String delegateRef = declareParentsElement.getAttribute(DELEGATE_REF);
-		
+
 		if (StringUtils.hasText(defaultImpl) && !StringUtils.hasText(delegateRef)) {
 			builder.addConstructorArgValue(defaultImpl);
 		}
@@ -304,8 +304,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses one of '<code>before</code>', '<code>after</code>', '<code>after-returning</code>',
-	 * '<code>after-throwing</code>' or '<code>around</code>' and registers the resulting
+	 * Parses one of '{@code before}', '{@code after}', '{@code after-returning}',
+	 * '{@code after-throwing}' or '{@code around}' and registers the resulting
 	 * BeanDefinition with the supplied BeanDefinitionRegistry.
 	 * @return the generated advice RootBeanDefinition
 	 */
@@ -427,7 +427,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the supplied <code>&lt;pointcut&gt;</code> and registers the resulting
+	 * Parses the supplied {@code &lt;pointcut&gt;} and registers the resulting
 	 * Pointcut with the BeanDefinitionRegistry.
 	 */
 	private AbstractBeanDefinition parsePointcut(Element pointcutElement, ParserContext parserContext) {
@@ -435,7 +435,7 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 		String expression = pointcutElement.getAttribute(EXPRESSION);
 
 		AbstractBeanDefinition pointcutDefinition = null;
-		
+
 		try {
 			this.parseState.push(new PointcutEntry(id));
 			pointcutDefinition = createPointcutDefinition(expression);
@@ -460,8 +460,8 @@ class ConfigBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	/**
-	 * Parses the <code>pointcut</code> or <code>pointcut-ref</code> attributes of the supplied
-	 * {@link Element} and add a <code>pointcut</code> property as appropriate. Generates a
+	 * Parses the {@code pointcut} or {@code pointcut-ref} attributes of the supplied
+	 * {@link Element} and add a {@code pointcut} property as appropriate. Generates a
 	 * {@link org.springframework.beans.factory.config.BeanDefinition} for the pointcut if  necessary
 	 * and returns its bean name, otherwise returns the bean name of the referred pointcut.
 	 */

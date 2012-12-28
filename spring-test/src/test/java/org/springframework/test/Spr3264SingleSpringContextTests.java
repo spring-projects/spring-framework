@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ package org.springframework.test;
  * JUnit 3.8 based unit test which verifies new functionality requested in <a
  * href="http://opensource.atlassian.com/projects/spring/browse/SPR-3264"
  * target="_blank">SPR-3264</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  * @see Spr3264DependencyInjectionSpringContextTests

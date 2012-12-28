@@ -76,6 +76,7 @@ public class CgLibProxyServletAnnotationTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerclass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override

@@ -58,7 +58,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private final List<String> fileExtensions = new ArrayList<String>();
 
-	
+
 	/**
 	 * Whether to use suffix pattern match (".*") when matching patterns to
 	 * requests. If enabled a method mapped to "/users" also matches to "/users.*".

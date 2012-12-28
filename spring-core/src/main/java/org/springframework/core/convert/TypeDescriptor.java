@@ -169,12 +169,12 @@ public class TypeDescriptor {
 
 	/**
 	 * Creates a type descriptor for a nested type declared within the field.
-	 * <p>For example, if the field is a <code>List&lt;String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be <code>String.class</code>.
-	 * If the field is a <code>List&lt;List&lt;String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will also be a <code>String.class</code>.
-	 * If the field is a <code>Map&lt;Integer, String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
-	 * If the field is a <code>List&lt;Map&lt;Integer, String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
-	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
-	 * For example, if the field is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
+	 * <p>For example, if the field is a {@code List&lt;String&gt;} and the nestingLevel is 1, the nested type descriptor will be {@code String.class}.
+	 * If the field is a {@code List&lt;List&lt;String&gt;&gt;} and the nestingLevel is 2, the nested type descriptor will also be a {@code String.class}.
+	 * If the field is a {@code Map&lt;Integer, String&gt;} and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
+	 * If the field is a {@code List&lt;Map&lt;Integer, String&gt;&gt;} and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns {@code null} if a nested type cannot be obtained because it was not declared.
+	 * For example, if the field is a {@code List&lt;?&gt;}, the nested type descriptor returned will be {@code null}.
 	 * @param field the field
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the field
 	 * @return the nested type descriptor at the specified nestingLevel, or null if it could not be obtained
@@ -186,15 +186,15 @@ public class TypeDescriptor {
 
 	/**
 	 * Creates a type descriptor for a nested type declared within the property.
-	 * <p>For example, if the property is a <code>List&lt;String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be <code>String.class</code>.
-	 * If the property is a <code>List&lt;List&lt;String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will also be a <code>String.class</code>.
-	 * If the property is a <code>Map&lt;Integer, String&gt;</code> and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
-	 * If the property is a <code>List&lt;Map&lt;Integer, String&gt;&gt;</code> and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
-	 * Returns <code>null</code> if a nested type cannot be obtained because it was not declared.
-	 * For example, if the property is a <code>List&lt;?&gt;</code>, the nested type descriptor returned will be <code>null</code>.
+	 * <p>For example, if the property is a {@code List&lt;String&gt;} and the nestingLevel is 1, the nested type descriptor will be {@code String.class}.
+	 * If the property is a {@code List&lt;List&lt;String&gt;&gt;} and the nestingLevel is 2, the nested type descriptor will also be a {@code String.class}.
+	 * If the property is a {@code Map&lt;Integer, String&gt;} and the nestingLevel is 1, the nested type descriptor will be String, derived from the map value.
+	 * If the property is a {@code List&lt;Map&lt;Integer, String&gt;&gt;} and the nestingLevel is 2, the nested type descriptor will be String, derived from the map value.
+	 * Returns {@code null} if a nested type cannot be obtained because it was not declared.
+	 * For example, if the property is a {@code List&lt;?&gt;}, the nested type descriptor returned will be {@code null}.
 	 * @param property the property
 	 * @param nestingLevel the nesting level of the collection/array element or map key/value declaration within the property
-	 * @return the nested type descriptor at the specified nestingLevel, or <code>null</code> if it could not be obtained
+	 * @return the nested type descriptor at the specified nestingLevel, or {@code null} if it could not be obtained
 	 * @throws IllegalArgumentException if the types up to the specified nesting level are not of collection, array, or map types
 	 */
 	public static TypeDescriptor nested(Property property, int nestingLevel) {
@@ -217,7 +217,7 @@ public class TypeDescriptor {
 	 * Returns primitive types as-is.
 	 * <p>See {@link #getObjectType()} for a variation of this operation that resolves primitive types
 	 * to their corresponding Object types if necessary.
-	 * @return the type, or <code>null</code>
+	 * @return the type, or {@code null}
 	 * @see #getObjectType()
 	 */
 	public Class<?> getType() {
@@ -235,11 +235,11 @@ public class TypeDescriptor {
 
 	/**
 	 * Narrows this {@link TypeDescriptor} by setting its type to the class of the provided value.
-	 * If the value is <code>null</code>, no narrowing is performed and this TypeDescriptor is returned unchanged.
+	 * If the value is {@code null}, no narrowing is performed and this TypeDescriptor is returned unchanged.
 	 * <p>Designed to be called by binding frameworks when they read property, field, or method return values.
 	 * Allows such frameworks to narrow a TypeDescriptor built from a declared property, field, or method return value type.
-	 * For example, a field declared as <code>java.lang.Object</code> would be narrowed to <code>java.util.HashMap</code>
-	 * if it was set to a <code>java.util.HashMap</code> value. The narrowed TypeDescriptor can then be used to convert
+	 * For example, a field declared as {@code java.lang.Object} would be narrowed to {@code java.util.HashMap}
+	 * if it was set to a {@code java.util.HashMap} value. The narrowed TypeDescriptor can then be used to convert
 	 * the HashMap to some other type. Annotation and nested type context is preserved by the narrowed copy.
 	 * @param value the value to use for narrowing this type descriptor
 	 * @return this TypeDescriptor narrowed (returns a copy with its type updated to the class of the provided value)
@@ -304,7 +304,7 @@ public class TypeDescriptor {
 	/**
 	 * Obtain the annotation associated with this type descriptor of the specified type.
 	 * @param annotationType the annotation type
-	 * @return the annotation, or <code>null</code> if no such annotation exists on this type descriptor
+	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
@@ -372,7 +372,7 @@ public class TypeDescriptor {
 	 * If this type is an array, returns the array's component type.
 	 * If this type is a {@link Collection} and it is parameterized, returns the Collection's element type.
 	 * If the Collection is not parameterized, returns null indicating the element type is not declared.
-	 * @return the array component type or Collection element type, or <code>null</code> if this type is a Collection but its element type is not parameterized
+	 * @return the array component type or Collection element type, or {@code null} if this type is a Collection but its element type is not parameterized
 	 * @throws IllegalStateException if this type is not a java.util.Collection or Array type
 	 */
 	public TypeDescriptor getElementTypeDescriptor() {
@@ -407,7 +407,7 @@ public class TypeDescriptor {
 	/**
 	 * If this type is a {@link Map} and its key type is parameterized, returns the map's key type.
 	 * If the Map's key type is not parameterized, returns null indicating the key type is not declared.
-	 * @return the Map key type, or <code>null</code> if this type is a Map but its key type is not parameterized
+	 * @return the Map key type, or {@code null} if this type is a Map but its key type is not parameterized
 	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	public TypeDescriptor getMapKeyTypeDescriptor() {
@@ -433,7 +433,7 @@ public class TypeDescriptor {
 	/**
 	 * If this type is a {@link Map} and its value type is parameterized, returns the map's value type.
 	 * If the Map's value type is not parameterized, returns null indicating the value type is not declared.
-	 * @return the Map value type, or <code>null</code> if this type is a Map but its value type is not parameterized
+	 * @return the Map value type, or {@code null} if this type is a Map but its value type is not parameterized
 	 * @throws IllegalStateException if this type is not a java.util.Map
 	 */
 	public TypeDescriptor getMapValueTypeDescriptor() {

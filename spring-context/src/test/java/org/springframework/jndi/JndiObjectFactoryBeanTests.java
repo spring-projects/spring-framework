@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.jndi;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
@@ -233,6 +236,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -259,6 +263,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -287,6 +292,7 @@ public class JndiObjectFactoryBeanTests {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		final TestBean tb = new TestBean();
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			public Object lookup(String name) {
 				if ("foo".equals(name)) {
 					tb.setName("tb");
@@ -380,12 +386,10 @@ public class JndiObjectFactoryBeanTests {
 	public void testLookupWithExposeAccessContext() throws Exception {
 		JndiObjectFactoryBean jof = new JndiObjectFactoryBean();
 		TestBean tb = new TestBean();
-		final Context mockCtx = createMock(Context.class);
-		expect(mockCtx.lookup("foo")).andReturn(tb);
-		mockCtx.close();
-		expectLastCall().times(2);
-		replay(mockCtx);
+		final Context mockCtx = mock(Context.class);
+		given(mockCtx.lookup("foo")).willReturn(tb);
 		jof.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockCtx;
 			}
@@ -402,7 +406,7 @@ public class JndiObjectFactoryBeanTests {
 		proxy.equals(proxy);
 		proxy.hashCode();
 		proxy.toString();
-		verify(mockCtx);
+		verify(mockCtx, times(2)).close();
 	}
 
 }

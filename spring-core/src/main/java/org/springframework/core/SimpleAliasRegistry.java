@@ -62,7 +62,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 
 	/**
 	 * Return whether alias overriding is allowed.
-	 * Default is <code>true</code>.
+	 * Default is {@code true}.
 	 */
 	protected boolean allowAliasOverriding() {
 		return true;

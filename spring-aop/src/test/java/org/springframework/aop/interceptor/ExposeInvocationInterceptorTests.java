@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 the original author or authors.
- * 
+ * Copyright 2002-2012 the original author or authors.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,12 +29,12 @@ import test.beans.TestBean;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests
- * 
+ *
  * @author Rod Johnson
  * @author Chris Beams
  */
 public final class ExposeInvocationInterceptorTests {
-	
+
 	private static final Resource CONTEXT =
 		qualifiedResource(ExposeInvocationInterceptorTests.class, "context.xml");
 
@@ -53,26 +53,29 @@ public final class ExposeInvocationInterceptorTests {
 
 abstract class ExposedInvocationTestBean extends TestBean {
 
+	@Override
 	public String getName() {
 		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 		assertions(invocation);
 		return super.getName();
 	}
 
+	@Override
 	public void absquatulate() {
 		MethodInvocation invocation = ExposeInvocationInterceptor.currentInvocation();
 		assertions(invocation);
 		super.absquatulate();
 	}
-	
+
 	protected abstract void assertions(MethodInvocation invocation);
 }
 
 
 class InvocationCheckExposedInvocationTestBean extends ExposedInvocationTestBean {
+	@Override
 	protected void assertions(MethodInvocation invocation) {
 		assertTrue(invocation.getThis() == this);
-		assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(), 
+		assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
 				ITestBean.class.isAssignableFrom(invocation.getMethod().getDeclaringClass()));
 	}
 }

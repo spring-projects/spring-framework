@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public interface BeanWiringInfoResolver {
 	/**
 	 * Resolve the BeanWiringInfo for the given bean instance.
 	 * @param beanInstance the bean instance to resolve info for
-	 * @return the BeanWiringInfo, or <code>null</code> if not found
+	 * @return the BeanWiringInfo, or {@code null} if not found
 	 */
 	BeanWiringInfo resolveWiringInfo(Object beanInstance);
 

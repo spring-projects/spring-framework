@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class TxNamespaceHandlerTests extends TestCase {
 
 	private Method setAgeMethod;
 
+	@Override
 	public void setUp() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge", new Class[0]);
@@ -76,13 +77,13 @@ public class TxNamespaceHandlerTests extends TestCase {
 			assertEquals("Should have 1 rolled back transaction", 1, ptm.rollbacks);
 		}
 	}
-	
+
 	public void testRollbackRules() {
 		TransactionInterceptor txInterceptor = (TransactionInterceptor) context.getBean("txRollbackAdvice");
 		TransactionAttributeSource txAttrSource = txInterceptor.getTransactionAttributeSource();
 		TransactionAttribute txAttr = txAttrSource.getTransactionAttribute(getAgeMethod,ITestBean.class);
 		assertTrue("should be configured to rollback on Exception",txAttr.rollbackOn(new Exception()));
-		
+
 		txAttr = txAttrSource.getTransactionAttribute(setAgeMethod, ITestBean.class);
 		assertFalse("should not rollback on RuntimeException",txAttr.rollbackOn(new RuntimeException()));
 	}

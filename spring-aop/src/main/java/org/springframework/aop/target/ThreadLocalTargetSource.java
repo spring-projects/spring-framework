@@ -37,7 +37,7 @@ import org.springframework.core.NamedThreadLocal;
  * for example, if one caller makes repeated calls on the AOP proxy.
  *
  * <p>Cleanup of thread-bound objects is performed on BeanFactory destruction,
- * calling their <code>DisposableBean.destroy()</code> method if available.
+ * calling their {@code DisposableBean.destroy()} method if available.
  * Be aware that many thread-bound objects can be around until the application
  * actually shuts down.
  *
@@ -49,7 +49,9 @@ import org.springframework.core.NamedThreadLocal;
  */
 public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
-	
+
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * ThreadLocal holding the target associated with the current
 	 * thread. Unlike most ThreadLocals, which are static, this variable
@@ -62,9 +64,9 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * Set of managed targets, enabling us to keep track of the targets we've created.
 	 */
 	private final Set<Object> targetSet = new HashSet<Object>();
-	
+
 	private int invocationCount;
-	
+
 	private int hitCount;
 
 
@@ -78,8 +80,10 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		Object target = this.targetInThread.get();
 		if (target == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("No target for prototype '" + getTargetBeanName() + "' bound to thread: " +
-				    "creating one and binding it to thread '" + Thread.currentThread().getName() + "'");
+				logger.debug("No target for prototype '" + getTargetBeanName() +
+						"' bound to thread: " +
+						"creating one and binding it to thread '" +
+						Thread.currentThread().getName() + "'");
 			}
 			// Associate target with ThreadLocal.
 			target = newPrototypeInstance();
@@ -93,7 +97,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 		}
 		return target;
 	}
-	
+
 	/**
 	 * Dispose of targets if necessary; clear ThreadLocal.
 	 * @see #destroyPrototypeInstance

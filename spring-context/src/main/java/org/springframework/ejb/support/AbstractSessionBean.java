@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.ejb.SessionContext;
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractSessionBean extends AbstractEnterpriseBean implements SmartSessionBean {
 
 	/** The SessionContext passed to this EJB */

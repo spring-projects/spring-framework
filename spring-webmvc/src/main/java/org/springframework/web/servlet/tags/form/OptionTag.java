@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,20 +25,20 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.util.TagUtils;
 
 /**
- * JSP tag for rendering an HTML '<code>option</code>' tag.
- * 
+ * JSP tag for rendering an HTML '{@code option}' tag.
+ *
  * <p><b>Must be used nested inside a {@link SelectTag}.</b>
- * 
+ *
  * <p>Provides full support for databinding by marking an
- * '<code>option</code>' as 'selected' if the {@link #setValue value}
+ * '{@code option}' as 'selected' if the {@link #setValue value}
  * matches the value bound to the out {@link SelectTag}.
  *
  * <p>The {@link #setValue value} property is required and corresponds to
- * the '<code>value</code>' attribute of the rendered '<code>option</code>'.
+ * the '{@code value}' attribute of the rendered '{@code option}'.
  *
  * <p>An optional {@link #setLabel label} property can be specified, the
  * value of which corresponds to inner text of the rendered
- * '<code>option</code>' tag. If no {@link #setLabel label} is specified
+ * '{@code option}' tag. If no {@link #setLabel label} is specified
  * then the {@link #setValue value} property will be used when rendering
  * the inner text.
  *
@@ -46,6 +46,7 @@ import org.springframework.web.util.TagUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
@@ -59,40 +60,40 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	public static final String DISPLAY_VALUE_VARIABLE_NAME = "displayValue";
 
 	/**
-	 * The name of the '<code>selected</code>' attribute.
+	 * The name of the '{@code selected}' attribute.
 	 */
 	private static final String SELECTED_ATTRIBUTE = "selected";
 
 	/**
-	 * The name of the '<code>value</code>' attribute.
+	 * The name of the '{@code value}' attribute.
 	 */
 	private static final String VALUE_ATTRIBUTE = VALUE_VARIABLE_NAME;
-	
+
 	/**
-	 * The name of the '<code>disabled</code>' attribute.
+	 * The name of the '{@code disabled}' attribute.
 	 */
 	private static final String DISABLED_ATTRIBUTE = "disabled";
 
 
 	/**
-	 * The 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * The 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
 	 */
 	private Object value;
 
 	/**
-	 * The text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * The text body of the rendered HTML {@code &lt;option&gt;} tag.
 	 */
 	private String label;
 
 	private Object oldValue;
 
 	private Object oldDisplayValue;
-	
+
 	private String disabled;
 
 
 	/**
-	 * Set the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Set the 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setValue(Object value) {
@@ -100,38 +101,38 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Get the 'value' attribute of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Get the 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
 	 */
 	protected Object getValue() {
 		return this.value;
 	}
-	
+
 	/**
-	 * Set the value of the '<code>disabled</code>' attribute.
+	 * Set the value of the '{@code disabled}' attribute.
 	 * <p>May be a runtime expression.
-	 * @param disabled the value of the '<code>disabled</code>' attribute
+	 * @param disabled the value of the '{@code disabled}' attribute
 	 */
 	public void setDisabled(String disabled) {
 		this.disabled = disabled;
 	}
 
 	/**
-	 * Get the value of the '<code>disabled</code>' attribute.
+	 * Get the value of the '{@code disabled}' attribute.
 	 */
 	protected String getDisabled() {
 		return this.disabled;
 	}
-	
+
 	/**
 	 * Is the current HTML tag disabled?
-	 * @return <code>true</code> if this tag is disabled 
+	 * @return {@code true} if this tag is disabled
 	 */
 	protected boolean isDisabled() throws JspException {
 		return evaluateBoolean(DISABLED_ATTRIBUTE, getDisabled());
 	}
 
 	/**
-	 * Set the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Set the text body of the rendered HTML {@code &lt;option&gt;} tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setLabel(String label) {
@@ -140,7 +141,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Get the text body of the rendered HTML <code>&lt;option&gt;</code> tag.
+	 * Get the text body of the rendered HTML {@code &lt;option&gt;} tag.
 	 */
 	protected String getLabel() {
 		return this.label;
@@ -162,7 +163,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Make sure we are under a '<code>select</code>' tag before proceeding.
+	 * Make sure we are under a '{@code select}' tag before proceeding.
 	 */
 	@Override
 	protected void onWriteTagContent() {
@@ -225,9 +226,9 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Returns the value of the label for this '<code>option</code>' element.
+	 * Returns the value of the label for this '{@code option}' element.
 	 * If the {@link #setLabel label} property is set then the resolved value
-	 * of that property is used, otherwise the value of the <code>resolvedValue</code>
+	 * of that property is used, otherwise the value of the {@code resolvedValue}
 	 * argument is used.
 	 */
 	private String getLabelValue(Object resolvedValue) throws JspException {
@@ -239,7 +240,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	private void assertUnderSelectTag() {
 		TagUtils.assertHasAncestorOfType(this, SelectTag.class, "option", "select");
 	}
-	
+
 	private SelectTag getSelectTag() {
 		return (SelectTag) findAncestorWithClass(this, SelectTag.class);
 	}

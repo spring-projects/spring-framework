@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,12 +71,12 @@ public class BeanWrapperAutoGrowingTests {
 	@Test
 	public void getPropertyValueAutoGrowArrayBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("array[4]"));
-		assertEquals(5, bean.getArray().length);		
-		assertTrue(bean.getArray()[0] instanceof Bean);		
-		assertTrue(bean.getArray()[1] instanceof Bean);		
-		assertTrue(bean.getArray()[2] instanceof Bean);		
-		assertTrue(bean.getArray()[3] instanceof Bean);		
-		assertTrue(bean.getArray()[4] instanceof Bean);		
+		assertEquals(5, bean.getArray().length);
+		assertTrue(bean.getArray()[0] instanceof Bean);
+		assertTrue(bean.getArray()[1] instanceof Bean);
+		assertTrue(bean.getArray()[2] instanceof Bean);
+		assertTrue(bean.getArray()[3] instanceof Bean);
+		assertTrue(bean.getArray()[4] instanceof Bean);
 		assertNotNull(wrapper.getPropertyValue("array[0]"));
 		assertNotNull(wrapper.getPropertyValue("array[1]"));
 		assertNotNull(wrapper.getPropertyValue("array[2]"));
@@ -94,7 +94,7 @@ public class BeanWrapperAutoGrowingTests {
 	public void getPropertyValueAutoGrowList() {
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertEquals(1, bean.getList().size());
-		assertTrue(bean.getList().get(0) instanceof Bean);		
+		assertTrue(bean.getList().get(0) instanceof Bean);
 	}
 
 	@Test
@@ -107,11 +107,11 @@ public class BeanWrapperAutoGrowingTests {
 	public void getPropertyValueAutoGrowListBySeveralElements() {
 		assertNotNull(wrapper.getPropertyValue("list[4]"));
 		assertEquals(5, bean.getList().size());
-		assertTrue(bean.getList().get(0) instanceof Bean);		
-		assertTrue(bean.getList().get(1) instanceof Bean);		
-		assertTrue(bean.getList().get(2) instanceof Bean);		
-		assertTrue(bean.getList().get(3) instanceof Bean);		
-		assertTrue(bean.getList().get(4) instanceof Bean);		
+		assertTrue(bean.getList().get(0) instanceof Bean);
+		assertTrue(bean.getList().get(1) instanceof Bean);
+		assertTrue(bean.getList().get(2) instanceof Bean);
+		assertTrue(bean.getList().get(3) instanceof Bean);
+		assertTrue(bean.getList().get(4) instanceof Bean);
 		assertNotNull(wrapper.getPropertyValue("list[0]"));
 		assertNotNull(wrapper.getPropertyValue("list[1]"));
 		assertNotNull(wrapper.getPropertyValue("list[2]"));
@@ -167,9 +167,9 @@ public class BeanWrapperAutoGrowingTests {
 		private Bean[] array;
 
 		private Bean[][] multiArray;
-		
+
 		private List<Bean> list;
-		
+
 		private List<List<Bean>> multiList;
 
 		private List listNotParameterized;
@@ -215,7 +215,7 @@ public class BeanWrapperAutoGrowingTests {
 		public void setList(List<Bean> list) {
 			this.list = list;
 		}
-		
+
 		public List<List<Bean>> getMultiList() {
 			return multiList;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,11 +30,11 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 /**
  * SqlUpdate subclass that performs batch update operations. Encapsulates
  * queuing up records to be updated, and adds them as a single batch once
- * <code>flush</code> is called or the given batch size has been met.
+ * {@code flush} is called or the given batch size has been met.
  *
  * <p>Note that this class is a <b>non-thread-safe object</b>, in contrast
  * to all other JDBC operations objects in this package. You need to create
- * a new instance of it for each use, or call <code>reset</code> before
+ * a new instance of it for each use, or call {@code reset} before
  * reuse within the same thread.
  *
  * @author Keith Donald
@@ -85,7 +85,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @see java.sql.Types
 	 */
 	public BatchSqlUpdate(DataSource ds, String sql, int[] types) {
@@ -99,7 +99,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 	 * @param ds DataSource to use to obtain connections
 	 * @param sql SQL statement to execute
 	 * @param types SQL types of the parameters, as defined in the
-	 * <code>java.sql.Types</code> class
+	 * {@code java.sql.Types} class
 	 * @param batchSize the number of statements that will trigger
 	 * an automatic intermediate flush
 	 * @see java.sql.Types
@@ -112,11 +112,11 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
 	 * Set the number of statements that will trigger an automatic intermediate
-	 * flush. <code>update</code> calls or the given statement parameters will
+	 * flush. {@code update} calls or the given statement parameters will
 	 * be queued until the batch size is met, at which point it will empty the
 	 * queue and execute the batch.
 	 * <p>You can also flush already queued statements with an explicit
-	 * <code>flush</code> call. Note that you need to this after queueing
+	 * {@code flush} call. Note that you need to this after queueing
 	 * all parameters to guarantee that all statements have been flushed.
 	 */
 	public void setBatchSize(int batchSize) {
@@ -144,13 +144,13 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 
 	/**
-	 * Overridden version of <code>update</code> that adds the given statement
+	 * Overridden version of {@code update} that adds the given statement
 	 * parameters to the queue rather than executing them immediately.
-	 * All other <code>update</code> methods of the SqlUpdate base class go
+	 * All other {@code update} methods of the SqlUpdate base class go
 	 * through this method and will thus behave similarly.
-	 * <p>You need to call <code>flush</code> to actually execute the batch.
+	 * <p>You need to call {@code flush} to actually execute the batch.
 	 * If the specified batch size is reached, an implicit flush will happen;
-	 * you still need to finally call <code>flush</code> to flush all statements.
+	 * you still need to finally call {@code flush} to flush all statements.
 	 * @param params array of parameter objects
 	 * @return the number of rows affected by the update (always -1,
 	 * meaning "not applicable", as the statement is not actually
@@ -180,7 +180,7 @@ public class BatchSqlUpdate extends SqlUpdate {
 		if (this.parameterQueue.isEmpty()) {
 			return new int[0];
 		}
-		
+
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
 				getSql(),
 				new BatchPreparedStatementSetter() {
@@ -220,8 +220,8 @@ public class BatchSqlUpdate extends SqlUpdate {
 
 	/**
 	 * Return the number of affected rows for all already executed statements.
-	 * Accumulates all of <code>flush</code>'s return values until
-	 * <code>reset</code> is invoked.
+	 * Accumulates all of {@code flush}'s return values until
+	 * {@code reset} is invoked.
 	 * @return an array of the number of rows affected by each statement
 	 * @see #reset
 	 */

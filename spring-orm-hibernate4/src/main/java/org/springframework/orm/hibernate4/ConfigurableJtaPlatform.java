@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.1.2
  */
+@SuppressWarnings("serial")
 class ConfigurableJtaPlatform extends AbstractJtaPlatform {
 
 	private final TransactionManager transactionManager;

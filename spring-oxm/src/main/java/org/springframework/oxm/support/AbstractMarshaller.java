@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Abstract implementation of the <code>Marshaller</code> and <code>Unmarshaller</code> interface.
- * This implementation inspects the given <code>Source</code> or <code>Result</code>, and defers
+ * Abstract implementation of the {@code Marshaller} and {@code Unmarshaller} interface.
+ * This implementation inspects the given {@code Source} or {@code Result}, and defers
  * further handling to overridable template methods.
  *
  * @author Arjen Poutsma
@@ -75,15 +75,15 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 
 
 	/**
-	 * Marshals the object graph with the given root into the provided <code>javax.xml.transform.Result</code>.
-	 * <p>This implementation inspects the given result, and calls <code>marshalDomResult</code>,
-	 * <code>marshalSaxResult</code>, or <code>marshalStreamResult</code>.
+	 * Marshals the object graph with the given root into the provided {@code javax.xml.transform.Result}.
+	 * <p>This implementation inspects the given result, and calls {@code marshalDomResult},
+	 * {@code marshalSaxResult}, or {@code marshalStreamResult}.
 	 * @param graph the root of the object graph to marshal
 	 * @param result the result to marshal to
 	 * @throws IOException if an I/O exception occurs
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
-	 * @throws IllegalArgumentException if <code>result</code> if neither a <code>DOMResult</code>,
-	 * a <code>SAXResult</code>, nor a <code>StreamResult</code>
+	 * @throws IllegalArgumentException if {@code result} if neither a {@code DOMResult},
+	 * a {@code SAXResult}, nor a {@code StreamResult}
 	 * @see #marshalDomResult(Object, javax.xml.transform.dom.DOMResult)
 	 * @see #marshalSaxResult(Object, javax.xml.transform.sax.SAXResult)
 	 * @see #marshalStreamResult(Object, javax.xml.transform.stream.StreamResult)
@@ -107,15 +107,15 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Unmarshals the given provided <code>javax.xml.transform.Source</code> into an object graph.
-	 * <p>This implementation inspects the given result, and calls <code>unmarshalDomSource</code>,
-	 * <code>unmarshalSaxSource</code>, or <code>unmarshalStreamSource</code>.
+	 * Unmarshals the given provided {@code javax.xml.transform.Source} into an object graph.
+	 * <p>This implementation inspects the given result, and calls {@code unmarshalDomSource},
+	 * {@code unmarshalSaxSource}, or {@code unmarshalStreamSource}.
 	 * @param source the source to marshal from
 	 * @return the object graph
 	 * @throws IOException if an I/O Exception occurs
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
-	 * @throws IllegalArgumentException if <code>source</code> is neither a <code>DOMSource</code>,
-	 * a <code>SAXSource</code>, nor a <code>StreamSource</code>
+	 * @throws IllegalArgumentException if {@code source} is neither a {@code DOMSource},
+	 * a {@code SAXSource}, nor a {@code StreamSource}
 	 * @see #unmarshalDomSource(javax.xml.transform.dom.DOMSource)
 	 * @see #unmarshalSaxSource(javax.xml.transform.sax.SAXSource)
 	 * @see #unmarshalStreamSource(javax.xml.transform.stream.StreamSource)
@@ -139,11 +139,11 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Create a <code>DocumentBuilder</code> that this marshaller will use for creating
-	 * DOM documents when passed an empty <code>DOMSource</code>.
+	 * Create a {@code DocumentBuilder} that this marshaller will use for creating
+	 * DOM documents when passed an empty {@code DOMSource}.
 	 * <p>Can be overridden in subclasses, adding further initialization of the builder.
-	 * @param factory the <code>DocumentBuilderFactory</code> that the DocumentBuilder should be created with
-	 * @return the <code>DocumentBuilder</code>
+	 * @param factory the {@code DocumentBuilderFactory} that the DocumentBuilder should be created with
+	 * @return the {@code DocumentBuilder}
 	 * @throws ParserConfigurationException if thrown by JAXP methods
 	 */
 	protected DocumentBuilder createDocumentBuilder(DocumentBuilderFactory factory)
@@ -153,9 +153,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Create a <code>DocumentBuilder</code> that this marshaller will use for creating
-	 * DOM documents when passed an empty <code>DOMSource</code>.
-	 * <p>The resulting <code>DocumentBuilderFactory</code> is cached, so this method
+	 * Create a {@code DocumentBuilder} that this marshaller will use for creating
+	 * DOM documents when passed an empty {@code DOMSource}.
+	 * <p>The resulting {@code DocumentBuilderFactory} is cached, so this method
 	 * will only be called once.
 	 * @return the DocumentBuilderFactory
 	 * @throws ParserConfigurationException if thrown by JAXP methods
@@ -168,7 +168,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Create a <code>XMLReader</code> that this marshaller will when passed an empty <code>SAXSource</code>.
+	 * Create a {@code XMLReader} that this marshaller will when passed an empty {@code SAXSource}.
 	 * @return the XMLReader
 	 * @throws SAXException if thrown by JAXP methods
 	 */
@@ -180,12 +180,12 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	// Marshalling
 
 	/**
-	 * Template method for handling <code>DOMResult</code>s.
-	 * <p>This implementation delegates to <code>marshalDomNode</code>.
-	 * @param graph	the root of the object graph to marshal
-	 * @param domResult the <code>DOMResult</code>
+	 * Template method for handling {@code DOMResult}s.
+	 * <p>This implementation delegates to {@code marshalDomNode}.
+	 * @param graph    the root of the object graph to marshal
+	 * @param domResult the {@code DOMResult}
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
-	 * @throws IllegalArgumentException if the <code>domResult</code> is empty
+	 * @throws IllegalArgumentException if the {@code domResult} is empty
 	 * @see #marshalDomNode(Object, org.w3c.dom.Node)
 	 */
 	protected void marshalDomResult(Object graph, DOMResult domResult) throws XmlMappingException {
@@ -208,15 +208,15 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>StaxResult</code>s.
-	 * <p>This implementation delegates to <code>marshalXMLSteamWriter</code> or
-	 * <code>marshalXMLEventConsumer</code>, depending on what is contained in the
-	 * <code>StaxResult</code>.
-	 * @param graph	the root of the object graph to marshal
+	 * Template method for handling {@code StaxResult}s.
+	 * <p>This implementation delegates to {@code marshalXMLSteamWriter} or
+	 * {@code marshalXMLEventConsumer}, depending on what is contained in the
+	 * {@code StaxResult}.
+	 * @param graph    the root of the object graph to marshal
 	 * @param staxResult a Spring {@link org.springframework.util.xml.StaxSource} or JAXP 1.4 {@link StAXSource}
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
-	 * @throws IllegalArgumentException if the <code>domResult</code> is empty
-	 * @see #marshalDomNode(Object,org.w3c.dom.Node)
+	 * @throws IllegalArgumentException if the {@code domResult} is empty
+	 * @see #marshalDomNode(Object, org.w3c.dom.Node)
 	 */
 	protected void marshalStaxResult(Object graph, Result staxResult) throws XmlMappingException {
 		XMLStreamWriter streamWriter = StaxUtils.getXMLStreamWriter(staxResult);
@@ -235,10 +235,10 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>SAXResult</code>s.
-	 * <p>This implementation delegates to <code>marshalSaxHandlers</code>.
-	 * @param graph	the root of the object graph to marshal
-	 * @param saxResult the <code>SAXResult</code>
+	 * Template method for handling {@code SAXResult}s.
+	 * <p>This implementation delegates to {@code marshalSaxHandlers}.
+	 * @param graph    the root of the object graph to marshal
+	 * @param saxResult the {@code SAXResult}
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
 	 * @see #marshalSaxHandlers(Object, org.xml.sax.ContentHandler, org.xml.sax.ext.LexicalHandler)
 	 */
@@ -250,15 +250,15 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>StreamResult</code>s.
-	 * <p>This implementation delegates to <code>marshalOutputStream</code> or <code>marshalWriter</code>,
-	 * depending on what is contained in the <code>StreamResult</code>
+	 * Template method for handling {@code StreamResult}s.
+	 * <p>This implementation delegates to {@code marshalOutputStream} or {@code marshalWriter},
+	 * depending on what is contained in the {@code StreamResult}
 	 * @param graph the root of the object graph to marshal
-	 * @param streamResult the <code>StreamResult</code>
+	 * @param streamResult the {@code StreamResult}
 	 * @throws IOException if an I/O Exception occurs
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
-	 * @throws IllegalArgumentException if <code>streamResult</code> does neither
-	 * contain an <code>OutputStream</code> nor a <code>Writer</code>
+	 * @throws IllegalArgumentException if {@code streamResult} does neither
+	 * contain an {@code OutputStream} nor a {@code Writer}
 	 */
 	protected void marshalStreamResult(Object graph, StreamResult streamResult)
 			throws XmlMappingException, IOException {
@@ -278,14 +278,14 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	// Unmarshalling
 
 	/**
-	 * Template method for handling <code>DOMSource</code>s.
-	 * <p>This implementation delegates to <code>unmarshalDomNode</code>.
-	 * If the given source is empty, an empty source <code>Document</code>
+	 * Template method for handling {@code DOMSource}s.
+	 * <p>This implementation delegates to {@code unmarshalDomNode}.
+	 * If the given source is empty, an empty source {@code Document}
 	 * will be created as a placeholder.
-	 * @param domSource the <code>DOMSource</code>
+	 * @param domSource the {@code DOMSource}
 	 * @return the object graph
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
-	 * @throws IllegalArgumentException if the <code>domSource</code> is empty
+	 * @throws IllegalArgumentException if the {@code domSource} is empty
 	 * @see #unmarshalDomNode(org.w3c.dom.Node)
 	 */
 	protected Object unmarshalDomSource(DOMSource domSource) throws XmlMappingException {
@@ -308,10 +308,10 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>StaxSource</code>s.
-	 * <p>This implementation delegates to <code>unmarshalXmlStreamReader</code> or
-	 * <code>unmarshalXmlEventReader</code>.
-	 * @param staxSource the <code>StaxSource</code>
+	 * Template method for handling {@code StaxSource}s.
+	 * <p>This implementation delegates to {@code unmarshalXmlStreamReader} or
+	 * {@code unmarshalXmlEventReader}.
+	 * @param staxSource the {@code StaxSource}
 	 * @return the object graph
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
 	 */
@@ -332,9 +332,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>SAXSource</code>s.
-	 * <p>This implementation delegates to <code>unmarshalSaxReader</code>.
-	 * @param saxSource the <code>SAXSource</code>
+	 * Template method for handling {@code SAXSource}s.
+	 * <p>This implementation delegates to {@code unmarshalSaxReader}.
+	 * @param saxSource the {@code SAXSource}
 	 * @return the object graph
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
 	 * @throws IOException if an I/O Exception occurs
@@ -356,9 +356,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	}
 
 	/**
-	 * Template method for handling <code>StreamSource</code>s.
-	 * <p>This implementation defers to <code>unmarshalInputStream</code> or <code>unmarshalReader</code>.
-	 * @param streamSource the <code>StreamSource</code>
+	 * Template method for handling {@code StreamSource}s.
+	 * <p>This implementation defers to {@code unmarshalInputStream} or {@code unmarshalReader}.
+	 * @param streamSource the {@code StreamSource}
 	 * @return the object graph
 	 * @throws IOException if an I/O exception occurs
 	 * @throws XmlMappingException if the given source cannot be mapped to an object
@@ -379,9 +379,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	// Abstract template methods
 
 	/**
-	 * Abstract template method for marshalling the given object graph to a DOM <code>Node</code>.
-	 * <p>In practice, node is be a <code>Document</code> node, a <code>DocumentFragment</code> node,
-	 * or a <code>Element</code> node. In other words, a node that accepts children.
+	 * Abstract template method for marshalling the given object graph to a DOM {@code Node}.
+	 * <p>In practice, node is be a {@code Document} node, a {@code DocumentFragment} node,
+	 * or a {@code Element} node. In other words, a node that accepts children.
 	 * @param graph the root of the object graph to marshal
 	 * @param node the DOM node that will contain the result tree
 	 * @throws XmlMappingException if the given object cannot be marshalled to the DOM node
@@ -393,27 +393,27 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for marshalling the given object to a StAX <code>XMLEventWriter</code>.
-	 * @param graph	the root of the object graph to marshal
-	 * @param eventWriter the <code>XMLEventWriter</code> to write to
+	 * Abstract template method for marshalling the given object to a StAX {@code XMLEventWriter}.
+	 * @param graph    the root of the object graph to marshal
+	 * @param eventWriter the {@code XMLEventWriter} to write to
 	 * @throws XmlMappingException if the given object cannot be marshalled to the DOM node
 	 */
 	protected abstract void marshalXmlEventWriter(Object graph, XMLEventWriter eventWriter)
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for marshalling the given object to a StAX <code>XMLStreamWriter</code>.
+	 * Abstract template method for marshalling the given object to a StAX {@code XMLStreamWriter}.
 	 * @param graph the root of the object graph to marshal
-	 * @param streamWriter the <code>XMLStreamWriter</code> to write to
+	 * @param streamWriter the {@code XMLStreamWriter} to write to
 	 * @throws XmlMappingException if the given object cannot be marshalled to the DOM node
 	 */
 	protected abstract void marshalXmlStreamWriter(Object graph, XMLStreamWriter streamWriter)
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for marshalling the given object graph to a <code>OutputStream</code>.
+	 * Abstract template method for marshalling the given object graph to a {@code OutputStream}.
 	 * @param graph the root of the object graph to marshal
-	 * @param outputStream the <code>OutputStream</code> to write to
+	 * @param outputStream the {@code OutputStream} to write to
 	 * @throws XmlMappingException if the given object cannot be marshalled to the writer
 	 * @throws IOException if an I/O exception occurs
 	 */
@@ -421,10 +421,10 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException, IOException;
 
 	/**
-	 * Abstract template method for marshalling the given object graph to a SAX <code>ContentHandler</code>.
+	 * Abstract template method for marshalling the given object graph to a SAX {@code ContentHandler}.
 	 * @param graph the root of the object graph to marshal
-	 * @param contentHandler the SAX <code>ContentHandler</code>
-	 * @param lexicalHandler the SAX2 <code>LexicalHandler</code>. Can be <code>null</code>.
+	 * @param contentHandler the SAX {@code ContentHandler}
+	 * @param lexicalHandler the SAX2 {@code LexicalHandler}. Can be {@code null}.
 	 * @throws XmlMappingException if the given object cannot be marshalled to the handlers
 	 */
 	protected abstract void marshalSaxHandlers(
@@ -432,9 +432,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for marshalling the given object graph to a <code>Writer</code>.
+	 * Abstract template method for marshalling the given object graph to a {@code Writer}.
 	 * @param graph the root of the object graph to marshal
-	 * @param writer the <code>Writer</code> to write to
+	 * @param writer the {@code Writer} to write to
 	 * @throws XmlMappingException if the given object cannot be marshalled to the writer
 	 * @throws IOException if an I/O exception occurs
 	 */
@@ -442,7 +442,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException, IOException;
 
 	/**
-	 * Abstract template method for unmarshalling from a given DOM <code>Node</code>.
+	 * Abstract template method for unmarshalling from a given DOM {@code Node}.
 	 * @param node the DOM node that contains the objects to be unmarshalled
 	 * @return the object graph
 	 * @throws XmlMappingException if the given DOM node cannot be mapped to an object
@@ -450,8 +450,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	protected abstract Object unmarshalDomNode(Node node) throws XmlMappingException;
 
 	/**
-	 * Abstract template method for unmarshalling from a given Stax <code>XMLEventReader</code>.
-	 * @param eventReader the <code>XMLEventReader</code> to read from
+	 * Abstract template method for unmarshalling from a given Stax {@code XMLEventReader}.
+	 * @param eventReader the {@code XMLEventReader} to read from
 	 * @return the object graph
 	 * @throws XmlMappingException if the given event reader cannot be converted to an object
 	 */
@@ -459,8 +459,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for unmarshalling from a given Stax <code>XMLStreamReader</code>.
-	 * @param streamReader the <code>XMLStreamReader</code> to read from
+	 * Abstract template method for unmarshalling from a given Stax {@code XMLStreamReader}.
+	 * @param streamReader the {@code XMLStreamReader} to read from
 	 * @return the object graph
 	 * @throws XmlMappingException if the given stream reader cannot be converted to an object
 	 */
@@ -468,8 +468,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException;
 
 	/**
-	 * Abstract template method for unmarshalling from a given <code>InputStream</code>.
-	 * @param inputStream the <code>InputStreamStream</code> to read from
+	 * Abstract template method for unmarshalling from a given {@code InputStream}.
+	 * @param inputStream the {@code InputStreamStream} to read from
 	 * @return the object graph
 	 * @throws XmlMappingException if the given stream cannot be converted to an object
 	 * @throws IOException if an I/O exception occurs
@@ -478,8 +478,8 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException, IOException;
 
 	/**
-	 * Abstract template method for unmarshalling from a given <code>Reader</code>.
-	 * @param reader the <code>Reader</code> to read from
+	 * Abstract template method for unmarshalling from a given {@code Reader}.
+	 * @param reader the {@code Reader} to read from
 	 * @return the object graph
 	 * @throws XmlMappingException if the given reader cannot be converted to an object
 	 * @throws IOException if an I/O exception occurs
@@ -488,9 +488,9 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			throws XmlMappingException, IOException;
 
 	/**
-	 * Abstract template method for unmarshalling using a given SAX <code>XMLReader</code>
-	 * and <code>InputSource</code>.
-	 * @param xmlReader the SAX <code>XMLReader</code> to parse with
+	 * Abstract template method for unmarshalling using a given SAX {@code XMLReader}
+	 * and {@code InputSource}.
+	 * @param xmlReader the SAX {@code XMLReader} to parse with
 	 * @param inputSource the input source to parse from
 	 * @return the object graph
 	 * @throws XmlMappingException if the given reader and input source cannot be converted to an object

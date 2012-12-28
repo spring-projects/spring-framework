@@ -23,7 +23,7 @@ import org.springframework.expression.spel.SpelEvaluationException;
 
 /**
  * Represents a DOT separated expression sequence, such as 'property1.property2.methodOne()'
- * 
+ *
  * @author Andy Clement
  * @since 3.0
  */

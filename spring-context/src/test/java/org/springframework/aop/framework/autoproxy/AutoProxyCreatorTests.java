@@ -281,6 +281,7 @@ public final class AutoProxyCreatorTests {
 			this.proxyObject = proxyObject;
 		}
 
+		@Override
 		protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String name, TargetSource customTargetSource) {
 			if (StaticMessageSource.class.equals(beanClass)) {
 				return DO_NOT_PROXY;
@@ -308,6 +309,7 @@ public final class AutoProxyCreatorTests {
 
 		public int nrOfInvocations = 0;
 
+		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			if (!invocation.getMethod().getName().equals("finalize")) {
 				this.nrOfInvocations++;

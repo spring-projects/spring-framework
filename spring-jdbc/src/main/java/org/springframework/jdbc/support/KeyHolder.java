@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 
-/** 
+/**
  * Interface for retrieving keys, typically used for auto-generated keys
  * as potentially returned by JDBC insert statements.
  *
@@ -30,7 +30,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * for each row of keys.
  *
  * <p>Most applications only use on key per row and process only one row at a
- * time in an insert statement. In these cases, just call <code>getKey</code>
+ * time in an insert statement. In these cases, just call {@code getKey}
  * to retrieve the key. The returned value is a Number here, which is the
  * usual type for auto-generated keys.
  *
@@ -41,8 +41,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * @see org.springframework.jdbc.object.SqlUpdate
  */
 public interface KeyHolder {
-	
-	/** 
+
+	/**
 	 * Retrieve the first item from the first map, assuming that there is just
 	 * one item and just one map, and that the item is a number.
 	 * This is the typical case: a single, numeric generated key.
@@ -54,9 +54,9 @@ public interface KeyHolder {
 	 * @return the generated key
 	 * @throws InvalidDataAccessApiUsageException if multiple keys are encountered.
 	 */
-	Number getKey() throws InvalidDataAccessApiUsageException; 
+	Number getKey() throws InvalidDataAccessApiUsageException;
 
-	/** 
+	/**
 	 * Retrieve the first map of keys. If there are multiple entries in the list
 	 * (meaning that multiple rows had keys returned), then an
 	 * InvalidDataAccessApiUsageException is thrown.
@@ -65,7 +65,7 @@ public interface KeyHolder {
 	 */
 	Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException;
 
-	/** 
+	/**
 	 * Return a reference to the List that contains the keys.
 	 * Can be used for extracting keys for multiple rows (an unusual case),
 	 * and also for adding new maps of keys.

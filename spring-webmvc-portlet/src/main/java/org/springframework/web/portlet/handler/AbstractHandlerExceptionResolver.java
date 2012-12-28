@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * and handler classes, if any, and alspo checks the window state (according
 	 * to the "renderWhenMinimize" property).
 	 * @param request current portlet request
-	 * @param handler the executed handler, or <code>null</code> if none chosen at the
+	 * @param handler the executed handler, or {@code null} if none chosen at the
 	 * time of the exception (for example, if multipart resolution failed)
 	 * @return whether this resolved should proceed with resolving the exception
 	 * for the given request and handler

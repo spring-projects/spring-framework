@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.springframework.util.ErrorHandler;
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
+@SuppressWarnings("serial")
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements TaskScheduler, SchedulingTaskExecutor {
 
@@ -101,7 +102,7 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 
 	/**
 	 * Return the underlying ScheduledExecutorService for native access.
-	 * @return the underlying ScheduledExecutorService (never <code>null</code>)
+	 * @return the underlying ScheduledExecutorService (never {@code null})
 	 * @throws IllegalStateException if the ThreadPoolTaskScheduler hasn't been initialized yet
 	 */
 	public ScheduledExecutorService getScheduledExecutor() throws IllegalStateException {

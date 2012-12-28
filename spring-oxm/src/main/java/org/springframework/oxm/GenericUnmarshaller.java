@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ public interface GenericUnmarshaller extends Unmarshaller {
 	/**
 	 * Indicates whether this marshaller can marshal instances of the supplied generic type.
 	 * @param genericType the type that this marshaller is being asked if it can marshal
-	 * @return <code>true</code> if this marshaller can indeed marshal instances of the supplied type;
-	 * <code>false</code> otherwise
+	 * @return {@code true} if this marshaller can indeed marshal instances of the supplied type;
+	 * {@code false} otherwise
 	 */
 	boolean supports(Type genericType);
 

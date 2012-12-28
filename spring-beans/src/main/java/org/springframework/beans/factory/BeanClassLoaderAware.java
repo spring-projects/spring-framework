@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,12 @@ public interface BeanClassLoaderAware extends Aware {
 	 * a bean instance.
 	 * <p>Invoked <i>after</i> the population of normal bean properties but
 	 * <i>before</i> an initialization callback such as
-	 * {@link org.springframework.beans.factory.InitializingBean InitializingBean's}
-	 * {@link org.springframework.beans.factory.InitializingBean#afterPropertiesSet()}
+	 * {@link InitializingBean InitializingBean's}
+	 * {@link InitializingBean#afterPropertiesSet()}
 	 * method or a custom init-method.
-	 * @param classLoader the owning class loader; may be <code>null</code> in
-	 * which case a default <code>ClassLoader</code> must be used, for example
-	 * the <code>ClassLoader</code> obtained via
+	 * @param classLoader the owning class loader; may be {@code null} in
+	 * which case a default {@code ClassLoader} must be used, for example
+	 * the {@code ClassLoader} obtained via
 	 * {@link org.springframework.util.ClassUtils#getDefaultClassLoader()}
 	 */
 	void setBeanClassLoader(ClassLoader classLoader);

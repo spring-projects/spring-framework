@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,20 +40,24 @@ public class AnnotationTestBean implements IJmxTestBean {
 	private boolean isSuperman;
 
 
+	@Override
 	@ManagedAttribute(description = "The Age Attribute", currencyTimeLimit = 15)
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
 
+	@Override
 	@ManagedOperation(currencyTimeLimit = 30)
 	public long myOperation() {
 		return 1L;
 	}
 
+	@Override
 	@ManagedAttribute(description = "The Name Attribute",
 			currencyTimeLimit = 20,
 			defaultValue = "bar",
@@ -62,11 +66,12 @@ public class AnnotationTestBean implements IJmxTestBean {
 		this.name = name;
 	}
 
+	@Override
 	@ManagedAttribute(defaultValue = "foo", persistPeriod = 300)
 	public String getName() {
 		return name;
 	}
-	
+
 	@ManagedAttribute(description = "The Nick Name Attribute")
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
@@ -85,6 +90,7 @@ public class AnnotationTestBean implements IJmxTestBean {
 		return isSuperman;
 	}
 
+	@Override
 	@org.springframework.jmx.export.annotation.ManagedOperation(description = "Add Two Numbers Together")
 	@ManagedOperationParameters({@ManagedOperationParameter(name="x", description="Left operand"),
 	@ManagedOperationParameter(name="y", description="Right operand")})
@@ -95,21 +101,22 @@ public class AnnotationTestBean implements IJmxTestBean {
 	/**
 	 * Test method that is not exposed by the MetadataAssembler.
 	 */
+	@Override
 	public void dontExposeMe() {
 		throw new RuntimeException();
 	}
-	
-	@ManagedMetric(description="The QueueSize metric", currencyTimeLimit = 20, persistPolicy="OnUpdate", persistPeriod=300, 
+
+	@ManagedMetric(description="The QueueSize metric", currencyTimeLimit = 20, persistPolicy="OnUpdate", persistPeriod=300,
 			category="utilization", metricType = MetricType.COUNTER, displayName="Queue Size", unit="messages")
 	public long getQueueSize() {
 		return 100l;
 	}
-	
+
 	@ManagedMetric
 	public int getCacheEntries() {
 		return 3;
 	}
 
-	
+
 
 }

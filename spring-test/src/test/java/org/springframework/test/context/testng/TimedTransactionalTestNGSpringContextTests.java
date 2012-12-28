@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
  * {@link AbstractTransactionalTestNGSpringContextTests}; used to verify claim
  * raised in <a href="http://jira.springframework.org/browse/SPR-6124"
  * target="_blank">SPR-6124</a>.
- * 
+ *
  * @author Sam Brannen
  * @since 3.0
  */

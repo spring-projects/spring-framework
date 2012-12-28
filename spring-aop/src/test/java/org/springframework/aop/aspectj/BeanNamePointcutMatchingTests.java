@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ public final class BeanNamePointcutMatchingTests {
 	public void testMatchingPointcuts() {
 		assertMatch("someName", "bean(someName)");
 
-		// Spring bean names are less restrictive compared to AspectJ names (methods, types etc.) 
-		// MVC Controller-kind 
+		// Spring bean names are less restrictive compared to AspectJ names (methods, types etc.)
+		// MVC Controller-kind
 		assertMatch("someName/someOtherName", "bean(someName/someOtherName)");
 		assertMatch("someName/foo/someOtherName", "bean(someName/*/someOtherName)");
 		assertMatch("someName/foo/bar/someOtherName", "bean(someName/*/someOtherName)");
@@ -58,9 +58,9 @@ public final class BeanNamePointcutMatchingTests {
 		// Or, and, not expressions
 		assertMatch("someName", "bean(someName) || bean(someOtherName)");
 		assertMatch("someOtherName", "bean(someName) || bean(someOtherName)");
-		
+
 		assertMatch("someName", "!bean(someOtherName)");
-		
+
 		assertMatch("someName", "bean(someName) || !bean(someOtherName)");
 		assertMatch("someName", "bean(someName) && !bean(someOtherName)");
 	}
@@ -90,6 +90,7 @@ public final class BeanNamePointcutMatchingTests {
 	private static boolean matches(final String beanName, String pcExpression) {
 		@SuppressWarnings("serial")
 		AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut() {
+			@Override
 			protected String getCurrentProxiedBeanName() {
 				return beanName;
 			}

@@ -214,7 +214,7 @@ public class ModelAndViewContainer {
 	}
 
 	/**
-	 * Copy attributes in the supplied <code>Map</code> with existing objects of
+	 * Copy attributes in the supplied {@code Map} with existing objects of
 	 * the same name taking precedence (i.e. not getting replaced).
 	 * A shortcut for {@code getModel().mergeAttributes(Map<String, ?>)}.
 	 */

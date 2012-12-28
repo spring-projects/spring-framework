@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -230,6 +231,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -291,6 +293,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -337,6 +340,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -379,7 +383,7 @@ public final class MessageListenerAdapter102Tests {
 		QueueSender queueSender = (QueueSender) mockQueueSender.getMock();
 		queueSender.send(responseTextMessage);
 		mockQueueSender.setThrowable(new JMSException("Dow!"));
-		// ensure that regardless of a JMSException the producer is closed... 
+		// ensure that regardless of a JMSException the producer is closed...
 		queueSender.close();
 		mockQueueSender.setVoidCallable();
 		mockQueueSender.replay();
@@ -399,6 +403,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}
@@ -434,6 +439,7 @@ public final class MessageListenerAdapter102Tests {
 		mockDelegate.replay();
 
 		final MessageListenerAdapter102 adapter = new MessageListenerAdapter102(delegate) {
+			@Override
 			protected Object extractMessage(Message message) {
 				return message;
 			}

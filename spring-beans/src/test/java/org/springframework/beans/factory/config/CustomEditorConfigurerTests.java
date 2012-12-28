@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 
 /**
  * Unit tests for {@link CustomEditorConfigurer}.
- * 
+ *
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 31.07.2004
@@ -53,6 +53,7 @@ public final class CustomEditorConfigurerTests {
 		final DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
 		cec.setPropertyEditorRegistrars(new PropertyEditorRegistrar[] {
 				new PropertyEditorRegistrar() {
+					@Override
 					public void registerCustomEditors(PropertyEditorRegistry registry) {
 						registry.registerCustomEditor(Date.class, new CustomDateEditor(df, true));
 					}
@@ -189,6 +190,7 @@ public final class CustomEditorConfigurerTests {
 
 	public static class MyTestEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			setValue(new String[] {"test"});
 		}

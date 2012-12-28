@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * <p>Designed for use as a base class, with the subclass invoking
  * the {@link #beforeAccess()} and {@link #afterAccess()} methods at
- * appropriate points of its workflow. Note that <code>afterAccess</code>
+ * appropriate points of its workflow. Note that {@code afterAccess}
  * should usually be called in a finally block!
  *
  * <p>The default concurrency limit of this support class is -1
@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
  * @see org.springframework.aop.interceptor.ConcurrencyThrottleInterceptor
  * @see java.io.Serializable
  */
+@SuppressWarnings("serial")
 public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
@@ -54,7 +55,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	 * Switch concurrency 'off': that is, don't allow any concurrent invocations.
 	 */
 	public static final int NO_CONCURRENCY = 0;
-	
+
 
 	/** Transient to optimize serialization */
 	protected transient Log logger = LogFactory.getLog(getClass());
@@ -88,7 +89,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 
 	/**
 	 * Return whether this throttle is currently active.
-	 * @return <code>true</code> if the concurrency limit for this instance is active
+	 * @return {@code true} if the concurrency limit for this instance is active
 	 * @see #getConcurrencyLimit()
 	 */
 	public boolean isThrottleActive() {
@@ -99,7 +100,7 @@ public abstract class ConcurrencyThrottleSupport implements Serializable {
 	/**
 	 * To be invoked before the main execution logic of concrete subclasses.
 	 * <p>This implementation applies the concurrency throttle.
-	 * @see #afterAccess() 
+	 * @see #afterAccess()
 	 */
 	protected void beforeAccess() {
 		if (this.concurrencyLimit == NO_CONCURRENCY) {

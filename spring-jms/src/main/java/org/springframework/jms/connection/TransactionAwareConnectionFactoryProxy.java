@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  *
  * <p>Delegates to {@link ConnectionFactoryUtils} for automatically participating
  * in thread-bound transactions, for example managed by {@link JmsTransactionManager}.
- * <code>createSession</code> calls and <code>close</code> calls on returned Sessions
+ * {@code createSession} calls and {@code close} calls on returned Sessions
  * will behave properly within a transaction, that is, always work on the transactional
  * Session. If not within a transaction, normal ConnectionFactory behavior applies.
  *

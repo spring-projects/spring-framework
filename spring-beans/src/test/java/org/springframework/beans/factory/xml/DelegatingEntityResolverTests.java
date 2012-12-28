@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.springframework.beans.factory.xml;
-
-import junit.framework.TestCase;
 
 import org.junit.Test;
 import org.xml.sax.EntityResolver;
@@ -47,6 +45,7 @@ public final class DelegatingEntityResolverTests {
 
 
 	private static final class NoOpEntityResolver implements EntityResolver {
+		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			return null;
 		}

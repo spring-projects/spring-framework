@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,9 +141,9 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
-	 * <code>@javax.persistence.Entity</code>, <code>@javax.persistence.Embeddable</code>
-	 * or <code>@javax.persistence.MappedSuperclass</code>, as well as for
-	 * Hibernate's special <code>@org.hibernate.annotations.Entity</code>.
+	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
+	 * or {@code @javax.persistence.MappedSuperclass}, as well as for
+	 * Hibernate's special {@code @org.hibernate.annotations.Entity}.
 	 * @see #setPackagesToScan
 	 */
 	public void setEntityTypeFilters(TypeFilter[] entityTypeFilters) {

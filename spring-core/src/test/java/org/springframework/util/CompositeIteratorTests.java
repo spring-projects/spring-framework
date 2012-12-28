@@ -9,7 +9,7 @@ import junit.framework.TestCase;
 
 /**
  * Test case for {@link CompositeIterator}.
- * 
+ *
  * @author Erwin Vervaet
  */
 public class CompositeIteratorTests extends TestCase {

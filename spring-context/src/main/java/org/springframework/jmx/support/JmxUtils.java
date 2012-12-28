@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,12 +74,12 @@ public abstract class JmxUtils {
 
 
 	/**
-	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
-	 * <code>MBeanServer</code> can be found. Logs a warning if more than one
-	 * <code>MBeanServer</code> found, returning the first one from the list.
-	 * @return the <code>MBeanServer</code> if found
+	 * Attempt to find a locally running {@code MBeanServer}. Fails if no
+	 * {@code MBeanServer} can be found. Logs a warning if more than one
+	 * {@code MBeanServer} found, returning the first one from the list.
+	 * @return the {@code MBeanServer} if found
 	 * @throws org.springframework.jmx.MBeanServerNotFoundException
-	 * if no <code>MBeanServer</code> could be found
+	 * if no {@code MBeanServer} could be found
 	 * @see javax.management.MBeanServerFactory#findMBeanServer
 	 */
 	public static MBeanServer locateMBeanServer() throws MBeanServerNotFoundException {
@@ -87,15 +87,15 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Attempt to find a locally running <code>MBeanServer</code>. Fails if no
-	 * <code>MBeanServer</code> can be found. Logs a warning if more than one
-	 * <code>MBeanServer</code> found, returning the first one from the list.
+	 * Attempt to find a locally running {@code MBeanServer}. Fails if no
+	 * {@code MBeanServer} can be found. Logs a warning if more than one
+	 * {@code MBeanServer} found, returning the first one from the list.
 	 * @param agentId the agent identifier of the MBeanServer to retrieve.
-	 * If this parameter is <code>null</code>, all registered MBeanServers are considered.
+	 * If this parameter is {@code null}, all registered MBeanServers are considered.
 	 * If the empty String is given, the platform MBeanServer will be returned.
-	 * @return the <code>MBeanServer</code> if found
+	 * @return the {@code MBeanServer} if found
 	 * @throws org.springframework.jmx.MBeanServerNotFoundException
-	 * if no <code>MBeanServer</code> could be found
+	 * if no {@code MBeanServer} could be found
 	 * @see javax.management.MBeanServerFactory#findMBeanServer(String)
 	 */
 	public static MBeanServer locateMBeanServer(String agentId) throws MBeanServerNotFoundException {
@@ -139,8 +139,8 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Convert an array of <code>MBeanParameterInfo</code> into an array of
-	 * <code>Class</code> instances corresponding to the parameters.
+	 * Convert an array of {@code MBeanParameterInfo} into an array of
+	 * {@code Class} instances corresponding to the parameters.
 	 * @param paramInfo the JMX parameter info
 	 * @return the parameter types as classes
 	 * @throws ClassNotFoundException if a parameter type could not be resolved
@@ -150,8 +150,8 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Convert an array of <code>MBeanParameterInfo</code> into an array of
-	 * <code>Class</code> instances corresponding to the parameters.
+	 * Convert an array of {@code MBeanParameterInfo} into an array of
+	 * {@code Class} instances corresponding to the parameters.
 	 * @param paramInfo the JMX parameter info
 	 * @param classLoader the ClassLoader to use for loading parameter types
 	 * @return the parameter types as classes
@@ -171,7 +171,7 @@ public abstract class JmxUtils {
 	}
 
 	/**
-	 * Create a <code>String[]</code> representing the argument signature of a
+	 * Create a {@code String[]} representing the argument signature of a
 	 * method. Each element in the array is the fully qualified class name
 	 * of the corresponding argument in the methods signature.
 	 * @param method the method to build an argument signature for
@@ -189,9 +189,9 @@ public abstract class JmxUtils {
 	/**
 	 * Return the JMX attribute name to use for the given JavaBeans property.
 	 * <p>When using strict casing, a JavaBean property with a getter method
-	 * such as <code>getFoo()</code> translates to an attribute called
-	 * <code>Foo</code>. With strict casing disabled, <code>getFoo()</code>
-	 * would translate to just <code>foo</code>.
+	 * such as {@code getFoo()} translates to an attribute called
+	 * {@code Foo}. With strict casing disabled, {@code getFoo()}
+	 * would translate to just {@code foo}.
 	 * @param property the JavaBeans property descriptor
 	 * @param useStrictCasing whether to use strict casing
 	 * @return the JMX attribute name to use
@@ -207,7 +207,7 @@ public abstract class JmxUtils {
 
 	/**
 	 * Append an additional key/value pair to an existing {@link ObjectName} with the key being
-	 * the static value <code>identity</code> and the value being the identity hash code of the
+	 * the static value {@code identity} and the value being the identity hash code of the
 	 * managed resource being exposed on the supplied {@link ObjectName}. This can be used to
 	 * provide a unique {@link ObjectName} for each distinct instance of a particular bean or
 	 * class. Useful when generating {@link ObjectName ObjectNames} at runtime for a set of
@@ -321,7 +321,7 @@ public abstract class JmxUtils {
 	/**
 	 * Check whether MXBean support is available, i.e. whether we're running
 	 * on Java 6 or above.
-	 * @return <code>true</code> if available; <code>false</code> otherwise
+	 * @return {@code true} if available; {@code false} otherwise
 	 */
 	public static boolean isMXBeanSupportAvailable() {
 		return mxBeanAnnotationAvailable;

@@ -47,7 +47,7 @@ public abstract class ExpressionEvaluationUtils {
 
 	/**
 	 * Expression support parameter at the servlet context level
-	 * (i.e. a context-param in <code>web.xml</code>): "springJspExpressionSupport".
+	 * (i.e. a context-param in {@code web.xml}): "springJspExpressionSupport".
 	 */
 	public static final String EXPRESSION_SUPPORT_CONTEXT_PARAM = "springJspExpressionSupport";
 
@@ -60,19 +60,19 @@ public abstract class ExpressionEvaluationUtils {
 	 * Check whether Spring's JSP expression support is actually active.
 	 * <p>Note that JSP 2.0+ containers come with expression support themselves:
 	 * However, it will only be active for web applications declaring Servlet 2.4
-	 * or higher in their <code>web.xml</code> deployment descriptor.
-	 * <p>If a <code>web.xml</code> context-param named "springJspExpressionSupport" is
+	 * or higher in their {@code web.xml} deployment descriptor.
+	 * <p>If a {@code web.xml} context-param named "springJspExpressionSupport" is
 	 * found, its boolean value will be taken to decide whether this support is active.
 	 * If not found, the default is for expression support to be inactive on Servlet 3.0
 	 * containers with web applications declaring Servlet 2.4 or higher in their
-	 * <code>web.xml</code>. For backwards compatibility, Spring's expression support
+	 * {@code web.xml}. For backwards compatibility, Spring's expression support
 	 * will remain active for applications declaring Servlet 2.3 or earlier. However,
 	 * on Servlet 2.4/2.5 containers, we can't find out what the application has declared;
 	 * as of Spring 3.2, we won't activate Spring's expression support at all then since
 	 * it got deprecated and will be removed in the next iteration of the framework.
 	 * @param pageContext current JSP PageContext
-	 * @return <code>true</code> if active (ExpressionEvaluationUtils will actually evaluate expressions);
-	 * <code>false</code> if not active (ExpressionEvaluationUtils will return given values as-is,
+	 * @return {@code true} if active (ExpressionEvaluationUtils will actually evaluate expressions);
+	 * {@code false} if not active (ExpressionEvaluationUtils will return given values as-is,
 	 * relying on the JSP container pre-evaluating values before passing them to JSP tag attributes)
 	 */
 	public static boolean isSpringJspExpressionSupportActive(PageContext pageContext) {
@@ -95,8 +95,8 @@ public abstract class ExpressionEvaluationUtils {
 	/**
 	 * Check if the given expression value is an EL expression.
 	 * @param value the expression to check
-	 * @return <code>true</code> if the expression is an EL expression,
-	 * <code>false</code> otherwise
+	 * @return {@code true} if the expression is an EL expression,
+	 * {@code false} otherwise
 	 */
 	public static boolean isExpressionLanguage(String value) {
 		return (value != null && value.contains(EXPRESSION_PREFIX));

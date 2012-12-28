@@ -58,6 +58,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	private static final String DEPENDENCY_CHECK_CONTEXT =  CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
 
 
+	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
 		as.setProxyTargetClass(true);
 		Object proxy = as.createAopProxy().getProxy();
@@ -65,11 +66,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		return proxy;
 	}
 
+	@Override
 	protected AopProxy createAopProxy(AdvisedSupport as) {
 		as.setProxyTargetClass(true);
 		return new CglibAopProxy(as);
 	}
 
+	@Override
 	protected boolean requiresTarget() {
 		return true;
 	}
@@ -87,7 +90,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 	@Test
 	public void testNoTarget() {
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[]{ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
 		try {
 			AopProxy aop = createAopProxy(pc);
@@ -104,7 +107,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ProtectedMethodTestBean bean = new ProtectedMethodTestBean();
 		mockTargetSource.setTarget(bean);
 
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		AopProxy aop = new CglibAopProxy(as);
@@ -158,7 +161,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		CglibTestBean bean = new CglibTestBean();
 		bean.setName("Rob Harrop");
 
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
 		as.setTarget(bean);
 		as.addAdvice(new NopInterceptor());
 		AopProxy aop = new CglibAopProxy(as);
@@ -174,7 +177,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		CglibTestBean target = new CglibTestBean();
 		target.setName("Rob Harrop");
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[]{});
 		pc.setFrozen(true);
 		pc.setTarget(target);
 
@@ -202,15 +205,17 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 	private ITestBean getAdvisedProxy(TestBean target) {
-		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
+		ProxyFactory pf = new ProxyFactory(new Class<?>[]{ITestBean.class});
 		pf.setProxyTargetClass(true);
 
 		MethodInterceptor advice = new NopInterceptor();
 		Pointcut pointcut = new Pointcut() {
+			@Override
 			public ClassFilter getClassFilter() {
 				return ClassFilter.TRUE;
 			}
 
+			@Override
 			public MethodMatcher getMethodMatcher() {
 				return MethodMatcher.TRUE;
 			}
@@ -227,7 +232,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 		return (ITestBean) pf.getProxy();
 	}
-	
+
 	@Test
 	public void testMultipleProxiesForIntroductionAdvisor() {
 		TestBean target = new TestBean();
@@ -241,9 +246,9 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	}
 
 	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
-		ProxyFactory pf = new ProxyFactory(new Class[]{ITestBean.class});
+		ProxyFactory pf = new ProxyFactory(new Class<?>[]{ITestBean.class});
 		pf.setProxyTargetClass(true);
-		
+
 		pf.addAdvisor(new LockMixinAdvisor());
 		pf.setTarget(target);
 		pf.setFrozen(true);
@@ -258,11 +263,11 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		target.reset();
 
 		mockTargetSource.setTarget(target);
-		AdvisedSupport pc = new AdvisedSupport(new Class[]{});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[]{});
 		pc.setTargetSource(mockTargetSource);
 		CglibAopProxy aop = new CglibAopProxy(pc);
 		aop.setConstructorArguments(new Object[] {"Rob Harrop", new Integer(22)},
-				new Class[] {String.class, int.class});
+				new Class<?>[] {String.class, int.class});
 
 		NoArgCtorTestBean proxy = (NoArgCtorTestBean) aop.getProxy();
 		proxy = (NoArgCtorTestBean) aop.getProxy();
@@ -275,7 +280,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ITestBean target = new TestBean();
 
 		mockTargetSource.setTarget(target);
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		CglibAopProxy cglib = new CglibAopProxy(as);
@@ -283,7 +288,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ITestBean proxy1 = (ITestBean) cglib.getProxy();
 
 		mockTargetSource.setTarget(proxy1);
-		as = new AdvisedSupport(new Class[]{});
+		as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		cglib = new CglibAopProxy(as);
@@ -296,7 +301,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ITestBean target = new TestBean();
 		mockTargetSource.setTarget(target);
 
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		as.addInterface(Serializable.class);
@@ -305,7 +310,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ITestBean proxy1 = (ITestBean) cglib.getProxy();
 
 		mockTargetSource.setTarget(proxy1);
-		as = new AdvisedSupport(new Class[]{});
+		as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		cglib = new CglibAopProxy(as);
@@ -319,7 +324,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		ExceptionThrower bean = new ExceptionThrower();
 		mockTargetSource.setTarget(bean);
 
-		AdvisedSupport as = new AdvisedSupport(new Class[]{});
+		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{});
 		as.setTargetSource(mockTargetSource);
 		as.addAdvice(new NopInterceptor());
 		AopProxy aop = new CglibAopProxy(as);
@@ -462,15 +467,15 @@ class CglibTestBean {
 class NoArgCtorTestBean {
 
 	private boolean called = false;
-	
+
 	public NoArgCtorTestBean(String x, int y) {
 		called = true;
 	}
-	
+
 	public boolean wasCalled() {
 		return called;
 	}
-	
+
 	public void reset() {
 		called = false;
 	}
@@ -492,6 +497,7 @@ class UnsupportedInterceptor implements MethodInterceptor {
 	/**
 	 * @see org.aopalliance.intercept.MethodInterceptor#invoke(org.aopalliance.intercept.MethodInvocation)
 	 */
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		throw new UnsupportedOperationException(mi.getMethod().getName());
 	}

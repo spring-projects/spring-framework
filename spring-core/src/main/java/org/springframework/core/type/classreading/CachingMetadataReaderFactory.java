@@ -40,6 +40,7 @@ public class CachingMetadataReaderFactory extends SimpleMetadataReaderFactory {
 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
+	@SuppressWarnings("serial")
 	private final Map<Resource, MetadataReader> metadataReaderCache =
 			new LinkedHashMap<Resource, MetadataReader>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,10 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		else {
 			invokeAwareInterfaces(bean);
 		}
-		
+
 		return bean;
 	}
-	
+
 	private void invokeAwareInterfaces(Object bean) {
 		if (bean instanceof Aware) {
 			if (bean instanceof EnvironmentAware) {

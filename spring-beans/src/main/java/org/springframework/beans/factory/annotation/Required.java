@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 /**
  * Marks a method (typically a JavaBean setter method) as being 'required': that is,
  * the setter method must be configured to be dependency-injected with a value.
- * 
+ *
  * <p>Please do consult the javadoc for the {@link RequiredAnnotationBeanPostProcessor}
  * class (which, by default, checks for the presence of this annotation).
  *

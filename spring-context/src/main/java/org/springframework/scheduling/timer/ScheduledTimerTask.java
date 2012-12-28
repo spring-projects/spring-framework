@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import java.util.TimerTask;
  * @see java.util.TimerTask
  * @see java.util.Timer#schedule(TimerTask, long, long)
  * @see java.util.Timer#scheduleAtFixedRate(TimerTask, long, long)
- * @deprecated as of Spring 3.0, in favor of the <code>scheduling.concurrent</code>
- * package which is based on Java 5's <code>java.util.concurrent.ExecutorService</code>
+ * @deprecated as of Spring 3.0, in favor of the {@code scheduling.concurrent}
+ * package which is based on Java 5's {@code java.util.concurrent.ExecutorService}
  */
 @Deprecated
 public class ScheduledTimerTask {
@@ -178,7 +178,7 @@ public class ScheduledTimerTask {
 	 * <p>Note that the semantics of the period value vary between fixed-rate
 	 * and fixed-delay execution.
 	 * <p><b>Note:</b> A period of 0 (for example as fixed delay) is <i>not</i>
-	 * supported, simply because <code>java.util.Timer</code> itself does not
+	 * supported, simply because {@code java.util.Timer} itself does not
 	 * support it. Hence a value of 0 will be treated as one-time execution;
 	 * however, that value should never be specified explicitly in the first place!
 	 * @see #setFixedRate
@@ -198,7 +198,7 @@ public class ScheduledTimerTask {
 
 	/**
 	 * Is this task only ever going to execute once?
-	 * @return <code>true</code> if this task is only ever going to execute once
+	 * @return {@code true} if this task is only ever going to execute once
 	 * @see #getPeriod()
 	 */
 	public boolean isOneTimeTask() {

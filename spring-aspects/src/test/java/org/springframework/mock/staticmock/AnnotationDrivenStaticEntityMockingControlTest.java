@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		playback();
 		Assert.assertEquals(expectedCount, Person.countPeople());
 	}
-	
+
 	@Test(expected=PersistenceException.class)
 	public void testNoArgThrows() {
 		Person.countPeople();
@@ -64,7 +64,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		Assert.assertEquals(found, Person.findPerson(id));
 	}
 
-	
+
 	@Test
 	public void testLongSeriesOfCalls() {
 		long id1 = 13;
@@ -80,7 +80,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		Person.countPeople();
 		expectReturn(0);
 		playback();
-		
+
 		Assert.assertEquals(found1, Person.findPerson(id1));
 		Assert.assertEquals(found2, Person.findPerson(id2));
 		Assert.assertEquals(found1, Person.findPerson(id1));
@@ -122,22 +122,22 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 	public void testRejectUnexpectedCall() {
 		new Delegate().rejectUnexpectedCall();
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void testFailTooFewCalls() {
 		new Delegate().failTooFewCalls();
 	}
-	
+
 	@Test
 	public void testEmpty() {
 		// Test that verification check doesn't blow up if no replay() call happened
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void testDoesntEverReplay() {
 		new Delegate().doesntEverReplay();
 	}
-	
+
 	@Test(expected=IllegalStateException.class)
 	public void testDoesntEverSetReturn() {
 		new Delegate().doesntEverSetReturn();

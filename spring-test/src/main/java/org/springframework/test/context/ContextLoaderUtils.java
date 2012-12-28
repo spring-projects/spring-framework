@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * Utility methods for working with {@link ContextLoader ContextLoaders} and
  * {@link SmartContextLoader SmartContextLoaders} and resolving resource locations,
  * annotated classes, and active bean definition profiles.
- * 
+ *
  * @author Sam Brannen
  * @since 3.1
  * @see ContextLoader
@@ -72,7 +72,7 @@ abstract class ContextLoaderUtils {
 	 * supplied list of {@link ContextConfigurationAttributes} and then
 	 * instantiate and return that {@code ContextLoader}.
 	 *
-	 * <p>If the supplied <code>defaultContextLoaderClassName</code> is
+	 * <p>If the supplied {@code defaultContextLoaderClassName} is
 	 * {@code null} or <em>empty</em>, depending on the absence or presence
 	 * of {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
 	 * either {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
@@ -88,7 +88,7 @@ abstract class ContextLoaderUtils {
 	 * @param defaultContextLoaderClassName the name of the default
 	 * {@code ContextLoader} class to use; may be {@code null} or <em>empty</em>
 	 * @return the resolved {@code ContextLoader} for the supplied
-	 * <code>testClass</code> (never {@code null})
+	 * {@code testClass} (never {@code null})
 	 * @see #resolveContextLoaderClass()
 	 */
 	static ContextLoader resolveContextLoader(Class<?> testClass,
@@ -112,20 +112,20 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Resolve the {@link ContextLoader} {@linkplain Class class} to use for the
 	 * supplied list of {@link ContextConfigurationAttributes}.
-	 * 
+	 *
 	 * <p>Beginning with the first level in the context configuration attributes
-	 * hierarchy: 
+	 * hierarchy:
 	 *
 	 * <ol>
 	 * <li>If the {@link ContextConfigurationAttributes#getContextLoaderClass()
 	 * contextLoaderClass} property of {@link ContextConfigurationAttributes} is
 	 * configured with an explicit class, that class will be returned.</li>
-	 * <li>If an explicit {@code ContextLoader} class is not specified at the 
+	 * <li>If an explicit {@code ContextLoader} class is not specified at the
 	 * current level in the hierarchy, traverse to the next level in the hierarchy
 	 * and return to step #1.</li>
 	 * <li>If no explicit {@code ContextLoader} class is found after traversing
 	 * the hierarchy, an attempt will be made to load and return the class
-	 * with the supplied <code>defaultContextLoaderClassName</code>.</li>
+	 * with the supplied {@code defaultContextLoaderClassName}.</li>
 	 * </ol>
 	 *
 	 * @param testClass the class for which to resolve the {@code ContextLoader}
@@ -137,9 +137,9 @@ abstract class ContextLoaderUtils {
 	 * {@code ContextLoader} class to use; must not be {@code null} or empty
 	 * @return the {@code ContextLoader} class to use for the supplied test class
 	 * @throws IllegalArgumentException if {@code @ContextConfiguration} is not
-	 * <em>present</em> on the supplied test class 
+	 * <em>present</em> on the supplied test class
 	 * @throws IllegalStateException if the default {@code ContextLoader} class
-	 * could not be loaded 
+	 * could not be loaded
 	 */
 	@SuppressWarnings("unchecked")
 	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<?> testClass,
@@ -236,8 +236,8 @@ abstract class ContextLoaderUtils {
 	 *
 	 * <p>Note that the {@link ContextConfiguration#inheritInitializers inheritInitializers}
 	 * flag of {@link ContextConfiguration @ContextConfiguration} will be taken into
-	 * consideration. Specifically, if the <code>inheritInitializers</code> flag is
-	 * set to <code>true</code> for a given level in the class hierarchy represented by
+	 * consideration. Specifically, if the {@code inheritInitializers} flag is
+	 * set to {@code true} for a given level in the class hierarchy represented by
 	 * the provided configuration attributes, context initializer classes defined
 	 * at the given level will be merged with those defined in higher levels
 	 * of the class hierarchy.
@@ -277,15 +277,15 @@ abstract class ContextLoaderUtils {
 	 *
 	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles}
 	 * flag of {@link ActiveProfiles &#064;ActiveProfiles} will be taken into
-	 * consideration. Specifically, if the <code>inheritProfiles</code> flag is
-	 * set to <code>true</code>, profiles defined in the test class will be
+	 * consideration. Specifically, if the {@code inheritProfiles} flag is
+	 * set to {@code true}, profiles defined in the test class will be
 	 * merged with those defined in superclasses.
 	 *
 	 * @param testClass the class for which to resolve the active profiles (must
 	 * not be {@code null})
 	 * @return the set of active profiles for the specified class, including
 	 * active profiles from superclasses if appropriate (never {@code null})
-	 * @see org.springframework.test.context.ActiveProfiles
+	 * @see ActiveProfiles
 	 * @see org.springframework.context.annotation.Profile
 	 */
 	static String[] resolveActiveProfiles(Class<?> testClass) {
@@ -341,7 +341,7 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Build the {@link MergedContextConfiguration merged context configuration}
 	 * for the supplied {@link Class testClass} and
-	 * <code>defaultContextLoaderClassName</code>.
+	 * {@code defaultContextLoaderClassName}.
 	 *
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
 	 * should be built (must not be {@code null})
@@ -407,8 +407,8 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Load the {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
 	 * class, using reflection in order to avoid package cycles.
-	 * 
-	 * @return the {@code @WebAppConfiguration} class or <code>null</code> if it
+	 *
+	 * @return the {@code @WebAppConfiguration} class or {@code null} if it
 	 * cannot be loaded
 	 * @since 3.2
 	 */
@@ -432,7 +432,7 @@ abstract class ContextLoaderUtils {
 	 * WebMergedContextConfiguration} from the supplied arguments, using reflection
 	 * in order to avoid package cycles.
 	 *
-	 * @return the {@code WebMergedContextConfiguration} or <code>null</code> if
+	 * @return the {@code WebMergedContextConfiguration} or {@code null} if
 	 * it could not be built
 	 * @since 3.2
 	 */

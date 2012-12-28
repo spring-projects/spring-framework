@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Strategy interface for resolving the scope of bean definitions.
- * 
+ *
  * @author Mark Fisher
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
@@ -29,16 +29,16 @@ public interface ScopeMetadataResolver {
 
 	/**
 	 * Resolve the {@link ScopeMetadata} appropriate to the supplied
-	 * bean <code>definition</code>.
+	 * bean {@code definition}.
 	 * <p>Implementations can of course use any strategy they like to
 	 * determine the scope metadata, but some implementations that spring
 	 * immediately to mind might be to use source level annotations
 	 * present on {@link BeanDefinition#getBeanClassName() the class} of the
-	 * supplied <code>definition</code>, or to use metadata present in the
-	 * {@link BeanDefinition#attributeNames()} of the supplied <code>definition</code>.
+	 * supplied {@code definition}, or to use metadata present in the
+	 * {@link BeanDefinition#attributeNames()} of the supplied {@code definition}.
 	 * @param definition the target bean definition
-	 * @return the relevant scope metadata; never <code>null</code>
+	 * @return the relevant scope metadata; never {@code null}
 	 */
 	ScopeMetadata resolveScopeMetadata(BeanDefinition definition);
-	
+
 }

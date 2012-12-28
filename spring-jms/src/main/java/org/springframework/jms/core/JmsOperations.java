@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import org.springframework.jms.JmsException;
 
 /**
  * Specifies a basic set of JMS operations.
- * 
+ *
  * <p>Implemented by {@link JmsTemplate}. Not often used but a useful option
  * to enhance testability, as it can easily be mocked or stubbed.
  *
- * <p>Provides <code>JmsTemplate's</code> <code>send(..)</code> and
- * <code>receive(..)</code> methods that mirror various JMS API methods.
+ * <p>Provides {@code JmsTemplate's} {@code send(..)} and
+ * {@code receive(..)} methods that mirror various JMS API methods.
  * See the JMS specification and javadocs for details on those methods.
  *
  * @author Mark Pollack
@@ -160,7 +160,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -172,7 +172,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(Destination destination, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 	/**
 	 * Send the given object to the specified destination, converting the object
@@ -185,7 +185,7 @@ public interface JmsOperations {
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	void convertAndSend(String destinationName, Object message, MessagePostProcessor postProcessor)
-	    throws JmsException;
+		throws JmsException;
 
 
 	//-------------------------------------------------------------------------
@@ -198,7 +198,7 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * <p>This will only work with a default destination specified!
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receive() throws JmsException;
@@ -209,7 +209,7 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destination the destination to receive a message from
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receive(Destination destination) throws JmsException;
@@ -221,7 +221,7 @@ public interface JmsOperations {
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receive(String destinationName) throws JmsException;
@@ -232,9 +232,9 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * <p>This will only work with a default destination specified!
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receiveSelected(String messageSelector) throws JmsException;
@@ -245,9 +245,9 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destination the destination to receive a message from
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receiveSelected(Destination destination, String messageSelector) throws JmsException;
@@ -259,9 +259,9 @@ public interface JmsOperations {
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message received by the consumer, or <code>null</code> if the timeout expires
+	 * @return the message received by the consumer, or {@code null} if the timeout expires
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Message receiveSelected(String destinationName, String messageSelector) throws JmsException;
@@ -278,7 +278,7 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * <p>This will only work with a default destination specified!
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveAndConvert() throws JmsException;
@@ -290,7 +290,7 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destination the destination to receive a message from
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveAndConvert(Destination destination) throws JmsException;
@@ -303,7 +303,7 @@ public interface JmsOperations {
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveAndConvert(String destinationName) throws JmsException;
@@ -315,9 +315,9 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * <p>This will only work with a default destination specified!
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveSelectedAndConvert(String messageSelector) throws JmsException;
@@ -329,9 +329,9 @@ public interface JmsOperations {
 	 * <p>This method should be used carefully, since it will block the thread
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destination the destination to receive a message from
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveSelectedAndConvert(Destination destination, String messageSelector) throws JmsException;
@@ -344,9 +344,9 @@ public interface JmsOperations {
 	 * until the message becomes available or until the timeout value is exceeded.
 	 * @param destinationName the name of the destination to send this message to
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
-	 * @return the message produced for the consumer or <code>null</code> if the timeout expires.
+	 * @return the message produced for the consumer or {@code null} if the timeout expires.
 	 * @throws JmsException checked JMSException converted to unchecked
 	 */
 	Object receiveSelectedAndConvert(String destinationName, String messageSelector) throws JmsException;
@@ -389,7 +389,7 @@ public interface JmsOperations {
 	/**
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
 	 * Session and QueueBrowser in order to browse the queue and react to the contents.
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
 	 * @param action callback object that exposes the session/browser pair
 	 * @return the result object from working with the session
@@ -401,7 +401,7 @@ public interface JmsOperations {
 	 * Browse selected messages in a JMS queue. The callback gives access to the JMS
 	 * Session and QueueBrowser in order to browse the queue and react to the contents.
 	 * @param queue the queue to browse
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
 	 * @param action callback object that exposes the session/browser pair
 	 * @return the result object from working with the session
@@ -414,7 +414,7 @@ public interface JmsOperations {
 	 * Session and QueueBrowser in order to browse the queue and react to the contents.
 	 * @param queueName the name of the queue to browse
 	 * (to be resolved to an actual destination by a DestinationResolver)
-	 * @param messageSelector the JMS message selector expression (or <code>null</code> if none).
+	 * @param messageSelector the JMS message selector expression (or {@code null} if none).
 	 * See the JMS specification for a detailed definition of selector expressions.
 	 * @param action callback object that exposes the session/browser pair
 	 * @return the result object from working with the session

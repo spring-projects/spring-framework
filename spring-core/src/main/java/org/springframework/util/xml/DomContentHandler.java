@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.xml.sax.SAXException;
 import org.springframework.util.Assert;
 
 /**
- * SAX <code>ContentHandler</code> that transforms callback calls to DOM <code>Node</code>s.
+ * SAX {@code ContentHandler} that transforms callback calls to DOM {@code Node}s.
  *
  * @author Arjen Poutsma
  * @see org.w3c.dom.Node
@@ -47,7 +47,7 @@ class DomContentHandler implements ContentHandler {
 	private final Node node;
 
 	/**
-	 * Creates a new instance of the <code>DomContentHandler</code> with the given node.
+	 * Creates a new instance of the {@code DomContentHandler} with the given node.
 	 *
 	 * @param node the node to publish events to
 	 */

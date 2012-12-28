@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Juergen Hoeller
  * @since 08.05.2003
  */
+@SuppressWarnings("serial")
 public class DefaultTransactionDefinition implements TransactionDefinition, Serializable {
 
 	/** Prefix for the propagation constants defined in TransactionDefinition */
@@ -108,7 +109,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * TransactionDefinition, e.g. "PROPAGATION_REQUIRED".
 	 * @param constantName name of the constant
 	 * @exception IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the <code>PROPAGATION_</code> constants or is <code>null</code>
+	 * to one of the {@code PROPAGATION_} constants or is {@code null}
 	 * @see #setPropagationBehavior
 	 * @see #PROPAGATION_REQUIRED
 	 */
@@ -123,7 +124,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the propagation behavior. Must be one of the propagation constants
 	 * in the TransactionDefinition interface. Default is PROPAGATION_REQUIRED.
 	 * @exception IllegalArgumentException if the supplied value is not
-	 * one of the <code>PROPAGATION_</code> constants
+	 * one of the {@code PROPAGATION_} constants
 	 * @see #PROPAGATION_REQUIRED
 	 */
 	public final void setPropagationBehavior(int propagationBehavior) {
@@ -142,7 +143,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * TransactionDefinition, e.g. "ISOLATION_DEFAULT".
 	 * @param constantName name of the constant
 	 * @exception IllegalArgumentException if the supplied value is not resolvable
-	 * to one of the <code>ISOLATION_</code> constants or is <code>null</code>
+	 * to one of the {@code ISOLATION_} constants or is {@code null}
 	 * @see #setIsolationLevel
 	 * @see #ISOLATION_DEFAULT
 	 */
@@ -157,7 +158,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Set the isolation level. Must be one of the isolation constants
 	 * in the TransactionDefinition interface. Default is ISOLATION_DEFAULT.
 	 * @exception IllegalArgumentException if the supplied value is not
-	 * one of the <code>ISOLATION_</code> constants
+	 * one of the {@code ISOLATION_} constants
 	 * @see #ISOLATION_DEFAULT
 	 */
 	public final void setIsolationLevel(int isolationLevel) {
@@ -214,7 +215,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 
 	/**
-	 * This implementation compares the <code>toString()</code> results.
+	 * This implementation compares the {@code toString()} results.
 	 * @see #toString()
 	 */
 	@Override
@@ -223,7 +224,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	}
 
 	/**
-	 * This implementation returns <code>toString()</code>'s hash code.
+	 * This implementation returns {@code toString()}'s hash code.
 	 * @see #toString()
 	 */
 	@Override
@@ -235,10 +236,10 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 	 * Return an identifying description for this transaction definition.
 	 * <p>The format matches the one used by
 	 * {@link org.springframework.transaction.interceptor.TransactionAttributeEditor},
-	 * to be able to feed <code>toString</code> results into bean properties of type
+	 * to be able to feed {@code toString} results into bean properties of type
 	 * {@link org.springframework.transaction.interceptor.TransactionAttribute}.
-	 * <p>Has to be overridden in subclasses for correct <code>equals</code>
-	 * and <code>hashCode</code> behavior. Alternatively, {@link #equals}
+	 * <p>Has to be overridden in subclasses for correct {@code equals}
+	 * and {@code hashCode} behavior. Alternatively, {@link #equals}
 	 * and {@link #hashCode} can be overridden themselves.
 	 * @see #getDefinitionDescription()
 	 * @see org.springframework.transaction.interceptor.TransactionAttributeEditor
@@ -250,7 +251,7 @@ public class DefaultTransactionDefinition implements TransactionDefinition, Seri
 
 	/**
 	 * Return an identifying description for this transaction definition.
-	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
+	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected final StringBuilder getDefinitionDescription() {
 		StringBuilder result = new StringBuilder();

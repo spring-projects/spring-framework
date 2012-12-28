@@ -186,9 +186,11 @@ public class ResourceTests {
 		final String name = "test-resource";
 
 		Resource resource = new AbstractResource() {
+			@Override
 			public String getDescription() {
 				return name;
 			}
+			@Override
 			public InputStream getInputStream() {
 				return null;
 			}
@@ -222,9 +224,11 @@ public class ResourceTests {
 	@Test
 	public void testContentLength() throws IOException {
 		AbstractResource resource = new AbstractResource() {
+			@Override
 			public InputStream getInputStream() throws IOException {
 				return new ByteArrayInputStream(new byte[] { 'a', 'b', 'c' });
 			}
+			@Override
 			public String getDescription() {
 				return null;
 			}
@@ -235,9 +239,11 @@ public class ResourceTests {
 	@Test(expected=IllegalStateException.class)
 	public void testContentLength_withNullInputStream() throws IOException {
 		AbstractResource resource = new AbstractResource() {
+			@Override
 			public InputStream getInputStream() throws IOException {
 				return null;
 			}
+			@Override
 			public String getDescription() {
 				return null;
 			}

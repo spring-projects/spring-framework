@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.dao.DataAccessException;
  * @since 2.0
  */
 public interface PersistenceExceptionTranslator {
-	
+
 	/**
 	 * Translate the given runtime exception thrown by a persistence framework to a
 	 * corresponding exception from Spring's generic DataAccessException hierarchy,
@@ -44,7 +44,7 @@ public interface PersistenceExceptionTranslator {
 	 * Implementations may use Spring JDBC's sophisticated exception translation
 	 * to provide further information in the event of SQLException as a root cause.
 	 * @param ex a RuntimeException thrown
-	 * @return the corresponding DataAccessException (or <code>null</code> if the
+	 * @return the corresponding DataAccessException (or {@code null} if the
 	 * exception could not be translated, as in this case it may result from
 	 * user code rather than an actual persistence problem)
 	 * @see org.springframework.dao.DataIntegrityViolationException

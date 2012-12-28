@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,19 +48,19 @@ import javax.portlet.ResourceResponse;
  * @see org.springframework.web.portlet.mvc.SimpleControllerHandlerAdapter
  */
 public interface HandlerAdapter {
-	
+
 	/**
 	 * Given a handler instance, return whether or not this HandlerAdapter can
 	 * support it. Typical HandlerAdapters will base the decision on the handler
 	 * type. HandlerAdapters will usually only support one handler type each.
 	 * <p>A typical implementation:
-	 * <p><code>
+	 * <p>{@code
 	 * return (handler instanceof MyHandler);
-	 * </code>
+	 * }
 	 * @param handler handler object to check
 	 * @return whether or not this object can use the given handler
 	 */
-	boolean supports(Object handler); 
+	boolean supports(Object handler);
 
 	/**
 	 * Use the given handler to handle this action request.
@@ -68,7 +68,7 @@ public interface HandlerAdapter {
 	 * @param request current action request
 	 * @param response current action response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the <code>supports</code> method of this interface, which must have
+	 * to the {@code supports} method of this interface, which must have
 	 * returned true.
 	 * @throws Exception in case of errors
 	 * @see javax.portlet.Portlet#processAction
@@ -81,11 +81,11 @@ public interface HandlerAdapter {
 	 * @param request current render request
 	 * @param response current render response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the <code>supports</code> method of this interface, which must have
-	 * returned <code>true</code>.
+	 * to the {@code supports} method of this interface, which must have
+	 * returned {@code true}.
 	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
-	 * model data, or <code>null</code> if the request has been handled directly
+	 * model data, or {@code null} if the request has been handled directly
 	 * @see javax.portlet.Portlet#render
 	 */
 	ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception;
@@ -96,11 +96,11 @@ public interface HandlerAdapter {
 	 * @param request current render request
 	 * @param response current render response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the <code>supports</code> method of this interface, which must have
-	 * returned <code>true</code>.
+	 * to the {@code supports} method of this interface, which must have
+	 * returned {@code true}.
 	 * @throws Exception in case of errors
 	 * @return ModelAndView object with the name of the view and the required
-	 * model data, or <code>null</code> if the request has been handled directly
+	 * model data, or {@code null} if the request has been handled directly
 	 * @see javax.portlet.ResourceServingPortlet#serveResource
 	 */
 	ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler) throws Exception;
@@ -111,7 +111,7 @@ public interface HandlerAdapter {
 	 * @param request current action request
 	 * @param response current action response
 	 * @param handler handler to use. This object must have previously been passed
-	 * to the <code>supports</code> method of this interface, which must have
+	 * to the {@code supports} method of this interface, which must have
 	 * returned true.
 	 * @throws Exception in case of errors
 	 * @see javax.portlet.EventPortlet#processEvent

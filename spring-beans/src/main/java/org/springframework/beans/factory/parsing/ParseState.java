@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,15 +44,15 @@ public final class ParseState {
 
 
 	/**
-	 * Create a new <code>ParseState</code> with an empty {@link Stack}.
+	 * Create a new {@code ParseState} with an empty {@link Stack}.
 	 */
 	public ParseState() {
 		this.state = new Stack();
 	}
 
 	/**
-	 * Create a new <code>ParseState</code> whose {@link Stack} is a {@link Object#clone clone}
-	 * of that of the passed in <code>ParseState</code>.
+	 * Create a new {@code ParseState} whose {@link Stack} is a {@link Object#clone clone}
+	 * of that of the passed in {@code ParseState}.
 	 */
 	private ParseState(ParseState other) {
 		this.state = (Stack) other.state.clone();
@@ -75,7 +75,7 @@ public final class ParseState {
 
 	/**
 	 * Return the {@link Entry} currently at the top of the {@link Stack} or
-	 * <code>null</code> if the {@link Stack} is empty.
+	 * {@code null} if the {@link Stack} is empty.
 	 */
 	public Entry peek() {
 		return (Entry) (this.state.empty() ? null : this.state.peek());
@@ -91,7 +91,7 @@ public final class ParseState {
 
 
 	/**
-	 * Returns a tree-style representation of the current <code>ParseState</code>.
+	 * Returns a tree-style representation of the current {@code ParseState}.
 	 */
 	@Override
 	public String toString() {

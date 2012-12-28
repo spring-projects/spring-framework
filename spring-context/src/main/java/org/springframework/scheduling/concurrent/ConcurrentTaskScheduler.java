@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ErrorHandler;
 
 /**
- * Adapter that takes a JDK 1.5 <code>java.util.concurrent.ScheduledExecutorService</code>
+ * Adapter that takes a JDK 1.5 {@code java.util.concurrent.ScheduledExecutorService}
  * and exposes a Spring {@link org.springframework.scheduling.TaskScheduler} for it.
  * Extends {@link ConcurrentTaskExecutor} in order to implement the
  * {@link org.springframework.scheduling.SchedulingTaskExecutor} interface as well.

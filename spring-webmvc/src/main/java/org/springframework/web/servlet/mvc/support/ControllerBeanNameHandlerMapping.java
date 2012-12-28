@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
  * Implementation of {@link org.springframework.web.servlet.HandlerMapping} that
  * follows a simple convention for generating URL path mappings from the <i>bean names</i>
  * of registered {@link org.springframework.web.servlet.mvc.Controller} beans
- * as well as <code>@Controller</code> annotated beans.
+ * as well as {@code @Controller} annotated beans.
  *
  * <p>This is similar to {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
  * but doesn't expect bean names to follow the URL convention: It turns plain bean names

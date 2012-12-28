@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 
 	/**
 	 * Create a new CustomCollectionEditor for the given target type,
-	 * keeping an incoming <code>null</code> as-is.
+	 * keeping an incoming {@code null} as-is.
 	 * @param collectionType the target type, which needs to be a
 	 * sub-interface of Collection or a concrete Collection class
 	 * @see java.util.Collection
@@ -72,7 +72,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 	 * TreeSet for SortedSet, and LinkedHashSet for Set.
 	 * @param collectionType the target type, which needs to be a
 	 * sub-interface of Collection or a concrete Collection class
-	 * @param nullAsEmptyCollection whether to convert an incoming <code>null</code>
+	 * @param nullAsEmptyCollection whether to convert an incoming {@code null}
 	 * value to an empty Collection (of the appropriate type)
 	 * @see java.util.Collection
 	 * @see java.util.ArrayList
@@ -198,7 +198,7 @@ public class CustomCollectionEditor extends PropertyEditorSupport {
 
 
 	/**
-	 * This implementation returns <code>null</code> to indicate that
+	 * This implementation returns {@code null} to indicate that
 	 * there is no appropriate text representation.
 	 */
 	@Override

@@ -54,15 +54,15 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * <p>View that redirects to an absolute, context relative, or current request
- * relative URL. The URL may be a URI template in which case the URI template 
- * variables will be replaced with values available in the model. By default 
- * all primitive model attributes (or collections thereof) are exposed as HTTP 
- * query parameters (assuming they've not been used as URI template variables), 
- * but this behavior can be changed by overriding the 
+ * relative URL. The URL may be a URI template in which case the URI template
+ * variables will be replaced with values available in the model. By default
+ * all primitive model attributes (or collections thereof) are exposed as HTTP
+ * query parameters (assuming they've not been used as URI template variables),
+ * but this behavior can be changed by overriding the
  * {@link #isEligibleProperty(String, Object)} method.
- * 
+ *
  * <p>A URL for this view is supposed to be a HTTP redirect URL, i.e.
- * suitable for HttpServletResponse's <code>sendRedirect</code> method, which
+ * suitable for HttpServletResponse's {@code sendRedirect} method, which
  * is what actually does the redirect if the HTTP 1.0 flag is on, or via sending
  * back an HTTP 303 code - if the HTTP 1.0 compatibility flag is off.
  *
@@ -75,7 +75,7 @@ import org.springframework.web.util.WebUtils;
  * paths which are to be considered relative to the web application root.
  *
  * <p><b>NOTE when using this redirect view in a Portlet environment:</b> Make sure
- * that your controller respects the Portlet <code>sendRedirect</code> constraints.
+ * that your controller respects the Portlet {@code sendRedirect} constraints.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -185,7 +185,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Set whether to stay compatible with HTTP 1.0 clients.
 	 * <p>In the default implementation, this will enforce HTTP status code 302
-	 * in any case, i.e. delegate to <code>HttpServletResponse.sendRedirect</code>.
+	 * in any case, i.e. delegate to {@code HttpServletResponse.sendRedirect}.
 	 * Turning this off will send HTTP status code 303, which is the correct
 	 * code for HTTP 1.1 clients, but not understood by HTTP 1.0 clients.
 	 * <p>Many HTTP 1.1 clients treat 302 just like 303, not making any
@@ -198,9 +198,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
-	 * Set the <code>exposeModelAttributes</code> flag which denotes whether
+	 * Set the {@code exposeModelAttributes} flag which denotes whether
 	 * or not model attributes should be exposed as HTTP query parameters.
-	 * <p>Defaults to <code>true</code>.
+	 * <p>Defaults to {@code true}.
 	 */
 	public void setExposeModelAttributes(final boolean exposeModelAttributes) {
 		this.exposeModelAttributes = exposeModelAttributes;
@@ -226,10 +226,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * Whether to treat the redirect URL as a URI template.
-	 * Set this flag to <code>false</code> if the redirect URL contains open
+	 * Set this flag to {@code false} if the redirect URL contains open
 	 * and close curly braces "{", "}" and you don't want them interpreted
 	 * as URI variables.
-	 * <p>Defaults to <code>true</code>.
+	 * <p>Defaults to {@code true}.
 	 */
 	public void setExpandUriTemplateVariables(boolean expandUriTemplateVariables) {
 		this.expandUriTemplateVariables = expandUriTemplateVariables;
@@ -262,7 +262,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		String targetUrl = createTargetUrl(model, request);
 		targetUrl = updateTargetUrl(targetUrl, model, request, response);
-		
+
 		FlashMap flashMap = RequestContextUtils.getOutputFlashMap(request);
 		if (!CollectionUtils.isEmpty(flashMap)) {
 			UriComponents uriComponents = UriComponentsBuilder.fromUriString(targetUrl).build();
@@ -277,13 +277,13 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
-	 * Creates the target URL by checking if the redirect string is a URI template first, 
-	 * expanding it with the given model, and then optionally appending simple type model 
+	 * Creates the target URL by checking if the redirect string is a URI template first,
+	 * expanding it with the given model, and then optionally appending simple type model
 	 * attributes as query String parameters.
 	 */
 	protected final String createTargetUrl(Map<String, Object> model, HttpServletRequest request)
 			throws UnsupportedEncodingException {
-		
+
 		// Prepare target URL.
 		StringBuilder targetUrl = new StringBuilder();
 		if (this.contextRelative && getUrl().startsWith("/")) {
@@ -304,7 +304,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			Map<String, String> variables = getCurrentRequestUriVariables(request);
 			targetUrl = replaceUriTemplateVariables(targetUrl.toString(), model, variables, enc);
 		}
-		
+
 		if (this.exposeModelAttributes) {
 			appendQueryProperties(targetUrl, model, enc);
 		}
@@ -313,9 +313,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	}
 
 	/**
-	 * Replace URI template variables in the target URL with encoded model 
+	 * Replace URI template variables in the target URL with encoded model
 	 * attributes or URI variables from the current request. Model attributes
-	 * referenced in the URL are removed from the model. 
+	 * referenced in the URL are removed from the model.
 	 * @param targetUrl the redirect URL
 	 * @param model Map that contains model attributes
 	 * @param currentUriVariables current request URI variables to use
@@ -325,7 +325,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	protected StringBuilder replaceUriTemplateVariables(
 			String targetUrl, Map<String, Object> model, Map<String, String> currentUriVariables, String encodingScheme)
 			throws UnsupportedEncodingException {
-		
+
 		StringBuilder result = new StringBuilder();
 		Matcher m = URI_TEMPLATE_VARIABLE_PATTERN.matcher(targetUrl);
 		int endLastMatch = 0;
@@ -343,11 +343,11 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, String> getCurrentRequestUriVariables(HttpServletRequest request) {
-		Map<String, String> uriVars = 
+		Map<String, String> uriVars =
 			(Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
 		return (uriVars != null) ? uriVars : Collections.<String, String> emptyMap();
 	}
-	
+
 	/**
 	 * Append query properties to the redirect URL.
 	 * Stringifies, URL-encodes and formats model attributes as query properties.
@@ -486,7 +486,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	/**
 	 * URL-encode the given input String with the given encoding scheme.
-	 * <p>The default implementation uses <code>URLEncoder.encode(input, enc)</code>.
+	 * <p>The default implementation uses {@code URLEncoder.encode(input, enc)}.
 	 * @param input the unencoded input String
 	 * @param encodingScheme the encoding scheme
 	 * @return the encoded output String
@@ -503,9 +503,9 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 * it to update the redirect target URL.
 	 * @return the updated URL or the same as URL as the one passed in
 	 */
-	protected String updateTargetUrl(String targetUrl, Map<String, Object> model, 
+	protected String updateTargetUrl(String targetUrl, Map<String, Object> model,
 								  HttpServletRequest request, HttpServletResponse response) {
-		
+
 		RequestContext requestContext = null;
 		if (getWebApplicationContext() != null) {
 			requestContext = createRequestContext(request, response, model);
@@ -523,10 +523,10 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 				targetUrl = processor.processUrl(request, targetUrl);
 			}
 		}
-		
+
 		return targetUrl;
 	}
-	
+
 	/**
 	 * Send a redirect back to the HTTP client
 	 * @param request current HTTP request (allows for reacting to request method)
@@ -540,7 +540,7 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 			throws IOException {
 
 		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
-		
+
 		if (http10Compatible) {
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());

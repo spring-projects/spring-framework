@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package org.springframework.scripting.bsh;
 
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.util.Arrays;
 import java.util.Collection;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -189,30 +191,25 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 	public void testScriptThatCompilesButIsJustPlainBad() throws Exception {
-		MockControl mock = MockControl.createControl(ScriptSource.class);
-		ScriptSource script = (ScriptSource) mock.getMock();
-		script.getScriptAsString();
+		ScriptSource script = mock(ScriptSource.class);
 		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
-		mock.setReturnValue(badScript);
-		script.isModified();
-		mock.setReturnValue(true);
-		mock.replay();
+		given(script.getScriptAsString()).willReturn(badScript);
+		given(script.isModified()).willReturn(true);
 		BshScriptFactory factory = new BshScriptFactory(
 				ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX + badScript,
-				new Class[] {Messenger.class});
+				new Class<?>[] {Messenger.class});
 		try {
-			Messenger messenger = (Messenger) factory.getScriptedObject(script, new Class[]{Messenger.class});
+			Messenger messenger = (Messenger) factory.getScriptedObject(script, new Class<?>[]{Messenger.class});
 			messenger.getMessage();
 			fail("Must have thrown a BshScriptUtils.BshExecutionException.");
 		}
 		catch (BshScriptUtils.BshExecutionException expected) {
 		}
-		mock.verify();
 	}
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory(null, new Class[] {Messenger.class});
+			new BshScriptFactory(null, new Class<?>[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -221,7 +218,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory("", new Class[] {Messenger.class});
+			new BshScriptFactory("", new Class<?>[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -230,7 +227,7 @@ public class BshScriptFactoryTests extends TestCase {
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new BshScriptFactory("\n   ", new Class[] {Messenger.class});
+			new BshScriptFactory("\n   ", new Class<?>[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -241,7 +238,7 @@ public class BshScriptFactoryTests extends TestCase {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
-		Collection beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
+		Collection<String> beanNames = Arrays.asList(ctx.getBeanNamesForType(Messenger.class));
 		assertTrue(beanNames.contains("messenger"));
 		assertTrue(beanNames.contains("messengerImpl"));
 		assertTrue(beanNames.contains("messengerInstance"));
@@ -262,7 +259,7 @@ public class BshScriptFactoryTests extends TestCase {
 		TestBeanAwareMessenger messengerByName = (TestBeanAwareMessenger) ctx.getBean("messengerByName");
 		assertEquals(testBean, messengerByName.getTestBean());
 
-		Collection beans = ctx.getBeansOfType(Messenger.class).values();
+		Collection<Messenger> beans = ctx.getBeansOfType(Messenger.class).values();
 		assertTrue(beans.contains(messenger));
 		assertTrue(beans.contains(messengerImpl));
 		assertTrue(beans.contains(messengerInstance));
@@ -312,6 +309,7 @@ public class BshScriptFactoryTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MyEvent extends ApplicationEvent {
 
 		public MyEvent(Object source) {

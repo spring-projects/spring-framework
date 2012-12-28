@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,15 +27,15 @@ import org.springframework.util.Assert;
 /**
  * Orders AspectJ advice/advisors by precedence (<i>not</i> invocation order).
  *
- * <p>Given two pieces of advice, <code>a</code> and <code>b</code>:
+ * <p>Given two pieces of advice, {@code a} and {@code b}:
  * <ul>
- *   <li>if <code>a</code> and <code>b</code> are defined in different
+ *   <li>if {@code a} and {@code b} are defined in different
  *   aspects, then the advice in the aspect with the lowest order
  *   value has the highest precedence</li>
- *   <li>if <code>a</code> and <code>b</code> are defined in the same
- *   aspect, then if one of <code>a</code> or <code>b</code> is a form of
+ *   <li>if {@code a} and {@code b} are defined in the same
+ *   aspect, then if one of {@code a} or {@code b} is a form of
  *   after advice, then the advice declared last in the aspect has the
- *   highest precedence. If neither <code>a</code> nor <code>b</code> is a
+ *   highest precedence. If neither {@code a} nor {@code b} is a
  *   form of after advice, then the advice declared first in the aspect has
  *   the highest precedence.</li>
  * </ul>
@@ -106,14 +106,14 @@ class AspectJPrecedenceComparator implements Comparator {
 		boolean oneOrOtherIsAfterAdvice =
 				(AspectJAopUtils.isAfterAdvice(advisor1) || AspectJAopUtils.isAfterAdvice(advisor2));
 		int adviceDeclarationOrderDelta = getAspectDeclarationOrder(advisor1) - getAspectDeclarationOrder(advisor2);
-		
+
 		if (oneOrOtherIsAfterAdvice) {
 			// the advice declared last has higher precedence
 			if (adviceDeclarationOrderDelta < 0) {
 				// advice1 was declared before advice2
 				// so advice1 has lower precedence
 				return LOWER_PRECEDENCE;
-			} 
+			}
 			else if (adviceDeclarationOrderDelta == 0) {
 				return SAME_PRECEDENCE;
 			}
@@ -153,7 +153,7 @@ class AspectJPrecedenceComparator implements Comparator {
 	}
 
 	private int getAspectDeclarationOrder(Advisor anAdvisor) {
-		AspectJPrecedenceInformation precedenceInfo = 
+		AspectJPrecedenceInformation precedenceInfo =
 			AspectJAopUtils.getAspectJPrecedenceInformationFor(anAdvisor);
 		if (precedenceInfo != null) {
 			return precedenceInfo.getDeclarationOrder();

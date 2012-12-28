@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class PreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change */
 	private final String sql;
 
-	/** List of SqlParameter objects. May not be <code>null</code>. */
+	/** List of SqlParameter objects. May not be {@code null}. */
 	private final List<SqlParameter> declaredParameters;
 
 	private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
@@ -144,7 +144,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params list of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be {@code null})
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(List params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
@@ -152,7 +152,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementSetter for the given parameters.
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	public PreparedStatementSetter newPreparedStatementSetter(Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
@@ -160,7 +160,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params list of parameters (may be <code>null</code>)
+	 * @param params list of parameters (may be {@code null})
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
@@ -168,7 +168,7 @@ public class PreparedStatementCreatorFactory {
 
 	/**
 	 * Return a new PreparedStatementCreator for the given parameters.
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(Object[] params) {
 		return new PreparedStatementCreatorImpl(params != null ? Arrays.asList(params) : Collections.emptyList());
@@ -178,7 +178,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementCreator for the given parameters.
 	 * @param sqlToUse the actual SQL statement to use (if different from
 	 * the factory's, for example because of named parameter expanding)
-	 * @param params the parameter array (may be <code>null</code>)
+	 * @param params the parameter array (may be {@code null})
 	 */
 	public PreparedStatementCreator newPreparedStatementCreator(String sqlToUse, Object[] params) {
 		return new PreparedStatementCreatorImpl(

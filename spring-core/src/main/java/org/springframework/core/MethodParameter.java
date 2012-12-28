@@ -145,7 +145,7 @@ public class MethodParameter {
 	/**
 	 * Return the wrapped Method, if any.
 	 * <p>Note: Either Method or Constructor is available.
-	 * @return the Method, or <code>null</code> if none
+	 * @return the Method, or {@code null} if none
 	 */
 	public Method getMethod() {
 		return this.method;
@@ -154,7 +154,7 @@ public class MethodParameter {
 	/**
 	 * Return the wrapped Constructor, if any.
 	 * <p>Note: Either Method or Constructor is available.
-	 * @return the Constructor, or <code>null</code> if none
+	 * @return the Constructor, or {@code null} if none
 	 */
 	public Constructor getConstructor() {
 		return this.constructor;
@@ -200,7 +200,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the type of the method/constructor parameter.
-	 * @return the parameter type (never <code>null</code>)
+	 * @return the parameter type (never {@code null})
 	 */
 	public Class<?> getParameterType() {
 		if (this.parameterType == null) {
@@ -218,7 +218,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the generic type of the method/constructor parameter.
-	 * @return the parameter type (never <code>null</code>)
+	 * @return the parameter type (never {@code null})
 	 */
 	public Type getGenericParameterType() {
 		if (this.genericParameterType == null) {
@@ -267,7 +267,7 @@ public class MethodParameter {
 	/**
 	 * Return the method/constructor annotation of the given type, if available.
 	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or <code>null</code> if not found
+	 * @return the annotation object, or {@code null} if not found
 	 */
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 		return getAnnotatedElement().getAnnotation(annotationType);
@@ -293,7 +293,7 @@ public class MethodParameter {
 	/**
 	 * Return the parameter annotation of the given type, if available.
 	 * @param annotationType the annotation type to look for
-	 * @return the annotation object, or <code>null</code> if not found
+	 * @return the annotation object, or {@code null} if not found
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getParameterAnnotation(Class<T> annotationType) {
@@ -332,7 +332,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the name of the method/constructor parameter.
-	 * @return the parameter name (may be <code>null</code> if no
+	 * @return the parameter name (may be {@code null} if no
 	 * parameter name metadata is contained in the class file or no
 	 * {@link #initParameterNameDiscovery ParameterNameDiscoverer}
 	 * has been set to begin with)
@@ -379,7 +379,7 @@ public class MethodParameter {
 	/**
 	 * Set the type index for the current nesting level.
 	 * @param typeIndex the corresponding type index
-	 * (or <code>null</code> for the default type index)
+	 * (or {@code null} for the default type index)
 	 * @see #getNestingLevel()
 	 */
 	public void setTypeIndexForCurrentLevel(int typeIndex) {
@@ -388,7 +388,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the type index for the current nesting level.
-	 * @return the corresponding type index, or <code>null</code>
+	 * @return the corresponding type index, or {@code null}
 	 * if none specified (indicating the default type index)
 	 * @see #getNestingLevel()
 	 */
@@ -399,7 +399,7 @@ public class MethodParameter {
 	/**
 	 * Return the type index for the specified nesting level.
 	 * @param nestingLevel the nesting level to check
-	 * @return the corresponding type index, or <code>null</code>
+	 * @return the corresponding type index, or {@code null}
 	 * if none specified (indicating the default type index)
 	 */
 	public Integer getTypeIndexForLevel(int nestingLevel) {

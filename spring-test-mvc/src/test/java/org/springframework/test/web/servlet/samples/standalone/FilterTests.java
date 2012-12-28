@@ -151,6 +151,7 @@ public class FilterTests {
 				@Override
 				public Principal getUserPrincipal() {
 					return new Principal() {
+						@Override
 						public String getName() {
 							return PRINCIPAL_NAME;
 						}

@@ -153,10 +153,10 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Close this application context, releasing all resources and locks that the
 	 * implementation might hold. This includes destroying all cached singleton beans.
-	 * <p>Note: Does <i>not</i> invoke <code>close</code> on a parent context;
+	 * <p>Note: Does <i>not</i> invoke {@code close} on a parent context;
 	 * parent contexts have their own, independent lifecycle.
 	 * <p>This method can be called multiple times without side effects: Subsequent
-	 * <code>close</code> calls on an already closed context will be ignored.
+	 * {@code close} calls on an already closed context will be ignored.
 	 */
 	void close();
 

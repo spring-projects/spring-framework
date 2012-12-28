@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public abstract class AbstractTransactionalJUnit38SpringContextTests extends Abs
 
 	/**
 	 * Constructs a new AbstractTransactionalJUnit38SpringContextTests instance
-	 * with the supplied <code>name</code>.
+	 * with the supplied {@code name}.
 	 * @param name the name of the current test to execute
 	 */
 	public AbstractTransactionalJUnit38SpringContextTests(String name) {
@@ -145,7 +145,7 @@ public abstract class AbstractTransactionalJUnit38SpringContextTests extends Abs
 	 * @param continueOnError whether or not to continue without throwing an
 	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was <code>false</code>
+	 * and continueOnError was {@code false}
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError)
 			throws DataAccessException {

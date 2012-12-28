@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ public interface SessionAwareMessageListener<M extends Message> {
 	 * Callback for processing a received JMS message.
 	 * <p>Implementors are supposed to process the given Message,
 	 * typically sending reply messages through the given Session.
-	 * @param message the received JMS message (never <code>null</code>)
-	 * @param session the underlying JMS Session (never <code>null</code>)
+	 * @param message the received JMS message (never {@code null})
+	 * @param session the underlying JMS Session (never {@code null})
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	void onMessage(M message, Session session) throws JMSException;

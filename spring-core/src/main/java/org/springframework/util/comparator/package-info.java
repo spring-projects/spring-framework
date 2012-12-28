@@ -1,7 +1,6 @@
-
 /**
  *
- * Useful generic <code>java.util.Comparator</code> implementations,
+ * Useful generic {@code java.util.Comparator} implementations,
  * such as an invertible comparator and a compound comparator.
  *
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package org.springframework.core.enums;
  *
  * <p>Should almost always be subclassed, but for some simple situations it may be
  * used directly. Note that you will not be able to use unique type-based functionality
- * like <code>LabeledEnumResolver.getLabeledEnumSet(type)</code> in this case.
+ * like {@code LabeledEnumResolver.getLabeledEnumSet(type)} in this case.
  *
  * @author Keith Donald
  * @since 1.2.2
@@ -29,6 +29,8 @@ package org.springframework.core.enums;
  */
 @Deprecated
 public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The unique code of this enum.
@@ -39,14 +41,14 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	/**
 	 * Create a new ShortCodedLabeledEnum instance.
 	 * @param code the short code
-	 * @param label the label (can be <code>null</code>)
+	 * @param label the label (can be {@code null})
 	 */
 	public ShortCodedLabeledEnum(int code, String label) {
 		super(label);
 		this.code = new Short((short) code);
 	}
 
-	
+
 	public Comparable getCode() {
 		return code;
 	}

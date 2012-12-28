@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 	private TransactionInterceptor ti;
 
 
+	@Override
 	public void setUp() {
 		this.ptm = new CallCountingTransactionManager();
 		this.source = new AnnotationTransactionAttributeSource();
@@ -319,11 +320,13 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 
 	public static class TestWithInterfaceImpl implements TestWithInterface {
 
+		@Override
 		public void doSomething() {
 			assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 			assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		}
 
+		@Override
 		public void doSomethingElse() {
 			assertTrue(TransactionSynchronizationManager.isActualTransactionActive());
 			assertTrue(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
@@ -345,13 +348,16 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 
 	public static class SomeServiceImpl implements SomeService {
 
+		@Override
 		public void bar() {
 		}
 
+		@Override
 		@Transactional
 		public void foo() {
 		}
 
+		@Override
 		@Transactional(readOnly = false)
 		public void fooBar() {
 		}
@@ -367,6 +373,7 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 	@Transactional
 	public static class OtherServiceImpl implements OtherService {
 
+		@Override
 		public void foo() {
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,23 @@ import javax.transaction.xa.XAResource;
  */
 public class StubResourceAdapter implements ResourceAdapter {
 
+	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
 	}
 
+	@Override
 	public void stop() {
 	}
 
+	@Override
 	public void endpointActivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) throws ResourceException {
 	}
 
+	@Override
 	public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
 	}
 
+	@Override
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
 	}

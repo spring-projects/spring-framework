@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.core.Ordered;
 /**
  * Annotation that defines ordering. The value is optional, and represents order value
  * as defined in the {@link Ordered} interface. Lower values have higher priority.
- * The default value is <code>Ordered.LOWEST_PRECEDENCE</code>, indicating
+ * The default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
  * lowest priority (losing to any other specified order value).
  *
  * <p><b>NOTE:</b> Annotation-based ordering is supported for specific kinds of

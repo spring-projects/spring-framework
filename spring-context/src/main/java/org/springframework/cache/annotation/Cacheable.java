@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public @interface Cacheable {
 	String key() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching. 
+	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
 	 * <p>Default is "", meaning the method is always cached.
 	 */
 	String condition() default "";

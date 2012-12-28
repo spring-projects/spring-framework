@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.sql.Statement;
 /**
  * Interface for extracting native JDBC objects from wrapped objects coming from
  * connection pools. This is necessary to allow for casting to native implementations
- * like <code>OracleConnection</code> or <code>OracleResultSet</code> in application
+ * like {@code OracleConnection} or {@code OracleResultSet} in application
  * code, for example to create Blobs or to access vendor-specific features.
  *
- * <p>Note: Setting a custom <code>NativeJdbcExtractor</code> is just necessary
+ * <p>Note: Setting a custom {@code NativeJdbcExtractor} is just necessary
  * if you intend to cast to database-specific implementations like
- * <code>OracleConnection</code> or <code>OracleResultSet</code>.
+ * {@code OracleConnection} or {@code OracleResultSet}.
  * Otherwise, any wrapped JDBC object will be fine, with no need for unwrapping.
  *
  * <p>Note: To be able to support any pool's strategy of native ResultSet wrapping,
@@ -43,18 +43,18 @@ import java.sql.Statement;
  * <p>When working with a simple connection pool that wraps Connections but not
  * Statements, a {@link SimpleNativeJdbcExtractor} is often sufficient. However,
  * some pools (like Jakarta's Commons DBCP) wrap <i>all</i> JDBC objects that they
- * return: Therefore, you need to use a specific <code>NativeJdbcExtractor</code>
+ * return: Therefore, you need to use a specific {@code NativeJdbcExtractor}
  * (like {@link CommonsDbcpNativeJdbcExtractor}) with them.
  *
  * <p>{@link org.springframework.jdbc.core.JdbcTemplate} can properly apply a
- * <code>NativeJdbcExtractor</code> if specified, unwrapping all JDBC objects
+ * {@code NativeJdbcExtractor} if specified, unwrapping all JDBC objects
  * that it creates. Note that this is just necessary if you intend to cast to
  * native implementations in your data access code.
  *
  * <p>{@link org.springframework.jdbc.support.lob.OracleLobHandler},
  * the Oracle-specific implementation of Spring's
  * {@link org.springframework.jdbc.support.lob.LobHandler} interface, requires a
- * <code>NativeJdbcExtractor</code> for obtaining the native <code>OracleConnection</code>.
+ * {@code NativeJdbcExtractor} for obtaining the native {@code OracleConnection}.
  * This is also necessary for other Oracle-specific features that you may want
  * to leverage in your applications, such as Oracle InterMedia.
  *
@@ -112,10 +112,10 @@ public interface NativeJdbcExtractor {
 
 	/**
 	 * Retrieve the underlying native JDBC Connection for the given Statement.
-	 * Supposed to return the <code>Statement.getConnection()</code> if not
+	 * Supposed to return the {@code Statement.getConnection()} if not
 	 * capable of unwrapping.
 	 * <p>Having this extra method allows for more efficient unwrapping if data
-	 * access code already has a Statement. <code>Statement.getConnection()</code>
+	 * access code already has a Statement. {@code Statement.getConnection()}
 	 * often returns the native JDBC Connection even if the Statement itself
 	 * is wrapped by a pool.
 	 * @param stmt the Statement handle, potentially wrapped by a connection pool

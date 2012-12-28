@@ -51,7 +51,7 @@ import org.springframework.util.comparator.CompoundComparator;
 public class MediaType implements Comparable<MediaType> {
 
 	/**
-	 * Public constant media type that includes all media ranges (i.e. <code>&#42;/&#42;</code>).
+	 * Public constant media type that includes all media ranges (i.e. {@code &#42;/&#42;}).
 	 */
 	public static final MediaType ALL;
 
@@ -260,7 +260,7 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Create a new {@code MediaType} for the given primary type.
-	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>&#42;</code>, parameters empty.
+	 * <p>The {@linkplain #getSubtype() subtype} is set to {@code &#42;}, parameters empty.
 	 * @param type the primary type
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
@@ -306,7 +306,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Copy-constructor that copies the type and subtype of the given {@code MediaType},
 	 * and allows for different parameter.
 	 * @param other the other media type
-	 * @param parameters the parameters, may be <code>null</code>
+	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(MediaType other, Map<String, String> parameters) {
@@ -317,7 +317,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * Create a new {@code MediaType} for the given type, subtype, and parameters.
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @param parameters the parameters, may be <code>null</code>
+	 * @param parameters the parameters, may be {@code null}
 	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
 	 */
 	public MediaType(String type, String subtype, Map<String, String> parameters) {
@@ -399,7 +399,7 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getType() type} is the wildcard character <code>&#42;</code> or not.
+	 * Indicates whether the {@linkplain #getType() type} is the wildcard character {@code &#42;} or not.
 	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(type);
@@ -413,9 +413,9 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character <code>&#42;</code>
-	 * or the wildcard character followed by a sufiix (e.g. <code>&#42;+xml</code>), or not.
-	 * @return whether the subtype is <code>&#42;</code>
+	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character {@code &#42;}
+	 * or the wildcard character followed by a sufiix (e.g. {@code &#42;+xml}), or not.
+	 * @return whether the subtype is {@code &#42;}
 	 */
 	public boolean isWildcardSubtype() {
 		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
@@ -423,7 +423,7 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Indicates whether this media type is concrete, i.e. whether neither the type or subtype is a wildcard
-	 * character <code>&#42;</code>.
+	 * character {@code &#42;}.
 	 * @return whether this media type is concrete
 	 */
 	public boolean isConcrete() {
@@ -431,8 +431,8 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Return the character set, as indicated by a <code>charset</code> parameter, if any.
-	 * @return the character set; or <code>null</code> if not available
+	 * Return the character set, as indicated by a {@code charset} parameter, if any.
+	 * @return the character set; or {@code null} if not available
 	 */
 	public Charset getCharSet() {
 		String charSet = getParameter(PARAM_CHARSET);
@@ -440,8 +440,8 @@ public class MediaType implements Comparable<MediaType> {
 	}
 
 	/**
-	 * Return the quality value, as indicated by a <code>q</code> parameter, if any.
-	 * Defaults to <code>1.0</code>.
+	 * Return the quality value, as indicated by a {@code q} parameter, if any.
+	 * Defaults to {@code 1.0}.
 	 * @return the quality factory
 	 */
 	public double getQualityValue() {
@@ -452,7 +452,7 @@ public class MediaType implements Comparable<MediaType> {
 	/**
 	 * Return a generic parameter value, given a parameter name.
 	 * @param name the parameter name
-	 * @return the parameter value; or <code>null</code> if not present
+	 * @return the parameter value; or {@code null} if not present
 	 */
 	public String getParameter(String name) {
 		return this.parameters.get(name);
@@ -460,10 +460,10 @@ public class MediaType implements Comparable<MediaType> {
 
 	/**
 	 * Return all generic parameter values.
-	 * @return a read-only map, possibly empty, never <code>null</code>
+	 * @return a read-only map, possibly empty, never {@code null}
 	 */
 	public Map<String, String> getParameters() {
-	        return parameters;
+			return parameters;
 	}
 
 	/**
@@ -471,7 +471,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * <p>For instance, {@code text/*} includes {@code text/plain} and {@code text/html}, and {@code application/*+xml}
 	 * includes {@code application/soap+xml}, etc. This method is <b>not</b> symmetric.
 	 * @param other the reference media type with which to compare
-	 * @return <code>true</code> if this media type includes the given media type; <code>false</code> otherwise
+	 * @return {@code true} if this media type includes the given media type; {@code false} otherwise
 	 */
 	public boolean includes(MediaType other) {
 		if (other == null) {
@@ -513,7 +513,7 @@ public class MediaType implements Comparable<MediaType> {
 	 * <p>For instance, {@code text/*} is compatible with {@code text/plain}, {@code text/html}, and vice versa.
 	 * In effect, this method is similar to {@link #includes(MediaType)}, except that it <b>is</b> symmetric.
 	 * @param other the reference media type with which to compare
-	 * @return <code>true</code> if this media type is compatible with the given media type; <code>false</code> otherwise
+	 * @return {@code true} if this media type is compatible with the given media type; {@code false} otherwise
 	 */
 	public boolean isCompatibleWith(MediaType other) {
 		if (other == null) {

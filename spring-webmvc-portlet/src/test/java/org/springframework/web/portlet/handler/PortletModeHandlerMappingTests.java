@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,10 @@ import org.springframework.web.portlet.context.XmlPortletApplicationContext;
 public class PortletModeHandlerMappingTests extends TestCase {
 
 	public static final String CONF = "/org/springframework/web/portlet/handler/portletModeMapping.xml";
-	
-	private ConfigurablePortletApplicationContext pac; 
-	
+
+	private ConfigurablePortletApplicationContext pac;
+
+	@Override
 	public void setUp() throws Exception {
 		MockPortletContext portletContext = new MockPortletContext();
 		pac = new XmlPortletApplicationContext();
@@ -42,37 +43,37 @@ public class PortletModeHandlerMappingTests extends TestCase {
 		pac.setConfigLocations(new String[] {CONF});
 		pac.refresh();
 	}
-	
+
 	public void testPortletModeView() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.setPortletMode(PortletMode.VIEW);
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(pac.getBean("viewHandler"), handler);
 	}
 
 	public void testPortletModeEdit() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.setPortletMode(PortletMode.EDIT);
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(pac.getBean("editHandler"), handler);
 	}
-	
+
 	public void testPortletModeHelp() throws Exception {
 		HandlerMapping hm = (HandlerMapping)pac.getBean("handlerMapping");
-		
+
 		MockPortletRequest request = new MockPortletRequest();
 		request.setPortletMode(PortletMode.HELP);
-		
+
 		Object handler = hm.getHandler(request).getHandler();
 		assertEquals(pac.getBean("helpHandler"), handler);
 	}
-	
+
 	public void testDuplicateMappingAttempt() {
 		PortletModeHandlerMapping hm = (PortletModeHandlerMapping)pac.getBean("handlerMapping");
 		try {
@@ -83,5 +84,5 @@ public class PortletModeHandlerMappingTests extends TestCase {
 			// expected
 		}
 	}
-	
+
 }

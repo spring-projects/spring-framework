@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,13 +50,13 @@ final class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpR
 
 	private final HttpUriRequest httpRequest;
 
-    private final HttpContext httpContext;
+	private final HttpContext httpContext;
 
 
-    public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+	public HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
-        this.httpContext = httpContext;
+		this.httpContext = httpContext;
 	}
 
 

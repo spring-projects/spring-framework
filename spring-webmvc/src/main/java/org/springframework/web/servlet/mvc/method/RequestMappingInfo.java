@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
  * 	<li>{@link ProducesRequestCondition}
  * 	<li>{@code RequestCondition<?>} (optional, custom request condition)
  * </ol>
- * 
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -56,7 +56,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	private final ConsumesRequestCondition consumesCondition;
 
 	private final ProducesRequestCondition producesCondition;
-	
+
 	private final RequestConditionHolder customConditionHolder;
 
 	private int hash;
@@ -65,9 +65,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * Creates a new instance with the given request conditions.
 	 */
 	public RequestMappingInfo(PatternsRequestCondition patterns,
-							  RequestMethodsRequestCondition methods, 
+							  RequestMethodsRequestCondition methods,
 							  ParamsRequestCondition params,
-							  HeadersRequestCondition headers, 
+							  HeadersRequestCondition headers,
 							  ConsumesRequestCondition consumes,
 							  ProducesRequestCondition produces,
 							  RequestCondition<?> custom) {
@@ -89,7 +89,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Returns the URL patterns of this {@link RequestMappingInfo}; 
+	 * Returns the URL patterns of this {@link RequestMappingInfo};
 	 * or instance with 0 patterns, never {@code null}
 	 */
 	public PatternsRequestCondition getPatternsCondition() {
@@ -97,7 +97,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Returns the HTTP request methods of this {@link RequestMappingInfo}; 
+	 * Returns the HTTP request methods of this {@link RequestMappingInfo};
 	 * or instance with 0 request methods, never {@code null}
 	 */
 	public RequestMethodsRequestCondition getMethodsCondition() {
@@ -161,9 +161,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
-	 * Checks if all conditions in this request mapping info match the provided request and returns 
-	 * a potentially new request mapping info with conditions tailored to the current request. 
-	 * <p>For example the returned instance may contain the subset of URL patterns that match to 
+	 * Checks if all conditions in this request mapping info match the provided request and returns
+	 * a potentially new request mapping info with conditions tailored to the current request.
+	 * <p>For example the returned instance may contain the subset of URL patterns that match to
 	 * the current request, sorted with best matching patterns on top.
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
@@ -173,27 +173,27 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		HeadersRequestCondition headers = headersCondition.getMatchingCondition(request);
 		ConsumesRequestCondition consumes = consumesCondition.getMatchingCondition(request);
 		ProducesRequestCondition produces = producesCondition.getMatchingCondition(request);
-		
+
 		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
 			return null;
 		}
-		
+
 		PatternsRequestCondition patterns = patternsCondition.getMatchingCondition(request);
 		if (patterns == null) {
 			return null;
 		}
-		
+
 		RequestConditionHolder custom = customConditionHolder.getMatchingCondition(request);
 		if (custom == null) {
 			return null;
 		}
-		
+
 		return new RequestMappingInfo(patterns, methods, params, headers, consumes, produces, custom.getCondition());
 	}
-	
+
 	/**
-	 * Compares "this" info (i.e. the current instance) with another info in the context of a request. 
-	 * <p>Note: it is assumed both instances have been obtained via 
+	 * Compares "this" info (i.e. the current instance) with another info in the context of a request.
+	 * <p>Note: it is assumed both instances have been obtained via
 	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they have conditions with
 	 * content relevant to current request.
 	 */
@@ -241,7 +241,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 					this.paramsCondition.equals(other.paramsCondition) &&
 					this.headersCondition.equals(other.headersCondition) &&
 					this.consumesCondition.equals(other.consumesCondition) &&
-					this.producesCondition.equals(other.producesCondition) && 
+					this.producesCondition.equals(other.producesCondition) &&
 					this.customConditionHolder.equals(other.customConditionHolder));
 		}
 		return false;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 
 	/**
 	 * Builds a WebSphere JDBCConnectionSpec object for the current settings
-	 * and calls <code>WSDataSource.getConnection(JDBCConnectionSpec)</code>.
+	 * and calls {@code WSDataSource.getConnection(JDBCConnectionSpec)}.
 	 * @see #createConnectionSpec
 	 * @see com.ibm.websphere.rsadapter.WSDataSource#getConnection(com.ibm.websphere.rsadapter.JDBCConnectionSpec)
 	 */
@@ -144,15 +144,15 @@ public class WebSphereDataSourceAdapter extends IsolationLevelDataSourceAdapter 
 	}
 
 	/**
-	 * Create a WebSphere <code>JDBCConnectionSpec</code> object for the given charateristics.
+	 * Create a WebSphere {@code JDBCConnectionSpec} object for the given charateristics.
 	 * <p>The default implementation uses reflection to apply the given settings.
 	 * Can be overridden in subclasses to customize the JDBCConnectionSpec object
 	 * (<a href="http://publib.boulder.ibm.com/infocenter/wasinfo/v6r0/topic/com.ibm.websphere.javadoc.doc/public_html/api/com/ibm/websphere/rsadapter/JDBCConnectionSpec.html">JDBCConnectionSpec javadoc</a>;
 	 * <a href="http://www.ibm.com/developerworks/websphere/library/techarticles/0404_tang/0404_tang.html">IBM developerWorks article</a>).
-	 * @param isolationLevel the isolation level to apply (or <code>null</code> if none)
-	 * @param readOnlyFlag the read-only flag to apply (or <code>null</code> if none)
-	 * @param username the username to apply (<code>null</code> or empty indicates the default)
-	 * @param password the password to apply (may be <code>null</code> or empty)
+	 * @param isolationLevel the isolation level to apply (or {@code null} if none)
+	 * @param readOnlyFlag the read-only flag to apply (or {@code null} if none)
+	 * @param username the username to apply ({@code null} or empty indicates the default)
+	 * @param password the password to apply (may be {@code null} or empty)
 	 * @throws SQLException if thrown by JDBCConnectionSpec API methods
 	 * @see com.ibm.websphere.rsadapter.JDBCConnectionSpec
 	 */

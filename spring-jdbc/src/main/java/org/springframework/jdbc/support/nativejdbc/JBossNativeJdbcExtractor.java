@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * <p>Returns the underlying native Connection, Statement, etc to
  * application code instead of JBoss' wrapper implementations.
  * The returned JDBC classes can then safely be cast, e.g. to
- * <code>oracle.jdbc.OracleConnection</code>.
+ * {@code oracle.jdbc.OracleConnection}.
  *
  * <p>This NativeJdbcExtractor can be set just to <i>allow</i> working with
  * a JBoss connection pool: If a given object is not a JBoss wrapper,
@@ -94,11 +94,11 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 			this.wrappedStatementClass = getClass().getClassLoader().loadClass(prefix + "WrappedStatement");
 			this.wrappedResultSetClass = getClass().getClassLoader().loadClass(prefix + "WrappedResultSet");
 			this.getUnderlyingConnectionMethod =
-			    this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
+				this.wrappedConnectionClass.getMethod("getUnderlyingConnection", (Class[]) null);
 			this.getUnderlyingStatementMethod =
-			    this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
+				this.wrappedStatementClass.getMethod("getUnderlyingStatement", (Class[]) null);
 			this.getUnderlyingResultSetMethod =
-			    this.wrappedResultSetClass.getMethod("getUnderlyingResultSet", (Class[]) null);
+				this.wrappedResultSetClass.getMethod("getUnderlyingResultSet", (Class[]) null);
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
@@ -108,7 +108,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 
 	/**
-	 * Retrieve the Connection via JBoss' <code>getUnderlyingConnection</code> method.
+	 * Retrieve the Connection via JBoss' {@code getUnderlyingConnection} method.
 	 */
 	@Override
 	protected Connection doGetNativeConnection(Connection con) throws SQLException {
@@ -119,7 +119,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
+	 * Retrieve the Connection via JBoss' {@code getUnderlyingStatement} method.
 	 */
 	@Override
 	public Statement getNativeStatement(Statement stmt) throws SQLException {
@@ -130,7 +130,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
+	 * Retrieve the Connection via JBoss' {@code getUnderlyingStatement} method.
 	 */
 	@Override
 	public PreparedStatement getNativePreparedStatement(PreparedStatement ps) throws SQLException {
@@ -138,7 +138,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via JBoss' <code>getUnderlyingStatement</code> method.
+	 * Retrieve the Connection via JBoss' {@code getUnderlyingStatement} method.
 	 */
 	@Override
 	public CallableStatement getNativeCallableStatement(CallableStatement cs) throws SQLException {
@@ -146,7 +146,7 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 	}
 
 	/**
-	 * Retrieve the Connection via JBoss' <code>getUnderlyingResultSet</code> method.
+	 * Retrieve the Connection via JBoss' {@code getUnderlyingResultSet} method.
 	 */
 	@Override
 	public ResultSet getNativeResultSet(ResultSet rs) throws SQLException {
@@ -155,5 +155,5 @@ public class JBossNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 		}
 		return rs;
 	}
-	
+
 }

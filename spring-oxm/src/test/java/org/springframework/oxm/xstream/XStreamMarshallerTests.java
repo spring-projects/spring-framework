@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -216,7 +216,7 @@ public class XStreamMarshallerTests {
 		String expected = "<flight flightNumber=\"42\" />";
 		assertXMLEqual("Marshaller does not use attributes", expected, writer.toString());
 	}
-	
+
 	@Test
 	public void useAttributesForClassStringListMap() throws Exception {
 		marshaller
@@ -278,7 +278,7 @@ public class XStreamMarshallerTests {
 		Flights flights = new Flights();
 		flights.getFlights().add(flight);
 		flights.getStrings().add("42");
-		
+
 		Map<String, Class> aliases = new HashMap<String, Class>();
 		aliases.put("flight", Flight.class);
 		aliases.put("flights", Flights.class);

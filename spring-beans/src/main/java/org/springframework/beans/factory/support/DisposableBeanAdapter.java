@@ -94,7 +94,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	/**
 	 * Create a new DisposableBeanAdapter for the given bean.
-	 * @param bean the bean instance (never <code>null</code>)
+	 * @param bean the bean instance (never {@code null})
 	 * @param beanName the name of the bean
 	 * @param beanDefinition the merged bean definition
 	 * @param postProcessors the List of BeanPostProcessors

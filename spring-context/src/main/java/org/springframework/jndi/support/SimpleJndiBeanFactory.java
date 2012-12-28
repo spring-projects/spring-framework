@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.springframework.jndi.TypeMismatchNamingException;
  *
  * <p>The main intent of this factory is usage in combination with Spring's
  * {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor},
- * configured as "resourceFactory" for resolving <code>@Resource</code>
+ * configured as "resourceFactory" for resolving {@code @Resource}
  * annotations as JNDI objects without intermediate bean definitions.
  * It may be used for similar lookup scenarios as well, of course,
  * in particular if BeanFactory-style type checking is required.

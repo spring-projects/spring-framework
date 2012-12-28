@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class AssertTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void instanceOf() {
-		final Set set = new HashSet();
+		final Set<?> set = new HashSet<Object>();
 		Assert.isInstanceOf(HashSet.class, set);
 		Assert.isInstanceOf(HashMap.class, set);
 	}
@@ -105,12 +105,12 @@ public class AssertTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void assertNotEmptyWithNullCollectionThrowsException() throws Exception {
-		Assert.notEmpty((Collection) null);
+		Assert.notEmpty((Collection<?>) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void assertNotEmptyWithEmptyCollectionThrowsException() throws Exception {
-		Assert.notEmpty(new ArrayList());
+		Assert.notEmpty(new ArrayList<Object>());
 	}
 
 	@Test
@@ -122,12 +122,12 @@ public class AssertTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void assertNotEmptyWithNullMapThrowsException() throws Exception {
-		Assert.notEmpty((Map) null);
+		Assert.notEmpty((Map<?, ?>) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void assertNotEmptyWithEmptyMapThrowsException() throws Exception {
-		Assert.notEmpty(new HashMap());
+		Assert.notEmpty(new HashMap<Object, Object>());
 	}
 
 	@Test

@@ -255,34 +255,42 @@ public class TypeDescriptorTests {
 
 	public class IntegerType implements GenericType<Integer> {
 
+		@Override
 		public Integer getProperty() {
 			return null;
 		}
 
+		@Override
 		public void setProperty(Integer t) {
 		}
 
+		@Override
 		public List<Integer> getListProperty() {
 			return null;
 		}
 
+		@Override
 		public void setListProperty(List<Integer> t) {
 		}
 	}
 
 	public class NumberType implements GenericType<Number> {
 
+		@Override
 		public Integer getProperty() {
 			return null;
 		}
 
+		@Override
 		public void setProperty(Number t) {
 		}
 
+		@Override
 		public List<Number> getListProperty() {
 			return null;
 		}
 
+		@Override
 		public void setListProperty(List<Number> t) {
 		}
 	}

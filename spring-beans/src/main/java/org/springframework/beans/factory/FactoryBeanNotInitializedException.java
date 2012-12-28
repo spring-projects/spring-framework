@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.beans.FatalBeanException;
 
 /**
- * Exception to be thrown from a FactoryBean's <code>getObject()</code> method
+ * Exception to be thrown from a FactoryBean's {@code getObject()} method
  * if the bean is not fully initialized yet, for example because it is involved
  * in a circular reference.
  *
@@ -34,6 +34,7 @@ import org.springframework.beans.FatalBeanException;
  * @since 30.10.2003
  * @see FactoryBean#getObject()
  */
+@SuppressWarnings("serial")
 public class FactoryBeanNotInitializedException extends FatalBeanException {
 
 	/**

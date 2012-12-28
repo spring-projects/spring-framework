@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public abstract class DaoSupport implements InitializingBean {
 
 	/**
 	 * Abstract subclasses must override this to check their configuration.
-	 * <p>Implementors should be marked as <code>final</code if concrete subclasses
+	 * <p>Implementors should be marked as {@code final} if concrete subclasses
 	 * are not supposed to override this template method themselves.
 	 * @throws IllegalArgumentException in case of illegal configuration
 	 */

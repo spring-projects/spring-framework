@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * Default implementation of the {@link SqlXmlHandler} interface.
  * Provides database-specific implementations for storing and
  * retrieving XML documents to and from fields in a database,
- * relying on the JDBC 4.0 <code>java.sql.SQLXML</code> facility.
+ * relying on the JDBC 4.0 {@code java.sql.SQLXML} facility.
  *
  * @author Thomas Risberg
  * @author Juergen Hoeller

@@ -73,13 +73,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.StaxUtils;
 
 /**
- * Implementation of the <code>Marshaller</code> interface for XStream.
+ * Implementation of the {@code Marshaller} interface for XStream.
  *
  * <p>By default, XStream does not require any further configuration,
  * though class aliases can be used to have more control over the behavior of XStream.
  *
  * <p>Due to XStream's API, it is required to set the encoding used for writing to OutputStreams.
- * It defaults to <code>UTF-8</code>.
+ * It defaults to {@code UTF-8}.
  *
  * <p><b>NOTE:</b> XStream is an XML serialization library, not a data binding library.
  * Therefore, it has limited namespace support. As such, it is rather unsuitable for
@@ -129,8 +129,8 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Set the <code>Converters</code> or <code>SingleValueConverters</code> to be registered
-	 * with the <code>XStream</code> instance.
+	 * Set the {@code Converters} or {@code SingleValueConverters} to be registered
+	 * with the {@code XStream} instance.
 	 * @see Converter
 	 * @see SingleValueConverter
 	 */
@@ -278,7 +278,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Specify implicit collection fields, as a Map consisting of <code>Class</code> instances
+	 * Specify implicit collection fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated collection field names.
 	 *@see XStream#addImplicitCollection(Class, String)
 	 */
@@ -292,7 +292,7 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 	/**
-	 * Specify omitted fields, as a Map consisting of <code>Class</code> instances
+	 * Specify omitted fields, as a Map consisting of {@code Class} instances
 	 * mapped to comma separated field names.
 	 * @see XStream#omitField(Class, String)
 	 */
@@ -425,12 +425,12 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	@Override
 	protected void marshalOutputStream(Object graph, OutputStream outputStream) throws XmlMappingException, IOException {
-        if (this.streamDriver != null) {
-            marshal(graph, this.streamDriver.createWriter(outputStream));
-        }
-        else {
-		    marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
-        }
+		if (this.streamDriver != null) {
+			marshal(graph, this.streamDriver.createWriter(outputStream));
+		}
+		else {
+			marshalWriter(graph, new OutputStreamWriter(outputStream, this.encoding));
+		}
 	}
 
 	@Override
@@ -550,15 +550,15 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 
     /**
-	 * Convert the given XStream exception to an appropriate exception from the
-	 * <code>org.springframework.oxm</code> hierarchy.
-	 * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
-	 * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
-	 * @param ex XStream exception that occured
-	 * @param marshalling indicates whether the exception occurs during marshalling (<code>true</code>),
-	 * or unmarshalling (<code>false</code>)
-	 * @return the corresponding <code>XmlMappingException</code>
-	 */
+     * Convert the given XStream exception to an appropriate exception from the
+     * {@code org.springframework.oxm} hierarchy.
+     * <p>A boolean flag is used to indicate whether this exception occurs during marshalling or
+     * unmarshalling, since XStream itself does not make this distinction in its exception hierarchy.
+     * @param ex XStream exception that occured
+     * @param marshalling indicates whether the exception occurs during marshalling ({@code true}),
+     * or unmarshalling ({@code false})
+     * @return the corresponding {@code XmlMappingException}
+     */
 	protected XmlMappingException convertXStreamException(Exception ex, boolean marshalling) {
 		if (ex instanceof StreamException || ex instanceof CannotResolveClassException ||
 				ex instanceof ConversionException) {

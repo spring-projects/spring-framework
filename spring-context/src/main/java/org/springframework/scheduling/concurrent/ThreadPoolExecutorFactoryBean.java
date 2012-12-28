@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ExecutorService>, InitializingBean, DisposableBean {
 
@@ -78,7 +79,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the ThreadPoolExecutor's maximum pool size.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p><b>This setting can be modified at runtime, for example through JMX.</b>
 	 */
 	public void setMaxPoolSize(int maxPoolSize) {
@@ -109,7 +110,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 
 	/**
 	 * Set the capacity for the ThreadPoolExecutor's BlockingQueue.
-	 * Default is <code>Integer.MAX_VALUE</code>.
+	 * Default is {@code Integer.MAX_VALUE}.
 	 * <p>Any positive value will lead to a LinkedBlockingQueue instance;
 	 * any other value will lead to a SynchronousQueue instance.
 	 * @see java.util.concurrent.LinkedBlockingQueue

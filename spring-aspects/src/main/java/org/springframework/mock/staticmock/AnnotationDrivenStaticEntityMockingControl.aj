@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ package org.springframework.mock.staticmock;
 
 /**
  * Annotation-based aspect to use in test build to enable mocking static methods
- * on JPA-annotated <code>@Entity</code> classes, as used by Roo for finders.
+ * on JPA-annotated {@code @Entity} classes, as used by Roo for finders.
  *
- * <p>Mocking will occur in the call stack of any method in a class (typically a test class) 
- * that is annotated with the @MockStaticEntityMethods annotation. 
+ * <p>Mocking will occur in the call stack of any method in a class (typically a test class)
+ * that is annotated with the @MockStaticEntityMethods annotation.
  *
  * <p>Also provides static methods to simplify the programming model for
  * entering playback mode and setting expected return values.
  *
  * <p>Usage:
- * <ol> 
+ * <ol>
  * <li>Annotate a test class with @MockStaticEntityMethods.
  * <li>In each test method, AnnotationDrivenStaticEntityMockingControl will begin in recording mode.
  * Invoke static methods on Entity classes, with each recording-mode invocation
@@ -37,20 +37,20 @@ package org.springframework.mock.staticmock;
  * <li>Call the code you wish to test that uses the static methods. Verification will
  * occur automatically.
  * </ol>
- * 
+ *
  * @author Rod Johnson
  * @author Ramnivas Laddad
  * @see MockStaticEntityMethods
  */
 public aspect AnnotationDrivenStaticEntityMockingControl extends AbstractMethodMockingControl {
-	
+
 	/**
 	 * Stop recording mock calls and enter playback state
 	 */
 	public static void playback() {
 		AnnotationDrivenStaticEntityMockingControl.aspectOf().playbackInternal();
 	}
-	
+
 	public static void expectReturn(Object retVal) {
 		AnnotationDrivenStaticEntityMockingControl.aspectOf().expectReturnInternal(retVal);
 	}

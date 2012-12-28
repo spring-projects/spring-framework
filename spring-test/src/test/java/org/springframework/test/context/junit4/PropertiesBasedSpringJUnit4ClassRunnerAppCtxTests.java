@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ import org.springframework.test.context.support.GenericPropertiesContextLoader;
  * defined, the {@link ContextConfiguration#resourceSuffix() resourceSuffix} is
  * set to &quot;-context.properties&quot;, and
  * {@link ContextConfiguration#generateDefaultLocations() generateDefaultLocations}
- * is left set to its default value of <code>true</code>, this test class's
+ * is left set to its default value of {@code true}, this test class's
  * dependencies will be injected via
  * {@link Autowired annotation-based autowiring} from beans defined in the
- * {@link ApplicationContext} loaded from the default classpath resource: &quot;<code>/org/springframework/test/junit4/PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests-context.properties</code>&quot;.
+ * {@link ApplicationContext} loaded from the default classpath resource: &quot;{@code /org/springframework/test/junit4/PropertiesBasedSpringJUnit4ClassRunnerAppCtxTests-context.properties}&quot;.
  * </p>
  *
  * @author Sam Brannen

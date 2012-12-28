@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 
 /**
- * Data-binding-aware JSP tag for rendering an HTML '<code>input</code>'
- * element with a '<code>type</code>' of '<code>text</code>'.
- * 
+ * Data-binding-aware JSP tag for rendering an HTML '{@code input}'
+ * element with a '{@code type}' of '{@code text}'.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
@@ -55,7 +55,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Set the value of the '<code>size</code>' attribute.
+	 * Set the value of the '{@code size}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setSize(String size) {
@@ -63,14 +63,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>size</code>' attribute.
+	 * Get the value of the '{@code size}' attribute.
 	 */
 	protected String getSize() {
 		return this.size;
 	}
 
 	/**
-	 * Set the value of the '<code>maxlength</code>' attribute.
+	 * Set the value of the '{@code maxlength}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setMaxlength(String maxlength) {
@@ -78,14 +78,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>maxlength</code>' attribute.
+	 * Get the value of the '{@code maxlength}' attribute.
 	 */
 	protected String getMaxlength() {
 		return this.maxlength;
 	}
 
 	/**
-	 * Set the value of the '<code>alt</code>' attribute.
+	 * Set the value of the '{@code alt}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAlt(String alt) {
@@ -93,14 +93,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>alt</code>' attribute.
+	 * Get the value of the '{@code alt}' attribute.
 	 */
 	protected String getAlt() {
 		return this.alt;
 	}
 
 	/**
-	 * Set the value of the '<code>onselect</code>' attribute.
+	 * Set the value of the '{@code onselect}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setOnselect(String onselect) {
@@ -108,14 +108,14 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>onselect</code>' attribute.
+	 * Get the value of the '{@code onselect}' attribute.
 	 */
 	protected String getOnselect() {
 		return this.onselect;
 	}
 
 	/**
-	 * Set the value of the '<code>autocomplete</code>' attribute.
+	 * Set the value of the '{@code autocomplete}' attribute.
 	 * May be a runtime expression.
 	 */
 	public void setAutocomplete(String autocomplete) {
@@ -123,7 +123,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>autocomplete</code>' attribute.
+	 * Get the value of the '{@code autocomplete}' attribute.
 	 */
 	protected String getAutocomplete() {
 		return this.autocomplete;
@@ -131,9 +131,9 @@ public class InputTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Writes the '<code>input</code>' tag to the supplied {@link TagWriter}.
+	 * Writes the '{@code input}' tag to the supplied {@link TagWriter}.
 	 * Uses the value returned by {@link #getType()} to determine which
-	 * type of '<code>input</code>' element to render.
+	 * type of '{@code input}' element to render.
 	 */
 	@Override
 	protected int writeTagContent(TagWriter tagWriter) throws JspException {
@@ -161,7 +161,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Writes the '<code>value</code>' attribute to the supplied {@link TagWriter}.
+	 * Writes the '{@code value}' attribute to the supplied {@link TagWriter}.
 	 * Subclasses may choose to override this implementation to control exactly
 	 * when the value is written.
 	 */
@@ -172,7 +172,7 @@ public class InputTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal 
+	 * Flags {@code type="checkbox"} and {@code type="radio"} as illegal
 	 * dynamic attributes.
 	 */
 	@Override
@@ -184,11 +184,11 @@ public class InputTag extends AbstractHtmlInputElementTag {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Get the value of the '<code>type</code>' attribute. Subclasses
-	 * can override this to change the type of '<code>input</code>' element
-	 * rendered. Default value is '<code>text</code>'.
+	 * Get the value of the '{@code type}' attribute. Subclasses
+	 * can override this to change the type of '{@code input}' element
+	 * rendered. Default value is '{@code text}'.
 	 */
 	protected String getType() {
 		return "text";

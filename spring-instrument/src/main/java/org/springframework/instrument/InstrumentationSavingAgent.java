@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,8 @@ public class InstrumentationSavingAgent {
 	 * conditional checking with respect to agent availability, consider using
 	 * {@link org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver#getInstrumentation()}
 	 * instead - which will work without the agent class in the classpath as well.
-	 * @return the <code>Instrumentation</code> instance previously saved when
-	 * the {@link #premain} method was called by the JVM; will be <code>null</code>
+	 * @return the {@code Instrumentation} instance previously saved when
+	 * the {@link #premain} method was called by the JVM; will be {@code null}
 	 * if this class was not used as Java agent when this JVM was started.
 	 * @see org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver#getInstrumentation()
 	 */

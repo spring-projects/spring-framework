@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
  * Test fixture for {@link ExceptionHandlerMethodResolver} tests.
- * 
+ *
  * @author Rossen Stoyanchev
  */
 public class ExceptionHandlerMethodResolverTests {
@@ -83,7 +83,7 @@ public class ExceptionHandlerMethodResolverTests {
 		IOException exception = new IOException();
 		assertEquals("handleIOException", resolver.resolveMethod(exception).getName());
 	}
-	
+
 	@Test(expected = IllegalStateException.class)
 	public void ambiguousExceptionMapping() {
 		new ExceptionHandlerMethodResolver(AmbiguousController.class);
@@ -96,7 +96,7 @@ public class ExceptionHandlerMethodResolverTests {
 
 	@Controller
 	static class ExceptionController {
-		
+
 		public void handle() {}
 
 		@ExceptionHandler(IOException.class)
@@ -139,10 +139,10 @@ public class ExceptionHandlerMethodResolverTests {
 
 	@Controller
 	static class NoExceptionController {
-		
+
 		@ExceptionHandler
 		public void handle() {
 		}
 	}
-	
+
 }

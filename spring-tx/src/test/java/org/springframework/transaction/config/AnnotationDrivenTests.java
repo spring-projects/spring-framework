@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,10 @@ public class AnnotationDrivenTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TransactionCheckingInterceptor implements MethodInterceptor, Serializable {
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			if (methodInvocation.getMethod().getName().equals("setSomething")) {
 				assertTrue(TransactionSynchronizationManager.isActualTransactionActive());

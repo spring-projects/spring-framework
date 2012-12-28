@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 /**
  * An adapter for a target {@link javax.sql.DataSource}, applying the current
  * Spring transaction's isolation level (and potentially specified user credentials)
- * to every <code>getConnection</code> call. Also applies the read-only flag,
+ * to every {@code getConnection} call. Also applies the read-only flag,
  * if specified.
  *
  * <p>Can be used to proxy a target JNDI DataSource that does not have the
@@ -109,7 +109,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 
 	/**
 	 * Return the statically specified isolation level,
-	 * or <code>null</code> if none.
+	 * or {@code null} if none.
 	 */
 	protected Integer getIsolationLevel() {
 		return this.isolationLevel;
@@ -139,7 +139,7 @@ public class IsolationLevelDataSourceAdapter extends UserCredentialsDataSourceAd
 	/**
 	 * Determine the current isolation level: either the transaction's
 	 * isolation level or a statically defined isolation level.
-	 * @return the current isolation level, or <code>null</code> if none
+	 * @return the current isolation level, or {@code null} if none
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager#getCurrentTransactionIsolationLevel()
 	 * @see #setIsolationLevel
 	 */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public class JdoTransactionManagerTests extends TestCase {
 	private Transaction tx;
 
 
+	@Override
 	protected void setUp() {
 		pmfControl = MockControl.createControl(PersistenceManagerFactory.class);
 		pmf = (PersistenceManagerFactory) pmfControl.getMock();
@@ -78,6 +79,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		pmfControl.setReturnValue(null, 1);
 	}
 
+	@Override
 	protected void tearDown() {
 		try {
 			pmfControl.verify();
@@ -123,6 +125,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 
@@ -149,6 +152,7 @@ public class JdoTransactionManagerTests extends TestCase {
 
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						pm2.flush();
 						return l;
@@ -188,10 +192,12 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 					JdoTemplate jt = new JdoTemplate(pmf);
 					return jt.execute(new JdoCallback() {
+						@Override
 						public Object doInJdo(PersistenceManager pm) {
 							throw new RuntimeException("application exception");
 						}
@@ -232,10 +238,12 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 					JdoTemplate jt = new JdoTemplate(pmf);
 					return jt.execute(new JdoCallback() {
+						@Override
 						public Object doInJdo(PersistenceManager pm) {
 							throw new RuntimeException("application exception");
 						}
@@ -278,10 +286,12 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						pm2.flush();
 						return null;
@@ -318,6 +328,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		l.add("test");
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.reset();
 				tx.isActive();
@@ -329,9 +340,11 @@ public class JdoTransactionManagerTests extends TestCase {
 				txControl.replay();
 
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
+							@Override
 							public Object doInJdo(PersistenceManager pm2) {
 								pm2.flush();
 								return l;
@@ -365,6 +378,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		final TransactionTemplate tt = new TransactionTemplate(tm);
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
@@ -376,9 +390,11 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							JdoTemplate jt = new JdoTemplate(pmf);
 							return jt.execute(new JdoCallback() {
+								@Override
 								public Object doInJdo(PersistenceManager pm) {
 									throw new RuntimeException("application exception");
 								}
@@ -418,6 +434,7 @@ public class JdoTransactionManagerTests extends TestCase {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					txControl.reset();
 					tx.isActive();
@@ -433,9 +450,11 @@ public class JdoTransactionManagerTests extends TestCase {
 					txControl.replay();
 
 					return tt.execute(new TransactionCallback() {
+						@Override
 						public Object doInTransaction(TransactionStatus status) {
 							JdoTemplate jt = new JdoTemplate(pmf);
 							jt.execute(new JdoCallback() {
+								@Override
 								public Object doInJdo(PersistenceManager pm2) {
 									pm2.flush();
 									return l;
@@ -478,6 +497,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		l.add("test");
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.verify();
 				txControl.reset();
@@ -492,9 +512,11 @@ public class JdoTransactionManagerTests extends TestCase {
 				txControl.replay();
 
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
+							@Override
 							public Object doInJdo(PersistenceManager pm2) {
 								pm2.flush();
 								return l;
@@ -534,6 +556,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				txControl.verify();
 				txControl.reset();
@@ -549,15 +572,18 @@ public class JdoTransactionManagerTests extends TestCase {
 
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						return null;
 					}
 				});
 
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
+							@Override
 							public Object doInJdo(PersistenceManager pm2) {
 								pm2.flush();
 								return l;
@@ -604,11 +630,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("JTA synchronizations active", TransactionSynchronizationManager.isSynchronizationActive());
 				assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 						pm2.flush();
@@ -616,6 +644,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					}
 				});
 				Object result = jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 						pm2.flush();
@@ -667,6 +696,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				try {
 					utControl.verify();
@@ -692,15 +722,18 @@ public class JdoTransactionManagerTests extends TestCase {
 
 				JdoTemplate jt = new JdoTemplate(pmf);
 				jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						return null;
 					}
 				});
 
 				return tt.execute(new TransactionCallback() {
+					@Override
 					public Object doInTransaction(TransactionStatus status) {
 						JdoTemplate jt = new JdoTemplate(pmf);
 						return jt.execute(new JdoCallback() {
+							@Override
 							public Object doInJdo(PersistenceManager pm2) {
 								pm2.flush();
 								return l;
@@ -737,11 +770,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 				assertTrue("Is not new transaction", !status.isNewTransaction());
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm) {
 						return l;
 					}
@@ -770,6 +805,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		tt.setIsolationLevel(TransactionDefinition.ISOLATION_SERIALIZABLE);
 		try {
 			tt.execute(new TransactionCallbackWithoutResult() {
+				@Override
 				protected void doInTransactionWithoutResult(TransactionStatus status) {
 				}
 			});
@@ -806,10 +842,12 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm) {
 						return l;
 					}
@@ -868,11 +906,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				assertTrue("Has thread con", TransactionSynchronizationManager.hasResource(ds));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm) {
 						return l;
 					}
@@ -938,11 +978,13 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				assertTrue("Has thread con", TransactionSynchronizationManager.hasResource(ds));
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm) {
 						return l;
 					}
@@ -1004,6 +1046,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				assertTrue("Hasn't thread con", !TransactionSynchronizationManager.hasResource(ds));
@@ -1011,6 +1054,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				jt.setPersistenceManagerFactory(pmf);
 				jt.setJdoDialect(dialect);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						pm2.flush();
 						return l;
@@ -1104,6 +1148,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("Hasn't thread pm", !TransactionSynchronizationManager.hasResource(pmf));
 
 		Object result = tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				assertTrue("Has thread con", TransactionSynchronizationManager.hasResource(ds));
@@ -1113,6 +1158,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				}
 				else {
 					tt.execute(new TransactionCallbackWithoutResult() {
+						@Override
 						protected void doInTransactionWithoutResult(TransactionStatus status) {
 							assertTrue("Has thread session", TransactionSynchronizationManager.hasResource(pmf));
 							assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(ds));
@@ -1122,6 +1168,7 @@ public class JdoTransactionManagerTests extends TestCase {
 				}
 				JdoTemplate jt = new JdoTemplate(pmf);
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						pm2.flush();
 						return l;
@@ -1193,6 +1240,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallback() {
+			@Override
 			public Object doInTransaction(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				JdoTemplate jt = new JdoTemplate(pmf);
@@ -1201,6 +1249,7 @@ public class JdoTransactionManagerTests extends TestCase {
 					jt.setExposeNativePersistenceManager(true);
 				}
 				return jt.execute(new JdoCallback() {
+					@Override
 					public Object doInJdo(PersistenceManager pm2) {
 						if (exposeNativePm) {
 							assertSame(pm, pm2);
@@ -1249,6 +1298,7 @@ public class JdoTransactionManagerTests extends TestCase {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			public void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread pm", TransactionSynchronizationManager.hasResource(pmf));
 				status.flush();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,6 +153,7 @@ abstract class AutowireUtils {
 	/**
 	 * Reflective InvocationHandler for lazy access to the current target object.
 	 */
+	@SuppressWarnings("serial")
 	private static class ObjectFactoryDelegatingInvocationHandler implements InvocationHandler, Serializable {
 
 		private final ObjectFactory objectFactory;

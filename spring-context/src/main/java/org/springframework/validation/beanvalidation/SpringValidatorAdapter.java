@@ -37,7 +37,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.validation.SmartValidator;
 
 /**
- * Adapter that takes a JSR-303 <code>javax.validator.Validator</code>
+ * Adapter that takes a JSR-303 {@code javax.validator.Validator}
  * and exposes it as a Spring {@link org.springframework.validation.Validator}
  * while also exposing the original JSR-303 Validator interface itself.
  *

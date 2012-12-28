@@ -22,6 +22,6 @@ public interface RequestBuilder {
 	 * @param servletContext the {@link ServletContext} to use to create the request
 	 * @return the request
 	 */
-    MockHttpServletRequest buildRequest(ServletContext servletContext);
+	MockHttpServletRequest buildRequest(ServletContext servletContext);
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,9 +63,10 @@ public class MapAccessor implements PropertyAccessor {
 
 
 	/**
-	 * Exception thrown from <code>read</code> in order to reset a cached
+	 * Exception thrown from {@code read} in order to reset a cached
 	 * PropertyAccessor, allowing other accessors to have a try.
 	 */
+	@SuppressWarnings("serial")
 	private static class MapAccessException extends AccessException {
 
 		private final String key;

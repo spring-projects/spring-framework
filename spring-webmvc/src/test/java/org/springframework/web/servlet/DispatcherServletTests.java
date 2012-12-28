@@ -81,6 +81,7 @@ public class DispatcherServletTests extends TestCase {
 
 	private DispatcherServlet complexDispatcherServlet;
 
+	@Override
 	protected void setUp() throws ServletException {
 		servletConfig = new MockServletConfig(new MockServletContext(), "simple");
 		MockServletConfig complexConfig = new MockServletConfig(servletConfig.getServletContext(), "complex");
@@ -869,6 +870,7 @@ public class DispatcherServletTests extends TestCase {
 
 	public static class ControllerFromParent implements Controller {
 
+		@Override
 		public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {
 			return new ModelAndView(ControllerFromParent.class.getName());
 		}

@@ -22,7 +22,7 @@ import org.hibernate.Session;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 
 /**
- * Simple synchronization adapter that propagates a <code>flush()</code> call
+ * Simple synchronization adapter that propagates a {@code flush()} call
  * to the underlying Hibernate Session. Used in combination with JTA.
  *
  * @author Juergen Hoeller

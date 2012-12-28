@@ -40,7 +40,7 @@ public class ExceptionHandlerTests {
 		standaloneSetup(new PersonController()).build()
 			.perform(get("/person/Clyde"))
 				.andExpect(status().isOk())
-                .andExpect(forwardedUrl("errorView"));
+				.andExpect(forwardedUrl("errorView"));
 	}
 
 

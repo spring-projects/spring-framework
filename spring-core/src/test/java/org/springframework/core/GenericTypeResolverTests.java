@@ -130,26 +130,26 @@ public class GenericTypeResolverTests {
 		assertEquals(Object.class, resolveReturnTypeForGenericMethod(extractMagicValue, new Object[] { map }));
 	}
 
-    /**
-     * @since 3.2
-     */
-    @Test
-    public void testResolveType() {
-            Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
-            MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
-            assertEquals(MyInterfaceType.class,
-                            resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+	/**
+	 * @since 3.2
+	 */
+	@Test
+	public void testResolveType() {
+			Method intMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerInputMessage", MyInterfaceType.class);
+			MethodParameter intMessageMethodParam = new MethodParameter(intMessageMethod, 0);
+			assertEquals(MyInterfaceType.class,
+							resolveType(intMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
 
-            Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage", MyInterfaceType[].class);
-            MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
-            assertEquals(MyInterfaceType[].class,
-                            resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
+			Method intArrMessageMethod = findMethod(MyTypeWithMethods.class, "readIntegerArrayInputMessage", MyInterfaceType[].class);
+			MethodParameter intArrMessageMethodParam = new MethodParameter(intArrMessageMethod, 0);
+			assertEquals(MyInterfaceType[].class,
+							resolveType(intArrMessageMethodParam.getGenericParameterType(), new HashMap<TypeVariable, Type>()));
 
-            Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage", Object[].class);
-            MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
-            Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
-            assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
-    }
+			Method genericArrMessageMethod = findMethod(MySimpleTypeWithMethods.class, "readGenericArrayInputMessage", Object[].class);
+			MethodParameter genericArrMessageMethodParam = new MethodParameter(genericArrMessageMethod, 0);
+			Map<TypeVariable, Type> varMap = getTypeVariableMap(MySimpleTypeWithMethods.class);
+			assertEquals(Integer[].class, resolveType(genericArrMessageMethodParam.getGenericParameterType(), varMap));
+	}
 
 
 	public interface MyInterfaceType<T> {
@@ -234,14 +234,14 @@ public class GenericTypeResolverTests {
 			return null;
 		}
 
-        public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
-        }
+		public void readIntegerInputMessage(MyInterfaceType<Integer> message) {
+		}
 
-        public void readIntegerArrayInputMessage(MyInterfaceType<Integer>[] message) {
-        }
+		public void readIntegerArrayInputMessage(MyInterfaceType<Integer>[] message) {
+		}
 
-        public void readGenericArrayInputMessage(T[] message) {
-        }
+		public void readGenericArrayInputMessage(T[] message) {
+		}
 	}
 
 	public static class MySimpleTypeWithMethods extends MyTypeWithMethods<Integer> {

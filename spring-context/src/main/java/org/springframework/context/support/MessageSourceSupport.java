@@ -32,7 +32,7 @@ import org.springframework.util.ObjectUtils;
  * methods defined in the {@link org.springframework.context.MessageSource}.
  *
  * <p>{@link AbstractMessageSource} derives from this class, providing concrete
- * <code>getMessage</code> implementations that delegate to a central template
+ * {@code getMessage} implementations that delegate to a central template
  * method for message code resolution.
  *
  * @author Juergen Hoeller
@@ -87,12 +87,12 @@ public abstract class MessageSourceSupport {
 	 * Render the given default message String. The default message is
 	 * passed in as specified by the caller and can be rendered into
 	 * a fully formatted default message shown to the user.
-	 * <p>The default implementation passes the String to <code>formatMessage</code>,
+	 * <p>The default implementation passes the String to {@code formatMessage},
 	 * resolving any argument placeholders found in them. Subclasses may override
 	 * this method to plug in custom processing of default messages.
 	 * @param defaultMessage the passed-in default message String
 	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none.
+	 * the message, or {@code null} if none.
 	 * @param locale the Locale used for formatting
 	 * @return the rendered default message (with resolved arguments)
 	 * @see #formatMessage(String, Object[], java.util.Locale)
@@ -107,7 +107,7 @@ public abstract class MessageSourceSupport {
 	 * any argument placeholders found in them.
 	 * @param msg the message to format
 	 * @param args array of arguments that will be filled in for params within
-	 * the message, or <code>null</code> if none
+	 * the message, or {@code null} if none
 	 * @param locale the Locale used for formatting
 	 * @return the formatted message (with resolved arguments)
 	 */

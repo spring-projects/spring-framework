@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * You may introspect its configuration, but not modify the configuration
 	 * (other than from within an {@link #initDao} implementation).
 	 * Consider creating a custom HibernateTemplate instance via
-	 * <code>new HibernateTemplate(getSessionFactory())</code>, in which
+	 * {@code new HibernateTemplate(getSessionFactory())}, in which
 	 * case you're allowed to customize the settings on the resulting instance.
 	 */
 	public final HibernateTemplate getHibernateTemplate() {
@@ -138,7 +138,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	protected final Session getSession()
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		return getSession(this.hibernateTemplate.isAllowCreate());
 	}
@@ -163,10 +163,10 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
 	 */
 	protected final Session getSession(boolean allowCreate)
-	    throws DataAccessResourceFailureException, IllegalStateException {
+		throws DataAccessResourceFailureException, IllegalStateException {
 
 		return (!allowCreate ?
-		    SessionFactoryUtils.getSession(getSessionFactory(), false) :
+			SessionFactoryUtils.getSession(getSessionFactory(), false) :
 				SessionFactoryUtils.getSession(
 						getSessionFactory(),
 						this.hibernateTemplate.getEntityInterceptor(),
@@ -175,7 +175,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 
 	/**
 	 * Convert the given HibernateException to an appropriate exception from the
-	 * <code>org.springframework.dao</code> hierarchy. Will automatically detect
+	 * {@code org.springframework.dao} hierarchy. Will automatically detect
 	 * wrapped SQLExceptions and convert them accordingly.
 	 * <p>Delegates to the
 	 * {@link org.springframework.orm.hibernate3.HibernateTemplate#convertHibernateAccessException}

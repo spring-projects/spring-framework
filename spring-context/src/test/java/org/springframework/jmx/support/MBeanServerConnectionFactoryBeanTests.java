@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 			bean.afterPropertiesSet();
 
 			try {
-				MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+				MBeanServerConnection connection = bean.getObject();
 				assertNotNull("Connection should not be null", connection);
 
 				// perform simple MBean count test
@@ -100,7 +100,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
-		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		MBeanServerConnection connection = bean.getObject();
 		assertTrue(AopUtils.isAopProxy(connection));
 
 		JMXConnectorServer connector = null;
@@ -122,7 +122,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
-		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		MBeanServerConnection connection = bean.getObject();
 		assertTrue(AopUtils.isAopProxy(connection));
 		bean.destroy();
 	}

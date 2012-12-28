@@ -24,7 +24,7 @@ import org.springframework.test.context.TestExecutionListeners;
 /**
  * Unit test for {@link AbstractJUnit38SpringContextTests} which focuses on
  * proper support of the {@link Repeat @Repeat} annotation.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */

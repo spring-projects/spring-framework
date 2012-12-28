@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.jmx.export.annotation;
 
 /**
  * JDK 1.5+ method-level annotation used to provide metadata about operation
- * parameters, corresponding to a <code>ManagedOperationParameter</code> attribute.
- * Used as part of a <code>ManagedOperationParameters</code> annotation.
+ * parameters, corresponding to a {@code ManagedOperationParameter} attribute.
+ * Used as part of a {@code ManagedOperationParameters} annotation.
  *
  * @author Rob Harrop
  * @since 1.2

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies proper
  * <em>execution order</em> of registered {@link TestExecutionListener
  * TestExecutionListeners}.
- * 
+ *
  * @author Sam Brannen
  * @since 2.5
  */
@@ -64,7 +64,7 @@ public class TestContextManagerTests {
 	 * Asserts the <em>execution order</em> of 'before' and 'after' test method
 	 * calls on {@link TestExecutionListener listeners} registered for the
 	 * configured {@link TestContextManager}.
-	 * 
+	 *
 	 * @see #beforeTestMethodCalls
 	 * @see #afterTestMethodCalls
 	 */
@@ -121,7 +121,7 @@ public class TestContextManagerTests {
 	/**
 	 * Verifies the expected {@link TestExecutionListener}
 	 * <em>execution order</em> within a test method.
-	 * 
+	 *
 	 * @see #verifyListenerExecutionOrderAfterClass()
 	 */
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 	private XmlBeanFactory factory;
 
+	@Override
 	protected void setUp() {
 		parent = new DefaultListableBeanFactory();
 		Map m = new HashMap();
@@ -59,6 +60,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 
 		this.factory = new XmlBeanFactory(new ClassPathResource("test.xml", getClass()), parent);
 		this.factory.addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 				if (bean instanceof TestBean) {
 					((TestBean) bean).setPostProcessed(true);
@@ -68,6 +70,7 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 				}
 				return bean;
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 				return bean;
 			}
@@ -77,10 +80,12 @@ public class XmlListableBeanFactoryTests extends AbstractListableBeanFactoryTest
 		//this.factory.preInstantiateSingletons();
 	}
 
+	@Override
 	protected BeanFactory getBeanFactory() {
 		return factory;
 	}
 
+	@Override
 	public void testCount() {
 		assertCount(24);
 	}

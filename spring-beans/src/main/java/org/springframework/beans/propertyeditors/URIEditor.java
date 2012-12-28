@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Editor for <code>java.net.URI</code>, to directly populate a URI property
+ * Editor for {@code java.net.URI}, to directly populate a URI property
  * instead of using a String property as bridge.
  *
  * <p>Supports Spring-style URI notation: any fully qualified standard URI
@@ -79,7 +79,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * Create a new URIEditor, using the given ClassLoader to resolve
 	 * "classpath:" locations into physical resource URLs.
 	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
-	 * (may be <code>null</code> to indicate the default ClassLoader)
+	 * (may be {@code null} to indicate the default ClassLoader)
 	 */
 	public URIEditor(ClassLoader classLoader) {
 		this.classLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
@@ -90,7 +90,7 @@ public class URIEditor extends PropertyEditorSupport {
 	 * Create a new URIEditor, using the given ClassLoader to resolve
 	 * "classpath:" locations into physical resource URLs.
 	 * @param classLoader the ClassLoader to use for resolving "classpath:" locations
-	 * (may be <code>null</code> to indicate the default ClassLoader)
+	 * (may be {@code null} to indicate the default ClassLoader)
 	 * @param encode indicates whether Strings will be encoded or not
 	 */
 	public URIEditor(ClassLoader classLoader, boolean encode) {

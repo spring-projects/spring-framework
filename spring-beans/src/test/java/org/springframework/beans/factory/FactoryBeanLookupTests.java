@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,31 +40,31 @@ public class FactoryBeanLookupTests {
 		beanFactory = new XmlBeanFactory(
 				new ClassPathResource("FactoryBeanLookupTests-context.xml", this.getClass()));
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByNameDereferencing() {
 		Object fooFactory = beanFactory.getBean("&fooFactory");
 		assertThat(fooFactory, instanceOf(FooFactoryBean.class));
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByType() {
 		FooFactoryBean fooFactory = beanFactory.getBean(FooFactoryBean.class);
 		assertNotNull(fooFactory);
 	}
-	
+
 	@Test
 	public void factoryBeanLookupByTypeAndNameDereference() {
 		FooFactoryBean fooFactory = beanFactory.getBean("&fooFactory", FooFactoryBean.class);
 		assertNotNull(fooFactory);
 	}
-	
+
 	@Test
 	public void factoryBeanObjectLookupByName() {
 		Object fooFactory = beanFactory.getBean("fooFactory");
 		assertThat(fooFactory, instanceOf(Foo.class));
 	}
-	
+
 	@Test
 	public void factoryBeanObjectLookupByNameAndType() {
 		Foo foo = beanFactory.getBean("fooFactory", Foo.class);

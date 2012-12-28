@@ -36,7 +36,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Implementation of the <code>JmxAttributeSource</code> interface that
+ * Implementation of the {@code JmxAttributeSource} interface that
  * reads JDK 1.5+ annotations and exposes the corresponding attributes.
  *
  * @author Rob Harrop

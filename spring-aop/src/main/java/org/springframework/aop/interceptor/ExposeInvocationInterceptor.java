@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.core.Ordered;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, Serializable {
 
 	/** Singleton instance of this class */
@@ -101,7 +102,7 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	/**
 	 * Required to support serialization. Replaces with canonical instance
 	 * on deserialization, protecting Singleton pattern.
-	 * <p>Alternative to overriding the <code>equals</code> method.
+	 * <p>Alternative to overriding the {@code equals} method.
 	 */
 	private Object readResolve() {
 		return INSTANCE;

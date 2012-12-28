@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.util.ObjectUtils;
  * A simple message converter which is able to handle TextMessages, BytesMessages,
  * MapMessages, and ObjectMessages. Used as default conversion strategy
  * by {@link org.springframework.jms.core.JmsTemplate}, for
- * <code>convertAndSend</code> and <code>receiveAndConvert</code> operations.
+ * {@code convertAndSend} and {@code receiveAndConvert} operations.
  *
  * <p>Converts a String to a {@link javax.jms.TextMessage}, a byte array to a
  * {@link javax.jms.BytesMessage}, a Map to a {@link javax.jms.MapMessage}, and

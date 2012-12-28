@@ -24,7 +24,7 @@ import org.springframework.expression.spel.ExpressionState;
 /**
  * Implements the {@code multiply} operator.
  *
- * <p>Conversions and promotions are handled as defined in 
+ * <p>Conversions and promotions are handled as defined in
  * <a href="http://java.sun.com/docs/books/jls/third_edition/html/conversions.html">Section 5.6.2
  * of the Java Language Specification</a>:
  *

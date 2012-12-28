@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.springframework.util.Assert;
 /**
  * Interceptor to wrap an after-throwing advice.
  *
- * <p>The signatures on handler methods on the <code>ThrowsAdvice</code>
+ * <p>The signatures on handler methods on the {@code ThrowsAdvice}
  * implementation method argument must be of the form:<br>
  *
- * <code>void afterThrowing([Method, args, target], ThrowableSubclass);</code>
+ * {@code void afterThrowing([Method, args, target], ThrowableSubclass);}
  *
  * <p>Only the last argument is required.
  *
@@ -87,13 +87,13 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 				}
 			}
 		}
-		
+
 		if (this.exceptionHandlerMap.isEmpty()) {
 			throw new IllegalArgumentException(
 					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}
-	
+
 	public int getHandlerMethodCount() {
 		return this.exceptionHandlerMap.size();
 	}
@@ -131,7 +131,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			throw ex;
 		}
 	}
-	
+
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
 		if (method.getParameterTypes().length == 1) {

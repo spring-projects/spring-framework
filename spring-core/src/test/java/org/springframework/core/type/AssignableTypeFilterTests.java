@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertFalse(notMatchingFilter.match(metadataReader, metadataReaderFactory));
 		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
 	}
-	
+
 	public void testInterfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
@@ -49,7 +49,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
@@ -59,7 +59,7 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(filter.match(metadataReader, metadataReaderFactory));
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
-	
+
 	public void testInterfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";

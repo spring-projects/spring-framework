@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.springframework.web.util.TagUtils;
  * resolved using the ApplicationContext and thus support internationalization.
  *
  * <p>Detects an HTML escaping setting, either on this tag instance, the page level,
- * or the <code>web.xml</code> level. Can also apply JavaScript escaping.
+ * or the {@code web.xml} level. Can also apply JavaScript escaping.
  *
  * <p>If "code" isn't set or cannot be resolved, "text" will be used as default
  * message. Thus, this tag can also be used for HTML escaping of any texts.
@@ -51,6 +51,7 @@ import org.springframework.web.util.TagUtils;
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
+@SuppressWarnings("serial")
 public class MessageTag extends HtmlEscapingAwareTag {
 
 	/**
@@ -68,9 +69,9 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	private String argumentSeparator = DEFAULT_ARGUMENT_SEPARATOR;
 
 	private String text;
-	
+
 	private String var;
-	
+
 	private String scope = TagUtils.SCOPE_PAGE;
 
 	private boolean javaScriptEscape = false;
@@ -118,7 +119,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setText(String text) {
 		this.text = text;
 	}
-	
+
 	/**
 	 * Set PageContext attribute name under which to expose
 	 * a variable that contains the resolved message.
@@ -128,7 +129,7 @@ public class MessageTag extends HtmlEscapingAwareTag {
 	public void setVar(String var) {
 		this.var = var;
 	}
-	
+
 	/**
 	 * Set the scope to export the variable to.
 	 * Default is SCOPE_PAGE ("page").

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * A contract for inspecting and potentially modifying request data values such
- * as URL query parameters or form field values before they are rendered by a 
+ * as URL query parameters or form field values before they are rendered by a
  * view or before a redirect.
- * 
- * <p>Implementations may use this contract for example as part of a solution 
- * to provide data integrity, confidentiality, protection against cross-site 
+ *
+ * <p>Implementations may use this contract for example as part of a solution
+ * to provide data integrity, confidentiality, protection against cross-site
  * request forgery (CSRF), and others or for other tasks such as automatically
  * adding a hidden field to all forms and URLs.
- * 
+ *
  * <p>View technologies that support this contract can obtain an instance to
  * delegate to via {@link RequestContext#getRequestDataValueProcessor()}.
- * 
+ *
  * @author Rossen Stoyanchev
  * @since 3.1
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import org.springframework.web.util.NestedServletException;
 
 /**
  * Convenient superclass for views rendered using an XSLT stylesheet.
- * 
+ *
  * <p>Subclasses typically must provide the {@link Source} to transform
  * by overriding {@link #createXsltSource}. Subclasses do not need to
  * concern themselves with XSLT other than providing a valid stylesheet location.
@@ -66,11 +66,11 @@ import org.springframework.web.util.NestedServletException;
  * <li>{@link #setErrorListener(javax.xml.transform.ErrorListener) errorListener} (optional):
  * the {@link ErrorListener} implementation instance for custom handling of warnings and errors during TransformerFactory operations
  * <li>{@link #setIndent(boolean) indent} (optional): whether additional whitespace
- * may be added when outputting the result; defaults to <code>true</code>
- * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to <code>true</code> 
+ * may be added when outputting the result; defaults to {@code true}
+ * <li>{@link #setCache(boolean) cache} (optional): are templates to be cached; debug setting only; defaults to {@code true}
  * </ul>
  *
- * <p>Note that setting {@link #setCache(boolean) "cache"} to <code>false</code>
+ * <p>Note that setting {@link #setCache(boolean) "cache"} to {@code false}
  * will cause the template objects to be reloaded for each rendering. This is
  * useful during development, but will seriously affect performance in production
  * and is not thread-safe.
@@ -179,12 +179,12 @@ public abstract class AbstractXsltView extends AbstractView {
 	/**
 	 * Set whether to use the name of a given single model object as the
 	 * document root element name.
-	 * <p>Default is <code>true</code> : If you pass in a model with a single object
+	 * <p>Default is {@code true} : If you pass in a model with a single object
 	 * named "myElement", then the document root will be named "myElement"
-	 * as well. Set this flag to <code>false</code> if you want to pass in a single
+	 * as well. Set this flag to {@code false} if you want to pass in a single
 	 * model object while still using the root element name configured
 	 * through the {@link #setRoot(String) "root" property}.
-	 * @param useSingleModelNameAsRoot <code>true</code> if the name of a given single
+	 * @param useSingleModelNameAsRoot {@code true} if the name of a given single
 	 * model object is to be used as the document root element name
 	 * @see #setRoot
 	 */
@@ -194,7 +194,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	/**
 	 * Set the URIResolver used in the transform.
-	 * <p>The URIResolver handles calls to the XSLT <code>document()</code> function.
+	 * <p>The URIResolver handles calls to the XSLT {@code document()} function.
 	 */
 	public void setUriResolver(URIResolver uriResolver) {
 		this.uriResolver = uriResolver;
@@ -216,7 +216,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	/**
 	 * Set whether the XSLT transformer may add additional whitespace when
 	 * outputting the result tree.
-	 * <p>Default is <code>true</code> (on); set this to <code>false</code> (off)
+	 * <p>Default is {@code true} (on); set this to {@code false} (off)
 	 * to not specify an "indent" key, leaving the choice up to the stylesheet.
 	 * @see javax.xml.transform.OutputKeys#INDENT
 	 */
@@ -236,7 +236,7 @@ public abstract class AbstractXsltView extends AbstractView {
 
 	/**
 	 * Set whether to activate the template cache for this view.
-	 * <p>Default is <code>true</code>. Turn this off to refresh
+	 * <p>Default is {@code true}. Turn this off to refresh
 	 * the Templates object on every access, e.g. during development.
 	 * @see #resetCachedTemplates()
 	 */
@@ -421,7 +421,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * Return a Map of transformer parameters to be applied to the stylesheet.
 	 * <p>Subclasses can override this method in order to apply one or more
 	 * parameters to the transformation process.
-	 * <p>The default implementation simply returns <code>null</code>.
+	 * <p>The default implementation simply returns {@code null}.
 	 * @param request current HTTP request
 	 * @return a Map of parameters to apply to the transformation process
 	 * @see #getParameters(Map, HttpServletRequest)
@@ -432,13 +432,13 @@ public abstract class AbstractXsltView extends AbstractView {
 	}
 
 	/**
-	 * Return whether to use a <code>java.io.Writer</code> to write text content
-	 * to the HTTP response. Else, a <code>java.io.OutputStream</code> will be used,
+	 * Return whether to use a {@code java.io.Writer} to write text content
+	 * to the HTTP response. Else, a {@code java.io.OutputStream} will be used,
 	 * to write binary content to the response.
-	 * <p>The default implementation returns <code>false</code>, indicating a
-	 * a <code>java.io.OutputStream</code>.
-	 * @return whether to use a Writer (<code>true</code>) or an OutputStream
-	 * (<code>false</code>)
+	 * <p>The default implementation returns {@code false}, indicating a
+	 * a {@code java.io.OutputStream}.
+	 * @return whether to use a Writer ({@code true}) or an OutputStream
+	 * ({@code false})
 	 * @see javax.servlet.ServletResponse#getWriter()
 	 * @see javax.servlet.ServletResponse#getOutputStream()
 	 */
@@ -500,7 +500,7 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * given parameters.
 	 * @param parameters a Map of parameters to be applied to the stylesheet
 	 * (as determined by {@link #getParameters(Map, HttpServletRequest)})
-	 * @return the Transformer object (never <code>null</code>)
+	 * @return the Transformer object (never {@code null})
 	 * @throws TransformerConfigurationException if the Transformer object
 	 * could not be built
 	 */
@@ -517,8 +517,8 @@ public abstract class AbstractXsltView extends AbstractView {
 	 * stylesheet, either a cached one or a freshly built one.
 	 * <p>Subclasses may override this method e.g. in order to refresh
 	 * the Templates instance, calling {@link #resetCachedTemplates()}
-	 * before delegating to this <code>getTemplates()</code> implementation.
-	 * @return the Templates object (or <code>null</code> if there is
+	 * before delegating to this {@code getTemplates()} implementation.
+	 * @return the Templates object (or {@code null} if there is
 	 * no stylesheet specified)
 	 * @throws TransformerConfigurationException if the Templates object
 	 * could not be built

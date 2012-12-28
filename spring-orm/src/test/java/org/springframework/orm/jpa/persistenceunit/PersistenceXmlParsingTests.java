@@ -40,7 +40,7 @@ import static org.junit.Assert.*;
 
 /**
  * Unit and integration tests for the JPA XML resource parsing support.
- * 
+ *
  * @author Costin Leau
  * @author Juergen Hoeller
  */
@@ -275,7 +275,7 @@ public class PersistenceXmlParsingTests {
 		url = reader.determinePersistenceUnitRootUrl(new ClassPathResource("/org/springframework/orm/jpa/META-INF/persistence.xml"));
 		assertTrue("the containing folder should have been returned", url.toString().endsWith("/org/springframework/orm/jpa"));
 	}
-	
+
 	@Test
 	public void testPersistenceUnitRootUrlWithJar() throws Exception {
 		PersistenceUnitReader reader = new PersistenceUnitReader(

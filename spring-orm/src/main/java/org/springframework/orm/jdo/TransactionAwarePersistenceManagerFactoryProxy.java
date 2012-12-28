@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ import org.springframework.util.ClassUtils;
  * Proxy for a target JDO {@link javax.jdo.PersistenceManagerFactory},
  * returning the current thread-bound PersistenceManager (the Spring-managed
  * transactional PersistenceManager or the single OpenPersistenceManagerInView
- * PersistenceManager) on <code>getPersistenceManager()</code>, if any.
+ * PersistenceManager) on {@code getPersistenceManager()}, if any.
  *
- * <p>Essentially, <code>getPersistenceManager()</code> calls get seamlessly
+ * <p>Essentially, {@code getPersistenceManager()} calls get seamlessly
  * forwarded to {@link PersistenceManagerFactoryUtils#getPersistenceManager}.
- * Furthermore, <code>PersistenceManager.close</code> calls get forwarded to
+ * Furthermore, {@code PersistenceManager.close} calls get forwarded to
  * {@link PersistenceManagerFactoryUtils#releasePersistenceManager}.
  *
  * <p>The main advantage of this proxy is that it allows DAOs to work with a
@@ -104,8 +104,8 @@ public class TransactionAwarePersistenceManagerFactoryProxy implements FactoryBe
 	 * <p>Default is "true". Can be turned off to enforce access to
 	 * transactional PersistenceManagers, which safely allows for DAOs
 	 * written to get a PersistenceManager without explicit closing
-	 * (i.e. a <code>PersistenceManagerFactory.getPersistenceManager()</code>
-	 * call without corresponding <code>PersistenceManager.close()</code> call).
+	 * (i.e. a {@code PersistenceManagerFactory.getPersistenceManager()}
+	 * call without corresponding {@code PersistenceManager.close()} call).
 	 * @see PersistenceManagerFactoryUtils#getPersistenceManager(javax.jdo.PersistenceManagerFactory, boolean)
 	 */
 	public void setAllowCreate(boolean allowCreate) {

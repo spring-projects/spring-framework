@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 
 /**
  * Unit tests for type comparison
- * 
+ *
  * @author Andy Clement
  */
 public class StandardTypeLocatorTests {
@@ -35,7 +35,7 @@ public class StandardTypeLocatorTests {
 		StandardTypeLocator locator = new StandardTypeLocator();
 		Assert.assertEquals(Integer.class,locator.findType("java.lang.Integer"));
 		Assert.assertEquals(String.class,locator.findType("java.lang.String"));
-		
+
 		List<String> prefixes = locator.getImportPrefixes();
 		Assert.assertEquals(1,prefixes.size());
 		Assert.assertTrue(prefixes.contains("java.lang"));
@@ -44,7 +44,7 @@ public class StandardTypeLocatorTests {
 		Assert.assertEquals(Boolean.class,locator.findType("Boolean"));
 		// currently does not know about java.util by default
 //		assertEquals(java.util.List.class,locator.findType("List"));
-		
+
 		try {
 			locator.findType("URL");
 			Assert.fail("Should have failed");
@@ -54,7 +54,7 @@ public class StandardTypeLocatorTests {
 		}
 		locator.registerImport("java.net");
 		Assert.assertEquals(java.net.URL.class,locator.findType("URL"));
-		
+
 	}
 
 }

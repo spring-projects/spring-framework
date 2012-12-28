@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public interface SourceExtractor {
 	/**
 	 * Extract the source metadata from the candidate object supplied
 	 * by the configuration parser.
-	 * @param sourceCandidate the original source metadata (never <code>null</code>)
+	 * @param sourceCandidate the original source metadata (never {@code null})
 	 * @param definingResource the resource that defines the given source object
-	 * (may be <code>null</code>)
-	 * @return the source metadata object to store (may be <code>null</code>)
+	 * (may be {@code null})
+	 * @return the source metadata object to store (may be {@code null})
 	 */
 	Object extractSource(Object sourceCandidate, Resource definingResource);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.springframework.web.portlet.util.PortletUtils;
 
 /**
  * Adapter to use the Portlet interface with the generic DispatcherPortlet.
- * Calls the Portlet's <code>render</code> and <code>processAction</code>
+ * Calls the Portlet's {@code render} and {@code processAction}
  * methods to handle a request.
  *
  * <p>This adapter is not activated by default; it needs to be defined as a
@@ -59,7 +59,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @see org.springframework.web.portlet.mvc.PortletWrappingController
  */
 public class SimplePortletHandlerAdapter implements HandlerAdapter, PortletContextAware {
-	
+
 	private PortletContext portletContext;
 
 

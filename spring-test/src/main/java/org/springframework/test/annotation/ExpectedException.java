@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import java.lang.annotation.Target;
 /**
  * Test annotation to indicate that a test method is required to throw the
  * specified exception.
- * 
+ *
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
  * @deprecated as of Spring 3.1 in favor of using built-in support for declaring
- * expected exceptions in the underlying testing framework (e.g., JUnit, TestNG, etc.) 
+ * expected exceptions in the underlying testing framework (e.g., JUnit, TestNG, etc.)
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

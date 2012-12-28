@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public interface SqlXmlObjectMappingHandler extends SqlXmlHandler {
 	 * <p>Works with an internal Object to XML Mapping implementation.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as an Object, or <code>null</code> in case of SQL NULL
+	 * @return the content as an Object, or {@code null} in case of SQL NULL
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
@@ -51,15 +51,15 @@ public interface SqlXmlObjectMappingHandler extends SqlXmlHandler {
 	 * <p>Works with an internal Object to XML Mapping implementation.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as an Object, or <code>null</code> in case of SQL NULL
+	 * @return the content as an Object, or {@code null} in case of SQL NULL
 	 * @throws java.sql.SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 */
 	Object getXmlAsObject(ResultSet rs, int columnIndex) throws SQLException;
 
 	/**
-	 * Get an instance of an <code>SqlXmlValue</code> implementation to be used together
-	 * with the database specific implementation of this <code>SqlXmlObjectMappingHandler</code>.
+	 * Get an instance of an {@code SqlXmlValue} implementation to be used together
+	 * with the database specific implementation of this {@code SqlXmlObjectMappingHandler}.
 	 * @param value the Object to be marshalled to XML
 	 * @return the implementation specific instance
 	 * @see SqlXmlValue

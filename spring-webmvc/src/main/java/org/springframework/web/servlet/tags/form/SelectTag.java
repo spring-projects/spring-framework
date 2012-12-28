@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.servlet.support.BindStatus;
 
 /**
- * Databinding-aware JSP tag that renders an HTML '<code>select</code>'
+ * Databinding-aware JSP tag that renders an HTML '{@code select}'
  * element.
  *
- * <p>Inner '<code>option</code>' tags can be rendered using one of the
+ * <p>Inner '{@code option}' tags can be rendered using one of the
  * approaches supported by the OptionWriter class.
  *
  * <p>Also supports the use of nested {@link OptionTag OptionTags} or
@@ -40,6 +40,7 @@ import org.springframework.web.servlet.support.BindStatus;
  * @since 2.0
  * @see OptionTag
  */
+@SuppressWarnings("serial")
 public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
@@ -58,30 +59,30 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * The {@link Collection}, {@link Map} or array of objects used to generate the inner
-	 * '<code>option</code>' tags.
+	 * '{@code option}' tags.
 	 */
 	private Object items;
 
 	/**
-	 * The name of the property mapped to the '<code>value</code>' attribute
-	 * of the '<code>option</code>' tag.
+	 * The name of the property mapped to the '{@code value}' attribute
+	 * of the '{@code option}' tag.
 	 */
 	private String itemValue;
 
 	/**
 	 * The name of the property mapped to the inner text of the
-	 * '<code>option</code>' tag.
+	 * '{@code option}' tag.
 	 */
 	private String itemLabel;
 
 	/**
-	 * The value of the HTML '<code>size</code>' attribute rendered
-	 * on the final '<code>select</code>' element.
+	 * The value of the HTML '{@code size}' attribute rendered
+	 * on the final '{@code select}' element.
 	 */
 	private String size;
 
 	/**
-	 * Indicates whether or not the '<code>select</code>' tag allows
+	 * Indicates whether or not the '{@code select}' tag allows
 	 * multiple-selections.
 	 */
 	private Object multiple = Boolean.FALSE;
@@ -95,8 +96,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the {@link Collection}, {@link Map} or array of objects used to
-	 * generate the inner '<code>option</code>' tags.
-	 * <p>Required when wishing to render '<code>option</code>' tags from
+	 * generate the inner '{@code option}' tags.
+	 * <p>Required when wishing to render '{@code option}' tags from
 	 * an array, {@link Collection} or {@link Map}.
 	 * <p>Typically a runtime expression.
 	 * @param items the items that comprise the options of this selection
@@ -106,7 +107,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>items</code>' attribute.
+	 * Get the value of the '{@code items}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected Object getItems() {
@@ -114,9 +115,9 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Set the name of the property mapped to the '<code>value</code>'
-	 * attribute of the '<code>option</code>' tag.
-	 * <p>Required when wishing to render '<code>option</code>' tags from
+	 * Set the name of the property mapped to the '{@code value}'
+	 * attribute of the '{@code option}' tag.
+	 * <p>Required when wishing to render '{@code option}' tags from
 	 * an array or {@link Collection}.
 	 * <p>May be a runtime expression.
 	 */
@@ -125,7 +126,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>itemValue</code>' attribute.
+	 * Get the value of the '{@code itemValue}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemValue() {
@@ -134,7 +135,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 	/**
 	 * Set the name of the property mapped to the label (inner text) of the
-	 * '<code>option</code>' tag.
+	 * '{@code option}' tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setItemLabel(String itemLabel) {
@@ -142,7 +143,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the '<code>itemLabel</code>' attribute.
+	 * Get the value of the '{@code itemLabel}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getItemLabel() {
@@ -150,17 +151,17 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Set the value of the HTML '<code>size</code>' attribute rendered
-	 * on the final '<code>select</code>' element.
+	 * Set the value of the HTML '{@code size}' attribute rendered
+	 * on the final '{@code select}' element.
 	 * <p>May be a runtime expression.
-	 * @param size the desired value of the '<code>size</code>' attribute
+	 * @param size the desired value of the '{@code size}' attribute
 	 */
 	public void setSize(String size) {
 		this.size = size;
 	}
 
 	/**
-	 * Get the value of the '<code>size</code>' attribute.
+	 * Get the value of the '{@code size}' attribute.
 	 * <p>May be a runtime expression.
 	 */
 	protected String getSize() {
@@ -168,8 +169,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Set the value of the HTML '<code>multiple</code>' attribute rendered
-	 * on the final '<code>select</code>' element.
+	 * Set the value of the HTML '{@code multiple}' attribute rendered
+	 * on the final '{@code select}' element.
 	 * <p>May be a runtime expression.
 	 */
 	public void setMultiple(Object multiple) {
@@ -177,8 +178,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Get the value of the HTML '<code>multiple</code>' attribute rendered
-	 * on the final '<code>select</code>' element.
+	 * Get the value of the HTML '{@code multiple}' attribute rendered
+	 * on the final '{@code select}' element.
 	 * <p>May be a runtime expression.
 	 */
 	protected Object getMultiple() {
@@ -187,9 +188,9 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 
 
 	/**
-	 * Renders the HTML '<code>select</code>' tag to the supplied
+	 * Renders the HTML '{@code select}' tag to the supplied
 	 * {@link TagWriter}.
-	 * <p>Renders nested '<code>option</code>' tags if the
+	 * <p>Renders nested '{@code option}' tags if the
 	 * {@link #setItems items} property is set, otherwise exposes the
 	 * bound value for the nested {@link OptionTag OptionTags}.
 	 */
@@ -238,7 +239,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	/**
 	 * If using a multi-select, a hidden element is needed to make sure all
 	 * items are correctly unselected on the server-side in response to a
-	 * <code>null</code> post.
+	 * {@code null} post.
 	 */
 	private void writeHiddenTagIfNecessary(TagWriter tagWriter) throws JspException {
 		if (isMultiple()) {
@@ -263,8 +264,8 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns '<code>true</code>' if the bound value requires the
-	 * resultant '<code>select</code>' tag to be multi-select.
+	 * Returns '{@code true}' if the bound value requires the
+	 * resultant '{@code select}' tag to be multi-select.
 	 */
 	private boolean forceMultiple() throws JspException {
 		BindStatus bindStatus = getBindStatus();
@@ -282,7 +283,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 	}
 
 	/**
-	 * Returns '<code>true</code>' for arrays, {@link Collection Collections}
+	 * Returns '{@code true}' for arrays, {@link Collection Collections}
 	 * and {@link Map Maps}.
 	 */
 	private static boolean typeRequiresMultiple(Class type) {
@@ -312,5 +313,5 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 		this.tagWriter = null;
 		this.pageContext.removeAttribute(LIST_VALUE_PAGE_ATTRIBUTE);
 	}
-	
+
 }

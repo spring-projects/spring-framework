@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set whether to use XML validation. Default is <code>true</code>.
+	 * Set whether to use XML validation. Default is {@code true}.
 	 * <p>This method switches namespace awareness on if validation is turned off,
 	 * in order to still process schema namespaces properly in such a scenario.
 	 * @see #setValidationMode
@@ -212,7 +212,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Specify the {@link SourceExtractor} to use.
-	 * <p>The default implementation is {@link NullSourceExtractor} which simply returns <code>null</code>
+	 * <p>The default implementation is {@link NullSourceExtractor} which simply returns {@code null}
 	 * as the source object. This means that - during normal runtime execution -
 	 * no additional source metadata is attached to the bean configuration metadata.
 	 */
@@ -266,7 +266,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	}
 
 	/**
-	 * Set an implementation of the <code>org.xml.sax.ErrorHandler</code>
+	 * Set an implementation of the {@code org.xml.sax.ErrorHandler}
 	 * interface for custom handling of XML parsing errors and warnings.
 	 * <p>If not set, a default SimpleSaxErrorHandler is used that simply
 	 * logs warnings using the logger instance of the view class,
@@ -363,7 +363,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Load bean definitions from the specified XML file.
 	 * @param inputSource the SAX InputSource to read from
 	 * @param resourceDescription a description of the resource
-	 * (can be <code>null</code> or empty)
+	 * (can be {@code null} or empty)
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
@@ -439,7 +439,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Detects which kind of validation to perform on the XML file identified
-	 * by the supplied {@link Resource}. If the file has a <code>DOCTYPE</code>
+	 * by the supplied {@link Resource}. If the file has a {@code DOCTYPE}
 	 * definition then DTD validation is used otherwise XSD validation is assumed.
 	 * <p>Override this method if you would like to customize resolution
 	 * of the {@link #VALIDATION_AUTO} mode.
@@ -475,9 +475,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
 	/**
 	 * Register the bean definitions contained in the given DOM document.
-	 * Called by <code>loadBeanDefinitions</code>.
+	 * Called by {@code loadBeanDefinitions}.
 	 * <p>Creates a new instance of the parser class and invokes
-	 * <code>registerBeanDefinitions</code> on it.
+	 * {@code registerBeanDefinitions} on it.
 	 * @param doc the DOM document
 	 * @param resource the resource descriptor (for context information)
 	 * @return the number of bean definitions found

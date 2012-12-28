@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import org.springframework.core.NamedThreadLocal;
 /**
  * Class containing static methods used to obtain information about the current AOP invocation.
  *
- * <p>The <code>currentProxy()</code> method is usable if the AOP framework is configured to
+ * <p>The {@code currentProxy()} method is usable if the AOP framework is configured to
  * expose the current proxy (not the default). It returns the AOP proxy in use. Target objects
- * or advice can use this to make advised calls, in the same way as <code>getEJBObject()</code>
+ * or advice can use this to make advised calls, in the same way as {@code getEJBObject()}
  * can be used in EJBs. They can also use it to find advice configuration.
  *
  * <p>Spring's AOP framework does not expose proxies by default, as there is a performance cost
@@ -42,7 +42,7 @@ public abstract class AopContext {
 
 	/**
 	 * ThreadLocal holder for AOP proxy associated with this thread.
-	 * Will contain <code>null</code> unless the "exposeProxy" property on
+	 * Will contain {@code null} unless the "exposeProxy" property on
 	 * the controlling proxy configuration has been set to "true".
 	 * @see ProxyConfig#setExposeProxy
 	 */
@@ -53,7 +53,7 @@ public abstract class AopContext {
 	 * Try to return the current AOP proxy. This method is usable only if the
 	 * calling method has been invoked via AOP, and the AOP framework has been set
 	 * to expose proxies. Otherwise, this method will throw an IllegalStateException.
-	 * @return Object the current AOP proxy (never returns <code>null</code>)
+	 * @return Object the current AOP proxy (never returns {@code null})
 	 * @throws IllegalStateException if the proxy cannot be found, because the
 	 * method was invoked outside an AOP invocation context, or because the
 	 * AOP framework has not been configured to expose the proxy
@@ -68,10 +68,10 @@ public abstract class AopContext {
 	}
 
 	/**
-	 * Make the given proxy available via the <code>currentProxy()</code> method.
+	 * Make the given proxy available via the {@code currentProxy()} method.
 	 * <p>Note that the caller should be careful to keep the old value as appropriate.
-	 * @param proxy the proxy to expose (or <code>null</code> to reset it)
-	 * @return the old proxy, which may be <code>null</code> if none was bound
+	 * @param proxy the proxy to expose (or {@code null} to reset it)
+	 * @return the old proxy, which may be {@code null} if none was bound
 	 * @see #currentProxy()
 	 */
 	static Object setCurrentProxy(Object proxy) {

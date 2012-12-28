@@ -178,7 +178,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Create a new AbstractBeanFactory with the given parent.
-	 * @param parentBeanFactory parent bean factory, or <code>null</code> if none
+	 * @param parentBeanFactory parent bean factory, or {@code null} if none
 	 * @see #getBean
 	 */
 	public AbstractBeanFactory(BeanFactory parentBeanFactory) {
@@ -718,7 +718,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	/**
 	 * Return the custom TypeConverter to use, if any.
-	 * @return the custom TypeConverter, or <code>null</code> if none specified
+	 * @return the custom TypeConverter, or {@code null} if none specified
 	 */
 	protected TypeConverter getCustomTypeConverter() {
 		return this.typeConverter;
@@ -858,7 +858,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Return a 'merged' BeanDefinition for the given bean name,
 	 * merging a child bean definition with its parent if necessary.
-	 * <p>This <code>getMergedBeanDefinition</code> considers bean definition
+	 * <p>This {@code getMergedBeanDefinition} considers bean definition
 	 * in ancestors as well.
 	 * @param name the name of the bean to retrieve the merged definition for
 	 * (may be an alias)
@@ -1116,7 +1116,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean definition
 	 * @param bd the original bean definition (Root/ChildBeanDefinition)
 	 * @param containingBd the containing bean definition in case of inner bean,
-	 * or <code>null</code> in case of a top-level bean
+	 * or {@code null} in case of a top-level bean
 	 * @return a (potentially merged) RootBeanDefinition for the given bean
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
@@ -1234,8 +1234,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param mbd the merged bean definition to determine the class for
 	 * @param beanName the name of the bean (for error handling purposes)
 	 * @param typesToMatch the types to match in case of internal type matching purposes
-	 * (also signals that the returned <code>Class</code> will never be exposed to application code)
-	 * @return the resolved bean class (or <code>null</code> if none)
+	 * (also signals that the returned {@code Class} will never be exposed to application code)
+	 * @return the resolved bean class (or {@code null} if none)
 	 * @throws CannotLoadBeanClassException if we failed to load the class
 	 */
 	protected Class<?> resolveBeanClass(final RootBeanDefinition mbd, String beanName, final Class<?>... typesToMatch)
@@ -1313,8 +1313,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition to determine the type for
 	 * @param typesToMatch the types to match in case of internal type matching purposes
-	 * (also signals that the returned <code>Class</code> will never be exposed to application code)
-	 * @return the type of the bean, or <code>null</code> if not predictable
+	 * (also signals that the returned {@code Class} will never be exposed to application code)
+	 * @return the type of the bean, or {@code null} if not predictable
 	 */
 	protected Class<?> predictBeanType(String beanName, RootBeanDefinition mbd, Class<?>... typesToMatch) {
 		if (mbd.getFactoryMethodName() != null) {
@@ -1337,15 +1337,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Determine the bean type for the given FactoryBean definition, as far as possible.
 	 * Only called if there is no singleton instance registered for the target bean already.
-	 * <p>The default implementation creates the FactoryBean via <code>getBean</code>
-	 * to call its <code>getObjectType</code> method. Subclasses are encouraged to optimize
+	 * <p>The default implementation creates the FactoryBean via {@code getBean}
+	 * to call its {@code getObjectType} method. Subclasses are encouraged to optimize
 	 * this, typically by just instantiating the FactoryBean but not populating it yet,
-	 * trying whether its <code>getObjectType</code> method already returns a type.
+	 * trying whether its {@code getObjectType} method already returns a type.
 	 * If no type found, a full FactoryBean creation as performed by this implementation
 	 * should be used as fallback.
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
-	 * @return the type for the bean if determinable, or <code>null</code> else
+	 * @return the type for the bean if determinable, or {@code null} else
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 * @see #getBean(String)
 	 */
@@ -1381,7 +1381,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Determine whether the specified bean is eligible for having
 	 * its bean definition metadata cached.
 	 * @param beanName the name of the bean
-	 * @return <code>true</code> if the bean's metadata may be cached
+	 * @return {@code true} if the bean's metadata may be cached
 	 * at this point already
 	 */
 	protected boolean isBeanEligibleForMetadataCaching(String beanName) {
@@ -1392,7 +1392,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * Remove the singleton instance (if any) for the given bean name,
 	 * but only if it hasn't been used for other purposes than type checking.
 	 * @param beanName the name of the bean
-	 * @return <code>true</code> if actually removed, <code>false</code> otherwise
+	 * @return {@code true} if actually removed, {@code false} otherwise
 	 */
 	protected boolean removeSingletonIfCreatedForTypeCheckOnly(String beanName) {
 		if (!this.alreadyCreated.containsKey(beanName)) {
@@ -1512,7 +1512,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	/**
 	 * Check if this bean factory contains a bean definition with the given name.
 	 * Does not consider any hierarchy this factory may participate in.
-	 * Invoked by <code>containsBean</code> when no cached singleton instance is found.
+	 * Invoked by {@code containsBean} when no cached singleton instance is found.
 	 * <p>Depending on the nature of the concrete bean factory implementation,
 	 * this operation might be expensive (for example, because of directory lookups
 	 * in external registries). However, for listable bean factories, this usually
@@ -1537,7 +1537,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * public interface there. The same implementation can serve for both this
 	 * template method and the public interface method in that case.
 	 * @param beanName the name of the bean to find a definition for
-	 * @return the BeanDefinition for this prototype name (never <code>null</code>)
+	 * @return the BeanDefinition for this prototype name (never {@code null})
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException
 	 * if the bean definition cannot be resolved
 	 * @throws BeansException in case of errors
@@ -1557,7 +1557,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @param beanName the name of the bean
 	 * @param mbd the merged bean definition for the bean
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
-	 * static factory method. This parameter must be <code>null</code> except in this case.
+	 * static factory method. This parameter must be {@code null} except in this case.
 	 * @return a new instance of the bean
 	 * @throws BeanCreationException if the bean could not be created
 	 */

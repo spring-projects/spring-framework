@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * or from a surrounding JDO-intercepted method), the interceptor simply participates in it.
  *
  * <p>Application code must retrieve a JDO PersistenceManager via the
- * <code>PersistenceManagerFactoryUtils.getPersistenceManager</code> method,
+ * {@code PersistenceManagerFactoryUtils.getPersistenceManager} method,
  * to be able to detect a thread-bound PersistenceManager. It is preferable to use
- * <code>getPersistenceManager</code> with allowCreate=false, if the code relies on
+ * {@code getPersistenceManager} with allowCreate=false, if the code relies on
  * the interceptor to provide proper PersistenceManager handling. Typically, the code
  * will look like as follows:
  *
@@ -44,9 +44,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * }</pre>
  *
  * <p>Note that this interceptor automatically translates JDOExceptions, via
- * delegating to the <code>PersistenceManagerFactoryUtils.convertJdoAccessException</code>
+ * delegating to the {@code PersistenceManagerFactoryUtils.convertJdoAccessException}
  * method that converts them to exceptions that are compatible with the
- * <code>org.springframework.dao</code> exception hierarchy (like JdoTemplate does).
+ * {@code org.springframework.dao} exception hierarchy (like JdoTemplate does).
  * This can be turned off if the raw exceptions are preferred.
  *
  * <p>This class can be considered a declarative alternative to JdoTemplate's
@@ -80,7 +80,7 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 
 	/**
 	 * Set whether to convert any JDOException raised to a Spring DataAccessException,
-	 * compatible with the <code>org.springframework.dao</code> exception hierarchy.
+	 * compatible with the {@code org.springframework.dao} exception hierarchy.
 	 * <p>Default is "true". Turn this flag off to let the caller receive raw exceptions
 	 * as-is, without any wrapping.
 	 * @see org.springframework.dao.DataAccessException

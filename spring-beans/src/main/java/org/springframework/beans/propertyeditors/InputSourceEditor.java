@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.core.io.ResourceEditor;
 import org.springframework.util.Assert;
 
 /**
- * Editor for <code>org.xml.sax.InputSource</code>, converting from a
+ * Editor for {@code org.xml.sax.InputSource}, converting from a
  * Spring resource location String to a SAX InputSource object.
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
@@ -37,8 +37,8 @@ import org.springframework.util.Assert;
  * @see org.xml.sax.InputSource
  * @see org.springframework.core.io.ResourceEditor
  * @see org.springframework.core.io.ResourceLoader
- * @see org.springframework.beans.propertyeditors.URLEditor
- * @see org.springframework.beans.propertyeditors.FileEditor
+ * @see URLEditor
+ * @see FileEditor
  */
 public class InputSourceEditor extends PropertyEditorSupport {
 

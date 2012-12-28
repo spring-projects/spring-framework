@@ -1,7 +1,6 @@
-
 /**
  *
- * Classes supporting the <code>org.springframework.web.client</code> package.
+ * Classes supporting the {@code org.springframework.web.client} package.
  * Contains a base class for RestTemplate usage.
  *
  */

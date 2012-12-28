@@ -106,7 +106,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> getClass(String attributeName) {
-		return (Class<T>)doGet(attributeName, Class.class);
+		return doGet(attributeName, Class.class);
 	}
 
 	public Class<?>[] getClassArray(String attributeName) {

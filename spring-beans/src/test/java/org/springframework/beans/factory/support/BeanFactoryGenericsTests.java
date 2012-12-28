@@ -30,8 +30,9 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 import test.beans.GenericBean;
 import test.beans.GenericIntegerBean;
 import test.beans.GenericSetOfIntegerBean;
@@ -391,6 +392,7 @@ public class BeanFactoryGenericsTests {
 	public void testGenericMapWithCollectionValueConstructor() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
 			}
@@ -547,6 +549,7 @@ public class BeanFactoryGenericsTests {
 	public void testGenericMapWithCollectionValueFactoryMethod() throws MalformedURLException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
+			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {
 				registry.registerCustomEditor(Number.class, new CustomNumberEditor(Integer.class, false));
 			}
@@ -624,23 +627,23 @@ public class BeanFactoryGenericsTests {
 
 	/**
 	 * Tests support for parameterized {@code factory-method} declarations such
-	 * as EasyMock's {@code createMock()} method which has the following signature.
+	 * as Mockito {@code mock()} method which has the following signature.
 	 *
 	 * <pre>{@code
-	 * public static <T> T createMock(Class<T> toMock)
+	 * public static <T> T mock(Class<T> classToMock)
 	 * }</pre>
 	 *
+	 * See SPR-9493
 	 * @since 3.2
-	 * @see SPR-9493
 	 */
 	@Test
 	public void parameterizedFactoryMethod() {
-		RootBeanDefinition rbd = new RootBeanDefinition(EasyMock.class);
-		rbd.setFactoryMethodName("createMock");
+		RootBeanDefinition rbd = new RootBeanDefinition(Mockito.class);
+		rbd.setFactoryMethodName("mock");
 		rbd.getConstructorArgumentValues().addGenericArgumentValue(Runnable.class);
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-		bf.registerBeanDefinition("easyMock", rbd);
+		bf.registerBeanDefinition("mock", rbd);
 
 		Map<String, Runnable> beans = bf.getBeansOfType(Runnable.class);
 		assertEquals(1, beans.size());

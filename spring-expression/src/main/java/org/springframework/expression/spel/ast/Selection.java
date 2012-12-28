@@ -54,7 +54,7 @@ public class Selection extends SpelNodeImpl {
 	private final boolean nullSafe;
 
 	public Selection(boolean nullSafe, int variant,int pos,SpelNodeImpl expression) {
-		super(pos,expression); 
+		super(pos,expression);
 		this.nullSafe = nullSafe;
 		this.variant = variant;
 	}
@@ -153,7 +153,7 @@ public class Selection extends SpelNodeImpl {
 			}
 		} else {
 			if (operand==null) {
-				if (nullSafe) { 
+				if (nullSafe) {
 					return ValueRef.NullValueRef.instance;
 				} else {
 					throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
@@ -162,7 +162,7 @@ public class Selection extends SpelNodeImpl {
 			} else {
 				throw new SpelEvaluationException(getStartPosition(), SpelMessage.INVALID_TYPE_FOR_SELECTION,
 						operand.getClass().getName());
-			}				
+			}
 		}
 	}
 

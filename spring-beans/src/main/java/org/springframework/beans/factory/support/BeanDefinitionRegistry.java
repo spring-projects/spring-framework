@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public interface BeanDefinitionRegistry extends AliasRegistry {
 	/**
 	 * Return the BeanDefinition for the given bean name.
 	 * @param beanName name of the bean to find a definition for
-	 * @return the BeanDefinition for the given name (never <code>null</code>)
+	 * @return the BeanDefinition for the given name (never {@code null})
 	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 */
 	BeanDefinition getBeanDefinition(String beanName) throws NoSuchBeanDefinitionException;

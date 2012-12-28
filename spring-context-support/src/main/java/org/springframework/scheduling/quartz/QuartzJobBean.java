@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@ public abstract class QuartzJobBean implements Job {
 
 	/**
 	 * This implementation applies the passed-in job data map as bean property
-	 * values, and delegates to <code>executeInternal</code> afterwards.
+	 * values, and delegates to {@code executeInternal} afterwards.
 	 * @see #executeInternal
 	 */
 	public final void execute(JobExecutionContext context) throws JobExecutionException {

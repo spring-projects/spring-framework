@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @author Rod Johnson
  * @since 16.03.2003
  */
+@SuppressWarnings("serial")
 public class DefaultTransactionAttribute extends DefaultTransactionDefinition implements TransactionAttribute {
 
 	private String qualifier;
@@ -97,7 +98,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 
 	/**
 	 * Return an identifying description for this transaction attribute.
-	 * <p>Available to subclasses, for inclusion in their <code>toString()</code> result.
+	 * <p>Available to subclasses, for inclusion in their {@code toString()} result.
 	 */
 	protected final StringBuilder getAttributeDescription() {
 		StringBuilder result = getDefinitionDescription();

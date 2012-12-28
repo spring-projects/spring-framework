@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,16 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
  */
 public class ConfigurableJasperReportsViewWithWriterTests extends AbstractConfigurableJasperReportsViewTests {
 
+	@Override
 	protected AbstractJasperReportsView getViewImplementation() {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setExporterClass(JRPdfExporter.class);
 		view.setUseWriter(false);
 		view.setContentType("text/html");
-		return view;       
+		return view;
 	}
 
+	@Override
 	protected String getDesiredContentType() {
 		return "text/html";
 	}
