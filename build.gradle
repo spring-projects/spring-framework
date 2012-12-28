@@ -110,7 +110,7 @@ configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
 	}
 }
 
-configure(subprojects) { subproject ->
+configure(subprojects - project(":spring-build-junit")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
@@ -157,6 +157,34 @@ configure(subprojects) { subproject ->
 		archives sourcesJar
 		archives javadocJar
 	}
+}
+
+configure(allprojects - project(":spring-build-junit")) {
+	dependencies {
+		testCompile(project(":spring-build-junit"))
+	}
+
+	eclipse.classpath.file.whenMerged { classpath ->
+		classpath.entries.find{it.path == "/spring-build-junit"}.exported = false
+	}
+
+	test.systemProperties.put("testGroups", properties.get("testGroups"))
+}
+
+project("spring-build-junit") {
+	description = "Build-time JUnit dependencies and utilities"
+
+	// NOTE: This is an internal project and is not published.
+
+	dependencies {
+		compile("commons-logging:commons-logging:1.1.1")
+		compile("junit:junit:${junitVersion}")
+		compile("org.hamcrest:hamcrest-all:1.3")
+		compile("org.easymock:easymock:${easymockVersion}")
+	}
+
+	// Don't actually generate any artifacts
+	configurations.archives.artifacts.clear()
 }
 
 

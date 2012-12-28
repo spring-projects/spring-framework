@@ -18,10 +18,13 @@ package org.springframework.scheduling.annotation;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +50,11 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class ScheduledAndTransactionalAnnotationIntegrationTests {
+
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Test
 	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {

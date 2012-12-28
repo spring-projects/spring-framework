@@ -35,6 +35,8 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
@@ -398,6 +400,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance1() {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -415,6 +418,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance2() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -442,6 +446,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance3() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");

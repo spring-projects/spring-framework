@@ -72,6 +72,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -1693,10 +1695,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1713,10 +1713,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithDependencyCheckIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(LifecycleBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1759,10 +1757,8 @@ public class DefaultListableBeanFactoryTests {
 	@Test
 	@Ignore  // TODO re-enable when ConstructorResolver TODO sorted out
 	public void testPrototypeCreationWithConstructorArgumentsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1809,10 +1805,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1833,10 +1827,8 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test
 	public void testPrototypeCreationWithPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -1882,10 +1874,8 @@ public class DefaultListableBeanFactoryTests {
 	 */
 	@Test
 	public void testPrototypeCreationWithResolvedPropertiesIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition rbd = new RootBeanDefinition(TestBean.class);
 		rbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
@@ -2200,6 +2190,7 @@ public class DefaultListableBeanFactoryTests {
 	 */
 	@Test(timeout=1000)
 	public void testByTypeLookupIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		for (int i = 0; i < 1000; i++) {
