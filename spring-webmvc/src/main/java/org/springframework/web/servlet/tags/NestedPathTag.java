@@ -111,10 +111,12 @@ public class NestedPathTag extends TagSupport implements TryCatchFinally {
 		return EVAL_PAGE;
 	}
 
+	@Override
 	public void doCatch(Throwable throwable) throws Throwable {
 		throw throwable;
 	}
 
+	@Override
 	public void doFinally() {
 		this.previousNestedPath = null;
 	}

@@ -49,19 +49,23 @@ public class ServletContextFactoryBean implements FactoryBean<ServletContext>, S
 	private ServletContext servletContext;
 
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
 
+	@Override
 	public ServletContext getObject() {
 		return this.servletContext;
 	}
 
+	@Override
 	public Class<? extends ServletContext> getObjectType() {
 		return (this.servletContext != null ? this.servletContext.getClass() : ServletContext.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

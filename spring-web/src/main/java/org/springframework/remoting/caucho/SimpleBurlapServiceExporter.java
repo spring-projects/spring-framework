@@ -50,6 +50,7 @@ public class SimpleBurlapServiceExporter extends BurlapExporter implements HttpH
 	/**
 	 * Processes the incoming Burlap request and creates a Burlap response.
 	 */
+	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		if (!"POST".equals(exchange.getRequestMethod())) {
 			exchange.getResponseHeaders().set("Allow", "POST");

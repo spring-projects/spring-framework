@@ -64,6 +64,7 @@ public class ContentRequestMatchers {
 	 */
 	public RequestMatcher contentType(final MediaType expectedContentType) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MediaType actualContentType = request.getHeaders().getContentType();
 				assertTrue("Content type not set", actualContentType != null);
@@ -77,6 +78,7 @@ public class ContentRequestMatchers {
 	 */
 	public RequestMatcher string(final Matcher<? super String> matcher) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				assertThat("Request content", mockRequest.getBodyAsString(), matcher);
@@ -89,6 +91,7 @@ public class ContentRequestMatchers {
 	 */
 	public RequestMatcher string(final String expectedContent) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				assertEquals("Request content", expectedContent, mockRequest.getBodyAsString());
@@ -101,6 +104,7 @@ public class ContentRequestMatchers {
 	 */
 	public RequestMatcher bytes(final byte[] expectedContent) {
 		return new RequestMatcher() {
+			@Override
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
@@ -157,6 +161,7 @@ public class ContentRequestMatchers {
 	 */
 	private abstract static class AbstractXmlRequestMatcher implements RequestMatcher {
 
+		@Override
 		public final void match(ClientHttpRequest request) throws IOException, AssertionError {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;

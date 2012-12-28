@@ -73,11 +73,13 @@ public class SchedulerAccessorBean extends SchedulerAccessor implements BeanFact
 		return this.scheduler;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws SchedulerException {
 		if (this.scheduler == null) {
 			if (this.schedulerName != null) {

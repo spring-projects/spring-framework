@@ -231,6 +231,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Return the ClassLoader that this pattern resolver works with
 	 * (never {@code null}).
 	 */
+	@Override
 	public ClassLoader getClassLoader() {
 		return getResourceLoader().getClassLoader();
 	}
@@ -253,10 +254,12 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 
+	@Override
 	public Resource getResource(String location) {
 		return getResourceLoader().getResource(location);
 	}
 
+	@Override
 	public Resource[] getResources(String locationPattern) throws IOException {
 		Assert.notNull(locationPattern, "Location pattern must not be null");
 		if (locationPattern.startsWith(CLASSPATH_ALL_URL_PREFIX)) {
@@ -674,6 +677,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			this.rootPath = (rootPath.length() == 0 || rootPath.endsWith("/") ? rootPath : rootPath + "/");
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (Object.class.equals(method.getDeclaringClass())) {

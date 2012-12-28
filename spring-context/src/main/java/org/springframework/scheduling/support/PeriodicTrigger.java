@@ -94,6 +94,7 @@ public class PeriodicTrigger implements Trigger {
 	/**
 	 * Returns the time after which a task should run again.
 	 */
+	@Override
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		if (triggerContext.lastScheduledExecutionTime() == null) {
 			return new Date(System.currentTimeMillis() + this.initialDelay);

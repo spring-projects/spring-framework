@@ -43,6 +43,7 @@ class JBossMCTranslatorAdapter implements InvocationHandler {
 		this.transformer = transformer;
 	}
 
+	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String name = method.getName();
 

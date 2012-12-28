@@ -63,6 +63,7 @@ public class SpringBeanJobFactory extends AdaptableJobFactory implements Schedul
 		this.ignoredUnknownProperties = ignoredUnknownProperties;
 	}
 
+	@Override
 	public void setSchedulerContext(SchedulerContext schedulerContext) {
 		this.schedulerContext = schedulerContext;
 	}

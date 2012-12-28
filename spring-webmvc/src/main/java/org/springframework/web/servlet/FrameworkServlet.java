@@ -1054,6 +1054,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 	 */
 	private class ContextRefreshListener implements ApplicationListener<ContextRefreshedEvent> {
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			FrameworkServlet.this.onApplicationEvent(event);
 		}

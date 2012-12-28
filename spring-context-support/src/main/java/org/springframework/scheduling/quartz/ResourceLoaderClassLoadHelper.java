@@ -62,6 +62,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 	}
 
 
+	@Override
 	public void initialize() {
 		if (this.resourceLoader == null) {
 			this.resourceLoader = SchedulerFactoryBean.getConfigTimeResourceLoader();
@@ -71,6 +72,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		}
 	}
 
+	@Override
 	public Class loadClass(String name) throws ClassNotFoundException {
 		return this.resourceLoader.getClassLoader().loadClass(name);
 	}
@@ -80,6 +82,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		return loadClass(name);
 	}
 
+	@Override
 	public URL getResource(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
 		try {
@@ -94,6 +97,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		}
 	}
 
+	@Override
 	public InputStream getResourceAsStream(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
 		try {
@@ -108,6 +112,7 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 		}
 	}
 
+	@Override
 	public ClassLoader getClassLoader() {
 		return this.resourceLoader.getClassLoader();
 	}

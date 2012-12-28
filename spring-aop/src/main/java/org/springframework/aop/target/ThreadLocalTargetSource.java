@@ -75,6 +75,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * We look for a target held in a ThreadLocal. If we don't find one,
 	 * we create one and bind it to the thread. No synchronization is required.
 	 */
+	@Override
 	public Object getTarget() throws BeansException {
 		++this.invocationCount;
 		Object target = this.targetInThread.get();
@@ -102,6 +103,7 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	 * Dispose of targets if necessary; clear ThreadLocal.
 	 * @see #destroyPrototypeInstance
 	 */
+	@Override
 	public void destroy() {
 		logger.debug("Destroying ThreadLocalTargetSource bindings");
 		synchronized (this.targetSet) {
@@ -115,14 +117,17 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	}
 
 
+	@Override
 	public int getInvocationCount() {
 		return this.invocationCount;
 	}
 
+	@Override
 	public int getHitCount() {
 		return this.hitCount;
 	}
 
+	@Override
 	public int getObjectCount() {
 		synchronized (this.targetSet) {
 			return this.targetSet.size();

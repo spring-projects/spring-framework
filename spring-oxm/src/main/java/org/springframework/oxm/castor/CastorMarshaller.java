@@ -380,10 +380,12 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 		this.clearCollections = clearCollections;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
+	@Override
 	public final void afterPropertiesSet() throws CastorMappingException, IOException {
 		if (logger.isInfoEnabled()) {
 			if (!ObjectUtils.isEmpty(this.mappingLocations)) {
@@ -448,6 +450,7 @@ public class CastorMarshaller extends AbstractMarshaller implements Initializing
 	/**
 	 * Returns {@code true} for all classes, i.e. Castor supports arbitrary classes.
 	 */
+	@Override
 	public boolean supports(Class<?> clazz) {
 		return true;
 	}

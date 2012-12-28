@@ -37,6 +37,7 @@ public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableA
 	 * @return {@link ProxyAsyncConfiguration} or {@code AspectJAsyncConfiguration} for
 	 * {@code PROXY} and {@code ASPECTJ} values of {@link EnableAsync#mode()}, respectively
 	 */
+	@Override
 	public String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:

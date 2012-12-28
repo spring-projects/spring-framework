@@ -52,6 +52,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 	public static final String MISSING_FIELD_ERROR_CODE = "required";
 
 
+	@Override
 	public void processMissingFieldError(String missingField, BindingResult bindingResult) {
 		// Create field error with code "required".
 		String fixedField = bindingResult.getNestedPath() + missingField;
@@ -62,6 +63,7 @@ public class DefaultBindingErrorProcessor implements BindingErrorProcessor {
 				codes, arguments, "Field '" + fixedField + "' is required"));
 	}
 
+	@Override
 	public void processPropertyAccessException(PropertyAccessException ex, BindingResult bindingResult) {
 		// Create field error with the exceptions's code, e.g. "typeMismatch".
 		String field = ex.getPropertyName();

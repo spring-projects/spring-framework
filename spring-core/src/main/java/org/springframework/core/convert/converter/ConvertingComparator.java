@@ -77,6 +77,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 	}
 
 
+	@Override
 	public int compare(S o1, S o2) {
 		T c1 = this.converter.convert(o1);
 		T c2 = this.converter.convert(o2);
@@ -94,6 +95,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 			Comparator<K> comparator) {
 		return new ConvertingComparator<Map.Entry<K,V>, K>(comparator, new Converter<Map.Entry<K, V>, K>() {
 
+			@Override
 			public K convert(Map.Entry<K, V> source) {
 				return source.getKey();
 			}
@@ -111,6 +113,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 			Comparator<V> comparator) {
 		return new ConvertingComparator<Map.Entry<K,V>, V>(comparator, new Converter<Map.Entry<K, V>, V>() {
 
+			@Override
 			public V convert(Map.Entry<K, V> source) {
 				return source.getValue();
 			}
@@ -135,6 +138,7 @@ public class ConvertingComparator<S, T> implements Comparator<S> {
 			this.targetType = targetType;
 		}
 
+		@Override
 		public T convert(S source) {
 			return this.conversionService.convert(source, this.targetType);
 		}

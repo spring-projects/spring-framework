@@ -72,6 +72,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/**
 	 * Set the {@link BeanFactory} in which this aspect must configure beans.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
@@ -96,6 +97,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	/**
 	 * Check that a {@link BeanFactory} has been set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		Assert.notNull(this.beanFactory, "BeanFactory must be set");
 	}
@@ -104,6 +106,7 @@ public class BeanConfigurerSupport implements BeanFactoryAware, InitializingBean
 	 * Release references to the {@link BeanFactory} and
 	 * {@link BeanWiringInfoResolver} when the container is destroyed.
 	 */
+	@Override
 	public void destroy() {
 		this.beanFactory = null;
 		this.beanWiringInfoResolver = null;

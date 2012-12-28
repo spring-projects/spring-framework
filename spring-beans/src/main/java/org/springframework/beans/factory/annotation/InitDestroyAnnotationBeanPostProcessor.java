@@ -112,11 +112,13 @@ public class InitDestroyAnnotationBeanPostProcessor
 	  this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 	  return this.order;
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			LifecycleMetadata metadata = findLifecycleMetadata(beanType);
@@ -124,6 +126,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 	}
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
@@ -138,10 +141,12 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {

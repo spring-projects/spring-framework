@@ -35,6 +35,7 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
 			Connection connection = dataSource.getConnection();

@@ -52,6 +52,7 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 	}
 
 
+	@Override
 	public Object convert(byte[] source) {
 		ByteArrayInputStream byteStream = new ByteArrayInputStream(source);
 		try {

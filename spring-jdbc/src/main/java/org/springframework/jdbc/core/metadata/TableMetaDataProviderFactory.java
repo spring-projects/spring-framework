@@ -62,6 +62,7 @@ public class TableMetaDataProviderFactory {
 		try {
 			return (TableMetaDataProvider) JdbcUtils.extractDatabaseMetaData(dataSource,
 					new DatabaseMetaDataCallback() {
+						@Override
 						public Object processMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 							String databaseProductName =
 									JdbcUtils.commonDatabaseName(databaseMetaData.getDatabaseProductName());

@@ -203,10 +203,12 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	}
 
 
+	@Override
 	public void run() {
 		destroy();
 	}
 
+	@Override
 	public void destroy() {
 		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
@@ -221,6 +223,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			try {
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							((DisposableBean) bean).destroy();
 							return null;
@@ -258,6 +261,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		try {
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedAction<Method>() {
+					@Override
 					public Method run() {
 						return findDestroyMethod();
 					}
@@ -298,6 +302,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		try {
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
+					@Override
 					public Object run() {
 						ReflectionUtils.makeAccessible(destroyMethod);
 						return null;
@@ -305,6 +310,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				});
 				try {
 					AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
+						@Override
 						public Object run() throws Exception {
 							destroyMethod.invoke(bean, args);
 							return null;

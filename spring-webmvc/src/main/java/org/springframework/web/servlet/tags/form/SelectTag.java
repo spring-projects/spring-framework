@@ -216,6 +216,7 @@ public class SelectTag extends AbstractHtmlInputElementTag {
 							ObjectUtils.getDisplayString(evaluate("itemLabel", getItemLabel())) : null);
 					OptionWriter optionWriter =
 							new OptionWriter(itemsObject, getBindStatus(), valueProperty, labelProperty, isHtmlEscape()) {
+								@Override
 								protected String processOptionValue(String resolvedValue) {
 									return processFieldValue(selectName, resolvedValue, "option");
 								}

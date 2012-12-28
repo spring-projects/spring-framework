@@ -263,10 +263,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -275,10 +277,12 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 	}
 
 
+	@Override
 	public boolean supports(Object handler) {
 		return getMethodResolver(handler).hasHandlerMethods();
 	}
 
+	@Override
 	public void handleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
 		Object returnValue = doHandle(request, response, handler);
 		if (returnValue != null) {
@@ -286,16 +290,19 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 	}
 
+	@Override
 	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
 		checkAndPrepare(request, response);
 		return doHandle(request, response, handler);
 	}
 
+	@Override
 	public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler) throws Exception {
 		checkAndPrepare(request, response);
 		return doHandle(request, response, handler);
 	}
 
+	@Override
 	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
 		Object returnValue = doHandle(request, response, handler);
 		if (returnValue != null) {

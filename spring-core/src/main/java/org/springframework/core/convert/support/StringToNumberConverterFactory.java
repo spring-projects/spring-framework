@@ -40,6 +40,7 @@ import org.springframework.util.NumberUtils;
  */
 final class StringToNumberConverterFactory implements ConverterFactory<String, Number> {
 
+	@Override
 	public <T extends Number> Converter<String, T> getConverter(Class<T> targetType) {
 		return new StringToNumber<T>(targetType);
 	}
@@ -52,6 +53,7 @@ final class StringToNumberConverterFactory implements ConverterFactory<String, N
 			this.targetType = targetType;
 		}
 
+		@Override
 		public T convert(String source) {
 			if (source.length() == 0) {
 				return null;

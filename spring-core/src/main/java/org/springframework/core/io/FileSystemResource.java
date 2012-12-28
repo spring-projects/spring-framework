@@ -109,6 +109,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation opens a FileInputStream for the underlying file.
 	 * @see java.io.FileInputStream
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		return new FileInputStream(this.file);
 	}
@@ -172,6 +173,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * path of the file.
 	 * @see java.io.File#getAbsolutePath()
 	 */
+	@Override
 	public String getDescription() {
 		return "file [" + this.file.getAbsolutePath() + "]";
 	}
@@ -185,6 +187,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * @see java.io.File#canWrite()
 	 * @see java.io.File#isDirectory()
 	 */
+	@Override
 	public boolean isWritable() {
 		return (this.file.canWrite() && !this.file.isDirectory());
 	}
@@ -193,6 +196,7 @@ public class FileSystemResource extends AbstractResource implements WritableReso
 	 * This implementation opens a FileOutputStream for the underlying file.
 	 * @see java.io.FileOutputStream
 	 */
+	@Override
 	public OutputStream getOutputStream() throws IOException {
 		return new FileOutputStream(this.file);
 	}

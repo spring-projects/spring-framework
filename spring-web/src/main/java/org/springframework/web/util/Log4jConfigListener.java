@@ -41,10 +41,12 @@ import javax.servlet.ServletContextListener;
  */
 public class Log4jConfigListener implements ServletContextListener {
 
+	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		Log4jWebConfigurer.initLogging(event.getServletContext());
 	}
 
+	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		Log4jWebConfigurer.shutdownLogging(event.getServletContext());
 	}

@@ -112,6 +112,7 @@ public abstract class JpaAccessor extends EntityManagerFactoryAccessor implement
 	 * Eagerly initialize the JPA dialect, creating a default one
 	 * for the specified EntityManagerFactory if none set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		if (emf == null && getEntityManager() == null) {

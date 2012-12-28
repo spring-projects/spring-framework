@@ -48,6 +48,7 @@ public abstract class AbstractClientHttpRequestFactoryWrapper implements ClientH
 	 * with the wrapped request factory provided to the
 	 * {@linkplain #AbstractClientHttpRequestFactoryWrapper(ClientHttpRequestFactory) constructor}.
 	 */
+	@Override
 	public final ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		return createRequest(uri, httpMethod, requestFactory);
 	}

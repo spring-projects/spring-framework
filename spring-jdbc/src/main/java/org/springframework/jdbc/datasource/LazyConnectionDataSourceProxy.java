@@ -274,6 +274,7 @@ public class LazyConnectionDataSourceProxy extends DelegatingDataSource {
 			this.password = password;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

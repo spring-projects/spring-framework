@@ -133,6 +133,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * Sets the id of this context to the bean name by default,
 	 * for cases where the context instance is itself defined as a bean.
 	 */
+	@Override
 	public void setBeanName(String name) {
 		if (!this.setIdCalled) {
 			super.setId(name);
@@ -144,6 +145,7 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * Triggers {@link #refresh()} if not refreshed in the concrete context's
 	 * constructor already.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (!isActive()) {
 			refresh();

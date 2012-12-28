@@ -50,6 +50,7 @@ public class SimpleTransactionFactory implements TransactionFactory {
 	}
 
 
+	@Override
 	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
 		if (timeout >= 0) {
 			this.transactionManager.setTransactionTimeout(timeout);
@@ -58,6 +59,7 @@ public class SimpleTransactionFactory implements TransactionFactory {
 		return new ManagedTransactionAdapter(this.transactionManager);
 	}
 
+	@Override
 	public boolean supportsResourceAdapterManagedTransactions() {
 		return false;
 	}

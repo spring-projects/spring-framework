@@ -47,22 +47,27 @@ public class LocalCacheProviderProxy implements CacheProvider {
 	}
 
 
+	@Override
 	public Cache buildCache(String regionName, Properties properties) throws CacheException {
 		return this.cacheProvider.buildCache(regionName, properties);
 	}
 
+	@Override
 	public long nextTimestamp() {
 		return this.cacheProvider.nextTimestamp();
 	}
 
+	@Override
 	public void start(Properties properties) throws CacheException {
 		this.cacheProvider.start(properties);
 	}
 
+	@Override
 	public void stop() {
 		this.cacheProvider.stop();
 	}
 
+	@Override
 	public boolean isMinimalPutsEnabledByDefault() {
 		return this.cacheProvider.isMinimalPutsEnabledByDefault();
 	}

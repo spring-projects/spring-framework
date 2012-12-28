@@ -171,6 +171,7 @@ public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 		return this.status.getErrors();
 	}
 
+	@Override
 	public final PropertyEditor getEditor() {
 		return this.status.getEditor();
 	}

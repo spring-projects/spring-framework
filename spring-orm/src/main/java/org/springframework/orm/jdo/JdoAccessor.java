@@ -131,6 +131,7 @@ public abstract class JdoAccessor implements InitializingBean {
 	 * Eagerly initialize the JDO dialect, creating a default one
 	 * for the specified PersistenceManagerFactory if none set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");

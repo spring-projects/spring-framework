@@ -64,6 +64,7 @@ public abstract class AbstractLobStreamingResultSetExtractor implements ResultSe
 	 * @see #streamData
 	 * @see org.springframework.jdbc.LobRetrievalFailureException
 	 */
+	@Override
 	public final Object extractData(ResultSet rs) throws SQLException, DataAccessException {
 		if (!rs.next()) {
 			handleNoRowFound();

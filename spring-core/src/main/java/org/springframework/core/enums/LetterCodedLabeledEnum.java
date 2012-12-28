@@ -52,6 +52,7 @@ public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	}
 
 
+	@Override
 	public Comparable getCode() {
 		return code;
 	}

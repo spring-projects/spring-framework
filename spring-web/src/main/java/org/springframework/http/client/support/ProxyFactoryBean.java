@@ -63,6 +63,7 @@ public class ProxyFactoryBean implements FactoryBean<Proxy>, InitializingBean {
 		this.port = port;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws IllegalArgumentException {
 		Assert.notNull(type, "'type' must not be null");
 		Assert.hasLength(hostname, "'hostname' must not be empty");
@@ -73,14 +74,17 @@ public class ProxyFactoryBean implements FactoryBean<Proxy>, InitializingBean {
 
 	}
 
+	@Override
 	public Proxy getObject() {
 		return proxy;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return Proxy.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

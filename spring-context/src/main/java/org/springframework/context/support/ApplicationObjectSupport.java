@@ -56,6 +56,7 @@ public abstract class ApplicationObjectSupport implements ApplicationContextAwar
 	private MessageSourceAccessor messageSourceAccessor;
 
 
+	@Override
 	public final void setApplicationContext(ApplicationContext context) throws BeansException {
 		if (context == null && !isContextRequired()) {
 			// Reset internal context state.

@@ -410,6 +410,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	 * Initialize the UserTransaction as well as the TransactionManager handle.
 	 * @see #initUserTransactionAndTransactionManager()
 	 */
+	@Override
 	public void afterPropertiesSet() throws TransactionSystemException {
 		initUserTransactionAndTransactionManager();
 		checkUserTransactionAndTransactionManager();
@@ -1164,6 +1165,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 	// Implementation of TransactionFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public Transaction createTransaction(String name, int timeout) throws NotSupportedException, SystemException {
 		TransactionManager tm = getTransactionManager();
 		Assert.state(tm != null, "No JTA TransactionManager available");
@@ -1174,6 +1176,7 @@ public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		return new ManagedTransactionAdapter(tm);
 	}
 
+	@Override
 	public boolean supportsResourceAdapterManagedTransactions() {
 		return false;
 	}

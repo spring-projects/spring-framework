@@ -177,15 +177,18 @@ public abstract class ResourceHolderSupport implements ResourceHolder {
 	/**
 	 * Reset this resource holder - transactional state as well as reference count.
 	 */
+	@Override
 	public void reset() {
 		clear();
 		this.referenceCount = 0;
 	}
 
+	@Override
 	public void unbound() {
 		this.isVoid = true;
 	}
 
+	@Override
 	public boolean isVoid() {
 		return this.isVoid;
 	}

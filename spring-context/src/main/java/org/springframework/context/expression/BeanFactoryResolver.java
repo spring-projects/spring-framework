@@ -39,6 +39,7 @@ public class BeanFactoryResolver implements BeanResolver {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public Object resolve(EvaluationContext context, String beanName) throws AccessException {
 		try {
 			return this.beanFactory.getBean(beanName);

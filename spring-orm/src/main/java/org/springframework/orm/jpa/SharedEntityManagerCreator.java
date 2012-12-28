@@ -152,6 +152,7 @@ public abstract class SharedEntityManagerCreator {
 			}
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
@@ -287,6 +288,7 @@ public abstract class SharedEntityManagerCreator {
 			this.em = em;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Query interface coming in...
 

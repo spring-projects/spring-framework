@@ -242,6 +242,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		this.hibernateManagedSession = hibernateManagedSession;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
@@ -262,6 +263,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getSessionFactory();
 	}
@@ -652,6 +654,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			return this.sessionHolder.isRollbackOnly() ||
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());

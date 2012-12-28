@@ -75,14 +75,17 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	/**
 	 * Set the ServletContext that this WebApplicationContext runs in.
 	 */
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
 
+	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
+	@Override
 	public void setServletConfig(ServletConfig servletConfig) {
 		this.servletConfig = servletConfig;
 		if (servletConfig != null && this.servletContext == null) {
@@ -90,10 +93,12 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		}
 	}
 
+	@Override
 	public ServletConfig getServletConfig() {
 		return this.servletConfig;
 	}
 
+	@Override
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 		if (namespace != null) {
@@ -101,6 +106,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 		}
 	}
 
+	@Override
 	public String getNamespace() {
 		return this.namespace;
 	}
@@ -109,6 +115,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * The {@link StaticWebApplicationContext} class does not support this method.
 	 * @throws UnsupportedOperationException <b>always</b>
 	 */
+	@Override
 	public void setConfigLocation(String configLocation) {
 		if (configLocation != null) {
 			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
@@ -119,12 +126,14 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 	 * The {@link StaticWebApplicationContext} class does not support this method.
 	 * @throws UnsupportedOperationException <b>always</b>
 	 */
+	@Override
 	public void setConfigLocations(String[] configLocations) {
 		if (configLocations != null) {
 			throw new UnsupportedOperationException("StaticWebApplicationContext does not support config locations");
 		}
 	}
 
+	@Override
 	public String[] getConfigLocations() {
 		return null;
 	}
@@ -193,6 +202,7 @@ public class StaticWebApplicationContext extends StaticApplicationContext
 				this.getEnvironment().getPropertySources(), this.servletContext, this.servletConfig);
 	}
 
+	@Override
 	public Theme getTheme(String themeName) {
 		return this.themeSource.getTheme(themeName);
 	}

@@ -73,6 +73,7 @@ public class MimeMailMessage implements MailMessage {
 	}
 
 
+	@Override
 	public void setFrom(String from) throws MailParseException {
 		try {
 			this.helper.setFrom(from);
@@ -82,6 +83,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setReplyTo(String replyTo) throws MailParseException {
 		try {
 			this.helper.setReplyTo(replyTo);
@@ -91,6 +93,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setTo(String to) throws MailParseException {
 		try {
 			this.helper.setTo(to);
@@ -100,6 +103,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setTo(String[] to) throws MailParseException {
 		try {
 			this.helper.setTo(to);
@@ -109,6 +113,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setCc(String cc) throws MailParseException {
 		try {
 			this.helper.setCc(cc);
@@ -118,6 +123,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setCc(String[] cc) throws MailParseException {
 		try {
 			this.helper.setCc(cc);
@@ -127,6 +133,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setBcc(String bcc) throws MailParseException {
 		try {
 			this.helper.setBcc(bcc);
@@ -136,6 +143,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setBcc(String[] bcc) throws MailParseException {
 		try {
 			this.helper.setBcc(bcc);
@@ -145,6 +153,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setSentDate(Date sentDate) throws MailParseException {
 		try {
 			this.helper.setSentDate(sentDate);
@@ -154,6 +163,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setSubject(String subject) throws MailParseException {
 		try {
 			this.helper.setSubject(subject);
@@ -163,6 +173,7 @@ public class MimeMailMessage implements MailMessage {
 		}
 	}
 
+	@Override
 	public void setText(String text) throws MailParseException {
 		try {
 			this.helper.setText(text);

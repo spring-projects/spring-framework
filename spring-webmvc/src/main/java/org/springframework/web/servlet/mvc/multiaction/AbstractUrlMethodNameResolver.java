@@ -85,6 +85,7 @@ public abstract class AbstractUrlMethodNameResolver implements MethodNameResolve
 	 * Converts {@code null} values to NoSuchRequestHandlingMethodExceptions.
 	 * @see #getHandlerMethodNameForUrlPath
 	 */
+	@Override
 	public final String getHandlerMethodName(HttpServletRequest request)
 			throws NoSuchRequestHandlingMethodException {
 

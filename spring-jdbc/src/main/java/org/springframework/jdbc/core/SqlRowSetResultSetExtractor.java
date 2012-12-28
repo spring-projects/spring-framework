@@ -58,6 +58,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	}
 
 
+	@Override
 	public SqlRowSet extractData(ResultSet rs) throws SQLException {
 		return createSqlRowSet(rs);
 	}
@@ -120,6 +121,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 			}
 		}
 
+		@Override
 		public CachedRowSet createCachedRowSet() throws SQLException {
 			return this.rowSetFactory.createCachedRowSet();
 		}
@@ -131,6 +133,7 @@ public class SqlRowSetResultSetExtractor implements ResultSetExtractor<SqlRowSet
 	 */
 	private static class SunCachedRowSetFactory implements CachedRowSetFactory {
 
+		@Override
 		public CachedRowSet createCachedRowSet() throws SQLException {
 			return new com.sun.rowset.CachedRowSetImpl();
 		}

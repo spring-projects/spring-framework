@@ -88,6 +88,7 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 			this.entityManager = entityManager;
 		}
 
+		@Override
 		public Object createSavepoint() throws TransactionException {
 			this.savepointCounter++;
 			String savepointName = ConnectionHolder.SAVEPOINT_NAME_PREFIX + this.savepointCounter;
@@ -95,10 +96,12 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 			return savepointName;
 		}
 
+		@Override
 		public void rollbackToSavepoint(Object savepoint) throws TransactionException {
 			this.entityManager.rollbackToSavepoint((String) savepoint);
 		}
 
+		@Override
 		public void releaseSavepoint(Object savepoint) throws TransactionException {
 			this.entityManager.releaseSavepoint((String) savepoint);
 		}
@@ -120,10 +123,12 @@ public class OpenJpaDialect extends DefaultJpaDialect {
 			this.entityManager = entityManager;
 		}
 
+		@Override
 		public Connection getConnection() {
 			return (Connection) this.entityManager.getConnection();
 		}
 
+		@Override
 		public void releaseConnection(Connection con) {
 			JdbcUtils.closeConnection(con);
 		}

@@ -119,6 +119,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 	  this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 	  return this.order;
 	}
@@ -161,11 +162,13 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 		this.ignoreUnresolvableEditors = ignoreUnresolvableEditors;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (this.propertyEditorRegistrars != null) {
@@ -234,6 +237,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 			this.sharedEditor = sharedEditor;
 		}
 
+		@Override
 		public void registerCustomEditors(PropertyEditorRegistry registry) {
 			if (!(registry instanceof PropertyEditorRegistrySupport)) {
 				throw new IllegalArgumentException("Cannot registered shared editor " +

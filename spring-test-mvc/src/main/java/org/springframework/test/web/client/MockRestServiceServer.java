@@ -184,6 +184,7 @@ public class MockRestServiceServer {
 
 		private Iterator<RequestMatcherClientHttpRequest> requestIterator;
 
+		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 			Assert.notNull(uri, "'uri' must not be null");
 			Assert.notNull(httpMethod, "'httpMethod' must not be null");

@@ -29,6 +29,7 @@ import org.springframework.expression.spel.SpelMessage;
  */
 public class StandardTypeComparator implements TypeComparator {
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public int compare(Object left, Object right) throws SpelEvaluationException {
 		// If one is null, check if the other is
@@ -72,6 +73,7 @@ public class StandardTypeComparator implements TypeComparator {
 		throw new SpelEvaluationException(SpelMessage.NOT_COMPARABLE, left.getClass(), right.getClass());
 	}
 
+	@Override
 	public boolean canCompare(Object left, Object right) {
 		if (left == null || right == null) {
 			return true;

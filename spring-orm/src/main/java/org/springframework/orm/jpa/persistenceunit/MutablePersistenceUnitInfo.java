@@ -72,6 +72,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceUnitName = persistenceUnitName;
 	}
 
+	@Override
 	public String getPersistenceUnitName() {
 		return this.persistenceUnitName;
 	}
@@ -80,6 +81,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceProviderClassName = persistenceProviderClassName;
 	}
 
+	@Override
 	public String getPersistenceProviderClassName() {
 		return this.persistenceProviderClassName;
 	}
@@ -88,6 +90,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.transactionType = transactionType;
 	}
 
+	@Override
 	public PersistenceUnitTransactionType getTransactionType() {
 		if (this.transactionType != null) {
 			return this.transactionType;
@@ -102,6 +105,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.jtaDataSource = jtaDataSource;
 	}
 
+	@Override
 	public DataSource getJtaDataSource() {
 		return this.jtaDataSource;
 	}
@@ -110,6 +114,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.nonJtaDataSource = nonJtaDataSource;
 	}
 
+	@Override
 	public DataSource getNonJtaDataSource() {
 		return this.nonJtaDataSource;
 	}
@@ -118,6 +123,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.mappingFileNames.add(mappingFileName);
 	}
 
+	@Override
 	public List<String> getMappingFileNames() {
 		return this.mappingFileNames;
 	}
@@ -126,6 +132,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.jarFileUrls.add(jarFileUrl);
 	}
 
+	@Override
 	public List<URL> getJarFileUrls() {
 		return this.jarFileUrls;
 	}
@@ -134,6 +141,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.persistenceUnitRootUrl = persistenceUnitRootUrl;
 	}
 
+	@Override
 	public URL getPersistenceUnitRootUrl() {
 		return this.persistenceUnitRootUrl;
 	}
@@ -142,6 +150,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.managedClassNames.add(managedClassName);
 	}
 
+	@Override
 	public List<String> getManagedClassNames() {
 		return this.managedClassNames;
 	}
@@ -150,6 +159,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.excludeUnlistedClasses = excludeUnlistedClasses;
 	}
 
+	@Override
 	public boolean excludeUnlistedClasses() {
 		return this.excludeUnlistedClasses;
 	}
@@ -165,6 +175,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		this.properties = properties;
 	}
 
+	@Override
 	public Properties getProperties() {
 		return this.properties;
 	}
@@ -177,6 +188,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 		return this.persistenceXMLSchemaVersion;
 	}
 
+	@Override
 	public void setPersistenceProviderPackageName(String persistenceProviderPackageName) {
 		this.persistenceProviderPackageName = persistenceProviderPackageName;
 	}
@@ -190,6 +202,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	 * This implementation returns the default ClassLoader.
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 */
+	@Override
 	public ClassLoader getClassLoader() {
 		return ClassUtils.getDefaultClassLoader();
 	}
@@ -197,6 +210,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	/**
 	 * This implementation throws an UnsupportedOperationException.
 	 */
+	@Override
 	public void addTransformer(ClassTransformer classTransformer) {
 		throw new UnsupportedOperationException("addTransformer not supported");
 	}
@@ -204,6 +218,7 @@ public class MutablePersistenceUnitInfo implements SmartPersistenceUnitInfo {
 	/**
 	 * This implementation throws an UnsupportedOperationException.
 	 */
+	@Override
 	public ClassLoader getNewTempClassLoader() {
 		throw new UnsupportedOperationException("getNewTempClassLoader not supported");
 	}

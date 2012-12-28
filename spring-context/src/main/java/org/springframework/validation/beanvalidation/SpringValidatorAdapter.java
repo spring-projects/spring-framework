@@ -81,14 +81,17 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	// Implementation of Spring Validator interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		return true;
 	}
 
+	@Override
 	public void validate(Object target, Errors errors) {
 		processConstraintViolations(this.targetValidator.validate(target), errors);
 	}
 
+	@Override
 	@SuppressWarnings("rawtypes")
 	public void validate(Object target, Errors errors, Object... validationHints) {
 		Set<Class> groups = new LinkedHashSet<Class>();
@@ -191,24 +194,29 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	// Implementation of JSR-303 Validator interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) {
 		return this.targetValidator.validate(object, groups);
 	}
 
+	@Override
 	public <T> Set<ConstraintViolation<T>> validateProperty(T object, String propertyName, Class<?>... groups) {
 		return this.targetValidator.validateProperty(object, propertyName, groups);
 	}
 
+	@Override
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
 		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
+	@Override
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
 		return this.targetValidator.getConstraintsForClass(clazz);
 	}
 
+	@Override
 	public <T> T unwrap(Class<T> type) {
 		return this.targetValidator.unwrap(type);
 	}

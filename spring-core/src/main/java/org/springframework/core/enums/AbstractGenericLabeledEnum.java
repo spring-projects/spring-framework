@@ -43,6 +43,7 @@ public abstract class AbstractGenericLabeledEnum extends AbstractLabeledEnum {
 	}
 
 
+	@Override
 	public String getLabel() {
 		if (this.label != null) {
 			return label;

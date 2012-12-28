@@ -36,6 +36,7 @@ import org.springframework.util.ClassUtils;
  */
 public class AnnotationBeanWiringInfoResolver implements BeanWiringInfoResolver {
 
+	@Override
 	public BeanWiringInfo resolveWiringInfo(Object beanInstance) {
 		Assert.notNull(beanInstance, "Bean instance must not be null");
 		Configurable annotation = beanInstance.getClass().getAnnotation(Configurable.class);

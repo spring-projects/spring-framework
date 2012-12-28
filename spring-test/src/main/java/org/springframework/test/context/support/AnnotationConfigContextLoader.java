@@ -74,6 +74,7 @@ public class AnnotationConfigContextLoader extends AbstractGenericContextLoader 
 	 * @see #isGenerateDefaultLocations()
 	 * @see #detectDefaultConfigurationClasses(Class)
 	 */
+	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		if (ObjectUtils.isEmpty(configAttributes.getClasses()) && isGenerateDefaultLocations()) {
 			Class<?>[] defaultConfigClasses = detectDefaultConfigurationClasses(configAttributes.getDeclaringClass());

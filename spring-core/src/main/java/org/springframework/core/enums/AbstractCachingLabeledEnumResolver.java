@@ -50,15 +50,18 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 	private final LabeledEnumCache labeledEnumCache = new LabeledEnumCache();
 
 
+	@Override
 	public Set<LabeledEnum> getLabeledEnumSet(Class type) throws IllegalArgumentException {
 		return new TreeSet<LabeledEnum>(getLabeledEnumMap(type).values());
 	}
 
+	@Override
 	public Map<Comparable, LabeledEnum> getLabeledEnumMap(Class type) throws IllegalArgumentException {
 		Assert.notNull(type, "No type specified");
 		return this.labeledEnumCache.get(type);
 	}
 
+	@Override
 	public LabeledEnum getLabeledEnumByCode(Class type, Comparable code) throws IllegalArgumentException {
 		Assert.notNull(code, "No enum code specified");
 		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
@@ -72,6 +75,7 @@ public abstract class AbstractCachingLabeledEnumResolver implements LabeledEnumR
 		return codedEnum;
 	}
 
+	@Override
 	public LabeledEnum getLabeledEnumByLabel(Class type, String label) throws IllegalArgumentException {
 		Map<Comparable, LabeledEnum> typeEnums = getLabeledEnumMap(type);
 		for (LabeledEnum value : typeEnums.values()) {

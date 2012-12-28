@@ -35,10 +35,12 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  */
 final class FallbackObjectToStringConverter implements ConditionalGenericConverter {
 
+	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, String.class));
 	}
 
+	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Class<?> sourceClass = sourceType.getObjectType();
 		if (String.class.equals(sourceClass)) {
@@ -48,6 +50,7 @@ final class FallbackObjectToStringConverter implements ConditionalGenericConvert
 			ObjectToObjectConverter.hasValueOfMethodOrConstructor(sourceClass, String.class);
 	}
 
+	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return (source != null ? source.toString() : null);
 	}

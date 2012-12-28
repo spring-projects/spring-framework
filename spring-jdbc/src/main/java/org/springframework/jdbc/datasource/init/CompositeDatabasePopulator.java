@@ -50,6 +50,7 @@ public class CompositeDatabasePopulator implements DatabasePopulator {
 	}
 
 
+	@Override
 	public void populate(Connection connection) throws SQLException {
 		for (DatabasePopulator populator : this.populators) {
 			populator.populate(connection);

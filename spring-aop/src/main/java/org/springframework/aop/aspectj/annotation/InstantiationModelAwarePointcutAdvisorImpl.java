@@ -97,6 +97,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	 * The pointcut for Spring AOP to use. Actual behaviour of the pointcut will change
 	 * depending on the state of the advice.
 	 */
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
@@ -106,6 +107,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	 * are much richer. In AspectJ terminology, all a return of {@code true}
 	 * means here is that the aspect is not a SINGLETON.
 	 */
+	@Override
 	public boolean isPerInstance() {
 		return (getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON);
 	}
@@ -120,6 +122,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	/**
 	 * Lazily instantiate advice if necessary.
 	 */
+	@Override
 	public synchronized Advice getAdvice() {
 		if (this.instantiatedAdvice == null) {
 			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
@@ -127,10 +130,12 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.instantiatedAdvice;
 	}
 
+	@Override
 	public boolean isLazy() {
 		return this.lazy;
 	}
 
+	@Override
 	public synchronized boolean isAdviceInstantiated() {
 		return (this.instantiatedAdvice != null);
 	}
@@ -149,18 +154,22 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.declaredPointcut;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.aspectInstanceFactory.getOrder();
 	}
 
+	@Override
 	public String getAspectName() {
 		return this.aspectName;
 	}
 
+	@Override
 	public int getDeclarationOrder() {
 		return this.declarationOrder;
 	}
 
+	@Override
 	public boolean isBeforeAdvice() {
 		if (this.isBeforeAdvice == null) {
 			determineAdviceType();
@@ -168,6 +177,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.isBeforeAdvice;
 	}
 
+	@Override
 	public boolean isAfterAdvice() {
 		if (this.isAfterAdvice == null) {
 			determineAdviceType();
@@ -245,6 +255,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 					this.preInstantiationPointcut.getMethodMatcher().matches(method, targetClass);
 		}
 
+		@Override
 		public boolean matches(Method method, Class targetClass, Object[] args) {
 			// This can match only on declared pointcut.
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass));

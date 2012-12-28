@@ -184,9 +184,11 @@ public class BatchSqlUpdate extends SqlUpdate {
 		int[] rowsAffected = getJdbcTemplate().batchUpdate(
 				getSql(),
 				new BatchPreparedStatementSetter() {
+					@Override
 					public int getBatchSize() {
 						return parameterQueue.size();
 					}
+					@Override
 					public void setValues(PreparedStatement ps, int index) throws SQLException {
 						Object[] params = parameterQueue.removeFirst();
 						newPreparedStatementSetter(params).setValues(ps);

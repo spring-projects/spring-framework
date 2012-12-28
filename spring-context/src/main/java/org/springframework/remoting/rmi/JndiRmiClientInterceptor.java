@@ -267,6 +267,7 @@ public class JndiRmiClientInterceptor extends JndiObjectLocator implements Metho
 	 * @see java.rmi.ConnectIOException
 	 * @see java.rmi.NoSuchObjectException
 	 */
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Object stub = null;
 		try {

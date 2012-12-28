@@ -344,6 +344,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * Prepares the JAX-RPC service and port if the "lookupServiceOnStartup"
 	 * is turned on (which it is by default).
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.lookupServiceOnStartup) {
 			prepare();
@@ -542,6 +543,7 @@ public class JaxRpcPortClientInterceptor extends LocalJaxRpcServiceFactory
 	 * @see #prepare()
 	 * @see #doInvoke
 	 */
+	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		if (AopUtils.isToStringMethod(invocation.getMethod())) {
 			return "JAX-RPC proxy for port [" + getPortName() + "] of service [" + getServiceName() + "]";

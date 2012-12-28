@@ -39,6 +39,7 @@ public class PassThroughSourceExtractor implements SourceExtractor {
 	 * @param sourceCandidate the source metadata
 	 * @return the supplied {@code sourceCandidate}
 	 */
+	@Override
 	public Object extractSource(Object sourceCandidate, Resource definingResource) {
 		return sourceCandidate;
 	}

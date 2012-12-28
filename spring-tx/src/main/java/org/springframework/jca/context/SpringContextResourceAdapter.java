@@ -156,6 +156,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	 * This implementation loads a Spring ApplicationContext through the
 	 * {@link #createApplicationContext} template method.
 	 */
+	@Override
 	public void start(BootstrapContext bootstrapContext) throws ResourceAdapterInternalException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Starting SpringContextResourceAdapter with BootstrapContext: " + bootstrapContext);
@@ -200,6 +201,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	/**
 	 * This implementation closes the Spring ApplicationContext.
 	 */
+	@Override
 	public void stop() {
 		logger.info("Stopping SpringContextResourceAdapter");
 		this.applicationContext.close();
@@ -209,6 +211,7 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	/**
 	 * This implementation always throws a NotSupportedException.
 	 */
+	@Override
 	public void endpointActivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec)
 			throws ResourceException {
 
@@ -218,12 +221,14 @@ public class SpringContextResourceAdapter implements ResourceAdapter {
 	/**
 	 * This implementation does nothing.
 	 */
+	@Override
 	public void endpointDeactivation(MessageEndpointFactory messageEndpointFactory, ActivationSpec activationSpec) {
 	}
 
 	/**
 	 * This implementation always returns {@code null}.
 	 */
+	@Override
 	public XAResource[] getXAResources(ActivationSpec[] activationSpecs) throws ResourceException {
 		return null;
 	}

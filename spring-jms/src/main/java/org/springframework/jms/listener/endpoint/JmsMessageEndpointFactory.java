@@ -59,6 +59,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	/**
 	 * Creates a concrete JMS message endpoint, internal to this factory.
 	 */
+	@Override
 	protected AbstractMessageEndpoint createEndpointInternal() throws UnavailableException {
 		return new JmsMessageEndpoint();
 	}
@@ -69,6 +70,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	 */
 	private class JmsMessageEndpoint extends AbstractMessageEndpoint implements MessageListener {
 
+		@Override
 		public void onMessage(Message message) {
 			boolean applyDeliveryCalls = !hasBeforeDeliveryBeenCalled();
 			if (applyDeliveryCalls) {
@@ -102,6 +104,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 			}
 		}
 
+		@Override
 		protected ClassLoader getEndpointClassLoader() {
 			return messageListener.getClass().getClassLoader();
 		}

@@ -206,6 +206,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Set the BeanFactory to use for retrieving PlatformTransactionManager beans.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -220,6 +221,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	/**
 	 * Check that required properties were set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (this.transactionManager == null && this.beanFactory == null) {
 			throw new IllegalStateException(

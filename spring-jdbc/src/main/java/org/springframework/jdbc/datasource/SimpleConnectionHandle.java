@@ -44,6 +44,7 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 	/**
 	 * Return the specified Connection as-is.
 	 */
+	@Override
 	public Connection getConnection() {
 		return this.connection;
 	}
@@ -52,6 +53,7 @@ public class SimpleConnectionHandle implements ConnectionHandle {
 	 * This implementation is empty, as we're using a standard
 	 * Connection handle that does not have to be released.
 	 */
+	@Override
 	public void releaseConnection(Connection con) {
 	}
 

@@ -65,6 +65,7 @@ public class NumberFormatter extends AbstractNumberFormatter {
 	}
 
 
+	@Override
 	public NumberFormat getNumberFormat(Locale locale) {
 		NumberFormat format = NumberFormat.getInstance(locale);
 		if (!(format instanceof DecimalFormat)) {

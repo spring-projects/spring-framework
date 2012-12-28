@@ -92,6 +92,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @see org.springframework.test.context.SmartContextLoader#loadContext(MergedContextConfiguration)
 	 * @see GenericWebApplicationContext
 	 */
+	@Override
 	public final ConfigurableApplicationContext loadContext(MergedContextConfiguration mergedConfig) throws Exception {
 
 		if (!(mergedConfig instanceof WebMergedContextConfiguration)) {
@@ -216,6 +217,7 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * @see org.springframework.test.context.ContextLoader#loadContext(java.lang.String[])
 	 * @throws UnsupportedOperationException
 	 */
+	@Override
 	public final ApplicationContext loadContext(String... locations) throws Exception {
 		throw new UnsupportedOperationException(
 			"AbstractGenericWebContextLoader does not support the loadContext(String... locations) method");

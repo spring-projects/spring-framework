@@ -153,6 +153,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (transactionAttribute != null) {
 			transactionAttribute = new DelegatingTransactionAttribute(transactionAttribute) {
 
+				@Override
 				public String getName() {
 					return testMethod.getName();
 				}

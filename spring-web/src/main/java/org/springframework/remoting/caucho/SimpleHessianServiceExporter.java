@@ -50,6 +50,7 @@ public class SimpleHessianServiceExporter extends HessianExporter implements Htt
 	/**
 	 * Processes the incoming Hessian request and creates a Hessian response.
 	 */
+	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		if (!"POST".equals(exchange.getRequestMethod())) {
 			exchange.getResponseHeaders().set("Allow", "POST");

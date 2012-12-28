@@ -106,6 +106,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * If both instances have conditions, combine the individual conditions
 	 * after ensuring they are of the same type and number.
 	 */
+	@Override
 	public CompositeRequestCondition combine(CompositeRequestCondition other) {
 		if (isEmpty() && other.isEmpty()) {
 			return this;
@@ -137,6 +138,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * resulting "matching" condition instances.
 	 * <p>An empty {@code CompositeRequestCondition} matches to all requests.
 	 */
+	@Override
 	public CompositeRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (isEmpty()) {
 			return this;
@@ -155,6 +157,7 @@ public class CompositeRequestCondition extends AbstractRequestCondition<Composit
 	 * If one instance is empty, the other "wins". If both instances have
 	 * conditions, compare them in the order in which they were provided.
 	 */
+	@Override
 	public int compareTo(CompositeRequestCondition other, HttpServletRequest request) {
 		if (isEmpty() && other.isEmpty()) {
 			return 0;

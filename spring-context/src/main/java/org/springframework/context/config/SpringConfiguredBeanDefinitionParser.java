@@ -43,6 +43,7 @@ class SpringConfiguredBeanDefinitionParser implements BeanDefinitionParser {
 			"org.springframework.beans.factory.aspectj.AnnotationBeanConfigurerAspect";
 
 
+	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		if (!parserContext.getRegistry().containsBeanDefinition(BEAN_CONFIGURER_ASPECT_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition();

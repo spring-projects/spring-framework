@@ -42,6 +42,7 @@ public abstract class AbstractMappingContentNegotiationStrategy extends MappingM
 		super(mediaTypes);
 	}
 
+	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) {
 		String key = getMediaTypeKey(webRequest);
 		if (StringUtils.hasText(key)) {

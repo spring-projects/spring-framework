@@ -132,6 +132,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 		this.targetType = targetType;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
@@ -145,6 +146,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * @see #marshalToTextMessage
 	 * @see #marshalToBytesMessage
 	 */
+	@Override
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		try {
 			switch (this.targetType) {
@@ -169,6 +171,7 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 	 * @see #unmarshalFromTextMessage
 	 * @see #unmarshalFromBytesMessage
 	 */
+	@Override
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		try {
 			if (message instanceof TextMessage) {

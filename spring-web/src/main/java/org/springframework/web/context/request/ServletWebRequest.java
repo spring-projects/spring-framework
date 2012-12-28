@@ -79,76 +79,94 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return this.response;
 	}
 
+	@Override
 	public Object getNativeRequest() {
 		return getRequest();
 	}
 
+	@Override
 	public Object getNativeResponse() {
 		return getResponse();
 	}
 
+	@Override
 	public <T> T getNativeRequest(Class<T> requiredType) {
 		return WebUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
+	@Override
 	public <T> T getNativeResponse(Class<T> requiredType) {
 		return WebUtils.getNativeResponse(getResponse(), requiredType);
 	}
 
 
+	@Override
 	public String getHeader(String headerName) {
 		return getRequest().getHeader(headerName);
 	}
 
+	@Override
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getHeaders(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
 
+	@Override
 	public Iterator<String> getHeaderNames() {
 		return CollectionUtils.toIterator(getRequest().getHeaderNames());
 	}
 
+	@Override
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
+	@Override
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
 
+	@Override
 	public Iterator<String> getParameterNames() {
 		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
 
+	@Override
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}
 
+	@Override
 	public Locale getLocale() {
 		return getRequest().getLocale();
 	}
 
+	@Override
 	public String getContextPath() {
 		return getRequest().getContextPath();
 	}
 
+	@Override
 	public String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
+	@Override
 	public Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}
 
+	@Override
 	public boolean isUserInRole(String role) {
 		return getRequest().isUserInRole(role);
 	}
 
+	@Override
 	public boolean isSecure() {
 		return getRequest().isSecure();
 	}
 
+	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		if (lastModifiedTimestamp >= 0 && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_LAST_MODIFIED))) {
@@ -166,6 +184,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return this.notModified;
 	}
 
+	@Override
 	public boolean checkNotModified(String eTag) {
 		if (StringUtils.hasLength(eTag) && !this.notModified &&
 				(this.response == null || !this.response.containsHeader(HEADER_ETAG))) {
@@ -188,6 +207,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return this.notModified;
 	}
 
+	@Override
 	public String getDescription(boolean includeClientInfo) {
 		HttpServletRequest request = getRequest();
 		StringBuilder sb = new StringBuilder();

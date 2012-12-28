@@ -73,6 +73,7 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	}
 
 
+	@Override
 	public final void afterPropertiesSet() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		if (emf == null) {
@@ -105,14 +106,17 @@ public class SharedEntityManagerBean extends EntityManagerFactoryAccessor
 	}
 
 
+	@Override
 	public EntityManager getObject() {
 		return this.shared;
 	}
 
+	@Override
 	public Class<? extends EntityManager> getObjectType() {
 		return (this.entityManagerInterface != null ? this.entityManagerInterface : EntityManager.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

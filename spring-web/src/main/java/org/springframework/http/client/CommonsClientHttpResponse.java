@@ -48,14 +48,17 @@ final class CommonsClientHttpResponse extends AbstractClientHttpResponse {
 	}
 
 
+	@Override
 	public int getRawStatusCode() {
 		return this.httpMethod.getStatusCode();
 	}
 
+	@Override
 	public String getStatusText() {
 		return this.httpMethod.getStatusText();
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -66,10 +69,12 @@ final class CommonsClientHttpResponse extends AbstractClientHttpResponse {
 		return this.headers;
 	}
 
+	@Override
 	public InputStream getBody() throws IOException {
 		return this.httpMethod.getResponseBodyAsStream();
 	}
 
+	@Override
 	public void close() {
 		this.httpMethod.releaseConnection();
 	}

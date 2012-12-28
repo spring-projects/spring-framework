@@ -37,10 +37,12 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	 * <p>To be considered a candidate the bean's <em>autowire-candidate</em>
 	 * attribute must not have been set to 'false'.
 	 */
+	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();
 	}
 
+	@Override
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		return null;
 	}

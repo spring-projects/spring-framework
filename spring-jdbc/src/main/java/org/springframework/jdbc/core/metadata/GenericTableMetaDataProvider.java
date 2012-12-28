@@ -113,22 +113,27 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		return this.storesLowerCaseIdentifiers;
 	}
 
+	@Override
 	public boolean isTableColumnMetaDataUsed() {
 		return this.tableColumnMetaDataUsed;
 	}
 
+	@Override
 	public List<TableParameterMetaData> getTableParameterMetaData() {
 		return this.insertParameterMetaData;
 	}
 
+	@Override
 	public boolean isGetGeneratedKeysSupported() {
 		return this.getGeneratedKeysSupported;
 	}
 
+	@Override
 	public boolean isGetGeneratedKeysSimulated(){
 		return false;
 	}
 
+	@Override
 	public String getSimpleQueryForGetGeneratedKey(String tableName, String keyColumnName) {
 		return null;
 	}
@@ -147,10 +152,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		this.generatedKeysColumnNameArraySupported = generatedKeysColumnNameArraySupported;
 	}
 
+	@Override
 	public boolean isGeneratedKeysColumnNameArraySupported() {
 		return this.generatedKeysColumnNameArraySupported;
 	}
 
+	@Override
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
 	}
@@ -160,6 +167,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 	}
 
 
+	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
 			if (databaseMetaData.supportsGetGeneratedKeys()) {
@@ -214,6 +222,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 
 	}
 
+	@Override
 	public void initializeWithTableColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
 			String schemaName, String tableName) throws SQLException {
 
@@ -221,6 +230,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		locateTableAndProcessMetaData(databaseMetaData, catalogName, schemaName, tableName);
 	}
 
+	@Override
 	public String tableNameToUse(String tableName) {
 		if (tableName == null) {
 			return null;
@@ -236,6 +246,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 	}
 
+	@Override
 	public String catalogNameToUse(String catalogName) {
 		if (catalogName == null) {
 			return null;
@@ -251,6 +262,7 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 	}
 
+	@Override
 	public String schemaNameToUse(String schemaName) {
 		if (schemaName == null) {
 			return null;
@@ -266,10 +278,12 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 		}
 	}
 
+	@Override
 	public String metaDataCatalogNameToUse(String catalogName) {
 		return catalogNameToUse(catalogName);
 	}
 
+	@Override
 	public String metaDataSchemaNameToUse(String schemaName) {
 		if (schemaName == null) {
 			return schemaNameToUse(getDefaultSchema());

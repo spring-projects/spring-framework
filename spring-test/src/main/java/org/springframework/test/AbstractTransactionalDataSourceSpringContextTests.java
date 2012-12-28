@@ -121,6 +121,7 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests
 	 * cleared, as a defensive measure against accidental <i>permanent</i> wiping of a database.
 	 * @see org.springframework.test.AbstractTransactionalSpringContextTests#setComplete()
 	 */
+	@Override
 	protected final void setComplete() {
 		if (this.zappedTables) {
 			throw new IllegalStateException("Cannot set complete after deleting tables");

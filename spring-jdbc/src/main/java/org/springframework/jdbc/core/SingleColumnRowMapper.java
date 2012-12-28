@@ -78,6 +78,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 	 * @see #getColumnValue(java.sql.ResultSet, int, Class)
 	 * @see #convertValueToRequiredType(Object, Class)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// Validate column count.

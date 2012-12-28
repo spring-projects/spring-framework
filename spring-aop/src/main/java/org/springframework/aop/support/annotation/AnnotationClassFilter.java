@@ -59,6 +59,7 @@ public class AnnotationClassFilter implements ClassFilter {
 	}
 
 
+	@Override
 	public boolean matches(Class clazz) {
 		return (this.checkInherited ?
 				(AnnotationUtils.findAnnotation(clazz, this.annotationType) != null) :

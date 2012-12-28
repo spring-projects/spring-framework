@@ -106,6 +106,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		return new PortletFileUpload(fileItemFactory);
 	}
 
+	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		if (!isUploadTempDirSpecified()) {
 			getFileItemFactory().setRepository(PortletUtils.getTempDir(portletContext));
@@ -113,10 +114,12 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	}
 
 
+	@Override
 	public boolean isMultipart(ActionRequest request) {
 		return (request != null && PortletFileUpload.isMultipartContent(request));
 	}
 
+	@Override
 	public MultipartActionRequest resolveMultipart(final ActionRequest request) throws MultipartException {
 		Assert.notNull(request, "Request must not be null");
 		if (this.resolveLazily) {
@@ -177,6 +180,7 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 		return encoding;
 	}
 
+	@Override
 	public void cleanupMultipart(MultipartActionRequest request) {
 		if (request != null) {
 			try {

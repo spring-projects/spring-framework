@@ -246,6 +246,7 @@ public abstract class UriComponents {
 			this.uriVariables = uriVariables;
 		}
 
+		@Override
 		public Object getValue(String name) {
 			if (!this.uriVariables.containsKey(name)) {
 				throw new IllegalArgumentException("Map has no value for '" + name + "'");
@@ -266,6 +267,7 @@ public abstract class UriComponents {
 			this.valueIterator = Arrays.asList(uriVariableValues).iterator();
 		}
 
+		@Override
 		public Object getValue(String name) {
 			if (!valueIterator.hasNext()) {
 				throw new IllegalArgumentException(

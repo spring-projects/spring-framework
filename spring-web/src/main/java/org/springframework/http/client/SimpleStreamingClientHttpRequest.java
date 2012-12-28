@@ -50,10 +50,12 @@ final class SimpleStreamingClientHttpRequest extends AbstractClientHttpRequest {
 		this.chunkSize = chunkSize;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.connection.getRequestMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return this.connection.getURL().toURI();

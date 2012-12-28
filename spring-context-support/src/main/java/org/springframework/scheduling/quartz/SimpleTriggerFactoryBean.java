@@ -195,11 +195,13 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
 
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ParseException {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -266,14 +268,17 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 	}
 
 
+	@Override
 	public SimpleTrigger getObject() {
 		return this.simpleTrigger;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return SimpleTrigger.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

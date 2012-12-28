@@ -50,6 +50,7 @@ public class SimpleMessageConverter102 extends SimpleMessageConverter {
 	 * JMS 1.1 and is therefore not available on a JMS 1.0.2 provider.
 	 * @see javax.jms.BytesMessage#getBodyLength()
 	 */
+	@Override
 	protected byte[] extractByteArrayFromMessage(BytesMessage message) throws JMSException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream(BUFFER_SIZE);
 		byte[] buffer = new byte[BUFFER_SIZE];

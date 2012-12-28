@@ -40,6 +40,7 @@ public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport impl
 		this.source = source;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}

@@ -200,6 +200,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 		this.docTypeInternalSubset = docTypeInternalSubset;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws JiBXException {
 		if (this.targetClass != null) {
 			if (StringUtils.hasLength(this.bindingName)) {
@@ -228,6 +229,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 	}
 
 
+	@Override
 	public boolean supports(Class<?> clazz) {
 		Assert.notNull(clazz, "'clazz' must not be null");
 		if (this.targetClass != null) {

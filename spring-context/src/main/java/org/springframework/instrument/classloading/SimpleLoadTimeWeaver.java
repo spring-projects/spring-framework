@@ -62,10 +62,12 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.classLoader.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
@@ -73,6 +75,7 @@ public class SimpleLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * This implementation builds a {@link SimpleThrowawayClassLoader}.
 	 */
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}

@@ -130,6 +130,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		return canRead(clazz, null, mediaType);
 	}
 
+	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
 		return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
@@ -154,6 +155,7 @@ public class MappingJacksonHttpMessageConverter extends AbstractHttpMessageConve
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@Override
 	public Object read(Type type, Class<?> contextClass, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 

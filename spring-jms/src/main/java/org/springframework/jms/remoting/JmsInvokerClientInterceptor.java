@@ -180,6 +180,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
@@ -190,6 +191,7 @@ public class JmsInvokerClientInterceptor implements MethodInterceptor, Initializ
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "JMS invoker proxy for queue [" + this.queue + "]";
