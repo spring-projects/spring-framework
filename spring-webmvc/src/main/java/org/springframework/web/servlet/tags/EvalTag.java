@@ -49,6 +49,7 @@ import org.springframework.web.util.TagUtils;
  * @author Juergen Hoeller
  * @since 3.0.1
  */
+@SuppressWarnings("serial")
 public class EvalTag extends HtmlEscapingAwareTag {
 
 	/**

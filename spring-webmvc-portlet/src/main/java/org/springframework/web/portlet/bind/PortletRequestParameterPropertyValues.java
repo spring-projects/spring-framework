@@ -37,6 +37,7 @@ import org.springframework.web.portlet.util.PortletUtils;
  * @since 2.0
  * @see org.springframework.web.portlet.util.PortletUtils#getParametersStartingWith
  */
+@SuppressWarnings("serial")
 public class PortletRequestParameterPropertyValues extends MutablePropertyValues {
 
 	/** Default prefix separator */

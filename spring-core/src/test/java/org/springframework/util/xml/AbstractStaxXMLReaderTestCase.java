@@ -25,7 +25,6 @@ import javax.xml.stream.XMLStreamException;
 import org.easymock.AbstractMatcher;
 import org.easymock.MockControl;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -145,6 +144,7 @@ public abstract class AbstractStaxXMLReaderTestCase {
 	protected abstract AbstractStaxXMLReader createStaxXmlReader(InputStream inputStream) throws XMLStreamException;
 
 	/** Easymock {@code AbstractMatcher} implementation that matches SAX arguments. */
+	@SuppressWarnings("serial")
 	protected static class SaxArgumentMatcher extends AbstractMatcher {
 
 		@Override

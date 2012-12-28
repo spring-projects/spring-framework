@@ -36,6 +36,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @see org.springframework.web.util.WebUtils#getParametersStartingWith
  */
+@SuppressWarnings("serial")
 public class ServletRequestParameterPropertyValues extends MutablePropertyValues {
 
 	/** Default prefix separator */

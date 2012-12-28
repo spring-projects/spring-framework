@@ -40,6 +40,7 @@ import org.springframework.web.util.TagUtils;
  * @since 20.09.2003
  * @see BindTag
  */
+@SuppressWarnings("serial")
 public class TransformTag extends HtmlEscapingAwareTag {
 
 	/** the value to transform using the appropriate property editor */

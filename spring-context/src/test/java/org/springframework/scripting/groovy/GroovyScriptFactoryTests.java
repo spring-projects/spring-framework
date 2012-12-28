@@ -201,7 +201,7 @@ public class GroovyScriptFactoryTests {
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
 				+ badScript);
 		try {
-			factory.getScriptedObject(script, new Class[] {});
+			factory.getScriptedObject(script, new Class<?>[] {});
 			fail("Must have thrown a ScriptCompilationException (no public no-arg ctor in scripted class).");
 		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(InstantiationException.class));
@@ -219,7 +219,7 @@ public class GroovyScriptFactoryTests {
 		GroovyScriptFactory factory = new GroovyScriptFactory(ScriptFactoryPostProcessor.INLINE_SCRIPT_PREFIX
 				+ badScript);
 		try {
-			factory.getScriptedObject(script, new Class[] {});
+			factory.getScriptedObject(script, new Class<?>[] {});
 			fail("Must have thrown a ScriptCompilationException (no oublic no-arg ctor in scripted class).");
 		} catch (ScriptCompilationException expected) {
 			assertTrue(expected.contains(IllegalAccessException.class));
@@ -402,7 +402,7 @@ public class GroovyScriptFactoryTests {
 	@Test
 	public void testAnonymousScriptDetected() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
-		Map beans = ctx.getBeansOfType(Messenger.class);
+		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());
 	}
 

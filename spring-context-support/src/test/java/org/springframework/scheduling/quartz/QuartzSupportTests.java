@@ -118,7 +118,7 @@ public class QuartzSupportTests {
 		}
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -210,7 +210,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -304,7 +304,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger1 = new SimpleTriggerBean();
 		trigger1.setBeanName("myTrigger1");
@@ -446,7 +446,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doWait");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTriggerBean trigger0 = new SimpleTriggerBean();
 		trigger0.setBeanName("myTrigger1");
@@ -532,7 +532,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetObject(task1);
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail1 = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail1 = mijdfb.getObject();
 
 		SimpleTrigger trigger1 = new SimpleTrigger();
 		trigger1.setName("myTrigger1");
@@ -618,7 +618,7 @@ public class QuartzSupportTests {
 		try {
 			schedulerFactoryBean.afterPropertiesSet();
 			schedulerFactoryBean.start();
-			Scheduler returnedScheduler = (Scheduler) schedulerFactoryBean.getObject();
+			Scheduler returnedScheduler = schedulerFactoryBean.getObject();
 			assertEquals(tb, returnedScheduler.getContext().get("testBean"));
 			assertEquals(ac, returnedScheduler.getContext().get("appCtx"));
 		}
@@ -659,7 +659,7 @@ public class QuartzSupportTests {
 		mijdfb.setTargetMethod("doSomething");
 		mijdfb.setJobListenerNames(names);
 		mijdfb.afterPropertiesSet();
-		JobDetail jobDetail = (JobDetail) mijdfb.getObject();
+		JobDetail jobDetail = mijdfb.getObject();
 		List result = Arrays.asList(jobDetail.getJobListenerNames());
 		assertEquals(Arrays.asList(names), result);
 	}

@@ -371,6 +371,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * Simple adapter class that extends {@link GenericServlet}.
 	 * Needed for JSP access in FreeMarker.
 	 */
+	@SuppressWarnings("serial")
 	private static class GenericServletAdapter extends GenericServlet {
 
 		@Override

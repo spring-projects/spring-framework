@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * @author Scott Andrews
  * @since 2.5.2
  */
+@SuppressWarnings("serial")
 public abstract class AbstractMultiCheckedElementTag extends AbstractCheckedElementTag {
 
 	/**

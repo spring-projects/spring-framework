@@ -32,6 +32,7 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
  * @see BadSqlGrammarException
  * @see org.springframework.jdbc.support.rowset.SqlRowSet
  */
+@SuppressWarnings("serial")
 public class InvalidResultSetAccessException extends InvalidDataAccessResourceUsageException {
 
 	private String sql;

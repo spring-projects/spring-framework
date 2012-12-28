@@ -22,6 +22,7 @@ package org.springframework.jms;
  * @author Juergen Hoeller
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public class UncategorizedJmsException extends JmsException {
 
 	/**

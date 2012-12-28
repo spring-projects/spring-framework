@@ -73,7 +73,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		FreeMarkerConfigurationFactoryBean fcfb = new FreeMarkerConfigurationFactoryBean();
 		fcfb.setTemplateLoaderPath("file:/mydir");
 		fcfb.afterPropertiesSet();
-		Configuration cfg = (Configuration) fcfb.getObject();
+		Configuration cfg = fcfb.getObject();
 		assertTrue(cfg.getTemplateLoader() instanceof SpringTemplateLoader);
 	}
 
@@ -97,7 +97,7 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		});
 		fcfb.afterPropertiesSet();
 		assertTrue(fcfb.getObject() instanceof Configuration);
-		Configuration fc = (Configuration) fcfb.getObject();
+		Configuration fc = fcfb.getObject();
 		Template ft = fc.getTemplate("test");
 		assertEquals("test", FreeMarkerTemplateUtils.processTemplateIntoString(ft, new HashMap()));
 	}

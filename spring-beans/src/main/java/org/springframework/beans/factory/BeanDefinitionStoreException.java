@@ -26,6 +26,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @author Rob Harrop
  */
+@SuppressWarnings("serial")
 public class BeanDefinitionStoreException extends FatalBeanException {
 
 	private String resourceDescription;

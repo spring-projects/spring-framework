@@ -48,6 +48,7 @@ import org.springframework.util.ErrorHandler;
  * @see #setThreadFactory
  * @see #setErrorHandler
  */
+@SuppressWarnings("serial")
 public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		implements TaskScheduler, SchedulingTaskExecutor {
 

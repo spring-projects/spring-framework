@@ -475,7 +475,6 @@ public class GenericTableMetaDataProvider implements TableMetaDataProvider {
 			this.type = type;
 		}
 
-		@SuppressWarnings("unused")
 		public String getType() {
 			return this.type;
 		}

@@ -42,6 +42,7 @@ import org.springframework.util.StringUtils;
  * @see #setInterceptorNames
  * @see AbstractAutoProxyCreator
  */
+@SuppressWarnings("serial")
 public class BeanNameAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	private List<String> beanNames;

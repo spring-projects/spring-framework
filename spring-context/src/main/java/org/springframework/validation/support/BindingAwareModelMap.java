@@ -33,6 +33,7 @@ import org.springframework.validation.BindingResult;
  * @since 2.5.6
  * @see org.springframework.validation.BindingResult
  */
+@SuppressWarnings("serial")
 public class BindingAwareModelMap extends ExtendedModelMap {
 
 	@Override

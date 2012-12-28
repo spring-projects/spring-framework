@@ -100,6 +100,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public void testCustomTranslateMethodTranslation() {
 		final String TASK = "TASK";
 		final String SQL = "SQL SELECT *";

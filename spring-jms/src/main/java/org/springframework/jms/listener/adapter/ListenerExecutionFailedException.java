@@ -25,6 +25,7 @@ import org.springframework.jms.JmsException;
  * @since 2.0
  * @see MessageListenerAdapter
  */
+@SuppressWarnings("serial")
 public class ListenerExecutionFailedException extends JmsException {
 
 	/**

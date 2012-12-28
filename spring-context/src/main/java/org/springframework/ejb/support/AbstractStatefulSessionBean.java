@@ -44,6 +44,7 @@ import org.springframework.beans.FatalBeanException;
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractStatefulSessionBean extends AbstractSessionBean {
 
 	/**

@@ -75,6 +75,7 @@ import org.springframework.util.Assert;
  * @deprecated as of Spring 3.2, in favor of using the native JDK 6 concurrent support
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		implements SchedulingTaskExecutor, Executor, BeanNameAware, InitializingBean, DisposableBean {
 

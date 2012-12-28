@@ -43,14 +43,14 @@ public class MethodInvokerTests extends TestCase {
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello"});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello"});
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", "bogus"});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", "bogus"});
 		mi.prepare();
 		assertEquals("hello", mi.invoke());
 
@@ -58,7 +58,7 @@ public class MethodInvokerTests extends TestCase {
 		mi = new MethodInvoker();
 		mi.setTargetClass(TestClass1.class);
 		mi.setTargetMethod("supertypes2");
-		mi.setArguments(new Object[] {new ArrayList(), new ArrayList(), "hello", Boolean.TRUE});
+		mi.setArguments(new Object[] {new ArrayList<>(), new ArrayList<>(), "hello", Boolean.TRUE});
 		try {
 			mi.prepare();
 			fail("Shouldn't have matched without argument conversion");
@@ -169,23 +169,23 @@ public class MethodInvokerTests extends TestCase {
 		public static void intArguments(int[] arg) {
 		}
 
-		public static String supertypes(Collection c, Integer i) {
+		public static String supertypes(Collection<?> c, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes(Collection c, List l, String s) {
+		public static String supertypes(Collection<?> c, List<?> l, String s) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, Integer i) {
 			return i.toString();
 		}
 
-		public static String supertypes2(Collection c, List l, String s, Integer i) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, Integer i) {
 			return s;
 		}
 
-		public static String supertypes2(Collection c, List l, String s, String s2) {
+		public static String supertypes2(Collection<?> c, List<?> l, String s, String s2) {
 			return s;
 		}
 	}

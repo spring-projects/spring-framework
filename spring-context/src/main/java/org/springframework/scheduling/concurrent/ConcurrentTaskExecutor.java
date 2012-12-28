@@ -18,13 +18,9 @@ package org.springframework.scheduling.concurrent;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RejectedExecutionException;
 
-import org.springframework.core.task.TaskRejectedException;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 

@@ -161,6 +161,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void emptyRequestMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -185,6 +186,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void emptyValueMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -271,6 +273,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void defaultExpressionParameters() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -300,6 +303,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void typeNestedSetBinding() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -334,7 +338,7 @@ public class ServletAnnotationControllerTests {
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
 		assertEquals("Invalid response status", HttpServletResponse.SC_METHOD_NOT_ALLOWED, response.getStatus());
-		String allowHeader = (String) response.getHeader("Allow");
+		String allowHeader = response.getHeader("Allow");
 		assertNotNull("No Allow header", allowHeader);
 		Set<String> allowedMethods = new HashSet<String>();
 		allowedMethods.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(allowHeader, ", ")));
@@ -348,6 +352,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void proxiedStandardHandleMethod() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -560,6 +565,7 @@ public class ServletAnnotationControllerTests {
 		doTestAdaptedHandleMethods(MyAdaptedController3.class);
 	}
 
+	@SuppressWarnings("serial")
 	private void initServlet(final Class<?> controllerClass) throws ServletException {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -656,6 +662,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void proxiedFormController() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1583,6 +1590,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void controllerClassNameNoTypeLevelAnn() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1617,6 +1625,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void simpleUrlHandlerMapping() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1667,6 +1676,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void requestMappingInterfaceWithProxy() throws Exception {
 		DispatcherServlet servlet = new DispatcherServlet() {
 			@Override
@@ -1865,6 +1875,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerArray() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1893,6 +1904,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerSet() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -1921,6 +1933,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void parameterCsvAsIntegerSetWithCustomSeparator() throws Exception {
 		servlet = new DispatcherServlet() {
 			@Override
@@ -2436,6 +2449,7 @@ public class ServletAnnotationControllerTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Controller
 	@RequestMapping("/myPath.do")
 	private static class MyParameterDispatchingController implements Serializable {

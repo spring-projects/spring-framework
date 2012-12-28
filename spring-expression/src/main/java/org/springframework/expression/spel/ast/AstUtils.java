@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.expression.PropertyAccessor;
-import org.springframework.expression.spel.ExpressionState;
 
 /**
  * Utilities methods for use in the Ast classes.

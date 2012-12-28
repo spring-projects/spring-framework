@@ -61,6 +61,7 @@ public class ConversionServiceFactoryBeanTests {
 		converters.add(new ConverterFactory<String, Bar>() {
 			public <T extends Bar> Converter<String, T> getConverter(Class<T> targetType) {
 				return new Converter<String, T> () {
+					@SuppressWarnings("unchecked")
 					public T convert(String source) {
 						return (T) new Bar();
 					}
@@ -103,7 +104,7 @@ public class ConversionServiceFactoryBeanTests {
 		doTestConversionServiceInApplicationContext("conversionServiceWithResourceOverriding.xml", FileSystemResource.class);
 	}
 
-	private void doTestConversionServiceInApplicationContext(String fileName, Class resourceClass) {
+	private void doTestConversionServiceInApplicationContext(String fileName, Class<?> resourceClass) {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(fileName, getClass());
 		ResourceTestBean tb = ctx.getBean("resourceTestBean", ResourceTestBean.class);
 		assertTrue(resourceClass.isInstance(tb.getResource()));
@@ -128,7 +129,7 @@ public class ConversionServiceFactoryBeanTests {
 
 	public static class ComplexConstructorArgument {
 
-		public ComplexConstructorArgument(Map<String, Class> map) {
+		public ComplexConstructorArgument(Map<String, Class<?>> map) {
 			assertTrue(!map.isEmpty());
 			assertTrue(map.keySet().iterator().next() instanceof String);
 			assertTrue(map.values().iterator().next() instanceof Class);

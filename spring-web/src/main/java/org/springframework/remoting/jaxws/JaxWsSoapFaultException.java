@@ -29,6 +29,7 @@ import org.springframework.remoting.soap.SoapFaultException;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class JaxWsSoapFaultException extends SoapFaultException {
 
 	/**

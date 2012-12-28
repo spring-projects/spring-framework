@@ -28,6 +28,7 @@ import org.springframework.web.context.support.RequestHandledEvent;
  * @see org.springframework.web.portlet.FrameworkPortlet
  * @see org.springframework.context.ApplicationContext#publishEvent
  */
+@SuppressWarnings("serial")
 public class PortletRequestHandledEvent extends RequestHandledEvent {
 
 	/** Name of the portlet that handled the request */

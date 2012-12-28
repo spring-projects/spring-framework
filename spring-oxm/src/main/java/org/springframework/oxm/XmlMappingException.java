@@ -24,6 +24,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Arjen Poutsma
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public abstract class XmlMappingException extends NestedRuntimeException {
 
 	/**

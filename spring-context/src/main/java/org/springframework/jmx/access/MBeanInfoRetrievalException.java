@@ -28,6 +28,7 @@ import org.springframework.jmx.JmxException;
  * @see MBeanClientInterceptor
  * @see MBeanProxyFactoryBean
  */
+@SuppressWarnings("serial")
 public class MBeanInfoRetrievalException extends JmxException {
 
 	/**

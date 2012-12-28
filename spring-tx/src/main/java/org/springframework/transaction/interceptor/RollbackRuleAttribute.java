@@ -31,6 +31,7 @@ import java.io.Serializable;
  * @since 09.04.2003
  * @see NoRollbackRuleAttribute
  */
+@SuppressWarnings("serial")
 public class RollbackRuleAttribute implements Serializable{
 
 	/**

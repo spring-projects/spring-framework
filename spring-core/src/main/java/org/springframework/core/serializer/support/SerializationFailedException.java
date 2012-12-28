@@ -28,6 +28,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 3.0.5
  */
+@SuppressWarnings("serial")
 public class SerializationFailedException extends NestedRuntimeException {
 
 	/**

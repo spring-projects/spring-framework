@@ -42,6 +42,7 @@ import org.springframework.aop.support.AopUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ScopedBeanInterceptor extends EmptyInterceptor {
 
 	@Override

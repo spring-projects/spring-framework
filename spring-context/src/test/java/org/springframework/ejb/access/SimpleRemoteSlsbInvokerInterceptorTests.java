@@ -79,7 +79,7 @@ public class SimpleRemoteSlsbInvokerInterceptorTests {
 
 	protected Object configuredProxy(SimpleRemoteSlsbInvokerInterceptor si, Class<?> ifc) throws NamingException {
 		si.afterPropertiesSet();
-		ProxyFactory pf = new ProxyFactory(new Class[] {ifc});
+		ProxyFactory pf = new ProxyFactory(new Class<?>[] {ifc});
 		pf.addAdvice(si);
 		return pf.getProxy();
 	}

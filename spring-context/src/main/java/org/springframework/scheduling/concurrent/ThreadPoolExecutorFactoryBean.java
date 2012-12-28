@@ -49,6 +49,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @see java.util.concurrent.Executors
  * @see java.util.concurrent.ThreadPoolExecutor
  */
+@SuppressWarnings("serial")
 public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 		implements FactoryBean<ExecutorService>, InitializingBean, DisposableBean {
 

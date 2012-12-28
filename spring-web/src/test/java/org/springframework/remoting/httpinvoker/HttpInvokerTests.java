@@ -450,6 +450,7 @@ public class HttpInvokerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class TestRemoteInvocation extends RemoteInvocation {
 
 		public TestRemoteInvocation(MethodInvocation methodInvocation) {
@@ -458,6 +459,7 @@ public class HttpInvokerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class TestRemoteInvocationWrapper implements Serializable {
 
 		private final RemoteInvocation remoteInvocation;
@@ -468,6 +470,7 @@ public class HttpInvokerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class TestRemoteInvocationResultWrapper implements Serializable {
 
 		private final RemoteInvocationResult remoteInvocationResult;

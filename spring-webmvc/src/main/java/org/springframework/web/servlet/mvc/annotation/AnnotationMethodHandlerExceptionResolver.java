@@ -84,6 +84,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
+@Deprecated
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
 	// dummy method placeholder

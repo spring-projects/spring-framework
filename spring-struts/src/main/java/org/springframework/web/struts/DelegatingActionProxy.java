@@ -127,7 +127,7 @@ public class DelegatingActionProxy extends Action {
 	protected Action getDelegateAction(ActionMapping mapping) throws BeansException {
 		WebApplicationContext wac = getWebApplicationContext(getServlet(), mapping.getModuleConfig());
 		String beanName = determineActionBeanName(mapping);
-		return (Action) wac.getBean(beanName, Action.class);
+		return wac.getBean(beanName, Action.class);
 	}
 
 	/**

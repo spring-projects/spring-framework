@@ -23,6 +23,7 @@ package org.springframework.jmx.export;
  * @author Rob Harrop
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class UnableToRegisterMBeanException extends MBeanExportException {
 
 	/**

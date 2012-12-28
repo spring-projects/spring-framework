@@ -70,6 +70,7 @@ public class NamedParameterJdbcTemplate implements NamedParameterJdbcOperations 
 	private volatile int cacheLimit = DEFAULT_CACHE_LIMIT;
 
 	/** Cache of original SQL String to ParsedSql representation */
+	@SuppressWarnings("serial")
 	private final Map<String, ParsedSql> parsedSqlCache =
 			new LinkedHashMap<String, ParsedSql>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 				@Override

@@ -87,6 +87,7 @@ import org.springframework.util.ClassUtils;
  * @see BeanNameAutoProxyCreator
  * @see DefaultAdvisorAutoProxyCreator
  */
+@SuppressWarnings("serial")
 public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		implements SmartInstantiationAwareBeanPostProcessor, BeanClassLoaderAware, BeanFactoryAware,
 		Ordered, AopInfrastructureBean {

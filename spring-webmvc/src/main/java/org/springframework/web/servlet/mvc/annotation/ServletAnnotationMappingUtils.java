@@ -35,6 +35,7 @@ import org.springframework.web.util.WebUtils;
  * @deprecated in 3.2 together with {@link DefaultAnnotationHandlerMapping},
  * {@link AnnotationMethodHandlerAdapter}, and {@link AnnotationMethodHandlerExceptionResolver}.
  */
+@Deprecated
 abstract class ServletAnnotationMappingUtils {
 
 	/**

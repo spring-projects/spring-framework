@@ -28,6 +28,7 @@ import org.springframework.util.ClassUtils;
  * @author Juergen Hoeller
  * @since 03.09.2003
  */
+@SuppressWarnings("serial")
 public class UnsatisfiedDependencyException extends BeanCreationException {
 
 	/**

@@ -28,6 +28,7 @@ import org.springframework.jmx.JmxException;
  * @since 2.0
  * @see NotificationPublisher
  */
+@SuppressWarnings("serial")
 public class UnableToSendNotificationException extends JmxException {
 
 	/**

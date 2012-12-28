@@ -264,6 +264,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	/** Servlet that sets the given status code. */
+	@SuppressWarnings("serial")
 	private static class StatusCodeServlet extends GenericServlet {
 
 		private final int sc;
@@ -279,6 +280,7 @@ public class RestTemplateIntegrationTests {
 	}
 
 	/** Servlet that returns an error message for a given status code. */
+	@SuppressWarnings("serial")
 	private static class ErrorServlet extends GenericServlet {
 
 		private final int sc;
@@ -293,6 +295,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class GetServlet extends HttpServlet {
 
 		private final byte[] buf;
@@ -315,6 +318,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class PostServlet extends HttpServlet {
 
 		private final String s;
@@ -347,6 +351,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class UriServlet extends HttpServlet {
 
 		@Override
@@ -357,6 +362,7 @@ public class RestTemplateIntegrationTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private static class MultipartServlet extends HttpServlet {
 
 		@Override

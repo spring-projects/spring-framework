@@ -25,6 +25,7 @@ package org.springframework.beans.factory;
  * @since 10.03.2003
  * @see org.springframework.beans.factory.FactoryBean
  */
+@SuppressWarnings("serial")
 public class BeanIsNotAFactoryException extends BeanNotOfRequiredTypeException {
 
 	/**

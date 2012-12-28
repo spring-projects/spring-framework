@@ -186,7 +186,7 @@ public abstract class AbstractErrors implements Errors, Serializable {
 
 	public FieldError getFieldError(String field) {
 		List<FieldError> fieldErrors = getFieldErrors(field);
-		return (!fieldErrors.isEmpty() ? (FieldError) fieldErrors.get(0) : null);
+		return (!fieldErrors.isEmpty() ? fieldErrors.get(0) : null);
 	}
 
 

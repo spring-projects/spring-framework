@@ -22,6 +22,7 @@ import javax.xml.ws.WebFault;
  * @author Juergen Hoeller
  */
 @WebFault
+@SuppressWarnings("serial")
 public class OrderNotFoundException extends Exception {
 
 	private String faultInfo;

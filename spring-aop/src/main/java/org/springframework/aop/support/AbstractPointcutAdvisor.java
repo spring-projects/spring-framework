@@ -34,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @since 1.1.2
  * @see AbstractGenericPointcutAdvisor
  */
+@SuppressWarnings("serial")
 public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
 	private Integer order;

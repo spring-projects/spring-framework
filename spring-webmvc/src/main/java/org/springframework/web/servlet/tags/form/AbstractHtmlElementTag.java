@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.DynamicAttributes;
 
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -41,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public abstract class AbstractHtmlElementTag extends AbstractDataBoundFormElementTag implements DynamicAttributes {
 
 	public static final String CLASS_ATTRIBUTE = "class";

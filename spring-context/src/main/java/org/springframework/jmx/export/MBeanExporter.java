@@ -1069,6 +1069,7 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * {@link org.springframework.jmx.export.notification.NotificationPublisher}
 	 * into the lazy resource as it is created if required.
 	 */
+	@SuppressWarnings("serial")
 	private class NotificationPublisherAwareLazyTargetSource extends LazyInitTargetSource {
 
 		private ModelMBean modelMBean;

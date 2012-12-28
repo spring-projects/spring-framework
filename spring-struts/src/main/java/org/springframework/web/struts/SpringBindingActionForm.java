@@ -88,6 +88,7 @@ import org.springframework.validation.ObjectError;
  * @deprecated as of Spring 3.0
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class SpringBindingActionForm extends ActionForm {
 
 	private static final Log logger = LogFactory.getLog(SpringBindingActionForm.class);

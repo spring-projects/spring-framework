@@ -131,6 +131,7 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 	/**
 	 * Independent inner class - for serialization purposes.
 	 */
+	@SuppressWarnings("serial")
 	private static class TargetBeanObjectFactory implements ObjectFactory, Serializable {
 
 		private final BeanFactory beanFactory;

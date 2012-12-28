@@ -27,6 +27,7 @@ import java.util.concurrent.RejectedExecutionException;
  * @see TaskExecutor#execute(Runnable)
  * @see TaskTimeoutException
  */
+@SuppressWarnings("serial")
 public class TaskRejectedException extends RejectedExecutionException {
 
 	/**

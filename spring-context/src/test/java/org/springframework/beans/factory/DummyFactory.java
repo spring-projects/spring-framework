@@ -32,7 +32,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @since 10.03.2003
  */
 public class DummyFactory
-		implements FactoryBean, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
+		implements FactoryBean<Object>, BeanNameAware, BeanFactoryAware, InitializingBean, DisposableBean {
 
 	public static final String SINGLETON_NAME = "Factory singleton";
 
@@ -158,7 +158,7 @@ public class DummyFactory
 		}
 	}
 
-	public Class getObjectType() {
+	public Class<TestBean> getObjectType() {
 		return TestBean.class;
 	}
 

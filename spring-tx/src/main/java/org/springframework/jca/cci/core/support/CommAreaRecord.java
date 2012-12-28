@@ -33,6 +33,7 @@ import org.springframework.util.FileCopyUtils;
  * @since 1.2
  * @see org.springframework.jca.cci.object.MappingCommAreaOperation
  */
+@SuppressWarnings("serial")
 public class CommAreaRecord implements Record, Streamable {
 
 	private byte[] bytes;

@@ -62,7 +62,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 			bean.afterPropertiesSet();
 
 			try {
-				MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+				MBeanServerConnection connection = bean.getObject();
 				assertNotNull("Connection should not be null", connection);
 
 				// perform simple MBean count test
@@ -100,7 +100,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
-		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		MBeanServerConnection connection = bean.getObject();
 		assertTrue(AopUtils.isAopProxy(connection));
 
 		JMXConnectorServer connector = null;
@@ -122,7 +122,7 @@ public class MBeanServerConnectionFactoryBeanTests extends AbstractMBeanServerTe
 		bean.setConnectOnStartup(false);
 		bean.afterPropertiesSet();
 
-		MBeanServerConnection connection = (MBeanServerConnection) bean.getObject();
+		MBeanServerConnection connection = bean.getObject();
 		assertTrue(AopUtils.isAopProxy(connection));
 		bean.destroy();
 	}

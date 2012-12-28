@@ -29,6 +29,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @since 2.0
  * @see EntityManagerFactoryUtils#convertJpaAccessExceptionIfPossible
  */
+@SuppressWarnings("serial")
 public class JpaSystemException extends UncategorizedDataAccessException {
 
 	public JpaSystemException(PersistenceException ex) {

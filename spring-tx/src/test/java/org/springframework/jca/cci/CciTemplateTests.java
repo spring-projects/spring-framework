@@ -699,7 +699,7 @@ public class CciTemplateTests {
 		replay(connectionFactory, connection, interaction);
 
 		CciTemplate ct = new CciTemplate(connectionFactory);
-		Record tmpOutputRecord = (Record) ct.execute(interactionSpec,
+		Record tmpOutputRecord = ct.execute(interactionSpec,
 				inputOutputRecord);
 		assertNull(tmpOutputRecord);
 

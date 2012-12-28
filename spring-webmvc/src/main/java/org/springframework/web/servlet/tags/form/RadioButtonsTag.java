@@ -27,6 +27,7 @@ package org.springframework.web.servlet.tags.form;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class RadioButtonsTag extends AbstractMultiCheckedElementTag {
 
 	@Override

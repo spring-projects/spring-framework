@@ -42,7 +42,7 @@ public class SimpleConfigTests {
 		String value = fooService.foo(1);
 		assertEquals("bar", value);
 
-		Future future = fooService.asyncFoo(1);
+		Future<?> future = fooService.asyncFoo(1);
 		assertTrue(future instanceof FutureTask);
 		assertEquals("bar", future.get());
 

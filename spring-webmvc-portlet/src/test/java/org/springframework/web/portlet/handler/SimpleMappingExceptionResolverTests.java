@@ -255,21 +255,25 @@ public class SimpleMappingExceptionResolverTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SomeOddException extends Exception {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SomeOddExceptionChild extends SomeOddException {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class NoSubstringMatchesThisException extends SomeOddException {
 
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class AnotherOddException extends Exception {
 
 	}

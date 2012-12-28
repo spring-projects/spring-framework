@@ -30,6 +30,7 @@ import javax.portlet.PortletException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class ModelAndViewDefiningException extends PortletException {
 
 	private ModelAndView modelAndView;

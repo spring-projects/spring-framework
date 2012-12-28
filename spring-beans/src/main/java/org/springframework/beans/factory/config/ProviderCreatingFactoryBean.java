@@ -76,6 +76,7 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 	/**
 	 * Independent inner class - for serialization purposes.
 	 */
+	@SuppressWarnings("serial")
 	private static class TargetBeanProvider implements Provider, Serializable {
 
 		private final BeanFactory beanFactory;

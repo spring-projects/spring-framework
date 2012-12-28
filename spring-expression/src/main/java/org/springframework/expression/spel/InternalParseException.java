@@ -25,6 +25,7 @@ import org.springframework.expression.spel.SpelParseException;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class InternalParseException extends RuntimeException {
 
 	public InternalParseException(SpelParseException cause) {

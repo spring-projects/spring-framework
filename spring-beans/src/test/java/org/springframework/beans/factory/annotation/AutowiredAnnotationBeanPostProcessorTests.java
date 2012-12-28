@@ -1346,6 +1346,7 @@ public final class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryInjectionBean implements Serializable {
 
 		@Autowired

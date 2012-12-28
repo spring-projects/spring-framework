@@ -25,6 +25,7 @@ package org.springframework.oxm;
  * @see MarshallingFailureException
  * @see UnmarshallingFailureException
  */
+@SuppressWarnings("serial")
 public abstract class MarshallingException extends XmlMappingException {
 
 	/**

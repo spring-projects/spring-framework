@@ -31,6 +31,7 @@ import org.springframework.http.HttpMethod;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class HttpRequestMethodNotSupportedException extends ServletException {
 
 	private String method;

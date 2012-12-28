@@ -28,6 +28,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Juergen Hoeller
  * @since 1.1
  */
+@SuppressWarnings("serial")
 public abstract class JmsException extends NestedRuntimeException {
 
 	/**

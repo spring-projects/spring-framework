@@ -31,6 +31,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.task.NoOpRunnable;
 
+import static org.mockito.Mockito.*;
+
+
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
@@ -53,6 +56,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testShutdownNowIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -75,6 +79,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testShutdownIsPropagatedToTheExecutorOnDestroy() throws Exception {
 		MockControl mockScheduledExecutorService = MockControl.createNiceControl(ScheduledExecutorService.class);
 		final ScheduledExecutorService executor = (ScheduledExecutorService) mockScheduledExecutorService.getMock();
@@ -225,6 +230,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testSettingThreadFactoryToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
@@ -241,6 +247,7 @@ public class ScheduledExecutorFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings("serial")
 	public void testSettingRejectedExecutionHandlerToNullForcesUseOfDefaultButIsOtherwiseCool() throws Exception {
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean() {
 			protected ScheduledExecutorService createExecutor(int poolSize, ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {

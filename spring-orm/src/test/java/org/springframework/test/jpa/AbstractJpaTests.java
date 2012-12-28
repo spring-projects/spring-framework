@@ -80,6 +80,7 @@ import org.springframework.util.StringUtils;
  * @deprecated as of Spring 3.0, in favor of using the listener-based test context framework
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
+@Deprecated
 public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";

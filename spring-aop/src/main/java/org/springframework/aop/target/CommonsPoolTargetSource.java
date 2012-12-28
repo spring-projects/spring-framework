@@ -58,6 +58,8 @@ import org.springframework.core.Constants;
 public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		implements PoolableObjectFactory {
 
+	private static final long serialVersionUID = 1L;
+
 	private static final Constants constants = new Constants(GenericObjectPool.class);
 
 

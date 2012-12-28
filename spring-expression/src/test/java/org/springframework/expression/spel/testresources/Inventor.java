@@ -111,6 +111,7 @@ public class Inventor {
 		return valueIn;
 	}
 
+	@SuppressWarnings("serial")
 	static class TestException extends Exception {}
 
 	public String throwException(PlaceOfBirth pob) {

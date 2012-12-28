@@ -40,7 +40,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 15 April 2001
  */
-public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable {
+public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOther, Comparable<Object> {
 
 	private String beanName;
 
@@ -70,13 +70,13 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Float myFloat = new Float(0.0);
 
-	private Collection friends = new LinkedList();
+	private Collection<? super Object> friends = new LinkedList<>();
 
-	private Set someSet = new HashSet();
+	private Set<?> someSet = new HashSet<>();
 
-	private Map someMap = new HashMap();
+	private Map<?, ?> someMap = new HashMap<>();
 
-	private List someList = new ArrayList();
+	private List<?> someList = new ArrayList<>();
 
 	private Properties someProperties = new Properties();
 
@@ -94,9 +94,9 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 
 	private Boolean someBoolean;
 
-	private List otherColours;
+	private List<?> otherColours;
 
-	private List pets;
+	private List<?> pets;
 
 
 	public TestBean() {
@@ -120,15 +120,15 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.someProperties = someProperties;
 	}
 
-	public TestBean(List someList) {
+	public TestBean(List<?> someList) {
 		this.someList = someList;
 	}
 
-	public TestBean(Set someSet) {
+	public TestBean(Set<?> someSet) {
 		this.someSet = someSet;
 	}
 
-	public TestBean(Map someMap) {
+	public TestBean(Map<?, ?> someMap) {
 		this.someMap = someMap;
 	}
 
@@ -262,35 +262,35 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.myFloat = myFloat;
 	}
 
-	public Collection getFriends() {
+	public Collection<? super Object> getFriends() {
 		return friends;
 	}
 
-	public void setFriends(Collection friends) {
+	public void setFriends(Collection<? super Object> friends) {
 		this.friends = friends;
 	}
 
-	public Set getSomeSet() {
+	public Set<?> getSomeSet() {
 		return someSet;
 	}
 
-	public void setSomeSet(Set someSet) {
+	public void setSomeSet(Set<?> someSet) {
 		this.someSet = someSet;
 	}
 
-	public Map getSomeMap() {
+	public Map<?, ?> getSomeMap() {
 		return someMap;
 	}
 
-	public void setSomeMap(Map someMap) {
+	public void setSomeMap(Map<?, ?> someMap) {
 		this.someMap = someMap;
 	}
 
-	public List getSomeList() {
+	public List<?> getSomeList() {
 		return someList;
 	}
 
-	public void setSomeList(List someList) {
+	public void setSomeList(List<?> someList) {
 		this.someList = someList;
 	}
 
@@ -350,19 +350,19 @@ public class TestBean implements BeanNameAware, BeanFactoryAware, ITestBean, IOt
 		this.nestedIndexedBean = nestedIndexedBean;
 	}
 
-	public List getOtherColours() {
+	public List<?> getOtherColours() {
 		return otherColours;
 	}
 
-	public void setOtherColours(List otherColours) {
+	public void setOtherColours(List<?> otherColours) {
 		this.otherColours = otherColours;
 	}
 
-	public List getPets() {
+	public List<?> getPets() {
 		return pets;
 	}
 
-	public void setPets(List pets) {
+	public void setPets(List<?> pets) {
 		this.pets = pets;
 	}
 

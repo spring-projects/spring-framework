@@ -77,6 +77,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #setUowManagerName
  * @see com.ibm.wsspi.uow.UOWManager
  */
+@SuppressWarnings("serial")
 public class WebSphereUowTransactionManager extends JtaTransactionManager
 		implements CallbackPreferringPlatformTransactionManager {
 

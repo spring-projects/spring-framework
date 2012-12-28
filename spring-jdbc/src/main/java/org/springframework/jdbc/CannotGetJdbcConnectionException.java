@@ -25,6 +25,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class CannotGetJdbcConnectionException extends DataAccessResourceFailureException {
 
 	/**

@@ -26,6 +26,7 @@ import org.springframework.core.AttributeAccessorSupport;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public class BeanMetadataAttributeAccessor extends AttributeAccessorSupport implements BeanMetadataElement {
 
 	private Object source;

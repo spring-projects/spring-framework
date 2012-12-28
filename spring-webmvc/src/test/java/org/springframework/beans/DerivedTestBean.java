@@ -25,6 +25,7 @@ import org.springframework.beans.factory.DisposableBean;
  * @author Juergen Hoeller
  * @since 21.08.2003
  */
+@SuppressWarnings("serial")
 public class DerivedTestBean extends TestBean implements Serializable, BeanNameAware, DisposableBean {
 
 	private String beanName;

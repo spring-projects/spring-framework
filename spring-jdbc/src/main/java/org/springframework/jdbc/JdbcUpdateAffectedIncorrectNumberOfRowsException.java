@@ -26,6 +26,7 @@ import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class JdbcUpdateAffectedIncorrectNumberOfRowsException extends IncorrectUpdateSemanticsDataAccessException {
 
 	/** Number of rows that should have been affected */

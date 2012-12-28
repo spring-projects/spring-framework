@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationEvent;
  * @author Juergen Hoeller
  * @since 2.5
  */
+@SuppressWarnings("serial")
 public abstract class ApplicationContextEvent extends ApplicationEvent {
 
 	/**

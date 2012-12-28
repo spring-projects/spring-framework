@@ -19,8 +19,8 @@ package org.springframework.aop.config;
 import java.lang.reflect.Method;
 
 import static org.easymock.EasyMock.*;
-import org.junit.After;
 import static org.junit.Assert.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -106,6 +106,7 @@ public final class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testSunnyDayPath() throws Exception {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);
@@ -121,6 +122,7 @@ public final class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testWhereMethodCannotBeResolved() {
 		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
 		replay(beanFactory);

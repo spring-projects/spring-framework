@@ -30,6 +30,7 @@ import javax.servlet.jsp.tagext.BodyTagSupport;
  * @see Param
  * @see UrlTag
  */
+@SuppressWarnings("serial")
 public class ParamTag extends BodyTagSupport {
 
 	private String name;

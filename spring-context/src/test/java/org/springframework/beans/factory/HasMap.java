@@ -28,34 +28,34 @@ import java.util.Set;
  */
 public class HasMap {
 
-	private Map map;
+	private Map<?, ?> map;
 
-	private Set set;
+	private Set<?> set;
 
 	private Properties props;
 
 	private Object[] objectArray;
 
-	private Class[] classArray;
+	private Class<?>[] classArray;
 
 	private Integer[] intArray;
 
 	private HasMap() {
 	}
 
-	public Map getMap() {
+	public Map<?, ?> getMap() {
 		return map;
 	}
 
-	public void setMap(Map map) {
+	public void setMap(Map<?, ?> map) {
 		this.map = map;
 	}
 
-	public Set getSet() {
+	public Set<?> getSet() {
 		return set;
 	}
 
-	public void setSet(Set set) {
+	public void setSet(Set<?> set) {
 		this.set = set;
 	}
 
@@ -75,11 +75,11 @@ public class HasMap {
 		this.objectArray = objectArray;
 	}
 
-	public Class[] getClassArray() {
+	public Class<?>[] getClassArray() {
 		return classArray;
 	}
 
-	public void setClassArray(Class[] classArray) {
+	public void setClassArray(Class<?>[] classArray) {
 		this.classArray = classArray;
 	}
 

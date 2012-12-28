@@ -61,7 +61,7 @@ public class SharedEntityManagerFactoryTests {
 		assertTrue(EntityManager.class.isAssignableFrom(proxyFactoryBean.getObjectType()));
 		assertTrue(proxyFactoryBean.isSingleton());
 
-		EntityManager proxy = (EntityManager) proxyFactoryBean.getObject();
+		EntityManager proxy = proxyFactoryBean.getObject();
 		assertSame(proxy, proxyFactoryBean.getObject());
 		assertFalse(proxy.contains(o));
 

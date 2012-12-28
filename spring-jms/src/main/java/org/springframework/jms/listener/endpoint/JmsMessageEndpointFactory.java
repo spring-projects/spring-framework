@@ -116,6 +116,7 @@ public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
 	 * directly, leavng it up to the concrete endpoint to apply those -
 	 * and to handle any ResourceExceptions thrown from them.
 	 */
+	@SuppressWarnings("serial")
 	public static class JmsResourceException extends RuntimeException {
 
 		public JmsResourceException(ResourceException cause) {

@@ -133,14 +133,17 @@ public final class TagUtilsTests {
 		TagUtils.assertHasAncestorOfType(a, TagC.class, "a", "c");
 	}
 
+	@SuppressWarnings("serial")
 	private static final class TagA extends TagSupport {
 
 	}
 
+	@SuppressWarnings("serial")
 	private static final class TagB extends TagSupport {
 
 	}
 
+	@SuppressWarnings("serial")
 	private static final class TagC extends TagSupport {
 
 	}

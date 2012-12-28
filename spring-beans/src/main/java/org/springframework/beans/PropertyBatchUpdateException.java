@@ -35,6 +35,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 18 April 2001
  */
+@SuppressWarnings("serial")
 public class PropertyBatchUpdateException extends BeansException {
 
 	/** List of PropertyAccessException objects */

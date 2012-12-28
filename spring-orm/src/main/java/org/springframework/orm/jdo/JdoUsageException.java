@@ -29,6 +29,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
  * @since 03.06.2003
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
+@SuppressWarnings("serial")
 public class JdoUsageException extends InvalidDataAccessApiUsageException {
 
 	public JdoUsageException(JDOUserException ex) {

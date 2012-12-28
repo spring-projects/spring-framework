@@ -113,7 +113,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 		factory.setTargetBeanName(targetBeanName);
 		factory.setBeanFactory(beanFactory);
 		factory.afterPropertiesSet();
-		ObjectFactory<?> objectFactory = (ObjectFactory<?>) factory.getObject();
+		ObjectFactory<?> objectFactory = factory.getObject();
 		Object actualSingleton = objectFactory.getObject();
 		assertSame(expectedSingleton, actualSingleton);
 

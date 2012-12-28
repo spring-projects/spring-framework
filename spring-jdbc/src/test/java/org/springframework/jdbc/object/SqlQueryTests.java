@@ -953,7 +953,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			public List findCustomers(List ids) {
 				Map params = new HashMap();
 				params.put("ids", ids);
-				return (List) executeByNamedParam(params);
+				return executeByNamedParam(params);
 			}
 		}
 
@@ -1026,7 +1026,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			public List findCustomers(Integer id) {
 				Map params = new HashMap();
 				params.put("id1", id);
-				return (List) executeByNamedParam(params);
+				return executeByNamedParam(params);
 			}
 		}
 
@@ -1067,7 +1067,7 @@ public class SqlQueryTests extends AbstractJdbcTests {
 			public List findCustomers(Integer id1) {
 				Map params = new HashMap();
 				params.put("id1", id1);
-				return (List) executeByNamedParam(params);
+				return executeByNamedParam(params);
 			}
 		}
 

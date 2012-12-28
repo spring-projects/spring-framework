@@ -72,7 +72,7 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 			// Allow for ViewResolver chaining.
 			return null;
 		}
-		return (View) context.getBean(viewName, View.class);
+		return context.getBean(viewName, View.class);
 	}
 
 }

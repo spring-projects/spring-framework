@@ -384,6 +384,7 @@ public class StatusResultMatchers {
 	  * Assert the response status code is {@code HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE} (419).
 	  * @deprecated matching the deprecation of HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE
 	  */
+	 @Deprecated
 	 public ResultMatcher isInsufficientSpaceOnResource() {
 		 return matcher(HttpStatus.INSUFFICIENT_SPACE_ON_RESOURCE);
 	 }
@@ -392,6 +393,7 @@ public class StatusResultMatchers {
 	  * Assert the response status code is {@code HttpStatus.METHOD_FAILURE} (420).
 	  * @deprecated matching the deprecation of HttpStatus.METHOD_FAILURE
 	  */
+	 @Deprecated
 	 public ResultMatcher isMethodFailure() {
 		 return matcher(HttpStatus.METHOD_FAILURE);
 	 }
@@ -400,6 +402,7 @@ public class StatusResultMatchers {
 	  * Assert the response status code is {@code HttpStatus.DESTINATION_LOCKED} (421).
 	  * @deprecated matching the deprecation of HttpStatus.DESTINATION_LOCKED
 	  */
+	 @Deprecated
 	 public ResultMatcher isDestinationLocked() {
 		 return matcher(HttpStatus.DESTINATION_LOCKED);
 	 }

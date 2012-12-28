@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * @since 13.02.2004
  * @see org.springframework.context.MessageSource#getMessage(MessageSourceResolvable, java.util.Locale)
  */
+@SuppressWarnings("serial")
 public class DefaultMessageSourceResolvable implements MessageSourceResolvable, Serializable {
 
 	private final String[] codes;

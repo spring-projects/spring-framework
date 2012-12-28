@@ -92,6 +92,7 @@ public class ParamTagTests extends AbstractTagTests {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private class MockParamSupportTag extends TagSupport implements ParamAware {
 
 		private Param param;

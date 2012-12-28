@@ -38,6 +38,7 @@ import org.springframework.util.PatternMatchUtils;
  * @see #isMatch
  * @see MethodMapTransactionAttributeSource
  */
+@SuppressWarnings("serial")
 public class NameMatchTransactionAttributeSource implements TransactionAttributeSource, Serializable {
 
 	/**

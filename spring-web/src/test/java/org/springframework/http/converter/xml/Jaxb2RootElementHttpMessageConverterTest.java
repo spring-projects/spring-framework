@@ -72,29 +72,26 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlRootElement() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		RootElement result = (RootElement) converter.read((Class) RootElement.class, inputMessage);
+		RootElement result = (RootElement) converter.read(RootElement.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.type.s);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlRootElementSubclass() throws Exception {
 		byte[] body = "<rootElement><type s=\"Hello World\"/></rootElement>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		RootElementSubclass result = (RootElementSubclass) converter.read((Class) RootElementSubclass.class, inputMessage);
+		RootElementSubclass result = (RootElementSubclass) converter.read(RootElementSubclass.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.type.s);
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void readXmlType() throws Exception {
 		byte[] body = "<foo s=\"Hello World\"/>".getBytes("UTF-8");
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
-		Type result = (Type) converter.read((Class) Type.class, inputMessage);
+		Type result = (Type) converter.read(Type.class, inputMessage);
 		assertEquals("Invalid result", "Hello World", result.s);
 	}
 

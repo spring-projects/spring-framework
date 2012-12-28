@@ -25,6 +25,7 @@ package org.springframework.transaction;
  * @author Rod Johnson
  * @since 17.03.2003
  */
+@SuppressWarnings("serial")
 public class NoTransactionException extends TransactionUsageException {
 
 	/**

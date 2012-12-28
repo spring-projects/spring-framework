@@ -39,7 +39,7 @@ public class TimerSupportTests extends TestCase {
 		mittfb.setTargetObject(task1);
 		mittfb.setTargetMethod("doSomething");
 		mittfb.afterPropertiesSet();
-		final TimerTask timerTask1 = (TimerTask) mittfb.getObject();
+		final TimerTask timerTask1 = mittfb.getObject();
 
 		final TestRunnable timerTask2 = new TestRunnable();
 
@@ -48,7 +48,7 @@ public class TimerSupportTests extends TestCase {
 		tasks[1] = new ScheduledTimerTask(timerTask1, 10, 20, true);
 		tasks[2] = new ScheduledTimerTask(timerTask2, 20);
 
-		final List success = new ArrayList(3);
+		final List<Boolean> success = new ArrayList<Boolean>(3);
 		final Timer timer = new Timer(true) {
 			public void schedule(TimerTask task, long delay, long period) {
 				if (task == timerTask0 && delay == 0 && period == 10) {

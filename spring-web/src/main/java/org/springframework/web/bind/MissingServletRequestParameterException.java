@@ -22,6 +22,7 @@ package org.springframework.web.bind;
  * @author Juergen Hoeller
  * @since 2.0.2
  */
+@SuppressWarnings("serial")
 public class MissingServletRequestParameterException extends ServletRequestBindingException {
 
 	private final String parameterName;

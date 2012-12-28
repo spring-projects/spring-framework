@@ -17,16 +17,8 @@
 package org.springframework.beans.support;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import junit.framework.TestCase;
-
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 
 import test.beans.TestBean;
 

@@ -55,6 +55,7 @@ import org.springframework.transaction.TransactionException;
  * @see #setLazyDatabaseTransaction
  * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
  */
+@SuppressWarnings("serial")
 public class EclipseLinkJpaDialect extends DefaultJpaDialect {
 
 	private boolean lazyDatabaseTransaction = false;

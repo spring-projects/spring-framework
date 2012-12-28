@@ -24,6 +24,7 @@ package org.springframework.core;
  * @since 28.04.2003
  * @see org.springframework.core.Constants
  */
+@SuppressWarnings("serial")
 public class ConstantException extends IllegalArgumentException {
 
 	/**

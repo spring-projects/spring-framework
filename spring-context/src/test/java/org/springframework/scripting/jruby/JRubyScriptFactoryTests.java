@@ -94,7 +94,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testCtorWithNullScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory(null, new Class[]{Messenger.class});
+			new JRubyScriptFactory(null, new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -103,7 +103,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("", new Class[]{Messenger.class});
+			new JRubyScriptFactory("", new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -112,7 +112,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
-			new JRubyScriptFactory("\n   ", new Class[]{Messenger.class});
+			new JRubyScriptFactory("\n   ", new Class<?>[]{Messenger.class});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -130,7 +130,7 @@ public class JRubyScriptFactoryTests extends TestCase {
 
 	public void testCtorWithEmptyScriptInterfacesArray() throws Exception {
 		try {
-			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class[]{});
+			new JRubyScriptFactory(RUBY_SCRIPT_SOURCE_LOCATOR, new Class<?>[]{});
 			fail("Must have thrown exception by this point.");
 		}
 		catch (IllegalArgumentException expected) {
@@ -250,14 +250,14 @@ public class JRubyScriptFactoryTests extends TestCase {
 		assertEquals("2", lol[1][0]);
 		assertEquals("3", lol[2][0]);
 
-		Map singleValueMap = adder.toMap("key", "value");
+		Map<?, ?> singleValueMap = adder.toMap("key", "value");
 		assertNotNull(singleValueMap);
 		assertEquals(1, singleValueMap.size());
 		assertEquals("key", singleValueMap.keySet().iterator().next());
 		assertEquals("value", singleValueMap.values().iterator().next());
 
 		String[] expectedStrings = new String[]{"1", "2", "3"};
-		Map map = adder.toMap("key", expectedStrings);
+		Map<?, ?> map = adder.toMap("key", expectedStrings);
 		assertNotNull(map);
 		assertEquals(1, map.size());
 		assertEquals("key", map.keySet().iterator().next());

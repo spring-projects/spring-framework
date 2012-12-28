@@ -24,6 +24,7 @@ package org.springframework.dao;
  * @author Juergen Hoeller
  * @since 13.10.2003
  */
+@SuppressWarnings("serial")
 public class DataRetrievalFailureException extends NonTransientDataAccessException {
 
 	/**

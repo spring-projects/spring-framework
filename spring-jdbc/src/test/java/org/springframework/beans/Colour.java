@@ -21,6 +21,7 @@ import org.springframework.core.enums.ShortCodedLabeledEnum;
 /**
  * @author Rob Harrop
  */
+@SuppressWarnings("serial")
 public class Colour extends ShortCodedLabeledEnum {
 
 	public static final Colour RED = new Colour(0, "RED");

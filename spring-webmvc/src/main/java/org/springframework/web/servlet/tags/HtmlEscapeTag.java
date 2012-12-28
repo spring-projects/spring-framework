@@ -31,6 +31,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @since 04.03.2003
  * @see HtmlEscapingAwareTag#setHtmlEscape
  */
+@SuppressWarnings("serial")
 public class HtmlEscapeTag extends RequestContextAwareTag {
 
 	private String defaultHtmlEscape;

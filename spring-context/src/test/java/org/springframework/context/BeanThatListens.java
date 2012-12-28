@@ -24,7 +24,7 @@ import java.util.Map;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class BeanThatListens implements ApplicationListener {
+public class BeanThatListens implements ApplicationListener<ApplicationEvent> {
 
 	private BeanThatBroadcasts beanThatBroadcasts;
 
@@ -36,7 +36,7 @@ public class BeanThatListens implements ApplicationListener {
 
 	public BeanThatListens(BeanThatBroadcasts beanThatBroadcasts) {
 		this.beanThatBroadcasts = beanThatBroadcasts;
-		Map beans = beanThatBroadcasts.applicationContext.getBeansOfType(BeanThatListens.class);
+		Map<?, BeanThatListens> beans = beanThatBroadcasts.applicationContext.getBeansOfType(BeanThatListens.class);
 		if (!beans.isEmpty()) {
 			throw new IllegalStateException("Shouldn't have found any BeanThatListens instances");
 		}

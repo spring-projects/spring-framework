@@ -40,8 +40,7 @@ public class ServiceInvocationCounter {
 	@Before("serviceExecution()")
 	public void countUse() {
 		this.useCount++;
-		this.threadLocalCount.set(this.useCount);
-		System.out.println("");
+		threadLocalCount.set(this.useCount);
 	}
 
 	public int getCount() {

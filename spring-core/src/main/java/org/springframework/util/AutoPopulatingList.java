@@ -39,6 +39,7 @@ import java.util.ListIterator;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class AutoPopulatingList<E> implements List<E>, Serializable {
 
 	/**

@@ -120,7 +120,7 @@ public abstract class AbstractAopProxyTests {
 
 	@Test
 	public void testNoInterceptorsAndNoTarget() {
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		// Add no interceptors
 		try {
 			AopProxy aop = createAopProxy(pc);
@@ -418,7 +418,7 @@ public abstract class AbstractAopProxyTests {
 				return s;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		if (context) {
 			pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		}
@@ -445,7 +445,7 @@ public abstract class AbstractAopProxyTests {
 		TestBean raw = new OwnSpouse();
 
 		ProxyCreatorSupport pc = new ProxyCreatorSupport();
-		pc.setInterfaces(new Class[] {ITestBean.class});
+		pc.setInterfaces(new Class<?>[] {ITestBean.class});
 		pc.setTarget(raw);
 
 		ITestBean tb = (ITestBean) createProxy(pc);
@@ -461,7 +461,7 @@ public abstract class AbstractAopProxyTests {
 				throw expectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -495,7 +495,7 @@ public abstract class AbstractAopProxyTests {
 				throw unexpectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -527,7 +527,7 @@ public abstract class AbstractAopProxyTests {
 				throw unexpectedException;
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		pc.addAdvice(mi);
 
@@ -555,7 +555,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testTargetCanGetInvocationEvenIfNoAdviceChain() throws Throwable {
 		NeedsToSeeProxy target = new NeedsToSeeProxy();
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {INeedsToSeeProxy.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {INeedsToSeeProxy.class});
 		pc.setTarget(target);
 		pc.setExposeProxy(true);
 
@@ -570,7 +570,7 @@ public abstract class AbstractAopProxyTests {
 	public void testTargetCanGetInvocation() throws Throwable {
 		final InvocationCheckExposedInvocationTestBean expectedTarget = new InvocationCheckExposedInvocationTestBean();
 
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class, IOther.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class, IOther.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
@@ -615,7 +615,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testMixinWithIntroductionAdvisor() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		pc.addAdvisor(new LockMixinAdvisor());
 		pc.setTarget(tb);
 
@@ -625,7 +625,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testMixinWithIntroductionInfo() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		// We don't use an IntroductionAdvisor, we can just add an advice that implements IntroductionInfo
 		pc.addAdvice(new LockMixin());
 		pc.setTarget(tb);
@@ -664,7 +664,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testReplaceArgument() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		pc.setTarget(tb);
 		pc.addAdvisor(new StringSetterNullReplacementAdvice());
 
@@ -952,7 +952,7 @@ public abstract class AbstractAopProxyTests {
 	public void testProxyConfigString() {
 		TestBean target = new TestBean();
 		ProxyFactory pc = new ProxyFactory(target);
-		pc.setInterfaces(new Class[] {ITestBean.class});
+		pc.setInterfaces(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
 		MethodBeforeAdvice mba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(new NameMatchMethodPointcut(), mba);
@@ -968,7 +968,7 @@ public abstract class AbstractAopProxyTests {
 	public void testCanPreventCastToAdvisedUsingOpaque() {
 		TestBean target = new TestBean();
 		ProxyFactory pc = new ProxyFactory(target);
-		pc.setInterfaces(new Class[] {ITestBean.class});
+		pc.setInterfaces(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(new NopInterceptor());
 		CountingBeforeAdvice mba = new CountingBeforeAdvice();
 		Advisor advisor = new DefaultPointcutAdvisor(new NameMatchMethodPointcut().addMethodName("setAge"), mba);
@@ -1069,7 +1069,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testDynamicMethodPointcutThatAlwaysAppliesStatically() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		TestDynamicPointcutAdvice dp = new TestDynamicPointcutAdvice(new NopInterceptor(), "getAge");
 		pc.addAdvisor(dp);
 		pc.setTarget(tb);
@@ -1085,7 +1085,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testDynamicMethodPointcutThatAppliesStaticallyOnlyToSetters() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		// Could apply dynamically to getAge/setAge but not to getName
 		TestDynamicPointcutForSettersOnly dp = new TestDynamicPointcutForSettersOnly(new NopInterceptor(), "Age");
 		pc.addAdvisor(dp);
@@ -1107,7 +1107,7 @@ public abstract class AbstractAopProxyTests {
 	@Test
 	public void testStaticMethodPointcut() throws Throwable {
 		TestBean tb = new TestBean();
-		ProxyFactory pc = new ProxyFactory(new Class[] {ITestBean.class});
+		ProxyFactory pc = new ProxyFactory(new Class<?>[] {ITestBean.class});
 		NopInterceptor di = new NopInterceptor();
 		TestStaticPointcutAdvice sp = new TestStaticPointcutAdvice(di, "getAge");
 		pc.addAdvisor(sp);
@@ -1353,7 +1353,7 @@ public abstract class AbstractAopProxyTests {
 				return invocation.proceed();
 			}
 		};
-		AdvisedSupport pc = new AdvisedSupport(new Class[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		MapAwareMethodInterceptor mami1 = new MapAwareMethodInterceptor(new HashMap<String, String>(), new HashMap<String, String>());
 		Map<String, String> firstValuesToAdd = new HashMap<String, String>();
 		firstValuesToAdd.put("test", "");

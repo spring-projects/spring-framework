@@ -31,6 +31,8 @@ import org.springframework.beans.BeansException;
  */
 public class PrototypeTargetSource extends AbstractPrototypeBasedTargetSource {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Obtain a new prototype instance for every call.
 	 * @see #newPrototypeInstance()

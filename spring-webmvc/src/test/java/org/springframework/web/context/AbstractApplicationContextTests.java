@@ -100,7 +100,7 @@ public abstract class AbstractApplicationContextTests extends AbstractListableBe
 	}
 
 	public void testGrandparentTypedDefinitionFound() throws Exception {
-		TestBean dad = (TestBean) applicationContext.getBean("father", TestBean.class);
+		TestBean dad = applicationContext.getBean("father", TestBean.class);
 		assertTrue("Dad has correct name", dad.getName().equals("Albert"));
 	}
 

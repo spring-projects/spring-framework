@@ -30,6 +30,7 @@ import org.springframework.beans.Mergeable;
  * @author Rob Harrop
  * @since 27.05.2003
  */
+@SuppressWarnings("serial")
 public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, BeanMetadataElement {
 
 	private Object source;

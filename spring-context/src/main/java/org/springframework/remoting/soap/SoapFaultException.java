@@ -29,6 +29,7 @@ import org.springframework.remoting.RemoteInvocationFailureException;
  * @see javax.xml.rpc.soap.SOAPFaultException
  * @see javax.xml.ws.soap.SOAPFaultException
  */
+@SuppressWarnings("serial")
 public abstract class SoapFaultException extends RemoteInvocationFailureException {
 
 	/**

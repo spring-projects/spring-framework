@@ -248,6 +248,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable("beanOne")
+	@SuppressWarnings("serial")
 	protected static class ShouldBeConfiguredBySpring implements Serializable {
 
 		private String name;
@@ -263,6 +264,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable("beanOne")
+	@SuppressWarnings("serial")
 	private static class ShouldBeConfiguredBySpringContainsPublicReadResolve implements Serializable {
 
 		private String name;
@@ -317,6 +319,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SerializableThatShouldNotBeConfiguredBySpring implements Serializable {
 
 		private String name;
@@ -444,6 +447,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	}
 
 	@Configurable
+	@SuppressWarnings("serial")
 	private static class BaseSerializableBean implements Serializable {
 
 		public int setterCount;
@@ -457,6 +461,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SubSerializableBean extends BaseSerializableBean {
 	}
 
@@ -551,6 +556,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	public static class Order implements MailSenderClient, Serializable {
 		private transient MailSender mailSender;
 
@@ -577,6 +583,7 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 	}
 
 	@Configurable
+	@SuppressWarnings("serial")
 	private static class PreOrPostConstructionConfiguredBean implements Serializable {
 		private transient String name;
 		protected transient boolean preConstructionConfigured;
@@ -597,11 +604,13 @@ public abstract class AbstractBeanConfigurerTests extends TestCase {
 
 
 	@Configurable(preConstruction=true)
+	@SuppressWarnings("serial")
 	public static class PreConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 
 
 	@Configurable(preConstruction=false)
+	@SuppressWarnings("serial")
 	private static class PostConstructionConfiguredBean extends PreOrPostConstructionConfiguredBean {
 	}
 

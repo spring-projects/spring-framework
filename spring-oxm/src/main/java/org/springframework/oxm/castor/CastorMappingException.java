@@ -24,6 +24,7 @@ import org.springframework.oxm.XmlMappingException;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class CastorMappingException extends XmlMappingException {
 
 	/**

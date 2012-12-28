@@ -57,7 +57,7 @@ public class ApplicationContextExpressionTests {
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(ac);
 
 		ac.getBeanFactory().registerScope("myScope", new Scope() {
-			public Object get(String name, ObjectFactory objectFactory) {
+			public Object get(String name, ObjectFactory<?> objectFactory) {
 				return objectFactory.getObject();
 			}
 			public Object remove(String name) {
@@ -296,6 +296,7 @@ public class ApplicationContextExpressionTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ValueTestBean implements Serializable {
 
 		@Autowired @Value("XXX#{tb0.name}YYY#{mySpecialAttr}ZZZ")

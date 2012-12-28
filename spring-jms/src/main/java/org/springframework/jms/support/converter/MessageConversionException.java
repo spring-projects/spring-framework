@@ -26,6 +26,7 @@ import org.springframework.jms.JmsException;
  * @since 1.1
  * @see MessageConverter
  */
+@SuppressWarnings("serial")
 public class MessageConversionException extends JmsException {
 
 	/**

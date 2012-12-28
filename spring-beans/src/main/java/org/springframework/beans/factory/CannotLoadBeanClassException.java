@@ -25,6 +25,7 @@ import org.springframework.beans.FatalBeanException;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class CannotLoadBeanClassException extends FatalBeanException {
 
 	private String resourceDescription;

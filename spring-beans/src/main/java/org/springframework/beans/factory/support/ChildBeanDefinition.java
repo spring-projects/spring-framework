@@ -43,6 +43,7 @@ import org.springframework.util.ObjectUtils;
  * @see GenericBeanDefinition
  * @see RootBeanDefinition
  */
+@SuppressWarnings("serial")
 public class ChildBeanDefinition extends AbstractBeanDefinition {
 
 	private String parentName;

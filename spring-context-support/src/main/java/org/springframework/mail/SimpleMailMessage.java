@@ -39,6 +39,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.mail.javamail.MimeMessageHelper
  * @see org.springframework.mail.javamail.MimeMailMessage
  */
+@SuppressWarnings("serial")
 public class SimpleMailMessage implements MailMessage, Serializable {
 
 	private String from;

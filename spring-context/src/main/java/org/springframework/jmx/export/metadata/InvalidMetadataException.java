@@ -27,6 +27,7 @@ import org.springframework.jmx.JmxException;
  * @see JmxAttributeSource
  * @see org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler
  */
+@SuppressWarnings("serial")
 public class InvalidMetadataException extends JmxException {
 
 	/**

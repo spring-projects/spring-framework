@@ -94,6 +94,7 @@ public class CachingMapDecoratorTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class MyCachingMap extends CachingMapDecorator<String, String> {
 
 		private boolean createCalled;

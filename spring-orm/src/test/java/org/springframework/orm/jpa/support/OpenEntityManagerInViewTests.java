@@ -228,8 +228,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);
@@ -292,8 +292,8 @@ public class OpenEntityManagerInViewTests extends TestCase {
 
 		replay(manager, factory);
 
-		final EntityManagerFactory factory2 = (EntityManagerFactory) createMock(EntityManagerFactory.class);
-		final EntityManager manager2 = (EntityManager) createMock(EntityManager.class);
+		final EntityManagerFactory factory2 = createMock(EntityManagerFactory.class);
+		final EntityManager manager2 = createMock(EntityManager.class);
 
 		expect(factory2.createEntityManager()).andReturn(manager2);
 		expect(manager2.isOpen()).andReturn(true);

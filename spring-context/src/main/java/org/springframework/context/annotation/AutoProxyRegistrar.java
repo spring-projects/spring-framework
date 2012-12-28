@@ -18,7 +18,6 @@ package org.springframework.context.annotation;
 
 import static org.springframework.context.annotation.MetadataUtils.attributesFor;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;

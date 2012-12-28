@@ -46,6 +46,7 @@ import org.springframework.util.ClassUtils;
  * @see #getProxy(ClassLoader)
  * @see org.springframework.aop.framework.ProxyFactory
  */
+@SuppressWarnings("serial")
 public class AspectJProxyFactory extends ProxyCreatorSupport {
 
 	/** Cache for singleton aspect instances */

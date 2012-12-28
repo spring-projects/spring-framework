@@ -700,7 +700,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 				// 1 primitive arg, and one candidate...
 				for (int i = 0; i < this.argumentTypes.length; i++) {
 					if (isUnbound(i) && this.argumentTypes[i].isPrimitive()) {
-						bindParameterName(i, (String) varNames.get(0));
+						bindParameterName(i, varNames.get(0));
 						break;
 					}
 				}
@@ -790,6 +790,7 @@ public class AspectJAdviceParameterNameDiscoverer implements ParameterNameDiscov
 	 * Thrown in response to an ambiguous binding being detected when
 	 * trying to resolve a method's parameter names.
 	 */
+	@SuppressWarnings("serial")
 	public static class AmbiguousBindingException extends RuntimeException {
 
 		/**

@@ -28,6 +28,7 @@ import org.springframework.aop.support.DelegatingIntroductionInterceptor;
  * @author Rod Johnson
  * @since 10.07.2003
  */
+@SuppressWarnings("serial")
 public class LockMixin extends DelegatingIntroductionInterceptor implements Lockable {
 
 	/** This field demonstrates additional state in the mixin */

@@ -39,6 +39,7 @@ import org.springframework.util.ConcurrencyThrottleSupport;
  * @since 11.02.2004
  * @see #setConcurrencyLimit
  */
+@SuppressWarnings("serial")
 public class ConcurrencyThrottleInterceptor extends ConcurrencyThrottleSupport
 		implements MethodInterceptor, Serializable {
 

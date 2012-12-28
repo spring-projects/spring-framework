@@ -126,6 +126,7 @@ public abstract class SharedEntityManagerCreator {
 	 * transactional EntityManager, if any; else, it will fall back
 	 * to a newly created EntityManager per operation.
 	 */
+	@SuppressWarnings("serial")
 	private static class SharedEntityManagerInvocationHandler implements InvocationHandler, Serializable {
 
 		private final Log logger = LogFactory.getLog(getClass());

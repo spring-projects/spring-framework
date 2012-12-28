@@ -29,6 +29,7 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
  */
+@SuppressWarnings("serial")
 public class HibernateSystemException extends UncategorizedDataAccessException {
 
 	/**

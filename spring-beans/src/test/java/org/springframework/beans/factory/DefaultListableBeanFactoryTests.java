@@ -497,7 +497,7 @@ public class DefaultListableBeanFactoryTests {
 		int count = (new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p, PREFIX);
 		assertTrue("2 beans registered, not " + count, count == 2);
 
-		TestBean kerry = (TestBean) lbf.getBean("kerry", TestBean.class);
+		TestBean kerry = lbf.getBean("kerry", TestBean.class);
 		assertTrue("Kerry name is Kerry", "Kerry".equals(kerry.getName()));
 		ITestBean spouse = kerry.getSpouse();
 		assertTrue("Kerry spouse is non null", spouse != null);
@@ -516,7 +516,7 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("1 beans registered, not " + count, count == 1);
 		assertEquals(1, lbf.getBeanDefinitionCount());
 
-		TestBean tb = (TestBean) lbf.getBean("tb", TestBean.class);
+		TestBean tb = lbf.getBean("tb", TestBean.class);
 		assertEquals("my.value", tb.getSomeMap().get("my.key"));
 	}
 

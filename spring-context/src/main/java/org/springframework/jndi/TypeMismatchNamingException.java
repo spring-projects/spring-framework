@@ -26,6 +26,7 @@ import javax.naming.NamingException;
  * @since 1.2.8
  * @see JndiTemplate#lookup(String, Class)
  */
+@SuppressWarnings("serial")
 public class TypeMismatchNamingException extends NamingException {
 
 	private Class requiredType;

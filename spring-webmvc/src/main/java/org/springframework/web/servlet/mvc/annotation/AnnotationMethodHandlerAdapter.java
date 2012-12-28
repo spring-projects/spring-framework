@@ -142,6 +142,7 @@ import org.springframework.web.util.WebUtils;
  * @deprecated in Spring 3.2 in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
  */
+@Deprecated
 public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		implements HandlerAdapter, Ordered, BeanFactoryAware {
 

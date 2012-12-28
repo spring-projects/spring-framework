@@ -26,6 +26,7 @@ import org.aopalliance.aop.Advice;
  * @see #setAdvice
  * @see DefaultPointcutAdvisor
  */
+@SuppressWarnings("serial")
 public abstract class AbstractGenericPointcutAdvisor extends AbstractPointcutAdvisor {
 
 	private Advice advice;

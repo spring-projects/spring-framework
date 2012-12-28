@@ -938,6 +938,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -949,6 +950,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMethodInjectionBean implements Serializable {
 
 		private Provider<TestBean> testBeanFactory;
@@ -992,6 +994,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryListFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -1007,6 +1010,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryListMethodInjectionBean implements Serializable {
 
 		private Provider<List<TestBean>> testBeanFactory;
@@ -1022,6 +1026,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMapFieldInjectionBean implements Serializable {
 
 		@Inject
@@ -1037,6 +1042,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class ObjectFactoryMapMethodInjectionBean implements Serializable {
 
 		private Provider<Map<String, TestBean>> testBeanFactory;

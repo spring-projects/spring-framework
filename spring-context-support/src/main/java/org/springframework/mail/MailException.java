@@ -23,6 +23,7 @@ import org.springframework.core.NestedRuntimeException;
  *
  * @author Dmitriy Kopylenko
  */
+@SuppressWarnings("serial")
 public abstract class MailException extends NestedRuntimeException {
 
 	/**

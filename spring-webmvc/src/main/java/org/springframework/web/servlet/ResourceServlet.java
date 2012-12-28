@@ -88,6 +88,7 @@ import org.springframework.web.context.support.ServletContextResource;
  * @see #setAllowedResources
  * @see #setApplyLastModified
  */
+@SuppressWarnings("serial")
 public class ResourceServlet extends HttpServletBean {
 
 	/**

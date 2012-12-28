@@ -50,6 +50,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxTag() {
 			protected TagWriter createTagWriter() {

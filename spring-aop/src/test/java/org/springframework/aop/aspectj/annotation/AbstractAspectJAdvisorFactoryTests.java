@@ -386,7 +386,7 @@ public abstract class AbstractAspectJAdvisorFactoryTests {
 				),
 				CannotBeUnlocked.class);
 		assertTrue(proxy instanceof Lockable);
-		Lockable lockable = (Lockable) proxy;
+		Lockable lockable = proxy;
 		assertTrue("Already locked", lockable.locked());
 		lockable.lock();
 		assertTrue("Real target ignores locking", lockable.locked());

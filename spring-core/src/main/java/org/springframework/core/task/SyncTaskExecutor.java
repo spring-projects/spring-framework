@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
  * @since 2.0
  * @see SimpleAsyncTaskExecutor
  */
+@SuppressWarnings("serial")
 public class SyncTaskExecutor implements TaskExecutor, Serializable {
 
 	/**

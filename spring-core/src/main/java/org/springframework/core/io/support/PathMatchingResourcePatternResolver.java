@@ -714,7 +714,6 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return this.resources;
 		}
 
-		@SuppressWarnings("unused")
 		public int size() {
 			return this.resources.size();
 		}

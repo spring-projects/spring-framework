@@ -40,6 +40,7 @@ import org.springframework.core.Ordered;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, Serializable {
 
 	/** Singleton instance of this class */

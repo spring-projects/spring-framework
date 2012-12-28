@@ -692,7 +692,7 @@ public class DefaultLifecycleProcessorTests {
 	}
 
 
-	public static class DummySmartLifecycleFactoryBean implements FactoryBean, SmartLifecycle {
+	public static class DummySmartLifecycleFactoryBean implements FactoryBean<Object>, SmartLifecycle {
 
 		public boolean running = false;
 
@@ -702,7 +702,7 @@ public class DefaultLifecycleProcessorTests {
 			return this.bean;
 		}
 
-		public Class getObjectType() {
+		public Class<?> getObjectType() {
 			return DummySmartLifecycleBean.class;
 		}
 

@@ -22,6 +22,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class CannotAcquireLockException extends PessimisticLockingFailureException {
 
 	/**

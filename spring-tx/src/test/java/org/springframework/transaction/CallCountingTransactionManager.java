@@ -23,6 +23,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class CallCountingTransactionManager extends AbstractPlatformTransactionManager {
 
 	public TransactionDefinition lastDefinition;

@@ -39,6 +39,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @since 1.2
  * @see #getConnection
  */
+@SuppressWarnings("serial")
 public class DelegatingConnectionFactory implements ConnectionFactory, InitializingBean {
 
 	private ConnectionFactory targetConnectionFactory;

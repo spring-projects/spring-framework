@@ -30,6 +30,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @author Juergen Hoeller
  * @since 3.1
  */
+@SuppressWarnings("serial")
 public class SpringJtaSessionContext extends JTASessionContext {
 
 	public SpringJtaSessionContext(SessionFactoryImplementor factory) {

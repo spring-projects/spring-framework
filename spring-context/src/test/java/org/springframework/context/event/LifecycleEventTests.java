@@ -63,7 +63,7 @@ public class LifecycleEventTests extends TestCase {
 	}
 
 
-	private static class LifecycleListener implements ApplicationListener {
+	private static class LifecycleListener implements ApplicationListener<ApplicationEvent> {
 
 		private ApplicationContext context;
 

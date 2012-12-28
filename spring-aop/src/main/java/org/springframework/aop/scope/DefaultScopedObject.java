@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.BeanFactory#getBean
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroyScopedBean
  */
+@SuppressWarnings("serial")
 public class DefaultScopedObject implements ScopedObject, Serializable {
 
 	private final ConfigurableBeanFactory beanFactory;

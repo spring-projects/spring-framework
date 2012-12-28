@@ -29,6 +29,7 @@ import org.springframework.util.ObjectUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public abstract class BeansException extends NestedRuntimeException {
 
 	/**

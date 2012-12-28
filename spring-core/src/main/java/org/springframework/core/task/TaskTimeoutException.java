@@ -25,6 +25,7 @@ package org.springframework.core.task;
  * @see AsyncTaskExecutor#execute(Runnable, long)
  * @see TaskRejectedException
  */
+@SuppressWarnings("serial")
 public class TaskTimeoutException extends TaskRejectedException {
 
 	/**

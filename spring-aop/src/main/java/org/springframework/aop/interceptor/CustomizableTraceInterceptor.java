@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  * @see #setExceptionMessage
  * @see SimpleTraceInterceptor
  */
+@SuppressWarnings("serial")
 public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {
 
 	/**

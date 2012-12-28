@@ -240,6 +240,7 @@ public class DefaultConversionTests {
 		conversionService.convert(Integer.valueOf(1), CustomNumber.class);
 	}
 
+	@SuppressWarnings("serial")
 	public static class CustomNumber extends Number {
 
 		@Override
@@ -297,7 +298,7 @@ public class DefaultConversionTests {
 
 	@Test
 	public void testSpr7766() throws Exception {
-		ConverterRegistry registry = ((ConverterRegistry) conversionService);
+		ConverterRegistry registry = (conversionService);
 		registry.addConverter(new ColorConverter());
 		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" }, TypeDescriptor.valueOf(String[].class), new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
 		assertEquals(2, colors.size());

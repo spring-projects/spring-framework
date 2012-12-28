@@ -212,6 +212,7 @@ public abstract class BshScriptUtils {
 	/**
 	 * Exception to be thrown on script execution failure.
 	 */
+	@SuppressWarnings("serial")
 	public static class BshExecutionException extends NestedRuntimeException {
 
 		private BshExecutionException(EvalError ex) {

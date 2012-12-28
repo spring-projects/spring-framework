@@ -23,6 +23,7 @@ import java.util.Locale;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class NoSuchMessageException extends RuntimeException {
 
 	/**

@@ -24,6 +24,7 @@ package org.springframework.dao;
  *
  * @author Thomas Risberg
  */
+@SuppressWarnings("serial")
 public class DuplicateKeyException extends DataIntegrityViolationException {
 
 	/**

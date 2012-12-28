@@ -131,7 +131,6 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Map<String, String[]> getParameterMap() {
 		Map<String, String[]> paramMap = new HashMap<String, String[]>();
 		paramMap.putAll(super.getParameterMap());

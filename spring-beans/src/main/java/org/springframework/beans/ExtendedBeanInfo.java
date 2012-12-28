@@ -495,7 +495,7 @@ class PropertyDescriptorUtils {
 		// copy all attributes (emulating behavior of private FeatureDescriptor#addTable)
 		Enumeration<String> keys = source.attributeNames();
 		while (keys.hasMoreElements()) {
-			String key = (String)keys.nextElement();
+			String key = keys.nextElement();
 			target.setValue(key, source.getValue(key));
 		}
 

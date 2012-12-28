@@ -1047,6 +1047,7 @@ public class StoredProcedureTests extends AbstractJdbcTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class CustomDataException extends DataAccessException {
 
 		public CustomDataException(String s) {

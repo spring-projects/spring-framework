@@ -27,6 +27,7 @@ import org.springframework.core.ErrorCoded;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public abstract class PropertyAccessException extends BeansException implements ErrorCoded {
 
 	private transient PropertyChangeEvent propertyChangeEvent;

@@ -50,6 +50,7 @@ import org.springframework.aop.ProxyMethodInvocation;
  * @see #suppressInterface
  * @see DelegatingIntroductionInterceptor
  */
+@SuppressWarnings("serial")
 public class DelegatePerTargetObjectIntroductionInterceptor extends IntroductionInfoSupport
 		implements IntroductionInterceptor {
 

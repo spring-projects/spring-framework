@@ -84,6 +84,7 @@ public class AnnotationDrivenTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TransactionCheckingInterceptor implements MethodInterceptor, Serializable {
 
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {

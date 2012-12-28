@@ -26,6 +26,7 @@ package org.springframework.dao;
  * @author Rod Johnson
  * @see PessimisticLockingFailureException
  */
+@SuppressWarnings("serial")
 public class OptimisticLockingFailureException extends ConcurrencyFailureException {
 
 	/**

@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.tags.form;
 
-import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -27,8 +26,6 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 
 /**
@@ -50,6 +47,7 @@ public class FormTagTests extends AbstractHtmlElementTagTests {
 	private MockHttpServletRequest request;
 
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new FormTag() {
 			protected TagWriter createTagWriter() {

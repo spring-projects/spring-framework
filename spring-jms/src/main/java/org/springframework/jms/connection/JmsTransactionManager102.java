@@ -42,6 +42,7 @@ import javax.jms.TopicConnectionFactory;
  * @deprecated as of Spring 3.0, in favor of the JMS 1.1 based {@link JmsTransactionManager}
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class JmsTransactionManager102 extends JmsTransactionManager {
 
 	private boolean pubSubDomain = false;

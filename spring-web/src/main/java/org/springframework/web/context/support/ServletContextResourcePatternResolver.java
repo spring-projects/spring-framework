@@ -156,7 +156,6 @@ public class ServletContextResourcePatternResolver extends PathMatchingResourceP
 	 * @param result the Set of matching Resources to add to
 	 * @throws IOException if jar contents could not be retrieved
 	 */
-	@SuppressWarnings("unchecked")
 	private void doRetrieveMatchingJarEntries(String jarFilePath, String entryPattern, Set<Resource> result) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Searching jar file [" + jarFilePath + "] for entries matching [" + entryPattern + "]");

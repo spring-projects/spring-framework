@@ -30,6 +30,7 @@ import org.springframework.remoting.soap.SoapFaultException;
  * @deprecated in favor of JAX-WS support in {@code org.springframework.remoting.jaxws}
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class JaxRpcSoapFaultException extends SoapFaultException {
 
 	/**

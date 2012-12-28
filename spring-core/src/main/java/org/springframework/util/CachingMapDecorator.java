@@ -44,6 +44,7 @@ import java.util.WeakHashMap;
  * @deprecated as of Spring 3.2, to be removed along with LabeledEnum support
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class CachingMapDecorator<K, V> implements Map<K, V>, Serializable {
 
 	private static Object NULL_VALUE = new Object();

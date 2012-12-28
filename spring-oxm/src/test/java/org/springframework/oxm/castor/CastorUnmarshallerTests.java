@@ -66,7 +66,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	protected void testFlight(Object o) {
 		Flight flight = (Flight) o;
 		assertNotNull("Flight is null", flight);
-		assertEquals("Number is invalid", 42L, (long) flight.getNumber());
+		assertEquals("Number is invalid", 42L, flight.getNumber());
 	}
 
 	@Override
@@ -104,10 +104,10 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Invalid amount of items", 2, order.getOrderItemCount());
 		OrderItem item = order.getOrderItem(0);
 		assertEquals("Invalid items", "1", item.getId());
-		assertEquals("Invalid items", 15, (int)item.getQuantity());
+		assertEquals("Invalid items", 15, item.getQuantity());
 		item = order.getOrderItem(1);
 		assertEquals("Invalid items", "3", item.getId());
-		assertEquals("Invalid items", 20, (int)item.getQuantity());
+		assertEquals("Invalid items", 20, item.getQuantity());
 	}
 
 	@Test

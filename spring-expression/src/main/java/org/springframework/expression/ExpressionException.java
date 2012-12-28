@@ -23,6 +23,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class ExpressionException extends RuntimeException {
 
 	protected String expressionString;

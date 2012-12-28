@@ -17,12 +17,15 @@
 package org.springframework.util;
 
 import java.beans.Introspector;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+
 import java.security.AccessControlException;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,7 +50,6 @@ import java.util.Set;
  * @see TypeUtils
  * @see ReflectionUtils
  */
-@SuppressWarnings("unchecked")
 public abstract class ClassUtils {
 
 	/** Suffix for array class names: "[]" */
@@ -114,9 +116,9 @@ public abstract class ClassUtils {
 
 		Set<Class<?>> primitiveTypes = new HashSet<Class<?>>(32);
 		primitiveTypes.addAll(primitiveWrapperTypeMap.values());
-		primitiveTypes.addAll(Arrays.asList(
+		primitiveTypes.addAll(Arrays.asList(new Class<?>[] {
 				boolean[].class, byte[].class, char[].class, double[].class,
-				float[].class, int[].class, long[].class, short[].class));
+				float[].class, int[].class, long[].class, short[].class}));
 		primitiveTypes.add(void.class);
 		for (Class<?> primitiveType : primitiveTypes) {
 			primitiveTypeNameMap.put(primitiveType.getName(), primitiveType);

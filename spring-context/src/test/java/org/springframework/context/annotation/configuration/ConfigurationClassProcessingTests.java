@@ -230,7 +230,7 @@ public class ConfigurationClassProcessingTests {
 		public @Bean Object stringBean() {
 			return "foo";
 		}
-		public @Bean FactoryBean factoryBean() {
+		public @Bean FactoryBean<?> factoryBean() {
 			ListFactoryBean fb = new ListFactoryBean();
 			fb.setSourceList(Arrays.asList("element1", "element2"));
 			return fb;

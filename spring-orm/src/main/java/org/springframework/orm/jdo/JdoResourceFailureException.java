@@ -29,6 +29,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
  * @since 1.1
  * @see PersistenceManagerFactoryUtils#convertJdoAccessException
  */
+@SuppressWarnings("serial")
 public class JdoResourceFailureException extends DataAccessResourceFailureException {
 
 	public JdoResourceFailureException(JDODataStoreException ex) {

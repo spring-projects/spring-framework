@@ -16,9 +16,7 @@
 
 package org.springframework.web.servlet.tags;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

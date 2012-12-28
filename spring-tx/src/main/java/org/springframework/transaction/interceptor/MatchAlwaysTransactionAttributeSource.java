@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * @see org.springframework.transaction.interceptor.TransactionProxyFactoryBean
  * @see org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator
  */
+@SuppressWarnings("serial")
 public class MatchAlwaysTransactionAttributeSource implements TransactionAttributeSource, Serializable {
 
 	private TransactionAttribute transactionAttribute = new DefaultTransactionAttribute();

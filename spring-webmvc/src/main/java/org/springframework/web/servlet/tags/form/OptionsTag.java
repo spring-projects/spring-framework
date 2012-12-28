@@ -17,8 +17,6 @@
 package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TagSupport;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -37,6 +35,7 @@ import org.springframework.web.util.TagUtils;
  * @author Scott Andrews
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class OptionsTag extends AbstractHtmlElementTag {
 
 	/**

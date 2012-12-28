@@ -23,6 +23,7 @@ package org.springframework.dao;
  * @author Rod Johnson
  * @author Thomas Risberg
  */
+@SuppressWarnings("serial")
 public class DataAccessResourceFailureException extends NonTransientDataAccessResourceException {
 
 	/**

@@ -23,6 +23,7 @@ package org.springframework.beans;
  * @author Juergen Hoeller
  * @since 1.2.8
  */
+@SuppressWarnings("serial")
 public class BeanInstantiationException extends FatalBeanException {
 
 	private Class beanClass;

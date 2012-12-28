@@ -44,6 +44,7 @@ import org.springframework.core.OrderComparator;
  * @author Juergen Hoeller
  * @see #findCandidateAdvisors
  */
+@SuppressWarnings("serial")
 public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyCreator {
 
 	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;

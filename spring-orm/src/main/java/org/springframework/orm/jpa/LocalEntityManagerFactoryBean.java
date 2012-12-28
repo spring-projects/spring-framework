@@ -67,6 +67,8 @@ import javax.persistence.spi.PersistenceProvider;
  */
 public class LocalEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Initialize the EntityManagerFactory for the given configuration.
 	 * @throws javax.persistence.PersistenceException in case of JPA initialization errors

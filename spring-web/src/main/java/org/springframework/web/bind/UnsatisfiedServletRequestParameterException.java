@@ -31,6 +31,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  * @see org.springframework.web.bind.annotation.RequestMapping#params()
  */
+@SuppressWarnings("serial")
 public class UnsatisfiedServletRequestParameterException extends ServletRequestBindingException {
 
 	private final String[] paramConditions;
@@ -47,7 +48,7 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map actualParams) {
 		super("");
 		this.paramConditions = paramConditions;
-		this.actualParams = (Map<String, String[]>) actualParams;
+		this.actualParams = actualParams;
 	}
 
 

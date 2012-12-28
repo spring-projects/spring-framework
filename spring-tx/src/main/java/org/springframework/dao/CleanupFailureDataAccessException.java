@@ -29,6 +29,7 @@ package org.springframework.dao;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class CleanupFailureDataAccessException extends NonTransientDataAccessException {
 
 	/**

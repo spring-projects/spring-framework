@@ -22,6 +22,7 @@ package org.springframework.expression;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class EvaluationException extends ExpressionException {
 
 	/**

@@ -26,6 +26,7 @@ import javax.jms.MessageListener;
  * @deprecated as of Spring 3.2, in favor of implementing EJBs in EJB 3 style
  */
 @Deprecated
+@SuppressWarnings("serial")
 public abstract class AbstractJmsMessageDrivenBean extends AbstractMessageDrivenBean implements MessageListener {
 
 	// Empty: The purpose of this class is to ensure

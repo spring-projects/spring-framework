@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class ManagedArray extends ManagedList<Object> {
 
 	/** Resolved element type for runtime creation of the target array */

@@ -16,8 +16,6 @@
 
 package org.springframework.beans.factory.xml;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;

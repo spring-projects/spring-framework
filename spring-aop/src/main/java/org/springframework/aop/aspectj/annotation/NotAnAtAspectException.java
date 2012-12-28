@@ -26,6 +26,7 @@ import org.springframework.aop.framework.AopConfigException;
  * @author Rod Johnson
  * @since 2.0
  */
+@SuppressWarnings("serial")
 public class NotAnAtAspectException extends AopConfigException {
 
 	private Class<?> nonAspectClass;

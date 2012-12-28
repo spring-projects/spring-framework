@@ -65,6 +65,7 @@ import org.springframework.transaction.TransactionSystemException;
  * @see weblogic.transaction.TransactionManager#forceResume
  * @see weblogic.transaction.TransactionHelper
  */
+@SuppressWarnings("serial")
 public class WebLogicJtaTransactionManager extends JtaTransactionManager {
 
 	private static final String USER_TRANSACTION_CLASS_NAME = "weblogic.transaction.UserTransaction";

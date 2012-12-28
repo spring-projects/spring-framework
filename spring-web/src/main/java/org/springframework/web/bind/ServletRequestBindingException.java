@@ -29,6 +29,7 @@ import org.springframework.web.util.NestedServletException;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class ServletRequestBindingException extends NestedServletException {
 
 	/**

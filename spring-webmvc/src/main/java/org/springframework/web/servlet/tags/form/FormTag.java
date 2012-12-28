@@ -53,6 +53,7 @@ import org.springframework.web.util.HtmlUtils;
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
+@SuppressWarnings("serial")
 public class FormTag extends AbstractHtmlElementTag {
 
 	/** The default HTTP method using which form values are sent to the server: "post" */

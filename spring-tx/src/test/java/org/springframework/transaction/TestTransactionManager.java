@@ -23,6 +23,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
+@SuppressWarnings("serial")
 class TestTransactionManager extends AbstractPlatformTransactionManager {
 
 	private static final Object TRANSACTION = "transaction";

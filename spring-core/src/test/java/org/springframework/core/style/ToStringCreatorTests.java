@@ -111,7 +111,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testMethod() throws Exception {
-		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod", null))
+		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod"))
 				.toString();
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
 				+ " myMethod = testMethod@ToStringCreatorTests]", str);

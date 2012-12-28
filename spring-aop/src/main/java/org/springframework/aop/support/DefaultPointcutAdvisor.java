@@ -34,6 +34,7 @@ import org.springframework.aop.Pointcut;
  * @see #setPointcut
  * @see #setAdvice
  */
+@SuppressWarnings("serial")
 public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor implements Serializable {
 
 	private Pointcut pointcut = Pointcut.TRUE;

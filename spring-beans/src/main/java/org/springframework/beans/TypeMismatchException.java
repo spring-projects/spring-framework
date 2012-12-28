@@ -26,6 +26,7 @@ import org.springframework.util.ClassUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class TypeMismatchException extends PropertyAccessException {
 
 	/**

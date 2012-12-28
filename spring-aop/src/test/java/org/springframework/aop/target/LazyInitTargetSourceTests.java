@@ -80,6 +80,7 @@ public final class LazyInitTargetSourceTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class CustomLazyInitTargetSource extends LazyInitTargetSource {
 
 		protected void postProcessTargetObject(Object targetObject) {

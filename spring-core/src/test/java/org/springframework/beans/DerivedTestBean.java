@@ -22,6 +22,7 @@ import java.io.Serializable;
  * @author Juergen Hoeller
  * @since 21.08.2003
  */
+@SuppressWarnings("serial")
 public class DerivedTestBean extends TestBean implements Serializable {
 
 	private String beanName;

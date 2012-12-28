@@ -67,6 +67,8 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 
 	protected static class DummyEntityManagerFactoryBean extends AbstractEntityManagerFactoryBean {
 
+		private static final long serialVersionUID = 1L;
+
 		private final EntityManagerFactory emf;
 
 		public DummyEntityManagerFactoryBean(EntityManagerFactory emf) {

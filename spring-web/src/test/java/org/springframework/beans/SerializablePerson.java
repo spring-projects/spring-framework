@@ -25,6 +25,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 public class SerializablePerson implements Person, Serializable {
 
 	private String name;

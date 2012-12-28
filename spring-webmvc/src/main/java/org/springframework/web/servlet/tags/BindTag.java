@@ -46,6 +46,7 @@ import org.springframework.web.util.ExpressionEvaluationUtils;
  * @author Juergen Hoeller
  * @see #setPath
  */
+@SuppressWarnings("serial")
 public class BindTag extends HtmlEscapingAwareTag implements EditorAwareTag {
 
 	/**

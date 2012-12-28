@@ -334,6 +334,7 @@ public abstract class CollectionFactory {
 	 * ConcurrentMap adapter for the JDK ConcurrentHashMap class.
 	 */
 	@Deprecated
+	@SuppressWarnings("serial")
 	private static class JdkConcurrentHashMap extends ConcurrentHashMap implements ConcurrentMap {
 
 		private JdkConcurrentHashMap(int initialCapacity) {

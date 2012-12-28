@@ -197,7 +197,7 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 					else if (value instanceof String) {
 						Class editorClass = ClassUtils.forName((String) value, this.beanClassLoader);
 						Assert.isAssignable(PropertyEditor.class, editorClass);
-						beanFactory.registerCustomEditor(requiredType, (Class<? extends PropertyEditor>) editorClass);
+						beanFactory.registerCustomEditor(requiredType, editorClass);
 					}
 					else {
 						throw new IllegalArgumentException("Mapped value [" + value + "] for custom editor key [" +

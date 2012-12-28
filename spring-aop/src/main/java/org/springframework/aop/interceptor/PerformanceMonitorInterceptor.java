@@ -33,6 +33,7 @@ import org.springframework.util.StopWatch;
  * @see org.springframework.util.StopWatch
  * @see JamonPerformanceMonitorInterceptor
  */
+@SuppressWarnings("serial")
 public class PerformanceMonitorInterceptor extends AbstractMonitoringInterceptor {
 
 	/**

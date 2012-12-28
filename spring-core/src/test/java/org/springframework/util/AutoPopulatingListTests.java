@@ -30,22 +30,22 @@ import org.springframework.beans.TestBean;
 public class AutoPopulatingListTests extends TestCase {
 
 	public void testWithClass() throws Exception {
-		doTestWithClass(new AutoPopulatingList(TestBean.class));
+		doTestWithClass(new AutoPopulatingList<Object>(TestBean.class));
 	}
 
 	public void testWithClassAndUserSuppliedBackingList() throws Exception {
-		doTestWithClass(new AutoPopulatingList(new LinkedList(), TestBean.class));
+		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<Object>(), TestBean.class));
 	}
 
 	public void testWithElementFactory() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList(new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<Object>(new MockElementFactory()));
 	}
 
 	public void testWithElementFactoryAndUserSuppliedBackingList() throws Exception {
-		doTestWithElementFactory(new AutoPopulatingList(new LinkedList(), new MockElementFactory()));
+		doTestWithElementFactory(new AutoPopulatingList<Object>(new LinkedList<Object>(), new MockElementFactory()));
 	}
 
-	private void doTestWithClass(AutoPopulatingList list) {
+	private void doTestWithClass(AutoPopulatingList<Object> list) {
 		Object lastElement = null;
 		for (int x = 0; x < 10; x++) {
 			Object element = list.get(x);
@@ -66,7 +66,7 @@ public class AutoPopulatingListTests extends TestCase {
 		assertTrue(list.get(20) instanceof TestBean);
 	}
 
-	private void doTestWithElementFactory(AutoPopulatingList list) {
+	private void doTestWithElementFactory(AutoPopulatingList<Object> list) {
 		doTestWithClass(list);
 
 		for(int x = 0; x < list.size(); x++) {
@@ -78,7 +78,7 @@ public class AutoPopulatingListTests extends TestCase {
 	}
 
 	public void testSerialization() throws Exception {
-		AutoPopulatingList list = new AutoPopulatingList(TestBean.class);
+		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestBean.class);
 		Assert.assertEquals(list, SerializationTestUtils.serializeAndDeserialize(list));
 	}
 

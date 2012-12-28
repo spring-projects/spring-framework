@@ -28,6 +28,7 @@ import junit.framework.Assert;
  */
 public class NestedExceptionTests extends TestCase {
 
+	@SuppressWarnings("serial")
 	public void testNestedRuntimeExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
@@ -44,6 +45,7 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(mesg) == -1);
 	}
 
+	@SuppressWarnings("serial")
 	public void testNestedRuntimeExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";
@@ -64,6 +66,7 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(rootCauseMesg) == -1);
 	}
 
+	@SuppressWarnings("serial")
 	public void testNestedCheckedExceptionWithNoRootCause() {
 		String mesg = "mesg of mine";
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
@@ -80,6 +83,7 @@ public class NestedExceptionTests extends TestCase {
 		assertFalse(stackTrace.indexOf(mesg) == -1);
 	}
 
+	@SuppressWarnings("serial")
 	public void testNestedCheckedExceptionWithRootCause() {
 		String myMessage = "mesg for this exception";
 		String rootCauseMesg = "this is the obscure message of the root cause";

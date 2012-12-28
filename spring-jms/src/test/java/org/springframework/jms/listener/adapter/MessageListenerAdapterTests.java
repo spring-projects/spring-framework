@@ -33,7 +33,6 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import junit.framework.TestCase;
 import org.easymock.MockControl;
 import org.junit.Test;
 
@@ -671,6 +670,7 @@ public class MessageListenerAdapterTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class SerializableObject implements Serializable {
 	}
 

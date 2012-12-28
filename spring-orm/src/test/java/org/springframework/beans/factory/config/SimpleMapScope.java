@@ -28,6 +28,7 @@ import org.springframework.beans.factory.ObjectFactory;
 /**
  * @author Juergen Hoeller
  */
+@SuppressWarnings("serial")
 public class SimpleMapScope implements Scope, Serializable {
 
 	private final Map map = new HashMap();

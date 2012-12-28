@@ -175,6 +175,7 @@ public class SessionScopeTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class CustomSerializableDestructionAwareBeanPostProcessor
 			implements DestructionAwareBeanPostProcessor, Serializable {
 

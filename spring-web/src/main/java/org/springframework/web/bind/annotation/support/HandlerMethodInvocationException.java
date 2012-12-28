@@ -27,6 +27,7 @@ import org.springframework.core.NestedRuntimeException;
  * @since 2.5.6
  * @see HandlerMethodInvoker#invokeHandlerMethod
  */
+@SuppressWarnings("serial")
 public class HandlerMethodInvocationException extends NestedRuntimeException {
 
 	/**

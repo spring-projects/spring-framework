@@ -24,6 +24,7 @@ import org.springframework.core.NestedRuntimeException;
  * @author Rod Johnson
  * @since 13.03.2003
  */
+@SuppressWarnings("serial")
 public class AopConfigException extends NestedRuntimeException {
 
 	/**

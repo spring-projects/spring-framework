@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
  *
  * @author Rod Johnson
  */
+@SuppressWarnings("serial")
 class TrueMethodMatcher implements MethodMatcher, Serializable {
 
 	public static final TrueMethodMatcher INSTANCE = new TrueMethodMatcher();

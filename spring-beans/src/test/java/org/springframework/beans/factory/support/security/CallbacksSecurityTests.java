@@ -314,14 +314,14 @@ public class CallbacksSecurityTests {
 		}
 
 		final CustomCallbackBean bean = new CustomCallbackBean();
-		final Method method = bean.getClass().getMethod("destroy", null);
+		final Method method = bean.getClass().getMethod("destroy");
 		method.setAccessible(true);
 
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
 
 				public Object run() throws Exception {
-					method.invoke(bean, null);
+					method.invoke(bean);
 					return null;
 				}
 			}, acc);

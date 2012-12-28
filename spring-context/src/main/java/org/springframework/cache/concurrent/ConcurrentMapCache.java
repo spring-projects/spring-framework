@@ -140,6 +140,7 @@ public class ConcurrentMapCache implements Cache {
 	}
 
 
+	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {
 	}
 

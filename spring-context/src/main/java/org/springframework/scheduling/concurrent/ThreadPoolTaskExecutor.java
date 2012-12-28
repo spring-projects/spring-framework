@@ -63,6 +63,7 @@ import org.springframework.util.Assert;
  * @see java.util.concurrent.ThreadPoolExecutor
  * @see ConcurrentTaskExecutor
  */
+@SuppressWarnings("serial")
 public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport implements SchedulingTaskExecutor {
 
 	private final Object poolSizeMonitor = new Object();

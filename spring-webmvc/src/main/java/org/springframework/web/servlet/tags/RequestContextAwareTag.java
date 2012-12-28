@@ -45,6 +45,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * @see org.springframework.web.servlet.support.RequestContext
  * @see org.springframework.web.servlet.DispatcherServlet
  */
+@SuppressWarnings("serial")
 public abstract class RequestContextAwareTag extends TagSupport implements TryCatchFinally {
 
 	/**

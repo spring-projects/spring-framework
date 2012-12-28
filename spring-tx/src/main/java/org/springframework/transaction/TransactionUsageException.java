@@ -23,6 +23,7 @@ package org.springframework.transaction;
  * @author Rod Johnson
  * @since 22.03.2003
  */
+@SuppressWarnings("serial")
 public class TransactionUsageException extends TransactionException {
 
 	/**

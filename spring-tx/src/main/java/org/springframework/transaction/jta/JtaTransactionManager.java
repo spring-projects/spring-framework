@@ -117,6 +117,7 @@ import org.springframework.util.StringUtils;
  * @see #setTransactionManager
  * @see WebLogicJtaTransactionManager
  */
+@SuppressWarnings("serial")
 public class JtaTransactionManager extends AbstractPlatformTransactionManager
 		implements TransactionFactory, InitializingBean, Serializable {
 

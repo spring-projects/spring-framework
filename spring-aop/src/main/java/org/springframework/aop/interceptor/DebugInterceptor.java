@@ -32,6 +32,7 @@ import org.aopalliance.intercept.MethodInvocation;
  * @see SimpleTraceInterceptor
  * @see CustomizableTraceInterceptor
  */
+@SuppressWarnings("serial")
 public class DebugInterceptor extends SimpleTraceInterceptor {
 
 	private volatile long count;

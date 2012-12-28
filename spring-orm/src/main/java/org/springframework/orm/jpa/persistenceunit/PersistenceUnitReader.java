@@ -293,7 +293,6 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the {@code property} XML elements.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void parseProperties(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		Element propRoot = DomUtils.getChildElementByTagName(persistenceUnit, PROPERTIES);
 		if (propRoot == null) {
@@ -310,7 +309,6 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the {@code class} XML elements.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void parseManagedClasses(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> classes = DomUtils.getChildElementsByTagName(persistenceUnit, MANAGED_CLASS_NAME);
 		for (Element element : classes) {
@@ -323,7 +321,6 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the {@code mapping-file} XML elements.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void parseMappingFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) {
 		List<Element> files = DomUtils.getChildElementsByTagName(persistenceUnit, MAPPING_FILE_NAME);
 		for (Element element : files) {
@@ -337,7 +334,6 @@ class PersistenceUnitReader {
 	/**
 	 * Parse the {@code jar-file} XML elements.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void parseJarFiles(Element persistenceUnit, SpringPersistenceUnitInfo unitInfo) throws IOException {
 		List<Element> jars = DomUtils.getChildElementsByTagName(persistenceUnit, JAR_FILE_URL);
 		for (Element element : jars) {

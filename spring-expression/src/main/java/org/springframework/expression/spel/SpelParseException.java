@@ -26,6 +26,7 @@ import org.springframework.expression.ParseException;
  * @author Andy Clement
  * @since 3.0
  */
+@SuppressWarnings("serial")
 public class SpelParseException extends ParseException {
 
 	private SpelMessage message;

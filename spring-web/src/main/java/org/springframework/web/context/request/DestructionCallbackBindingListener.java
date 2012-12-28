@@ -29,6 +29,7 @@ import javax.servlet.http.HttpSessionBindingListener;
  * @see RequestAttributes#registerDestructionCallback
  * @see ServletRequestAttributes#registerSessionDestructionCallback
  */
+@SuppressWarnings("serial")
 public class DestructionCallbackBindingListener implements HttpSessionBindingListener, Serializable {
 
 	private final Runnable destructionCallback;

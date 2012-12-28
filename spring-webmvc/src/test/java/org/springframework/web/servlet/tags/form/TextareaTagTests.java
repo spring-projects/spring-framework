@@ -33,6 +33,7 @@ public class TextareaTagTests extends AbstractFormTagTests {
 
 	private TestBean rob;
 
+	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new TextareaTag() {
 			protected TagWriter createTagWriter() {

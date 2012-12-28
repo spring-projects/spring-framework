@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * @deprecated as of Spring 3.0, in favor of Java 5 enums.
  */
 @Deprecated
+@SuppressWarnings("serial")
 public class LetterCodedLabeledEnum extends AbstractGenericLabeledEnum {
 
 	/**

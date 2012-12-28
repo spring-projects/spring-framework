@@ -19,8 +19,6 @@ package org.springframework.jmx.export.assembler;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
-import org.junit.Ignore;
-
 /**
  * @author Rob Harrop
  */
@@ -42,7 +40,7 @@ public class InterfaceBasedMBeanInfoAssemblerCustomTests extends AbstractJmxAsse
 
 	protected MBeanInfoAssembler getAssembler() {
 		InterfaceBasedMBeanInfoAssembler assembler = new InterfaceBasedMBeanInfoAssembler();
-		assembler.setManagedInterfaces(new Class[] {ICustomJmxBean.class});
+		assembler.setManagedInterfaces(new Class<?>[] {ICustomJmxBean.class});
 		return assembler;
 	}
 

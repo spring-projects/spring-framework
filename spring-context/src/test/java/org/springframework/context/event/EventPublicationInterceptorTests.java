@@ -19,7 +19,6 @@ package org.springframework.context.event;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.ProxyFactory;
@@ -121,6 +120,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class TestEvent extends ApplicationEvent {
 
 		public TestEvent(Object source) {
@@ -129,6 +129,7 @@ public class EventPublicationInterceptorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static final class TestEventWithNoValidOneArgObjectCtor extends ApplicationEvent {
 
 		public TestEventWithNoValidOneArgObjectCtor() {
@@ -137,13 +138,13 @@ public class EventPublicationInterceptorTests {
 	}
 
 
-	public static class FactoryBeanTestListener extends TestListener implements FactoryBean {
+	public static class FactoryBeanTestListener extends TestListener implements FactoryBean<Object> {
 
 		public Object getObject() throws Exception {
 			return "test";
 		}
 
-		public Class getObjectType() {
+		public Class<String> getObjectType() {
 			return String.class;
 		}
 

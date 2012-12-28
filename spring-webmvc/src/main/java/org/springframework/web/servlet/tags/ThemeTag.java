@@ -40,6 +40,7 @@ import org.springframework.context.NoSuchMessageException;
  * @see HtmlEscapeTag#setDefaultHtmlEscape
  * @see org.springframework.web.util.WebUtils#HTML_ESCAPE_CONTEXT_PARAM
  */
+@SuppressWarnings("serial")
 public class ThemeTag extends MessageTag {
 
 	/**

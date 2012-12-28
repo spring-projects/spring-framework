@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
  * @see javax.resource.cci.Connection#close()
  * @see org.springframework.jca.cci.core.CciTemplate
  */
+@SuppressWarnings("serial")
 public class SingleConnectionFactory extends DelegatingConnectionFactory implements DisposableBean {
 
 	protected final Log logger = LogFactory.getLog(getClass());

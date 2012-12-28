@@ -46,6 +46,7 @@ import org.springframework.web.context.WebApplicationContext;
  * @see org.springframework.web.HttpRequestHandler
  * @see org.springframework.web.servlet.DispatcherServlet
  */
+@SuppressWarnings("serial")
 public class HttpRequestHandlerServlet extends HttpServlet {
 
 	private HttpRequestHandler target;
@@ -54,7 +55,7 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 	@Override
 	public void init() throws ServletException {
 		WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
-		this.target = (HttpRequestHandler) wac.getBean(getServletName(), HttpRequestHandler.class);
+		this.target = wac.getBean(getServletName(), HttpRequestHandler.class);
 	}
 
 
@@ -67,7 +68,7 @@ public class HttpRequestHandlerServlet extends HttpServlet {
 			this.target.handleRequest(request, response);
 		}
 		catch (HttpRequestMethodNotSupportedException ex) {
-			String[] supportedMethods = ((HttpRequestMethodNotSupportedException) ex).getSupportedMethods();
+			String[] supportedMethods = ex.getSupportedMethods();
 			if (supportedMethods != null) {
 				response.setHeader("Allow", StringUtils.arrayToDelimitedString(supportedMethods, ", "));
 			}
