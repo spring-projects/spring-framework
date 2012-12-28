@@ -38,6 +38,7 @@ public interface ServerHttpResponse extends HttpOutputMessage, Closeable {
 	/**
 	 * Close this response, freeing any resources created.
 	 */
+	@Override
 	void close();
 
 }

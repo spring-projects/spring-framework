@@ -128,6 +128,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * @see javax.jdo.Transaction#begin
 	 * @see org.springframework.transaction.InvalidIsolationLevelException
 	 */
+	@Override
 	public Object beginTransaction(Transaction transaction, TransactionDefinition definition)
 			throws JDOException, SQLException, TransactionException {
 
@@ -145,6 +146,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * does not require any cleanup.
 	 * @see #beginTransaction
 	 */
+	@Override
 	public void cleanupTransaction(Object transactionData) {
 	}
 
@@ -169,6 +171,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * @see org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor
 	 * @see org.springframework.jdbc.datasource.DataSourceUtils#releaseConnection
 	 */
+	@Override
 	public ConnectionHandle getJdbcConnection(PersistenceManager pm, boolean readOnly)
 			throws JDOException, SQLException {
 
@@ -183,6 +186,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * {@code Connection.close} here.
 	 * @see java.sql.Connection#close()
 	 */
+	@Override
 	public void releaseJdbcConnection(ConnectionHandle conHandle, PersistenceManager pm)
 			throws JDOException, SQLException {
 	}
@@ -193,6 +197,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * "javax.persistence.query.timeout", assuming that JDO providers are often
 	 * JPA providers as well.
 	 */
+	@Override
 	public void applyQueryTimeout(Query query, int remainingTimeInSeconds) throws JDOException {
 		if (setTimeoutMillisMethod != null) {
 			ReflectionUtils.invokeMethod(setTimeoutMillisMethod, query, remainingTimeInSeconds);
@@ -216,6 +221,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * @see org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor
 	 * @see #translateException
 	 */
+	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof JDOException) {
 			return translateException((JDOException) ex);
@@ -227,6 +233,7 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 	 * This implementation delegates to PersistenceManagerFactoryUtils.
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
+	@Override
 	public DataAccessException translateException(JDOException ex) {
 		if (getJdbcExceptionTranslator() != null && ex.getCause() instanceof SQLException) {
 			return getJdbcExceptionTranslator().translate("JDO operation: " + ex.getMessage(),
@@ -262,10 +269,12 @@ public class DefaultJdoDialect implements JdoDialect, PersistenceExceptionTransl
 			this.persistenceManager = persistenceManager;
 		}
 
+		@Override
 		public Connection getConnection() {
 			return (Connection) this.persistenceManager.getDataStoreConnection();
 		}
 
+		@Override
 		public void releaseConnection(Connection con) {
 			JdbcUtils.closeConnection(con);
 		}

@@ -35,15 +35,18 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 	private boolean executed = false;
 
 
+	@Override
 	public final HttpHeaders getHeaders() {
 		return (this.executed ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
+	@Override
 	public final OutputStream getBody() throws IOException {
 		checkExecuted();
 		return getBodyInternal(this.headers);
 	}
 
+	@Override
 	public final ClientHttpResponse execute() throws IOException {
 		checkExecuted();
 		ClientHttpResponse result = executeInternal(this.headers);

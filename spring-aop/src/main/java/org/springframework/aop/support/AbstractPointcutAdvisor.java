@@ -44,6 +44,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		if (this.order != null) {
 			return this.order;
@@ -55,6 +56,7 @@ public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordere
 		return Ordered.LOWEST_PRECEDENCE;
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}

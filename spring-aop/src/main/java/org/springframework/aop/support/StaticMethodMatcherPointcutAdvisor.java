@@ -63,6 +63,7 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -71,14 +72,17 @@ public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMat
 		this.advice = advice;
 	}
 
+	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
+	@Override
 	public boolean isPerInstance() {
 		return true;
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this;
 	}

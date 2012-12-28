@@ -56,10 +56,12 @@ final class CommonsClientHttpRequest extends AbstractBufferingClientHttpRequest 
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.httpMethod.getName());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return URI.create(this.httpMethod.getURI().getEscapedURI());

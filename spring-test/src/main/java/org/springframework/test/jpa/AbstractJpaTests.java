@@ -330,6 +330,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			this.ltw = ltw;
 		}
 
+		@Override
 		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof LocalContainerEntityManagerFactoryBean) {
 				((LocalContainerEntityManagerFactoryBean) bean).setLoadTimeWeaver(this.ltw);
@@ -350,6 +351,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			this.shadowingClassLoader = shadowingClassLoader;
 		}
 
+		@Override
 		public void addTransformer(ClassFileTransformer transformer) {
 			try {
 				Method addClassFileTransformer =
@@ -362,10 +364,12 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 			}
 		}
 
+		@Override
 		public ClassLoader getInstrumentableClassLoader() {
 			return this.shadowingClassLoader;
 		}
 
+		@Override
 		public ClassLoader getThrowawayClassLoader() {
 			// Be sure to copy the same resource overrides and same class file transformers:
 			// We want the throwaway class loader to behave like the instrumentable class loader.

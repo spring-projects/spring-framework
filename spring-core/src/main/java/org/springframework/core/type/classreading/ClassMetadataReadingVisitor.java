@@ -67,6 +67,7 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 	}
 
 
+	@Override
 	public void visit(int version, int access, String name, String signature, String supername, String[] interfaces) {
 		this.className = ClassUtils.convertResourcePathToClassName(name);
 		this.isInterface = ((access & Opcodes.ACC_INTERFACE) != 0);
@@ -81,10 +82,12 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 		}
 	}
 
+	@Override
 	public void visitOuterClass(String owner, String name, String desc) {
 		this.enclosingClassName = ClassUtils.convertResourcePathToClassName(owner);
 	}
 
+	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
 		if (outerName != null) {
 			String fqName = ClassUtils.convertResourcePathToClassName(name);
@@ -99,78 +102,96 @@ class ClassMetadataReadingVisitor extends ClassVisitor implements ClassMetadata 
 		}
 	}
 
+	@Override
 	public void visitSource(String source, String debug) {
 		// no-op
 	}
 
+	@Override
 	public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 		// no-op
 		return new EmptyAnnotationVisitor();
 	}
 
+	@Override
 	public void visitAttribute(Attribute attr) {
 		// no-op
 	}
 
+	@Override
 	public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
 		// no-op
 		return new EmptyFieldVisitor();
 	}
 
+	@Override
 	public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
 		// no-op
 		return new EmptyMethodVisitor();
 	}
 
+	@Override
 	public void visitEnd() {
 		// no-op
 	}
 
 
+	@Override
 	public String getClassName() {
 		return this.className;
 	}
 
+	@Override
 	public boolean isInterface() {
 		return this.isInterface;
 	}
 
+	@Override
 	public boolean isAbstract() {
 		return this.isAbstract;
 	}
 
+	@Override
 	public boolean isConcrete() {
 		return !(this.isInterface || this.isAbstract);
 	}
 
+	@Override
 	public boolean isFinal() {
 		return this.isFinal;
 	}
 
+	@Override
 	public boolean isIndependent() {
 		return (this.enclosingClassName == null || this.independentInnerClass);
 	}
 
+	@Override
 	public boolean hasEnclosingClass() {
 		return (this.enclosingClassName != null);
 	}
 
+	@Override
 	public String getEnclosingClassName() {
 		return this.enclosingClassName;
 	}
 
+	@Override
 	public boolean hasSuperClass() {
 		return (this.superClassName != null);
 	}
 
+	@Override
 	public String getSuperClassName() {
 		return this.superClassName;
 	}
 
+	@Override
 	public String[] getInterfaceNames() {
 		return this.interfaces;
 	}
 
+	@Override
 	public String[] getMemberClassNames() {
 		return this.memberClassNames.toArray(new String[this.memberClassNames.size()]);
 	}

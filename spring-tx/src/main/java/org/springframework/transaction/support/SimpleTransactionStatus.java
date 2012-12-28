@@ -57,6 +57,7 @@ public class SimpleTransactionStatus extends AbstractTransactionStatus {
 	}
 
 
+	@Override
 	public boolean isNewTransaction() {
 		return this.newTransaction;
 	}

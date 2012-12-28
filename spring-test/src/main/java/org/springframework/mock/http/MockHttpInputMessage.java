@@ -45,10 +45,12 @@ public class MockHttpInputMessage implements HttpInputMessage {
 		this.body = body;
 	}
 
+	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
 
+	@Override
 	public InputStream getBody() throws IOException {
 		return this.body;
 	}

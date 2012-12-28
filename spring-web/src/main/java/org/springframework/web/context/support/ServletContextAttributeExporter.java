@@ -63,6 +63,7 @@ public class ServletContextAttributeExporter implements ServletContextAware {
 		this.attributes = attributes;
 	}
 
+	@Override
 	public void setServletContext(ServletContext servletContext) {
 		for (Map.Entry<String, Object> entry : attributes.entrySet()) {
 			String attributeName = entry.getKey();

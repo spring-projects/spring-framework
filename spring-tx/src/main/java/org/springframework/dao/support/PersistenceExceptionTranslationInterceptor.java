@@ -107,6 +107,7 @@ public class PersistenceExceptionTranslationInterceptor
 		this.alwaysTranslate = alwaysTranslate;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (this.persistenceExceptionTranslator == null) {
 			// No explicit exception translator specified - perform autodetection.
@@ -119,6 +120,7 @@ public class PersistenceExceptionTranslationInterceptor
 		}
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (this.persistenceExceptionTranslator == null) {
 			throw new IllegalArgumentException("Property 'persistenceExceptionTranslator' is required");
@@ -150,6 +152,7 @@ public class PersistenceExceptionTranslationInterceptor
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();

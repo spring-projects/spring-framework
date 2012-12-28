@@ -98,6 +98,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 	 * @see #setPropertySources
 	 * @see #postProcessBeanFactory
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		this.environment = environment;
 	}
@@ -163,6 +164,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 		propertyResolver.setValueSeparator(this.valueSeparator);
 
 		StringValueResolver valueResolver = new StringValueResolver() {
+			@Override
 			public String resolveStringValue(String strVal) {
 				String resolved = ignoreUnresolvablePlaceholders ?
 						propertyResolver.resolvePlaceholders(strVal) :

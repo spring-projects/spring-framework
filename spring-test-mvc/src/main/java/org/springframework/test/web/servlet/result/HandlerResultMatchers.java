@@ -52,6 +52,7 @@ public class HandlerResultMatchers {
 	 */
 	public ResultMatcher handlerType(final Class<?> type) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				Object handler = result.getHandler();
 				assertTrue("No handler: ", handler != null);
@@ -73,6 +74,7 @@ public class HandlerResultMatchers {
 	 */
 	public ResultMatcher methodName(final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				Object handler = assertHandlerMethod(result);
 				assertThat("HandlerMethod", ((HandlerMethod) handler).getMethod().getName(), matcher);
@@ -88,6 +90,7 @@ public class HandlerResultMatchers {
 	 */
 	public ResultMatcher methodName(final String name) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				Object handler = assertHandlerMethod(result);
 				assertEquals("HandlerMethod", name, ((HandlerMethod) handler).getMethod().getName());
@@ -103,6 +106,7 @@ public class HandlerResultMatchers {
 	 */
 	public ResultMatcher method(final Method method) {
 		return new ResultMatcher() {
+			@Override
 			public void match(MvcResult result) throws Exception {
 				Object handler = assertHandlerMethod(result);
 				assertEquals("HandlerMethod", method, ((HandlerMethod) handler).getMethod());

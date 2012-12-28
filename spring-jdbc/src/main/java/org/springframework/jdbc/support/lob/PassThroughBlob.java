@@ -49,47 +49,58 @@ class PassThroughBlob implements Blob {
 	}
 
 
+	@Override
 	public long length() throws SQLException {
 		return this.contentLength;
 	}
 
+	@Override
 	public InputStream getBinaryStream() throws SQLException {
 		return (this.content != null ? new ByteArrayInputStream(this.content) : this.binaryStream);
 	}
 
 
+	@Override
 	public InputStream getBinaryStream(long pos, long length) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public OutputStream setBinaryStream(long pos) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public byte[] getBytes(long pos, int length) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public int setBytes(long pos, byte[] bytes) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public long position(byte pattern[], long start) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public long position(Blob pattern, long start) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void truncate(long len) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
 	public void free() throws SQLException {
 		// no-op
 	}

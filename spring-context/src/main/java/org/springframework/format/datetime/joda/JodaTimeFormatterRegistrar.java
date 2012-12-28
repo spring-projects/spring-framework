@@ -149,6 +149,7 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 		this.formatters.put(Type.DATE_TIME, formatter);
 	}
 
+	@Override
 	public void registerFormatters(FormatterRegistry registry) {
 		JodaTimeConverters.registerConverters(registry);
 

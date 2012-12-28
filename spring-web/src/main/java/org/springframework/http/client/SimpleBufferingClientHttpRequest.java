@@ -45,10 +45,12 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	}
 
 
+	@Override
 	public HttpMethod getMethod() {
 		return HttpMethod.valueOf(this.connection.getRequestMethod());
 	}
 
+	@Override
 	public URI getURI() {
 		try {
 			return this.connection.getURL().toURI();

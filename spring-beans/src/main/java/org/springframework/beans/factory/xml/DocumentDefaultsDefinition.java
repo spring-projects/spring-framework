@@ -153,6 +153,7 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 		this.source = source;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}

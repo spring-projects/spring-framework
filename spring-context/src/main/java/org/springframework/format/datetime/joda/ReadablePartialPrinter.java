@@ -41,6 +41,7 @@ public final class ReadablePartialPrinter implements Printer<ReadablePartial> {
 		this.formatter = formatter;
 	}
 
+	@Override
 	public String print(ReadablePartial partial, Locale locale) {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(partial);
 	}

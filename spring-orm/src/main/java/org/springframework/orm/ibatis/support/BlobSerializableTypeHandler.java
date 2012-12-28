@@ -106,6 +106,7 @@ public class BlobSerializableTypeHandler extends AbstractLobTypeHandler {
 		}
 	}
 
+	@Override
 	public Object valueOf(String s) {
 		return s;
 	}

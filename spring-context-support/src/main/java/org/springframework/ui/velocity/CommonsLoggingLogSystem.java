@@ -40,9 +40,11 @@ public class CommonsLoggingLogSystem implements LogSystem {
 
 	private static final Log logger = LogFactory.getLog(VelocityEngine.class);
 
+	@Override
 	public void init(RuntimeServices runtimeServices) {
 	}
 
+	@Override
 	public void logVelocityMessage(int type, String msg) {
 		switch (type) {
 			case ERROR_ID:

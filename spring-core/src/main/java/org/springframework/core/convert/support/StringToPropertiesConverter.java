@@ -30,6 +30,7 @@ import org.springframework.core.convert.converter.Converter;
  */
 final class StringToPropertiesConverter implements Converter<String, Properties> {
 
+	@Override
 	public Properties convert(String source) {
 		try {
 			Properties props = new Properties();

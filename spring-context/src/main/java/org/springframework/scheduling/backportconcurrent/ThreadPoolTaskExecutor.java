@@ -238,6 +238,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		this.threadNamePrefixSet = true;
 	}
 
+	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
@@ -247,6 +248,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	 * Calls {@code initialize()} after the container applied all property values.
 	 * @see #initialize()
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		initialize();
 	}
@@ -306,6 +308,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	 * @see edu.emory.mathcs.backport.java.util.concurrent.Executor#execute(Runnable)
 	 * @see org.springframework.core.task.TaskExecutor#execute(Runnable)
 	 */
+	@Override
 	public void execute(Runnable task) {
 		Executor executor = getThreadPoolExecutor();
 		try {
@@ -316,16 +319,19 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 		}
 	}
 
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -335,6 +341,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
+	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -362,6 +369,7 @@ public class ThreadPoolTaskExecutor extends CustomizableThreadFactory
 	 * the task executor instance.
 	 * @see #shutdown()
 	 */
+	@Override
 	public void destroy() {
 		shutdown();
 	}

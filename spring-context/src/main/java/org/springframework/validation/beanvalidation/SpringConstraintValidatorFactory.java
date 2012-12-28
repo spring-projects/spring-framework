@@ -46,6 +46,7 @@ public class SpringConstraintValidatorFactory implements ConstraintValidatorFact
 	}
 
 
+	@Override
 	public <T extends ConstraintValidator<?, ?>> T getInstance(Class<T> key) {
 		return this.beanFactory.createBean(key);
 	}

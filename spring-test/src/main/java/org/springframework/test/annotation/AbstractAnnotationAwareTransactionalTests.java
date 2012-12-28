@@ -174,6 +174,7 @@ public abstract class AbstractAnnotationAwareTransactionalTests extends
 
 		// Let JUnit handle execution. We're just changing the state of the test class first.
 		runTestTimed(new TestExecutionCallback() {
+			@Override
 			public void run() throws Throwable {
 				try {
 					AbstractAnnotationAwareTransactionalTests.super.runBare();

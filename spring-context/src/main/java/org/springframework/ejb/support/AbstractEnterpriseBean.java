@@ -187,6 +187,7 @@ public abstract class AbstractEnterpriseBean implements EnterpriseBean {
 			this.beanFactoryReference = beanFactoryReference;
 		}
 
+		@Override
 		public void released() {
 			this.beanFactoryReference.release();
 		}

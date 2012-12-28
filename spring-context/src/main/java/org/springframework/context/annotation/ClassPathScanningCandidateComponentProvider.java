@@ -117,6 +117,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
@@ -157,6 +158,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		this.environment = environment;
 	}
 
+	@Override
 	public final Environment getEnvironment() {
 		return this.environment;
 	}

@@ -105,6 +105,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	 * Set the owning BeanFactory. We need to save a reference so that we can
 	 * use the {@code getBean} method on every invocation.
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (this.targetBeanName == null) {
 			throw new IllegalStateException("Property'targetBeanName' is required");
@@ -120,6 +121,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 	}
 
 
+	@Override
 	public synchronized Class<?> getTargetClass() {
 		if (this.targetClass == null && this.beanFactory != null) {
 			// Determine type of the target bean.
@@ -137,10 +139,12 @@ public abstract class AbstractBeanFactoryBasedTargetSource
 		return this.targetClass;
 	}
 
+	@Override
 	public boolean isStatic() {
 		return false;
 	}
 
+	@Override
 	public void releaseTarget(Object target) throws Exception {
 		// Nothing to do here.
 	}

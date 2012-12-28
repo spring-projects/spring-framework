@@ -59,6 +59,7 @@ public abstract class AbstractMBeanInfoAssembler implements MBeanInfoAssembler {
 	 * @see #getNotificationInfo(Object, String)
 	 * @see #populateMBeanDescriptor(javax.management.Descriptor, Object, String)
 	 */
+	@Override
 	public ModelMBeanInfo getMBeanInfo(Object managedBean, String beanKey) throws JMException {
 		checkManagedBean(managedBean);
 		ModelMBeanInfo info = new ModelMBeanInfoSupport(

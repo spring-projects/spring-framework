@@ -67,10 +67,12 @@ public class EscapeBodyTag extends HtmlEscapingAwareTag implements BodyTag {
 		return EVAL_BODY_BUFFERED;
 	}
 
+	@Override
 	public void doInitBody() {
 		// do nothing
 	}
 
+	@Override
 	public void setBodyContent(BodyContent bodyContent) {
 		this.bodyContent = bodyContent;
 	}

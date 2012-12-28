@@ -111,6 +111,7 @@ public class TilesConfigurer extends WebApplicationObjectSupport implements Init
 	 * @throws DefinitionsFactoryException if an error occurs
 	 * @see #createDefinitionsFactory
 	 */
+	@Override
 	public void afterPropertiesSet() throws DefinitionsFactoryException {
 		logger.debug("TilesConfigurer: initializion started");
 

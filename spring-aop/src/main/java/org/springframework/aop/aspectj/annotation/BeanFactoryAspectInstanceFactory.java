@@ -72,10 +72,12 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	}
 
 
+	@Override
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.name);
 	}
 
+	@Override
 	public ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
@@ -85,6 +87,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 		}
 	}
 
+	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.aspectMetadata;
 	}
@@ -99,6 +102,7 @@ public class BeanFactoryAspectInstanceFactory implements MetadataAwareAspectInst
 	 * @see org.springframework.core.Ordered
 	 * @see org.springframework.core.annotation.Order
 	 */
+	@Override
 	public int getOrder() {
 		Class<?> type = this.beanFactory.getType(this.name);
 		if (type != null) {

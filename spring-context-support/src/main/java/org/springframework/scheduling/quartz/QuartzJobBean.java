@@ -95,6 +95,7 @@ public abstract class QuartzJobBean implements Job {
 	 * values, and delegates to {@code executeInternal} afterwards.
 	 * @see #executeInternal
 	 */
+	@Override
 	public final void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
 			// Reflectively adapting to differences between Quartz 1.x and Quartz 2.0...

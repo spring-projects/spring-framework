@@ -76,6 +76,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 	}
 
 
+	@Override
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
 		if (systemId != null) {
 			if (systemId.endsWith(DTD_SUFFIX)) {

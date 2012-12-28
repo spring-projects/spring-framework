@@ -44,19 +44,23 @@ public class LocalJaxRpcServiceFactoryBean extends LocalJaxRpcServiceFactory
 	private Service service;
 
 
+	@Override
 	public void afterPropertiesSet() throws ServiceException {
 		this.service = createJaxRpcService();
 	}
 
 
+	@Override
 	public Service getObject() throws Exception {
 		return this.service;
 	}
 
+	@Override
 	public Class<? extends Service> getObjectType() {
 		return (this.service != null ? this.service.getClass() : Service.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

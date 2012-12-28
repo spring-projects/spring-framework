@@ -118,6 +118,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @see java.net.URLConnection#setUseCaches(boolean)
 	 * @see java.net.URLConnection#getInputStream()
 	 */
+	@Override
 	public InputStream getInputStream() throws IOException {
 		URLConnection con = this.url.openConnection();
 		ResourceUtils.useCachesIfNecessary(con);
@@ -196,6 +197,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation returns a description that includes the URL.
 	 */
+	@Override
 	public String getDescription() {
 		return "URL [" + this.url + "]";
 	}

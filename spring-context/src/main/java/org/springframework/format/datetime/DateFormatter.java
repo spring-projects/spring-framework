@@ -145,10 +145,12 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 
+	@Override
 	public String print(Date date, Locale locale) {
 		return getDateFormat(locale).format(date);
 	}
 
+	@Override
 	public Date parse(String text, Locale locale) throws ParseException {
 		return getDateFormat(locale).parse(text);
 	}

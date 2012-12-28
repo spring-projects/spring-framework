@@ -61,6 +61,7 @@ public class BeanFactoryTransactionAttributeSourceAdvisor extends AbstractBeanFa
 		this.pointcut.setClassFilter(classFilter);
 	}
 
+	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

@@ -232,6 +232,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	 * for the specified PersistenceManagerFactory if none set.
 	 * Auto-detect the PersistenceManagerFactory's DataSource, if any.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
@@ -256,6 +257,7 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getPersistenceManagerFactory();
 	}
@@ -571,11 +573,13 @@ public class JdoTransactionManager extends AbstractPlatformTransactionManager
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			Transaction tx = this.persistenceManagerHolder.getPersistenceManager().currentTransaction();
 			return tx.getRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.persistenceManagerHolder.getPersistenceManager().flush();

@@ -44,6 +44,7 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		MatrixVariable paramAnnot = parameter.getParameterAnnotation(MatrixVariable.class);
 		if (paramAnnot != null) {
@@ -54,6 +55,7 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 		return false;
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 

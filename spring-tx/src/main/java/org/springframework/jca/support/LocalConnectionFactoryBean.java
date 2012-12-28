@@ -109,6 +109,7 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 		this.connectionManager = connectionManager;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws ResourceException {
 		if (this.managedConnectionFactory == null) {
 			throw new IllegalArgumentException("Property 'managedConnectionFactory' is required");
@@ -122,14 +123,17 @@ public class LocalConnectionFactoryBean implements FactoryBean<Object>, Initiali
 	}
 
 
+	@Override
 	public Object getObject() {
 		return this.connectionFactory;
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.connectionFactory != null ? this.connectionFactory.getClass() : null);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

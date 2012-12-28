@@ -85,6 +85,7 @@ public class JpaInterceptor extends JpaAccessor implements MethodInterceptor {
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		// Determine current EntityManager: either the transactional one
 		// managed by the factory or a temporary one for the given invocation.

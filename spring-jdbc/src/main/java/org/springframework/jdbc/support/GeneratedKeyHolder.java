@@ -57,6 +57,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 	}
 
 
+	@Override
 	public Number getKey() throws InvalidDataAccessApiUsageException, DataRetrievalFailureException {
 		if (this.keyList.size() == 0) {
 			return null;
@@ -83,6 +84,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		}
 	}
 
+	@Override
 	public Map<String, Object> getKeys() throws InvalidDataAccessApiUsageException {
 		if (this.keyList.size() == 0) {
 			return null;
@@ -94,6 +96,7 @@ public class GeneratedKeyHolder implements KeyHolder {
 		return this.keyList.get(0);
 	}
 
+	@Override
 	public List<Map<String, Object>> getKeyList() {
 		return this.keyList;
 	}

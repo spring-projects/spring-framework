@@ -72,6 +72,7 @@ public class PropertyComparator implements Comparator {
 	}
 
 
+	@Override
 	public int compare(Object o1, Object o2) {
 		Object v1 = getPropertyValue(o1);
 		Object v2 = getPropertyValue(o2);

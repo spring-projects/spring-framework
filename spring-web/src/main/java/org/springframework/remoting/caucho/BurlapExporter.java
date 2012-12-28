@@ -47,6 +47,7 @@ public class BurlapExporter extends RemoteExporter implements InitializingBean {
 	private BurlapSkeleton skeleton;
 
 
+	@Override
 	public void afterPropertiesSet() {
 		prepare();
 	}

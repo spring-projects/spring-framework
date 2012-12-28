@@ -93,6 +93,7 @@ public class HessianExporter extends RemoteExporter implements InitializingBean 
 	}
 
 
+	@Override
 	public void afterPropertiesSet() {
 		prepare();
 	}

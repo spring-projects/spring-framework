@@ -57,6 +57,7 @@ public abstract class AbstractMessageDrivenBean extends AbstractEnterpriseBean
 	 * Required lifecycle method. Sets the MessageDriven context.
 	 * @param messageDrivenContext MessageDrivenContext
 	 */
+	@Override
 	public void setMessageDrivenContext(MessageDrivenContext messageDrivenContext) {
 		this.messageDrivenContext = messageDrivenContext;
 	}

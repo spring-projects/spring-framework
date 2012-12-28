@@ -213,6 +213,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	/**
 	 * Create the ActionServlet's WebApplicationContext.
 	 */
+	@Override
 	public final void init(ActionServlet actionServlet, ModuleConfig moduleConfig) throws ServletException {
 		long startTime = System.currentTimeMillis();
 		if (logger.isInfoEnabled()) {
@@ -345,6 +346,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 		}
 		wac.addBeanFactoryPostProcessor(
 				new BeanFactoryPostProcessor() {
+					@Override
 					public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 						beanFactory.addBeanPostProcessor(new ActionServletAwareProcessor(getActionServlet()));
 						beanFactory.ignoreDependencyType(ActionServlet.class);
@@ -385,6 +387,7 @@ public class ContextLoaderPlugIn implements PlugIn {
 	 * Close the WebApplicationContext of the ActionServlet.
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
 	 */
+	@Override
 	public void destroy() {
 		getServletContext().log("Closing WebApplicationContext of Struts ActionServlet '" +
 				getServletName() + "', module '" + getModulePrefix() + "'");

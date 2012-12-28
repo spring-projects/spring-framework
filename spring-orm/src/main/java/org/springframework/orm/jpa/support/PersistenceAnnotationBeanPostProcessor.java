@@ -306,10 +306,12 @@ public class PersistenceAnnotationBeanPostProcessor
 	  this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 	  return this.order;
 	}
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ListableBeanFactory) {
 			this.beanFactory = (ListableBeanFactory) beanFactory;
@@ -317,6 +319,7 @@ public class PersistenceAnnotationBeanPostProcessor
 	}
 
 
+	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			InjectionMetadata metadata = findPersistenceMetadata(beanType);
@@ -324,14 +327,17 @@ public class PersistenceAnnotationBeanPostProcessor
 		}
 	}
 
+	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
+	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;
 	}
 
+	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 
@@ -345,14 +351,17 @@ public class PersistenceAnnotationBeanPostProcessor
 		return pvs;
 	}
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
+	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		EntityManager emToClose = this.extendedEntityManagersToClose.remove(bean);
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);

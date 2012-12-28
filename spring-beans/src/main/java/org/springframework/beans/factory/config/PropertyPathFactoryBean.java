@@ -147,11 +147,13 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	 * "targetBeanName" nor "propertyPath" have been specified.
 	 * This allows for concise bean definitions with just an id/name.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
 	}
 
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 
@@ -190,6 +192,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	}
 
 
+	@Override
 	public Object getObject() throws BeansException {
 		BeanWrapper target = this.targetBeanWrapper;
 		if (target != null) {
@@ -208,6 +211,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 		return target.getPropertyValue(this.propertyPath);
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return this.resultType;
 	}
@@ -218,6 +222,7 @@ public class PropertyPathFactoryBean implements FactoryBean<Object>, BeanNameAwa
 	 * for each call, so we have to assume that we're not returning the
 	 * same object for each {@link #getObject()} call.
 	 */
+	@Override
 	public boolean isSingleton() {
 		return false;
 	}

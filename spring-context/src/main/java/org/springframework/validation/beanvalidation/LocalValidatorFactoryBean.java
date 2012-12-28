@@ -171,11 +171,13 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 		return this.validationPropertyMap;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		@SuppressWarnings("rawtypes")
@@ -222,22 +224,27 @@ public class LocalValidatorFactoryBean extends SpringValidatorAdapter
 	}
 
 
+	@Override
 	public Validator getValidator() {
 		return this.validatorFactory.getValidator();
 	}
 
+	@Override
 	public ValidatorContext usingContext() {
 		return this.validatorFactory.usingContext();
 	}
 
+	@Override
 	public MessageInterpolator getMessageInterpolator() {
 		return this.validatorFactory.getMessageInterpolator();
 	}
 
+	@Override
 	public TraversableResolver getTraversableResolver() {
 		return this.validatorFactory.getTraversableResolver();
 	}
 
+	@Override
 	public ConstraintValidatorFactory getConstraintValidatorFactory() {
 		return this.validatorFactory.getConstraintValidatorFactory();
 	}

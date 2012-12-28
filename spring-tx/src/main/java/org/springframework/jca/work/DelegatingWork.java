@@ -53,6 +53,7 @@ public class DelegatingWork implements Work {
 	/**
 	 * Delegates execution to the underlying Runnable.
 	 */
+	@Override
 	public void run() {
 		this.delegate.run();
 	}
@@ -61,6 +62,7 @@ public class DelegatingWork implements Work {
 	 * This implementation is empty, since we expect the Runnable
 	 * to terminate based on some specific shutdown signal.
 	 */
+	@Override
 	public void release() {
 	}
 

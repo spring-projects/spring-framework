@@ -85,6 +85,7 @@ public abstract class JndiObjectLocator extends JndiLocatorSupport implements In
 		return this.expectedType;
 	}
 
+	@Override
 	public void afterPropertiesSet() throws IllegalArgumentException, NamingException {
 		if (!StringUtils.hasLength(getJndiName())) {
 			throw new IllegalArgumentException("Property 'jndiName' is required");

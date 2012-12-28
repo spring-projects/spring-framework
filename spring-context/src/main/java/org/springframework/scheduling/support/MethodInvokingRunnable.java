@@ -46,6 +46,7 @@ public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
 	private ClassLoader beanClassLoader = ClassUtils.getDefaultClassLoader();
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -55,11 +56,13 @@ public class MethodInvokingRunnable extends ArgumentConvertingMethodInvoker
 		return ClassUtils.forName(className, this.beanClassLoader);
 	}
 
+	@Override
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();
 	}
 
 
+	@Override
 	public void run() {
 		try {
 			invoke();

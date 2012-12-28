@@ -74,18 +74,22 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 	}
 
 
+	@Override
 	public Set<String> getAnnotationTypes() {
 		return this.annotationSet;
 	}
 
+	@Override
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		return this.metaAnnotationMap.get(annotationType);
 	}
 
+	@Override
 	public boolean hasAnnotation(String annotationType) {
 		return this.annotationSet.contains(annotationType);
 	}
 
+	@Override
 	public boolean hasMetaAnnotation(String metaAnnotationType) {
 		Collection<Set<String>> allMetaTypes = this.metaAnnotationMap.values();
 		for (Set<String> metaTypes : allMetaTypes) {
@@ -96,14 +100,17 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		return false;
 	}
 
+	@Override
 	public boolean isAnnotated(String annotationType) {
 		return this.attributeMap.containsKey(annotationType);
 	}
 
+	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
 		return getAnnotationAttributes(annotationType, false);
 	}
 
+	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		return getAnnotationAttributes(annotationType, classValuesAsString, false);
 	}
@@ -169,10 +176,12 @@ final class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisitor
 		return result;
 	}
 
+	@Override
 	public boolean hasAnnotatedMethods(String annotationType) {
 		return this.methodMetadataMap.containsKey(annotationType);
 	}
 
+	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		List<MethodMetadata> list = this.methodMetadataMap.get(annotationType);
 		if (CollectionUtils.isEmpty(list)) {

@@ -89,6 +89,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 	}
 
 
+	@Override
 	public void setFrom(String from) {
 		this.from = from;
 	}
@@ -97,6 +98,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return this.from;
 	}
 
+	@Override
 	public void setReplyTo(String replyTo) {
 		this.replyTo = replyTo;
 	}
@@ -105,10 +107,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return replyTo;
 	}
 
+	@Override
 	public void setTo(String to) {
 		this.to = new String[] {to};
 	}
 
+	@Override
 	public void setTo(String[] to) {
 		this.to = to;
 	}
@@ -117,10 +121,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return this.to;
 	}
 
+	@Override
 	public void setCc(String cc) {
 		this.cc = new String[] {cc};
 	}
 
+	@Override
 	public void setCc(String[] cc) {
 		this.cc = cc;
 	}
@@ -129,10 +135,12 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return cc;
 	}
 
+	@Override
 	public void setBcc(String bcc) {
 		this.bcc = new String[] {bcc};
 	}
 
+	@Override
 	public void setBcc(String[] bcc) {
 		this.bcc = bcc;
 	}
@@ -141,6 +149,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return bcc;
 	}
 
+	@Override
 	public void setSentDate(Date sentDate) {
 		this.sentDate = sentDate;
 	}
@@ -149,6 +158,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return sentDate;
 	}
 
+	@Override
 	public void setSubject(String subject) {
 		this.subject = subject;
 	}
@@ -157,6 +167,7 @@ public class SimpleMailMessage implements MailMessage, Serializable {
 		return this.subject;
 	}
 
+	@Override
 	public void setText(String text) {
 		this.text = text;
 	}

@@ -55,10 +55,12 @@ public class DefaultScopedObject implements ScopedObject, Serializable {
 	}
 
 
+	@Override
 	public Object getTargetObject() {
 		return this.beanFactory.getBean(this.targetBeanName);
 	}
 
+	@Override
 	public void removeFromScope() {
 		this.beanFactory.destroyScopedBean(this.targetBeanName);
 	}

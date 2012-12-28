@@ -144,6 +144,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 * {@link TransactionSynchronizationManager}.
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession
 	 */
+	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
@@ -189,6 +190,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 * assuming that service layer transactions have flushed their changes on commit.
 	 * @see #setFlushMode
 	 */
+	@Override
 	public void postHandle(WebRequest request, ModelMap model) throws DataAccessException {
 		if (isSingleSession()) {
 			// Only potentially flush in single session mode.
@@ -210,6 +212,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 	 * been opened during the current request (in deferred close mode).
 	 * @see org.springframework.transaction.support.TransactionSynchronizationManager
 	 */
+	@Override
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		if (!decrementParticipateCount(request)) {
 			if (isSingleSession()) {
@@ -226,6 +229,7 @@ public class OpenSessionInViewInterceptor extends HibernateAccessor implements A
 		}
 	}
 
+	@Override
 	public void afterConcurrentHandlingStarted(WebRequest request) {
 		if (!decrementParticipateCount(request)) {
 			if (isSingleSession()) {

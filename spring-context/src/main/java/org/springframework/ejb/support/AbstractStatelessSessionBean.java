@@ -85,6 +85,7 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 	 * This method always throws an exception, as it should not be invoked by the EJB container.
 	 * @see javax.ejb.SessionBean#ejbActivate()
 	 */
+	@Override
 	public void ejbActivate() throws EJBException {
 		throw new IllegalStateException("ejbActivate must not be invoked on a stateless session bean");
 	}
@@ -93,6 +94,7 @@ public abstract class AbstractStatelessSessionBean extends AbstractSessionBean {
 	 * This method always throws an exception, as it should not be invoked by the EJB container.
 	 * @see javax.ejb.SessionBean#ejbPassivate()
 	 */
+	@Override
 	public void ejbPassivate() throws EJBException {
 		throw new IllegalStateException("ejbPassivate must not be invoked on a stateless session bean");
 	}

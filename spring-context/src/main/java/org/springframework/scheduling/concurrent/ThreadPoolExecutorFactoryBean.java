@@ -133,6 +133,7 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 
+	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -170,14 +171,17 @@ public class ThreadPoolExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 
+	@Override
 	public ExecutorService getObject() throws Exception {
 		return this.exposedExecutor;
 	}
 
+	@Override
 	public Class<? extends ExecutorService> getObjectType() {
 		return (this.exposedExecutor != null ? this.exposedExecutor.getClass() : ExecutorService.class);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

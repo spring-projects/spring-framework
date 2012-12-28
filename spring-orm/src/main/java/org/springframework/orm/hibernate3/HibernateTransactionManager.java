@@ -395,10 +395,12 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * bean names. It does not need to be set for any other mode of operation.
 	 * @see #setEntityInterceptorBeanName
 	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		if (getSessionFactory() == null) {
 			throw new IllegalArgumentException("Property 'sessionFactory' is required");
@@ -422,6 +424,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getSessionFactory();
 	}
@@ -882,11 +885,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 			}
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			return this.sessionHolder.isRollbackOnly() ||
 					(hasConnectionHolder() && getConnectionHolder().isRollbackOnly());
 		}
 
+		@Override
 		public void flush() {
 			try {
 				this.sessionHolder.getSession().flush();

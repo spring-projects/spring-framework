@@ -47,6 +47,7 @@ public class SingletonMetadataAwareAspectInstanceFactory extends SingletonAspect
 	}
 
 
+	@Override
 	public final AspectMetadata getAspectMetadata() {
 		return this.metadata;
 	}

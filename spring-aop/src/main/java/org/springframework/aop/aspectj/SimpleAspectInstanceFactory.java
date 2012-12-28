@@ -49,6 +49,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	}
 
 
+	@Override
 	public final Object getAspectInstance() {
 		try {
 			return this.aspectClass.newInstance();
@@ -61,6 +62,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 		}
 	}
 
+	@Override
 	public ClassLoader getAspectClassLoader() {
 		return this.aspectClass.getClassLoader();
 	}
@@ -73,6 +75,7 @@ public class SimpleAspectInstanceFactory implements AspectInstanceFactory {
 	 * @see org.springframework.core.Ordered
 	 * @see #getOrderForAspectClass
 	 */
+	@Override
 	public int getOrder() {
 		return getOrderForAspectClass(this.aspectClass);
 	}

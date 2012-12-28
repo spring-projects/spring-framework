@@ -240,10 +240,12 @@ public class LocalContainerEntityManagerFactoryBean extends AbstractEntityManage
 	 * @see org.springframework.instrument.classloading.ReflectiveLoadTimeWeaver
 	 * @see org.springframework.instrument.classloading.tomcat.TomcatInstrumentableClassLoader
 	 */
+	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.internalPersistenceUnitManager.setLoadTimeWeaver(loadTimeWeaver);
 	}
 
+	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.internalPersistenceUnitManager.setResourceLoader(resourceLoader);
 	}

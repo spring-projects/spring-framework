@@ -55,6 +55,7 @@ public class CronTrigger implements Trigger {
 	}
 
 
+	@Override
 	public Date nextExecutionTime(TriggerContext triggerContext) {
 		Date date = triggerContext.lastCompletionTime();
 		if (date != null) {

@@ -90,6 +90,7 @@ public class JdoInterceptor extends JdoAccessor implements MethodInterceptor {
 	}
 
 
+	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		boolean existingTransaction = false;
 		PersistenceManager pm = PersistenceManagerFactoryUtils.getPersistenceManager(getPersistenceManagerFactory(), true);

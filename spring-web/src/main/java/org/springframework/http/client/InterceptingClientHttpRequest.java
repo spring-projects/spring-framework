@@ -52,10 +52,12 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 		this.uri = uri;
 	}
 
+	@Override
 	public HttpMethod getMethod() {
 		return method;
 	}
 
+	@Override
 	public URI getURI() {
 		return uri;
 	}
@@ -75,6 +77,7 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 			this.iterator = interceptors.iterator();
 		}
 
+		@Override
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
 			if (iterator.hasNext()) {
 				ClientHttpRequestInterceptor nextInterceptor = iterator.next();

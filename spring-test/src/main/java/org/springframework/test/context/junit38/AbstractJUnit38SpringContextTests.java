@@ -177,6 +177,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 	 * Sets the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
 	 */
+	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -215,6 +216,7 @@ public abstract class AbstractJUnit38SpringContextTests extends TestCase impleme
 
 		runTestTimed(new TestExecutionCallback() {
 
+			@Override
 			public void run() throws Throwable {
 				runManaged(testMethod);
 			}

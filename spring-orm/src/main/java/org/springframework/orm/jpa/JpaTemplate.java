@@ -146,10 +146,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	}
 
 
+	@Override
 	public <T> T execute(JpaCallback<T> action) throws DataAccessException {
 		return execute(action, isExposeNativeEntityManager());
 	}
 
+	@Override
 	public List executeFind(JpaCallback<?> action) throws DataAccessException {
 		Object result = execute(action, isExposeNativeEntityManager());
 		if (!(result instanceof List)) {
@@ -229,32 +231,40 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience methods for load, save, delete
 	//-------------------------------------------------------------------------
 
+	@Override
 	public <T> T find(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.find(entityClass, id);
 			}
 		}, true);
 	}
 
+	@Override
 	public <T> T getReference(final Class<T> entityClass, final Object id) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.getReference(entityClass, id);
 			}
 		}, true);
 	}
 
+	@Override
 	public boolean contains(final Object entity) throws DataAccessException {
 		return execute(new JpaCallback<Boolean>() {
+			@Override
 			public Boolean doInJpa(EntityManager em) throws PersistenceException {
 				return em.contains(entity);
 			}
 		}, true);
 	}
 
+	@Override
 	public void refresh(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.refresh(entity);
 				return null;
@@ -262,8 +272,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public void persist(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.persist(entity);
 				return null;
@@ -271,16 +283,20 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public <T> T merge(final T entity) throws DataAccessException {
 		return execute(new JpaCallback<T>() {
+			@Override
 			public T doInJpa(EntityManager em) throws PersistenceException {
 				return em.merge(entity);
 			}
 		}, true);
 	}
 
+	@Override
 	public void remove(final Object entity) throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.remove(entity);
 				return null;
@@ -288,8 +304,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		}, true);
 	}
 
+	@Override
 	public void flush() throws DataAccessException {
 		execute(new JpaCallback<Object>() {
+			@Override
 			public Object doInJpa(EntityManager em) throws PersistenceException {
 				em.flush();
 				return null;
@@ -302,12 +320,15 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 	// Convenience finder methods
 	//-------------------------------------------------------------------------
 
+	@Override
 	public List find(String queryString) throws DataAccessException {
 		return find(queryString, (Object[]) null);
 	}
 
+	@Override
 	public List find(final String queryString, final Object... values) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -321,8 +342,10 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedParams(final String queryString, final Map<String, ?> params) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -336,12 +359,15 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedQuery(String queryName) throws DataAccessException {
 		return findByNamedQuery(queryName, (Object[]) null);
 	}
 
+	@Override
 	public List findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -355,10 +381,12 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 		});
 	}
 
+	@Override
 	public List findByNamedQueryAndNamedParams(final String queryName, final Map<String, ?> params)
 			throws DataAccessException {
 
 		return execute(new JpaCallback<List>() {
+			@Override
 			public List doInJpa(EntityManager em) throws PersistenceException {
 				Query queryObject = em.createNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -408,6 +436,7 @@ public class JpaTemplate extends JpaAccessor implements JpaOperations {
 			this.target = target;
 		}
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface (or provider-specific extension) coming in...
 

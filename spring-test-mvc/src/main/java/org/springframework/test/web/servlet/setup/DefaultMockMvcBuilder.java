@@ -181,6 +181,7 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	/**
 	 * Build a {@link MockMvc} instance.
 	 */
+	@Override
 	public final MockMvc build() {
 
 		initWebAppContext(this.webAppContext);

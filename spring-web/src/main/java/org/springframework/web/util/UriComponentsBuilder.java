@@ -611,15 +611,18 @@ public class UriComponentsBuilder {
 			this.path = new StringBuilder(path);
 		}
 
+		@Override
 		public HierarchicalUriComponents.PathComponent build() {
 			return new HierarchicalUriComponents.FullPathComponent(path.toString());
 		}
 
+		@Override
 		public PathComponentBuilder appendPath(String path) {
 			this.path.append(path);
 			return this;
 		}
 
+		@Override
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
 			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
 			builder.appendPathSegments(pathSegments);
@@ -648,16 +651,19 @@ public class UriComponentsBuilder {
 			return result;
 		}
 
+		@Override
 		public HierarchicalUriComponents.PathComponent build() {
 			return new HierarchicalUriComponents.PathSegmentComponent(pathSegments);
 		}
 
+		@Override
 		public PathComponentBuilder appendPath(String path) {
 			PathComponentCompositeBuilder builder = new PathComponentCompositeBuilder(this);
 			builder.appendPath(path);
 			return builder;
 		}
 
+		@Override
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
 			this.pathSegments.addAll(removeEmptyPathSegments(pathSegments));
 			return this;
@@ -675,6 +681,7 @@ public class UriComponentsBuilder {
 			pathComponentBuilders.add(builder);
 		}
 
+		@Override
 		public HierarchicalUriComponents.PathComponent build() {
 			List<HierarchicalUriComponents.PathComponent> pathComponents =
 					new ArrayList<HierarchicalUriComponents.PathComponent>(pathComponentBuilders.size());
@@ -685,11 +692,13 @@ public class UriComponentsBuilder {
 			return new HierarchicalUriComponents.PathComponentComposite(pathComponents);
 		}
 
+		@Override
 		public PathComponentBuilder appendPath(String path) {
 			this.pathComponentBuilders.add(new FullPathComponentBuilder(path));
 			return this;
 		}
 
+		@Override
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
 			this.pathComponentBuilders.add(new PathSegmentComponentBuilder(pathSegments));
 			return this;
@@ -702,14 +711,17 @@ public class UriComponentsBuilder {
 	 */
 	private static PathComponentBuilder NULL_PATH_COMPONENT_BUILDER = new PathComponentBuilder() {
 
+		@Override
 		public HierarchicalUriComponents.PathComponent build() {
 			return HierarchicalUriComponents.NULL_PATH_COMPONENT;
 		}
 
+		@Override
 		public PathComponentBuilder appendPath(String path) {
 			return new FullPathComponentBuilder(path);
 		}
 
+		@Override
 		public PathComponentBuilder appendPathSegments(String... pathSegments) {
 			return new PathSegmentComponentBuilder(pathSegments);
 		}

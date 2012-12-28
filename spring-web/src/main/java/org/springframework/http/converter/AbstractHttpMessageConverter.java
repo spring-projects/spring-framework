@@ -82,6 +82,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		this.supportedMediaTypes = new ArrayList<MediaType>(supportedMediaTypes);
 	}
 
+	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.supportedMediaTypes);
 	}
@@ -92,6 +93,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * and if the {@linkplain #getSupportedMediaTypes() supported media types}
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
+	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canRead(mediaType);
 	}
@@ -121,6 +123,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * and if the {@linkplain #getSupportedMediaTypes() supported media types}
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
+	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
 		}
@@ -149,6 +152,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}.
 	 * Future implementations might add some default behavior, however.
 	 */
+	@Override
 	public final T read(Class<? extends T> clazz, HttpInputMessage inputMessage) throws IOException {
 		return readInternal(clazz, inputMessage);
 	}
@@ -158,6 +162,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
 	 * on the output message. It then calls {@link #writeInternal}.
 	 */
+	@Override
 	public final void write(T t, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 

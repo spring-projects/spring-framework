@@ -190,14 +190,17 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public Object getBean(String name) throws BeansException {
 		return doGetBean(name, null, null, false);
 	}
 
+	@Override
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		return doGetBean(name, requiredType, null, false);
 	}
 
+	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		return doGetBean(name, null, args, false);
 	}
@@ -290,6 +293,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			// Create bean instance.
 			if (mbd.isSingleton()) {
 				sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {
+					@Override
 					public Object getObject() throws BeansException {
 						try {
 							return createBean(beanName, mbd, args);
@@ -327,6 +331,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 				try {
 					Object scopedInstance = scope.get(beanName, new ObjectFactory<Object>() {
+						@Override
 						public Object getObject() throws BeansException {
 							beforePrototypeCreation(beanName);
 							try {
@@ -364,6 +369,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return (T) bean;
 	}
 
+	@Override
 	public boolean containsBean(String name) {
 		String beanName = transformedBeanName(name);
 		if (containsSingleton(beanName) || containsBeanDefinition(beanName)) {
@@ -374,6 +380,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return (parentBeanFactory != null && parentBeanFactory.containsBean(originalBeanName(name)));
 	}
 
+	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
@@ -419,6 +426,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
@@ -443,6 +451,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				final FactoryBean<?> factoryBean = (FactoryBean<?>) getBean(FACTORY_BEAN_PREFIX + beanName);
 				if (System.getSecurityManager() != null) {
 					return AccessController.doPrivileged(new PrivilegedAction<Boolean>() {
+						@Override
 						public Boolean run() {
 							return ((factoryBean instanceof SmartFactoryBean && ((SmartFactoryBean<?>) factoryBean).isPrototype()) ||
 									!factoryBean.isSingleton());
@@ -460,6 +469,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 		Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
@@ -531,6 +541,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
@@ -621,10 +632,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public BeanFactory getParentBeanFactory() {
 		return this.parentBeanFactory;
 	}
 
+	@Override
 	public boolean containsLocalBean(String name) {
 		String beanName = transformedBeanName(name);
 		return ((containsSingleton(beanName) || containsBeanDefinition(beanName)) &&
@@ -636,6 +649,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	// Implementation of ConfigurableBeanFactory interface
 	//---------------------------------------------------------------------
 
+	@Override
 	public void setParentBeanFactory(BeanFactory parentBeanFactory) {
 		if (this.parentBeanFactory != null && this.parentBeanFactory != parentBeanFactory) {
 			throw new IllegalStateException("Already associated with parent BeanFactory: " + this.parentBeanFactory);
@@ -643,46 +657,57 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.parentBeanFactory = parentBeanFactory;
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = (beanClassLoader != null ? beanClassLoader : ClassUtils.getDefaultClassLoader());
 	}
 
+	@Override
 	public ClassLoader getBeanClassLoader() {
 		return this.beanClassLoader;
 	}
 
+	@Override
 	public void setTempClassLoader(ClassLoader tempClassLoader) {
 		this.tempClassLoader = tempClassLoader;
 	}
 
+	@Override
 	public ClassLoader getTempClassLoader() {
 		return this.tempClassLoader;
 	}
 
+	@Override
 	public void setCacheBeanMetadata(boolean cacheBeanMetadata) {
 		this.cacheBeanMetadata = cacheBeanMetadata;
 	}
 
+	@Override
 	public boolean isCacheBeanMetadata() {
 		return this.cacheBeanMetadata;
 	}
 
+	@Override
 	public void setBeanExpressionResolver(BeanExpressionResolver resolver) {
 		this.beanExpressionResolver = resolver;
 	}
 
+	@Override
 	public BeanExpressionResolver getBeanExpressionResolver() {
 		return this.beanExpressionResolver;
 	}
 
+	@Override
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+	@Override
 	public ConversionService getConversionService() {
 		return this.conversionService;
 	}
 
+	@Override
 	public void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar) {
 		Assert.notNull(registrar, "PropertyEditorRegistrar must not be null");
 		this.propertyEditorRegistrars.add(registrar);
@@ -695,12 +720,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.propertyEditorRegistrars;
 	}
 
+	@Override
 	public void registerCustomEditor(Class<?> requiredType, Class<? extends PropertyEditor> propertyEditorClass) {
 		Assert.notNull(requiredType, "Required type must not be null");
 		Assert.isAssignable(PropertyEditor.class, propertyEditorClass);
 		this.customEditors.put(requiredType, propertyEditorClass);
 	}
 
+	@Override
 	public void copyRegisteredEditorsTo(PropertyEditorRegistry registry) {
 		registerCustomEditors(registry);
 	}
@@ -712,6 +739,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.customEditors;
 	}
 
+	@Override
 	public void setTypeConverter(TypeConverter typeConverter) {
 		this.typeConverter = typeConverter;
 	}
@@ -724,6 +752,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.typeConverter;
 	}
 
+	@Override
 	public TypeConverter getTypeConverter() {
 		TypeConverter customConverter = getCustomTypeConverter();
 		if (customConverter != null) {
@@ -738,11 +767,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public void addEmbeddedValueResolver(StringValueResolver valueResolver) {
 		Assert.notNull(valueResolver, "StringValueResolver must not be null");
 		this.embeddedValueResolvers.add(valueResolver);
 	}
 
+	@Override
 	public String resolveEmbeddedValue(String value) {
 		String result = value;
 		for (StringValueResolver resolver : this.embeddedValueResolvers) {
@@ -751,6 +782,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return result;
 	}
 
+	@Override
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");
 		this.beanPostProcessors.remove(beanPostProcessor);
@@ -763,6 +795,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public int getBeanPostProcessorCount() {
 		return this.beanPostProcessors.size();
 	}
@@ -795,6 +828,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return this.hasDestructionAwareBeanPostProcessors;
 	}
 
+	@Override
 	public void registerScope(String scopeName, Scope scope) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		Assert.notNull(scope, "Scope must not be null");
@@ -804,10 +838,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		this.scopes.put(scopeName, scope);
 	}
 
+	@Override
 	public String[] getRegisteredScopeNames() {
 		return StringUtils.toStringArray(this.scopes.keySet());
 	}
 
+	@Override
 	public Scope getRegisteredScope(String scopeName) {
 		Assert.notNull(scopeName, "Scope identifier must not be null");
 		return this.scopes.get(scopeName);
@@ -833,6 +869,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				AccessController.getContext());
 	}
 
+	@Override
 	public void copyConfigurationFrom(ConfigurableBeanFactory otherFactory) {
 		Assert.notNull(otherFactory, "BeanFactory must not be null");
 		setBeanClassLoader(otherFactory.getBeanClassLoader());
@@ -866,6 +903,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
 	 * @throws BeanDefinitionStoreException in case of an invalid bean definition
 	 */
+	@Override
 	public BeanDefinition getMergedBeanDefinition(String name) throws BeansException {
 		String beanName = transformedBeanName(name);
 
@@ -877,6 +915,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return getMergedLocalBeanDefinition(beanName);
 	}
 
+	@Override
 	public boolean isFactoryBean(String name) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
 
@@ -959,6 +998,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 	}
 
+	@Override
 	public void destroyBean(String beanName, Object beanInstance) {
 		destroyBean(beanName, beanInstance, getMergedLocalBeanDefinition(beanName));
 	}
@@ -974,6 +1014,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		new DisposableBeanAdapter(beanInstance, beanName, mbd, getBeanPostProcessors(), getAccessControlContext()).destroy();
 	}
 
+	@Override
 	public void destroyScopedBean(String beanName) {
 		RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 		if (mbd.isSingleton() || mbd.isPrototype()) {
@@ -1246,6 +1287,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedExceptionAction<Class<?>>() {
+					@Override
 					public Class<?> run() throws Exception {
 						return doResolveBeanClass(mbd, typesToMatch);
 					}

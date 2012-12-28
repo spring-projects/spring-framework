@@ -146,6 +146,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	/**
 	 * Make sure the ConnectionFactory has been set.
 	 */
+	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
@@ -153,10 +154,12 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 	}
 
 
+	@Override
 	public Object getResourceFactory() {
 		return getConnectionFactory();
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		JmsTransactionObject txObject = new JmsTransactionObject();
 		txObject.setResourceHolder(
@@ -164,11 +167,13 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		return txObject;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		return (txObject.getResourceHolder() != null);
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (definition.getIsolationLevel() != TransactionDefinition.ISOLATION_DEFAULT) {
 			throw new InvalidIsolationLevelException("JMS does not support an isolation level concept");
@@ -204,17 +209,20 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected Object doSuspend(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		txObject.setResourceHolder(null);
 		return TransactionSynchronizationManager.unbindResource(getConnectionFactory());
 	}
 
+	@Override
 	protected void doResume(Object transaction, Object suspendedResources) {
 		JmsResourceHolder conHolder = (JmsResourceHolder) suspendedResources;
 		TransactionSynchronizationManager.bindResource(getConnectionFactory(), conHolder);
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
 		Session session = txObject.getResourceHolder().getSession();
@@ -232,6 +240,7 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
 		Session session = txObject.getResourceHolder().getSession();
@@ -246,11 +255,13 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 		}
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		JmsTransactionObject txObject = (JmsTransactionObject) status.getTransaction();
 		txObject.getResourceHolder().setRollbackOnly();
 	}
 
+	@Override
 	protected void doCleanupAfterCompletion(Object transaction) {
 		JmsTransactionObject txObject = (JmsTransactionObject) transaction;
 		TransactionSynchronizationManager.unbindResource(getConnectionFactory());
@@ -302,10 +313,12 @@ public class JmsTransactionManager extends AbstractPlatformTransactionManager
 			return this.resourceHolder;
 		}
 
+		@Override
 		public boolean isRollbackOnly() {
 			return this.resourceHolder.isRollbackOnly();
 		}
 
+		@Override
 		public void flush() {
 			// no-op
 		}

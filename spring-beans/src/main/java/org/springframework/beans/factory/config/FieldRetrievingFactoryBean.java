@@ -142,15 +142,18 @@ public class FieldRetrievingFactoryBean
 	 * nor "targetField" have been specified.
 	 * This allows for concise bean definitions with just an id/name.
 	 */
+	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = StringUtils.trimAllWhitespace(BeanFactoryUtils.originalBeanName(beanName));
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
 
+	@Override
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchFieldException {
 		if (this.targetClass != null && this.targetObject != null) {
 			throw new IllegalArgumentException("Specify either targetClass or targetObject, not both");
@@ -191,6 +194,7 @@ public class FieldRetrievingFactoryBean
 	}
 
 
+	@Override
 	public Object getObject() throws IllegalAccessException {
 		if (this.fieldObject == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -206,10 +210,12 @@ public class FieldRetrievingFactoryBean
 		}
 	}
 
+	@Override
 	public Class<?> getObjectType() {
 		return (this.fieldObject != null ? this.fieldObject.getType() : null);
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return false;
 	}

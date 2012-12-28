@@ -45,25 +45,30 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 	}
 
 
+	@Override
 	public void suspend() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.unbindResource(this.resourceKey);
 		}
 	}
 
+	@Override
 	public void resume() {
 		if (this.holderActive) {
 			TransactionSynchronizationManager.bindResource(this.resourceKey, this.resourceHolder);
 		}
 	}
 
+	@Override
 	public void flush() {
 		flushResource(this.resourceHolder);
 	}
 
+	@Override
 	public void beforeCommit(boolean readOnly) {
 	}
 
+	@Override
 	public void beforeCompletion() {
 		if (shouldUnbindAtCompletion()) {
 			TransactionSynchronizationManager.unbindResource(this.resourceKey);
@@ -74,12 +79,14 @@ public abstract class ResourceHolderSynchronization<H extends ResourceHolder, K>
 		}
 	}
 
+	@Override
 	public void afterCommit() {
 		if (!shouldReleaseBeforeCompletion()) {
 			processResourceAfterCommit(this.resourceHolder);
 		}
 	}
 
+	@Override
 	public void afterCompletion(int status) {
 		if (shouldUnbindAtCompletion()) {
 			boolean releaseNecessary = false;

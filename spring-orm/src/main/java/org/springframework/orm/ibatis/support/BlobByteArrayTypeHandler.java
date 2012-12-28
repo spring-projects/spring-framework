@@ -70,6 +70,7 @@ public class BlobByteArrayTypeHandler extends AbstractLobTypeHandler {
 		return lobHandler.getBlobAsBytes(rs, index);
 	}
 
+	@Override
 	public Object valueOf(String s) {
 		return s.getBytes();
 	}

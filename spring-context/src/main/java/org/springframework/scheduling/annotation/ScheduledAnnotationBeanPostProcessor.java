@@ -89,25 +89,31 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.scheduler = scheduler;
 	}
 
+	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
 
+	@Override
 	public int getOrder() {
 		return LOWEST_PRECEDENCE;
 	}
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
 		final Class<?> targetClass = AopUtils.getTargetClass(bean);
 		ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
+			@Override
 			public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 				Scheduled annotation = AnnotationUtils.getAnnotation(method, Scheduled.class);
 				if (annotation != null) {
@@ -164,6 +170,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (event.getApplicationContext() != this.applicationContext) {
 			return;
@@ -203,6 +210,7 @@ public class ScheduledAnnotationBeanPostProcessor
 		this.registrar.afterPropertiesSet();
 	}
 
+	@Override
 	public void destroy() throws Exception {
 		if (this.registrar != null) {
 			this.registrar.destroy();

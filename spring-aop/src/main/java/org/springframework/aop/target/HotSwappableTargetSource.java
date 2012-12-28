@@ -59,18 +59,22 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 	 * Return the type of the current target object.
 	 * <p>The returned type should usually be constant across all target objects.
 	 */
+	@Override
 	public synchronized Class<?> getTargetClass() {
 		return this.target.getClass();
 	}
 
+	@Override
 	public final boolean isStatic() {
 		return false;
 	}
 
+	@Override
 	public synchronized Object getTarget() {
 		return this.target;
 	}
 
+	@Override
 	public void releaseTarget(Object target) {
 		// nothing to do
 	}

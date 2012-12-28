@@ -53,6 +53,7 @@ public class StringCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	}
 
 
+	@Override
 	public Comparable getCode() {
 		return this.code;
 	}

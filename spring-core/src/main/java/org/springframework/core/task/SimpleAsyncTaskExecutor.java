@@ -144,6 +144,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * if configured (through the superclass's settings).
 	 * @see #doExecute(Runnable)
 	 */
+	@Override
 	public void execute(Runnable task) {
 		execute(task, TIMEOUT_INDEFINITE);
 	}
@@ -157,6 +158,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 	 * @see #TIMEOUT_IMMEDIATE
 	 * @see #doExecute(Runnable)
 	 */
+	@Override
 	public void execute(Runnable task, long startTimeout) {
 		Assert.notNull(task, "Runnable must not be null");
 		if (isThrottleActive() && startTimeout > TIMEOUT_IMMEDIATE) {
@@ -168,12 +170,14 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 		}
 	}
 
+	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future, TIMEOUT_INDEFINITE);
 		return future;
 	}
 
+	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future, TIMEOUT_INDEFINITE);
@@ -225,6 +229,7 @@ public class SimpleAsyncTaskExecutor extends CustomizableThreadCreator implement
 			this.target = target;
 		}
 
+		@Override
 		public void run() {
 			try {
 				this.target.run();

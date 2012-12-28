@@ -189,6 +189,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * @throws IllegalArgumentException if environment is not assignable to
 	 * {@code ConfigurableWebEnvironment}.
 	 */
+	@Override
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableWebEnvironment.class, environment);
 		this.environment = (ConfigurableWebEnvironment)environment;
@@ -199,6 +200,7 @@ public abstract class HttpServletBean extends HttpServlet
 	 * <p>If {@code null}, a new environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
+	@Override
 	public ConfigurableWebEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = this.createEnvironment();

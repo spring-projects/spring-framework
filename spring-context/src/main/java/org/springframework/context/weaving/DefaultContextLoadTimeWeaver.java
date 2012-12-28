@@ -70,6 +70,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		setBeanClassLoader(beanClassLoader);
 	}
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		LoadTimeWeaver serverSpecificLoadTimeWeaver = createServerSpecificLoadTimeWeaver(classLoader);
 		if (serverSpecificLoadTimeWeaver != null) {
@@ -130,6 +131,7 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 		return null;
 	}
 
+	@Override
 	public void destroy() {
 		if (this.loadTimeWeaver instanceof InstrumentationLoadTimeWeaver) {
 			logger.info("Removing all registered transformers for class loader: " +
@@ -139,14 +141,17 @@ public class DefaultContextLoadTimeWeaver implements LoadTimeWeaver, BeanClassLo
 	}
 
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		this.loadTimeWeaver.addTransformer(transformer);
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.loadTimeWeaver.getInstrumentableClassLoader();
 	}
 
+	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return this.loadTimeWeaver.getThrowawayClassLoader();
 	}

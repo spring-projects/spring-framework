@@ -64,14 +64,17 @@ final class SimpleMetadataReader implements MetadataReader {
 		this.resource = resource;
 	}
 
+	@Override
 	public Resource getResource() {
 		return this.resource;
 	}
 
+	@Override
 	public ClassMetadata getClassMetadata() {
 		return this.classMetadata;
 	}
 
+	@Override
 	public AnnotationMetadata getAnnotationMetadata() {
 		return this.annotationMetadata;
 	}

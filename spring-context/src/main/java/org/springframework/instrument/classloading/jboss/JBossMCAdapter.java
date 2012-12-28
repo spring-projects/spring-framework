@@ -127,6 +127,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
+	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		InvocationHandler adapter = new JBossMCTranslatorAdapter(transformer);
 		Object adapterInstance = Proxy.newProxyInstance(this.translatorClass.getClassLoader(),
@@ -139,6 +140,7 @@ class JBossMCAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
+	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return classLoader;
 	}

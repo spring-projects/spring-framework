@@ -45,6 +45,7 @@ public interface TaskExecutor extends Executor {
 	 * @param task the {@code Runnable} to execute (never {@code null})
 	 * @throws TaskRejectedException if the given task was not accepted
 	 */
+	@Override
 	void execute(Runnable task);
 
 }

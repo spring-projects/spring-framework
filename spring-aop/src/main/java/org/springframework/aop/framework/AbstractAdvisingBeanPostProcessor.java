@@ -50,6 +50,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	private final Map<String, Boolean> eligibleBeans = new ConcurrentHashMap<String, Boolean>(64);
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -58,15 +59,18 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return this.order;
 	}
 
 
+	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
+	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		if (bean instanceof AopInfrastructureBean) {
 			// Ignore AOP infrastructure such as scoped proxies.

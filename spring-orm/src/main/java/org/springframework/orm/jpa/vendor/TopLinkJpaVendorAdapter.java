@@ -51,6 +51,7 @@ public class TopLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final JpaDialect jpaDialect = new TopLinkJpaDialect();
 
 
+	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

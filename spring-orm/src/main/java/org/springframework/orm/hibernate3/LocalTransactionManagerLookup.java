@@ -58,14 +58,17 @@ public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 		this.transactionManager = tm;
 	}
 
+	@Override
 	public TransactionManager getTransactionManager(Properties props) {
 		return this.transactionManager;
 	}
 
+	@Override
 	public String getUserTransactionName() {
 		return null;
 	}
 
+	@Override
 	public Object getTransactionIdentifier(Transaction transaction) {
 		return transaction;
 	}

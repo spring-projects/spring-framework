@@ -57,6 +57,7 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 		this.source = source;
 	}
 
+	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -83,10 +84,12 @@ public class ManagedList<E> extends ArrayList<E> implements Mergeable, BeanMetad
 		this.mergeEnabled = mergeEnabled;
 	}
 
+	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public List<E> merge(Object parent) {
 		if (!this.mergeEnabled) {

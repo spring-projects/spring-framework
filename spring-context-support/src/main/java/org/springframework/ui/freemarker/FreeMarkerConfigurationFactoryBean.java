@@ -56,19 +56,23 @@ public class FreeMarkerConfigurationFactoryBean extends FreeMarkerConfigurationF
 	private Configuration configuration;
 
 
+	@Override
 	public void afterPropertiesSet() throws IOException, TemplateException {
 		this.configuration = createConfiguration();
 	}
 
 
+	@Override
 	public Configuration getObject() {
 		return this.configuration;
 	}
 
+	@Override
 	public Class<? extends Configuration> getObjectType() {
 		return Configuration.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -113,6 +113,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	}
 
 
+	@Override
 	public byte[] getBlobAsBytes(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as bytes");
 		if (this.wrapAsLob) {
@@ -124,6 +125,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public InputStream getBlobAsBinaryStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning BLOB as binary stream");
 		if (this.wrapAsLob) {
@@ -135,6 +137,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public String getClobAsString(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as string");
 		if (this.wrapAsLob) {
@@ -146,6 +149,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public InputStream getClobAsAsciiStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as ASCII stream");
 		if (this.wrapAsLob) {
@@ -157,6 +161,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public Reader getClobAsCharacterStream(ResultSet rs, int columnIndex) throws SQLException {
 		logger.debug("Returning CLOB as character stream");
 		if (this.wrapAsLob) {
@@ -168,6 +173,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 		}
 	}
 
+	@Override
 	public LobCreator getLobCreator() {
 		return new DefaultLobCreator();
 	}
@@ -179,6 +185,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 	 */
 	protected class DefaultLobCreator implements LobCreator {
 
+		@Override
 		public void setBlobAsBytes(PreparedStatement ps, int paramIndex, byte[] content)
 				throws SQLException {
 
@@ -207,6 +214,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setBlobAsBinaryStream(
 				PreparedStatement ps, int paramIndex, InputStream binaryStream, int contentLength)
 				throws SQLException {
@@ -236,6 +244,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsString(PreparedStatement ps, int paramIndex, String content)
 				throws SQLException {
 
@@ -264,6 +273,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsAsciiStream(
 				PreparedStatement ps, int paramIndex, InputStream asciiStream, int contentLength)
 				throws SQLException {
@@ -295,6 +305,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void setClobAsCharacterStream(
 				PreparedStatement ps, int paramIndex, Reader characterStream, int contentLength)
 				throws SQLException {
@@ -324,6 +335,7 @@ public class DefaultLobHandler extends AbstractLobHandler {
 			}
 		}
 
+		@Override
 		public void close() {
 			// nothing to do here
 		}

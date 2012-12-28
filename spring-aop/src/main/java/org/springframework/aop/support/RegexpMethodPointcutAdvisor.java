@@ -116,6 +116,7 @@ public class RegexpMethodPointcutAdvisor extends AbstractGenericPointcutAdvisor 
 	/**
 	 * Initialize the singleton Pointcut held within this Advisor.
 	 */
+	@Override
 	public Pointcut getPointcut() {
 		synchronized (this.pointcutMonitor) {
 			if (this.pointcut == null) {

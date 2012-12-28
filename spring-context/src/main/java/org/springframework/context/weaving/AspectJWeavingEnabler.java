@@ -50,18 +50,22 @@ public class AspectJWeavingEnabler
 	public static final String ASPECTJ_AOP_XML_RESOURCE = "META-INF/aop.xml";
 
 
+	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
+	@Override
 	public void setLoadTimeWeaver(LoadTimeWeaver loadTimeWeaver) {
 		this.loadTimeWeaver = loadTimeWeaver;
 	}
 
+	@Override
 	public int getOrder() {
 		return HIGHEST_PRECEDENCE;
 	}
 
+	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		enableAspectJWeaving(this.loadTimeWeaver, this.beanClassLoader);
 	}
@@ -95,6 +99,7 @@ public class AspectJWeavingEnabler
 			this.delegate = delegate;
 		}
 
+		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 
