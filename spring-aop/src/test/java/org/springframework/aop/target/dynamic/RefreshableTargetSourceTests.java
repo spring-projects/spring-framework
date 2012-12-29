@@ -19,6 +19,8 @@ package org.springframework.aop.target.dynamic;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.springframework.build.junit.Assume;
+import org.springframework.build.junit.TestGroup;
 
 /**
  * @author Rob Harrop
@@ -75,6 +77,8 @@ public final class RefreshableTargetSourceTests {
 
 	@Test
 	public void testRefreshOverTime() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);
 
