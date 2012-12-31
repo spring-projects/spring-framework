@@ -40,6 +40,7 @@ import org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager;
  * @since 1.1.5
  * @see org.apache.taglibs.standard.lang.support.ExpressionEvaluatorManager
  */
+@Deprecated
 public class MockExpressionEvaluator extends ExpressionEvaluator {
 
 	private final PageContext pageContext;

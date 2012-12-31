@@ -40,6 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 29.04.2003
  */
+@Deprecated
 public class WizardFormControllerTests extends TestCase {
 
 	public void testNoDirtyPageChange() throws Exception {

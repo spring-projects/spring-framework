@@ -31,8 +31,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
@@ -46,7 +46,8 @@ public class GenericStoredProcedureTests {
 
 	@Test
 	public void testAddInvoices() throws Exception {
-		BeanFactory bf = new XmlBeanFactory(
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericStoredProcedureTests-context.xml"));
 		Connection connection = mock(Connection.class);
 		DataSource dataSource = mock(DataSource.class);

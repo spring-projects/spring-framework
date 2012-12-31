@@ -401,7 +401,7 @@ public class DefaultConversionTests {
 	public void convertArrayToObjectAssignableTargetType() {
 		Long[] array = new Long[] { 3L };
 		Long[] result = (Long[]) conversionService.convert(array, Object.class);
-		assertEquals(array, result);
+		assertArrayEquals(array, result);
 	}
 
 	@Test

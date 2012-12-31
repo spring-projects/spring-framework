@@ -16,14 +16,16 @@
 
 package org.springframework.context.access;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
 import org.springframework.beans.factory.access.SingletonBeanFactoryLocatorTests;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ClassUtils;
@@ -43,8 +45,10 @@ public class ContextSingletonBeanFactoryLocatorTests extends SingletonBeanFactor
 	public void testBaseBeanFactoryDefs() {
 		// Just test the base BeanFactory/AppContext defs we are going to work
 		// with in other tests.
-		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans1.xml"));
-		new XmlBeanFactory(new ClassPathResource("/org/springframework/beans/factory/access/beans2.xml"));
+		new XmlBeanDefinitionReader(new DefaultListableBeanFactory()).loadBeanDefinitions(new ClassPathResource(
+				"/org/springframework/beans/factory/access/beans1.xml"));
+		new XmlBeanDefinitionReader(new DefaultListableBeanFactory()).loadBeanDefinitions(new ClassPathResource(
+				"/org/springframework/beans/factory/access/beans2.xml"));
 	}
 
 	@Override

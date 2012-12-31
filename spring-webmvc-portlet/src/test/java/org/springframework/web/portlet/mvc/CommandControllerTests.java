@@ -52,6 +52,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 /**
  * @author Mark Fisher
  */
+@Deprecated
 public class CommandControllerTests extends TestCase {
 
 	private static final String ERRORS_KEY = "errors";

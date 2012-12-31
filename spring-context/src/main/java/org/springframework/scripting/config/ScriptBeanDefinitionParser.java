@@ -99,6 +99,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * Registers a {@link ScriptFactoryPostProcessor} if needed.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());

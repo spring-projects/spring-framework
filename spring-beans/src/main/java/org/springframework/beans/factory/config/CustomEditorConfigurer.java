@@ -234,6 +234,8 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, BeanCla
 			this.sharedEditor = sharedEditor;
 		}
 
+		@Override
+		@SuppressWarnings("deprecation")
 		public void registerCustomEditors(PropertyEditorRegistry registry) {
 			if (!(registry instanceof PropertyEditorRegistrySupport)) {
 				throw new IllegalArgumentException("Cannot registered shared editor " +

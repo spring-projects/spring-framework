@@ -29,6 +29,7 @@ import org.springframework.scheduling.TestMethodInvokingTask;
  * @author Juergen Hoeller
  * @since 20.02.2004
  */
+@Deprecated
 public class TimerSupportTests extends TestCase {
 
 	public void testTimerFactoryBean() throws Exception {

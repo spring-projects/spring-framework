@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationException;
@@ -64,12 +64,12 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 		eContext.setOperatorOverloader(new StringAndBooleanAddition());
 
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'+true");
-		Assert.assertEquals("abctrue",expr.getValue(eContext));
+		assertEquals("abctrue",expr.getValue(eContext));
 
 		expr = (SpelExpression)parser.parseExpression("'abc'-true");
-		Assert.assertEquals("abc",expr.getValue(eContext));
+		assertEquals("abc",expr.getValue(eContext));
 
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
-		Assert.assertEquals("abcnull",expr.getValue(eContext));
+		assertEquals("abcnull",expr.getValue(eContext));
 	}
 }

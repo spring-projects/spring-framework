@@ -16,12 +16,15 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
 import test.beans.ITestBean;
@@ -39,11 +42,12 @@ public class ThreadLocalTargetSourceTests {
 	/** Initial count value set in bean factory XML */
 	private static final int INITIAL_COUNT = 10;
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(CONTEXT);
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
 	}
 
 	/**

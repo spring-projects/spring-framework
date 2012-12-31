@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.GregorianCalendar;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -486,7 +488,7 @@ public class UriTemplateServletAnnotationControllerTests {
 		public void handle(@PathVariable("hotel") String hotel, @PathVariable Date date, Writer writer)
 				throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
-			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
+			assertEquals("Invalid path variable value", new GregorianCalendar(2008, 10, 18).getTime(), date);
 			writer.write("test-" + hotel);
 		}
 

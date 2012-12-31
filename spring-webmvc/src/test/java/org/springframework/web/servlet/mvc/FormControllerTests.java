@@ -46,6 +46,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
+@Deprecated
 public class FormControllerTests extends TestCase {
 
 	public void testReferenceDataOnForm() throws Exception {

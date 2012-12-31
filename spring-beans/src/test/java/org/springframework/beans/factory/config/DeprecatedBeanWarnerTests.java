@@ -38,6 +38,7 @@ public class DeprecatedBeanWarnerTests {
 
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void postProcess() {
 		beanFactory = new DefaultListableBeanFactory();
 		BeanDefinition def = new RootBeanDefinition(MyDeprecatedBean.class);

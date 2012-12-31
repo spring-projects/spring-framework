@@ -21,6 +21,7 @@ import java.beans.PropertyEditor;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 
 /**
@@ -67,7 +68,9 @@ public class ResourceArrayPropertyEditorTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testStrictSystemPropertyReplacement() {
-		PropertyEditor editor = new ResourceArrayPropertyEditor(new PathMatchingResourcePatternResolver(), false);
+		PropertyEditor editor = new ResourceArrayPropertyEditor(
+				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
+				false);
 		System.setProperty("test.prop", "foo");
 		try {
 			editor.setAsText("${test.prop}-${bar}");

@@ -16,16 +16,21 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ObjectUtils;
@@ -34,9 +39,6 @@ import test.beans.DummyFactory;
 import test.beans.ITestBean;
 import test.beans.IndexedTestBean;
 import test.beans.TestBean;
-
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson
@@ -60,10 +62,17 @@ public final class BeanFactoryUtilsTests {
 	public void setUp() {
 		// Interesting hierarchical factory to test counts.
 		// Slow to read so we cache it.
-		XmlBeanFactory grandParent = new XmlBeanFactory(ROOT_CONTEXT);
-		XmlBeanFactory parent = new XmlBeanFactory(MIDDLE_CONTEXT, grandParent);
-		XmlBeanFactory child = new XmlBeanFactory(LEAF_CONTEXT, parent);
-		this.dependentBeansBF = new XmlBeanFactory(DEPENDENT_BEANS_CONTEXT);
+
+
+		DefaultListableBeanFactory grandParent = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(grandParent).loadBeanDefinitions(ROOT_CONTEXT);
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory(grandParent);
+		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(MIDDLE_CONTEXT);
+		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
+		new XmlBeanDefinitionReader(child).loadBeanDefinitions(LEAF_CONTEXT);
+
+		this.dependentBeansBF = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.dependentBeansBF).loadBeanDefinitions(DEPENDENT_BEANS_CONTEXT);
 		dependentBeansBF.preInstantiateSingletons();
 		this.listableBeanFactory = child;
 	}

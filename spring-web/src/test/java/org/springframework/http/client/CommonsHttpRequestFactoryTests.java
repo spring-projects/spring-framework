@@ -21,6 +21,7 @@ import java.net.URI;
 import org.junit.Test;
 import org.springframework.http.HttpMethod;
 
+@Deprecated
 public class CommonsHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override

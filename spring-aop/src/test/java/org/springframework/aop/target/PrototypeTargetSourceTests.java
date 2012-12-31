@@ -22,7 +22,9 @@ import static test.util.TestResourceUtils.qualifiedResource;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
 import test.beans.SideEffectBean;
@@ -43,7 +45,8 @@ public final class PrototypeTargetSourceTests {
 
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(CONTEXT);
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.beanFactory).loadBeanDefinitions(CONTEXT);
 	}
 
 	/**

@@ -16,12 +16,15 @@
 
 package org.springframework.beans.factory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -38,14 +41,16 @@ public final class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(RETURNS_NULL_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
 		Object result = factory.getBean("factoryBean");
 		assertNull(result);
 	}
 
 	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
@@ -62,7 +67,8 @@ public final class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);

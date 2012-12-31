@@ -185,7 +185,7 @@ public abstract class AssertThrows {
 	 * Template method called when the test fails; i.e. the expected
 	 * {@link java.lang.Exception} is <b>not</b> thrown.
 	 * <p>The default implementation simply fails the test via a call to
-	 * {@link junit.framework.Assert#fail(String)}.
+	 * {@link org.junit.Assert#fail(String)}.
 	 * <p>If you want to customise the failure message, consider overriding
 	 * {@link #createMessageForNoExceptionThrown()}, and / or supplying an
 	 * extra, contextual failure message via the appropriate constructor overload.

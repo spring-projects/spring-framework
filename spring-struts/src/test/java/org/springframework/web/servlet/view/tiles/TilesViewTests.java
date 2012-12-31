@@ -42,6 +42,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
  * @author Alef Arendsen
  * @author Juergen Hoeller
  */
+@Deprecated
 public class TilesViewTests {
 
 	protected StaticWebApplicationContext prepareWebApplicationContext() throws Exception {

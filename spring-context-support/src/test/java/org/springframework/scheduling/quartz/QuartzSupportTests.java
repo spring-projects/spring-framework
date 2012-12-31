@@ -51,7 +51,6 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
-
 import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -63,7 +62,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.TestMethodInvokingTask;
 
 /**
@@ -973,7 +972,7 @@ public class QuartzSupportTests {
 
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/scheduling/quartz/databasePersistence.xml");
-		SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
 		Thread.sleep(3000);
 		try {

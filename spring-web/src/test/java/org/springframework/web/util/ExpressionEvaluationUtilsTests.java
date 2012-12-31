@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
+@Deprecated
 public class ExpressionEvaluationUtilsTests {
 
 	@Test

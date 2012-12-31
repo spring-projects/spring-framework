@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 
+@Deprecated
 public class Spr7839Tests {
 
 	AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();

@@ -19,7 +19,6 @@ package org.springframework.web.context;
 import java.beans.PropertyEditorSupport;
 import java.util.StringTokenizer;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.springframework.beans.BeansException;
@@ -87,7 +86,7 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 	 */
 	public void testLifecycleCallbacks() {
 		LifecycleBean lb = (LifecycleBean) getBeanFactory().getBean("lifecycle");
-		Assert.assertEquals("lifecycle", lb.getBeanName());
+		assertEquals("lifecycle", lb.getBeanName());
 		// The dummy business method will throw an exception if the
 		// necessary callbacks weren't invoked in the right order.
 		lb.businessMethod();
