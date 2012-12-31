@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -329,6 +329,10 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		// note: "Id" is not a valid JavaBean name, nevertheless it is treated as "id"
 		Assert.assertEquals("id",rpr.read(ctx,t,"Id").getValue());
 		Assert.assertTrue(rpr.canRead(ctx,t,"Id"));
+
+		// SPR-10122, ReflectivePropertyAccessor JavaBean property names compliance tests - setters
+		rpr.write(ctx, t, "pEBS","Test String");
+		Assert.assertEquals("Test String",rpr.read(ctx,t,"pEBS").getValue());
 	}
 
 	@Test
@@ -419,6 +423,7 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		String iD = "iD";
 		String id = "id";
 		String ID = "ID";
+		String pEBS = "pEBS";
 
 		public String getProperty() { return property; }
 		public void setProperty(String value) { property = value; }
@@ -434,6 +439,14 @@ public class ReflectionHelperTests extends ExpressionTestCase {
 		public String getId() { return id; }
 
 		public String getID() { return ID; }
+
+		public String getpEBS() {
+			return pEBS;
+		}
+
+		public void setpEBS(String pEBS) {
+			this.pEBS = pEBS;
+		}
 	}
 
 	static class Super {
