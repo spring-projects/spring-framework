@@ -51,7 +51,7 @@ public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 	 */
 	private boolean supports(Class<?> beanClass) {
 		for (Method method : beanClass.getMethods()) {
-			if (ExtendedBeanInfo.isNonVoidWriteMethod(method)) {
+			if (ExtendedBeanInfo.isCandidateWriteMethod(method)) {
 				return true;
 			}
 		}
