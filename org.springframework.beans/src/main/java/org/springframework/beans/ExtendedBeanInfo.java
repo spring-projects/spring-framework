@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,8 @@ import static org.springframework.beans.PropertyDescriptorUtils.*;
 
 /**
  * Decorator for a standard {@link BeanInfo} object, e.g. as created by
- * {@link Introspector#getBeanInfo(Class)}, designed to discover and register non-void
- * returning setter methods. For example:
+ * {@link Introspector#getBeanInfo(Class)}, designed to discover and register static
+ * and/or non-void returning setter methods. For example:
  * <pre>{@code
  * public class Bean {
  *     private Foo foo;
@@ -102,17 +102,17 @@ class ExtendedBeanInfo implements BeanInfo {
 					new SimpleNonIndexedPropertyDescriptor(pd));
 		}
 
-		for (Method method : findNonVoidWriteMethods(delegate.getMethodDescriptors())) {
-			handleNonVoidWriteMethod(method);
+		for (Method method : findCandidateWriteMethods(delegate.getMethodDescriptors())) {
+			handleCandidateWriteMethod(method);
 		}
 	}
 
 
-	private List<Method> findNonVoidWriteMethods(MethodDescriptor[] methodDescriptors) {
+	private List<Method> findCandidateWriteMethods(MethodDescriptor[] methodDescriptors) {
 		List<Method> matches = new ArrayList<Method>();
 		for (MethodDescriptor methodDescriptor : methodDescriptors) {
 			Method method = methodDescriptor.getMethod();
-			if (isNonVoidWriteMethod(method)) {
+			if (isCandidateWriteMethod(method)) {
 				matches.add(method);
 			}
 		}
@@ -127,20 +127,23 @@ class ExtendedBeanInfo implements BeanInfo {
 		return matches;
 	}
 
-	public static boolean isNonVoidWriteMethod(Method method) {
+	public static boolean isCandidateWriteMethod(Method method) {
 		String methodName = method.getName();
 		Class<?>[] parameterTypes = method.getParameterTypes();
 		int nParams = parameterTypes.length;
 		if (methodName.length() > 3 && methodName.startsWith("set") &&
 				Modifier.isPublic(method.getModifiers()) &&
-				!void.class.isAssignableFrom(method.getReturnType()) &&
+				(
+						!void.class.isAssignableFrom(method.getReturnType()) ||
+						Modifier.isStatic(method.getModifiers())
+				) &&
 				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class)))) {
 			return true;
 		}
 		return false;
 	}
 
-	private void handleNonVoidWriteMethod(Method method) throws IntrospectionException {
+	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {
 		int nParams = method.getParameterTypes().length;
 		String propertyName = propertyNameFor(method);
 		Class<?> propertyType = method.getParameterTypes()[nParams-1];

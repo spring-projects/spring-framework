@@ -22,6 +22,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,7 +33,6 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -214,7 +214,15 @@ public class CachedIntrospectionResults {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting BeanInfo for class [" + beanClass.getName() + "]");
 			}
-			this.beanInfo = new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass));
+			BeanInfo originalBeanInfo = Introspector.getBeanInfo(beanClass);
+			BeanInfo extendedBeanInfo = null;
+			for (Method method : beanClass.getMethods()) {
+				if (ExtendedBeanInfo.isCandidateWriteMethod(method)) {
+					extendedBeanInfo = new ExtendedBeanInfo(originalBeanInfo);
+					break;
+				}
+			}
+			this.beanInfo = extendedBeanInfo != null ? extendedBeanInfo : originalBeanInfo;
 
 			// Immediately remove class from Introspector cache, to allow for proper
 			// garbage collection on class loader shutdown - we cache it here anyway,

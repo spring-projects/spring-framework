@@ -1541,6 +1541,24 @@ public final class BeanWrapperTests {
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
 	}
 
+	@Test
+	public void cornerSpr10115() {
+		Spr10115Bean foo = new Spr10115Bean();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+		bwi.setPropertyValue("prop1", "val1");
+		assertEquals("val1", Spr10115Bean.prop1);
+	}
+
+
+	static class Spr10115Bean {
+		private static String prop1;
+
+		public static void setProp1(String prop1) {
+			Spr10115Bean.prop1 = prop1;
+		}
+	}
+
 
 	private static class Foo {
 
