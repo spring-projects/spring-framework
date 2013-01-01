@@ -171,6 +171,18 @@ configure(allprojects - project(":spring-build-junit")) {
 	test.systemProperties.put("testGroups", properties.get("testGroups"))
 }
 
+project("spring-build-src") {
+	description = "Exposes gradle buildSrc for IDE support"
+	apply plugin: "groovy"
+
+	dependencies {
+		compile gradleApi()
+		groovy localGroovy()
+	}
+
+	configurations.archives.artifacts.clear()
+}
+
 project("spring-build-junit") {
 	description = "Build-time JUnit dependencies and utilities"
 
