@@ -170,12 +170,10 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 
-	@Override
 	public ClassFilter getClassFilter() {
 		return this.classFilter;
 	}
 
-	@Override
 	public MethodMatcher getMethodMatcher() {
 		return this.methodMatcher;
 	}

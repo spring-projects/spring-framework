@@ -69,7 +69,6 @@ public class MockRenderResponse extends MockMimeResponse implements RenderRespon
 	// RenderResponse methods
 	//---------------------------------------------------------------------
 
-	@Override
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -78,7 +77,6 @@ public class MockRenderResponse extends MockMimeResponse implements RenderRespon
 		return this.title;
 	}
 
-	@Override
 	public void setNextPossiblePortletModes(Collection<PortletMode> portletModes) {
 		this.nextPossiblePortletModes = portletModes;
 	}

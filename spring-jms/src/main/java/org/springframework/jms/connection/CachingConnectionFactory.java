@@ -176,7 +176,6 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	/**
 	 * Resets the Session cache as well.
 	 */
-	@Override
 	public void resetConnection() {
 		this.active = false;
 		synchronized (this.cachedSessions) {
@@ -203,7 +202,6 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 	/**
 	 * Checks for a cached Session for the given mode.
 	 */
-	@Override
 	protected Session getSession(Connection con, Integer mode) throws JMSException {
 		LinkedList<Session> sessionList;
 		synchronized (this.cachedSessions) {
@@ -281,7 +279,6 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 			this.sessionList = sessionList;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
 			if (methodName.equals("equals")) {

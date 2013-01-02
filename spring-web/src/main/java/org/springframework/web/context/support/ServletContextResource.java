@@ -134,7 +134,6 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * but throws a FileNotFoundException if no resource found.
 	 * @see javax.servlet.ServletContext#getResourceAsStream(String)
 	 */
-	@Override
 	public InputStream getInputStream() throws IOException {
 		InputStream is = this.servletContext.getResourceAsStream(this.path);
 		if (is == null) {
@@ -203,12 +202,10 @@ public class ServletContextResource extends AbstractFileResolvingResource implem
 	 * This implementation returns a description that includes the ServletContext
 	 * resource location.
 	 */
-	@Override
 	public String getDescription() {
 		return "ServletContext resource [" + this.path + "]";
 	}
 
-	@Override
 	public String getPathWithinContext() {
 		return this.path;
 	}

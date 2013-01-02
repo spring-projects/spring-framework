@@ -64,7 +64,6 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 			new ConcurrentHashMap<Class<?>, Map<Member, String[]>>(32);
 
 
-	@Override
 	public String[] getParameterNames(Method method) {
 		Class<?> declaringClass = method.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);
@@ -79,7 +78,6 @@ public class LocalVariableTableParameterNameDiscoverer implements ParameterNameD
 		return null;
 	}
 
-	@Override
 	public String[] getParameterNames(Constructor<?> ctor) {
 		Class<?> declaringClass = ctor.getDeclaringClass();
 		Map<Member, String[]> map = this.parameterNamesCache.get(declaringClass);

@@ -100,7 +100,6 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Return the Environment for this application context in configurable form.
 	 */
-	@Override
 	ConfigurableEnvironment getEnvironment();
 
 	/**
@@ -159,7 +158,6 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * <p>This method can be called multiple times without side effects: Subsequent
 	 * {@code close} calls on an already closed context will be ignored.
 	 */
-	@Override
 	void close();
 
 	/**

@@ -45,7 +45,6 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 		this.source = source;
 	}
 
-	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -58,13 +57,11 @@ public class ManagedProperties extends Properties implements Mergeable, BeanMeta
 		this.mergeEnabled = mergeEnabled;
 	}
 
-	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
 	}
 
 
-	@Override
 	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {
 			throw new IllegalStateException("Not allowed to merge when the 'mergeEnabled' property is set to 'false'");

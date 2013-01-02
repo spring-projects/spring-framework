@@ -91,7 +91,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -181,7 +180,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	 * Eagerly initialize Locales if necessary.
 	 * @see #setLocalesToInitialize
 	 */
-	@Override
 	public void afterPropertiesSet() throws BeansException {
 		if (this.localesToInitialize != null) {
 			for (Locale locale : this.localesToInitialize) {
@@ -277,7 +275,6 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 	/**
 	 * Close the bundle View factories on context shutdown.
 	 */
-	@Override
 	public void destroy() throws BeansException {
 		for (ConfigurableApplicationContext factory : this.bundleCache.values()) {
 			factory.close();

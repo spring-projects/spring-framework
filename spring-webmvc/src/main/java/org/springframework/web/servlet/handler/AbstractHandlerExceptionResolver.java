@@ -64,7 +64,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -124,7 +123,6 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * in case of "mappedHandlers" having been specified), then delegates to the
 	 * {@link #doResolveException} template method.
 	 */
-	@Override
 	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response,
 			Object handler, Exception ex) {
 

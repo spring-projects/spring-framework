@@ -217,43 +217,35 @@ class ExtendedBeanInfo implements BeanInfo {
 	 * method found during construction.
 	 * @see #ExtendedBeanInfo(BeanInfo)
 	 */
-	@Override
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return this.propertyDescriptors.toArray(
 				new PropertyDescriptor[this.propertyDescriptors.size()]);
 	}
 
-	@Override
 	public BeanInfo[] getAdditionalBeanInfo() {
 		return delegate.getAdditionalBeanInfo();
 	}
 
-	@Override
 	public BeanDescriptor getBeanDescriptor() {
 		return delegate.getBeanDescriptor();
 	}
 
-	@Override
 	public int getDefaultEventIndex() {
 		return delegate.getDefaultEventIndex();
 	}
 
-	@Override
 	public int getDefaultPropertyIndex() {
 		return delegate.getDefaultPropertyIndex();
 	}
 
-	@Override
 	public EventSetDescriptor[] getEventSetDescriptors() {
 		return delegate.getEventSetDescriptors();
 	}
 
-	@Override
 	public Image getIcon(int iconKind) {
 		return delegate.getIcon(iconKind);
 	}
 
-	@Override
 	public MethodDescriptor[] getMethodDescriptors() {
 		return delegate.getMethodDescriptors();
 	}
@@ -663,7 +655,6 @@ class PropertyDescriptorUtils {
  */
 class PropertyDescriptorComparator implements Comparator<PropertyDescriptor> {
 
-	@Override
 	public int compare(PropertyDescriptor desc1, PropertyDescriptor desc2) {
 		String left = desc1.getName();
 		String right = desc2.getName();

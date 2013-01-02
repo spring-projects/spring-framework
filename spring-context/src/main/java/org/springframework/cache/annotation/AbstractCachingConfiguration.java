@@ -50,7 +50,6 @@ public abstract class AbstractCachingConfiguration implements ImportAware {
 	@Autowired(required=false)
 	private Collection<CachingConfigurer> cachingConfigurers;
 
-	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableCaching = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableCaching.class.getName(), false));

@@ -70,90 +70,74 @@ public class SimpleJdbcInsert extends AbstractJdbcInsert implements SimpleJdbcIn
 	}
 
 
-	@Override
 	public SimpleJdbcInsert withTableName(String tableName) {
 		setTableName(tableName);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsert withSchemaName(String schemaName) {
 		setSchemaName(schemaName);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsert withCatalogName(String catalogName) {
 		setCatalogName(catalogName);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsert usingColumns(String... columnNames) {
 		setColumnNames(Arrays.asList(columnNames));
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsert usingGeneratedKeyColumns(String... columnNames) {
 		setGeneratedKeyNames(columnNames);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsertOperations withoutTableColumnMetaDataAccess() {
 		setAccessTableColumnMetaData(false);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsertOperations includeSynonymsForTableColumnMetaData() {
 		setOverrideIncludeSynonymsDefault(true);
 		return this;
 	}
 
-	@Override
 	public SimpleJdbcInsertOperations useNativeJdbcExtractorForMetaData(NativeJdbcExtractor nativeJdbcExtractor) {
 		setNativeJdbcExtractor(nativeJdbcExtractor);
 		return this;
 	}
 
-	@Override
 	public int execute(Map<String, Object> args) {
 		return doExecute(args);
 	}
 
-	@Override
 	public int execute(SqlParameterSource parameterSource) {
 		return doExecute(parameterSource);
 	}
 
-	@Override
 	public Number executeAndReturnKey(Map<String, Object> args) {
 		return doExecuteAndReturnKey(args);
 	}
 
-	@Override
 	public Number executeAndReturnKey(SqlParameterSource parameterSource) {
 		return doExecuteAndReturnKey(parameterSource);
 	}
 
-	@Override
 	public KeyHolder executeAndReturnKeyHolder(Map<String, Object> args) {
 		return doExecuteAndReturnKeyHolder(args);
 	}
 
-	@Override
 	public KeyHolder executeAndReturnKeyHolder(SqlParameterSource parameterSource) {
 		return doExecuteAndReturnKeyHolder(parameterSource);
 	}
 
-	@Override
 	public int[] executeBatch(Map<String, Object>[] batch) {
 		return doExecuteBatch(batch);
 	}
 
-	@Override
 	public int[] executeBatch(SqlParameterSource[] batch) {
 		return doExecuteBatch(batch);
 	}

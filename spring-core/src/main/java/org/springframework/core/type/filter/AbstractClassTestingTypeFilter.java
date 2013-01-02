@@ -35,7 +35,6 @@ import org.springframework.core.type.classreading.MetadataReader;
  */
 public abstract class AbstractClassTestingTypeFilter implements TypeFilter {
 
-	@Override
 	public final boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
 			throws IOException {
 

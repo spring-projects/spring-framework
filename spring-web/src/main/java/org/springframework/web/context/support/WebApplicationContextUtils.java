@@ -292,7 +292,6 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class RequestObjectFactory implements ObjectFactory<ServletRequest>, Serializable {
 
-		@Override
 		public ServletRequest getObject() {
 			return currentRequestAttributes().getRequest();
 		}
@@ -310,7 +309,6 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class SessionObjectFactory implements ObjectFactory<HttpSession>, Serializable {
 
-		@Override
 		public HttpSession getObject() {
 			return currentRequestAttributes().getRequest().getSession();
 		}
@@ -328,7 +326,6 @@ public abstract class WebApplicationContextUtils {
 	@SuppressWarnings("serial")
 	private static class WebRequestObjectFactory implements ObjectFactory<WebRequest>, Serializable {
 
-		@Override
 		public WebRequest getObject() {
 			return new ServletWebRequest(currentRequestAttributes().getRequest());
 		}
@@ -347,7 +344,6 @@ public abstract class WebApplicationContextUtils {
 
 		public static void registerFacesDependencies(ConfigurableListableBeanFactory beanFactory) {
 			beanFactory.registerResolvableDependency(FacesContext.class, new ObjectFactory<FacesContext>() {
-				@Override
 				public FacesContext getObject() {
 					return FacesContext.getCurrentInstance();
 				}
@@ -357,7 +353,6 @@ public abstract class WebApplicationContextUtils {
 				}
 			});
 			beanFactory.registerResolvableDependency(ExternalContext.class, new ObjectFactory<ExternalContext>() {
-				@Override
 				public ExternalContext getObject() {
 					return FacesContext.getCurrentInstance().getExternalContext();
 				}

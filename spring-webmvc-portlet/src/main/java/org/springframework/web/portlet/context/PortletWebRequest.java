@@ -68,91 +68,74 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 		return this.response;
 	}
 
-	@Override
 	public Object getNativeRequest() {
 		return getRequest();
 	}
 
-	@Override
 	public Object getNativeResponse() {
 		return getResponse();
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeRequest(Class<T> requiredType) {
 		return PortletUtils.getNativeRequest(getRequest(), requiredType);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getNativeResponse(Class<T> requiredType) {
 		return PortletUtils.getNativeResponse(getResponse(), requiredType);
 	}
 
 
-	@Override
 	public String getHeader(String headerName) {
 		return getRequest().getProperty(headerName);
 	}
 
-	@Override
 	public String[] getHeaderValues(String headerName) {
 		String[] headerValues = StringUtils.toStringArray(getRequest().getProperties(headerName));
 		return (!ObjectUtils.isEmpty(headerValues) ? headerValues : null);
 	}
 
-	@Override
 	public Iterator<String> getHeaderNames() {
 		return CollectionUtils.toIterator(getRequest().getPropertyNames());
 	}
 
-	@Override
 	public String getParameter(String paramName) {
 		return getRequest().getParameter(paramName);
 	}
 
-	@Override
 	public String[] getParameterValues(String paramName) {
 		return getRequest().getParameterValues(paramName);
 	}
 
-	@Override
 	public Iterator<String> getParameterNames() {
 		return CollectionUtils.toIterator(getRequest().getParameterNames());
 	}
 
-	@Override
 	public Map<String, String[]> getParameterMap() {
 		return getRequest().getParameterMap();
 	}
 
-	@Override
 	public Locale getLocale() {
 		return getRequest().getLocale();
 	}
 
-	@Override
 	public String getContextPath() {
 		return getRequest().getContextPath();
 	}
 
-	@Override
 	public String getRemoteUser() {
 		return getRequest().getRemoteUser();
 	}
 
-	@Override
 	public Principal getUserPrincipal() {
 		return getRequest().getUserPrincipal();
 	}
 
-	@Override
 	public boolean isUserInRole(String role) {
 		return getRequest().isUserInRole(role);
 	}
 
-	@Override
 	public boolean isSecure() {
 		return getRequest().isSecure();
 	}
@@ -161,7 +144,6 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 * Last-modified handling not supported for portlet requests:
 	 * As a consequence, this method always returns {@code false}.
 	 */
-	@Override
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		return false;
 	}
@@ -170,12 +152,10 @@ public class PortletWebRequest extends PortletRequestAttributes implements Nativ
 	 * Last-modified handling not supported for portlet requests:
 	 * As a consequence, this method always returns {@code false}.
 	 */
-	@Override
 	public boolean checkNotModified(String eTag) {
 		return false;
 	}
 
-	@Override
 	public String getDescription(boolean includeClientInfo) {
 		PortletRequest request = getRequest();
 		StringBuilder result = new StringBuilder();

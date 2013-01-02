@@ -43,7 +43,6 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		"org.springframework.web.servlet.config.viewControllerHandlerMapping";
 
 
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

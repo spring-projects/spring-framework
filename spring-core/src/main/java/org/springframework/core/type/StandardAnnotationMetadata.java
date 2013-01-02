@@ -64,7 +64,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 
-	@Override
 	public Set<String> getAnnotationTypes() {
 		Set<String> types = new LinkedHashSet<String>();
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
@@ -74,7 +73,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return types;
 	}
 
-	@Override
 	public Set<String> getMetaAnnotationTypes(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -93,7 +91,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return null;
 	}
 
-	@Override
 	public boolean hasAnnotation(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -104,7 +101,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	@Override
 	public boolean hasMetaAnnotation(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -123,7 +119,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	@Override
 	public boolean isAnnotated(String annotationType) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -139,12 +134,10 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType) {
 		return this.getAnnotationAttributes(annotationType, false);
 	}
 
-	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
@@ -162,7 +155,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return null;
 	}
 
-	@Override
 	public boolean hasAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
@@ -182,7 +174,6 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 		return false;
 	}
 
-	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();

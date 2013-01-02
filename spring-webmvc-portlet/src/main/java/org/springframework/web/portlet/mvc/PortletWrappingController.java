@@ -117,7 +117,6 @@ public class PortletWrappingController extends AbstractController
 		this.portletContext = portletContext;
 	}
 
-	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}
@@ -147,13 +146,11 @@ public class PortletWrappingController extends AbstractController
 		this.initParameters = initParameters;
 	}
 
-	@Override
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.portletClass == null) {
 			throw new IllegalArgumentException("portletClass is required");
@@ -189,7 +186,6 @@ public class PortletWrappingController extends AbstractController
 		return null;
 	}
 
-	@Override
 	public ModelAndView handleResourceRequest(
 			ResourceRequest request, ResourceResponse response) throws Exception {
 
@@ -218,7 +214,6 @@ public class PortletWrappingController extends AbstractController
 		return null;
 	}
 
-	@Override
 	public void handleEventRequest(
 			EventRequest request, EventResponse response) throws Exception {
 
@@ -247,7 +242,6 @@ public class PortletWrappingController extends AbstractController
 	}
 
 
-	@Override
 	public void destroy() {
 		this.portletInstance.destroy();
 	}
@@ -261,57 +255,46 @@ public class PortletWrappingController extends AbstractController
 	 */
 	private class DelegatingPortletConfig implements PortletConfig {
 
-		@Override
 		public String getPortletName() {
 			return portletName;
 		}
 
-		@Override
 		public PortletContext getPortletContext() {
 			return portletContext;
 		}
 
-		@Override
 		public String getInitParameter(String paramName) {
 			return initParameters.get(paramName);
 		}
 
-		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(initParameters.keySet());
 		}
 
-		@Override
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (portletConfig != null ? portletConfig.getResourceBundle(locale) : null);
 		}
 
-		@Override
 		public Enumeration<String> getPublicRenderParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
-		@Override
 		public String getDefaultNamespace() {
 			return XMLConstants.NULL_NS_URI;
 		}
 
-		@Override
 		public Enumeration<QName> getPublishingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
-		@Override
 		public Enumeration<QName> getProcessingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
-		@Override
 		public Enumeration<Locale> getSupportedLocales() {
 			return Collections.enumeration(new HashSet<Locale>());
 		}
 
-		@Override
 		public Map<String, String[]> getContainerRuntimeOptions() {
 			return (portletConfig != null ? portletConfig.getContainerRuntimeOptions() : null);
 		}

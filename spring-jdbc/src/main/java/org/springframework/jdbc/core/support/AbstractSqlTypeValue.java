@@ -52,7 +52,6 @@ import org.springframework.jdbc.core.SqlTypeValue;
  */
 public abstract class AbstractSqlTypeValue implements SqlTypeValue {
 
-	@Override
 	public final void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName)
 			throws SQLException {
 

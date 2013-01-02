@@ -38,7 +38,6 @@ import org.springframework.beans.factory.xml.ParserContext;
  */
 public class AnnotationConfigBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

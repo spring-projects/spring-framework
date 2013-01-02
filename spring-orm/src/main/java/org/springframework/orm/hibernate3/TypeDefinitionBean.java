@@ -111,14 +111,12 @@ public class TypeDefinitionBean implements BeanNameAware, InitializingBean {
 	 * the TypeDefinitionBean will be used.
 	 * @see #setTypeName
 	 */
-	@Override
 	public void setBeanName(String name) {
 		if (this.typeName == null) {
 			this.typeName = name;
 		}
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.typeName == null) {
 			throw new IllegalArgumentException("typeName is required");

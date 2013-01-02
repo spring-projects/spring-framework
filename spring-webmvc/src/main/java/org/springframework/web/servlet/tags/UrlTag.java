@@ -157,7 +157,6 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				ExpressionEvaluationUtils.evaluateBoolean("javaScriptEscape", javaScriptEscape, pageContext);
 	}
 
-	@Override
 	public void addParam(Param param) {
 		this.params.add(param);
 	}

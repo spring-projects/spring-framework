@@ -56,7 +56,6 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * @see #createMessageForMap
 	 * @see #createMessageForSerializable
 	 */
-	@Override
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		if (object instanceof Message) {
 			return (Message) object;
@@ -90,7 +89,6 @@ public class SimpleMessageConverter implements MessageConverter {
 	 * @see #extractMapFromMessage
 	 * @see #extractSerializableFromMessage
 	 */
-	@Override
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		if (message instanceof TextMessage) {
 			return extractStringFromMessage((TextMessage) message);

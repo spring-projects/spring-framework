@@ -55,7 +55,6 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 	/**
 	 * Serializes the source object and returns the byte array result.
 	 */
-	@Override
 	public byte[] convert(Object source) {
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(128);
 		try  {

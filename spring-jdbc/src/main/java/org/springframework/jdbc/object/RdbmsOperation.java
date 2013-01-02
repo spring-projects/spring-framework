@@ -313,7 +313,6 @@ public abstract class RdbmsOperation implements InitializingBean {
 	/**
 	 * Ensures compilation if used in a bean factory.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		compile();
 	}

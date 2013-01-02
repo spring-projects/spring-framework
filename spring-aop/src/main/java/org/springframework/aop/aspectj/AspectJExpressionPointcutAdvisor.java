@@ -31,7 +31,6 @@ public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdv
 	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 
 
-	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

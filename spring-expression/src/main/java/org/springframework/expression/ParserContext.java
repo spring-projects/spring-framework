@@ -62,17 +62,14 @@ public interface ParserContext {
 	 */
 	public static final ParserContext TEMPLATE_EXPRESSION = new ParserContext() {
 
-		@Override
 		public String getExpressionPrefix() {
 			return "#{";
 		}
 
-		@Override
 		public String getExpressionSuffix() {
 			return "}";
 		}
 
-		@Override
 		public boolean isTemplate() {
 			return true;
 		}

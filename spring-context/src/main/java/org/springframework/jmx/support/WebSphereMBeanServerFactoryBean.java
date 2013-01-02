@@ -55,7 +55,6 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 	private MBeanServer mbeanServer;
 
 
-	@Override
 	public void afterPropertiesSet() throws MBeanServerNotFoundException {
 		try {
 			/*
@@ -81,17 +80,14 @@ public class WebSphereMBeanServerFactoryBean implements FactoryBean<MBeanServer>
 	}
 
 
-	@Override
 	public MBeanServer getObject() {
 		return this.mbeanServer;
 	}
 
-	@Override
 	public Class<? extends MBeanServer> getObjectType() {
 		return (this.mbeanServer != null ? this.mbeanServer.getClass() : MBeanServer.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

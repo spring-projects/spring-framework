@@ -37,12 +37,10 @@ import org.springframework.web.servlet.LocaleResolver;
  */
 public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
-	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
 		return request.getLocale();
 	}
 
-	@Override
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		throw new UnsupportedOperationException(
 				"Cannot change HTTP accept header - use a different locale resolution strategy");

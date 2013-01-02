@@ -89,7 +89,6 @@ public class OpenPersistenceManagerInViewInterceptor implements WebRequestInterc
 	}
 
 
-	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
 		if (TransactionSynchronizationManager.hasResource(getPersistenceManagerFactory())) {
 			// Do not modify the PersistenceManager: just mark the request accordingly.
@@ -107,11 +106,9 @@ public class OpenPersistenceManagerInViewInterceptor implements WebRequestInterc
 		}
 	}
 
-	@Override
 	public void postHandle(WebRequest request, ModelMap model) {
 	}
 
-	@Override
 	public void afterCompletion(WebRequest request, Exception ex) throws DataAccessException {
 		String participateAttributeName = getParticipateAttributeName();
 		Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);

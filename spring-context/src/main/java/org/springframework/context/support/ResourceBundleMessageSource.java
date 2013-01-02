@@ -223,7 +223,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		return (this.bundleClassLoader != null ? this.bundleClassLoader : this.beanClassLoader);
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = (classLoader != null ? classLoader : ClassUtils.getDefaultClassLoader());
 	}
@@ -432,7 +431,6 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				try {
 					stream = AccessController.doPrivileged(
 							new PrivilegedExceptionAction<InputStream>() {
-								@Override
 								public InputStream run() throws IOException {
 									InputStream is = null;
 									if (reloadFlag) {

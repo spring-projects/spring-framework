@@ -37,7 +37,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	private boolean namespaceContextChanged = false;
 
-	@Override
 	public final void startDocument() throws SAXException {
 		namespaceContext.clear();
 		namespaceContextChanged = false;
@@ -51,7 +50,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	protected abstract void startDocumentInternal() throws XMLStreamException;
 
-	@Override
 	public final void endDocument() throws SAXException {
 		namespaceContext.clear();
 		namespaceContextChanged = false;
@@ -70,7 +68,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	 *
 	 * @see SimpleNamespaceContext#bindNamespaceUri(String,String)
 	 */
-	@Override
 	public final void startPrefixMapping(String prefix, String uri) {
 		namespaceContext.bindNamespaceUri(prefix, uri);
 		namespaceContextChanged = true;
@@ -81,13 +78,11 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	 *
 	 * @see SimpleNamespaceContext#removeBinding(String)
 	 */
-	@Override
 	public final void endPrefixMapping(String prefix) {
 		namespaceContext.removeBinding(prefix);
 		namespaceContextChanged = true;
 	}
 
-	@Override
 	public final void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
 		try {
 			startElementInternal(toQName(uri, qName), atts, namespaceContextChanged ? namespaceContext : null);
@@ -101,7 +96,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	protected abstract void startElementInternal(QName name, Attributes atts, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException;
 
-	@Override
 	public final void endElement(String uri, String localName, String qName) throws SAXException {
 		try {
 			endElementInternal(toQName(uri, qName), namespaceContextChanged ? namespaceContext : null);
@@ -115,7 +109,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 	protected abstract void endElementInternal(QName name, SimpleNamespaceContext namespaceContext)
 			throws XMLStreamException;
 
-	@Override
 	public final void characters(char ch[], int start, int length) throws SAXException {
 		try {
 			charactersInternal(ch, start, length);
@@ -127,7 +120,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	protected abstract void charactersInternal(char[] ch, int start, int length) throws XMLStreamException;
 
-	@Override
 	public final void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
 		try {
 			ignorableWhitespaceInternal(ch, start, length);
@@ -139,7 +131,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	protected abstract void ignorableWhitespaceInternal(char[] ch, int start, int length) throws XMLStreamException;
 
-	@Override
 	public final void processingInstruction(String target, String data) throws SAXException {
 		try {
 			processingInstructionInternal(target, data);
@@ -151,7 +142,6 @@ abstract class AbstractStaxContentHandler implements ContentHandler {
 
 	protected abstract void processingInstructionInternal(String target, String data) throws XMLStreamException;
 
-	@Override
 	public final void skippedEntity(String name) throws SAXException {
 		try {
 			skippedEntityInternal(name);

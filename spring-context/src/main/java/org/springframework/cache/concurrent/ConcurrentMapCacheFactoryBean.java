@@ -74,31 +74,26 @@ public class ConcurrentMapCacheFactoryBean
 		this.allowNullValues = allowNullValues;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		if (!StringUtils.hasLength(this.name)) {
 			setName(beanName);
 		}
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		this.cache = (this.store != null ? new ConcurrentMapCache(this.name, this.store, this.allowNullValues) :
 				new ConcurrentMapCache(this.name, this.allowNullValues));
 	}
 
 
-	@Override
 	public ConcurrentMapCache getObject() {
 		return this.cache;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return ConcurrentMapCache.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

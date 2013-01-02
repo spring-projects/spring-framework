@@ -73,7 +73,6 @@ public class ClobStringTypeHandler extends AbstractLobTypeHandler {
 		return lobHandler.getClobAsString(rs, index);
 	}
 
-	@Override
 	public Object valueOf(String s) {
 		return s;
 	}

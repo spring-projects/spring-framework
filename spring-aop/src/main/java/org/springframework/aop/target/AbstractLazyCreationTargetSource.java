@@ -64,12 +64,10 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	 * a meaningful value when the target is still {@code null}.
 	 * @see #isInitialized()
 	 */
-	@Override
 	public synchronized Class<?> getTargetClass() {
 		return (this.lazyTarget != null ? this.lazyTarget.getClass() : null);
 	}
 
-	@Override
 	public boolean isStatic() {
 		return false;
 	}
@@ -79,7 +77,6 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 	 * creating it on-the-fly if it doesn't exist already.
 	 * @see #createObject()
 	 */
-	@Override
 	public synchronized Object getTarget() throws Exception {
 		if (this.lazyTarget == null) {
 			logger.debug("Initializing lazy target object");
@@ -88,7 +85,6 @@ public abstract class AbstractLazyCreationTargetSource implements TargetSource {
 		return this.lazyTarget;
 	}
 
-	@Override
 	public void releaseTarget(Object target) throws Exception {
 		// nothing to do
 	}

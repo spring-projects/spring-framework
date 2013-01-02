@@ -91,7 +91,6 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	/**
 	 * Set the {@code BeanFactory} to be used when looking up executors by qualifier.
 	 */
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
 		delegateBeanFactory(beanFactory);
@@ -128,12 +127,10 @@ public class AsyncAnnotationAdvisor extends AbstractPointcutAdvisor implements B
 	}
 
 
-	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}
 
-	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

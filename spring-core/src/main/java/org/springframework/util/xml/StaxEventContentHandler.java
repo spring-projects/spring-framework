@@ -71,7 +71,6 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 		this.eventConsumer = consumer;
 	}
 
-	@Override
 	public void setDocumentLocator(Locator locator) {
 		if (locator != null) {
 			this.eventFactory.setLocation(new LocatorLocationAdapter(locator));
@@ -169,27 +168,22 @@ class StaxEventContentHandler extends AbstractStaxContentHandler {
 			this.locator = locator;
 		}
 
-		@Override
 		public int getLineNumber() {
 			return this.locator.getLineNumber();
 		}
 
-		@Override
 		public int getColumnNumber() {
 			return this.locator.getColumnNumber();
 		}
 
-		@Override
 		public int getCharacterOffset() {
 			return -1;
 		}
 
-		@Override
 		public String getPublicId() {
 			return this.locator.getPublicId();
 		}
 
-		@Override
 		public String getSystemId() {
 			return this.locator.getSystemId();
 		}

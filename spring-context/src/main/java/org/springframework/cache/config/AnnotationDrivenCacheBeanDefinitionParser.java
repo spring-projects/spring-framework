@@ -53,7 +53,6 @@ class AnnotationDrivenCacheBeanDefinitionParser implements BeanDefinitionParser 
 	 * {@link AopNamespaceUtils#registerAutoProxyCreatorIfNecessary
 	 * register an AutoProxyCreator} with the container as necessary.
 	 */
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		String mode = element.getAttribute("mode");
 		if ("aspectj".equals(mode)) {

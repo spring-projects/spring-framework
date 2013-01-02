@@ -63,7 +63,6 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	 * Actually resolve the value and check the resolved value is not
 	 * {@link WebArgumentResolver#UNRESOLVED} absorbing _any_ exceptions.
 	 */
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		try {
 			NativeWebRequest webRequest = getWebRequest();
@@ -92,7 +91,6 @@ public abstract class AbstractWebArgumentResolverAdapter implements HandlerMetho
 	 * @exception IllegalStateException if the resolved value is not assignable
 	 * to the method parameter.
 	 */
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

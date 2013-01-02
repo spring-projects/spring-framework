@@ -51,7 +51,6 @@ public class CustomizableThreadFactory extends CustomizableThreadCreator impleme
 	}
 
 
-	@Override
 	public Thread newThread(Runnable runnable) {
 		return createThread(runnable);
 	}

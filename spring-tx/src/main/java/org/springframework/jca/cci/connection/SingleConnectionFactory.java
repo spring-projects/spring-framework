@@ -129,7 +129,6 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
-	@Override
 	public void destroy() {
 		resetConnection();
 	}
@@ -229,7 +228,6 @@ public class SingleConnectionFactory extends DelegatingConnectionFactory impleme
 			this.target = target;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

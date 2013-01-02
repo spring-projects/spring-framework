@@ -48,7 +48,6 @@ public class MessageSourceResourceBundleLocator implements ResourceBundleLocator
 		this.messageSource = messageSource;
 	}
 
-	@Override
 	public ResourceBundle getResourceBundle(Locale locale) {
 		return new MessageSourceResourceBundle(this.messageSource, locale);
 	}

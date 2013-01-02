@@ -91,7 +91,6 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * Returns a new instance with the union of the header expressions
 	 * from "this" and the "other" instance.
 	 */
-	@Override
 	public HeadersRequestCondition combine(HeadersRequestCondition other) {
 		Set<HeaderExpression> set = new LinkedHashSet<HeaderExpression>(this.expressions);
 		set.addAll(other.expressions);
@@ -102,7 +101,6 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * Returns "this" instance if the request matches all expressions;
 	 * or {@code null} otherwise.
 	 */
-	@Override
 	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
 		for (HeaderExpression expression : expressions) {
 			if (!expression.match(request)) {
@@ -124,7 +122,6 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching header expression only or is otherwise empty.
 	 */
-	@Override
 	public int compareTo(HeadersRequestCondition other, HttpServletRequest request) {
 		return other.expressions.size() - this.expressions.size();
 	}

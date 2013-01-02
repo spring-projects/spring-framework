@@ -52,7 +52,6 @@ public class SessionLocaleResolver extends AbstractLocaleResolver {
 	public static final String LOCALE_SESSION_ATTRIBUTE_NAME = SessionLocaleResolver.class.getName() + ".LOCALE";
 
 
-	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale locale = (Locale) WebUtils.getSessionAttribute(request, LOCALE_SESSION_ATTRIBUTE_NAME);
 		if (locale == null) {
@@ -79,7 +78,6 @@ public class SessionLocaleResolver extends AbstractLocaleResolver {
 		return defaultLocale;
 	}
 
-	@Override
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		WebUtils.setSessionAttribute(request, LOCALE_SESSION_ATTRIBUTE_NAME, locale);
 	}

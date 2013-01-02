@@ -109,13 +109,11 @@ public class InterfaceBasedMBeanInfoAssembler extends AbstractConfigurableMBeanI
 		this.interfaceMappings = mappings;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.interfaceMappings != null) {
 			this.resolvedInterfaceMappings = resolveInterfaceMappings(this.interfaceMappings);

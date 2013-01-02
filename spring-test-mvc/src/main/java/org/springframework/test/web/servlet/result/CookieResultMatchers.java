@@ -49,7 +49,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher value(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("Response cookie not found: " + name, cookie != null);
@@ -63,7 +62,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher value(final String name, final String expectedValue) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("Response cookie not found: " + name, cookie != null);
@@ -78,7 +76,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher exists(final String name) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("No cookie with name: " + name, cookie != null);
@@ -92,7 +89,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher doesNotExist(final String name) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("Unexpected cookie with name " + name, cookie == null);
@@ -105,7 +101,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher maxAge(final String name, final Matcher<? super Integer> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("No cookie with name: " + name, cookie != null);
@@ -119,7 +114,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher maxAge(final String name, final int maxAge) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertTrue("No cookie with name: " + name, cookie != null);
@@ -133,7 +127,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher path(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertThat("Response cookie path", cookie.getPath(), matcher);
@@ -143,7 +136,6 @@ public class CookieResultMatchers {
 
 	public ResultMatcher path(final String name, final String path) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertEquals("Response cookie path", path, cookie.getPath());
@@ -156,7 +148,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher domain(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertThat("Response cookie domain", cookie.getDomain(), matcher);
@@ -169,7 +160,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher domain(final String name, final String domain) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertEquals("Response cookie domain", domain, cookie.getDomain());
@@ -182,7 +172,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher comment(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertThat("Response cookie comment", cookie.getComment(), matcher);
@@ -195,7 +184,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher comment(final String name, final String comment) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertEquals("Response cookie comment", comment, cookie.getComment());
@@ -208,7 +196,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher version(final String name, final Matcher<? super Integer> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertThat("Response cookie version", cookie.getVersion(), matcher);
@@ -221,7 +208,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher version(final String name, final int version) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertEquals("Response cookie version", version, cookie.getVersion());
@@ -234,7 +220,6 @@ public class CookieResultMatchers {
 	 */
 	public ResultMatcher secure(final String name, final boolean secure) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				Cookie cookie = result.getResponse().getCookie(name);
 				assertEquals("Response cookie secure", secure, cookie.getSecure());

@@ -54,7 +54,6 @@ public class BurlapServiceExporter extends BurlapExporter implements HttpRequest
 	/**
 	 * Processes the incoming Burlap request and creates a Burlap response.
 	 */
-	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

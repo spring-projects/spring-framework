@@ -59,7 +59,6 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final JpaDialect jpaDialect = new HibernateJpaDialect();
 
 
-	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

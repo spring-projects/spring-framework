@@ -73,14 +73,12 @@ final class TestDispatcherServlet extends DispatcherServlet {
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(servletRequest);
 
 		asyncManager.registerCallableInterceptor(KEY, new CallableProcessingInterceptorAdapter() {
-			@Override
 			public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object value) throws Exception {
 				getMvcResult(servletRequest).setAsyncResult(value);
 				asyncResultLatch.countDown();
 			}
 		});
 		asyncManager.registerDeferredResultInterceptor(KEY, new DeferredResultProcessingInterceptorAdapter() {
-			@Override
 			public <T> void postProcess(NativeWebRequest request, DeferredResult<T> result, Object value) throws Exception {
 				getMvcResult(servletRequest).setAsyncResult(value);
 				asyncResultLatch.countDown();

@@ -118,7 +118,6 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 	/**
 	 * Creates the {@code MBeanServer} instance.
 	 */
-	@Override
 	public void afterPropertiesSet() throws MBeanServerNotFoundException {
 		// Try to locate existing MBeanServer, if desired.
 		if (this.locateExistingServerIfPossible || this.agentId != null) {
@@ -180,17 +179,14 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 	}
 
 
-	@Override
 	public MBeanServer getObject() {
 		return this.server;
 	}
 
-	@Override
 	public Class<? extends MBeanServer> getObjectType() {
 		return (this.server != null ? this.server.getClass() : MBeanServer.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -199,7 +195,6 @@ public class MBeanServerFactoryBean implements FactoryBean<MBeanServer>, Initial
 	/**
 	 * Unregisters the {@code MBeanServer} instance, if necessary.
 	 */
-	@Override
 	public void destroy() {
 		if (this.newlyRegistered) {
 			MBeanServerFactory.releaseMBeanServer(this.server);

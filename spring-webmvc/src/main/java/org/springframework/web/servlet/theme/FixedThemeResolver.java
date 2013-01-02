@@ -33,12 +33,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class FixedThemeResolver extends AbstractThemeResolver {
 
-	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		return getDefaultThemeName();
 	}
 
-	@Override
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
 		throw new UnsupportedOperationException("Cannot change theme - use a different theme resolution strategy");
 	}

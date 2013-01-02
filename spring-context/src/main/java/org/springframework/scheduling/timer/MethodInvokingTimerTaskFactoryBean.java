@@ -53,17 +53,14 @@ public class MethodInvokingTimerTaskFactoryBean extends MethodInvokingRunnable i
 	}
 
 
-	@Override
 	public TimerTask getObject() {
 		return this.timerTask;
 	}
 
-	@Override
 	public Class<TimerTask> getObjectType() {
 		return TimerTask.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

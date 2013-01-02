@@ -59,7 +59,6 @@ public class TaskExecutorAdapter implements AsyncTaskExecutor {
 	 * Delegates to the specified JDK 1.5 concurrent executor.
 	 * @see java.util.concurrent.Executor#execute(Runnable)
 	 */
-	@Override
 	public void execute(Runnable task) {
 		try {
 			this.concurrentExecutor.execute(task);
@@ -70,12 +69,10 @@ public class TaskExecutorAdapter implements AsyncTaskExecutor {
 		}
 	}
 
-	@Override
 	public void execute(Runnable task, long startTimeout) {
 		execute(task);
 	}
 
-	@Override
 	public Future<?> submit(Runnable task) {
 		try {
 			if (this.concurrentExecutor instanceof ExecutorService) {
@@ -93,7 +90,6 @@ public class TaskExecutorAdapter implements AsyncTaskExecutor {
 		}
 	}
 
-	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		try {
 			if (this.concurrentExecutor instanceof ExecutorService) {

@@ -91,7 +91,6 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 		return this.businessInterface;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -106,17 +105,14 @@ public class SimpleRemoteStatelessSessionProxyFactoryBean extends SimpleRemoteSl
 	}
 
 
-	@Override
 	public Object getObject() {
 		return this.proxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return this.businessInterface;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

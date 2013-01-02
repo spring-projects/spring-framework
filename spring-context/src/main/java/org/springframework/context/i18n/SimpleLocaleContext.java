@@ -42,7 +42,6 @@ public class SimpleLocaleContext implements LocaleContext {
 		this.locale = locale;
 	}
 
-	@Override
 	public Locale getLocale() {
 		return this.locale;
 	}

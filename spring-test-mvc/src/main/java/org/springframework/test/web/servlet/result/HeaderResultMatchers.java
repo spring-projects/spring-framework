@@ -45,7 +45,6 @@ public class HeaderResultMatchers {
 	 */
 	public ResultMatcher string(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				assertThat("Response header", result.getResponse().getHeader(name), matcher);
 			}
@@ -57,7 +56,6 @@ public class HeaderResultMatchers {
 	 */
 	public ResultMatcher string(final String name, final String value) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				assertEquals("Response header", value, result.getResponse().getHeader(name));
 			}
@@ -69,7 +67,6 @@ public class HeaderResultMatchers {
 	 */
 	public ResultMatcher longValue(final String name, final long value) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) {
 				assertEquals("Response header " + name, value, Long.parseLong(result.getResponse().getHeader(name)));
 			}

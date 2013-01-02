@@ -30,7 +30,6 @@ package org.springframework.aop.target;
 @SuppressWarnings("serial")
 public class SimpleBeanTargetSource extends AbstractBeanFactoryBasedTargetSource {
 
-	@Override
 	public Object getTarget() throws Exception {
 		return getBeanFactory().getBean(getTargetBeanName());
 	}

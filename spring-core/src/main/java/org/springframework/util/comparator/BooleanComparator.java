@@ -59,7 +59,6 @@ public final class BooleanComparator implements Comparator<Boolean>, Serializabl
 	}
 
 
-	@Override
 	public int compare(Boolean v1, Boolean v2) {
 		return (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;
 	}

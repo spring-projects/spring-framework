@@ -78,12 +78,10 @@ public class MockServletConfig implements ServletConfig {
 	}
 
 
-	@Override
 	public String getServletName() {
 		return this.servletName;
 	}
 
-	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
@@ -93,13 +91,11 @@ public class MockServletConfig implements ServletConfig {
 		this.initParameters.put(name, value);
 	}
 
-	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}

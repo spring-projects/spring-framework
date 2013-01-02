@@ -50,7 +50,6 @@ public class AdaptableJobFactory implements JobFactory {
 	/**
 	 * Quartz 1.x version of newJob: contains actual implementation code.
 	 */
-	@Override
 	public Job newJob(TriggerFiredBundle bundle) throws SchedulerException {
 		try {
 			Object jobObject = createJobInstance(bundle);

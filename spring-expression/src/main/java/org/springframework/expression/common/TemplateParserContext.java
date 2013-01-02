@@ -50,17 +50,14 @@ public class TemplateParserContext implements ParserContext {
 	}
 
 
-	@Override
 	public final boolean isTemplate() {
 		return true;
 	}
 
-	@Override
 	public final String getExpressionPrefix() {
 		return this.expressionPrefix;
 	}
 
-	@Override
 	public final String getExpressionSuffix() {
 		return this.expressionSuffix;
 	}

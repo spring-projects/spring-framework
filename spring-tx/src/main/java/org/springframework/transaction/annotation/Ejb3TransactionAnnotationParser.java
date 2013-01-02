@@ -34,7 +34,6 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 @SuppressWarnings("serial")
 public class Ejb3TransactionAnnotationParser implements TransactionAnnotationParser, Serializable {
 
-	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
 		javax.ejb.TransactionAttribute ann = ae.getAnnotation(javax.ejb.TransactionAttribute.class);
 		if (ann != null) {

@@ -40,7 +40,6 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	protected AnnotationAttributes enableAsync;
 	protected Executor executor;
 
-	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableAsync = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false));

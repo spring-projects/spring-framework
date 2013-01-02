@@ -26,7 +26,6 @@ import org.springframework.aop.MethodMatcher;
  */
 public abstract class DynamicMethodMatcher implements MethodMatcher {
 
-	@Override
 	public final boolean isRuntime() {
 		return true;
 	}
@@ -35,7 +34,6 @@ public abstract class DynamicMethodMatcher implements MethodMatcher {
 	 * Can override to add preconditions for dynamic matching. This implementation
 	 * always returns true.
 	 */
-	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return true;
 	}

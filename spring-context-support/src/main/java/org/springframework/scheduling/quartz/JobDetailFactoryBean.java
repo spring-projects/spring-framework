@@ -139,12 +139,10 @@ public class JobDetailFactoryBean
 		this.description = description;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
-	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -170,7 +168,6 @@ public class JobDetailFactoryBean
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -218,17 +215,14 @@ public class JobDetailFactoryBean
 	}
 
 
-	@Override
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return JobDetail.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

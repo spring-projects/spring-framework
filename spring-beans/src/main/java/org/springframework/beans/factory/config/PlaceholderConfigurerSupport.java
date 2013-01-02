@@ -174,7 +174,6 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * @see #setLocations
 	 * @see org.springframework.core.io.ResourceEditor
 	 */
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
@@ -187,7 +186,6 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 * @see #setLocations
 	 * @see org.springframework.core.io.ResourceEditor
 	 */
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

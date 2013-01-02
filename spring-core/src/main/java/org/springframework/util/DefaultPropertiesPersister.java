@@ -75,12 +75,10 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 			ClassUtils.hasMethod(Properties.class, "store", new Class[] {Writer.class, String.class});
 
 
-	@Override
 	public void load(Properties props, InputStream is) throws IOException {
 		props.load(is);
 	}
 
-	@Override
 	public void load(Properties props, Reader reader) throws IOException {
 		if (loadFromReaderAvailable) {
 			// On JDK 1.6+
@@ -159,12 +157,10 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 
-	@Override
 	public void store(Properties props, OutputStream os, String header) throws IOException {
 		props.store(os, header);
 	}
 
-	@Override
 	public void store(Properties props, Writer writer, String header) throws IOException {
 		if (storeToWriterAvailable) {
 			// On JDK 1.6+
@@ -231,7 +227,6 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 	}
 
 
-	@Override
 	public void loadFromXml(Properties props, InputStream is) throws IOException {
 		try {
 			props.loadFromXML(is);
@@ -241,7 +236,6 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 		}
 	}
 
-	@Override
 	public void storeToXml(Properties props, OutputStream os, String header) throws IOException {
 		try {
 			props.storeToXML(os, header);
@@ -251,7 +245,6 @@ public class DefaultPropertiesPersister implements PropertiesPersister {
 		}
 	}
 
-	@Override
 	public void storeToXml(Properties props, OutputStream os, String header, String encoding) throws IOException {
 		try {
 			props.storeToXML(os, header, encoding);

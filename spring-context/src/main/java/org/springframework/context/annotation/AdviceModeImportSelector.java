@@ -65,7 +65,6 @@ public abstract class AdviceModeImportSelector<A extends Annotation> implements 
 	 * on the importing {@code @Configuration} class or if {@link #selectImports(AdviceMode)}
 	 * returns {@code null}
 	 */
-	@Override
 	public final String[] selectImports(AnnotationMetadata importingClassMetadata) {
 		Class<?> annoType = GenericTypeResolver.resolveTypeArgument(this.getClass(), AdviceModeImportSelector.class);
 

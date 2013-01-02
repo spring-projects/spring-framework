@@ -39,7 +39,6 @@ public class JndiDataSourceLookup extends JndiLocatorSupport implements DataSour
 		setResourceRef(true);
 	}
 
-	@Override
 	public DataSource getDataSource(String dataSourceName) throws DataSourceLookupFailureException {
 		try {
 			return lookup(dataSourceName, DataSource.class);

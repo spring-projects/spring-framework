@@ -48,7 +48,6 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 		super(beanFactory);
 	}
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(CookieValue.class);
 	}

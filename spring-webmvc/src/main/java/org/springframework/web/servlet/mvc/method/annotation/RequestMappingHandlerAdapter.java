@@ -465,7 +465,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 * <p>A {@link ConfigurableBeanFactory} is expected for resolving
 	 * expressions in method argument default values.
 	 */
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
 			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
@@ -479,7 +478,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 		return this.beanFactory;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.argumentResolvers == null) {
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
@@ -865,7 +863,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter INIT_BINDER_METHODS = new MethodFilter() {
 
-		@Override
 		public boolean matches(Method method) {
 			return AnnotationUtils.findAnnotation(method, InitBinder.class) != null;
 		}
@@ -876,7 +873,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter i
 	 */
 	public static final MethodFilter MODEL_ATTRIBUTE_METHODS = new MethodFilter() {
 
-		@Override
 		public boolean matches(Method method) {
 			return ((AnnotationUtils.findAnnotation(method, RequestMapping.class) == null) &&
 					(AnnotationUtils.findAnnotation(method, ModelAttribute.class) != null));

@@ -73,7 +73,6 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 		return this.targetDataSource;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getTargetDataSource() == null) {
 			throw new IllegalArgumentException("Property 'targetDataSource' is required");
@@ -81,32 +80,26 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	}
 
 
-	@Override
 	public Connection getConnection() throws SQLException {
 		return getTargetDataSource().getConnection();
 	}
 
-	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return getTargetDataSource().getConnection(username, password);
 	}
 
-	@Override
 	public PrintWriter getLogWriter() throws SQLException {
 		return getTargetDataSource().getLogWriter();
 	}
 
-	@Override
 	public void setLogWriter(PrintWriter out) throws SQLException {
 		getTargetDataSource().setLogWriter(out);
 	}
 
-	@Override
 	public int getLoginTimeout() throws SQLException {
 		return getTargetDataSource().getLoginTimeout();
 	}
 
-	@Override
 	public void setLoginTimeout(int seconds) throws SQLException {
 		getTargetDataSource().setLoginTimeout(seconds);
 	}
@@ -116,7 +109,6 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	// Implementation of JDBC 4.0's Wrapper interface
 	//---------------------------------------------------------------------
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		if (iface.isInstance(this)) {
@@ -125,7 +117,6 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 		return getTargetDataSource().unwrap(iface);
 	}
 
-	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return (iface.isInstance(this) || getTargetDataSource().isWrapperFor(iface));
 	}
@@ -135,7 +126,6 @@ public class DelegatingDataSource implements DataSource, InitializingBean {
 	// Implementation of JDBC 4.1's getParentLogger method
 	//---------------------------------------------------------------------
 
-	@Override
 	public Logger getParentLogger() {
 		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}

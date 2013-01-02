@@ -111,7 +111,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 * is that aspects written in the code-style (AspectJ language) also have the annotation present
 	 * when compiled by ajc with the -1.5 flag, yet they cannot be consumed by Spring AOP.
 	 */
-	@Override
 	public boolean isAspect(Class<?> clazz) {
 		return (hasAspectAnnotation(clazz) && !compiledByAjc(clazz));
 	}
@@ -136,7 +135,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 		return false;
 	}
 
-	@Override
 	public void validate(Class<?> aspectClass) throws AopConfigException {
 		// If the parent has the annotation and isn't abstract it's an error
 		if (aspectClass.getSuperclass().getAnnotation(Aspect.class) != null &&
@@ -311,7 +309,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 	 */
 	private static class AspectJAnnotationParameterNameDiscoverer implements ParameterNameDiscoverer {
 
-		@Override
 		public String[] getParameterNames(Method method) {
 			if (method.getParameterTypes().length == 0) {
 				return new String[0];
@@ -333,7 +330,6 @@ public abstract class AbstractAspectJAdvisorFactory implements AspectJAdvisorFac
 			}
 		}
 
-		@Override
 		public String[] getParameterNames(Constructor ctor) {
 			throw new UnsupportedOperationException("Spring AOP cannot handle constructor advice");
 		}

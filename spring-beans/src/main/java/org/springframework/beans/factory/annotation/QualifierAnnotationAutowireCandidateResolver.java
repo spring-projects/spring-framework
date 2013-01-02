@@ -126,7 +126,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 		this.valueAnnotationType = valueAnnotationType;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -144,7 +143,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * attribute does not match.
 	 * @see Qualifier
 	 */
-	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		if (!bdHolder.getBeanDefinition().isAutowireCandidate()) {
 			// if explicitly false, do not proceed with qualifier check
@@ -295,7 +293,6 @@ public class QualifierAnnotationAutowireCandidateResolver implements AutowireCan
 	 * Determine whether the given dependency carries a value annotation.
 	 * @see Value
 	 */
-	@Override
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
 		if (value == null) {

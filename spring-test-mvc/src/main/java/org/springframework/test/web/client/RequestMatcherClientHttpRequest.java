@@ -45,20 +45,17 @@ class RequestMatcherClientHttpRequest extends MockClientHttpRequest implements R
 		this.requestMatchers.add(requestMatcher);
 	}
 
-	@Override
 	public ResponseActions andExpect(RequestMatcher requestMatcher) {
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
 		this.requestMatchers.add(requestMatcher);
 		return this;
 	}
 
-	@Override
 	public void andRespond(ResponseCreator responseCreator) {
 		Assert.notNull(responseCreator, "ResponseCreator is required");
 		this.responseCreator = responseCreator;
 	}
 
-	@Override
 	public ClientHttpResponse executeInternal() throws IOException {
 
 		if (this.requestMatchers.isEmpty()) {

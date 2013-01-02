@@ -88,13 +88,11 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 		this.daemon = daemon;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		logger.info("Initializing Timer");
 		this.timer = createTimer(this.beanName, this.daemon);
@@ -146,17 +144,14 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 	}
 
 
-	@Override
 	public Timer getObject() {
 		return this.timer;
 	}
 
-	@Override
 	public Class<? extends Timer> getObjectType() {
 		return Timer.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -166,7 +161,6 @@ public class TimerFactoryBean implements FactoryBean<Timer>, BeanNameAware, Init
 	 * Cancel the Timer on bean factory shutdown, stopping all scheduled tasks.
 	 * @see java.util.Timer#cancel()
 	 */
-	@Override
 	public void destroy() {
 		logger.info("Cancelling Timer");
 		this.timer.cancel();

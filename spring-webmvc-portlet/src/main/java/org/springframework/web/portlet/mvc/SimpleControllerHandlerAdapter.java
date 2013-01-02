@@ -49,32 +49,27 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter, PortletCo
 	private PortletContext portletContext;
 
 
-	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
 
 
-	@Override
 	public boolean supports(Object handler) {
 		return (handler instanceof Controller);
 	}
 
-	@Override
 	public void handleAction(ActionRequest request, ActionResponse response, Object handler)
 			throws Exception {
 
 		((Controller) handler).handleActionRequest(request, response);
 	}
 
-	@Override
 	public ModelAndView handleRender(RenderRequest request, RenderResponse response, Object handler)
 			throws Exception {
 
 		return ((Controller) handler).handleRenderRequest(request, response);
 	}
 
-	@Override
 	public ModelAndView handleResource(ResourceRequest request, ResourceResponse response, Object handler)
 			throws Exception {
 
@@ -88,7 +83,6 @@ public class SimpleControllerHandlerAdapter implements HandlerAdapter, PortletCo
 		}
 	}
 
-	@Override
 	public void handleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
 		if (handler instanceof EventAwareController) {
 			((EventAwareController) handler).handleEventRequest(request, response);

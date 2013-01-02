@@ -111,7 +111,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * @see org.springframework.jms.support.destination.DynamicDestinationResolver
 	 * @see org.springframework.jms.support.converter.SimpleMessageConverter102
 	 */
-	@Override
 	protected void initDefaultStrategies() {
 		setMessageConverter(new SimpleMessageConverter102());
 	}
@@ -122,7 +121,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * the specified destination type: QueueConnectionFactory for queues,
 	 * and TopicConnectionFactory for topics.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
@@ -151,7 +149,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * This implementation overrides the superclass method to accept either
 	 * a QueueConnection or a TopicConnection, depending on the domain.
 	 */
-	@Override
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection(isPubSubDomain() ? (Class) TopicConnection.class : QueueConnection.class);
 	}
@@ -160,7 +157,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * This implementation overrides the superclass method to accept either
 	 * a QueueSession or a TopicSession, depending on the domain.
 	 */
-	@Override
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession(isPubSubDomain() ? (Class) TopicSession.class : QueueSession.class);
 	}
@@ -168,7 +164,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Connection createConnection() throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnectionFactory) getConnectionFactory()).createTopicConnection();
@@ -181,7 +176,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Session createSession(Connection con) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnection) con).createTopicSession(isSessionTransacted(), getSessionAcknowledgeMode());
@@ -194,7 +188,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected MessageProducer doCreateProducer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicSession) session).createPublisher((Topic) destination);
@@ -207,7 +200,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected MessageConsumer createConsumer(Session session, Destination destination, String messageSelector)
 			throws JMSException {
 
@@ -219,7 +211,6 @@ public class JmsTemplate102 extends JmsTemplate {
 		}
 	}
 
-	@Override
 	protected QueueBrowser createBrowser(Session session, Queue queue, String messageSelector)
 			throws JMSException {
 
@@ -234,7 +225,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected void doSend(MessageProducer producer, Message message) throws JMSException {
 		if (isPubSubDomain()) {
 			if (isExplicitQosEnabled()) {
@@ -260,7 +250,6 @@ public class JmsTemplate102 extends JmsTemplate {
 	 * The best we can do here is to check the setting on the template.
 	 * @see #getSessionAcknowledgeMode()
 	 */
-	@Override
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}

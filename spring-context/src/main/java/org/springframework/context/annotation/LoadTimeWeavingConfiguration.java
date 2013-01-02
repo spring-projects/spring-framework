@@ -52,7 +52,6 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 
 	private ClassLoader beanClassLoader;
 
-	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableLTW = MetadataUtils.attributesFor(importMetadata, EnableLoadTimeWeaving.class);
 		Assert.notNull(this.enableLTW,
@@ -60,7 +59,6 @@ public class LoadTimeWeavingConfiguration implements ImportAware, BeanClassLoade
 				importMetadata.getClassName());
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}

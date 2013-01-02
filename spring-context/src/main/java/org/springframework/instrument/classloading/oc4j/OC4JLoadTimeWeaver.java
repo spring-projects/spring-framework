@@ -62,7 +62,6 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
-	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		// Since OC4J 10.1.3's PolicyClassLoader is going to be removed,
@@ -70,12 +69,10 @@ public class OC4JLoadTimeWeaver implements LoadTimeWeaver {
 		this.classLoader.addTransformer(transformer);
 	}
 
-	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader.getClassLoader();
 	}
 
-	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return this.classLoader.getThrowawayClassLoader();
 	}

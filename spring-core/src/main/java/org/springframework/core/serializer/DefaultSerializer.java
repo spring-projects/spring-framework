@@ -34,7 +34,6 @@ public class DefaultSerializer implements Serializer<Object> {
 	 * Writes the source object to an output stream using Java Serialization.
 	 * The source object must implement {@link Serializable}.
 	 */
-	@Override
 	public void serialize(Object object, OutputStream outputStream) throws IOException {
 		if (!(object instanceof Serializable)) {
 			throw new IllegalArgumentException(getClass().getSimpleName() + " requires a Serializable payload " +

@@ -78,7 +78,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
-	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		FilteringClassFileTransformer actualTransformer =
@@ -98,7 +97,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	 * JVM in this way, so the instrumentable class loader will always be the
 	 * current loader.
 	 */
-	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
@@ -106,7 +104,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 	/**
 	 * This implementation always returns a {@link SimpleThrowawayClassLoader}.
 	 */
-	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		return new SimpleThrowawayClassLoader(getInstrumentableClassLoader());
 	}
@@ -174,7 +171,6 @@ public class InstrumentationLoadTimeWeaver implements LoadTimeWeaver {
 			this.targetClassLoader = targetClassLoader;
 		}
 
-		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
 				ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 

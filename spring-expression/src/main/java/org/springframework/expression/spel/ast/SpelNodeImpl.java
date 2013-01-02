@@ -88,7 +88,6 @@ public abstract class SpelNodeImpl implements SpelNode {
 		return false;
 	}
 
-	@Override
 	public final Object getValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState).getValue();
@@ -98,7 +97,6 @@ public abstract class SpelNodeImpl implements SpelNode {
 		}
 	}
 
-	@Override
 	public final TypedValue getTypedValue(ExpressionState expressionState) throws EvaluationException {
 		if (expressionState != null) {
 			return getValueInternal(expressionState);
@@ -109,27 +107,22 @@ public abstract class SpelNodeImpl implements SpelNode {
 	}
 
 	// by default Ast nodes are not writable
-	@Override
 	public boolean isWritable(ExpressionState expressionState) throws EvaluationException {
 		return false;
 	}
 
-	@Override
 	public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException {
 		throw new SpelEvaluationException(getStartPosition(), SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());
 	}
 
-	@Override
 	public SpelNode getChild(int index) {
 		return children[index];
 	}
 
-	@Override
 	public int getChildCount() {
 		return children.length;
 	}
 
-	@Override
 	public Class<?> getObjectClass(Object obj) {
 		if (obj == null) {
 			return null;
@@ -143,15 +136,12 @@ public abstract class SpelNodeImpl implements SpelNode {
 
 	public abstract TypedValue getValueInternal(ExpressionState expressionState) throws EvaluationException;
 
-	@Override
 	public abstract String toStringAST();
 
-	@Override
 	public int getStartPosition() {
 		return (pos>>16);
 	}
 
-	@Override
 	public int getEndPosition() {
 		return (pos&0xffff);
 	}

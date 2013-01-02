@@ -36,7 +36,6 @@ import org.springframework.beans.factory.config.Scope;
  */
 public abstract class AbstractRequestAttributesScope implements Scope {
 
-	@Override
 	public Object get(String name, ObjectFactory objectFactory) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
@@ -47,7 +46,6 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		return scopedObject;
 	}
 
-	@Override
 	public Object remove(String name) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		Object scopedObject = attributes.getAttribute(name, getScope());
@@ -60,13 +58,11 @@ public abstract class AbstractRequestAttributesScope implements Scope {
 		}
 	}
 
-	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		attributes.registerDestructionCallback(name, callback, getScope());
 	}
 
-	@Override
 	public Object resolveContextualObject(String key) {
 		RequestAttributes attributes = RequestContextHolder.currentRequestAttributes();
 		return attributes.resolveReference(key);

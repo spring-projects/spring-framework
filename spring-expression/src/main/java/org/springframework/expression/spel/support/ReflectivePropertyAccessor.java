@@ -56,12 +56,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	/**
 	 * @return null which means this is a general purpose accessor
 	 */
-	@Override
 	public Class<?>[] getSpecificTargetClasses() {
 		return null;
 	}
 
-	@Override
 	public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 		if (target == null) {
 			return false;
@@ -96,7 +94,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return false;
 	}
 
-	@Override
 	public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 		if (target == null) {
 			throw new AccessException("Cannot read property of null target");
@@ -163,7 +160,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		throw new AccessException("Neither getter nor field found for property '" + name + "'");
 	}
 
-	@Override
 	public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 		if (target == null) {
 			return false;
@@ -193,7 +189,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		return false;
 	}
 
-	@Override
 	public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		if (target == null) {
 			throw new AccessException("Cannot write property on null target");
@@ -502,12 +497,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 
-		@Override
 		public Class[] getSpecificTargetClasses() {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
-		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			if (target == null) {
 				return false;
@@ -531,7 +524,6 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 
-		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (this.member instanceof Method) {
 				try {
@@ -560,12 +552,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			throw new AccessException("Neither getter nor field found for property '" + name + "'");
 		}
 
-		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}
 
-		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) {
 			throw new UnsupportedOperationException("Should not be called on an OptimalPropertyAccessor");
 		}

@@ -81,7 +81,6 @@ public class MethodMapTransactionAttributeSource
 		this.methodMap = methodMap;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -92,7 +91,6 @@ public class MethodMapTransactionAttributeSource
 	 * {@link #setMethodMap(java.util.Map) "methodMap"}, if any.
 	 * @see #initMethodMap(java.util.Map)
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		initMethodMap(this.methodMap);
 		this.eagerlyInitialized = true;
@@ -206,7 +204,6 @@ public class MethodMapTransactionAttributeSource
 	}
 
 
-	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		if (this.eagerlyInitialized) {
 			return this.transactionAttributeMap.get(method);

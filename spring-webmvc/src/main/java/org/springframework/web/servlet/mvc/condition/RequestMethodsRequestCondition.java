@@ -80,7 +80,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Returns a new instance with a union of the HTTP request methods
 	 * from "this" and the "other" instance.
 	 */
-	@Override
 	public RequestMethodsRequestCondition combine(RequestMethodsRequestCondition other) {
 		Set<RequestMethod> set = new LinkedHashSet<RequestMethod>(this.methods);
 		set.addAll(other.methods);
@@ -95,7 +94,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * @return the same instance if the condition is empty, a new condition with
 	 * the matched request method, or {@code null} if no request methods match
 	 */
-	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (this.methods.isEmpty()) {
 			return this;
@@ -132,7 +130,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * {@link #getMatchingCondition(HttpServletRequest)} and therefore each instance
 	 * contains the matching HTTP request method only or is otherwise empty.
 	 */
-	@Override
 	public int compareTo(RequestMethodsRequestCondition other, HttpServletRequest request) {
 		return other.methods.size() - this.methods.size();
 	}

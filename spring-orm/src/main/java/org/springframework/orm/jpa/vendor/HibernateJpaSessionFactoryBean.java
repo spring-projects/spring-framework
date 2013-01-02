@@ -39,19 +39,16 @@ import org.springframework.util.Assert;
  */
 public class HibernateJpaSessionFactoryBean extends EntityManagerFactoryAccessor implements FactoryBean<SessionFactory> {
 
-	@Override
 	public SessionFactory getObject() {
 		EntityManagerFactory emf = getEntityManagerFactory();
 		Assert.isInstanceOf(HibernateEntityManagerFactory.class, emf);
 		return ((HibernateEntityManagerFactory) emf).getSessionFactory();
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return SessionFactory.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

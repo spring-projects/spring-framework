@@ -57,12 +57,10 @@ public class StandardTypeConverter implements TypeConverter {
 	}
 
 
-	@Override
 	public boolean canConvert(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.conversionService.canConvert(sourceType, targetType);
 	}
 
-	@Override
 	public Object convertValue(Object value, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		try {
 			return this.conversionService.convert(value, sourceType, targetType);

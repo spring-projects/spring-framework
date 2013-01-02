@@ -92,23 +92,19 @@ public class SimplePortletPostProcessor
 		this.useSharedPortletConfig = useSharedPortletConfig;
 	}
 
-	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
 
-	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		return bean;
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Portlet) {
 			PortletConfig config = this.portletConfig;
@@ -125,7 +121,6 @@ public class SimplePortletPostProcessor
 		return bean;
 	}
 
-	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		if (bean instanceof Portlet) {
 			((Portlet) bean).destroy();
@@ -151,57 +146,46 @@ public class SimplePortletPostProcessor
 			this.portletConfig = portletConfig;
 		}
 
-		@Override
 		public String getPortletName() {
 			return this.portletName;
 		}
 
-		@Override
 		public PortletContext getPortletContext() {
 			return this.portletContext;
 		}
 
-		@Override
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
-		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
-		@Override
 		public ResourceBundle getResourceBundle(Locale locale) {
 			return (this.portletConfig != null ? this.portletConfig.getResourceBundle(locale) : null);
 		}
 
-		@Override
 		public Enumeration<String> getPublicRenderParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}
 
-		@Override
 		public String getDefaultNamespace() {
 			return XMLConstants.NULL_NS_URI;
 		}
 
-		@Override
 		public Enumeration<QName> getPublishingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
-		@Override
 		public Enumeration<QName> getProcessingEventQNames() {
 			return Collections.enumeration(new HashSet<QName>());
 		}
 
-		@Override
 		public Enumeration<Locale> getSupportedLocales() {
 			return Collections.enumeration(new HashSet<Locale>());
 		}
 
-		@Override
 		public Map<String, String[]> getContainerRuntimeOptions() {
 			return (this.portletConfig != null ? this.portletConfig.getContainerRuntimeOptions() : null);
 		}

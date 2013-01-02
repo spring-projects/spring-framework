@@ -282,7 +282,6 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SqlMapClient configuration.
@@ -383,17 +382,14 @@ public class SqlMapClientFactoryBean implements FactoryBean<SqlMapClient>, Initi
 	}
 
 
-	@Override
 	public SqlMapClient getObject() {
 		return this.sqlMapClient;
 	}
 
-	@Override
 	public Class<? extends SqlMapClient> getObjectType() {
 		return (this.sqlMapClient != null ? this.sqlMapClient.getClass() : SqlMapClient.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

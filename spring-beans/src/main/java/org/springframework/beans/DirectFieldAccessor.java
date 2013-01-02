@@ -59,7 +59,6 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		Assert.notNull(target, "Target object must not be null");
 		this.target = target;
 		ReflectionUtils.doWithFields(this.target.getClass(), new ReflectionUtils.FieldCallback() {
-			@Override
 			public void doWith(Field field) {
 				if (fieldMap.containsKey(field.getName())) {
 					// ignore superclass declarations of fields already found in a subclass
@@ -75,12 +74,10 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 	}
 
 
-	@Override
 	public boolean isReadableProperty(String propertyName) throws BeansException {
 		return this.fieldMap.containsKey(propertyName);
 	}
 
-	@Override
 	public boolean isWritableProperty(String propertyName) throws BeansException {
 		return this.fieldMap.containsKey(propertyName);
 	}
@@ -94,7 +91,6 @@ public class DirectFieldAccessor extends AbstractPropertyAccessor {
 		return null;
 	}
 
-	@Override
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		Field field = this.fieldMap.get(propertyName);
 		if (field != null) {

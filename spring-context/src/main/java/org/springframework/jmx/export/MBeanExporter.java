@@ -371,7 +371,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 				notificationListeners.toArray(new NotificationListenerBean[notificationListeners.size()]);
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -384,7 +383,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * @see #setBeans
 	 * @see #setAutodetect
 	 */
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ListableBeanFactory) {
 			this.beanFactory = (ListableBeanFactory) beanFactory;
@@ -404,7 +402,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * {@code ApplicationContext}.
 	 * @see #registerBeans()
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		// If no server was provided then try to find one. This is useful in an environment
 		// such as JDK 1.5, Tomcat or JBoss where there is already an MBeanServer loaded.
@@ -428,7 +425,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 * Unregisters all beans that this exported has exposed via JMX
 	 * when the enclosing {@code ApplicationContext} is destroyed.
 	 */
-	@Override
 	public void destroy() {
 		logger.info("Unregistering JMX-exposed beans on shutdown");
 		unregisterNotificationListeners();
@@ -440,7 +436,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	// Implementation of MBeanExportOperations interface
 	//---------------------------------------------------------------------
 
-	@Override
 	public ObjectName registerManagedResource(Object managedResource) throws MBeanExportException {
 		Assert.notNull(managedResource, "Managed resource must not be null");
 		ObjectName objectName;
@@ -457,7 +452,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		return objectName;
 	}
 
-	@Override
 	public void registerManagedResource(Object managedResource, ObjectName objectName) throws MBeanExportException {
 		Assert.notNull(managedResource, "Managed resource must not be null");
 		Assert.notNull(objectName, "ObjectName must not be null");
@@ -477,7 +471,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 		}
 	}
 
-	@Override
 	public void unregisterManagedResource(ObjectName objectName) {
 		Assert.notNull(objectName, "ObjectName must not be null");
 		doUnregister(objectName);
@@ -847,7 +840,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private void autodetectBeans(final AutodetectCapableMBeanInfoAssembler assembler) {
 		autodetect(new AutodetectCallback() {
-			@Override
 			public boolean include(Class beanClass, String beanName) {
 				return assembler.includeBean(beanClass, beanName);
 			}
@@ -860,7 +852,6 @@ public class MBeanExporter extends MBeanRegistrationSupport
 	 */
 	private void autodetectMBeans() {
 		autodetect(new AutodetectCallback() {
-			@Override
 			public boolean include(Class beanClass, String beanName) {
 				return isMBean(beanClass);
 			}

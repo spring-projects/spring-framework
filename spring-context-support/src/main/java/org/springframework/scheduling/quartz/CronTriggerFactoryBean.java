@@ -191,13 +191,11 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		this.misfireInstruction = constants.asNumber(constantName).intValue();
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.name == null) {
 			this.name = this.beanName;
@@ -267,17 +265,14 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 	}
 
 
-	@Override
 	public CronTrigger getObject() {
 		return this.cronTrigger;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return CronTrigger.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

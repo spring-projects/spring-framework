@@ -58,17 +58,14 @@ public class XmlOptionsFactoryBean implements FactoryBean<XmlOptions> {
 	}
 
 
-	@Override
 	public XmlOptions getObject() {
 		return this.xmlOptions;
 	}
 
-	@Override
 	public Class<? extends XmlOptions> getObjectType() {
 		return XmlOptions.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

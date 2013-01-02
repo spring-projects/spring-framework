@@ -68,7 +68,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	}
 
 
-	@Override
 	public void initializeWithMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
 		try {
 			setSupportsCatalogsInProcedureCalls(databaseMetaData.supportsCatalogsInProcedureCalls());
@@ -96,7 +95,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public void initializeWithProcedureColumnMetaData(DatabaseMetaData databaseMetaData, String catalogName,
 			String schemaName, String procedureName) throws SQLException {
 
@@ -104,12 +102,10 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
 	}
 
-	@Override
 	public List<CallParameterMetaData> getCallParameterMetaData() {
 		return this.callParameterMetaData;
 	}
 
-	@Override
 	public String procedureNameToUse(String procedureName) {
 		if (procedureName == null) {
 			return null;
@@ -125,7 +121,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public String catalogNameToUse(String catalogName) {
 		if (catalogName == null) {
 			return null;
@@ -141,7 +136,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public String schemaNameToUse(String schemaName) {
 		if (schemaName == null) {
 			return null;
@@ -157,7 +151,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public String metaDataCatalogNameToUse(String catalogName) {
 		if (isSupportsCatalogsInProcedureCalls()) {
 			return catalogNameToUse(catalogName);
@@ -167,7 +160,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public String metaDataSchemaNameToUse(String schemaName) {
 		if (isSupportsSchemasInProcedureCalls()) {
 			return schemaNameToUse(schemaName);
@@ -177,7 +169,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public String parameterNameToUse(String parameterName) {
 		if (parameterName == null) {
 			return null;
@@ -193,47 +184,38 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 		}
 	}
 
-	@Override
 	public boolean byPassReturnParameter(String parameterName) {
 		return false;
 	}
 
-	@Override
 	public SqlParameter createDefaultOutParameter(String parameterName, CallParameterMetaData meta) {
 		return new SqlOutParameter(parameterName, meta.getSqlType());
 	}
 
-	@Override
 	public SqlParameter createDefaultInOutParameter(String parameterName, CallParameterMetaData meta) {
 		return new SqlInOutParameter(parameterName, meta.getSqlType());
 	}
 
-	@Override
 	public SqlParameter createDefaultInParameter(String parameterName, CallParameterMetaData meta) {
 		return new SqlParameter(parameterName, meta.getSqlType());
 	}
 
-	@Override
 	public String getUserName() {
 		return this.userName;
 	}
 
-	@Override
 	public boolean isReturnResultSetSupported() {
 		return true;
 	}
 
-	@Override
 	public boolean isRefCursorSupported() {
 		return false;
 	}
 
-	@Override
 	public int getRefCursorSqlType() {
 		return Types.OTHER;
 	}
 
-	@Override
 	public boolean isProcedureColumnMetaDataUsed() {
 		return this.procedureColumnMetaDataUsed;
 	}
@@ -249,7 +231,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Does the database support the use of catalog name in procedure calls
 	 */
-	@Override
 	public boolean isSupportsCatalogsInProcedureCalls() {
 		return this.supportsCatalogsInProcedureCalls;
 	}
@@ -264,7 +245,6 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 	/**
 	 * Does the database support the use of schema name in procedure calls
 	 */
-	@Override
 	public boolean isSupportsSchemasInProcedureCalls() {
 		return this.supportsSchemasInProcedureCalls;
 	}

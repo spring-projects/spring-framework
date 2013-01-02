@@ -75,7 +75,6 @@ public class CurrencyFormatter extends AbstractNumberFormatter {
 	}
 
 
-	@Override
 	public BigDecimal parse(String text, Locale locale) throws ParseException {
 		BigDecimal decimal = (BigDecimal) super.parse(text, locale);
 		if (decimal != null) {
@@ -89,7 +88,6 @@ public class CurrencyFormatter extends AbstractNumberFormatter {
 		return decimal;
 	}
 
-	@Override
 	protected NumberFormat getNumberFormat(Locale locale) {
 		DecimalFormat format = (DecimalFormat) NumberFormat.getCurrencyInstance(locale);
 		format.setParseBigDecimal(true);

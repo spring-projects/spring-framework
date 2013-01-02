@@ -70,7 +70,6 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (this.servletContext != null && bean instanceof ServletContextAware) {
 			((ServletContextAware) bean).setServletContext(this.servletContext);
@@ -81,7 +80,6 @@ public class ServletContextAwareProcessor implements BeanPostProcessor {
 		return bean;
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}

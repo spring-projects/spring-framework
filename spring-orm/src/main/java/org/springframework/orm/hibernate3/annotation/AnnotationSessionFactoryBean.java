@@ -150,7 +150,6 @@ public class AnnotationSessionFactoryBean extends LocalSessionFactoryBean implem
 		this.entityTypeFilters = entityTypeFilters;
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}

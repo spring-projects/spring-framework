@@ -184,7 +184,6 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	 * @see #buildSessionFactory()
 	 * @see #wrapSessionFactoryIfNecessary
 	 */
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		SessionFactory rawSf = buildSessionFactory();
 		this.sessionFactory = wrapSessionFactoryIfNecessary(rawSf);
@@ -220,7 +219,6 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	/**
 	 * Close the SessionFactory on bean factory shutdown.
 	 */
-	@Override
 	public void destroy() throws HibernateException {
 		logger.info("Closing Hibernate SessionFactory");
 		try {
@@ -235,17 +233,14 @@ public abstract class AbstractSessionFactoryBean extends HibernateExceptionTrans
 	/**
 	 * Return the singleton SessionFactory.
 	 */
-	@Override
 	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}
 
-	@Override
 	public Class<? extends SessionFactory> getObjectType() {
 		return (this.sessionFactory != null ? this.sessionFactory.getClass() : SessionFactory.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

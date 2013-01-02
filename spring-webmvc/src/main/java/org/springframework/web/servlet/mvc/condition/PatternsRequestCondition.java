@@ -161,7 +161,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 *  <li>If neither instance has patterns, use an empty String (i.e. "").
 	 * </ul>
 	 */
-	@Override
 	public PatternsRequestCondition combine(PatternsRequestCondition other) {
 		Set<String> result = new LinkedHashSet<String>();
 		if (!this.patterns.isEmpty() && !other.patterns.isEmpty()) {
@@ -203,7 +202,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * 		or a new condition with sorted matching patterns;
 	 * 		or {@code null} if no patterns match.
 	 */
-	@Override
 	public PatternsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		if (this.patterns.isEmpty()) {
 			return this;
@@ -273,7 +271,6 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 * contain only patterns that match the request and are sorted with
 	 * the best matches on top.
 	 */
-	@Override
 	public int compareTo(PatternsRequestCondition other, HttpServletRequest request) {
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
 		Comparator<String> patternComparator = this.pathMatcher.getPatternComparator(lookupPath);

@@ -52,7 +52,6 @@ public class DefaultToStringStyler implements ToStringStyler {
 	}
 
 
-	@Override
 	public void styleStart(StringBuilder buffer, Object obj) {
 		if (!obj.getClass().isArray()) {
 			buffer.append('[').append(ClassUtils.getShortName(obj.getClass()));
@@ -71,12 +70,10 @@ public class DefaultToStringStyler implements ToStringStyler {
 		buffer.append(ObjectUtils.getIdentityHexString(obj));
 	}
 
-	@Override
 	public void styleEnd(StringBuilder buffer, Object o) {
 		buffer.append(']');
 	}
 
-	@Override
 	public void styleField(StringBuilder buffer, String fieldName, Object value) {
 		styleFieldStart(buffer, fieldName);
 		styleValue(buffer, value);
@@ -90,12 +87,10 @@ public class DefaultToStringStyler implements ToStringStyler {
 	protected void styleFieldEnd(StringBuilder buffer, String fieldName) {
 	}
 
-	@Override
 	public void styleValue(StringBuilder buffer, Object value) {
 		buffer.append(this.valueStyler.style(value));
 	}
 
-	@Override
 	public void styleFieldSeparator(StringBuilder buffer) {
 		buffer.append(',');
 	}

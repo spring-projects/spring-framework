@@ -1021,7 +1021,6 @@ public class DispatcherServlet extends FrameworkServlet {
 	@Override
 	protected LocaleContext buildLocaleContext(final HttpServletRequest request) {
 		return new LocaleContext() {
-			@Override
 			public Locale getLocale() {
 				return localeResolver.resolveLocale(request);
 			}

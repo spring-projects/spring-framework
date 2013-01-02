@@ -66,7 +66,6 @@ public abstract class AbstractLobCreatingPreparedStatementCallback implements Pr
 	}
 
 
-	@Override
 	public final Integer doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
 		LobCreator lobCreator = this.lobHandler.getLobCreator();
 		try {

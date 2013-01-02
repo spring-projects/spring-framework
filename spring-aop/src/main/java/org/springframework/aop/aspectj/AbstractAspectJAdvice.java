@@ -203,7 +203,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		return this.aspectInstanceFactory.getAspectClassLoader();
 	}
 
-	@Override
 	public int getOrder() {
 		return this.aspectInstanceFactory.getOrder();
 	}
@@ -213,7 +212,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		this.aspectName = name;
 	}
 
-	@Override
 	public String getAspectName() {
 		return this.aspectName;
 	}
@@ -225,7 +223,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		this.declarationOrder = order;
 	}
 
-	@Override
 	public int getDeclarationOrder() {
 		return this.declarationOrder;
 	}
@@ -681,7 +678,6 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 			this.adviceMethod = adviceMethod;
 		}
 
-		@Override
 		public boolean matches(Method method, Class targetClass) {
 			return !this.adviceMethod.equals(method);
 		}

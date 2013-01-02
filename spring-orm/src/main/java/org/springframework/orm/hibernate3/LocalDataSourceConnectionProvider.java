@@ -44,7 +44,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	private DataSource dataSourceToUse;
 
 
-	@Override
 	public void configure(Properties props) throws HibernateException {
 		this.dataSource = LocalSessionFactoryBean.getConfigTimeDataSource();
 		// absolutely needs thread-bound DataSource to initialize
@@ -79,7 +78,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	 * This implementation delegates to the underlying DataSource.
 	 * @see javax.sql.DataSource#getConnection()
 	 */
-	@Override
 	public Connection getConnection() throws SQLException {
 		try {
 			return this.dataSourceToUse.getConnection();
@@ -94,7 +92,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	 * This implementation calls {@link DataSourceUtils#doCloseConnection},
 	 * checking against a {@link org.springframework.jdbc.datasource.SmartDataSource}.
 	 */
-	@Override
 	public void closeConnection(Connection con) throws SQLException {
 		try {
 			DataSourceUtils.doCloseConnection(con, this.dataSourceToUse);
@@ -109,7 +106,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	 * This implementation does nothing:
 	 * We're dealing with an externally managed DataSource.
 	 */
-	@Override
 	public void close() {
 	}
 
@@ -118,7 +114,6 @@ public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 	 * to receive the same Connection within a transaction, not even when
 	 * dealing with a JNDI DataSource.
 	 */
-	@Override
 	public boolean supportsAggressiveRelease() {
 		return false;
 	}

@@ -241,12 +241,10 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
-	@Override
 	public String getParentName() {
 		return null;
 	}
 
-	@Override
 	public void setParentName(String parentName) {
 		if (parentName != null) {
 			throw new IllegalArgumentException("Root bean cannot be changed into a child bean with parent reference");

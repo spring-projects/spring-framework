@@ -52,7 +52,6 @@ public class DeprecatedBeanWarner implements BeanFactoryPostProcessor {
 	}
 
 
-	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		if (isLogEnabled()) {
 			String[] beanNames = beanFactory.getBeanDefinitionNames();

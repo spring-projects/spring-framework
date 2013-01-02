@@ -171,7 +171,6 @@ public class SimpleRemoteSlsbInvokerInterceptor extends AbstractRemoteSlsbInvoke
 	/**
 	 * Remove the cached session bean instance, if necessary.
 	 */
-	@Override
 	public void destroy() {
 		if (this.cacheSessionBean) {
 			synchronized (this.beanInstanceMonitor) {

@@ -100,7 +100,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 	}
 
 
-	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -137,7 +136,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -163,7 +161,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (isRequestActive()) {
@@ -190,7 +187,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
@@ -215,7 +211,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
 		if (scope == SCOPE_REQUEST) {
 			registerRequestDestructionCallback(name, callback);
@@ -225,7 +220,6 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return this.request;
@@ -238,12 +232,10 @@ public class PortletRequestAttributes extends AbstractRequestAttributes {
 		}
 	}
 
-	@Override
 	public String getSessionId() {
 		return getSession(true).getId();
 	}
 
-	@Override
 	public Object getSessionMutex() {
 		return PortletUtils.getSessionMutex(getSession(true));
 	}

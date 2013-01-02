@@ -71,7 +71,6 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	/**
 	 * Subclasses can override this for greater filtering (and performance).
 	 */
-	@Override
 	public boolean matches(Class clazz) {
 		return true;
 	}
@@ -80,17 +79,14 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	 * Subclasses can override this if it's possible to filter out
 	 * some candidate classes.
 	 */
-	@Override
 	public boolean matches(Method method, Class targetClass) {
 		return true;
 	}
 
-	@Override
 	public boolean isRuntime() {
 		return true;
 	}
 
-	@Override
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		++this.evaluations;
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
@@ -105,12 +101,10 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 
-	@Override
 	public ClassFilter getClassFilter() {
 		return this;
 	}
 
-	@Override
 	public MethodMatcher getMethodMatcher() {
 		return this;
 	}

@@ -55,7 +55,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 	}
 
 
-	@Override
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
 		// Don't override the class with CGLIB if no overrides.
 		if (beanDefinition.getMethodOverrides().isEmpty()) {
@@ -70,7 +69,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 					try {
 						if (System.getSecurityManager() != null) {
 							constructorToUse = AccessController.doPrivileged(new PrivilegedExceptionAction<Constructor>() {
-								@Override
 								public Constructor run() throws Exception {
 									return clazz.getDeclaredConstructor((Class[]) null);
 								}
@@ -107,7 +105,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	@Override
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			final Constructor<?> ctor, Object[] args) {
 
@@ -115,7 +112,6 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 			if (System.getSecurityManager() != null) {
 				// use own privileged to change accessibility (when security is on)
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
 					public Object run() {
 						ReflectionUtils.makeAccessible(ctor);
 						return null;
@@ -142,14 +138,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 				"Method Injection not supported in SimpleInstantiationStrategy");
 	}
 
-	@Override
 	public Object instantiate(RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
 			Object factoryBean, final Method factoryMethod, Object[] args) {
 
 		try {
 			if (System.getSecurityManager() != null) {
 				AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
 					public Object run() {
 						ReflectionUtils.makeAccessible(factoryMethod);
 						return null;

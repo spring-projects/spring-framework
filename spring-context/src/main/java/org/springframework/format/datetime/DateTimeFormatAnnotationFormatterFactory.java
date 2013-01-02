@@ -55,22 +55,18 @@ public class DateTimeFormatAnnotationFormatterFactory implements
 	private StringValueResolver embeddedValueResolver;
 
 
-	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
 
-	@Override
 	public Set<Class<?>> getFieldTypes() {
 		return FIELD_TYPES;
 	}
 
-	@Override
 	public Printer<?> getPrinter(DateTimeFormat annotation, Class<?> fieldType) {
 		return getFormatter(annotation, fieldType);
 	}
 
-	@Override
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
 		return getFormatter(annotation, fieldType);
 	}

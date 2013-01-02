@@ -69,7 +69,6 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		return this.adviceBeanName;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -80,7 +79,6 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 		}
 	}
 
-	@Override
 	public Advice getAdvice() {
 		synchronized (this.adviceMonitor) {
 			if (this.advice == null && this.adviceBeanName != null) {

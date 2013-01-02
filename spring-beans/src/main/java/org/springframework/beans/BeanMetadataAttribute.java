@@ -69,7 +69,6 @@ public class BeanMetadataAttribute implements BeanMetadataElement {
 		this.source = source;
 	}
 
-	@Override
 	public Object getSource() {
 		return this.source;
 	}

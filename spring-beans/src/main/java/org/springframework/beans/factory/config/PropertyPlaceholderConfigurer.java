@@ -251,7 +251,6 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 			this.resolver = new PropertyPlaceholderConfigurerResolver(props);
 		}
 
-		@Override
 		public String resolveStringValue(String strVal) throws BeansException {
 			String value = this.helper.replacePlaceholders(strVal, this.resolver);
 			return (value.equals(nullValue) ? null : value);
@@ -267,7 +266,6 @@ public class PropertyPlaceholderConfigurer extends PlaceholderConfigurerSupport 
 			this.props = props;
 		}
 
-		@Override
 		public String resolvePlaceholder(String placeholderName) {
 			return PropertyPlaceholderConfigurer.this.resolvePlaceholder(placeholderName, props, systemPropertiesMode);
 		}

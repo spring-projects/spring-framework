@@ -104,7 +104,6 @@ public class UserCredentialsConnectionFactoryAdapter
 		this.password = password;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.targetConnectionFactory == null) {
 			throw new IllegalArgumentException("Property 'targetConnectionFactory' is required");
@@ -142,7 +141,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateConnection
 	 */
-	@Override
 	public final Connection createConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -156,7 +154,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target ConnectionFactory.
 	 */
-	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		return doCreateConnection(username, password);
 	}
@@ -189,7 +186,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateQueueConnection
 	 */
-	@Override
 	public final QueueConnection createQueueConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -203,7 +199,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target QueueConnectionFactory.
 	 */
-	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		return doCreateQueueConnection(username, password);
 	}
@@ -240,7 +235,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	 * username and password (i.e. values of the bean properties) else.
 	 * @see #doCreateTopicConnection
 	 */
-	@Override
 	public final TopicConnection createTopicConnection() throws JMSException {
 		JmsUserCredentials threadCredentials = this.threadBoundCredentials.get();
 		if (threadCredentials != null) {
@@ -254,7 +248,6 @@ public class UserCredentialsConnectionFactoryAdapter
 	/**
 	 * Delegate the call straight to the target TopicConnectionFactory.
 	 */
-	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		return doCreateTopicConnection(username, password);
 	}

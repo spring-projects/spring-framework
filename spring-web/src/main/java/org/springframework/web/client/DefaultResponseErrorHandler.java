@@ -45,7 +45,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	/**
 	 * Delegates to {@link #hasError(HttpStatus)} with the response status code.
 	 */
-	@Override
 	public boolean hasError(ClientHttpResponse response) throws IOException {
 		return hasError(getHttpStatusCode(response));
 	}
@@ -82,7 +81,6 @@ public class DefaultResponseErrorHandler implements ResponseErrorHandler {
 	 * if it is {@link org.springframework.http.HttpStatus.Series#SERVER_ERROR},
 	 * and a {@link RestClientException} in other cases.
 	 */
-	@Override
 	public void handleError(ClientHttpResponse response) throws IOException {
 		HttpStatus statusCode = getHttpStatusCode(response);
 		switch (statusCode.series()) {

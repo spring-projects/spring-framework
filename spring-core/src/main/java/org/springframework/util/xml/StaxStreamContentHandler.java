@@ -49,7 +49,6 @@ class StaxStreamContentHandler extends AbstractStaxContentHandler {
 		this.streamWriter = streamWriter;
 	}
 
-	@Override
 	public void setDocumentLocator(Locator locator) {
 	}
 

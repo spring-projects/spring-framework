@@ -94,17 +94,14 @@ public class MBeanProxyFactoryBean extends MBeanClientInterceptor
 	}
 
 
-	@Override
 	public Object getObject() {
 		return this.mbeanProxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return this.proxyInterface;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

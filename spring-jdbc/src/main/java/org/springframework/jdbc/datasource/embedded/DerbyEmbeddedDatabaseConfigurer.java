@@ -69,7 +69,6 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 	private DerbyEmbeddedDatabaseConfigurer() {
 	}
 
-	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
 		properties.setDriverClass(EmbeddedDriver.class);
 		properties.setUrl(String.format(URL_TEMPLATE, databaseName, "create=true"));
@@ -77,7 +76,6 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 		properties.setPassword("");
 	}
 
-	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
 			new EmbeddedDriver().connect(

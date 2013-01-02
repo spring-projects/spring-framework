@@ -150,7 +150,6 @@ public class CallableStatementCreatorFactory {
 			this.inParameters = inParams;
 		}
 
-		@Override
 		public CallableStatement createCallableStatement(Connection con) throws SQLException {
 			// If we were given a ParameterMapper, we must let the mapper do its thing to create the Map.
 			if (this.inParameterMapper != null) {
@@ -219,12 +218,10 @@ public class CallableStatementCreatorFactory {
 			return cs;
 		}
 
-		@Override
 		public String getSql() {
 			return callString;
 		}
 
-		@Override
 		public void cleanupParameters() {
 			if (this.inParameters != null) {
 				StatementCreatorUtils.cleanupParameters(this.inParameters.values());

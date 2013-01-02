@@ -52,7 +52,6 @@ public class RequestScope extends AbstractRequestAttributesScope {
 	 * There is no conversation id concept for a request, so this method
 	 * returns {@code null}.
 	 */
-	@Override
 	public String getConversationId() {
 		return null;
 	}

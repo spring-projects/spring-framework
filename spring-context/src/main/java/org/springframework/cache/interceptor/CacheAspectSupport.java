@@ -128,7 +128,6 @@ public abstract class CacheAspectSupport implements InitializingBean {
 		return this.keyGenerator;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.cacheManager == null) {
 			throw new IllegalStateException("'cacheManager' is required");

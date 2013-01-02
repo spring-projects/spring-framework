@@ -79,7 +79,6 @@ public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCrea
 		return this.advisorBeanNamePrefix;
 	}
 
-	@Override
 	public void setBeanName(String name) {
 		// If no infrastructure bean name prefix has been set, override it.
 		if (this.advisorBeanNamePrefix == null) {

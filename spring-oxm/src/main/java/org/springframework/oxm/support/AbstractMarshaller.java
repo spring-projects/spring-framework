@@ -88,7 +88,6 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @see #marshalSaxResult(Object, javax.xml.transform.sax.SAXResult)
 	 * @see #marshalStreamResult(Object, javax.xml.transform.stream.StreamResult)
 	 */
-	@Override
 	public final void marshal(Object graph, Result result) throws IOException, XmlMappingException {
 		if (result instanceof DOMResult) {
 			marshalDomResult(graph, (DOMResult) result);
@@ -121,7 +120,6 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * @see #unmarshalSaxSource(javax.xml.transform.sax.SAXSource)
 	 * @see #unmarshalStreamSource(javax.xml.transform.stream.StreamSource)
 	 */
-	@Override
 	public final Object unmarshal(Source source) throws IOException, XmlMappingException {
 		if (source instanceof DOMSource) {
 			return unmarshalDomSource((DOMSource) source);

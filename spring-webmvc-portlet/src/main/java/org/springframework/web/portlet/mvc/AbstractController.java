@@ -180,7 +180,6 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 	}
 
 
-	@Override
 	public void handleActionRequest(ActionRequest request, ActionResponse response) throws Exception {
 		// Delegate to PortletContentGenerator for checking and preparing.
 		check(request, response);
@@ -200,7 +199,6 @@ public abstract class AbstractController extends PortletContentGenerator impleme
 		handleActionRequestInternal(request, response);
 	}
 
-	@Override
 	public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) throws Exception {
 		// If the portlet is minimized and we don't want to render then return null.
 		if (WindowState.MINIMIZED.equals(request.getWindowState()) && !this.renderWhenMinimized) {

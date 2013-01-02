@@ -80,7 +80,6 @@ public abstract class AbstractJUnit4SpringContextTests implements ApplicationCon
 	 * Set the {@link ApplicationContext} to be used by this test instance,
 	 * provided via {@link ApplicationContextAware} semantics.
 	 */
-	@Override
 	public final void setApplicationContext(final ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}

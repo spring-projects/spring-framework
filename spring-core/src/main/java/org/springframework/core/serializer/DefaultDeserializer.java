@@ -34,7 +34,6 @@ public class DefaultDeserializer implements Deserializer<Object> {
 	/**
 	 * Reads the input stream and deserializes into an object.
 	 */
-	@Override
 	public Object deserialize(InputStream inputStream) throws IOException {
 		ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 		try {

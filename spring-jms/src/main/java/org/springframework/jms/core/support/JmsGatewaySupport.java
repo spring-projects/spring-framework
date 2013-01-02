@@ -96,7 +96,6 @@ public abstract class JmsGatewaySupport implements InitializingBean {
 		return this.jmsTemplate;
 	}
 
-	@Override
 	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		if (this.jmsTemplate == null) {
 			throw new IllegalArgumentException("'connectionFactory' or 'jmsTemplate' is required");

@@ -115,7 +115,6 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 
-	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
 		return (BufferedImage.class.equals(clazz) && isReadable(mediaType));
 	}
@@ -128,7 +127,6 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		return imageReaders.hasNext();
 	}
 
-	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return (BufferedImage.class.equals(clazz) && isWritable(mediaType));
 	}
@@ -141,12 +139,10 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		return imageWriters.hasNext();
 	}
 
-	@Override
 	public List<MediaType> getSupportedMediaTypes() {
 		return Collections.unmodifiableList(this.readableMediaTypes);
 	}
 
-	@Override
 	public BufferedImage read(Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
@@ -192,7 +188,6 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 		}
 	}
 
-	@Override
 	public void write(BufferedImage image, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 

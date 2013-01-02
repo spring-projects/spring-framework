@@ -149,7 +149,6 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		// Check socket factories for registry.
 		if (this.clientSocketFactory instanceof RMIServerSocketFactory) {
@@ -283,17 +282,14 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	}
 
 
-	@Override
 	public Registry getObject() throws Exception {
 		return this.registry;
 	}
 
-	@Override
 	public Class<? extends Registry> getObjectType() {
 		return (this.registry != null ? this.registry.getClass() : Registry.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -303,7 +299,6 @@ public class RmiRegistryFactoryBean implements FactoryBean<Registry>, Initializi
 	 * Unexport the RMI registry on bean factory shutdown,
 	 * provided that this bean actually created a registry.
 	 */
-	@Override
 	public void destroy() throws RemoteException {
 		if (this.created) {
 			logger.info("Unexporting RMI registry");

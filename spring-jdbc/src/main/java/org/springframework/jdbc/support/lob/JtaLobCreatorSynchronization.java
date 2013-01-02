@@ -46,7 +46,6 @@ public class JtaLobCreatorSynchronization implements Synchronization {
 		this.lobCreator = lobCreator;
 	}
 
-	@Override
 	public void beforeCompletion() {
 		// Close the LobCreator early if possible, to avoid issues with strict JTA
 		// implementations that issue warnings when doing JDBC operations after
@@ -55,7 +54,6 @@ public class JtaLobCreatorSynchronization implements Synchronization {
 		this.lobCreator.close();
 	}
 
-	@Override
 	public void afterCompletion(int status) {
 		if (!this.beforeCompletionCalled) {
 			// beforeCompletion not called before (probably because of JTA rollback).

@@ -68,7 +68,6 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	/**
 	 * Return the maximum size of the pool.
 	 */
-	@Override
 	public int getMaxSize() {
 		return this.maxSize;
 	}
@@ -98,7 +97,6 @@ public abstract class AbstractPoolingTargetSource extends AbstractPrototypeBased
 	 * @throws Exception we may need to deal with checked exceptions from pool
 	 * APIs, so we're forgiving with our exception signature
 	 */
-	@Override
 	public abstract Object getTarget() throws Exception;
 
 	/**

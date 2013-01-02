@@ -136,19 +136,16 @@ public class TransactionAwareConnectionFactoryProxy
 	}
 
 
-	@Override
 	public Connection createConnection() throws JMSException {
 		Connection targetConnection = this.targetConnectionFactory.createConnection();
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
-	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		Connection targetConnection = this.targetConnectionFactory.createConnection(username, password);
 		return getTransactionAwareConnectionProxy(targetConnection);
 	}
 
-	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
@@ -158,7 +155,6 @@ public class TransactionAwareConnectionFactoryProxy
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
-	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof QueueConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no QueueConnectionFactory");
@@ -168,7 +164,6 @@ public class TransactionAwareConnectionFactoryProxy
 		return (QueueConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
-	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
@@ -178,7 +173,6 @@ public class TransactionAwareConnectionFactoryProxy
 		return (TopicConnection) getTransactionAwareConnectionProxy(targetConnection);
 	}
 
-	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		if (!(this.targetConnectionFactory instanceof TopicConnectionFactory)) {
 			throw new javax.jms.IllegalStateException("'targetConnectionFactory' is no TopicConnectionFactory");
@@ -222,7 +216,6 @@ public class TransactionAwareConnectionFactoryProxy
 			this.target = target;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 
@@ -295,7 +288,6 @@ public class TransactionAwareConnectionFactoryProxy
 			this.target = target;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on SessionProxy interface coming in...
 

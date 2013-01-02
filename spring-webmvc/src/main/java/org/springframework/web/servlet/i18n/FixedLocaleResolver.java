@@ -52,7 +52,6 @@ public class FixedLocaleResolver extends AbstractLocaleResolver {
 	}
 
 
-	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
 		Locale locale = getDefaultLocale();
 		if (locale == null) {
@@ -61,7 +60,6 @@ public class FixedLocaleResolver extends AbstractLocaleResolver {
 		return locale;
 	}
 
-	@Override
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		throw new UnsupportedOperationException(
 				"Cannot change fixed locale - use a different locale resolution strategy");

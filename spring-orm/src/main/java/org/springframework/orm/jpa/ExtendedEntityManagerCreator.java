@@ -309,7 +309,6 @@ public abstract class ExtendedEntityManagerCreator {
 			}
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on EntityManager interface coming in...
 
@@ -453,7 +452,6 @@ public abstract class ExtendedEntityManagerCreator {
 			this.exceptionTranslator = exceptionTranslator;
 		}
 
-		@Override
 		public int getOrder() {
 			return EntityManagerFactoryUtils.ENTITY_MANAGER_SYNCHRONIZATION_ORDER + 1;
 		}

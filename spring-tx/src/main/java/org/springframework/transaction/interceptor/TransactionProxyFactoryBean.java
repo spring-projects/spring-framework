@@ -180,7 +180,6 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	 * @see org.springframework.beans.factory.BeanFactoryUtils#beanOfTypeIncludingAncestors
 	 * @see org.springframework.transaction.PlatformTransactionManager
 	 */
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.transactionInterceptor.setBeanFactory(beanFactory);
 	}

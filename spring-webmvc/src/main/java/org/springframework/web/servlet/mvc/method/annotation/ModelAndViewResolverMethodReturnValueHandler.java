@@ -67,12 +67,10 @@ public class ModelAndViewResolverMethodReturnValueHandler implements HandlerMeth
 	/**
 	 * Always returns {@code true}. See class-level note.
 	 */
-	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return true;
 	}
 
-	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest request)

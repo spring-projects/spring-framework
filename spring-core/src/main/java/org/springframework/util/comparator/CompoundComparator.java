@@ -162,7 +162,6 @@ public class CompoundComparator<T> implements Comparator<T>, Serializable {
 		return this.comparators.size();
 	}
 
-	@Override
 	public int compare(T o1, T o2) {
 		Assert.state(this.comparators.size() > 0,
 				"No sort definitions have been added to this CompoundComparator to compare");

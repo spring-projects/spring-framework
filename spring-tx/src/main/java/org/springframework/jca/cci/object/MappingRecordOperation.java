@@ -129,7 +129,6 @@ public abstract class MappingRecordOperation extends EisOperation {
 			this.inputObject = inObject;
 		}
 
-		@Override
 		public Record createRecord(RecordFactory recordFactory) throws ResourceException, DataAccessException {
 			return createInputRecord(recordFactory, this.inputObject);
 		}
@@ -142,7 +141,6 @@ public abstract class MappingRecordOperation extends EisOperation {
 	 */
 	protected class RecordExtractorImpl implements RecordExtractor {
 
-		@Override
 		public Object extractData(Record record) throws ResourceException, SQLException, DataAccessException {
 			return extractOutputData(record);
 		}

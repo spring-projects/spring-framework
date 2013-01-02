@@ -34,7 +34,6 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	@Override
 	public void beforeTestClass(TestContext testContext) throws Exception {
 		/* no-op */
 	}
@@ -43,7 +42,6 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		/* no-op */
 	}
@@ -52,7 +50,6 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	@Override
 	public void beforeTestMethod(TestContext testContext) throws Exception {
 		/* no-op */
 	}
@@ -61,7 +58,6 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		/* no-op */
 	}
@@ -70,7 +66,6 @@ public abstract class AbstractTestExecutionListener implements TestExecutionList
 	 * The default implementation is <em>empty</em>. Can be overridden by
 	 * subclasses as necessary.
 	 */
-	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {
 		/* no-op */
 	}

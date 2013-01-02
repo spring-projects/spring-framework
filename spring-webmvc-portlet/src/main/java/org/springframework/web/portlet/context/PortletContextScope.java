@@ -62,7 +62,6 @@ public class PortletContextScope implements Scope, DisposableBean {
 	}
 
 
-	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
 		Object scopedObject = this.portletContext.getAttribute(name);
 		if (scopedObject == null) {
@@ -72,7 +71,6 @@ public class PortletContextScope implements Scope, DisposableBean {
 		return scopedObject;
 	}
 
-	@Override
 	public Object remove(String name) {
 		Object scopedObject = this.portletContext.getAttribute(name);
 		if (scopedObject != null) {
@@ -85,17 +83,14 @@ public class PortletContextScope implements Scope, DisposableBean {
 		}
 	}
 
-	@Override
 	public void registerDestructionCallback(String name, Runnable callback) {
 		this.destructionCallbacks.put(name, callback);
 	}
 
-	@Override
 	public Object resolveContextualObject(String key) {
 		return null;
 	}
 
-	@Override
 	public String getConversationId() {
 		return null;
 	}
@@ -106,7 +101,6 @@ public class PortletContextScope implements Scope, DisposableBean {
 	 * To be called on ServletContext shutdown.
 	 * @see org.springframework.web.context.ContextCleanupListener
 	 */
-	@Override
 	public void destroy() {
 		for (Runnable runnable : this.destructionCallbacks.values()) {
 			runnable.run();

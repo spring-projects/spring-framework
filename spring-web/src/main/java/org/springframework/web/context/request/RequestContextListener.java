@@ -49,7 +49,6 @@ public class RequestContextListener implements ServletRequestListener {
 			RequestContextListener.class.getName() + ".REQUEST_ATTRIBUTES";
 
 
-	@Override
 	public void requestInitialized(ServletRequestEvent requestEvent) {
 		if (!(requestEvent.getServletRequest() instanceof HttpServletRequest)) {
 			throw new IllegalArgumentException(
@@ -62,7 +61,6 @@ public class RequestContextListener implements ServletRequestListener {
 		RequestContextHolder.setRequestAttributes(attributes);
 	}
 
-	@Override
 	public void requestDestroyed(ServletRequestEvent requestEvent) {
 		ServletRequestAttributes attributes =
 				(ServletRequestAttributes) requestEvent.getServletRequest().getAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE);

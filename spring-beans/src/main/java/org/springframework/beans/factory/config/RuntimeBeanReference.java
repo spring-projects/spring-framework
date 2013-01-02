@@ -61,7 +61,6 @@ public class RuntimeBeanReference implements BeanReference {
 	}
 
 
-	@Override
 	public String getBeanName() {
 		return this.beanName;
 	}
@@ -82,7 +81,6 @@ public class RuntimeBeanReference implements BeanReference {
 		this.source = source;
 	}
 
-	@Override
 	public Object getSource() {
 		return this.source;
 	}

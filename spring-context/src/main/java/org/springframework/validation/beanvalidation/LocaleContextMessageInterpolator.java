@@ -45,12 +45,10 @@ public class LocaleContextMessageInterpolator implements MessageInterpolator {
 	}
 
 
-	@Override
 	public String interpolate(String message, Context context) {
 		return this.targetInterpolator.interpolate(message, context, LocaleContextHolder.getLocale());
 	}
 
-	@Override
 	public String interpolate(String message, Context context, Locale locale) {
 		return this.targetInterpolator.interpolate(message, context, locale);
 	}

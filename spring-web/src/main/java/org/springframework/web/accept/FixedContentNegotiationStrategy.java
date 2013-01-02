@@ -43,7 +43,6 @@ public class FixedContentNegotiationStrategy implements ContentNegotiationStrate
 		this.defaultContentType = defaultContentType;
 	}
 
-	@Override
 	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Requested media types is " + this.defaultContentType + " (based on default MediaType)");

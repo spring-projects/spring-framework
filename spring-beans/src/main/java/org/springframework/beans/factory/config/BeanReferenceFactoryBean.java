@@ -65,7 +65,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		this.targetBeanName = targetBeanName;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (this.targetBeanName == null) {
@@ -77,7 +76,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 	}
 
 
-	@Override
 	public Object getObject() throws BeansException {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -85,7 +83,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.getBean(this.targetBeanName);
 	}
 
-	@Override
 	public Class getObjectType() {
 		if (this.beanFactory == null) {
 			return null;
@@ -93,7 +90,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.getType(this.targetBeanName);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -101,7 +97,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.isSingleton(this.targetBeanName);
 	}
 
-	@Override
 	public boolean isPrototype() {
 		if (this.beanFactory == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -109,7 +104,6 @@ public class BeanReferenceFactoryBean implements SmartFactoryBean, BeanFactoryAw
 		return this.beanFactory.isPrototype(this.targetBeanName);
 	}
 
-	@Override
 	public boolean isEagerInit() {
 		return false;
 	}

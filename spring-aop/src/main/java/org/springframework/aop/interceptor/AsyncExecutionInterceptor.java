@@ -75,11 +75,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
 	 * otherwise.
 	 */
-	@Override
 	public Object invoke(final MethodInvocation invocation) throws Throwable {
 		Future<?> result = this.determineAsyncExecutor(invocation.getMethod()).submit(
 				new Callable<Object>() {
-					@Override
 					public Object call() throws Exception {
 						try {
 							Object result = invocation.proceed();
@@ -115,7 +113,6 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 		return null;
 	}
 
-	@Override
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE;
 	}

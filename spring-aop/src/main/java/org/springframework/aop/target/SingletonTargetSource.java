@@ -55,22 +55,18 @@ public class SingletonTargetSource implements TargetSource, Serializable {
 	}
 
 
-	@Override
 	public Class<?> getTargetClass() {
 		return this.target.getClass();
 	}
 
-	@Override
 	public Object getTarget() {
 		return this.target;
 	}
 
-	@Override
 	public void releaseTarget(Object target) {
 		// nothing to do
 	}
 
-	@Override
 	public boolean isStatic() {
 		return true;
 	}

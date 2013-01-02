@@ -100,7 +100,6 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	 * the specified destination type: QueueConnectionFactory for queues,
 	 * and TopicConnectionFactory for topics.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
@@ -128,7 +127,6 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Connection createConnection() throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnectionFactory) getConnectionFactory()).createTopicConnection();
@@ -141,7 +139,6 @@ public class JmsTransactionManager102 extends JmsTransactionManager {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Session createSession(Connection con) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnection) con).createTopicSession(true, Session.AUTO_ACKNOWLEDGE);

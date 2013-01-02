@@ -61,7 +61,6 @@ public class SimpleHttpInvokerServiceExporter extends RemoteInvocationSerializin
 	 * @see #invokeAndCreateResult(org.springframework.remoting.support.RemoteInvocation, Object)
 	 * @see #writeRemoteInvocationResult(com.sun.net.httpserver.HttpExchange, org.springframework.remoting.support.RemoteInvocationResult)
 	 */
-	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 		try {
 			RemoteInvocation invocation = readRemoteInvocation(exchange);

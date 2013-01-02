@@ -49,17 +49,14 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 		}
 	}
 
-	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	@Override
 	public T getValue() {
 		return this.value;
 	}
 
-	@Override
 	public boolean isNegated() {
 		return this.isNegated;
 	}

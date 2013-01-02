@@ -129,7 +129,6 @@ public abstract class JdbcAccessor implements InitializingBean {
 	 * Eagerly initialize the exception translator, if demanded,
 	 * creating a default one for the specified DataSource if none set.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		if (getDataSource() == null) {
 			throw new IllegalArgumentException("Property 'dataSource' is required");

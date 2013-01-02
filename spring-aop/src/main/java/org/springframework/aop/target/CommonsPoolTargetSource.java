@@ -252,12 +252,10 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 		this.pool.returnObject(target);
 	}
 
-	@Override
 	public int getActiveCount() throws UnsupportedOperationException {
 		return this.pool.getNumActive();
 	}
 
-	@Override
 	public int getIdleCount() throws UnsupportedOperationException {
 		return this.pool.getNumIdle();
 	}
@@ -266,7 +264,6 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	/**
 	 * Closes the underlying {@code ObjectPool} when destroying this object.
 	 */
-	@Override
 	public void destroy() throws Exception {
 		logger.debug("Closing Commons ObjectPool");
 		this.pool.close();
@@ -277,26 +274,21 @@ public class CommonsPoolTargetSource extends AbstractPoolingTargetSource
 	// Implementation of org.apache.commons.pool.PoolableObjectFactory interface
 	//----------------------------------------------------------------------------
 
-	@Override
 	public Object makeObject() throws BeansException {
 		return newPrototypeInstance();
 	}
 
-	@Override
 	public void destroyObject(Object obj) throws Exception {
 		destroyPrototypeInstance(obj);
 	}
 
-	@Override
 	public boolean validateObject(Object obj) {
 		return true;
 	}
 
-	@Override
 	public void activateObject(Object obj) {
 	}
 
-	@Override
 	public void passivateObject(Object obj) {
 	}
 

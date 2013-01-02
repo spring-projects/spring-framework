@@ -39,12 +39,10 @@ import org.springframework.web.servlet.ModelAndView;
  */
 public class HttpRequestHandlerAdapter implements HandlerAdapter {
 
-	@Override
 	public boolean supports(Object handler) {
 		return (handler instanceof HttpRequestHandler);
 	}
 
-	@Override
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
@@ -52,7 +50,6 @@ public class HttpRequestHandlerAdapter implements HandlerAdapter {
 		return null;
 	}
 
-	@Override
 	public long getLastModified(HttpServletRequest request, Object handler) {
 		if (handler instanceof LastModified) {
 			return ((LastModified) handler).getLastModified(request);

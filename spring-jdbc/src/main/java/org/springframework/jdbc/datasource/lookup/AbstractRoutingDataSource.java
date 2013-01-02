@@ -107,7 +107,6 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.targetDataSources == null) {
 			throw new IllegalArgumentException("Property 'targetDataSources' is required");
@@ -159,12 +158,10 @@ public abstract class AbstractRoutingDataSource extends AbstractDataSource imple
 	}
 
 
-	@Override
 	public Connection getConnection() throws SQLException {
 		return determineTargetDataSource().getConnection();
 	}
 
-	@Override
 	public Connection getConnection(String username, String password) throws SQLException {
 		return determineTargetDataSource().getConnection(username, password);
 	}

@@ -84,7 +84,6 @@ public class InvertibleComparator<T> implements Comparator<T>, Serializable {
 	}
 
 
-	@Override
 	public int compare(T o1, T o2) {
 		int result = this.comparator.compare(o1, o2);
 		if (result != 0) {

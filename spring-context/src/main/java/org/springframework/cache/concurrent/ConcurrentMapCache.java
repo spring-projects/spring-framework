@@ -83,12 +83,10 @@ public class ConcurrentMapCache implements Cache {
 	}
 
 
-	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	@Override
 	public ConcurrentMap getNativeCache() {
 		return this.store;
 	}
@@ -97,23 +95,19 @@ public class ConcurrentMapCache implements Cache {
 		return this.allowNullValues;
 	}
 
-	@Override
 	public ValueWrapper get(Object key) {
 		Object value = this.store.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
 	}
 
-	@Override
 	public void put(Object key, Object value) {
 		this.store.put(key, toStoreValue(value));
 	}
 
-	@Override
 	public void evict(Object key) {
 		this.store.remove(key);
 	}
 
-	@Override
 	public void clear() {
 		this.store.clear();
 	}

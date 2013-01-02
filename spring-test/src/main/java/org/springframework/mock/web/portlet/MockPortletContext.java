@@ -126,12 +126,10 @@ public class MockPortletContext implements PortletContext {
 	}
 
 
-	@Override
 	public String getServerInfo() {
 		return "MockPortal/1.0";
 	}
 
-	@Override
 	public PortletRequestDispatcher getRequestDispatcher(String path) {
 		if (!path.startsWith("/")) {
 			throw new IllegalArgumentException(
@@ -140,12 +138,10 @@ public class MockPortletContext implements PortletContext {
 		return new MockPortletRequestDispatcher(path);
 	}
 
-	@Override
 	public PortletRequestDispatcher getNamedDispatcher(String path) {
 		return null;
 	}
 
-	@Override
 	public InputStream getResourceAsStream(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -157,22 +153,18 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	@Override
 	public int getMajorVersion() {
 		return 2;
 	}
 
-	@Override
 	public int getMinorVersion() {
 		return 0;
 	}
 
-	@Override
 	public String getMimeType(String filePath) {
 		return MimeTypeResolver.getMimeType(filePath);
 	}
 
-	@Override
 	public String getRealPath(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -184,7 +176,6 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	@Override
 	public Set<String> getResourcePaths(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -203,7 +194,6 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	@Override
 	public URL getResource(String path) throws MalformedURLException {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -215,17 +205,14 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	@Override
 	public Object getAttribute(String name) {
 		return this.attributes.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getAttributeNames() {
 		return new Vector<String>(this.attributes.keySet()).elements();
 	}
 
-	@Override
 	public void setAttribute(String name, Object value) {
 		if (value != null) {
 			this.attributes.put(name, value);
@@ -235,7 +222,6 @@ public class MockPortletContext implements PortletContext {
 		}
 	}
 
-	@Override
 	public void removeAttribute(String name) {
 		this.attributes.remove(name);
 	}
@@ -245,23 +231,19 @@ public class MockPortletContext implements PortletContext {
 		this.initParameters.put(name, value);
 	}
 
-	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}
 
-	@Override
 	public void log(String message) {
 		logger.info(message);
 	}
 
-	@Override
 	public void log(String message, Throwable t) {
 		logger.info(message, t);
 	}
@@ -270,7 +252,6 @@ public class MockPortletContext implements PortletContext {
 		this.portletContextName = portletContextName;
 	}
 
-	@Override
 	public String getPortletContextName() {
 		return this.portletContextName;
 	}
@@ -279,7 +260,6 @@ public class MockPortletContext implements PortletContext {
 		this.containerRuntimeOptions.add(key);
 	}
 
-	@Override
 	public Enumeration<String> getContainerRuntimeOptions() {
 		return Collections.enumeration(this.containerRuntimeOptions);
 	}

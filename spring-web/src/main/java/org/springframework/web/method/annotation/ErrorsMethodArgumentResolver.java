@@ -40,13 +40,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ErrorsMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return Errors.class.isAssignableFrom(paramType);
 	}
 
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

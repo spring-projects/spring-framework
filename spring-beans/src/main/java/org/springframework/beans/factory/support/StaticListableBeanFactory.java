@@ -75,7 +75,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	// Implementation of BeanFactory interface
 	//---------------------------------------------------------------------
 
-	@Override
 	public Object getBean(String name) throws BeansException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 		Object bean = this.beans.get(beanName);
@@ -104,7 +103,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		}
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getBean(String name, Class<T> requiredType) throws BeansException {
 		Object bean = getBean(name);
@@ -114,7 +112,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return (T) bean;
 	}
 
-	@Override
 	public <T> T getBean(Class<T> requiredType) throws BeansException {
 		String[] beanNames = getBeanNamesForType(requiredType);
 		if (beanNames.length == 1) {
@@ -125,7 +122,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		}
 	}
 
-	@Override
 	public Object getBean(String name, Object... args) throws BeansException {
 		if (args != null) {
 			throw new UnsupportedOperationException(
@@ -134,19 +130,16 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return getBean(name);
 	}
 
-	@Override
 	public boolean containsBean(String name) {
 		return this.beans.containsKey(name);
 	}
 
-	@Override
 	public boolean isSingleton(String name) throws NoSuchBeanDefinitionException {
 		Object bean = getBean(name);
 		// In case of FactoryBean, return singleton status of created object.
 		return (bean instanceof FactoryBean && ((FactoryBean) bean).isSingleton());
 	}
 
-	@Override
 	public boolean isPrototype(String name) throws NoSuchBeanDefinitionException {
 		Object bean = getBean(name);
 		// In case of FactoryBean, return prototype status of created object.
@@ -154,13 +147,11 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 				(bean instanceof FactoryBean && !((FactoryBean) bean).isSingleton()));
 	}
 
-	@Override
 	public boolean isTypeMatch(String name, Class targetType) throws NoSuchBeanDefinitionException {
 		Class type = getType(name);
 		return (targetType == null || (type != null && targetType.isAssignableFrom(type)));
 	}
 
-	@Override
 	public Class<?> getType(String name) throws NoSuchBeanDefinitionException {
 		String beanName = BeanFactoryUtils.transformedBeanName(name);
 
@@ -177,7 +168,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return bean.getClass();
 	}
 
-	@Override
 	public String[] getAliases(String name) {
 		return new String[0];
 	}
@@ -187,27 +177,22 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 	// Implementation of ListableBeanFactory interface
 	//---------------------------------------------------------------------
 
-	@Override
 	public boolean containsBeanDefinition(String name) {
 		return this.beans.containsKey(name);
 	}
 
-	@Override
 	public int getBeanDefinitionCount() {
 		return this.beans.size();
 	}
 
-	@Override
 	public String[] getBeanDefinitionNames() {
 		return StringUtils.toStringArray(this.beans.keySet());
 	}
 
-	@Override
 	public String[] getBeanNamesForType(Class type) {
 		return getBeanNamesForType(type, true, true);
 	}
 
-	@Override
 	public String[] getBeanNamesForType(Class type, boolean includeNonSingletons, boolean includeFactoryBeans) {
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
 		List<String> matches = new ArrayList<String>();
@@ -230,12 +215,10 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return StringUtils.toStringArray(matches);
 	}
 
-	@Override
 	public <T> Map<String, T> getBeansOfType(Class<T> type) throws BeansException {
 		return getBeansOfType(type, true, true);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Map<String, T> getBeansOfType(Class<T> type, boolean includeNonSingletons, boolean includeFactoryBeans)
 			throws BeansException {
@@ -272,7 +255,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return matches;
 	}
 
-	@Override
 	public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType)
 			throws BeansException {
 
@@ -285,7 +267,6 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 		return results;
 	}
 
-	@Override
 	public <A extends Annotation> A findAnnotationOnBean(String beanName, Class<A> annotationType) {
 		return AnnotationUtils.findAnnotation(getType(beanName), annotationType);
 	}

@@ -40,7 +40,6 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 	private ServletContext servletContext;
 
 
-	@Override
 	public final void setServletContext(ServletContext servletContext) {
 		if (servletContext != this.servletContext) {
 			this.servletContext = servletContext;

@@ -101,12 +101,10 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		DBConnectionManager.getInstance().addConnectionProvider(
 				TX_DATA_SOURCE_PREFIX + getInstanceName(),
 				new ConnectionProvider() {
-					@Override
 					public Connection getConnection() throws SQLException {
 						// Return a transactional Connection, if any.
 						return DataSourceUtils.doGetConnection(dataSource);
 					}
-					@Override
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}
@@ -126,12 +124,10 @@ public class LocalDataSourceJobStore extends JobStoreCMT {
 		DBConnectionManager.getInstance().addConnectionProvider(
 				NON_TX_DATA_SOURCE_PREFIX + getInstanceName(),
 				new ConnectionProvider() {
-					@Override
 					public Connection getConnection() throws SQLException {
 						// Always return a non-transactional Connection.
 						return nonTxDataSourceToUse.getConnection();
 					}
-					@Override
 					public void shutdown() {
 						// Do nothing - a Spring-managed DataSource has its own lifecycle.
 					}

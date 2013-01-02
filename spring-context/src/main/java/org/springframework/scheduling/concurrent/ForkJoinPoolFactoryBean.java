@@ -82,30 +82,25 @@ public class ForkJoinPoolFactoryBean implements FactoryBean<ForkJoinPool>, Initi
 		this.asyncMode = asyncMode;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		this.forkJoinPool =
 				new ForkJoinPool(this.parallelism, this.threadFactory, this.uncaughtExceptionHandler, this.asyncMode);
 	}
 
 
-	@Override
 	public ForkJoinPool getObject() {
 		return this.forkJoinPool;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return ForkJoinPool.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
-	@Override
 	public void destroy() {
 		this.forkJoinPool.shutdown();
 	}

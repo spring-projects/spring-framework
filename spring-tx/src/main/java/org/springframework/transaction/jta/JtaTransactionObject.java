@@ -60,7 +60,6 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	/**
 	 * This implementation checks the UserTransaction's rollback-only flag.
 	 */
-	@Override
 	public boolean isRollbackOnly() {
 		if (this.userTransaction == null) {
 			return false;
@@ -79,7 +78,6 @@ public class JtaTransactionObject implements SmartTransactionObject {
 	 * assuming that they will flush all affected ORM sessions.
 	 * @see org.springframework.transaction.support.TransactionSynchronization#flush()
 	 */
-	@Override
 	public void flush() {
 		TransactionSynchronizationUtils.triggerFlush();
 	}

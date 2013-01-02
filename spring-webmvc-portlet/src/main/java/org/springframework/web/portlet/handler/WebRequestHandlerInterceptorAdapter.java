@@ -76,7 +76,6 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 	}
 
 
-	@Override
 	public boolean preHandleAction(ActionRequest request, ActionResponse response, Object handler) throws Exception {
 		if (!this.renderPhaseOnly) {
 			this.requestInterceptor.preHandle(new PortletWebRequest(request));
@@ -84,7 +83,6 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 		return true;
 	}
 
-	@Override
 	public void afterActionCompletion(
 			ActionRequest request, ActionResponse response, Object handler, Exception ex) throws Exception {
 
@@ -93,13 +91,11 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 		}
 	}
 
-	@Override
 	public boolean preHandleRender(RenderRequest request, RenderResponse response, Object handler) throws Exception {
 		this.requestInterceptor.preHandle(new PortletWebRequest(request));
 		return true;
 	}
 
-	@Override
 	public void postHandleRender(
 			RenderRequest request, RenderResponse response, Object handler, ModelAndView modelAndView) throws Exception {
 
@@ -107,14 +103,12 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 				(modelAndView != null && !modelAndView.wasCleared() ? modelAndView.getModelMap() : null));
 	}
 
-	@Override
 	public void afterRenderCompletion(
 			RenderRequest request, RenderResponse response, Object handler, Exception ex) throws Exception {
 
 		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
 	}
 
-	@Override
 	public boolean preHandleResource(ResourceRequest request, ResourceResponse response, Object handler)
 			throws Exception {
 
@@ -122,7 +116,6 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 		return true;
 	}
 
-	@Override
 	public void postHandleResource(ResourceRequest request, ResourceResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
 
@@ -130,20 +123,17 @@ public class WebRequestHandlerInterceptorAdapter implements HandlerInterceptor {
 				(modelAndView != null ? modelAndView.getModelMap() : null));
 	}
 
-	@Override
 	public void afterResourceCompletion(ResourceRequest request, ResourceResponse response, Object handler,
 			Exception ex) throws Exception {
 
 		this.requestInterceptor.afterCompletion(new PortletWebRequest(request), ex);
 	}
 
-	@Override
 	public boolean preHandleEvent(EventRequest request, EventResponse response, Object handler) throws Exception {
 		this.requestInterceptor.preHandle(new PortletWebRequest(request));
 		return true;
 	}
 
-	@Override
 	public void afterEventCompletion(EventRequest request, EventResponse response, Object handler, Exception ex)
 			throws Exception {
 

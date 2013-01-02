@@ -55,7 +55,6 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 	}
 
 
-	@Override
 	public int compare(Class<? extends Throwable> o1, Class<? extends Throwable> o2) {
 		int depth1 = getDepth(o1, this.targetException, 0);
 		int depth2 = getDepth(o2, this.targetException, 0);

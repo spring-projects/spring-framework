@@ -42,7 +42,6 @@ public class MethodInvocationException extends PropertyAccessException {
 		super(propertyChangeEvent, "Property '" + propertyChangeEvent.getPropertyName() + "' threw exception", cause);
 	}
 
-	@Override
 	public String getErrorCode() {
 		return ERROR_CODE;
 	}

@@ -92,37 +92,30 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	}
 
 
-	@Override
 	public void add(int index, E element) {
 		this.backingList.add(index, element);
 	}
 
-	@Override
 	public boolean add(E o) {
 		return this.backingList.add(o);
 	}
 
-	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		return this.backingList.addAll(c);
 	}
 
-	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		return this.backingList.addAll(index, c);
 	}
 
-	@Override
 	public void clear() {
 		this.backingList.clear();
 	}
 
-	@Override
 	public boolean contains(Object o) {
 		return this.backingList.contains(o);
 	}
 
-	@Override
 	public boolean containsAll(Collection c) {
 		return this.backingList.containsAll(c);
 	}
@@ -131,7 +124,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 	 * Get the element at the supplied index, creating it if there is
 	 * no element at that index.
 	 */
-	@Override
 	public E get(int index) {
 		int backingListSize = this.backingList.size();
 		E element = null;
@@ -152,77 +144,62 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 		return element;
 	}
 
-	@Override
 	public int indexOf(Object o) {
 		return this.backingList.indexOf(o);
 	}
 
-	@Override
 	public boolean isEmpty() {
 		return this.backingList.isEmpty();
 	}
 
-	@Override
 	public Iterator<E> iterator() {
 		return this.backingList.iterator();
 	}
 
-	@Override
 	public int lastIndexOf(Object o) {
 		return this.backingList.lastIndexOf(o);
 	}
 
-	@Override
 	public ListIterator<E> listIterator() {
 		return this.backingList.listIterator();
 	}
 
-	@Override
 	public ListIterator<E> listIterator(int index) {
 		return this.backingList.listIterator(index);
 	}
 
-	@Override
 	public E remove(int index) {
 		return this.backingList.remove(index);
 	}
 
-	@Override
 	public boolean remove(Object o) {
 		return this.backingList.remove(o);
 	}
 
-	@Override
 	public boolean removeAll(Collection<?> c) {
 		return this.backingList.removeAll(c);
 	}
 
-	@Override
 	public boolean retainAll(Collection<?> c) {
 		return this.backingList.retainAll(c);
 	}
 
-	@Override
 	public E set(int index, E element) {
 		return this.backingList.set(index, element);
 	}
 
-	@Override
 	public int size() {
 		return this.backingList.size();
 	}
 
-	@Override
 	public List<E> subList(int fromIndex, int toIndex) {
 		return this.backingList.subList(fromIndex, toIndex);
 	}
 
-	@Override
 	public Object[] toArray() {
 		return this.backingList.toArray();
 	}
 
-	@Override
 	public <T> T[] toArray(T[] a) {
 		return this.backingList.toArray(a);
 	}
@@ -282,7 +259,6 @@ public class AutoPopulatingList<E> implements List<E>, Serializable {
 			this.elementClass = elementClass;
 		}
 
-		@Override
 		public E createElement(int index) {
 			try {
 				return this.elementClass.newInstance();

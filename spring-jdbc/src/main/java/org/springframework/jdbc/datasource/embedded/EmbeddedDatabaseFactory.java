@@ -172,54 +172,44 @@ public class EmbeddedDatabaseFactory {
 			this.dataSource = dataSource;
 		}
 
-		@Override
 		public Connection getConnection() throws SQLException {
 			return this.dataSource.getConnection();
 		}
 
-		@Override
 		public Connection getConnection(String username, String password) throws SQLException {
 			return this.dataSource.getConnection(username, password);
 		}
 
-		@Override
 		public PrintWriter getLogWriter() throws SQLException {
 			return this.dataSource.getLogWriter();
 		}
 
-		@Override
 		public void setLogWriter(PrintWriter out) throws SQLException {
 			this.dataSource.setLogWriter(out);
 		}
 
-		@Override
 		public int getLoginTimeout() throws SQLException {
 			return this.dataSource.getLoginTimeout();
 		}
 
-		@Override
 		public void setLoginTimeout(int seconds) throws SQLException {
 			this.dataSource.setLoginTimeout(seconds);
 		}
 
-		@Override
 		public <T> T unwrap(Class<T> iface) throws SQLException {
 			return this.dataSource.unwrap(iface);
 		}
 
-		@Override
 		public boolean isWrapperFor(Class<?> iface) throws SQLException {
 			return this.dataSource.isWrapperFor(iface);
 		}
 
 		// getParentLogger() is required for JDBC 4.1 compatibility
-		@Override
 		@SuppressWarnings("unused")
 		public Logger getParentLogger() {
 			return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 		}
 
-		@Override
 		public void shutdown() {
 			shutdownDatabase();
 		}

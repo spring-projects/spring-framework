@@ -30,7 +30,6 @@ import org.springframework.util.Assert;
  */
 public class DefaultRemoteInvocationExecutor implements RemoteInvocationExecutor {
 
-	@Override
 	public Object invoke(RemoteInvocation invocation, Object targetObject)
 			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException{
 

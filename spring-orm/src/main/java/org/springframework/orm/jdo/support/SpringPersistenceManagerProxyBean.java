@@ -144,7 +144,6 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 		return this.allowCreate;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getPersistenceManagerFactory() == null) {
 			throw new IllegalArgumentException("Property 'persistenceManagerFactory' is required");
@@ -159,17 +158,14 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 	}
 
 
-	@Override
 	public PersistenceManager getObject() {
 		return this.proxy;
 	}
 
-	@Override
 	public Class<? extends PersistenceManager> getObjectType() {
 		return getPersistenceManagerInterface();
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -181,7 +177,6 @@ public class SpringPersistenceManagerProxyBean implements FactoryBean<Persistenc
 	 */
 	private class PersistenceManagerInvocationHandler implements InvocationHandler {
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on PersistenceManager interface coming in...
 

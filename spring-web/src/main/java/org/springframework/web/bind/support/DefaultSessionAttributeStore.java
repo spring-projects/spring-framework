@@ -46,7 +46,6 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 	}
 
 
-	@Override
 	public void storeAttribute(WebRequest request, String attributeName, Object attributeValue) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -55,7 +54,6 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 		request.setAttribute(storeAttributeName, attributeValue, WebRequest.SCOPE_SESSION);
 	}
 
-	@Override
 	public Object retrieveAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");
@@ -63,7 +61,6 @@ public class DefaultSessionAttributeStore implements SessionAttributeStore {
 		return request.getAttribute(storeAttributeName, WebRequest.SCOPE_SESSION);
 	}
 
-	@Override
 	public void cleanupAttribute(WebRequest request, String attributeName) {
 		Assert.notNull(request, "WebRequest must not be null");
 		Assert.notNull(attributeName, "Attribute name must not be null");

@@ -364,7 +364,6 @@ public class MultiActionController extends AbstractController implements LastMod
 	 * Return -1 if there's no such handler, indicating that content must be updated.
 	 * @see org.springframework.web.servlet.mvc.LastModified#getLastModified(HttpServletRequest)
 	 */
-	@Override
 	public long getLastModified(HttpServletRequest request) {
 		try {
 			String handlerMethodName = this.methodNameResolver.getHandlerMethodName(request);

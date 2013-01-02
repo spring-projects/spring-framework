@@ -139,18 +139,15 @@ public class CronTriggerBean extends CronTrigger
 		this.jobDetail = jobDetail;
 	}
 
-	@Override
 	public JobDetail getJobDetail() {
 		return this.jobDetail;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.startDelay > 0) {
 			setStartTime(new Date(System.currentTimeMillis() + this.startDelay));

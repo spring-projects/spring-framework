@@ -191,7 +191,6 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 		}
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.objectMapper == null) {
 			this.objectMapper = new ObjectMapper();
@@ -230,17 +229,14 @@ public class JacksonObjectMapperFactoryBean implements FactoryBean<ObjectMapper>
 	/**
 	 * Return the singleton ObjectMapper.
 	 */
-	@Override
 	public ObjectMapper getObject() {
 		return this.objectMapper;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return ObjectMapper.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

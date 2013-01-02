@@ -40,7 +40,6 @@ public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 	/**
 	 * Return a new {@link ExtendedBeanInfo} for the given bean class.
 	 */
-	@Override
 	public BeanInfo getBeanInfo(Class<?> beanClass) throws IntrospectionException {
 		return supports(beanClass) ?
 				new ExtendedBeanInfo(Introspector.getBeanInfo(beanClass)) : null;
@@ -59,7 +58,6 @@ public class ExtendedBeanInfoFactory implements Ordered, BeanInfoFactory {
 		return false;
 	}
 
-	@Override
 	public int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE;
 	}

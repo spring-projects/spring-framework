@@ -50,7 +50,6 @@ class JmsListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String RECEIVE_TIMEOUT_ATTRIBUTE = "receive-timeout";
 
 
-	@Override
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
 		containerDef.setSource(parserContext.extractSource(containerEle));

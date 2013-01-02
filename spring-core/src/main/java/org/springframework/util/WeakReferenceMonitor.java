@@ -132,7 +132,6 @@ public class WeakReferenceMonitor {
 	 */
 	private static class MonitoringProcess implements Runnable {
 
-		@Override
 		public void run() {
 			logger.debug("Starting reference monitor thread");
 			// Check if there are any tracked entries left.

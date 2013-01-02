@@ -34,12 +34,10 @@ import org.springframework.aop.ThrowsAdvice;
 @SuppressWarnings("serial")
 class ThrowsAdviceAdapter implements AdvisorAdapter, Serializable {
 
-	@Override
 	public boolean supportsAdvice(Advice advice) {
 		return (advice instanceof ThrowsAdvice);
 	}
 
-	@Override
 	public MethodInterceptor getInterceptor(Advisor advisor) {
 		return new ThrowsAdviceInterceptor(advisor.getAdvice());
 	}

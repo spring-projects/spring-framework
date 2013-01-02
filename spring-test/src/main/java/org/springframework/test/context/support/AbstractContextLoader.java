@@ -86,7 +86,6 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @since 3.1
 	 * @see #processLocations(Class, String...)
 	 */
-	@Override
 	public void processContextConfiguration(ContextConfigurationAttributes configAttributes) {
 		String[] processedLocations = processLocations(configAttributes.getDeclaringClass(),
 			configAttributes.getLocations());
@@ -175,7 +174,6 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * @see org.springframework.test.context.ContextLoader#processLocations(Class, String...)
 	 * @see #processContextConfiguration(ContextConfigurationAttributes)
 	 */
-	@Override
 	public final String[] processLocations(Class<?> clazz, String... locations) {
 		return (ObjectUtils.isEmpty(locations) && isGenerateDefaultLocations()) ? generateDefaultLocations(clazz)
 				: modifyLocations(clazz, locations);

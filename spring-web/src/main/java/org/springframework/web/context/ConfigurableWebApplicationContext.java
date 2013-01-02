@@ -74,7 +74,6 @@ public interface ConfigurableWebApplicationContext extends WebApplicationContext
 	/**
 	 * Return the {@link ConfigurableWebEnvironment} used by this web application context.
 	 */
-	@Override
 	ConfigurableWebEnvironment getEnvironment();
 
 	/**

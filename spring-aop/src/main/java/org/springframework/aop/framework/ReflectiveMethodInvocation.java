@@ -114,17 +114,14 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 
-	@Override
 	public final Object getProxy() {
 		return this.proxy;
 	}
 
-	@Override
 	public final Object getThis() {
 		return this.target;
 	}
 
-	@Override
 	public final AccessibleObject getStaticPart() {
 		return this.method;
 	}
@@ -134,23 +131,19 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * May or may not correspond with a method invoked on an underlying
 	 * implementation of that interface.
 	 */
-	@Override
 	public final Method getMethod() {
 		return this.method;
 	}
 
-	@Override
 	public final Object[] getArguments() {
 		return (this.arguments != null ? this.arguments : new Object[0]);
 	}
 
-	@Override
 	public void setArguments(Object[] arguments) {
 		this.arguments = arguments;
 	}
 
 
-	@Override
 	public Object proceed() throws Throwable {
 		//	We start with an index of -1 and increment early.
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
@@ -199,7 +192,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * current interceptor index.
 	 * @see java.lang.Object#clone()
 	 */
-	@Override
 	public MethodInvocation invocableClone() {
 		Object[] cloneArguments = null;
 		if (this.arguments != null) {
@@ -218,7 +210,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 * current interceptor index.
 	 * @see java.lang.Object#clone()
 	 */
-	@Override
 	public MethodInvocation invocableClone(Object[] arguments) {
 		// Force initialization of the user attributes Map,
 		// for having a shared Map reference in the clone.
@@ -239,7 +230,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	}
 
 
-	@Override
 	public void setUserAttribute(String key, Object value) {
 		if (value != null) {
 			if (this.userAttributes == null) {
@@ -254,7 +244,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		}
 	}
 
-	@Override
 	public Object getUserAttribute(String key) {
 		return (this.userAttributes != null ? this.userAttributes.get(key) : null);
 	}

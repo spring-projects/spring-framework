@@ -58,12 +58,10 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 	}
 
 
-	@Override
 	public void visit(String attributeName, Object attributeValue) {
 		this.attributes.put(attributeName, attributeValue);
 	}
 
-	@Override
 	public AnnotationVisitor visitAnnotation(String attributeName, String asmTypeDescriptor) {
 		String annotationType = Type.getType(asmTypeDescriptor).getClassName();
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
@@ -71,12 +69,10 @@ abstract class AbstractRecursiveAnnotationVisitor extends AnnotationVisitor {
 		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
 	}
 
-	@Override
 	public AnnotationVisitor visitArray(String attributeName) {
 		return new RecursiveAnnotationArrayVisitor(attributeName, this.attributes, this.classLoader);
 	}
 
-	@Override
 	public void visitEnum(String attributeName, String asmTypeDescriptor, String attributeValue) {
 		Object valueToUse = attributeValue;
 		try {
@@ -138,7 +134,6 @@ final class RecursiveAnnotationArrayVisitor extends AbstractRecursiveAnnotationV
 		return new RecursiveAnnotationAttributesVisitor(annotationType, nestedAttributes, this.classLoader);
 	}
 
-	@Override
 	public void visitEnd() {
 		if (!this.allNestedAttributes.isEmpty()) {
 			this.attributes.put(this.attributeName, this.allNestedAttributes.toArray(
@@ -165,7 +160,6 @@ class RecursiveAnnotationAttributesVisitor extends AbstractRecursiveAnnotationVi
 	}
 
 
-	@Override
 	public final void visitEnd() {
 		try {
 			Class<?> annotationClass = this.classLoader.loadClass(this.annotationType);

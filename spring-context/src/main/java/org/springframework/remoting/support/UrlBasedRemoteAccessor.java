@@ -46,7 +46,6 @@ public abstract class UrlBasedRemoteAccessor extends RemoteAccessor implements I
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getServiceUrl() == null) {
 			throw new IllegalArgumentException("Property 'serviceUrl' is required");

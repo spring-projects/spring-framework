@@ -93,7 +93,6 @@ public class OpMinus extends Operator {
 		}
 		return super.toStringAST();
 	}
-	@Override
 	public SpelNodeImpl getRightOperand() {
 		if (children.length<2) {return null;}
 		return children[1];

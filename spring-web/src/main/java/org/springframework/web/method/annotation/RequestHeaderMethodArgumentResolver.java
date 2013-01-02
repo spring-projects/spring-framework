@@ -52,7 +52,6 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 		super(beanFactory);
 	}
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestHeader.class)
 				&& !Map.class.isAssignableFrom(parameter.getParameterType());

@@ -87,22 +87,18 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
 	}
 
 
-	@Override
 	public void execute(Runnable task) {
 		this.adaptedExecutor.execute(task);
 	}
 
-	@Override
 	public void execute(Runnable task, long startTimeout) {
 		this.adaptedExecutor.execute(task, startTimeout);
 	}
 
-	@Override
 	public Future<?> submit(Runnable task) {
 		return this.adaptedExecutor.submit(task);
 	}
 
-	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		return this.adaptedExecutor.submit(task);
 	}
@@ -110,7 +106,6 @@ public class ConcurrentTaskExecutor implements SchedulingTaskExecutor {
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
-	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}

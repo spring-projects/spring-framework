@@ -45,7 +45,6 @@ public abstract class AbstractDataSource implements DataSource {
 	/**
 	 * Returns 0, indicating the default system timeout is to be used.
 	 */
-	@Override
 	public int getLoginTimeout() throws SQLException {
 		return 0;
 	}
@@ -53,7 +52,6 @@ public abstract class AbstractDataSource implements DataSource {
 	/**
 	 * Setting a login timeout is not supported.
 	 */
-	@Override
 	public void setLoginTimeout(int timeout) throws SQLException {
 		throw new UnsupportedOperationException("setLoginTimeout");
 	}
@@ -61,7 +59,6 @@ public abstract class AbstractDataSource implements DataSource {
 	/**
 	 * LogWriter methods are not supported.
 	 */
-	@Override
 	public PrintWriter getLogWriter() {
 		throw new UnsupportedOperationException("getLogWriter");
 	}
@@ -69,7 +66,6 @@ public abstract class AbstractDataSource implements DataSource {
 	/**
 	 * LogWriter methods are not supported.
 	 */
-	@Override
 	public void setLogWriter(PrintWriter pw) throws SQLException {
 		throw new UnsupportedOperationException("setLogWriter");
 	}
@@ -79,7 +75,6 @@ public abstract class AbstractDataSource implements DataSource {
 	// Implementation of JDBC 4.0's Wrapper interface
 	//---------------------------------------------------------------------
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		if (iface.isInstance(this)) {
@@ -89,7 +84,6 @@ public abstract class AbstractDataSource implements DataSource {
 				"] cannot be unwrapped as [" + iface.getName() + "]");
 	}
 
-	@Override
 	public boolean isWrapperFor(Class<?> iface) throws SQLException {
 		return iface.isInstance(this);
 	}
@@ -99,7 +93,6 @@ public abstract class AbstractDataSource implements DataSource {
 	// Implementation of JDBC 4.1's getParentLogger method
 	//---------------------------------------------------------------------
 
-	@Override
 	public Logger getParentLogger() {
 		return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 	}

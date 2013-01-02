@@ -104,22 +104,18 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		}
 	}
 
-	@Override
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
 
-	@Override
 	public void setPortletContext(PortletContext portletContext) {
 		this.portletContext = portletContext;
 	}
 
-	@Override
 	public PortletContext getPortletContext() {
 		return this.portletContext;
 	}
 
-	@Override
 	public void setPortletConfig(PortletConfig portletConfig) {
 		this.portletConfig = portletConfig;
 		if (portletConfig != null && this.portletContext == null) {
@@ -127,12 +123,10 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		}
 	}
 
-	@Override
 	public PortletConfig getPortletConfig() {
 		return this.portletConfig;
 	}
 
-	@Override
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
 		if (namespace != null) {
@@ -140,7 +134,6 @@ public abstract class AbstractRefreshablePortletApplicationContext extends Abstr
 		}
 	}
 
-	@Override
 	public String getNamespace() {
 		return this.namespace;
 	}

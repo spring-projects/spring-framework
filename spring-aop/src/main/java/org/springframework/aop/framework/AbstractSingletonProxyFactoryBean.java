@@ -122,7 +122,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		this.proxyClassLoader = classLoader;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (this.proxyClassLoader == null) {
 			this.proxyClassLoader = classLoader;
@@ -130,7 +129,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.target == null) {
 			throw new IllegalArgumentException("Property 'target' is required");
@@ -192,7 +190,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 	}
 
 
-	@Override
 	public Object getObject() {
 		if (this.proxy == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -200,7 +197,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		return this.proxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();
@@ -217,7 +213,6 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		return null;
 	}
 
-	@Override
 	public final boolean isSingleton() {
 		return true;
 	}

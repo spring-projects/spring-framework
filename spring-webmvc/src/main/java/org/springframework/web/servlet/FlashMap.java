@@ -135,7 +135,6 @@ public final class FlashMap extends HashMap<String, Object> implements Comparabl
 	 * path or has more target URL parameters. Before comparing FlashMap
 	 * instances ensure that they match a given request.
 	 */
-	@Override
 	public int compareTo(FlashMap other) {
 		int thisUrlPath = (this.targetRequestPath != null) ? 1 : 0;
 		int otherUrlPath = (other.targetRequestPath != null) ? 1 : 0;

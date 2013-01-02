@@ -67,17 +67,14 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 
-	@Override
 	public boolean isPattern(String path) {
 		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
 	}
 
-	@Override
 	public boolean match(String pattern, String path) {
 		return doMatch(pattern, path, true, null);
 	}
 
-	@Override
 	public boolean matchStart(String pattern, String path) {
 		return doMatch(pattern, path, false, null);
 	}
@@ -248,7 +245,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * <p>Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but
 	 * does <strong>not</strong> enforce this.
 	 */
-	@Override
 	public String extractPathWithinPattern(String pattern, String path) {
 		String[] patternParts = StringUtils.tokenizeToStringArray(pattern, this.pathSeparator);
 		String[] pathParts = StringUtils.tokenizeToStringArray(path, this.pathSeparator);
@@ -279,7 +275,6 @@ public class AntPathMatcher implements PathMatcher {
 		return builder.toString();
 	}
 
-	@Override
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		Map<String, String> variables = new LinkedHashMap<String, String>();
 		boolean result = doMatch(pattern, path, true, variables);
@@ -306,7 +301,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return the combination of the two patterns
 	 * @throws IllegalArgumentException when the two patterns cannot be combined
 	 */
-	@Override
 	public String combine(String pattern1, String pattern2) {
 		if (!StringUtils.hasText(pattern1) && !StringUtils.hasText(pattern2)) {
 			return "";
@@ -385,7 +379,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
-	@Override
 	public Comparator<String> getPatternComparator(String path) {
 		return new AntPatternComparator(path);
 	}
@@ -399,7 +392,6 @@ public class AntPathMatcher implements PathMatcher {
 			this.path = path;
 		}
 
-		@Override
 		public int compare(String pattern1, String pattern2) {
 			if (pattern1 == null && pattern2 == null) {
 				return 0;

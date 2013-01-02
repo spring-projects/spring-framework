@@ -45,13 +45,11 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(RequestHeader.class)
 				&& Map.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

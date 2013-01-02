@@ -211,7 +211,6 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 	}
 
 
-	@Override
 	public <T> T execute(TransactionDefinition definition, TransactionCallback<T> callback) throws TransactionException {
 		if (definition == null) {
 			// Use defaults if no transaction definition given.
@@ -331,7 +330,6 @@ public class WebSphereUowTransactionManager extends JtaTransactionManager
 			this.debug = debug;
 		}
 
-		@Override
 		public void run() {
 			DefaultTransactionStatus status = prepareTransactionStatus(
 					this.definition, (this.actualTransaction ? this : null),

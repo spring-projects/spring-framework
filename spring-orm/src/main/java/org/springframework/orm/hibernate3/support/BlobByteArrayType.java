@@ -60,12 +60,10 @@ public class BlobByteArrayType extends AbstractLobType  {
 		super(lobHandler, jtaTransactionManager);
 	}
 
-	@Override
 	public int[] sqlTypes() {
 		return new int[] {Types.BLOB};
 	}
 
-	@Override
 	public Class returnedClass() {
 		return byte[].class;
 	}

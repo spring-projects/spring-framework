@@ -64,12 +64,10 @@ class PassThroughClob implements Clob {
 	}
 
 
-	@Override
 	public long length() throws SQLException {
 		return this.contentLength;
 	}
 
-	@Override
 	public Reader getCharacterStream() throws SQLException {
 		try {
 			if (this.content != null) {
@@ -87,7 +85,6 @@ class PassThroughClob implements Clob {
 		}
 	}
 
-	@Override
 	public InputStream getAsciiStream() throws SQLException {
 		try {
 			if (this.content != null) {
@@ -110,52 +107,42 @@ class PassThroughClob implements Clob {
 	}
 
 
-	@Override
 	public Reader getCharacterStream(long pos, long length) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public Writer setCharacterStream(long pos) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public OutputStream setAsciiStream(long pos) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public String getSubString(long pos, int length) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public int setString(long pos, String str) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public int setString(long pos, String str, int offset, int len) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public long position(String searchstr, long start) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public long position(Clob searchstr, long start) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void truncate(long len) throws SQLException {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void free() throws SQLException {
 		// no-op
 	}

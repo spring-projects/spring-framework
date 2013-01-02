@@ -66,12 +66,10 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 	}
 
 
-	@Override
 	public void setParentName(String parentName) {
 		this.parentName = parentName;
 	}
 
-	@Override
 	public String getParentName() {
 		return this.parentName;
 	}

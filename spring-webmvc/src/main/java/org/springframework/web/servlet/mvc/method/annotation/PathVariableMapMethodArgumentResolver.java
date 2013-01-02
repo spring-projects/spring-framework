@@ -42,7 +42,6 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		PathVariable annot = parameter.getParameterAnnotation(PathVariable.class);
 		return ((annot != null) && (Map.class.isAssignableFrom(parameter.getParameterType()))
@@ -52,7 +51,6 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 	/**
 	 * Return a Map with all URI template variables or an empty map.
 	 */
-	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 

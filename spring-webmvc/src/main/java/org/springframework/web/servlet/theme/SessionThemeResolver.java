@@ -46,14 +46,12 @@ public class SessionThemeResolver extends AbstractThemeResolver {
 	 */
 	public static final String THEME_SESSION_ATTRIBUTE_NAME = SessionThemeResolver.class.getName() + ".THEME";
 
-	@Override
 	public String resolveThemeName(HttpServletRequest request) {
 		String theme = (String) WebUtils.getSessionAttribute(request, THEME_SESSION_ATTRIBUTE_NAME);
 		// specific theme, or fallback to default?
 		return (theme != null ? theme : getDefaultThemeName());
 	}
 
-	@Override
 	public void setThemeName(HttpServletRequest request, HttpServletResponse response, String themeName) {
 		WebUtils.setSessionAttribute(request, THEME_SESSION_ATTRIBUTE_NAME, themeName);
 	}

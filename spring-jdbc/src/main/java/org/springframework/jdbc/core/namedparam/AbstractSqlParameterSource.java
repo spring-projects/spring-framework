@@ -61,7 +61,6 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * @return the SQL type of the parameter,
 	 * or {@code TYPE_UNKNOWN} if not registered
 	 */
-	@Override
 	public int getSqlType(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		Integer sqlType = this.sqlTypes.get(paramName);
@@ -77,7 +76,6 @@ public abstract class AbstractSqlParameterSource implements SqlParameterSource {
 	 * @return the type name of the parameter,
 	 * or {@code null} if not registered
 	 */
-	@Override
 	public String getTypeName(String paramName) {
 		Assert.notNull(paramName, "Parameter name must not be null");
 		return this.typeNames.get(paramName);

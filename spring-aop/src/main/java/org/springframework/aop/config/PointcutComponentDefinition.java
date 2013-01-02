@@ -46,7 +46,6 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 	}
 
 
-	@Override
 	public String getName() {
 		return this.pointcutBeanName;
 	}
@@ -61,7 +60,6 @@ public class PointcutComponentDefinition extends AbstractComponentDefinition {
 		return new BeanDefinition[] {this.pointcutDefinition};
 	}
 
-	@Override
 	public Object getSource() {
 		return this.pointcutDefinition.getSource();
 	}

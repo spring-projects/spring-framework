@@ -112,7 +112,6 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getNotificationListener() == null) {
 			throw new IllegalArgumentException("Property 'notificationListener' is required");
@@ -154,7 +153,6 @@ public class NotificationListenerRegistrar extends NotificationListenerHolder
 	/**
 	 * Unregisters the specified {@code NotificationListener}.
 	 */
-	@Override
 	public void destroy() {
 		try {
 			if (this.actualObjectNames != null) {

@@ -96,7 +96,6 @@ public abstract class Pointcuts {
 
 		public static SetterPointcut INSTANCE = new SetterPointcut();
 
-		@Override
 		public boolean matches(Method method, Class targetClass) {
 			return method.getName().startsWith("set") &&
 				method.getParameterTypes().length == 1 &&
@@ -117,7 +116,6 @@ public abstract class Pointcuts {
 
 		public static GetterPointcut INSTANCE = new GetterPointcut();
 
-		@Override
 		public boolean matches(Method method, Class targetClass) {
 			return method.getName().startsWith("get") &&
 				method.getParameterTypes().length == 0;

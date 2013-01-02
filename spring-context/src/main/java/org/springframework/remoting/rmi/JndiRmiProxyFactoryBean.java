@@ -69,7 +69,6 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor
 	private Object serviceProxy;
 
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -84,17 +83,14 @@ public class JndiRmiProxyFactoryBean extends JndiRmiClientInterceptor
 	}
 
 
-	@Override
 	public Object getObject() {
 		return this.serviceProxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

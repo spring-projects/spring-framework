@@ -212,7 +212,6 @@ public class SingleConnectionFactory
 	/**
 	 * Make sure a Connection or ConnectionFactory has been set.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		if (this.connection == null && getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("Connection or 'targetConnectionFactory' is required");
@@ -220,7 +219,6 @@ public class SingleConnectionFactory
 	}
 
 
-	@Override
 	public Connection createConnection() throws JMSException {
 		synchronized (this.connectionMonitor) {
 			if (this.connection == null) {
@@ -230,13 +228,11 @@ public class SingleConnectionFactory
 		}
 	}
 
-	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
-	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -250,13 +246,11 @@ public class SingleConnectionFactory
 		return ((QueueConnection) con);
 	}
 
-	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
 	}
 
-	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		Connection con;
 		synchronized (this.connectionMonitor) {
@@ -270,7 +264,6 @@ public class SingleConnectionFactory
 		return ((TopicConnection) con);
 	}
 
-	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		throw new javax.jms.IllegalStateException(
 				"SingleConnectionFactory does not support custom username and password");
@@ -304,7 +297,6 @@ public class SingleConnectionFactory
 	/**
 	 * Exception listener callback that renews the underlying single Connection.
 	 */
-	@Override
 	public void onException(JMSException ex) {
 		logger.warn("Encountered a JMSException - resetting the underlying JMS Connection", ex);
 		resetConnection();
@@ -316,7 +308,6 @@ public class SingleConnectionFactory
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
-	@Override
 	public void destroy() {
 		resetConnection();
 	}
@@ -478,7 +469,6 @@ public class SingleConnectionFactory
 			this.target = target;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getName().equals("equals")) {
 				// Only consider equal when proxies are identical.

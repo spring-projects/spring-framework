@@ -59,12 +59,10 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 		return (HttpServletRequest) super.getRequest();
 	}
 
-	@Override
 	public HttpMethod getRequestMethod() {
 		return HttpMethod.valueOf(getRequest().getMethod());
 	}
 
-	@Override
 	public HttpHeaders getRequestHeaders() {
 		HttpHeaders headers = new HttpHeaders();
 		Enumeration<String> headerNames = getHeaderNames();
@@ -75,17 +73,14 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 		return headers;
 	}
 
-	@Override
 	public Iterator<String> getFileNames() {
 		return getMultipartFiles().keySet().iterator();
 	}
 
-	@Override
 	public MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
 
-	@Override
 	public List<MultipartFile> getFiles(String name) {
 		List<MultipartFile> multipartFiles = getMultipartFiles().get(name);
 		if (multipartFiles != null) {
@@ -96,12 +91,10 @@ public abstract class AbstractMultipartHttpServletRequest extends HttpServletReq
 		}
 	}
 
-	@Override
 	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles().toSingleValueMap();
 	}
 
-	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return getMultipartFiles();
 	}

@@ -372,7 +372,6 @@ public abstract class EntityManagerFactoryUtils {
 			this.newEntityManager = newEm;
 		}
 
-		@Override
 		public int getOrder() {
 			return ENTITY_MANAGER_SYNCHRONIZATION_ORDER;
 		}

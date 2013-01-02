@@ -43,7 +43,6 @@ public class SimpleNamespaceContext implements NamespaceContext {
 
 	private String defaultNamespaceUri = "";
 
-	@Override
 	public String getNamespaceURI(String prefix) {
 		Assert.notNull(prefix, "prefix is null");
 		if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
@@ -61,13 +60,11 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		return "";
 	}
 
-	@Override
 	public String getPrefix(String namespaceUri) {
 		List prefixes = getPrefixesInternal(namespaceUri);
 		return prefixes.isEmpty() ? null : (String) prefixes.get(0);
 	}
 
-	@Override
 	public Iterator getPrefixes(String namespaceUri) {
 		return getPrefixesInternal(namespaceUri).iterator();
 	}

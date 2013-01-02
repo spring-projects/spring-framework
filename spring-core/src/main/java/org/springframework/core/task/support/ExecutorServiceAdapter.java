@@ -57,35 +57,29 @@ public class ExecutorServiceAdapter extends AbstractExecutorService {
 	}
 
 
-	@Override
 	public void execute(Runnable task) {
 		this.taskExecutor.execute(task);
 	}
 
-	@Override
 	public void shutdown() {
 		throw new IllegalStateException(
 				"Manual shutdown not supported - ExecutorServiceAdapter is dependent on an external lifecycle");
 	}
 
-	@Override
 	public List<Runnable> shutdownNow() {
 		throw new IllegalStateException(
 				"Manual shutdown not supported - ExecutorServiceAdapter is dependent on an external lifecycle");
 	}
 
-	@Override
 	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
 		throw new IllegalStateException(
 				"Manual shutdown not supported - ExecutorServiceAdapter is dependent on an external lifecycle");
 	}
 
-	@Override
 	public boolean isShutdown() {
 		return false;
 	}
 
-	@Override
 	public boolean isTerminated() {
 		return false;
 	}

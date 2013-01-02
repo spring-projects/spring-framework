@@ -37,12 +37,10 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class UriComponentsBuilderMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return UriComponentsBuilder.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

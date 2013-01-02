@@ -74,7 +74,6 @@ public class MockPortalContext implements PortalContext {
 	}
 
 
-	@Override
 	public String getPortalInfo() {
 		return "MockPortal/1.0";
 	}
@@ -83,22 +82,18 @@ public class MockPortalContext implements PortalContext {
 		this.properties.put(name, value);
 	}
 
-	@Override
 	public String getProperty(String name) {
 		return this.properties.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getPropertyNames() {
 		return Collections.enumeration(this.properties.keySet());
 	}
 
-	@Override
 	public Enumeration<PortletMode> getSupportedPortletModes() {
 		return Collections.enumeration(this.portletModes);
 	}
 
-	@Override
 	public Enumeration<WindowState> getSupportedWindowStates() {
 		return Collections.enumeration(this.windowStates);
 	}

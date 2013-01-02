@@ -90,7 +90,6 @@ public abstract class TaskUtils {
 
 		private final Log logger = LogFactory.getLog(LoggingErrorHandler.class);
 
-		@Override
 		public void handleError(Throwable t) {
 			if (logger.isErrorEnabled()) {
 				logger.error("Unexpected error occurred in scheduled task.", t);
@@ -105,7 +104,6 @@ public abstract class TaskUtils {
 	 */
 	static class PropagatingErrorHandler extends LoggingErrorHandler {
 
-		@Override
 		public void handleError(Throwable t) {
 			super.handleError(t);
 			ReflectionUtils.rethrowRuntimeException(t);

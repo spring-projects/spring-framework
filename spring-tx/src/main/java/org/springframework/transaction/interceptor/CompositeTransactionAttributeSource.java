@@ -52,7 +52,6 @@ public class CompositeTransactionAttributeSource implements TransactionAttribute
 	}
 
 
-	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		for (TransactionAttributeSource tas : this.transactionAttributeSources) {
 			TransactionAttribute ta = tas.getTransactionAttribute(method, targetClass);

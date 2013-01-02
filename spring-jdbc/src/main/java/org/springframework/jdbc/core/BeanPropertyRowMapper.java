@@ -228,7 +228,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * <p>Utilizes public setters and result set metadata.
 	 * @see java.sql.ResultSetMetaData
 	 */
-	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		T mappedObject = BeanUtils.instantiate(this.mappedClass);

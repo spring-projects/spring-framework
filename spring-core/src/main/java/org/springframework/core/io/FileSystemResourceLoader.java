@@ -65,7 +65,6 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 			super(path);
 		}
 
-		@Override
 		public String getPathWithinContext() {
 			return getPath();
 		}

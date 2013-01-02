@@ -117,18 +117,15 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 	}
 
 
-	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		Assert.notNull(transformer, "Transformer must not be null");
 		ReflectionUtils.invokeMethod(this.addTransformerMethod, this.classLoader, new Object[] {transformer});
 	}
 
-	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return this.classLoader;
 	}
 
-	@Override
 	public ClassLoader getThrowawayClassLoader() {
 		if (this.getThrowawayClassLoaderMethod != null) {
 			return (ClassLoader) ReflectionUtils.invokeMethod(this.getThrowawayClassLoaderMethod, this.classLoader,

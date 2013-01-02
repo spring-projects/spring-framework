@@ -57,7 +57,6 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 		this.methodName = methodName;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!StringUtils.hasText(this.targetBeanName)) {
 			throw new IllegalArgumentException("Property 'targetBeanName' is required");
@@ -79,17 +78,14 @@ public class MethodLocatingFactoryBean implements FactoryBean<Method>, BeanFacto
 	}
 
 
-	@Override
 	public Method getObject() throws Exception {
 		return this.method;
 	}
 
-	@Override
 	public Class<Method> getObjectType() {
 		return Method.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

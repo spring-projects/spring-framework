@@ -56,7 +56,6 @@ class ConfigurationClassEnhancer {
 		DisposableBeanMethodInterceptor.class, NoOp.class };
 
 	private static final CallbackFilter CALLBACK_FILTER = new CallbackFilter() {
-		@Override
 		public int accept(Method candidateMethod) {
 			// Set up the callback filter to return the index of the BeanMethodInterceptor when
 			// handling a @Bean-annotated method; otherwise, return index of the NoOp callback.
@@ -169,7 +168,6 @@ class ConfigurationClassEnhancer {
 			this.beanName = beanName;
 		}
 
-		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			return beanFactory.getBean(beanName);
 		}
@@ -185,7 +183,6 @@ class ConfigurationClassEnhancer {
 	 */
 	private static class DisposableBeanMethodInterceptor implements MethodInterceptor {
 
-		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 			Enhancer.registerStaticCallbacks(obj.getClass(), null);
 			// does the actual (non-CGLIB) superclass actually implement DisposableBean?
@@ -216,7 +213,6 @@ class ConfigurationClassEnhancer {
 			GetObjectMethodInterceptor.class, NoOp.class };
 
 		private static final CallbackFilter CALLBACK_FITLER = new CallbackFilter() {
-			@Override
 			public int accept(Method method) {
 				return method.getName().equals("getObject") ? 0 : 1;
 			}
@@ -238,7 +234,6 @@ class ConfigurationClassEnhancer {
 		 * invoking the super implementation of the proxied method i.e., the actual
 		 * {@code @Bean} method.
 		 */
-		@Override
 		public Object intercept(Object enhancedConfigInstance, Method beanMethod, Object[] beanMethodArgs,
 					MethodProxy cglibMethodProxy) throws Throwable {
 

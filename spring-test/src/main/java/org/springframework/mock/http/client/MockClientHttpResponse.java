@@ -52,22 +52,18 @@ public class MockClientHttpResponse extends MockHttpInputMessage implements Clie
 		this.status = statusCode;
 	}
 
-	@Override
 	public HttpStatus getStatusCode() throws IOException {
 		return this.status;
 	}
 
-	@Override
 	public int getRawStatusCode() throws IOException {
 		return this.status.value();
 	}
 
-	@Override
 	public String getStatusText() throws IOException {
 		return this.status.getReasonPhrase();
 	}
 
-	@Override
 	public void close() {
 	}
 

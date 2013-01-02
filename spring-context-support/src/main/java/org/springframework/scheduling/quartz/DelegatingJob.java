@@ -60,7 +60,6 @@ public class DelegatingJob implements Job {
 	/**
 	 * Delegates execution to the underlying Runnable.
 	 */
-	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		this.delegate.run();
 	}

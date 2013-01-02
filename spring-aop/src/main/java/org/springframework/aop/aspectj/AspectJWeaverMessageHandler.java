@@ -48,7 +48,6 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 	private static final Log LOGGER = LogFactory.getLog("AspectJ Weaver");
 
 
-	@Override
 	public boolean handleMessage(IMessage message) throws AbortException {
 		Kind messageKind = message.getKind();
 
@@ -94,18 +93,15 @@ public class AspectJWeaverMessageHandler implements IMessageHandler {
 		return AJ_ID + aMessage.getMessage();
 	}
 
-	@Override
 	public boolean isIgnoring(Kind messageKind) {
 		// We want to see everything, and allow configuration of log levels dynamically.
 		return false;
 	}
 
-	@Override
 	public void dontIgnore(Kind messageKind) {
 		// We weren't ignoring anything anyway...
 	}
 
-	@Override
 	public void ignore(Kind kind) {
 		// We weren't ignoring anything anyway...
 	}

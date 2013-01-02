@@ -56,7 +56,6 @@ public class EclipseLinkJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final JpaDialect jpaDialect = new EclipseLinkJpaDialect();
 
 
-	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

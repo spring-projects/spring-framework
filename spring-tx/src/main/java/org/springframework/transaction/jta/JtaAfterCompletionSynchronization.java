@@ -49,11 +49,9 @@ public class JtaAfterCompletionSynchronization implements Synchronization {
 	}
 
 
-	@Override
 	public void beforeCompletion() {
 	}
 
-	@Override
 	public void afterCompletion(int status) {
 		switch (status) {
 			case Status.STATUS_COMMITTED:

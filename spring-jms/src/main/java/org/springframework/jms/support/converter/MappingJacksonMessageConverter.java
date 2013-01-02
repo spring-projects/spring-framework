@@ -146,7 +146,6 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 	}
 
 
-	@Override
 	public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
 		Message message;
 		try {
@@ -168,7 +167,6 @@ public class MappingJacksonMessageConverter implements MessageConverter {
 		return message;
 	}
 
-	@Override
 	public Object fromMessage(Message message) throws JMSException, MessageConversionException {
 		try {
 			JavaType targetJavaType = getJavaTypeForMessage(message);

@@ -101,7 +101,6 @@ public class MBeanServerConnectionFactoryBean
 		this.connectOnStartup = connectOnStartup;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -111,7 +110,6 @@ public class MBeanServerConnectionFactoryBean
 	 * Creates a {@code JMXConnector} for the given settings
 	 * and exposes the associated {@code MBeanServerConnection}.
 	 */
-	@Override
 	public void afterPropertiesSet() throws IOException {
 		if (this.serviceUrl == null) {
 			throw new IllegalArgumentException("Property 'serviceUrl' is required");
@@ -148,17 +146,14 @@ public class MBeanServerConnectionFactoryBean
 	}
 
 
-	@Override
 	public MBeanServerConnection getObject() {
 		return this.connection;
 	}
 
-	@Override
 	public Class<? extends MBeanServerConnection> getObjectType() {
 		return (this.connection != null ? this.connection.getClass() : MBeanServerConnection.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -167,7 +162,6 @@ public class MBeanServerConnectionFactoryBean
 	/**
 	 * Closes the underlying {@code JMXConnector}.
 	 */
-	@Override
 	public void destroy() throws IOException {
 		if (this.connectorTargetSource == null || this.connectorTargetSource.isInitialized()) {
 			this.connector.close();

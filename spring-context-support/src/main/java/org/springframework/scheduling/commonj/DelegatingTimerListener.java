@@ -47,7 +47,6 @@ public class DelegatingTimerListener implements TimerListener {
 	/**
 	 * Delegates execution to the underlying Runnable.
 	 */
-	@Override
 	public void timerExpired(Timer timer) {
 		this.runnable.run();
 	}

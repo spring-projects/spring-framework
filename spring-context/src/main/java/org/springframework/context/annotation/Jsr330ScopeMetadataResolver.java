@@ -81,7 +81,6 @@ public class Jsr330ScopeMetadataResolver implements ScopeMetadataResolver {
 	}
 
 
-	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
 		metadata.setScopeName(BeanDefinition.SCOPE_PROTOTYPE);

@@ -84,7 +84,6 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 	private ExposeInvocationInterceptor() {
 	}
 
-	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		MethodInvocation oldInvocation = invocation.get();
 		invocation.set(mi);
@@ -96,7 +95,6 @@ public class ExposeInvocationInterceptor implements MethodInterceptor, Ordered, 
 		}
 	}
 
-	@Override
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE + 1;
 	}

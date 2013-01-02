@@ -104,7 +104,6 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Initialize the root web application context.
 	 */
-	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		this.contextLoader = createContextLoader();
 		if (this.contextLoader == null) {
@@ -139,7 +138,6 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Close the root web application context.
 	 */
-	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		if (this.contextLoader != null) {
 			this.contextLoader.closeWebApplicationContext(event.getServletContext());

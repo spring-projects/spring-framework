@@ -47,12 +47,10 @@ public class SimpleTheme implements Theme {
 	}
 
 
-	@Override
 	public final String getName() {
 		return this.name;
 	}
 
-	@Override
 	public final MessageSource getMessageSource() {
 		return this.messageSource;
 	}

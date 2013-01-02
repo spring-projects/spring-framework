@@ -53,7 +53,6 @@ public class ChainedPersistenceExceptionTranslator implements PersistenceExcepti
 	}
 
 
-	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		for (PersistenceExceptionTranslator pet : this.delegates) {
 			DataAccessException translatedDex = pet.translateExceptionIfPossible(ex);

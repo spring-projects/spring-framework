@@ -37,12 +37,10 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
-	@Override
 	public boolean isBeforeAdvice() {
 		return false;
 	}
 
-	@Override
 	public boolean isAfterAdvice() {
 		return true;
 	}
@@ -52,7 +50,6 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		setThrowingNameNoCheck(name);
 	}
 
-	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();

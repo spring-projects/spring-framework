@@ -47,7 +47,6 @@ public class IdentityNamingStrategy implements ObjectNamingStrategy {
 	 * Returns an instance of {@code ObjectName} based on the identity
 	 * of the managed resource.
 	 */
-	@Override
 	public ObjectName getObjectName(Object managedBean, String beanKey) throws MalformedObjectNameException {
 		String domain = ClassUtils.getPackageName(managedBean.getClass());
 		Hashtable keys = new Hashtable();

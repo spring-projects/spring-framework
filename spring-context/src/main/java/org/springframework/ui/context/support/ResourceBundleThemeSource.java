@@ -53,7 +53,6 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	private final Map<String, Theme> themeCache = new HashMap<String, Theme>();
 
 
-	@Override
 	public void setParentThemeSource(ThemeSource parent) {
 		this.parentThemeSource = parent;
 
@@ -66,7 +65,6 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 		}
 	}
 
-	@Override
 	public ThemeSource getParentThemeSource() {
 		return this.parentThemeSource;
 	}
@@ -95,7 +93,6 @@ public class ResourceBundleThemeSource implements HierarchicalThemeSource {
 	 * @see #setBasenamePrefix
 	 * @see #createMessageSource
 	 */
-	@Override
 	public Theme getTheme(String themeName) {
 		if (themeName == null) {
 			return null;

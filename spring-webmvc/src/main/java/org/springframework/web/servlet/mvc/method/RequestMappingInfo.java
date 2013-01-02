@@ -148,7 +148,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * <p>Example: combine type- and method-level request mappings.
 	 * @return a new request mapping info instance; never {@code null}
 	 */
-	@Override
 	public RequestMappingInfo combine(RequestMappingInfo other) {
 		PatternsRequestCondition patterns = this.patternsCondition.combine(other.patternsCondition);
 		RequestMethodsRequestCondition methods = this.methodsCondition.combine(other.methodsCondition);
@@ -168,7 +167,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * the current request, sorted with best matching patterns on top.
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
 	 */
-	@Override
 	public RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
 		RequestMethodsRequestCondition methods = methodsCondition.getMatchingCondition(request);
 		ParamsRequestCondition params = paramsCondition.getMatchingCondition(request);
@@ -199,7 +197,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * {@link #getMatchingCondition(HttpServletRequest)} to ensure they have conditions with
 	 * content relevant to current request.
 	 */
-	@Override
 	public int compareTo(RequestMappingInfo other, HttpServletRequest request) {
 		int result = patternsCondition.compareTo(other.getPatternsCondition(), request);
 		if (result != 0) {

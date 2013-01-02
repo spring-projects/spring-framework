@@ -357,13 +357,11 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 		this.supportedClasses = supportedClasses;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
 
-	@Override
 	public final void afterPropertiesSet() throws Exception {
 		customizeXStream(getXStream());
 	}
@@ -377,7 +375,6 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 	}
 
 
-	@Override
 	public boolean supports(Class clazz) {
 		if (ObjectUtils.isEmpty(this.supportedClasses)) {
 			return true;

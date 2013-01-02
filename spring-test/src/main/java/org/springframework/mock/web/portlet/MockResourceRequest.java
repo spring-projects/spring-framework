@@ -97,7 +97,6 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.resourceID = resourceID;
 	}
 
-	@Override
 	public String getResourceID() {
 		return this.resourceID;
 	}
@@ -106,12 +105,10 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.cacheability = cacheLevel;
 	}
 
-	@Override
 	public String getCacheability() {
 		return this.cacheability;
 	}
 
-	@Override
 	public String getETag() {
 		return getProperty(RenderRequest.ETAG);
 	}
@@ -124,7 +121,6 @@ public class MockResourceRequest extends MockClientDataRequest implements Resour
 		this.privateRenderParameterMap.put(key, values);
 	}
 
-	@Override
 	public Map<String, String[]> getPrivateRenderParameterMap() {
 		return Collections.unmodifiableMap(this.privateRenderParameterMap);
 	}

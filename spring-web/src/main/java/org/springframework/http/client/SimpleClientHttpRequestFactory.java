@@ -105,7 +105,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 	}
 
 
-	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());

@@ -129,7 +129,6 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	}
 
 
-	@Override
 	public void populate(Connection connection) throws SQLException {
 		for (Resource script : this.scripts) {
 			executeSqlScript(connection, applyEncodingIfNecessary(script), this.continueOnError, this.ignoreFailedDrops);

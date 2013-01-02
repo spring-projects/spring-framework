@@ -268,13 +268,11 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		this.jtaTransactionManager = jtaTransactionManager;
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws IOException {
 		LocalSessionFactoryBuilder sfb = new LocalSessionFactoryBuilder(this.dataSource, this.resourcePatternResolver);
 
@@ -387,23 +385,19 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 
-	@Override
 	public SessionFactory getObject() {
 		return this.sessionFactory;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return (this.sessionFactory != null ? this.sessionFactory.getClass() : SessionFactory.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
 
-	@Override
 	public void destroy() {
 		this.sessionFactory.close();
 	}

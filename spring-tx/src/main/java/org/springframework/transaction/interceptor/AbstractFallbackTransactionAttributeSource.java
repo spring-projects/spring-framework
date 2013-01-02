@@ -80,7 +80,6 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	 * @return TransactionAttribute for this method, or {@code null} if the method
 	 * is not transactional
 	 */
-	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);

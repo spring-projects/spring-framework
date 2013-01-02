@@ -74,7 +74,6 @@ public class ResourceScriptSource implements ScriptSource {
 		return this.resource;
 	}
 
-	@Override
 	public String getScriptAsString() throws IOException {
 		synchronized (this.lastModifiedMonitor) {
 			this.lastModified = retrieveLastModifiedTime();
@@ -87,7 +86,6 @@ public class ResourceScriptSource implements ScriptSource {
 		return FileCopyUtils.copyToString(reader);
 	}
 
-	@Override
 	public boolean isModified() {
 		synchronized (this.lastModifiedMonitor) {
 			return (this.lastModified < 0 || retrieveLastModifiedTime() > this.lastModified);
@@ -110,7 +108,6 @@ public class ResourceScriptSource implements ScriptSource {
 		}
 	}
 
-	@Override
 	public String suggestedClassName() {
 		return StringUtils.stripFilenameExtension(getResource().getFilename());
 	}

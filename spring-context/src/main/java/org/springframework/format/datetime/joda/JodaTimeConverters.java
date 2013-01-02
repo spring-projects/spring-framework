@@ -63,7 +63,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 **/
 	private static class DateTimeToLocalDateConverter implements Converter<DateTime, LocalDate> {
-		@Override
 		public LocalDate convert(DateTime source) {
 			return source.toLocalDate();
 		}
@@ -74,7 +73,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToLocalTimeConverter implements Converter<DateTime, LocalTime> {
-		@Override
 		public LocalTime convert(DateTime source) {
 			return source.toLocalTime();
 		}
@@ -85,7 +83,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToLocalDateTimeConverter implements Converter<DateTime, LocalDateTime> {
-		@Override
 		public LocalDateTime convert(DateTime source) {
 			return source.toLocalDateTime();
 		}
@@ -96,7 +93,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToDateMidnightConverter implements Converter<DateTime, DateMidnight> {
-		@Override
 		public DateMidnight convert(DateTime source) {
 			return source.toDateMidnight();
 		}
@@ -107,7 +103,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToInstantConverter implements Converter<DateTime, Instant> {
-		@Override
 		public Instant convert(DateTime source) {
 			return source.toInstant();
 		}
@@ -118,7 +113,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToMutableDateTimeConverter implements Converter<DateTime, MutableDateTime> {
-		@Override
 		public MutableDateTime convert(DateTime source) {
 			return source.toMutableDateTime();
 		}
@@ -129,7 +123,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToDateConverter implements Converter<DateTime, Date> {
-		@Override
 		public Date convert(DateTime source) {
 			return source.toDate();
 		}
@@ -140,7 +133,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToCalendarConverter implements Converter<DateTime, Calendar> {
-		@Override
 		public Calendar convert(DateTime source) {
 			return source.toGregorianCalendar();
 		}
@@ -151,7 +143,6 @@ final class JodaTimeConverters {
 	 * @see DateTimeParser
 	 */
 	private static class DateTimeToLongConverter implements Converter<DateTime, Long> {
-		@Override
 		public Long convert(DateTime source) {
 			return source.getMillis();
 		}
@@ -163,7 +154,6 @@ final class JodaTimeConverters {
 	 * @see JodaDateTimeFormatAnnotationFormatterFactory
 	 */
 	private static class CalendarToReadableInstantConverter implements Converter<Calendar, ReadableInstant> {
-		@Override
 		public ReadableInstant convert(Calendar source) {
 			return new DateTime(source);
 		}

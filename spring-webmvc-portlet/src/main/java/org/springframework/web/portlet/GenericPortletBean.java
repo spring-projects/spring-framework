@@ -174,7 +174,6 @@ public abstract class GenericPortletBean extends GenericPortlet
 	 * @throws IllegalArgumentException if environment is not assignable to
 	 * {@code ConfigurableEnvironment}.
 	 */
-	@Override
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment);
 		this.environment = (ConfigurableEnvironment)environment;
@@ -185,7 +184,6 @@ public abstract class GenericPortletBean extends GenericPortlet
 	 * <p>If {@code null}, a new environment will be initialized via
 	 * {@link #createEnvironment()}.
 	 */
-	@Override
 	public ConfigurableEnvironment getEnvironment() {
 		if (this.environment == null) {
 			this.environment = this.createEnvironment();

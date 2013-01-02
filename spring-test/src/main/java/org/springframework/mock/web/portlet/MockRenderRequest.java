@@ -86,7 +86,6 @@ public class MockRenderRequest extends MockPortletRequest implements RenderReque
 		return RENDER_PHASE;
 	}
 
-	@Override
 	public String getETag() {
 		return getProperty(RenderRequest.ETAG);
 	}

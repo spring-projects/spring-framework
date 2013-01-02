@@ -70,7 +70,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(final Object bean, String beanName) throws BeansException {
 		AccessControlContext acc = null;
 
@@ -83,7 +82,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
 		if (acc != null) {
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
-				@Override
 				public Object run() {
 					invokeAwareInterfaces(bean);
 					return null;
@@ -121,7 +119,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 		}
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
@@ -135,7 +132,6 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 			this.beanFactory = beanFactory;
 		}
 
-		@Override
 		public String resolveStringValue(String strVal) {
 			return this.beanFactory.resolveEmbeddedValue(strVal);
 		}

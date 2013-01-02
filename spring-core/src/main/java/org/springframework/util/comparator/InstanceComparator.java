@@ -52,7 +52,6 @@ public class InstanceComparator<T> implements Comparator<T> {
 	}
 
 
-	@Override
 	public int compare(T o1, T o2) {
 		int i1 = getOrder(o1);
 		int i2 = getOrder(o2);

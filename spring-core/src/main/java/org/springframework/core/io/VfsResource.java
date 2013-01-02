@@ -46,7 +46,6 @@ public class VfsResource extends AbstractResource {
 	}
 
 
-	@Override
 	public InputStream getInputStream() throws IOException {
 		return VfsUtils.getInputStream(this.resource);
 	}
@@ -115,7 +114,6 @@ public class VfsResource extends AbstractResource {
 		return VfsUtils.getName(this.resource);
 	}
 
-	@Override
 	public String getDescription() {
 		return this.resource.toString();
 	}

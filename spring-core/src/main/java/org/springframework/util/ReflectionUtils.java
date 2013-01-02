@@ -494,7 +494,6 @@ public abstract class ReflectionUtils {
 	public static Method[] getAllDeclaredMethods(Class<?> leafClass) throws IllegalArgumentException {
 		final List<Method> methods = new ArrayList<Method>(32);
 		doWithMethods(leafClass, new MethodCallback() {
-			@Override
 			public void doWith(Method method) {
 				methods.add(method);
 			}
@@ -510,7 +509,6 @@ public abstract class ReflectionUtils {
 	public static Method[] getUniqueDeclaredMethods(Class<?> leafClass) throws IllegalArgumentException {
 		final List<Method> methods = new ArrayList<Method>(32);
 		doWithMethods(leafClass, new MethodCallback() {
-			@Override
 			public void doWith(Method method) {
 				boolean knownSignature = false;
 				Method methodBeingOverriddenWithCovariantReturnType = null;
@@ -599,7 +597,6 @@ public abstract class ReflectionUtils {
 					+ "] must be same or subclass as source class [" + src.getClass().getName() + "]");
 		}
 		doWithFields(src.getClass(), new FieldCallback() {
-			@Override
 			public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
 				makeAccessible(field);
 				Object srcValue = field.get(src);
@@ -666,7 +663,6 @@ public abstract class ReflectionUtils {
 	 */
 	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
-		@Override
 		public boolean matches(Field field) {
 			return !(Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers()));
 		}
@@ -678,7 +674,6 @@ public abstract class ReflectionUtils {
 	 */
 	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
-		@Override
 		public boolean matches(Method method) {
 			return !method.isBridge();
 		}
@@ -691,7 +686,6 @@ public abstract class ReflectionUtils {
 	 */
 	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
-		@Override
 		public boolean matches(Method method) {
 			return (!method.isBridge() && method.getDeclaringClass() != Object.class);
 		}

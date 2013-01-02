@@ -81,13 +81,11 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 	}
 
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof LoadTimeWeaverAware) {
 			LoadTimeWeaver ltw = this.loadTimeWeaver;
@@ -102,7 +100,6 @@ public class LoadTimeWeaverAwareProcessor implements BeanPostProcessor, BeanFact
 		return bean;
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String name) {
 		return bean;
 	}

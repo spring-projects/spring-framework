@@ -87,7 +87,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns false.
 	 */
-	@Override
 	public boolean isMutable() {
 		return false;
 	}
@@ -96,7 +95,6 @@ public abstract class AbstractLobType implements UserType {
 	 * This implementation delegates to the Hibernate EqualsHelper.
 	 * @see org.hibernate.util.EqualsHelper#equals
 	 */
-	@Override
 	public boolean equals(Object x, Object y) throws HibernateException {
 		return EqualsHelper.equals(x, y);
 	}
@@ -104,7 +102,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns the hashCode of the given objectz.
 	 */
-	@Override
 	public int hashCode(Object x) throws HibernateException {
 		return x.hashCode();
 	}
@@ -112,7 +109,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns the passed-in value as-is.
 	 */
-	@Override
 	public Object deepCopy(Object value) throws HibernateException {
 		return value;
 	}
@@ -120,7 +116,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns the passed-in value as-is.
 	 */
-	@Override
 	public Serializable disassemble(Object value) throws HibernateException {
 		return (Serializable) value;
 	}
@@ -128,7 +123,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns the passed-in value as-is.
 	 */
-	@Override
 	public Object assemble(Serializable cached, Object owner) throws HibernateException {
 		return cached;
 	}
@@ -136,7 +130,6 @@ public abstract class AbstractLobType implements UserType {
 	/**
 	 * This implementation returns the passed-in original as-is.
 	 */
-	@Override
 	public Object replace(Object original, Object target, Object owner) throws HibernateException {
 		return original;
 	}
@@ -147,7 +140,6 @@ public abstract class AbstractLobType implements UserType {
 	 * passing in the LobHandler of this type.
 	 * @see #nullSafeGetInternal
 	 */
-	@Override
 	public final Object nullSafeGet(ResultSet rs, String[] names, Object owner)
 			throws HibernateException, SQLException {
 
@@ -170,7 +162,6 @@ public abstract class AbstractLobType implements UserType {
 	 * LobHandler of this type.
 	 * @see #nullSafeSetInternal
 	 */
-	@Override
 	public final void nullSafeSet(PreparedStatement st, Object value, int index)
 			throws HibernateException, SQLException {
 

@@ -238,7 +238,6 @@ public abstract class SchedulerAccessor implements ResourceLoaderAware {
 		this.transactionManager = transactionManager;
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}

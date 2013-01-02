@@ -87,7 +87,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	 * 	<li>Of type {@code javax.servlet.http.Part} unless annotated with {@code @RequestParam}.
 	 * </ul>
 	 */
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(RequestPart.class)) {
 			return true;
@@ -108,7 +107,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		}
 	}
 
-	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 

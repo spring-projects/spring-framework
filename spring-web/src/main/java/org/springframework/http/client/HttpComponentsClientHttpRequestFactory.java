@@ -128,7 +128,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		getHttpClient().getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
 	}
 
-	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
@@ -189,7 +188,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * {@link org.apache.http.conn.ClientConnectionManager ClientConnectionManager}'s
 	 * connection pool, if any.
 	 */
-	@Override
 	public void destroy() {
 		getHttpClient().getConnectionManager().shutdown();
 	}

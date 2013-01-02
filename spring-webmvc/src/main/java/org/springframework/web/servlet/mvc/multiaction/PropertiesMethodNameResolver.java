@@ -72,7 +72,6 @@ public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		this.pathMatcher = pathMatcher;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.mappings == null || this.mappings.isEmpty()) {
 			throw new IllegalArgumentException("'mappings' property is required");

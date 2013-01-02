@@ -71,7 +71,6 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is returned.
 	 */
-	@Override
 	public RequestConditionHolder combine(RequestConditionHolder other) {
 		if (this.condition == null && other.condition == null) {
 			return this;
@@ -105,7 +104,6 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * new RequestConditionHolder instance. Or otherwise if this is an empty
 	 * holder, return the same holder instance.
 	 */
-	@Override
 	public RequestConditionHolder getMatchingCondition(HttpServletRequest request) {
 		if (this.condition == null) {
 			return this;
@@ -119,7 +117,6 @@ public final class RequestConditionHolder extends AbstractRequestCondition<Reque
 	 * instances after making sure the conditions are of the same type.
 	 * Or if one holder is empty, the other holder is preferred.
 	 */
-	@Override
 	public int compareTo(RequestConditionHolder other, HttpServletRequest request) {
 		if (this.condition == null && other.condition == null) {
 			return 0;

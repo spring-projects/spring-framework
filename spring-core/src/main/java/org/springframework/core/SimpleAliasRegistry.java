@@ -41,7 +41,6 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	private final Map<String, String> aliasMap = new ConcurrentHashMap<String, String>(16);
 
 
-	@Override
 	public void registerAlias(String name, String alias) {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
@@ -69,7 +68,6 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		return true;
 	}
 
-	@Override
 	public void removeAlias(String alias) {
 		String name = this.aliasMap.remove(alias);
 		if (name == null) {
@@ -77,12 +75,10 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		}
 	}
 
-	@Override
 	public boolean isAlias(String name) {
 		return this.aliasMap.containsKey(name);
 	}
 
-	@Override
 	public String[] getAliases(String name) {
 		List<String> result = new ArrayList<String>();
 		synchronized (this.aliasMap) {

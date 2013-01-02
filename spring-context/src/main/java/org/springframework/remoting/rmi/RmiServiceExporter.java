@@ -225,7 +225,6 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws RemoteException {
 		prepare();
 	}
@@ -425,7 +424,6 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 	/**
 	 * Unbind the RMI service from the registry on bean factory shutdown.
 	 */
-	@Override
 	public void destroy() throws RemoteException {
 		if (logger.isInfoEnabled()) {
 			logger.info("Unbinding RMI service '" + this.serviceName +

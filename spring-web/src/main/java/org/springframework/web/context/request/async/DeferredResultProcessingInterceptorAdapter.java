@@ -30,21 +30,18 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult,
 			Object concurrentResult) throws Exception {
 	}
@@ -52,7 +49,6 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	/**
 	 * This implementation returns {@code true} by default.
 	 */
-	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
 		return true;
 	}
@@ -60,7 +56,6 @@ public abstract class DeferredResultProcessingInterceptorAdapter implements Defe
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void afterCompletion(NativeWebRequest request, DeferredResult<T> deferredResult) throws Exception {
 	}
 

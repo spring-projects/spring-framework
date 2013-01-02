@@ -32,21 +32,18 @@ public abstract class CallableProcessingInterceptorAdapter implements CallablePr
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void postProcess(NativeWebRequest request, Callable<T> task, Object concurrentResult) throws Exception {
 	}
 
@@ -54,7 +51,6 @@ public abstract class CallableProcessingInterceptorAdapter implements CallablePr
 	 * This implementation always returns
 	 * {@link CallableProcessingInterceptor#RESULT_NONE RESULT_NONE}.
 	 */
-	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
 		return RESULT_NONE;
 	}
@@ -62,7 +58,6 @@ public abstract class CallableProcessingInterceptorAdapter implements CallablePr
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public <T> void afterCompletion(NativeWebRequest request, Callable<T> task) throws Exception {
 	}
 

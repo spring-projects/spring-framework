@@ -240,7 +240,6 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 	 * shared connection and its sessions and consumers.
 	 * @param ex the reported connection exception
 	 */
-	@Override
 	public void onException(JMSException ex) {
 		// First invoke the user-specific ExceptionListener, if any.
 		invokeExceptionListener(ex);
@@ -302,10 +301,8 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 
 		if (this.taskExecutor != null) {
 			consumer.setMessageListener(new MessageListener() {
-				@Override
 				public void onMessage(final Message message) {
 					taskExecutor.execute(new Runnable() {
-						@Override
 						public void run() {
 							processMessage(message, session);
 						}
@@ -315,7 +312,6 @@ public class SimpleMessageListenerContainer extends AbstractMessageListenerConta
 		}
 		else {
 			consumer.setMessageListener(new MessageListener() {
-				@Override
 				public void onMessage(Message message) {
 					processMessage(message, session);
 				}

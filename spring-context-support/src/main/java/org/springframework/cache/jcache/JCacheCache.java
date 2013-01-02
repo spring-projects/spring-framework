@@ -64,12 +64,10 @@ public class JCacheCache implements Cache {
 	}
 
 
-	@Override
 	public String getName() {
 		return this.cache.getName();
 	}
 
-	@Override
 	public javax.cache.Cache<?,?> getNativeCache() {
 		return this.cache;
 	}
@@ -78,26 +76,22 @@ public class JCacheCache implements Cache {
 		return this.allowNullValues;
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public ValueWrapper get(Object key) {
 		Object value = this.cache.get(key);
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public void evict(Object key) {
 		this.cache.remove(key);
 	}
 
-	@Override
 	public void clear() {
 		this.cache.removeAll();
 	}

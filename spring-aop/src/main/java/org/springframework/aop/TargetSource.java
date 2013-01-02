@@ -39,7 +39,6 @@ public interface TargetSource extends TargetClassAware {
 	 * target class.
 	 * @return the type of targets returned by this {@link TargetSource}
 	 */
-	@Override
 	Class<?> getTargetClass();
 
 	/**

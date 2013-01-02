@@ -107,7 +107,6 @@ public class PropertyPlaceholderHelper {
 	public String replacePlaceholders(String value, final Properties properties) {
 		Assert.notNull(properties, "Argument 'properties' must not be null.");
 		return replacePlaceholders(value, new PlaceholderResolver() {
-			@Override
 			public String resolvePlaceholder(String placeholderName) {
 				return properties.getProperty(placeholderName);
 			}

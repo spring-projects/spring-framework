@@ -83,7 +83,6 @@ public abstract class AbstractExpressionPointcut implements ExpressionPointcut, 
 	/**
 	 * Return this pointcut's expression.
 	 */
-	@Override
 	public String getExpression() {
 		return this.expression;
 	}

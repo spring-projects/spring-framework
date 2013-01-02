@@ -57,7 +57,6 @@ public class ContextJndiBeanFactoryLocator extends JndiLocatorSupport implements
 	 * will be created from the combined resources.
 	 * @see #createBeanFactory
 	 */
-	@Override
 	public BeanFactoryReference useBeanFactory(String factoryKey) throws BeansException {
 		try {
 			String beanFactoryPath = lookup(factoryKey, String.class);

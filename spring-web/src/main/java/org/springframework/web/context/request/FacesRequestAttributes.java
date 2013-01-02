@@ -106,7 +106,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 	}
 
 
-	@Override
 	public Object getAttribute(String name, int scope) {
 		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
 			return PortletSessionAccessor.getAttribute(name, getExternalContext());
@@ -116,7 +115,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public void setAttribute(String name, Object value, int scope) {
 		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
 			PortletSessionAccessor.setAttribute(name, value, getExternalContext());
@@ -126,7 +124,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public void removeAttribute(String name, int scope) {
 		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
 			PortletSessionAccessor.removeAttribute(name, getExternalContext());
@@ -136,7 +133,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public String[] getAttributeNames(int scope) {
 		if (scope == SCOPE_GLOBAL_SESSION && portletApiPresent) {
 			return PortletSessionAccessor.getAttributeNames(getExternalContext());
@@ -146,7 +142,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public void registerDestructionCallback(String name, Runnable callback, int scope) {
 		if (logger.isWarnEnabled()) {
 			logger.warn("Could not register destruction callback [" + callback + "] for attribute '" + name +
@@ -154,7 +149,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public Object resolveReference(String key) {
 		if (REFERENCE_REQUEST.equals(key)) {
 			return getExternalContext().getRequest();
@@ -227,7 +221,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public String getSessionId() {
 		Object session = getExternalContext().getSession(true);
 		try {
@@ -240,7 +233,6 @@ public class FacesRequestAttributes implements RequestAttributes {
 		}
 	}
 
-	@Override
 	public Object getSessionMutex() {
 		// Enforce presence of a session first to allow listeners
 		// to create the mutex attribute, if any.

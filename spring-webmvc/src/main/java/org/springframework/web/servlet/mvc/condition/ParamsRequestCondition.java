@@ -82,7 +82,6 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * Returns a new instance with the union of the param expressions
 	 * from "this" and the "other" instance.
 	 */
-	@Override
 	public ParamsRequestCondition combine(ParamsRequestCondition other) {
 		Set<ParamExpression> set = new LinkedHashSet<ParamExpression>(this.expressions);
 		set.addAll(other.expressions);
@@ -93,7 +92,6 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * Returns "this" instance if the request matches all param expressions;
 	 * or {@code null} otherwise.
 	 */
-	@Override
 	public ParamsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		for (ParamExpression expression : expressions) {
 			if (!expression.match(request)) {
@@ -115,7 +113,6 @@ public final class ParamsRequestCondition extends AbstractRequestCondition<Param
 	 * {@link #getMatchingCondition(HttpServletRequest)} and each instance
 	 * contains the matching parameter expressions only or is otherwise empty.
 	 */
-	@Override
 	public int compareTo(ParamsRequestCondition other, HttpServletRequest request) {
 		return other.expressions.size() - this.expressions.size();
 	}

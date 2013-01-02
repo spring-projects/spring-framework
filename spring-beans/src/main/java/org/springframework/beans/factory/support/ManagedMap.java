@@ -58,7 +58,6 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		this.source = source;
 	}
 
-	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -99,12 +98,10 @@ public class ManagedMap<K, V> extends LinkedHashMap<K, V> implements Mergeable, 
 		this.mergeEnabled = mergeEnabled;
 	}
 
-	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public Object merge(Object parent) {
 		if (!this.mergeEnabled) {

@@ -63,7 +63,6 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	}
 
 
-	@Override
 	public synchronized Class<?> getTargetClass() {
 		if (this.targetObject == null) {
 			refresh();
@@ -74,12 +73,10 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/**
 	 * Not static.
 	 */
-	@Override
 	public boolean isStatic() {
 		return false;
 	}
 
-	@Override
 	public final synchronized Object getTarget() {
 		if ((refreshCheckDelayElapsed() && requiresRefresh()) || this.targetObject == null) {
 			refresh();
@@ -90,12 +87,10 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 	/**
 	 * No need to release target.
 	 */
-	@Override
 	public void releaseTarget(Object object) {
 	}
 
 
-	@Override
 	public final synchronized void refresh() {
 		logger.debug("Attempting to refresh target");
 
@@ -106,12 +101,10 @@ public abstract class AbstractRefreshableTargetSource implements TargetSource, R
 		logger.debug("Target refreshed successfully");
 	}
 
-	@Override
 	public synchronized long getRefreshCount() {
 		return this.refreshCount;
 	}
 
-	@Override
 	public synchronized long getLastRefreshTime() {
 		return this.lastRefreshTime;
 	}

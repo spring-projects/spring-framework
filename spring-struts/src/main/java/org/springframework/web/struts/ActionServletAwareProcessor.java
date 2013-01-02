@@ -52,7 +52,6 @@ class ActionServletAwareProcessor implements DestructionAwareBeanPostProcessor {
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		if (bean instanceof Action) {
 			((Action) bean).setServlet(this.actionServlet);
@@ -60,12 +59,10 @@ class ActionServletAwareProcessor implements DestructionAwareBeanPostProcessor {
 		return bean;
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}
 
-	@Override
 	public void postProcessBeforeDestruction(Object bean, String beanName) {
 		if (bean instanceof Action) {
 			((Action) bean).setServlet(null);

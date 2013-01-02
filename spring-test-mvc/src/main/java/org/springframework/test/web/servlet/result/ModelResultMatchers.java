@@ -50,7 +50,6 @@ public class ModelResultMatchers {
 	 */
 	public <T> ResultMatcher attribute(final String name, final Matcher<T> matcher) {
 		return new ResultMatcher() {
-			@Override
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
@@ -64,7 +63,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attribute(final String name, final Object value) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				assertEquals("Model attribute '" + name + "'", value, mav.getModel().get(name));
@@ -77,7 +75,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attributeExists(final String... names) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				for (String name : names) {
@@ -92,7 +89,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attributeErrorCount(final String name, final int expectedCount) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				Errors errors = getBindingResult(mav, name);
@@ -107,7 +103,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attributeHasErrors(final String... names) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				for (String name : names) {
@@ -123,7 +118,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attributeHasNoErrors(final String... names) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				for (String name : names) {
@@ -139,7 +133,6 @@ public class ModelResultMatchers {
 	 */
 	public ResultMatcher attributeHasFieldErrors(final String name, final String... fieldNames) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult mvcResult) throws Exception {
 				ModelAndView mav = getModelAndView(mvcResult);
 				BindingResult result = getBindingResult(mav, name);
@@ -157,7 +150,6 @@ public class ModelResultMatchers {
 	 */
 	public <T> ResultMatcher errorCount(final int expectedCount) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				int actualCount = getErrorCount(getModelAndView(result).getModelMap());
 				assertEquals("Binding/validation error count", expectedCount, actualCount);
@@ -170,7 +162,6 @@ public class ModelResultMatchers {
 	 */
 	public <T> ResultMatcher hasErrors() {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				int count = getErrorCount(getModelAndView(result).getModelMap());
 				assertTrue("Expected binding/validation errors", count != 0);
@@ -183,7 +174,6 @@ public class ModelResultMatchers {
 	 */
 	public <T> ResultMatcher hasNoErrors() {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				for (Object value : mav.getModel().values()) {
@@ -201,7 +191,6 @@ public class ModelResultMatchers {
 	 */
 	public <T> ResultMatcher size(final int size) {
 		return new ResultMatcher() {
-			@Override
 			public void match(MvcResult result) throws Exception {
 				ModelAndView mav = getModelAndView(result);
 				int actual = 0;

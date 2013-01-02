@@ -49,17 +49,14 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 	}
 
 
-	@Override
 	public int getRawStatusCode() throws IOException {
 		return this.httpResponse.getStatusLine().getStatusCode();
 	}
 
-	@Override
 	public String getStatusText() throws IOException {
 		return this.httpResponse.getStatusLine().getReasonPhrase();
 	}
 
-	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -70,13 +67,11 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 		return this.headers;
 	}
 
-	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
 		return entity != null ? entity.getContent() : null;
 	}
 
-	@Override
 	public void close() {
 		HttpEntity entity = this.httpResponse.getEntity();
 		if (entity != null) {

@@ -185,7 +185,6 @@ public class XpathRequestMatchers {
 	 */
 	private abstract static class AbstractXpathRequestMatcher implements RequestMatcher {
 
-		@Override
 		public final void match(ClientHttpRequest request) throws IOException, AssertionError {
 			try {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;

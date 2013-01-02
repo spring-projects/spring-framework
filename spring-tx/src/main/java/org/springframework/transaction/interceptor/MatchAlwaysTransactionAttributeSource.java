@@ -50,7 +50,6 @@ public class MatchAlwaysTransactionAttributeSource implements TransactionAttribu
 	}
 
 
-	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		return this.transactionAttribute;
 	}

@@ -43,7 +43,6 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 		setClassLoader(clazz.getClassLoader());
 	}
 
-	@Override
 	protected Resource getResourceByPath(String path) {
 		return new ClassRelativeContextResource(path, this.clazz);
 	}
@@ -62,7 +61,6 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 			this.clazz = clazz;
 		}
 
-		@Override
 		public String getPathWithinContext() {
 			return getPath();
 		}

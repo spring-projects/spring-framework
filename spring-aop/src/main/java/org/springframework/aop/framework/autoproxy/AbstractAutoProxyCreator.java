@@ -155,7 +155,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	  this.order = order;
 	}
 
-	@Override
 	public final int getOrder() {
 	  return this.order;
 	}
@@ -233,14 +232,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		this.classLoaderConfigured = (classLoader != null);
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (!this.classLoaderConfigured) {
 			this.proxyClassLoader = classLoader;
 		}
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -254,25 +251,21 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	}
 
 
-	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}
 
-	@Override
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
-	@Override
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
 		this.earlyProxyReferences.put(cacheKey, Boolean.TRUE);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
 
-	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(beanClass, beanName);
 
@@ -303,19 +296,16 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 		return null;
 	}
 
-	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
 		return true;
 	}
 
-	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
 
 		return pvs;
 	}
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
 		return bean;
 	}
@@ -325,7 +315,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyConfig
 	 * identified as one to proxy by the subclass.
 	 * @see #getAdvicesAndAdvisorsForBean
 	 */
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);

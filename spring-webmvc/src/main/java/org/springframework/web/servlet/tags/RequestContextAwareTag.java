@@ -110,12 +110,10 @@ public abstract class RequestContextAwareTag extends TagSupport implements TryCa
 	protected abstract int doStartTagInternal() throws Exception;
 
 
-	@Override
 	public void doCatch(Throwable throwable) throws Throwable {
 		throw throwable;
 	}
 
-	@Override
 	public void doFinally() {
 		this.requestContext = null;
 	}

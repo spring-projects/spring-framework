@@ -153,7 +153,6 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			this.session = session;
 		}
 
-		@Override
 		public Connection getConnection() {
 			try {
 				if (connectionMethod == null) {
@@ -167,7 +166,6 @@ public class HibernateJpaDialect extends DefaultJpaDialect {
 			}
 		}
 
-		@Override
 		public void releaseConnection(Connection con) {
 			JdbcUtils.closeConnection(con);
 		}

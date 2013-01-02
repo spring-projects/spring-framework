@@ -64,12 +64,10 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 		this.serviceInterface = serviceInterface;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.serviceInterface == null) {
@@ -79,17 +77,14 @@ public class JmsInvokerProxyFactoryBean extends JmsInvokerClientInterceptor
 	}
 
 
-	@Override
 	public Object getObject() {
 		return this.serviceProxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return this.serviceInterface;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

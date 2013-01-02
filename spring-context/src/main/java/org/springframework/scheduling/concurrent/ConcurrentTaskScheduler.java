@@ -116,7 +116,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 
-	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		try {
 			ErrorHandler errorHandler =
@@ -128,7 +127,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
-	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -140,7 +138,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
-	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -152,7 +149,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
-	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(
@@ -163,7 +159,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
-	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -175,7 +170,6 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		}
 	}
 
-	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(

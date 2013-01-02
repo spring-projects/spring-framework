@@ -55,17 +55,14 @@ public class VariableReference extends SpelNodeImpl {
 			this.eContext = evaluationContext;
 		}
 
-		@Override
 		public TypedValue getValue() {
 			return value;
 		}
 
-		@Override
 		public void setValue(Object newValue) {
 			eContext.setVariable(name, newValue);
 		}
 
-		@Override
 		public boolean isWritable() {
 			return true;
 		}

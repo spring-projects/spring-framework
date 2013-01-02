@@ -173,7 +173,6 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * message will be written to the log.
 	 * @see #injectDependencies()
 	 */
-	@Override
 	protected void prepareTestInstance() throws Exception {
 		if (getApplicationContext() == null) {
 			if (this.logger.isInfoEnabled()) {

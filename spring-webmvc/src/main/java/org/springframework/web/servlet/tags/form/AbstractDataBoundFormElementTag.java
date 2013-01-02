@@ -219,7 +219,6 @@ public abstract class AbstractDataBoundFormElementTag extends AbstractFormTag im
 	 * Exposes the {@link PropertyEditor} for {@link EditorAwareTag}.
 	 * <p>Use {@link #getPropertyEditor()} for internal rendering purposes.
 	 */
-	@Override
 	public final PropertyEditor getEditor() throws JspException {
 		return getPropertyEditor();
 	}

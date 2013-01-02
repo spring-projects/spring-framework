@@ -45,18 +45,15 @@ final class IdToEntityConverter implements ConditionalGenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
 	}
 
-	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		Method finder = getFinder(targetType.getType());
 		return finder != null && this.conversionService.canConvert(sourceType, TypeDescriptor.valueOf(finder.getParameterTypes()[0]));
 	}
 
-	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 		if (source == null) {
 			return null;

@@ -89,28 +89,24 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 	}
 
 
-	@Override
 	public boolean cancel(boolean mayInterruptIfRunning) {
 		synchronized (this.triggerContextMonitor) {
 			return this.currentFuture.cancel(mayInterruptIfRunning);
 		}
 	}
 
-	@Override
 	public boolean isCancelled() {
 		synchronized (this.triggerContextMonitor) {
 			return this.currentFuture.isCancelled();
 		}
 	}
 
-	@Override
 	public boolean isDone() {
 		synchronized (this.triggerContextMonitor) {
 			return this.currentFuture.isDone();
 		}
 	}
 
-	@Override
 	public Object get() throws InterruptedException, ExecutionException {
 		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
@@ -119,7 +115,6 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		return curr.get();
 	}
 
-	@Override
 	public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
@@ -128,7 +123,6 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		return curr.get(timeout, unit);
 	}
 
-	@Override
 	public long getDelay(TimeUnit unit) {
 		ScheduledFuture curr;
 		synchronized (this.triggerContextMonitor) {
@@ -137,7 +131,6 @@ class ReschedulingRunnable extends DelegatingErrorHandlingRunnable implements Sc
 		return curr.getDelay(unit);
 	}
 
-	@Override
 	public int compareTo(Delayed other) {
 		if (this == other) {
 			return 0;

@@ -249,7 +249,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		return put(key, value, true);
 	}
 
-	@Override
 	public V putIfAbsent(K key, V value) {
 		return put(key, value, false);
 	}
@@ -285,7 +284,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		});
 	}
 
-	@Override
 	public boolean remove(Object key, final Object value) {
 		return doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_AFTER, TaskOption.SKIP_IF_EMPTY) {
 			@Override
@@ -299,7 +297,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		});
 	}
 
-	@Override
 	public boolean replace(K key, final V oldValue, final V newValue) {
 		return doTask(key, new Task<Boolean>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
@@ -313,7 +310,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 		});
 	}
 
-	@Override
 	public V replace(K key, final V value) {
 		return doTask(key, new Task<V>(TaskOption.RESTRUCTURE_BEFORE, TaskOption.SKIP_IF_EMPTY) {
 			@Override
@@ -671,17 +667,14 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			this.value = value;
 		}
 
-		@Override
 		public K getKey() {
 			return this.key;
 		}
 
-		@Override
 		public V getValue() {
 			return this.value;
 		}
 
-		@Override
 		public V setValue(V value) {
 			V previous = this.value;
 			this.value = value;
@@ -843,13 +836,11 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			moveToNextSegment();
 		}
 
-		@Override
 		public boolean hasNext() {
 			getNextIfNecessary();
 			return this.next != null;
 		}
 
-		@Override
 		public Entry<K, V> next() {
 			getNextIfNecessary();
 			if (this.next == null) {
@@ -895,7 +886,6 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			}
 		}
 
-		@Override
 		public void remove() {
 			Assert.state(this.last != null);
 			ConcurrentReferenceHashMap.this.remove(this.last.getKey());
@@ -965,17 +955,14 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			this.nextReference = next;
 		}
 
-		@Override
 		public int getHash() {
 			return this.hash;
 		}
 
-		@Override
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}
 
-		@Override
 		public void release() {
 			enqueue();
 			clear();
@@ -1000,17 +987,14 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 			this.nextReference = next;
 		}
 
-		@Override
 		public int getHash() {
 			return this.hash;
 		}
 
-		@Override
 		public Reference<K, V> getNext() {
 			return this.nextReference;
 		}
 
-		@Override
 		public void release() {
 			enqueue();
 			clear();

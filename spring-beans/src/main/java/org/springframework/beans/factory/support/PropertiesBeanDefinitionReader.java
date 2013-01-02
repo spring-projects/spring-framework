@@ -204,7 +204,6 @@ public class PropertiesBeanDefinitionReader extends AbstractBeanDefinitionReader
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 * @see #loadBeanDefinitions(org.springframework.core.io.Resource, String)
 	 */
-	@Override
 	public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
 		return loadBeanDefinitions(new EncodedResource(resource), null);
 	}

@@ -43,12 +43,10 @@ import org.springframework.util.NumberUtils;
 final class NumberToNumberConverterFactory implements ConverterFactory<Number, Number>,
 		ConditionalConverter {
 
-	@Override
 	public <T extends Number> Converter<Number, T> getConverter(Class<T> targetType) {
 		return new NumberToNumber<T>(targetType);
 	}
 
-	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return !sourceType.equals(targetType);
 	}
@@ -61,7 +59,6 @@ final class NumberToNumberConverterFactory implements ConverterFactory<Number, N
 			this.targetType = targetType;
 		}
 
-		@Override
 		public T convert(Number source) {
 			return NumberUtils.convertNumberToTargetClass(source, this.targetType);
 		}

@@ -35,7 +35,6 @@ import org.springframework.util.Assert;
  */
 abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
-	@Override
 	public boolean containsKey(Object key) {
 		return get(key) != null;
 	}
@@ -44,7 +43,6 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	 * @param key the name of the system attribute to retrieve
 	 * @throws IllegalArgumentException if given key is non-String
 	 */
-	@Override
 	public String get(Object key) {
 		Assert.isInstanceOf(String.class, key,
 			String.format("expected key [%s] to be of type String, got %s",
@@ -53,7 +51,6 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 		return this.getSystemAttribute((String) key);
 	}
 
-	@Override
 	public boolean isEmpty() {
 		return false;
 	}
@@ -67,47 +64,38 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 
 	// Unsupported
 
-	@Override
 	public int size() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public String put(String key, String value) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public boolean containsValue(Object value) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public String remove(Object key) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void clear() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public Set<String> keySet() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public void putAll(Map<? extends String, ? extends String> m) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public Collection<String> values() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public Set<Entry<String, String>> entrySet() {
 		throw new UnsupportedOperationException();
 	}

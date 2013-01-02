@@ -48,7 +48,6 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 	}
 
 
-	@Override
 	public String[] getParameterNames(Method method) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(method);
@@ -59,7 +58,6 @@ public class PrioritizedParameterNameDiscoverer implements ParameterNameDiscover
 		return null;
 	}
 
-	@Override
 	public String[] getParameterNames(Constructor ctor) {
 		for (ParameterNameDiscoverer pnd : this.parameterNameDiscoverers) {
 			String[] result = pnd.getParameterNames(ctor);

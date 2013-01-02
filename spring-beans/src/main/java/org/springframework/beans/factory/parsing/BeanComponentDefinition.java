@@ -94,27 +94,22 @@ public class BeanComponentDefinition extends BeanDefinitionHolder implements Com
 	}
 
 
-	@Override
 	public String getName() {
 		return getBeanName();
 	}
 
-	@Override
 	public String getDescription() {
 		return getShortDescription();
 	}
 
-	@Override
 	public BeanDefinition[] getBeanDefinitions() {
 		return new BeanDefinition[] {getBeanDefinition()};
 	}
 
-	@Override
 	public BeanDefinition[] getInnerBeanDefinitions() {
 		return this.innerBeanDefinitions;
 	}
 
-	@Override
 	public BeanReference[] getBeanReferences() {
 		return this.beanReferences;
 	}

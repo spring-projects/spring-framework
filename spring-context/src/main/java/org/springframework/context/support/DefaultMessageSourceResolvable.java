@@ -96,7 +96,6 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	}
 
 
-	@Override
 	public String[] getCodes() {
 		return this.codes;
 	}
@@ -109,12 +108,10 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
 	}
 
-	@Override
 	public Object[] getArguments() {
 		return this.arguments;
 	}
 
-	@Override
 	public String getDefaultMessage() {
 		return this.defaultMessage;
 	}

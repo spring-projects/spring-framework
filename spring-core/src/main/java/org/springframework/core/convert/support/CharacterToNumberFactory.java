@@ -40,7 +40,6 @@ import org.springframework.util.NumberUtils;
  */
 final class CharacterToNumberFactory implements ConverterFactory<Character, Number> {
 
-	@Override
 	public <T extends Number> Converter<Character, T> getConverter(Class<T> targetType) {
 		return new CharacterToNumber<T>(targetType);
 	}
@@ -53,7 +52,6 @@ final class CharacterToNumberFactory implements ConverterFactory<Character, Numb
 			this.targetType = targetType;
 		}
 
-		@Override
 		public T convert(Character source) {
 			return NumberUtils.convertNumberToTargetClass((short) source.charValue(), this.targetType);
 		}

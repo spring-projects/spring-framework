@@ -63,7 +63,6 @@ public class HibernateExceptionTranslator implements PersistenceExceptionTransla
 	}
 
 
-	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof HibernateException) {
 			return convertHibernateAccessException((HibernateException) ex);

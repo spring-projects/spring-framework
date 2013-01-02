@@ -38,7 +38,6 @@ import org.w3c.dom.Element;
  */
 class InterceptorsBeanDefinitionParser implements BeanDefinitionParser {
 
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		CompositeComponentDefinition compDefinition = new CompositeComponentDefinition(element.getTagName(), parserContext.extractSource(element));
 		parserContext.pushContainingComponent(compDefinition);

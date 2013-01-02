@@ -91,7 +91,6 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	 * LobHandler of this type.
 	 * @see #setParameterInternal
 	 */
-	@Override
 	public final void setParameter(PreparedStatement ps, int i, Object parameter, String jdbcType)
 			throws SQLException {
 
@@ -117,7 +116,6 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	 * @see #getResult(java.sql.ResultSet, String)
 	 * @see java.sql.ResultSet#findColumn
 	 */
-	@Override
 	public final Object getResult(ResultSet rs, String columnName) throws SQLException {
 		return getResult(rs, rs.findColumn(columnName));
 	}
@@ -127,7 +125,6 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	 * passing in the LobHandler of this type.
 	 * @see #getResultInternal
 	 */
-	@Override
 	public final Object getResult(ResultSet rs, int columnIndex) throws SQLException {
 		try {
 			return getResultInternal(rs, columnIndex, this.lobHandler);
@@ -142,7 +139,6 @@ public abstract class AbstractLobTypeHandler extends BaseTypeHandler {
 	 * This implementation always throws a SQLException:
 	 * retrieving LOBs from a CallableStatement is not supported.
 	 */
-	@Override
 	public Object getResult(CallableStatement cs, int columnIndex) throws SQLException {
 		throw new SQLException("Retrieving LOBs from a CallableStatement is not supported");
 	}

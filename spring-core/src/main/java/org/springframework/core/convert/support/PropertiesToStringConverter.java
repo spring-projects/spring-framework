@@ -31,7 +31,6 @@ import org.springframework.core.convert.converter.Converter;
  */
 final class PropertiesToStringConverter implements Converter<Properties, String> {
 
-	@Override
 	public String convert(Properties source) {
 		try {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();

@@ -66,7 +66,6 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 			new HashMap<String, DefaultListableBeanFactory>();
 
 
-	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
 			throw new IllegalStateException("Cannot do auto-TargetSource creation with a BeanFactory " +
@@ -87,7 +86,6 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	// Implementation of the TargetSourceCreator interface
 	//---------------------------------------------------------------------
 
-	@Override
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
 		AbstractBeanFactoryBasedTargetSource targetSource =
 				createBeanFactoryBasedTargetSource(beanClass, beanName);
@@ -161,7 +159,6 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	 * Destroys the internal BeanFactory on shutdown of the TargetSourceCreator.
 	 * @see #getInternalBeanFactoryForBean
 	 */
-	@Override
 	public void destroy() {
 		synchronized (this.internalBeanFactories) {
 			for (DefaultListableBeanFactory bf : this.internalBeanFactories.values()) {

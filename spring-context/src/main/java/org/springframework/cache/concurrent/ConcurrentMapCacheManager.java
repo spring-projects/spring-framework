@@ -71,12 +71,10 @@ public class ConcurrentMapCacheManager implements CacheManager {
 		}
 	}
 
-	@Override
 	public Collection<String> getCacheNames() {
 		return Collections.unmodifiableSet(this.cacheMap.keySet());
 	}
 
-	@Override
 	public Cache getCache(String name) {
 		Cache cache = this.cacheMap.get(name);
 		if (cache == null && this.dynamic) {

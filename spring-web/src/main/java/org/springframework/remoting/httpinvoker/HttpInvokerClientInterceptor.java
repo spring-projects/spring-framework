@@ -91,7 +91,6 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	/**
 	 * Return the codebase URL to download classes from if not found locally.
 	 */
-	@Override
 	public String getCodebaseUrl() {
 		return this.codebaseUrl;
 	}
@@ -132,7 +131,6 @@ public class HttpInvokerClientInterceptor extends RemoteInvocationBasedAccessor
 	}
 
 
-	@Override
 	public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 		if (AopUtils.isToStringMethod(methodInvocation.getMethod())) {
 			return "HTTP invoker proxy for service URL [" + getServiceUrl() + "]";

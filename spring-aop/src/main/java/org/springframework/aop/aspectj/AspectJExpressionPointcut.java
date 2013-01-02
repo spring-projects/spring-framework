@@ -155,19 +155,16 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		this.pointcutParameterTypes = types;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 
-	@Override
 	public ClassFilter getClassFilter() {
 		checkReadyToMatch();
 		return this;
 	}
 
-	@Override
 	public MethodMatcher getMethodMatcher() {
 		checkReadyToMatch();
 		return this;
@@ -247,7 +244,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		return this.pointcutExpression;
 	}
 
-	@Override
 	public boolean matches(Class targetClass) {
 		checkReadyToMatch();
 		try {
@@ -271,7 +267,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 	}
 
-	@Override
 	public boolean matches(Method method, Class targetClass, boolean beanHasIntroductions) {
 		checkReadyToMatch();
 		Method targetMethod = AopUtils.getMostSpecificMethod(method, targetClass);
@@ -292,18 +287,15 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		}
 	}
 
-	@Override
 	public boolean matches(Method method, Class targetClass) {
 		return matches(method, targetClass, false);
 	}
 
-	@Override
 	public boolean isRuntime() {
 		checkReadyToMatch();
 		return this.pointcutExpression.mayNeedDynamicTest();
 	}
 
-	@Override
 	public boolean matches(Method method, Class targetClass, Object[] args) {
 		checkReadyToMatch();
 		ShadowMatch shadowMatch = getShadowMatch(AopUtils.getMostSpecificMethod(method, targetClass), method);
@@ -514,12 +506,10 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 		private static final String BEAN_DESIGNATOR_NAME = "bean";
 
-		@Override
 		public String getDesignatorName() {
 			return BEAN_DESIGNATOR_NAME;
 		}
 
-		@Override
 		public ContextBasedMatcher parse(String expression) {
 			return new BeanNameContextMatcher(expression);
 		}
@@ -541,27 +531,22 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			this.expressionPattern = new NamePattern(expression);
 		}
 
-		@Override
 		public boolean couldMatchJoinPointsInType(Class someClass) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
-		@Override
 		public boolean couldMatchJoinPointsInType(Class someClass, MatchingContext context) {
 			return (contextMatch(someClass) == FuzzyBoolean.YES);
 		}
 
-		@Override
 		public boolean matchesDynamically(MatchingContext context) {
 			return true;
 		}
 
-		@Override
 		public FuzzyBoolean matchesStatically(MatchingContext context) {
 			return contextMatch(null);
 		}
 
-		@Override
 		public boolean mayNeedDynamicTest() {
 			return false;
 		}
@@ -626,22 +611,18 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			this.other = other;
 		}
 
-		@Override
 		public boolean alwaysMatches() {
 			return primary.alwaysMatches();
 		}
 
-		@Override
 		public boolean maybeMatches() {
 			return primary.maybeMatches();
 		}
 
-		@Override
 		public boolean neverMatches() {
 			return primary.neverMatches();
 		}
 
-		@Override
 		public JoinPointMatch matchesJoinPoint(Object thisObject,
 				Object targetObject, Object[] args) {
 			try {
@@ -651,7 +632,6 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 			}
 		}
 
-		@Override
 		public void setMatchingContext(MatchingContext aMatchContext) {
 			primary.setMatchingContext(aMatchContext);
 			other.setMatchingContext(aMatchContext);

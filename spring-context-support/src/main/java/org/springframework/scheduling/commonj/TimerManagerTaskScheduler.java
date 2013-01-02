@@ -52,12 +52,10 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 	}
 
 
-	@Override
 	public ScheduledFuture schedule(Runnable task, Trigger trigger) {
 		return new ReschedulingTimerListener(errorHandlingTask(task, true), trigger).schedule();
 	}
 
-	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, false));
 		Timer timer = getTimerManager().schedule(futureTask, startTime);
@@ -65,7 +63,6 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		return futureTask;
 	}
 
-	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, Date startTime, long period) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, startTime, period);
@@ -73,7 +70,6 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		return futureTask;
 	}
 
-	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().scheduleAtFixedRate(futureTask, 0, period);
@@ -81,7 +77,6 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		return futureTask;
 	}
 
-	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().schedule(futureTask, startTime, delay);
@@ -89,7 +84,6 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 		return futureTask;
 	}
 
-	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
 		TimerScheduledFuture futureTask = new TimerScheduledFuture(errorHandlingTask(task, true));
 		Timer timer = getTimerManager().schedule(futureTask, 0, delay);
@@ -119,7 +113,6 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 			this.timer = timer;
 		}
 
-		@Override
 		public void timerExpired(Timer timer) {
 			runAndReset();
 		}
@@ -132,12 +125,10 @@ public class TimerManagerTaskScheduler extends TimerManagerAccessor implements T
 			return result;
 		}
 
-		@Override
 		public long getDelay(TimeUnit unit) {
 			return unit.convert(System.currentTimeMillis() - this.timer.getScheduledExecutionTime(), TimeUnit.MILLISECONDS);
 		}
 
-		@Override
 		public int compareTo(Delayed other) {
 			if (this == other) {
 				return 0;

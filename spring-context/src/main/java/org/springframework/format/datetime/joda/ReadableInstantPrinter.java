@@ -40,7 +40,6 @@ public final class ReadableInstantPrinter implements Printer<ReadableInstant> {
 		this.formatter = formatter;
 	}
 
-	@Override
 	public String print(ReadableInstant instant, Locale locale) {
 		return JodaTimeContextHolder.getFormatter(this.formatter, locale).print(instant);
 	}

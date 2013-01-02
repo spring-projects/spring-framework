@@ -39,18 +39,15 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 	private MessageSource parentMessageSource;
 
 
-	@Override
 	public void setParentMessageSource(MessageSource parent) {
 		this.parentMessageSource = parent;
 	}
 
-	@Override
 	public MessageSource getParentMessageSource() {
 		return this.parentMessageSource;
 	}
 
 
-	@Override
 	public String getMessage(String code, Object[] args, String defaultMessage, Locale locale) {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(code, args, defaultMessage, locale);
@@ -60,7 +57,6 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 		}
 	}
 
-	@Override
 	public String getMessage(String code, Object[] args, Locale locale) throws NoSuchMessageException {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(code, args, locale);
@@ -70,7 +66,6 @@ public class DelegatingMessageSource extends MessageSourceSupport implements Hie
 		}
 	}
 
-	@Override
 	public String getMessage(MessageSourceResolvable resolvable, Locale locale) throws NoSuchMessageException {
 		if (this.parentMessageSource != null) {
 			return this.parentMessageSource.getMessage(resolvable, locale);

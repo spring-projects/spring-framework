@@ -44,7 +44,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ServletResponseMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return ServletResponse.class.isAssignableFrom(paramType)
@@ -58,7 +57,6 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	 * to the response. If subsequently the underlying method returns
 	 * {@code null}, the request is considered directly handled.
 	 */
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

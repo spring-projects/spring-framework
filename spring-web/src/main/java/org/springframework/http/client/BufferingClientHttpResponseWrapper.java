@@ -43,27 +43,22 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 	}
 
 
-	@Override
 	public HttpStatus getStatusCode() throws IOException {
 		return this.response.getStatusCode();
 	}
 
-	@Override
 	public int getRawStatusCode() throws IOException {
 		return this.response.getRawStatusCode();
 	}
 
-	@Override
 	public String getStatusText() throws IOException {
 		return this.response.getStatusText();
 	}
 
-	@Override
 	public HttpHeaders getHeaders() {
 		return this.response.getHeaders();
 	}
 
-	@Override
 	public InputStream getBody() throws IOException {
 		if (this.body == null) {
 			this.body = FileCopyUtils.copyToByteArray(this.response.getBody());
@@ -71,7 +66,6 @@ final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
 		return new ByteArrayInputStream(this.body);
 	}
 
-	@Override
 	public void close() {
 		this.response.close();
 	}

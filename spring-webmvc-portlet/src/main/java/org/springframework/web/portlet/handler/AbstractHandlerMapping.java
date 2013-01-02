@@ -63,7 +63,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	  this.order = order;
 	}
 
-	@Override
 	public final int getOrder() {
 	  return this.order;
 	}
@@ -202,7 +201,6 @@ public abstract class AbstractHandlerMapping extends ApplicationObjectSupport im
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
 	 */
-	@Override
 	public final HandlerExecutionChain getHandler(PortletRequest request) throws Exception {
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {

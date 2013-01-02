@@ -115,12 +115,10 @@ public class JobDetailBean extends JobDetail
 		}
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
-	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
@@ -146,7 +144,6 @@ public class JobDetailBean extends JobDetail
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getName() == null) {
 			setName(this.beanName);

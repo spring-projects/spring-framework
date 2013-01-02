@@ -91,7 +91,6 @@ public class StandardJmsActivationSpecFactory implements JmsActivationSpecFactor
 	}
 
 
-	@Override
 	public ActivationSpec createActivationSpec(ResourceAdapter adapter, JmsActivationSpecConfig config) {
 		Class activationSpecClassToUse = this.activationSpecClass;
 		if (activationSpecClassToUse == null) {

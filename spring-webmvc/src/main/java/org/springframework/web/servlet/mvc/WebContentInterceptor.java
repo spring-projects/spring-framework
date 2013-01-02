@@ -137,7 +137,6 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	}
 
 
-	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 		throws ServletException {
 
@@ -190,7 +189,6 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public void postHandle(
 			HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)
 			throws Exception {
@@ -199,7 +197,6 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	/**
 	 * This implementation is empty.
 	 */
-	@Override
 	public void afterCompletion(
 			HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {

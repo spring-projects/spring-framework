@@ -85,7 +85,6 @@ public class MockPortletResponse implements PortletResponse {
 	// PortletResponse methods
 	//---------------------------------------------------------------------
 
-	@Override
 	public void addProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
 		String[] oldArr = this.properties.get(key);
@@ -100,7 +99,6 @@ public class MockPortletResponse implements PortletResponse {
 		}
 	}
 
-	@Override
 	public void setProperty(String key, String value) {
 		Assert.notNull(key, "Property key must not be null");
 		this.properties.put(key, new String[] {value});
@@ -121,7 +119,6 @@ public class MockPortletResponse implements PortletResponse {
 		return this.properties.get(key);
 	}
 
-	@Override
 	public String encodeURL(String path) {
 		return path;
 	}
@@ -130,12 +127,10 @@ public class MockPortletResponse implements PortletResponse {
 		this.namespace = namespace;
 	}
 
-	@Override
 	public String getNamespace() {
 		return this.namespace;
 	}
 
-	@Override
 	public void addProperty(Cookie cookie) {
 		Assert.notNull(cookie, "Cookie must not be null");
 		this.cookies.add(cookie);
@@ -155,7 +150,6 @@ public class MockPortletResponse implements PortletResponse {
 		return null;
 	}
 
-	@Override
 	public void addProperty(String key, Element value) {
 		Assert.notNull(key, "Property key must not be null");
 		Element[] oldArr = this.xmlProperties.get(key);
@@ -186,7 +180,6 @@ public class MockPortletResponse implements PortletResponse {
 		return this.xmlProperties.get(key);
 	}
 
-	@Override
 	public Element createElement(String tagName) throws DOMException {
 		if (this.xmlDocument == null) {
 			try {

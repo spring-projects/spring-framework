@@ -195,7 +195,6 @@ public class MockServletContext implements ServletContext {
 	}
 
 	/* This is a Servlet API 2.5 method. */
-	@Override
 	public String getContextPath() {
 		return this.contextPath;
 	}
@@ -204,7 +203,6 @@ public class MockServletContext implements ServletContext {
 		this.contexts.put(contextPath, context);
 	}
 
-	@Override
 	public ServletContext getContext(String contextPath) {
 		if (this.contextPath.equals(contextPath)) {
 			return this;
@@ -216,7 +214,6 @@ public class MockServletContext implements ServletContext {
 		this.majorVersion = majorVersion;
 	}
 
-	@Override
 	public int getMajorVersion() {
 		return this.majorVersion;
 	}
@@ -225,7 +222,6 @@ public class MockServletContext implements ServletContext {
 		this.minorVersion = minorVersion;
 	}
 
-	@Override
 	public int getMinorVersion() {
 		return this.minorVersion;
 	}
@@ -246,12 +242,10 @@ public class MockServletContext implements ServletContext {
 		return this.effectiveMinorVersion;
 	}
 
-	@Override
 	public String getMimeType(String filePath) {
 		return MimeTypeResolver.getMimeType(filePath);
 	}
 
-	@Override
 	public Set<String> getResourcePaths(String path) {
 		String actualPath = (path.endsWith("/") ? path : path + "/");
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(actualPath));
@@ -277,7 +271,6 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
 	public URL getResource(String path) throws MalformedURLException {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -295,7 +288,6 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
 	public InputStream getResourceAsStream(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		if (!resource.exists()) {
@@ -310,7 +302,6 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
 		if (!path.startsWith("/")) {
 			throw new IllegalArgumentException("RequestDispatcher path at ServletContext level must start with '/'");
@@ -318,7 +309,6 @@ public class MockServletContext implements ServletContext {
 		return new MockRequestDispatcher(path);
 	}
 
-	@Override
 	public RequestDispatcher getNamedDispatcher(String path) {
 		return this.namedRequestDispatchers.get(path);
 	}
@@ -376,37 +366,30 @@ public class MockServletContext implements ServletContext {
 		registerNamedDispatcher(this.defaultServletName, new MockRequestDispatcher(this.defaultServletName));
 	}
 
-	@Override
 	public Servlet getServlet(String name) {
 		return null;
 	}
 
-	@Override
 	public Enumeration<Servlet> getServlets() {
 		return Collections.enumeration(new HashSet<Servlet>());
 	}
 
-	@Override
 	public Enumeration<String> getServletNames() {
 		return Collections.enumeration(new HashSet<String>());
 	}
 
-	@Override
 	public void log(String message) {
 		logger.info(message);
 	}
 
-	@Override
 	public void log(Exception ex, String message) {
 		logger.info(message, ex);
 	}
 
-	@Override
 	public void log(String message, Throwable ex) {
 		logger.info(message, ex);
 	}
 
-	@Override
 	public String getRealPath(String path) {
 		Resource resource = this.resourceLoader.getResource(getResourceLocation(path));
 		try {
@@ -418,18 +401,15 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
 	public String getServerInfo() {
 		return "MockServletContext";
 	}
 
-	@Override
 	public String getInitParameter(String name) {
 		Assert.notNull(name, "Parameter name must not be null");
 		return this.initParameters.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getInitParameterNames() {
 		return Collections.enumeration(this.initParameters.keySet());
 	}
@@ -448,18 +428,15 @@ public class MockServletContext implements ServletContext {
 		this.initParameters.put(name, value);
 	}
 
-	@Override
 	public Object getAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		return this.attributes.get(name);
 	}
 
-	@Override
 	public Enumeration<String> getAttributeNames() {
 		return Collections.enumeration(this.attributes.keySet());
 	}
 
-	@Override
 	public void setAttribute(String name, Object value) {
 		Assert.notNull(name, "Attribute name must not be null");
 		if (value != null) {
@@ -470,7 +447,6 @@ public class MockServletContext implements ServletContext {
 		}
 	}
 
-	@Override
 	public void removeAttribute(String name) {
 		Assert.notNull(name, "Attribute name must not be null");
 		this.attributes.remove(name);
@@ -480,7 +456,6 @@ public class MockServletContext implements ServletContext {
 		this.servletContextName = servletContextName;
 	}
 
-	@Override
 	public String getServletContextName() {
 		return this.servletContextName;
 	}

@@ -69,7 +69,6 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Parses the supplied {@link Element} by delegating to the {@link BeanDefinitionParser} that is
 	 * registered for that {@link Element}.
 	 */
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		return findParserForElement(element, parserContext).parse(element, parserContext);
 	}
@@ -92,7 +91,6 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Decorates the supplied {@link Node} by delegating to the {@link BeanDefinitionDecorator} that
 	 * is registered to handle that {@link Node}.
 	 */
-	@Override
 	public BeanDefinitionHolder decorate(
 			Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 

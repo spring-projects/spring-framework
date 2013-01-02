@@ -73,12 +73,10 @@ public abstract class StaticLabeledEnum extends AbstractLabeledEnum {
 		}
 	}
 
-	@Override
 	public Comparable getCode() {
 		return code;
 	}
 
-	@Override
 	public String getLabel() {
 		return label;
 	}

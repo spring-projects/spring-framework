@@ -57,7 +57,6 @@ public class BeanFactoryCacheOperationSourceAdvisor extends AbstractBeanFactoryP
 		this.pointcut.setClassFilter(classFilter);
 	}
 
-	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

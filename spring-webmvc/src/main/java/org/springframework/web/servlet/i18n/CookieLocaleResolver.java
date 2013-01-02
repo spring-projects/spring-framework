@@ -89,7 +89,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 	}
 
 
-	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
 		// Check request for pre-parsed or preset locale.
 		Locale locale = (Locale) request.getAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME);
@@ -113,7 +112,6 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleResol
 		return determineDefaultLocale(request);
 	}
 
-	@Override
 	public void setLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
 		if (locale != null) {
 			// Set request attribute and add cookie.

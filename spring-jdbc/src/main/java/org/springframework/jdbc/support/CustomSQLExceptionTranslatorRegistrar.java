@@ -48,7 +48,6 @@ public class CustomSQLExceptionTranslatorRegistrar implements InitializingBean {
 		this.translators.putAll(translators);
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		for (String dbName : this.translators.keySet()) {
 			CustomSQLExceptionTranslatorRegistry.getInstance().registerTranslator(dbName, this.translators.get(dbName));

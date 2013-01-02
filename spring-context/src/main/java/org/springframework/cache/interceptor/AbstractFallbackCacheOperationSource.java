@@ -84,7 +84,6 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * @return {@link CacheOperation} for this method, or {@code null} if the method
 	 * is not cacheable
 	 */
-	@Override
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
 		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);

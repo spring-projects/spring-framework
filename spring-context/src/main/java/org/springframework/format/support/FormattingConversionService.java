@@ -59,13 +59,11 @@ public class FormattingConversionService extends GenericConversionService
 			new ConcurrentHashMap<AnnotationConverterKey, GenericConverter>(64);
 
 
-	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
 		this.embeddedValueResolver = resolver;
 	}
 
 
-	@Override
 	public void addFormatter(Formatter<?> formatter) {
 		Class<?> fieldType = GenericTypeResolver.resolveTypeArgument(formatter.getClass(), Formatter.class);
 		if (fieldType == null) {
@@ -75,19 +73,16 @@ public class FormattingConversionService extends GenericConversionService
 		addFormatterForFieldType(fieldType, formatter);
 	}
 
-	@Override
 	public void addFormatterForFieldType(Class<?> fieldType, Formatter<?> formatter) {
 		addConverter(new PrinterConverter(fieldType, formatter, this));
 		addConverter(new ParserConverter(fieldType, formatter, this));
 	}
 
-	@Override
 	public void addFormatterForFieldType(Class<?> fieldType, Printer<?> printer, Parser<?> parser) {
 		addConverter(new PrinterConverter(fieldType, printer, this));
 		addConverter(new ParserConverter(fieldType, parser, this));
 	}
 
-	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void addFormatterForFieldAnnotation(AnnotationFormatterFactory annotationFormatterFactory) {
 		final Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
@@ -125,12 +120,10 @@ public class FormattingConversionService extends GenericConversionService
 			this.conversionService = conversionService;
 		}
 
-		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(new ConvertiblePair(this.fieldType, String.class));
 		}
 
-		@Override
 		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			if (source == null) {
@@ -166,12 +159,10 @@ public class FormattingConversionService extends GenericConversionService
 			this.conversionService = conversionService;
 		}
 
-		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(new ConvertiblePair(String.class, this.fieldType));
 		}
 
-		@Override
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			String text = (String) source;
 			if (!StringUtils.hasText(text)) {
@@ -215,17 +206,14 @@ public class FormattingConversionService extends GenericConversionService
 			this.fieldType = fieldType;
 		}
 
-		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(new ConvertiblePair(fieldType, String.class));
 		}
 
-		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return sourceType.hasAnnotation(annotationType);
 		}
 
-		@Override
 		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			AnnotationConverterKey converterKey =
@@ -262,17 +250,14 @@ public class FormattingConversionService extends GenericConversionService
 			this.fieldType = fieldType;
 		}
 
-		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return Collections.singleton(new ConvertiblePair(String.class, fieldType));
 		}
 
-		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return targetType.hasAnnotation(annotationType);
 		}
 
-		@Override
 		@SuppressWarnings("unchecked")
 		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			AnnotationConverterKey converterKey =

@@ -387,22 +387,18 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 */
 	private class DelegatingServletConfig implements ServletConfig {
 
-		@Override
 		public String getServletName() {
 			return FreeMarkerView.this.getBeanName();
 		}
 
-		@Override
 		public ServletContext getServletContext() {
 			return FreeMarkerView.this.getServletContext();
 		}
 
-		@Override
 		public String getInitParameter(String paramName) {
 			return null;
 		}
 
-		@Override
 		public Enumeration<String> getInitParameterNames() {
 			return Collections.enumeration(new HashSet<String>());
 		}

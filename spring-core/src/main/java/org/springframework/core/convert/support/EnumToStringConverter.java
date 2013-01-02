@@ -37,7 +37,6 @@ final class EnumToStringConverter implements Converter<Enum<?>, String>, Conditi
 		this.conversionService = conversionService;
 	}
 
-	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		for (Class<?> interfaceType : ClassUtils.getAllInterfacesForClass(sourceType.getType())) {
 			if (conversionService.canConvert(TypeDescriptor.valueOf(interfaceType), targetType)) {
@@ -47,7 +46,6 @@ final class EnumToStringConverter implements Converter<Enum<?>, String>, Conditi
 		return true;
 	}
 
-	@Override
 	public String convert(Enum<?> source) {
 		return source.name();
 	}

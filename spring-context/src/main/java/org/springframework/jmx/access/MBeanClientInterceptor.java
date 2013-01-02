@@ -227,7 +227,6 @@ public class MBeanClientInterceptor
 		return this.managementInterface;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -237,7 +236,6 @@ public class MBeanClientInterceptor
 	 * Prepares the {@code MBeanServerConnection} if the "connectOnStartup"
 	 * is turned on (which it is by default).
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		if (this.server != null && this.refreshOnConnectFailure) {
 			throw new IllegalArgumentException("'refreshOnConnectFailure' does not work when setting " +
@@ -344,7 +342,6 @@ public class MBeanClientInterceptor
 	 * @see #doInvoke
 	 * @see #handleConnectFailure
 	 */
-	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		// Lazily connect to MBeanServer if necessary.
 		synchronized (this.preparationMonitor) {
@@ -607,7 +604,6 @@ public class MBeanClientInterceptor
 	}
 
 
-	@Override
 	public void destroy() {
 		this.connector.close();
 	}

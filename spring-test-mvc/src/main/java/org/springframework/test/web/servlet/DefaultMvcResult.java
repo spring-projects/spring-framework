@@ -61,17 +61,14 @@ class DefaultMvcResult implements MvcResult {
 		this.mockResponse = response;
 	}
 
-	@Override
 	public MockHttpServletResponse getResponse() {
 		return mockResponse;
 	}
 
-	@Override
 	public MockHttpServletRequest getRequest() {
 		return mockRequest;
 	}
 
-	@Override
 	public Object getHandler() {
 		return this.handler;
 	}
@@ -80,7 +77,6 @@ class DefaultMvcResult implements MvcResult {
 		this.handler = handler;
 	}
 
-	@Override
 	public HandlerInterceptor[] getInterceptors() {
 		return this.interceptors;
 	}
@@ -89,7 +85,6 @@ class DefaultMvcResult implements MvcResult {
 		this.interceptors = interceptors;
 	}
 
-	@Override
 	public Exception getResolvedException() {
 		return this.resolvedException;
 	}
@@ -98,7 +93,6 @@ class DefaultMvcResult implements MvcResult {
 		this.resolvedException = resolvedException;
 	}
 
-	@Override
 	public ModelAndView getModelAndView() {
 		return this.modelAndView;
 	}
@@ -107,7 +101,6 @@ class DefaultMvcResult implements MvcResult {
 		this.modelAndView = mav;
 	}
 
-	@Override
 	public FlashMap getFlashMap() {
 		return RequestContextUtils.getOutputFlashMap(mockRequest);
 	}
@@ -116,12 +109,10 @@ class DefaultMvcResult implements MvcResult {
 		this.asyncResult = asyncResult;
 	}
 
-	@Override
 	public Object getAsyncResult() {
 		return getAsyncResult(-1);
 	}
 
-	@Override
 	public Object getAsyncResult(long timeout) {
 		// MockHttpServletRequest type doesn't have async methods
 		HttpServletRequest request = this.mockRequest;

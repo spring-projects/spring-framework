@@ -29,7 +29,6 @@ import org.springframework.util.StringUtils;
  */
 final class StringToLocaleConverter implements Converter<String, Locale> {
 
-	@Override
 	public Locale convert(String source) {
 		return StringUtils.parseLocaleString(source);
 	}

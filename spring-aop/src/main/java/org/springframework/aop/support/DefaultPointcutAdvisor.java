@@ -77,7 +77,6 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 		this.pointcut = (pointcut != null ? pointcut : Pointcut.TRUE);
 	}
 
-	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}

@@ -133,7 +133,6 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	}
 
 
-	@Override
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception {
 

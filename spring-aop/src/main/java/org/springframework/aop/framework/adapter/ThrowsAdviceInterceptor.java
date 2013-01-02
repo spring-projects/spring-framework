@@ -119,7 +119,6 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		return handler;
 	}
 
-	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();

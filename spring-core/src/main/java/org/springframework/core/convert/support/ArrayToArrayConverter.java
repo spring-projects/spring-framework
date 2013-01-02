@@ -45,17 +45,14 @@ final class ArrayToArrayConverter implements ConditionalGenericConverter {
 		this.conversionService = conversionService;
 	}
 
-	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object[].class, Object[].class));
 	}
 
-	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		return this.helperConverter.matches(sourceType, targetType);
 	}
 
-	@Override
 	public Object convert(Object source, TypeDescriptor sourceType,
 			TypeDescriptor targetType) {
 		if ((conversionService instanceof GenericConversionService)

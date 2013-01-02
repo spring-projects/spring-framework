@@ -56,7 +56,6 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		this.source = source;
 	}
 
-	@Override
 	public Object getSource() {
 		return this.source;
 	}
@@ -83,12 +82,10 @@ public class ManagedSet<E> extends LinkedHashSet<E> implements Mergeable, BeanMe
 		this.mergeEnabled = mergeEnabled;
 	}
 
-	@Override
 	public boolean isMergeEnabled() {
 		return this.mergeEnabled;
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public Set<E> merge(Object parent) {
 		if (!this.mergeEnabled) {

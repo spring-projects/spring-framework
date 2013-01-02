@@ -128,7 +128,6 @@ public class TransactionAwareConnectionFactoryProxy extends DelegatingConnection
 			this.connectionFactory = cf;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on Connection interface coming in...
 

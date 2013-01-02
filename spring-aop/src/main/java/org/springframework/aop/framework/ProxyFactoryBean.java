@@ -218,14 +218,12 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		this.classLoaderConfigured = (classLoader != null);
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		if (!this.classLoaderConfigured) {
 			this.proxyClassLoader = classLoader;
 		}
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		checkInterceptorNames();
@@ -239,7 +237,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * {@code getObject()} for a proxy.
 	 * @return a fresh AOP proxy reflecting the current state of this factory
 	 */
-	@Override
 	public Object getObject() throws BeansException {
 		initializeAdvisorChain();
 		if (isSingleton()) {
@@ -260,7 +257,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 * a single one), the target bean type, or the TargetSource's target class.
 	 * @see org.springframework.aop.TargetSource#getTargetClass
 	 */
-	@Override
 	public Class<?> getObjectType() {
 		synchronized (this) {
 			if (this.singletonInstance != null) {
@@ -282,7 +278,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
@@ -643,12 +638,10 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			return beanName;
 		}
 
-		@Override
 		public Advice getAdvice() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}
 
-		@Override
 		public boolean isPerInstance() {
 			throw new UnsupportedOperationException("Cannot invoke methods: " + this.message);
 		}

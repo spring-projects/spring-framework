@@ -61,13 +61,11 @@ public class BeanNameViewResolver extends WebApplicationObjectSupport implements
 		this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 		return order;
 	}
 
 
-	@Override
 	public View resolveViewName(String viewName, Locale locale) throws BeansException {
 		ApplicationContext context = getApplicationContext();
 		if (!context.containsBean(viewName)) {

@@ -219,12 +219,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		setIntrospectionClass(object.getClass());
 	}
 
-	@Override
 	public final Object getWrappedInstance() {
 		return this.object;
 	}
 
-	@Override
 	public final Class getWrappedClass() {
 		return (this.object != null ? this.object.getClass() : null);
 	}
@@ -259,7 +257,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * enables auto-growth of collection elements when accessing an out-of-bounds index.
 	 * <p>Default is "false" on a plain BeanWrapper.
 	 */
-	@Override
 	public void setAutoGrowNestedPaths(boolean autoGrowNestedPaths) {
 		this.autoGrowNestedPaths = autoGrowNestedPaths;
 	}
@@ -267,7 +264,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Return whether "auto-growing" of nested paths has been activated.
 	 */
-	@Override
 	public boolean isAutoGrowNestedPaths() {
 		return this.autoGrowNestedPaths;
 	}
@@ -276,7 +272,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	 * Specify a limit for array and collection auto-growing.
 	 * <p>Default is unlimited on a plain BeanWrapper.
 	 */
-	@Override
 	public void setAutoGrowCollectionLimit(int autoGrowCollectionLimit) {
 		this.autoGrowCollectionLimit = autoGrowCollectionLimit;
 	}
@@ -284,7 +279,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	/**
 	 * Return the limit for array and collection auto-growing.
 	 */
-	@Override
 	public int getAutoGrowCollectionLimit() {
 		return this.autoGrowCollectionLimit;
 	}
@@ -330,12 +324,10 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 	}
 
 
-	@Override
 	public PropertyDescriptor[] getPropertyDescriptors() {
 		return getCachedIntrospectionResults().getPropertyDescriptors();
 	}
 
-	@Override
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws BeansException {
 		PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
 		if (pd == null) {
@@ -386,7 +378,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return null;
 	}
 
-	@Override
 	public TypeDescriptor getPropertyTypeDescriptor(String propertyName) throws BeansException {
 		try {
 			BeanWrapperImpl nestedBw = getBeanWrapperForPropertyPath(propertyName);
@@ -411,7 +402,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return null;
 	}
 
-	@Override
 	public boolean isReadableProperty(String propertyName) {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -432,7 +422,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 		return false;
 	}
 
-	@Override
 	public boolean isWritableProperty(String propertyName) {
 		try {
 			PropertyDescriptor pd = getPropertyDescriptorInternal(propertyName);
@@ -722,7 +711,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (!Modifier.isPublic(readMethod.getDeclaringClass().getModifiers()) && !readMethod.isAccessible()) {
 				if (System.getSecurityManager() != null) {
 					AccessController.doPrivileged(new PrivilegedAction<Object>() {
-						@Override
 						public Object run() {
 							readMethod.setAccessible(true);
 							return null;
@@ -738,7 +726,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 			if (System.getSecurityManager() != null) {
 				try {
 					value = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
 						public Object run() throws Exception {
 							return readMethod.invoke(object, (Object[]) null);
 						}
@@ -1075,7 +1062,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 									!readMethod.isAccessible()) {
 								if (System.getSecurityManager()!= null) {
 									AccessController.doPrivileged(new PrivilegedAction<Object>() {
-										@Override
 										public Object run() {
 											readMethod.setAccessible(true);
 											return null;
@@ -1089,7 +1075,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 							try {
 								if (System.getSecurityManager() != null) {
 									oldValue = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-										@Override
 										public Object run() throws Exception {
 											return readMethod.invoke(object);
 										}
@@ -1119,7 +1104,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (!Modifier.isPublic(writeMethod.getDeclaringClass().getModifiers()) && !writeMethod.isAccessible()) {
 					if (System.getSecurityManager()!= null) {
 						AccessController.doPrivileged(new PrivilegedAction<Object>() {
-							@Override
 							public Object run() {
 								writeMethod.setAccessible(true);
 								return null;
@@ -1134,7 +1118,6 @@ public class BeanWrapperImpl extends AbstractPropertyAccessor implements BeanWra
 				if (System.getSecurityManager() != null) {
 					try {
 						AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-							@Override
 							public Object run() throws Exception {
 								writeMethod.invoke(object, value);
 								return null;

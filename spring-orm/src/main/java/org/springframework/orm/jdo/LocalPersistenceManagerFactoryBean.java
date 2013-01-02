@@ -196,7 +196,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 		this.jdoDialect = jdoDialect;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -208,7 +207,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	 * @throws IOException if the properties could not be loaded from the given location
 	 * @throws JDOException in case of JDO initialization errors
 	 */
-	@Override
 	public void afterPropertiesSet() throws IllegalArgumentException, IOException, JDOException {
 		if (this.persistenceManagerFactoryName != null) {
 			if (this.configLocation != null || !this.jdoPropertyMap.isEmpty()) {
@@ -277,18 +275,15 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	/**
 	 * Return the singleton PersistenceManagerFactory.
 	 */
-	@Override
 	public PersistenceManagerFactory getObject() {
 		return this.persistenceManagerFactory;
 	}
 
-	@Override
 	public Class<? extends PersistenceManagerFactory> getObjectType() {
 		return (this.persistenceManagerFactory != null ?
 			this.persistenceManagerFactory.getClass() : PersistenceManagerFactory.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -303,7 +298,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	 * @see JdoDialect#translateException
 	 * @see PersistenceManagerFactoryUtils#convertJdoAccessException
 	 */
-	@Override
 	public DataAccessException translateExceptionIfPossible(RuntimeException ex) {
 		if (ex instanceof JDOException) {
 			if (this.jdoDialect != null) {
@@ -320,7 +314,6 @@ public class LocalPersistenceManagerFactoryBean implements FactoryBean<Persisten
 	/**
 	 * Close the PersistenceManagerFactory on bean factory shutdown.
 	 */
-	@Override
 	public void destroy() {
 		logger.info("Closing JDO PersistenceManagerFactory");
 		this.persistenceManagerFactory.close();

@@ -83,7 +83,6 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	 * attempts to locate the default Servlet using the known common
 	 * container-specific names.
 	 */
-	@Override
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		if (!StringUtils.hasText(this.defaultServletName)) {
@@ -110,7 +109,6 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 	}
 
 
-	@Override
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 

@@ -48,7 +48,6 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 		super(beanFactory);
 	}
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(Value.class);
 	}

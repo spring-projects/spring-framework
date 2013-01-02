@@ -64,7 +64,6 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 		this.converters = converters;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		this.conversionService = createConversionService();
 		ConversionServiceFactory.registerConverters(this.converters, this.conversionService);
@@ -83,17 +82,14 @@ public class ConversionServiceFactoryBean implements FactoryBean<ConversionServi
 
 	// implementing FactoryBean
 
-	@Override
 	public ConversionService getObject() {
 		return this.conversionService;
 	}
 
-	@Override
 	public Class<? extends ConversionService> getObjectType() {
 		return GenericConversionService.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

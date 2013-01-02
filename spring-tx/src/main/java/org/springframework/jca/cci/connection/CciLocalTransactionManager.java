@@ -109,7 +109,6 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 		return this.connectionFactory;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getConnectionFactory() == null) {
 			throw new IllegalArgumentException("Property 'connectionFactory' is required");
@@ -117,7 +116,6 @@ public class CciLocalTransactionManager extends AbstractPlatformTransactionManag
 	}
 
 
-	@Override
 	public Object getResourceFactory() {
 		return getConnectionFactory();
 	}

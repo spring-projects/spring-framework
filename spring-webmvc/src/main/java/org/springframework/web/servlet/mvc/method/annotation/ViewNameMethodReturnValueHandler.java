@@ -40,13 +40,11 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  */
 public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
 		return (void.class.equals(paramType) || String.class.equals(paramType));
 	}
 
-	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

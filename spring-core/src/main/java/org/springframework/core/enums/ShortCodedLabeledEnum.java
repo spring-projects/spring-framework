@@ -49,7 +49,6 @@ public class ShortCodedLabeledEnum extends AbstractGenericLabeledEnum {
 	}
 
 
-	@Override
 	public Comparable getCode() {
 		return code;
 	}

@@ -56,7 +56,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 		try {
 			if (System.getSecurityManager() != null) {
 				return AccessController.doPrivileged(new PrivilegedAction<Class>() {
-					@Override
 					public Class run() {
 						return factoryBean.getObjectType();
 					}
@@ -130,7 +129,6 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				AccessControlContext acc = getAccessControlContext();
 				try {
 					object = AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-						@Override
 						public Object run() throws Exception {
 								return factory.getObject();
 							}

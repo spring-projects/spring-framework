@@ -50,7 +50,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 * This implementation overrides the superclass method to accept either
 	 * a QueueConnection or a TopicConnection, depending on the domain.
 	 */
-	@Override
 	protected Connection getConnection(JmsResourceHolder holder) {
 		return holder.getConnection(isPubSubDomain() ? TopicConnection.class : QueueConnection.class);
 	}
@@ -59,7 +58,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 * This implementation overrides the superclass method to accept either
 	 * a QueueSession or a TopicSession, depending on the domain.
 	 */
-	@Override
 	protected Session getSession(JmsResourceHolder holder) {
 		return holder.getSession(isPubSubDomain() ? TopicSession.class : QueueSession.class);
 	}
@@ -67,7 +65,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Connection createConnection() throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnectionFactory) getConnectionFactory()).createTopicConnection();
@@ -80,7 +77,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Session createSession(Connection con) throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnection) con).createTopicSession(isSessionTransacted(), getSessionAcknowledgeMode());
@@ -93,7 +89,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected MessageConsumer createConsumer(Session session, Destination destination) throws JMSException {
 		if (isPubSubDomain()) {
 			if (isSubscriptionDurable()) {
@@ -115,7 +110,6 @@ public class DefaultMessageListenerContainer102 extends DefaultMessageListenerCo
 	 * JMS 1.1's Session {@code getAcknowledgeMode()} method.
 	 * The best we can do here is to check the setting on the listener container.
 	 */
-	@Override
 	protected boolean isClientAcknowledge(Session session) throws JMSException {
 		return (getSessionAcknowledgeMode() == Session.CLIENT_ACKNOWLEDGE);
 	}

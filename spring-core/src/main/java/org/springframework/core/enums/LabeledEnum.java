@@ -67,7 +67,6 @@ public interface LabeledEnum extends Comparable, Serializable {
 	 * Shared Comparator instance that sorts enumerations by {@code CODE_ORDER}.
 	 */
 	Comparator CODE_ORDER = new Comparator() {
-		@Override
 		public int compare(Object o1, Object o2) {
 			Comparable c1 = ((LabeledEnum) o1).getCode();
 			Comparable c2 = ((LabeledEnum) o2).getCode();
@@ -79,7 +78,6 @@ public interface LabeledEnum extends Comparable, Serializable {
 	 * Shared Comparator instance that sorts enumerations by {@code LABEL_ORDER}.
 	 */
 	Comparator LABEL_ORDER = new Comparator() {
-		@Override
 		public int compare(Object o1, Object o2) {
 			LabeledEnum e1 = (LabeledEnum) o1;
 			LabeledEnum e2 = (LabeledEnum) o2;

@@ -50,24 +50,20 @@ class Servlet3MockHttpServletRequest extends MockHttpServletRequest {
 		super(servletContext);
 	}
 
-	@Override
 	public boolean isAsyncSupported() {
 		return true;
 	}
 
-	@Override
 	public AsyncContext startAsync() {
 		return startAsync(this, null);
 	}
 
-	@Override
 	public AsyncContext startAsync(ServletRequest request, ServletResponse response) {
 		this.asyncStarted = true;
 		this.asyncContext = new MockAsyncContext(request, response);
 		return this.asyncContext;
 	}
 
-	@Override
 	public AsyncContext getAsyncContext() {
 		return this.asyncContext;
 	}
@@ -76,12 +72,10 @@ class Servlet3MockHttpServletRequest extends MockHttpServletRequest {
 		this.asyncContext = asyncContext;
 	}
 
-	@Override
 	public DispatcherType getDispatcherType() {
 		return DispatcherType.REQUEST;
 	}
 
-	@Override
 	public boolean isAsyncStarted() {
 		return this.asyncStarted;
 	}
@@ -94,17 +88,14 @@ class Servlet3MockHttpServletRequest extends MockHttpServletRequest {
 		this.parts.put(part.getName(), part);
 	}
 
-	@Override
 	public Part getPart(String key) throws IOException, IllegalStateException, ServletException {
 		return this.parts.get(key);
 	}
 
-	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
 		return this.parts.values();
 	}
 
-	@Override
 	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
 		throw new UnsupportedOperationException();
 	}

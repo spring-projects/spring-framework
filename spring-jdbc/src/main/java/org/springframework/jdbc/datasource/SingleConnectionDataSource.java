@@ -213,7 +213,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	/**
 	 * This is a single Connection: Do not close it when returning to the "pool".
 	 */
-	@Override
 	public boolean shouldClose(Connection con) {
 		synchronized (this.connectionMonitor) {
 			return (con != this.connection && con != this.target);
@@ -226,7 +225,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 	 * <p>As this bean implements DisposableBean, a bean factory will
 	 * automatically invoke this on destruction of its cached singletons.
 	 */
-	@Override
 	public void destroy() {
 		synchronized (this.connectionMonitor) {
 			closeConnection();
@@ -316,7 +314,6 @@ public class SingleConnectionDataSource extends DriverManagerDataSource
 			this.target = target;
 		}
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			// Invocation on ConnectionProxy interface coming in...
 

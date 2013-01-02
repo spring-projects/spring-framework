@@ -41,22 +41,18 @@ public class LocalJaxWsServiceFactoryBean extends LocalJaxWsServiceFactory
 	private Service service;
 
 
-	@Override
 	public void afterPropertiesSet() {
 		this.service = createJaxWsService();
 	}
 
-	@Override
 	public Service getObject() {
 		return this.service;
 	}
 
-	@Override
 	public Class<? extends Service> getObjectType() {
 		return (this.service != null ? this.service.getClass() : Service.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

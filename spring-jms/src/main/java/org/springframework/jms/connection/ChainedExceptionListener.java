@@ -52,7 +52,6 @@ public class ChainedExceptionListener implements ExceptionListener {
 	}
 
 
-	@Override
 	public void onException(JMSException ex) {
 		for (ExceptionListener listener : this.delegates) {
 			listener.onException(ex);

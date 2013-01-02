@@ -26,12 +26,10 @@ import org.springframework.aop.MethodMatcher;
  */
 public abstract class StaticMethodMatcher implements MethodMatcher {
 
-	@Override
 	public final boolean isRuntime() {
 		return false;
 	}
 
-	@Override
 	public final boolean matches(Method method, Class<?> targetClass, Object[] args) {
 		// should never be invoked because isRuntime() returns false
 		throw new UnsupportedOperationException("Illegal MethodMatcher usage");

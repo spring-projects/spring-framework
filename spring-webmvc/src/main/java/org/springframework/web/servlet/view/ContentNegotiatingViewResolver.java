@@ -111,7 +111,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -273,7 +272,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		this.cnManagerFactoryBean.setServletContext(servletContext);
 	}
 
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.contentNegotiationManager == null) {
 			this.cnManagerFactoryBean.afterPropertiesSet();
@@ -281,7 +279,6 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 		}
 	}
 
-	@Override
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		Assert.isInstanceOf(ServletRequestAttributes.class, attrs);
@@ -416,12 +413,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 
 	private static final View NOT_ACCEPTABLE_VIEW = new View() {
 
-		@Override
 		public String getContentType() {
 			return null;
 		}
 
-		@Override
 		public void render(Map<String, ?> model, HttpServletRequest request, HttpServletResponse response) {
 			response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
 		}

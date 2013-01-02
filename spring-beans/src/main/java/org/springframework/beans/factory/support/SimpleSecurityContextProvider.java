@@ -51,7 +51,6 @@ public class SimpleSecurityContextProvider implements SecurityContextProvider {
 	}
 
 
-	@Override
 	public AccessControlContext getAccessControlContext() {
 		return (this.acc != null ? acc : AccessController.getContext());
 	}

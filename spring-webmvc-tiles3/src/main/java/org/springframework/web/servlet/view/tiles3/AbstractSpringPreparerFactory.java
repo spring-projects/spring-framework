@@ -37,7 +37,6 @@ import org.springframework.web.servlet.view.tiles2.SpringBeanPreparerFactory;
  */
 public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 
-	@Override
 	public ViewPreparer getPreparer(String name, Request context) {
 		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getContext("request").get(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);

@@ -42,7 +42,6 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	/**
 	 * Return the headers.
 	 */
-	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
@@ -50,7 +49,6 @@ public class MockHttpOutputMessage implements HttpOutputMessage {
 	/**
 	 * Return the body content.
 	 */
-	@Override
 	public OutputStream getBody() throws IOException {
 		return this.body;
 	}

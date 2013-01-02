@@ -112,7 +112,6 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	}
 
 
-	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpMethodBase commonsHttpMethod = createCommonsHttpMethod(httpMethod, uri.toString());
 		postProcessCommonsHttpMethod(commonsHttpMethod);
@@ -163,7 +162,6 @@ public class CommonsClientHttpRequestFactory implements ClientHttpRequestFactory
 	 * Shutdown hook that closes the underlying {@link HttpConnectionManager}'s
 	 * connection pool, if any.
 	 */
-	@Override
 	public void destroy() {
 		HttpConnectionManager connectionManager = getHttpClient().getHttpConnectionManager();
 		if (connectionManager instanceof MultiThreadedHttpConnectionManager) {

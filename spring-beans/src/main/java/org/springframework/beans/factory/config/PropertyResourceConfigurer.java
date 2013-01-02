@@ -63,7 +63,6 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 		this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 		return this.order;
 	}
@@ -74,7 +73,6 @@ public abstract class PropertyResourceConfigurer extends PropertiesLoaderSupport
 	 * {@linkplain #processProperties process} properties against the given bean factory.
 	 * @throws BeanInitializationException if any properties cannot be loaded
 	 */
-	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		try {
 			Properties mergedProps = mergeProperties();

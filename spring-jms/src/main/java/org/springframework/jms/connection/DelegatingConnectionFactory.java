@@ -85,7 +85,6 @@ public class DelegatingConnectionFactory
 		this.shouldStopConnections = shouldStopConnections;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (getTargetConnectionFactory() == null) {
 			throw new IllegalArgumentException("'targetConnectionFactory' is required");
@@ -93,17 +92,14 @@ public class DelegatingConnectionFactory
 	}
 
 
-	@Override
 	public Connection createConnection() throws JMSException {
 		return getTargetConnectionFactory().createConnection();
 	}
 
-	@Override
 	public Connection createConnection(String username, String password) throws JMSException {
 		return getTargetConnectionFactory().createConnection(username, password);
 	}
 
-	@Override
 	public QueueConnection createQueueConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof QueueConnectionFactory) {
@@ -118,7 +114,6 @@ public class DelegatingConnectionFactory
 		}
 	}
 
-	@Override
 	public QueueConnection createQueueConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof QueueConnectionFactory) {
@@ -133,7 +128,6 @@ public class DelegatingConnectionFactory
 		}
 	}
 
-	@Override
 	public TopicConnection createTopicConnection() throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof TopicConnectionFactory) {
@@ -148,7 +142,6 @@ public class DelegatingConnectionFactory
 		}
 	}
 
-	@Override
 	public TopicConnection createTopicConnection(String username, String password) throws JMSException {
 		ConnectionFactory cf = getTargetConnectionFactory();
 		if (cf instanceof TopicConnectionFactory) {
@@ -163,7 +156,6 @@ public class DelegatingConnectionFactory
 		}
 	}
 
-	@Override
 	public boolean shouldStop(Connection con) {
 		return this.shouldStopConnections;
 	}

@@ -78,7 +78,6 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	/**
 	 * Use the populator to set up data in the data source.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		if (this.databasePopulator != null && this.enabled) {
 			DatabasePopulatorUtils.execute(this.databasePopulator, this.dataSource);
@@ -88,7 +87,6 @@ public class DataSourceInitializer implements InitializingBean, DisposableBean {
 	/**
 	 * Use the populator to clean up data in the data source.
 	 */
-	@Override
 	public void destroy() {
 		if (this.databaseCleaner != null && this.enabled) {
 			DatabasePopulatorUtils.execute(this.databaseCleaner, this.dataSource);

@@ -42,7 +42,6 @@ public class SingleDataSourceLookup implements DataSourceLookup {
 	}
 
 
-	@Override
 	public DataSource getDataSource(String dataSourceName) {
 		return this.dataSource;
 	}

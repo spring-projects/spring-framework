@@ -88,7 +88,6 @@ public class ProviderCreatingFactoryBean extends AbstractFactoryBean<Provider> {
 			this.targetBeanName = targetBeanName;
 		}
 
-		@Override
 		public Object get() throws BeansException {
 			return this.beanFactory.getBean(this.targetBeanName);
 		}

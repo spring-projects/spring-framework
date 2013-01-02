@@ -267,7 +267,6 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 		return this;
 	}
 
-	@Override
 	protected void initWebAppContext(WebApplicationContext cxt) {
 		StubWebApplicationContext mockCxt = (StubWebApplicationContext) cxt;
 		registerMvcSingletons(mockCxt);
@@ -413,7 +412,6 @@ public class StandaloneMockMvcBuilder extends DefaultMockMvcBuilder<StandaloneMo
 			this.view = view;
 		}
 
-		@Override
 		public View resolveViewName(String viewName, Locale locale) throws Exception {
 			return this.view;
 		}

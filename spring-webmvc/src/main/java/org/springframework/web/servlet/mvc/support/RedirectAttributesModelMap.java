@@ -57,7 +57,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	/**
 	 * Return the attributes candidate for flash storage or an empty Map.
 	 */
-	@Override
 	public Map<String, ?> getFlashAttributes() {
 		return this.flashAttributes;
 	}
@@ -66,7 +65,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
-	@Override
 	public RedirectAttributesModelMap addAttribute(String attributeName, Object attributeValue) {
 		super.addAttribute(attributeName, formatValue(attributeValue));
 		return this;
@@ -83,7 +81,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Formats the attribute value as a String before adding it.
 	 */
-	@Override
 	public RedirectAttributesModelMap addAttribute(Object attributeValue) {
 		super.addAttribute(attributeValue);
 		return this;
@@ -93,7 +90,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being added.
 	 */
-	@Override
 	public RedirectAttributesModelMap addAllAttributes(Collection<?> attributeValues) {
 		super.addAllAttributes(attributeValues);
 		return this;
@@ -103,7 +99,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being added.
 	 */
-	@Override
 	public RedirectAttributesModelMap addAllAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
@@ -117,7 +112,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 	 * {@inheritDoc}
 	 * <p>Each attribute value is formatted as a String before being merged.
 	 */
-	@Override
 	public RedirectAttributesModelMap mergeAttributes(Map<String, ?> attributes) {
 		if (attributes != null) {
 			for (String key : attributes.keySet()) {
@@ -129,7 +123,6 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		return this;
 	}
 
-	@Override
 	public Map<String, Object> asMap() {
 		return this;
 	}
@@ -156,13 +149,11 @@ public class RedirectAttributesModelMap extends ModelMap implements RedirectAttr
 		}
 	}
 
-	@Override
 	public RedirectAttributes addFlashAttribute(String attributeName, Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeName, attributeValue);
 		return this;
 	}
 
-	@Override
 	public RedirectAttributes addFlashAttribute(Object attributeValue) {
 		this.flashAttributes.addAttribute(attributeValue);
 		return this;

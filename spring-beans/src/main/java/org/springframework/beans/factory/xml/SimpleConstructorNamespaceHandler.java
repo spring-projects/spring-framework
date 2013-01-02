@@ -59,18 +59,15 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 	private static final String REF_SUFFIX = "-ref";
 	private static final String DELIMITER_PREFIX = "_";
 
-	@Override
 	public void init() {
 	}
 
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		parserContext.getReaderContext().error(
 				"Class [" + getClass().getName() + "] does not support custom elements.", element);
 		return null;
 	}
 
-	@Override
 	public BeanDefinitionHolder decorate(Node node, BeanDefinitionHolder definition, ParserContext parserContext) {
 		if (node instanceof Attr) {
 			Attr attr = (Attr) node;

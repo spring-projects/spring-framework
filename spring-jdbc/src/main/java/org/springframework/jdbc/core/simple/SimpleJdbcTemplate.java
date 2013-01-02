@@ -91,7 +91,6 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * Expose the classic Spring JdbcTemplate to allow invocation of
 	 * less commonly used methods.
 	 */
-	@Override
 	public JdbcOperations getJdbcOperations() {
 		return this.namedParameterJdbcOperations.getJdbcOperations();
 	}
@@ -100,207 +99,172 @@ public class SimpleJdbcTemplate implements SimpleJdbcOperations {
 	 * Expose the Spring NamedParameterJdbcTemplate to allow invocation of
 	 * less commonly used methods.
 	 */
-	@Override
 	public NamedParameterJdbcOperations getNamedParameterJdbcOperations() {
 		return this.namedParameterJdbcOperations;
 	}
 
 
-	@Override
 	public int queryForInt(String sql, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForInt(sql, args);
 	}
 
-	@Override
 	public int queryForInt(String sql, SqlParameterSource args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForInt(sql, args);
 	}
 
-	@Override
 	public int queryForInt(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForInt(sql) :
 					getJdbcOperations().queryForInt(sql, getArguments(args)));
 	}
 
-	@Override
 	public long queryForLong(String sql, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForLong(sql, args);
 	}
 
-	@Override
 	public long queryForLong(String sql, SqlParameterSource args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForLong(sql, args);
 	}
 
-	@Override
 	public long queryForLong(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 					getJdbcOperations().queryForLong(sql) :
 					getJdbcOperations().queryForLong(sql, getArguments(args)));
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, Class<T> requiredType, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, Class<T> requiredType, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, requiredType);
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, requiredType) :
 				getJdbcOperations().queryForObject(sql, getArguments(args), requiredType));
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, RowMapper<T> rm, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
-	@Override
 	@Deprecated
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Map<String, ?> args) throws DataAccessException {
 		return queryForObject(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForObject(sql, args, rm);
 	}
 
-	@Override
 	@Deprecated
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return queryForObject(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public <T> T queryForObject(String sql, RowMapper<T> rm, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForObject(sql, rm):
 				getJdbcOperations().queryForObject(sql, getArguments(args), rm));
 	}
 
-	@Override
 	@Deprecated
 	public <T> T queryForObject(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return queryForObject(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rm, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
-	@Override
 	@Deprecated
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Map<String, ?> args) throws DataAccessException {
 		return query(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().query(sql, args, rm);
 	}
 
-	@Override
 	@Deprecated
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, SqlParameterSource args)
 			throws DataAccessException {
 		return query(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rm, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().query(sql, rm) :
 				getJdbcOperations().query(sql, getArguments(args), rm));
 	}
 
-	@Override
 	@Deprecated
 	public <T> List<T> query(String sql, ParameterizedRowMapper<T> rm, Object... args) throws DataAccessException {
 		return query(sql, (RowMapper<T>) rm, args);
 	}
 
-	@Override
 	public Map<String, Object> queryForMap(String sql, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForMap(sql, args);
 	}
 
-	@Override
 	public Map<String, Object> queryForMap(String sql, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForMap(sql, args);
 	}
 
-	@Override
 	public Map<String, Object> queryForMap(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForMap(sql) :
 				getJdbcOperations().queryForMap(sql, getArguments(args)));
 	}
 
-	@Override
 	public List<Map<String, Object>> queryForList(String sql, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForList(sql, args);
 	}
 
-	@Override
 	public List<Map<String, Object>> queryForList(String sql, SqlParameterSource args)
 			throws DataAccessException {
 		return getNamedParameterJdbcOperations().queryForList(sql, args);
 	}
 
-	@Override
 	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().queryForList(sql) :
 				getJdbcOperations().queryForList(sql, getArguments(args)));
 	}
 
-	@Override
 	public int update(String sql, Map<String, ?> args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().update(sql, args);
 	}
 
-	@Override
 	public int update(String sql, SqlParameterSource args) throws DataAccessException {
 		return getNamedParameterJdbcOperations().update(sql, args);
 	}
 
-	@Override
 	public int update(String sql, Object ... args) throws DataAccessException {
 		return (ObjectUtils.isEmpty(args) ?
 				getJdbcOperations().update(sql) :
 				getJdbcOperations().update(sql, getArguments(args)));
 	}
 
-	@Override
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs) {
 		return batchUpdate(sql, batchArgs, new int[0]);
 	}
 
-	@Override
 	public int[] batchUpdate(String sql, List<Object[]> batchArgs, int[] argTypes) {
 		return BatchUpdateUtils.executeBatchUpdate(sql, batchArgs, argTypes, getJdbcOperations());
 	}
 
-	@Override
 	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
 		return getNamedParameterJdbcOperations().batchUpdate(sql, batchValues);
 	}
 
-	@Override
 	public int[] batchUpdate(String sql, SqlParameterSource[] batchArgs) {
 		return getNamedParameterJdbcOperations().batchUpdate(sql, batchArgs);
 	}

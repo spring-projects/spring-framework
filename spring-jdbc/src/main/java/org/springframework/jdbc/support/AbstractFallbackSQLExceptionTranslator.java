@@ -60,7 +60,6 @@ public abstract class AbstractFallbackSQLExceptionTranslator implements SQLExcep
 	 * Pre-checks the arguments, calls {@link #doTranslate}, and invokes the
 	 * {@link #getFallbackTranslator() fallback translator} if necessary.
 	 */
-	@Override
 	public DataAccessException translate(String task, String sql, SQLException ex) {
 		Assert.notNull(ex, "Cannot translate a null SQLException");
 		if (task == null) {

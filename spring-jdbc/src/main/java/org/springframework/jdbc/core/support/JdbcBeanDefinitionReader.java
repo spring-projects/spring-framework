@@ -107,7 +107,6 @@ public class JdbcBeanDefinitionReader {
 		Assert.notNull(this.jdbcTemplate, "Not fully configured - specify DataSource or JdbcTemplate");
 		final Properties props = new Properties();
 		this.jdbcTemplate.query(sql, new RowCallbackHandler() {
-			@Override
 			public void processRow(ResultSet rs) throws SQLException {
 				String beanName = rs.getString(1);
 				String property = rs.getString(2);

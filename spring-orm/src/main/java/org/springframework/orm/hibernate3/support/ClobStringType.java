@@ -62,12 +62,10 @@ public class ClobStringType extends AbstractLobType {
 		super(lobHandler, jtaTransactionManager);
 	}
 
-	@Override
 	public int[] sqlTypes() {
 		return new int[] {Types.CLOB};
 	}
 
-	@Override
 	public Class returnedClass() {
 		return String.class;
 	}

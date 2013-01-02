@@ -39,7 +39,6 @@ public abstract class DaoSupport implements InitializingBean {
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
-	@Override
 	public final void afterPropertiesSet() throws IllegalArgumentException, BeanInitializationException {
 		// Let abstract subclasses check their configuration.
 		checkDaoConfig();

@@ -52,7 +52,6 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 		this.driverClass = driverClass;
 	}
 
-	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
 		properties.setDriverClass(this.driverClass);
 		properties.setUrl("jdbc:hsqldb:mem:" + databaseName);

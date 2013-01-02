@@ -55,12 +55,10 @@ public class BeanPropertySqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 
-	@Override
 	public boolean hasValue(String paramName) {
 		return this.beanWrapper.isReadableProperty(paramName);
 	}
 
-	@Override
 	public Object getValue(String paramName) throws IllegalArgumentException {
 		try {
 			return this.beanWrapper.getPropertyValue(paramName);

@@ -278,7 +278,6 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 	 * Schedule all registered tasks against the underlying {@linkplain
 	 * #setTaskScheduler(TaskScheduler) task scheduler}.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		long now = System.currentTimeMillis();
 
@@ -326,7 +325,6 @@ public class ScheduledTaskRegistrar implements InitializingBean, DisposableBean 
 		}
 	}
 
-	@Override
 	public void destroy() {
 		for (ScheduledFuture<?> future : this.scheduledFutures) {
 			future.cancel(true);

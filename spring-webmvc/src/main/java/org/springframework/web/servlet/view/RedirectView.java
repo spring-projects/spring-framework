@@ -238,7 +238,6 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	/**
 	 * Returns "true" indicating this view performs a redirect.
 	 */
-	@Override
 	public boolean isRedirectView() {
 		return true;
 	}

@@ -55,7 +55,6 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * that has occurred.
 	 * @param problem the source of the error
 	 */
-	@Override
 	public void fatal(Problem problem) {
 		throw new BeanDefinitionParsingException(problem);
 	}
@@ -65,7 +64,6 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * that has occurred.
 	 * @param problem the source of the error
 	 */
-	@Override
 	public void error(Problem problem) {
 		throw new BeanDefinitionParsingException(problem);
 	}
@@ -74,7 +72,6 @@ public class FailFastProblemReporter implements ProblemReporter {
 	 * Writes the supplied {@link Problem} to the {@link Log} at {@code WARN} level.
 	 * @param problem the source of the warning
 	 */
-	@Override
 	public void warning(Problem problem) {
 		this.logger.warn(problem, problem.getRootCause());
 	}

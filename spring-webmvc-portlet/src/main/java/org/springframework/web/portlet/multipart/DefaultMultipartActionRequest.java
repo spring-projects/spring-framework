@@ -74,17 +74,14 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 
-	@Override
 	public Iterator<String> getFileNames() {
 		return getMultipartFiles().keySet().iterator();
 	}
 
-	@Override
 	public MultipartFile getFile(String name) {
 		return getMultipartFiles().getFirst(name);
 	}
 
-	@Override
 	public List<MultipartFile> getFiles(String name) {
 		List<MultipartFile> multipartFiles = getMultipartFiles().get(name);
 		if (multipartFiles != null) {
@@ -96,12 +93,10 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 	}
 
 
-	@Override
 	public Map<String, MultipartFile> getFileMap() {
 		return getMultipartFiles().toSingleValueMap();
 	}
 
-	@Override
 	public MultiValueMap<String, MultipartFile> getMultiFileMap() {
 		return getMultipartFiles();
 	}
@@ -143,7 +138,6 @@ public class DefaultMultipartActionRequest extends ActionRequestWrapper implemen
 		return paramMap;
 	}
 
-	@Override
 	public String getMultipartContentType(String paramOrFileName) {
 		MultipartFile file = getFile(paramOrFileName);
 		if (file != null) {

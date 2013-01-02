@@ -35,14 +35,12 @@ public abstract class AbstractLabeledEnum implements LabeledEnum {
 	protected AbstractLabeledEnum() {
 	}
 
-	@Override
 	public Class getType() {
 		// Could be coded as getClass().isAnonymousClass() on JDK 1.5
 		boolean isAnonymous = (getClass().getDeclaringClass() == null && getClass().getName().indexOf('$') != -1);
 		return (isAnonymous ? getClass().getSuperclass() : getClass());
 	}
 
-	@Override
 	public int compareTo(Object obj) {
 		if (!(obj instanceof LabeledEnum)) {
 			throw new ClassCastException("You may only compare LabeledEnums");

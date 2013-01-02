@@ -200,12 +200,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		this.defaultProxyTargetClass = defaultProxyTargetClass;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
 			throw new IllegalStateException("ScriptFactoryPostProcessor doesn't work with a BeanFactory "
@@ -228,12 +226,10 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 		}
 	}
 
-	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourceLoader = resourceLoader;
 	}
 
-	@Override
 	public int getOrder() {
 		return Integer.MIN_VALUE;
 	}
@@ -574,7 +570,6 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 	/**
 	 * Destroy the inner bean factory (used for scripts) on shutdown.
 	 */
-	@Override
 	public void destroy() {
 		this.scriptBeanFactory.destroySingletons();
 	}

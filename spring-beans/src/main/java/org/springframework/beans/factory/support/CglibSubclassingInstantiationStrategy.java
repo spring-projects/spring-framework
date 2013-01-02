@@ -153,7 +153,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 */
 		private class LookupOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
 
-			@Override
 			public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 				// Cast is safe, as CallbackFilter filters are used selectively.
 				LookupOverride lo = (LookupOverride) beanDefinition.getMethodOverrides().getOverride(method);
@@ -168,7 +167,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 */
 		private class ReplaceOverrideMethodInterceptor extends CglibIdentitySupport implements MethodInterceptor {
 
-			@Override
 			public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
 				ReplaceOverride ro = (ReplaceOverride) beanDefinition.getMethodOverrides().getOverride(method);
 				// TODO could cache if a singleton for minor performance optimization
@@ -183,7 +181,6 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 		 */
 		private class CallbackFilterImpl extends CglibIdentitySupport implements CallbackFilter {
 
-			@Override
 			public int accept(Method method) {
 				MethodOverride methodOverride = beanDefinition.getMethodOverrides().getOverride(method);
 				if (logger.isTraceEnabled()) {

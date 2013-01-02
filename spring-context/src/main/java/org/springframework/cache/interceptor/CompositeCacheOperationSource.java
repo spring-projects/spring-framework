@@ -52,7 +52,6 @@ public class CompositeCacheOperationSource implements CacheOperationSource, Seri
 		return this.cacheOperationSources;
 	}
 
-	@Override
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
 		Collection<CacheOperation> ops = null;
 

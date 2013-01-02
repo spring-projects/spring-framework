@@ -96,13 +96,11 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 		this.delay = delay;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.timer == null) {
 			logger.info("Initializing Timer");
@@ -143,25 +141,21 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	 * wrapping it in a {@link DelegatingTimerTask}.
 	 * @param task the task to be executed
 	 */
-	@Override
 	public void execute(Runnable task) {
 		getTimer().schedule(new DelegatingTimerTask(task), this.delay);
 	}
 
-	@Override
 	public void execute(Runnable task, long startTimeout) {
 		long actualDelay = (startTimeout < this.delay ? startTimeout : this.delay);
 		getTimer().schedule(new DelegatingTimerTask(task), actualDelay);
 	}
 
-	@Override
 	public Future<?> submit(Runnable task) {
 		FutureTask<Object> future = new FutureTask<Object>(task, null);
 		execute(future);
 		return future;
 	}
 
-	@Override
 	public <T> Future<T> submit(Callable<T> task) {
 		FutureTask<T> future = new FutureTask<T>(task);
 		execute(future);
@@ -171,7 +165,6 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	/**
 	 * This task executor prefers short-lived work units.
 	 */
-	@Override
 	public boolean prefersShortLivedTasks() {
 		return true;
 	}
@@ -181,7 +174,6 @@ public class TimerTaskExecutor implements SchedulingTaskExecutor, BeanNameAware,
 	 * Cancel the {@link Timer} on bean factory shutdown, stopping all scheduled tasks.
 	 * @see java.util.Timer#cancel()
 	 */
-	@Override
 	public void destroy() {
 		if (this.timerInternal) {
 			logger.info("Cancelling Timer");

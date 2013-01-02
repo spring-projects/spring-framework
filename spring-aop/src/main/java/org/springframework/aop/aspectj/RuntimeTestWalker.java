@@ -106,44 +106,35 @@ class RuntimeTestWalker {
 		protected static final int AT_TARGET_VAR = 4;
 		protected static final int AT_ANNOTATION_VAR = 8;
 
-		@Override
 		public void visit(And e) {
 			e.getLeft().accept(this);
 			e.getRight().accept(this);
 		}
 
-		@Override
 		public void visit(Or e) {
 			e.getLeft().accept(this);
 			e.getRight().accept(this);
 		}
 
-		@Override
 		public void visit(Not e) {
 			e.getBody().accept(this);
 		}
 
-		@Override
 		public void visit(Instanceof i) {
 		}
 
-		@Override
 		public void visit(Literal literal) {
 		}
 
-		@Override
 		public void visit(Call call) {
 		}
 
-		@Override
 		public void visit(FieldGetCall fieldGetCall) {
 		}
 
-		@Override
 		public void visit(HasAnnotation hasAnnotation) {
 		}
 
-		@Override
 		public void visit(MatchingContextBasedTest matchingContextTest) {
 		}
 

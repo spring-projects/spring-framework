@@ -82,7 +82,6 @@ public abstract class EisOperation implements InitializingBean {
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		this.cciTemplate.afterPropertiesSet();
 

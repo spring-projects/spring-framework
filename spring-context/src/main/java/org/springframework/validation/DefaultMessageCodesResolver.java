@@ -131,7 +131,6 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	}
 
 
-	@Override
 	public String[] resolveMessageCodes(String errorCode, String objectName) {
 		return resolveMessageCodes(errorCode, objectName, "", null);
 	}
@@ -145,7 +144,6 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 	 * details on the generated codes.
 	 * @return the list of codes
 	 */
-	@Override
 	public String[] resolveMessageCodes(String errorCode, String objectName, String field, Class<?> fieldType) {
 		Set<String> codeList = new LinkedHashSet<String>();
 		List<String> fieldList = new ArrayList<String>();
@@ -222,7 +220,6 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 * {@code errorCode + "." + object name + "." + field}
 		 */
 		PREFIX_ERROR_CODE {
-			@Override
 			public String format(String errorCode, String objectName, String field) {
 				return toDelimitedString(errorCode, objectName, field);
 			}
@@ -233,7 +230,6 @@ public class DefaultMessageCodesResolver implements MessageCodesResolver, Serial
 		 * {@code object name + "." + field + "." + errorCode}
 		 */
 		POSTFIX_ERROR_CODE {
-			@Override
 			public String format(String errorCode, String objectName, String field) {
 				return toDelimitedString(objectName, field, errorCode);
 			}

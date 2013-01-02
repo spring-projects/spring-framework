@@ -54,7 +54,6 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 	private Object serviceProxy;
 
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
@@ -76,17 +75,14 @@ public class JaxRpcPortProxyFactoryBean extends JaxRpcPortClientInterceptor
 	}
 
 
-	@Override
 	public Object getObject() {
 		return this.serviceProxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return getServiceInterface();
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -137,31 +137,26 @@ public class FilterDefinitionFactoryBean implements FactoryBean<FilterDefinition
 	 * the FilterDefinitionFactoryBean will be used.
 	 * @see #setFilterName
 	 */
-	@Override
 	public void setBeanName(String name) {
 		if (this.filterName == null) {
 			this.filterName = name;
 		}
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		this.filterDefinition =
 				new FilterDefinition(this.filterName, this.defaultFilterCondition, this.parameterTypeMap);
 	}
 
 
-	@Override
 	public FilterDefinition getObject() {
 		return this.filterDefinition;
 	}
 
-	@Override
 	public Class<FilterDefinition> getObjectType() {
 		return FilterDefinition.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

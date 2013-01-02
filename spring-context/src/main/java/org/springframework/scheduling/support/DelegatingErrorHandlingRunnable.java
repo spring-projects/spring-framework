@@ -48,7 +48,6 @@ public class DelegatingErrorHandlingRunnable implements Runnable {
 		this.errorHandler = errorHandler;
 	}
 
-	@Override
 	public void run() {
 		try {
 			this.delegate.run();

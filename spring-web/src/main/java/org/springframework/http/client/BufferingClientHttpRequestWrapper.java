@@ -42,12 +42,10 @@ final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHtt
 	}
 
 
-	@Override
 	public HttpMethod getMethod() {
 		return this.request.getMethod();
 	}
 
-	@Override
 	public URI getURI() {
 		return this.request.getURI();
 	}

@@ -67,7 +67,6 @@ public class RemoteInvocationTraceInterceptor implements MethodInterceptor {
 	}
 
 
-	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Method method = invocation.getMethod();
 		if (logger.isDebugEnabled()) {

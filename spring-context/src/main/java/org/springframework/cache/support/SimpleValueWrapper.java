@@ -42,7 +42,6 @@ public class SimpleValueWrapper implements ValueWrapper {
 	/**
 	 * Simply returns the value as given at construction time.
 	 */
-	@Override
 	public Object get() {
 		return this.value;
 	}

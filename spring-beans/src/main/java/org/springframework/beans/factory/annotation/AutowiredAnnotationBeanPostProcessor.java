@@ -199,12 +199,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	  this.order = order;
 	}
 
-	@Override
 	public int getOrder() {
 	  return this.order;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
 			throw new IllegalArgumentException(
@@ -214,7 +212,6 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 
-	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (beanType != null) {
 			InjectionMetadata metadata = findAutowiringMetadata(beanType);

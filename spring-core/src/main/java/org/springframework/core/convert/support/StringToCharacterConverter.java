@@ -26,7 +26,6 @@ import org.springframework.core.convert.converter.Converter;
  */
 final class StringToCharacterConverter implements Converter<String, Character> {
 
-	@Override
 	public Character convert(String source) {
 		if (source.length() == 0) {
 			return null;

@@ -253,7 +253,6 @@ public class RmiClientInterceptor extends RemoteInvocationBasedAccessor
 	 * @see java.rmi.ConnectIOException
 	 * @see java.rmi.NoSuchObjectException
 	 */
-	@Override
 	public Object invoke(MethodInvocation invocation) throws Throwable {
 		Remote stub = getStub();
 		try {

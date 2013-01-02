@@ -42,7 +42,6 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 	}
 
 
-	@Override
 	public synchronized Object getAspectInstance() {
 		if (this.materialized == null) {
 			synchronized (this) {
@@ -58,17 +57,14 @@ public class LazySingletonAspectInstanceFactoryDecorator implements MetadataAwar
 		return (this.materialized != null);
 	}
 
-	@Override
 	public ClassLoader getAspectClassLoader() {
 		return this.maaif.getAspectClassLoader();
 	}
 
-	@Override
 	public AspectMetadata getAspectMetadata() {
 		return this.maaif.getAspectMetadata();
 	}
 
-	@Override
 	public int getOrder() {
 		return this.maaif.getOrder();
 	}

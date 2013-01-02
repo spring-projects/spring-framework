@@ -181,7 +181,6 @@ public class ConfigurableWebBindingInitializer implements WebBindingInitializer 
 	}
 
 
-	@Override
 	public void initBinder(WebDataBinder binder, WebRequest request) {
 		binder.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 		if (this.directFieldAccess) {

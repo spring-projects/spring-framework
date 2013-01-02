@@ -65,7 +65,6 @@ public class CustomValidatorBean extends SpringValidatorAdapter implements Valid
 	}
 
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.validatorFactory == null) {
 			this.validatorFactory = Validation.buildDefaultValidatorFactory();

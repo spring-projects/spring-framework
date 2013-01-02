@@ -149,12 +149,10 @@ public class MapSqlParameterSource extends AbstractSqlParameterSource {
 	}
 
 
-	@Override
 	public boolean hasValue(String paramName) {
 		return this.values.containsKey(paramName);
 	}
 
-	@Override
 	public Object getValue(String paramName) {
 		if (!hasValue(paramName)) {
 			throw new IllegalArgumentException("No value registered for key '" + paramName + "'");

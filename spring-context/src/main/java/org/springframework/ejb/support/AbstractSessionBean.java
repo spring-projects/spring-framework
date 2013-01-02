@@ -42,7 +42,6 @@ public abstract class AbstractSessionBean extends AbstractEnterpriseBean impleme
 	 * Set the session context for this EJB.
 	 * <p><b>When overriding this method, be sure to invoke this form of it first.</b>
 	 */
-	@Override
 	public void setSessionContext(SessionContext sessionContext) {
 		this.sessionContext = sessionContext;
 	}
@@ -51,7 +50,6 @@ public abstract class AbstractSessionBean extends AbstractEnterpriseBean impleme
 	 * Convenience method for subclasses, returning the EJB session context
 	 * saved on initialization ({@link #setSessionContext}).
 	 */
-	@Override
 	public final SessionContext getSessionContext() {
 		return this.sessionContext;
 	}

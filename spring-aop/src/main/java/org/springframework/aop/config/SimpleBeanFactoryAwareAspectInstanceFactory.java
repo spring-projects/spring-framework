@@ -47,7 +47,6 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 		this.aspectBeanName = aspectBeanName;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		if (!StringUtils.hasText(this.aspectBeanName)) {
@@ -60,12 +59,10 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	 * Look up the aspect bean from the {@link BeanFactory} and returns it.
 	 * @see #setAspectBeanName
 	 */
-	@Override
 	public Object getAspectInstance() {
 		return this.beanFactory.getBean(this.aspectBeanName);
 	}
 
-	@Override
 	public ClassLoader getAspectClassLoader() {
 		if (this.beanFactory instanceof ConfigurableBeanFactory) {
 			return ((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader();
@@ -75,7 +72,6 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 		}
 	}
 
-	@Override
 	public int getOrder() {
 		if (this.beanFactory.isSingleton(this.aspectBeanName) &&
 				this.beanFactory.isTypeMatch(this.aspectBeanName, Ordered.class)) {

@@ -73,7 +73,6 @@ public class AliasDefinition implements BeanMetadataElement {
 		return this.alias;
 	}
 
-	@Override
 	public final Object getSource() {
 		return this.source;
 	}

@@ -77,7 +77,6 @@ public abstract class ServletEndpointSupport implements ServiceLifecycle {
 	 * @throws ServiceException if the context is not a ServletEndpointContext
 	 * @see #onInit
 	 */
-	@Override
 	public final void init(Object context) throws ServiceException {
 		if (!(context instanceof ServletEndpointContext)) {
 			throw new ServiceException("ServletEndpointSupport needs ServletEndpointContext, not [" + context + "]");
@@ -146,7 +145,6 @@ public abstract class ServletEndpointSupport implements ServiceLifecycle {
 	 * This implementation of destroy is empty.
 	 * Can be overridden in subclasses.
 	 */
-	@Override
 	public void destroy() {
 	}
 

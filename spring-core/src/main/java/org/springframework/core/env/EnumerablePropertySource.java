@@ -65,7 +65,6 @@ public abstract class EnumerablePropertySource<T> extends PropertySource<T> {
 	 * the {@link #getPropertyNames()} array.
 	 * @param name the property to find
 	 */
-	@Override
 	public boolean containsProperty(String name) {
 		Assert.notNull(name, "property name must not be null");
 		for (String candidate : this.getPropertyNames()) {

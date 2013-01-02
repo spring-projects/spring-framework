@@ -84,17 +84,14 @@ public abstract class AbstractFactoryBean<T>
 		this.singleton = singleton;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return this.singleton;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -127,7 +124,6 @@ public abstract class AbstractFactoryBean<T>
 	/**
 	 * Eagerly create the singleton instance, if necessary.
 	 */
-	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (isSingleton()) {
 			this.initialized = true;
@@ -142,7 +138,6 @@ public abstract class AbstractFactoryBean<T>
 	 * @see #createInstance()
 	 * @see #getEarlySingletonInterfaces()
 	 */
-	@Override
 	public final T getObject() throws Exception {
 		if (isSingleton()) {
 			return (this.initialized ? this.singletonInstance : getEarlySingletonInstance());
@@ -186,7 +181,6 @@ public abstract class AbstractFactoryBean<T>
 	 * Destroy the singleton instance, if any.
 	 * @see #destroyInstance(Object)
 	 */
-	@Override
 	public void destroy() throws Exception {
 		if (isSingleton()) {
 			destroyInstance(this.singletonInstance);
@@ -199,7 +193,6 @@ public abstract class AbstractFactoryBean<T>
 	 * interface, for a consistent offering of abstract template methods.
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
-	@Override
 	public abstract Class<?> getObjectType();
 
 	/**
@@ -248,7 +241,6 @@ public abstract class AbstractFactoryBean<T>
 	 */
 	private class EarlySingletonInvocationHandler implements InvocationHandler {
 
-		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (ReflectionUtils.isEqualsMethod(method)) {
 				// Only consider equal when proxies are identical.

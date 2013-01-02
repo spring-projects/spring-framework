@@ -318,7 +318,6 @@ class ConfigurationClassBeanDefinitionReader {
 			this.annotationMetadata = original.annotationMetadata;
 		}
 
-		@Override
 		public AnnotationMetadata getMetadata() {
 			return this.annotationMetadata;
 		}

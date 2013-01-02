@@ -56,7 +56,6 @@ public class DefaultResponseCreator implements ResponseCreator {
 		this.statusCode = statusCode;
 	}
 
-	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
 		MockClientHttpResponse response;
 		if (this.contentResource != null ){

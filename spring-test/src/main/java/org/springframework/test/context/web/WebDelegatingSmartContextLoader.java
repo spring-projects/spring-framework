@@ -37,12 +37,10 @@ public class WebDelegatingSmartContextLoader extends AbstractDelegatingSmartCont
 	private final SmartContextLoader annotationConfigLoader = new AnnotationConfigWebContextLoader();
 
 
-	@Override
 	protected SmartContextLoader getXmlLoader() {
 		return this.xmlLoader;
 	}
 
-	@Override
 	protected SmartContextLoader getAnnotationConfigLoader() {
 		return this.annotationConfigLoader;
 	}

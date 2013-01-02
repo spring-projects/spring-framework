@@ -43,7 +43,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		this.propertySources = propertySources;
 	}
 
-	@Override
 	public boolean containsProperty(String key) {
 		for (PropertySource<?> propertySource : this.propertySources) {
 			if (propertySource.containsProperty(key)) {
@@ -53,7 +52,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return false;
 	}
 
-	@Override
 	public String getProperty(String key) {
 		if (logger.isTraceEnabled()) {
 			logger.trace(format("getProperty(\"%s\") (implicit targetType [String])", key));
@@ -61,7 +59,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return this.getProperty(key, String.class);
 	}
 
-	@Override
 	public <T> T getProperty(String key, Class<T> targetValueType) {
 		boolean debugEnabled = logger.isDebugEnabled();
 		if (logger.isTraceEnabled()) {
@@ -98,7 +95,6 @@ public class PropertySourcesPropertyResolver extends AbstractPropertyResolver {
 		return null;
 	}
 
-	@Override
 	public <T> Class<T> getPropertyAsClass(String key, Class<T> targetValueType) {
 		boolean debugEnabled = logger.isDebugEnabled();
 		if (logger.isTraceEnabled()) {

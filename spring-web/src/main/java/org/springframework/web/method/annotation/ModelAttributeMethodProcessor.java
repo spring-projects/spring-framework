@@ -71,7 +71,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * @return true if the parameter is annotated with {@link ModelAttribute}
 	 * or in default resolution mode also if it is not a simple type.
 	 */
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
 			return true;
@@ -93,7 +92,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * and the next method parameter is not of type {@link Errors}.
 	 * @throws Exception if WebDataBinder initialization fails.
 	 */
-	@Override
 	public final Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory)
@@ -182,7 +180,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * Return {@code true} if there is a method-level {@code @ModelAttribute}
 	 * or if it is a non-simple type when {@code annotationNotRequired=true}.
 	 */
-	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		if (returnType.getMethodAnnotation(ModelAttribute.class) != null) {
 			return true;
@@ -198,7 +195,6 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	/**
 	 * Add non-null return values to the {@link ModelAndViewContainer}.
 	 */
-	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

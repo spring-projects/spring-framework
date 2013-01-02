@@ -37,7 +37,6 @@ class JcaListenerContainerParser extends AbstractListenerContainerParser {
 	private static final String ACTIVATION_SPEC_FACTORY_ATTRIBUTE = "activation-spec-factory";
 
 
-	@Override
 	protected BeanDefinition parseContainer(Element listenerEle, Element containerEle, ParserContext parserContext) {
 		RootBeanDefinition containerDef = new RootBeanDefinition();
 		containerDef.setSource(parserContext.extractSource(containerEle));

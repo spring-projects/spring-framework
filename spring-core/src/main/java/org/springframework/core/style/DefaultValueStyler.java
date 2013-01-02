@@ -48,7 +48,6 @@ public class DefaultValueStyler implements ValueStyler {
 	private static final String ARRAY = "array";
 
 
-	@Override
 	public String style(Object value) {
 		if (value == null) {
 			return NULL;

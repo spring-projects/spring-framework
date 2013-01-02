@@ -58,7 +58,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 	private BeanFactory beanFactory;
 
 
-	@Override
 	public void addApplicationListener(ApplicationListener listener) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListeners.add(listener);
@@ -66,7 +65,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 	}
 
-	@Override
 	public void addApplicationListenerBean(String listenerBeanName) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListenerBeans.add(listenerBeanName);
@@ -74,7 +72,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 	}
 
-	@Override
 	public void removeApplicationListener(ApplicationListener listener) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListeners.remove(listener);
@@ -82,7 +79,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 	}
 
-	@Override
 	public void removeApplicationListenerBean(String listenerBeanName) {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListenerBeans.remove(listenerBeanName);
@@ -90,7 +86,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 	}
 
-	@Override
 	public void removeAllListeners() {
 		synchronized (this.defaultRetriever) {
 			this.defaultRetriever.applicationListeners.clear();
@@ -99,7 +94,6 @@ public abstract class AbstractApplicationEventMulticaster implements Application
 		}
 	}
 
-	@Override
 	public final void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

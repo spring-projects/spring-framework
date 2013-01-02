@@ -33,7 +33,6 @@ public class OutputStreamFactory {
 	 */
 	public static OutputStream getNoopOutputStream() {
 		return new OutputStream() {
-			@Override
 			public void write(int b) throws IOException {
 				// ignore the output
 			}

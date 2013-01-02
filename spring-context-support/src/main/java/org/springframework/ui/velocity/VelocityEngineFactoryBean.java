@@ -53,23 +53,19 @@ public class VelocityEngineFactoryBean extends VelocityEngineFactory
 	private VelocityEngine velocityEngine;
 
 
-	@Override
 	public void afterPropertiesSet() throws IOException, VelocityException {
 		this.velocityEngine = createVelocityEngine();
 	}
 
 
-	@Override
 	public VelocityEngine getObject() {
 		return this.velocityEngine;
 	}
 
-	@Override
 	public Class<? extends VelocityEngine> getObjectType() {
 		return VelocityEngine.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

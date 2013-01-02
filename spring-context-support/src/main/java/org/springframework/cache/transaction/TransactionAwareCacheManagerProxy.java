@@ -65,7 +65,6 @@ public class TransactionAwareCacheManagerProxy implements CacheManager, Initiali
 		this.targetCacheManager = targetCacheManager;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.targetCacheManager == null) {
 			throw new IllegalStateException("'targetCacheManager' is required");
@@ -73,12 +72,10 @@ public class TransactionAwareCacheManagerProxy implements CacheManager, Initiali
 	}
 
 
-	@Override
 	public Cache getCache(String name) {
 		return new TransactionAwareCacheDecorator(this.targetCacheManager.getCache(name));
 	}
 
-	@Override
 	public Collection<String> getCacheNames() {
 		return this.targetCacheManager.getCacheNames();
 	}

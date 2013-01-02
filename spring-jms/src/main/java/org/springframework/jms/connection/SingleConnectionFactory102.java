@@ -93,7 +93,6 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 	 * the specified destination type: QueueConnectionFactory for queues,
 	 * TopicConnectionFactory for topics.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 
@@ -120,7 +119,6 @@ public class SingleConnectionFactory102 extends SingleConnectionFactory {
 	/**
 	 * This implementation overrides the superclass method to use JMS 1.0.2 API.
 	 */
-	@Override
 	protected Connection doCreateConnection() throws JMSException {
 		if (isPubSubDomain()) {
 			return ((TopicConnectionFactory) getTargetConnectionFactory()).createTopicConnection();

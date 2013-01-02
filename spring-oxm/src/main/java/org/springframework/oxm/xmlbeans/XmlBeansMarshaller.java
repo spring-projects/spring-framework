@@ -117,7 +117,6 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 	/**
 	 * This implementation returns true if the given class is an implementation of {@link XmlObject}.
 	 */
-	@Override
 	public boolean supports(Class<?> clazz) {
 		return XmlObject.class.isAssignableFrom(clazz);
 	}

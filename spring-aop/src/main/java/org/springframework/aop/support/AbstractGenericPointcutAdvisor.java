@@ -39,7 +39,6 @@ public abstract class AbstractGenericPointcutAdvisor extends AbstractPointcutAdv
 		this.advice = advice;
 	}
 
-	@Override
 	public Advice getAdvice() {
 		return this.advice;
 	}

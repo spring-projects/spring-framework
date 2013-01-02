@@ -44,12 +44,10 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	}
 
 
-	@Override
 	public final Object getAspectInstance() {
 		return this.aspectInstance;
 	}
 
-	@Override
 	public ClassLoader getAspectClassLoader() {
 		return this.aspectInstance.getClass().getClassLoader();
 	}
@@ -62,7 +60,6 @@ public class SingletonAspectInstanceFactory implements AspectInstanceFactory {
 	 * @see org.springframework.core.Ordered
 	 * @see #getOrderForAspectClass
 	 */
-	@Override
 	public int getOrder() {
 		if (this.aspectInstance instanceof Ordered) {
 			return ((Ordered) this.aspectInstance).getOrder();

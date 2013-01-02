@@ -124,7 +124,6 @@ public abstract class MockMvcRequestBuilders {
 	 */
 	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
 		return new RequestBuilder() {
-			@Override
 			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
 				MockHttpServletRequest request = mvcResult.getRequest();
 				Method method = ReflectionUtils.findMethod(request.getClass(), "setAsyncStarted", boolean.class);

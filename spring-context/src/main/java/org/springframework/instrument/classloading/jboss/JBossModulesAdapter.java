@@ -57,7 +57,6 @@ class JBossModulesAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
-	@Override
 	public void addTransformer(ClassFileTransformer transformer) {
 		try {
 			addTransformer.invoke(delegatingTransformer, transformer);
@@ -66,7 +65,6 @@ class JBossModulesAdapter implements JBossClassLoaderAdapter {
 		}
 	}
 
-	@Override
 	public ClassLoader getInstrumentableClassLoader() {
 		return classLoader;
 	}

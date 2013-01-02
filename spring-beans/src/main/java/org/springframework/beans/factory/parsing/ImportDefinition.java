@@ -77,7 +77,6 @@ public class ImportDefinition implements BeanMetadataElement {
 		return this.actualResources;
 	}
 
-	@Override
 	public final Object getSource() {
 		return this.source;
 	}

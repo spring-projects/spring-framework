@@ -43,7 +43,6 @@ public class OrderComparator implements Comparator<Object> {
 	public static final OrderComparator INSTANCE = new OrderComparator();
 
 
-	@Override
 	public int compare(Object o1, Object o2) {
 		boolean p1 = (o1 instanceof PriorityOrdered);
 		boolean p2 = (o2 instanceof PriorityOrdered);

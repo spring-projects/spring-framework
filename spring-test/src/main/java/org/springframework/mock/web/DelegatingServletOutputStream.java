@@ -54,18 +54,15 @@ public class DelegatingServletOutputStream extends ServletOutputStream {
 	}
 
 
-	@Override
 	public void write(int b) throws IOException {
 		this.targetStream.write(b);
 	}
 
-	@Override
 	public void flush() throws IOException {
 		super.flush();
 		this.targetStream.flush();
 	}
 
-	@Override
 	public void close() throws IOException {
 		super.close();
 		this.targetStream.close();

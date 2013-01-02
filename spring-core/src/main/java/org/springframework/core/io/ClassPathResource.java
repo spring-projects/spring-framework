@@ -145,7 +145,6 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * @see java.lang.ClassLoader#getResourceAsStream(String)
 	 * @see java.lang.Class#getResourceAsStream(String)
 	 */
-	@Override
 	public InputStream getInputStream() throws IOException {
 		InputStream is;
 		if (this.clazz != null) {
@@ -204,7 +203,6 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	/**
 	 * This implementation returns a description that includes the class path location.
 	 */
-	@Override
 	public String getDescription() {
 		StringBuilder builder = new StringBuilder("class path resource [");
 

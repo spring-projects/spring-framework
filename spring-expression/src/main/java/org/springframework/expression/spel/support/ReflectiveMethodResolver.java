@@ -86,7 +86,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	 * according to the registered type converter.
 	 * </ol>
 	 */
-	@Override
 	public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name,
 			List<TypeDescriptor> argumentTypes) throws AccessException {
 
@@ -112,7 +111,6 @@ public class ReflectiveMethodResolver implements MethodResolver {
 			}
 
 			Arrays.sort(methods, new Comparator<Method>() {
-				@Override
 				public int compare(Method m1, Method m2) {
 					int m1pl = m1.getParameterTypes().length;
 					int m2pl = m2.getParameterTypes().length;

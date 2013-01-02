@@ -83,7 +83,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Detects handler methods at initialization.
 	 */
-	@Override
 	public void afterPropertiesSet() {
 		initHandlerMethods();
 	}
@@ -136,7 +135,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
 		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
-			@Override
 			public boolean matches(Method method) {
 				return getMappingForMethod(method, userType) != null;
 			}
@@ -354,7 +352,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.comparator = comparator;
 		}
 
-		@Override
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
 		}

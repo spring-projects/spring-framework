@@ -142,7 +142,6 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private static boolean romePresent =
 			ClassUtils.isPresent("com.sun.syndication.feed.WireFeed", AnnotationDrivenBeanDefinitionParser.class.getClassLoader());
 
-	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		Object source = parserContext.extractSource(element);
 

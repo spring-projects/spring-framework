@@ -60,7 +60,6 @@ public class AspectJTypeFilter implements TypeFilter {
 	}
 
 
-	@Override
 	public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory)
 			throws IOException {
 

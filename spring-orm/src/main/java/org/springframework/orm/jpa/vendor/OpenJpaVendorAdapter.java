@@ -48,7 +48,6 @@ public class OpenJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final OpenJpaDialect jpaDialect = new OpenJpaDialect();
 
 
-	@Override
 	public PersistenceProvider getPersistenceProvider() {
 		return this.persistenceProvider;
 	}

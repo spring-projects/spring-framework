@@ -69,7 +69,6 @@ public class PortletContextAwareProcessor implements BeanPostProcessor {
 	}
 
 
-	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (this.portletContext != null && bean instanceof PortletContextAware) {
 			((PortletContextAware) bean).setPortletContext(this.portletContext);
@@ -80,7 +79,6 @@ public class PortletContextAwareProcessor implements BeanPostProcessor {
 		return bean;
 	}
 
-	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		return bean;
 	}

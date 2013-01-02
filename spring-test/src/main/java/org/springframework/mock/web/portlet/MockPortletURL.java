@@ -69,7 +69,6 @@ public class MockPortletURL extends MockBaseURL implements PortletURL {
 	// PortletURL methods
 	//---------------------------------------------------------------------
 
-	@Override
 	public void setWindowState(WindowState windowState) throws WindowStateException {
 		if (!CollectionUtils.contains(this.portalContext.getSupportedWindowStates(), windowState)) {
 			throw new WindowStateException("WindowState not supported", windowState);
@@ -77,12 +76,10 @@ public class MockPortletURL extends MockBaseURL implements PortletURL {
 		this.windowState = windowState;
 	}
 
-	@Override
 	public WindowState getWindowState() {
 		return this.windowState;
 	}
 
-	@Override
 	public void setPortletMode(PortletMode portletMode) throws PortletModeException {
 		if (!CollectionUtils.contains(this.portalContext.getSupportedPortletModes(), portletMode)) {
 			throw new PortletModeException("PortletMode not supported", portletMode);
@@ -90,12 +87,10 @@ public class MockPortletURL extends MockBaseURL implements PortletURL {
 		this.portletMode = portletMode;
 	}
 
-	@Override
 	public PortletMode getPortletMode() {
 		return this.portletMode;
 	}
 
-	@Override
 	public void removePublicRenderParameter(String name) {
 		this.parameters.remove(name);
 	}

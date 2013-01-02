@@ -540,7 +540,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		this.schemaUpdate = schemaUpdate;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.beanClassLoader = beanClassLoader;
 	}
@@ -940,7 +939,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
-					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
@@ -986,7 +984,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			hibernateTemplate.setFlushMode(HibernateTemplate.FLUSH_NEVER);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
-					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
@@ -1024,7 +1021,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 		hibernateTemplate.execute(
 			new HibernateCallback<Object>() {
-				@Override
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
 					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
@@ -1062,7 +1058,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			HibernateTemplate hibernateTemplate = new HibernateTemplate(sessionFactory);
 			hibernateTemplate.execute(
 				new HibernateCallback<Object>() {
-					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
 						@SuppressWarnings("deprecation")
 						Connection con = session.connection();

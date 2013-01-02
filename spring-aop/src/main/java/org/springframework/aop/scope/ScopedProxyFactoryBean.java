@@ -78,7 +78,6 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		this.scopedTargetSource.setTargetBeanName(targetBeanName);
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		if (!(beanFactory instanceof ConfigurableBeanFactory)) {
 			throw new IllegalStateException("Not running in a ConfigurableBeanFactory: " + beanFactory);
@@ -112,7 +111,6 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 	}
 
 
-	@Override
 	public Object getObject() {
 		if (this.proxy == null) {
 			throw new FactoryBeanNotInitializedException();
@@ -120,7 +118,6 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		return this.proxy;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		if (this.proxy != null) {
 			return this.proxy.getClass();
@@ -131,7 +128,6 @@ public class ScopedProxyFactoryBean extends ProxyConfig implements FactoryBean<O
 		return null;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

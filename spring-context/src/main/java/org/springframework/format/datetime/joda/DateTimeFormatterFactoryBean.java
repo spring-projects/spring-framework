@@ -39,22 +39,18 @@ public class DateTimeFormatterFactoryBean extends DateTimeFormatterFactory
 	private DateTimeFormatter dateTimeFormatter;
 
 
-	@Override
 	public void afterPropertiesSet() {
 		this.dateTimeFormatter = createDateTimeFormatter();
 	}
 
-	@Override
 	public DateTimeFormatter getObject() {
 		return this.dateTimeFormatter;
 	}
 
-	@Override
 	public Class<?> getObjectType() {
 		return DateTimeFormatter.class;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

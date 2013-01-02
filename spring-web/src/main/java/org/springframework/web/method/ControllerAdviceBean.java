@@ -101,7 +101,6 @@ public class ControllerAdviceBean implements Ordered {
 	 * Returns the order value extracted from the {@link ControllerAdvice}
 	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
 	 */
-	@Override
 	public int getOrder() {
 		return this.order;
 	}

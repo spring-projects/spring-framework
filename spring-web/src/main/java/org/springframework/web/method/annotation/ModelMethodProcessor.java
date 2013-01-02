@@ -37,12 +37,10 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class ModelMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return Model.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)
@@ -51,12 +49,10 @@ public class ModelMethodProcessor implements HandlerMethodArgumentResolver, Hand
 		return mavContainer.getModel();
 	}
 
-	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return Model.class.isAssignableFrom(returnType.getParameterType());
 	}
 
-	@Override
 	public void handleReturnValue(
 			Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)

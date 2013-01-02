@@ -53,12 +53,10 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 	}
 
 
-	@Override
 	public void include(RenderRequest request, RenderResponse response) throws PortletException, IOException {
 		include((PortletRequest) request, (PortletResponse) response);
 	}
 
-	@Override
 	public void include(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");
@@ -71,7 +69,6 @@ public class MockPortletRequestDispatcher implements PortletRequestDispatcher {
 		}
 	}
 
-	@Override
 	public void forward(PortletRequest request, PortletResponse response) throws PortletException, IOException {
 		Assert.notNull(request, "Request must not be null");
 		Assert.notNull(response, "Response must not be null");

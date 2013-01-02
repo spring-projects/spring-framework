@@ -55,7 +55,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class ServletRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {
 
-	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
 		return WebRequest.class.isAssignableFrom(paramType) ||
@@ -68,7 +67,6 @@ public class ServletRequestMethodArgumentResolver implements HandlerMethodArgume
 				Reader.class.isAssignableFrom(paramType);
 	}
 
-	@Override
 	public Object resolveArgument(
 			MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory)

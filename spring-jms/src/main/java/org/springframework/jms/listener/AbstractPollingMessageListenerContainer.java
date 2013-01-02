@@ -509,17 +509,14 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 */
 	private class MessageListenerContainerResourceFactory implements ConnectionFactoryUtils.ResourceFactory {
 
-		@Override
 		public Connection getConnection(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getConnection(holder);
 		}
 
-		@Override
 		public Session getSession(JmsResourceHolder holder) {
 			return AbstractPollingMessageListenerContainer.this.getSession(holder);
 		}
 
-		@Override
 		public Connection createConnection() throws JMSException {
 			if (AbstractPollingMessageListenerContainer.this.sharedConnectionEnabled()) {
 				Connection sharedCon = AbstractPollingMessageListenerContainer.this.getSharedConnection();
@@ -530,12 +527,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 			}
 		}
 
-		@Override
 		public Session createSession(Connection con) throws JMSException {
 			return AbstractPollingMessageListenerContainer.this.createSession(con);
 		}
 
-		@Override
 		public boolean isSynchedLocalTransactionAllowed() {
 			return AbstractPollingMessageListenerContainer.this.isSessionTransacted();
 		}

@@ -270,7 +270,6 @@ class ConstructorResolver {
 				final Constructor ctorToUse = constructorToUse;
 				final Object[] argumentsToUse = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, ctorToUse, argumentsToUse);
@@ -403,7 +402,6 @@ class ConstructorResolver {
 			final Class factoryClazz = factoryClass;
 			if (System.getSecurityManager() != null) {
 				rawCandidates = AccessController.doPrivileged(new PrivilegedAction<Method[]>() {
-					@Override
 					public Method[] run() {
 						return (mbd.isNonPublicAccessAllowed() ?
 								ReflectionUtils.getAllDeclaredMethods(factoryClazz) : factoryClazz.getMethods());
@@ -562,7 +560,6 @@ class ConstructorResolver {
 				final Method factoryMethod = factoryMethodToUse;
 				final Object[] args = argsToUse;
 				beanInstance = AccessController.doPrivileged(new PrivilegedAction<Object>() {
-					@Override
 					public Object run() {
 						return beanFactory.getInstantiationStrategy().instantiate(
 								mbd, beanName, beanFactory, fb, factoryMethod, args);

@@ -135,7 +135,6 @@ public interface LobCreator extends Closeable {
 	 * been executed or the affected O/R mapping sessions have been flushed.
 	 * Otherwise, the database resources for the temporary BLOBs might stay allocated.
 	 */
-	@Override
 	void close();
 
 }

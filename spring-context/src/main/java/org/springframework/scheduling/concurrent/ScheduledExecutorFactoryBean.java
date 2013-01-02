@@ -122,7 +122,6 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 
-	@Override
 	protected ExecutorService initializeExecutor(
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
@@ -199,17 +198,14 @@ public class ScheduledExecutorFactoryBean extends ExecutorConfigurationSupport
 	}
 
 
-	@Override
 	public ScheduledExecutorService getObject() {
 		return this.exposedExecutor;
 	}
 
-	@Override
 	public Class<? extends ScheduledExecutorService> getObjectType() {
 		return (this.exposedExecutor != null ? this.exposedExecutor.getClass() : ScheduledExecutorService.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

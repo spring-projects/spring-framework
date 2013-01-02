@@ -40,12 +40,10 @@ import org.springframework.web.portlet.ModelAndView;
  */
 public class PortletModeNameViewController implements Controller {
 
-	@Override
 	public void handleActionRequest(ActionRequest request, ActionResponse response) throws Exception {
 		throw new PortletException("PortletModeNameViewController does not handle action requests");
 	}
 
-	@Override
 	public ModelAndView handleRenderRequest(RenderRequest request, RenderResponse response) {
 		return new ModelAndView(request.getPortletMode().toString());
 	}

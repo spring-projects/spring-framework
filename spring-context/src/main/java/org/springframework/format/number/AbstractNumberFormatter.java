@@ -44,12 +44,10 @@ public abstract class AbstractNumberFormatter implements Formatter<Number> {
 		this.lenient = lenient;
 	}
 
-	@Override
 	public String print(Number number, Locale locale) {
 		return getNumberFormat(locale).format(number);
 	}
 
-	@Override
 	public Number parse(String text, Locale locale) throws ParseException {
 		NumberFormat format = getNumberFormat(locale);
 		ParsePosition position = new ParsePosition(0);

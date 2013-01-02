@@ -45,7 +45,6 @@ public class UtilNamespaceHandler extends NamespaceHandlerSupport {
 	private static final String SCOPE_ATTRIBUTE = "scope";
 
 
-	@Override
 	public void init() {
 		registerBeanDefinitionParser("constant", new ConstantBeanDefinitionParser());
 		registerBeanDefinitionParser("property-path", new PropertyPathBeanDefinitionParser());

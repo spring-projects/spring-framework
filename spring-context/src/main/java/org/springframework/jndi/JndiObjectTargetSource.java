@@ -105,7 +105,6 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 	}
 
 
-	@Override
 	public Class<?> getTargetClass() {
 		if (this.cachedObject != null) {
 			return this.cachedObject.getClass();
@@ -118,12 +117,10 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 		}
 	}
 
-	@Override
 	public boolean isStatic() {
 		return (this.cachedObject != null);
 	}
 
-	@Override
 	public Object getTarget() {
 		try {
 			if (this.lookupOnStartup || !this.cache) {
@@ -143,7 +140,6 @@ public class JndiObjectTargetSource extends JndiObjectLocator implements TargetS
 		}
 	}
 
-	@Override
 	public void releaseTarget(Object target) {
 	}
 

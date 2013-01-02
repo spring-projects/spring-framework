@@ -104,7 +104,6 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		}
 	}
 
-	@Override
 	public String getProperty() {
 		return this.property;
 	}
@@ -116,7 +115,6 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		this.ignoreCase = ignoreCase;
 	}
 
-	@Override
 	public boolean isIgnoreCase() {
 		return this.ignoreCase;
 	}
@@ -128,7 +126,6 @@ public class MutableSortDefinition implements SortDefinition, Serializable {
 		this.ascending = ascending;
 	}
 
-	@Override
 	public boolean isAscending() {
 		return this.ascending;
 	}

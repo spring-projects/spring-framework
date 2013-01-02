@@ -176,17 +176,14 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 		this.jobListenerNames = names;
 	}
 
-	@Override
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
 	}
 
-	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
 
-	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -197,7 +194,6 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 
-	@Override
 	public void afterPropertiesSet() throws ClassNotFoundException, NoSuchMethodException {
 		prepare();
 
@@ -276,17 +272,14 @@ public class MethodInvokingJobDetailFactoryBean extends ArgumentConvertingMethod
 	}
 
 
-	@Override
 	public JobDetail getObject() {
 		return this.jobDetail;
 	}
 
-	@Override
 	public Class<? extends JobDetail> getObjectType() {
 		return (this.jobDetail != null ? this.jobDetail.getClass() : JobDetail.class);
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return true;
 	}

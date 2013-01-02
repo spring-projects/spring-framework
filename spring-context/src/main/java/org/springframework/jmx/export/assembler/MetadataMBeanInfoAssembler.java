@@ -88,7 +88,6 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 		this.attributeSource = attributeSource;
 	}
 
-	@Override
 	public void afterPropertiesSet() {
 		if (this.attributeSource == null) {
 			throw new IllegalArgumentException("Property 'attributeSource' is required");
@@ -115,7 +114,6 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	 * @param beanClass the class of the bean
 	 * @param beanName the name of the bean in the bean factory
 	 */
-	@Override
 	public boolean includeBean(Class<?> beanClass, String beanName) {
 		return (this.attributeSource.getManagedResource(getClassToExpose(beanClass)) != null);
 	}
