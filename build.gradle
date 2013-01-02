@@ -108,6 +108,17 @@ configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
 		testCompile("org.easymock:easymock:${easymockVersion}")
 		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
 	}
+
+	if(project.hasProperty("jdk6Home")) {
+		task jdk6Test(type: Test, dependsOn: test) {
+			testClassesDir = test.testClassesDir
+			classpath  = test.classpath
+			executable = "${jdk6Home}/bin/java"
+			testReportDir = project.file("${project.buildDir}/reports-jdk6/")
+			testResultsDir = project.file("${project.buildDir}/test-results-jdk6/")
+		}
+		check.dependsOn jdk6Test
+	}
 }
 
 configure(subprojects - project(":spring-build-junit")) { subproject ->
@@ -351,7 +362,7 @@ project("spring-context") {
 		testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
 	}
 
-	test {
+	project.tasks.withType(Test) {
 		jvmArgs = ["-disableassertions:org.aspectj.weaver.UnresolvedType"] // SPR-7989
 	}
 }
