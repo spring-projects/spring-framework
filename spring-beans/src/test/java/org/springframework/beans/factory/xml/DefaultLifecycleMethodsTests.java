@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import junit.framework.TestCase;
 
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -25,11 +26,13 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class DefaultLifecycleMethodsTests extends TestCase {
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	@Override
 	protected void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("defaultLifecycleMethods.xml", getClass()));
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(new ClassPathResource(
+				"defaultLifecycleMethods.xml", getClass()));
 	}
 
 	public void testLifecycleMethodsInvoked() {
@@ -49,7 +52,9 @@ public class DefaultLifecycleMethodsTests extends TestCase {
 
 	public void testIgnoreDefaultLifecycleMethods() throws Exception {
 		try {
-			XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("ignoreDefaultLifecycleMethods.xml", getClass()));
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(
+					new ClassPathResource("ignoreDefaultLifecycleMethods.xml", getClass()));
 			bf.preInstantiateSingletons();
 			bf.destroySingletons();
 		}

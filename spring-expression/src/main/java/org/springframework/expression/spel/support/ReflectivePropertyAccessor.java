@@ -311,15 +311,10 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method[] ms = clazz.getMethods();
-		String propertyWriteMethodSuffix;
-		if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(1))) {
-			propertyWriteMethodSuffix = propertyName;
-		}
-		else {
-			propertyWriteMethodSuffix = StringUtils.capitalize(propertyName);
-		}
+		String propertyMethodSuffix = getPropertyMethodSuffix(propertyName);
+
 		// Try "get*" method...
-		String getterName = "get" + propertyWriteMethodSuffix;
+		String getterName = "get" + propertyMethodSuffix;
 		for (Method method : ms) {
 			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
@@ -327,7 +322,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 		// Try "is*" method...
-		getterName = "is" + propertyWriteMethodSuffix;
+		getterName = "is" + propertyMethodSuffix;
 		for (Method method : ms) {
 			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
@@ -343,7 +338,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
 		Method[] methods = clazz.getMethods();
-		String setterName = "set" + StringUtils.capitalize(propertyName);
+		String setterName = "set" + getPropertyMethodSuffix(propertyName);
 		for (Method method : methods) {
 			if (!method.isBridge() && method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
@@ -351,6 +346,15 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			}
 		}
 		return null;
+	}
+
+	protected String getPropertyMethodSuffix(String propertyName) {
+		if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(1))) {
+			return propertyName;
+		}
+		else {
+			return StringUtils.capitalize(propertyName);
+		}
 	}
 
 	/**

@@ -28,9 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.transaction.TransactionManager;
 
 import junit.framework.TestCase;
+
 import org.easymock.MockControl;
 import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
@@ -49,8 +51,8 @@ import org.hibernate.engine.FilterDefinition;
 import org.hibernate.event.MergeEvent;
 import org.hibernate.event.MergeEventListener;
 import org.hibernate.mapping.TypeDef;
-
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -612,7 +614,8 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 	*/
 
 	public void testLocalSessionFactoryBeanWithTypeDefinitions() throws Exception {
-		XmlBeanFactory xbf = new XmlBeanFactory(new ClassPathResource("typeDefinitions.xml", getClass()));
+		DefaultListableBeanFactory xbf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(xbf).loadBeanDefinitions(new ClassPathResource("typeDefinitions.xml", getClass()));
 		TypeTestLocalSessionFactoryBean sf = (TypeTestLocalSessionFactoryBean) xbf.getBean("&sessionFactory");
 		// Requires re-compilation when switching to Hibernate 3.5/3.6
 		// since Mappings changed from a class to an interface

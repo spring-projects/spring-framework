@@ -28,6 +28,7 @@ import org.junit.Test;
  * @author Rick Evans
  * @author Chris Beams
  */
+@Deprecated
 public final class TimerTaskExecutorTests {
 
 	@Test(expected=IllegalArgumentException.class)

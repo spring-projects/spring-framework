@@ -18,7 +18,6 @@ package org.springframework.jdbc.core;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,7 +34,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.build.test.hamcrest.Matchers.exceptionCause;
+import static org.springframework.tests.Matchers.exceptionCause;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

@@ -19,6 +19,7 @@ package org.springframework.beans.factory.xml;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +39,9 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final List defaults = new LinkedList();
 
-	private final Map componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map componentDefinitions = new LinkedHashMap<>(8);
 
-	private final Map aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map aliasMap = new LinkedHashMap<>(8);
 
 	private final List imports = new LinkedList();
 

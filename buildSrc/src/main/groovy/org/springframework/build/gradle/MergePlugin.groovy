@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.build.gradle.merge
+package org.springframework.build.gradle
 
 import org.gradle.api.*
 import org.gradle.api.artifacts.Configuration

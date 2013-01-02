@@ -49,8 +49,8 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
-import org.springframework.build.junit.Assume;
-import org.springframework.build.junit.TestGroup;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -1548,6 +1548,24 @@ public final class BeanWrapperTests {
 		BeanWrapper bw = new BeanWrapperImpl(consumer);
 		bw.setPropertyValue("enumValue", TestEnum.class.getName() + ".TEST_VALUE");
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
+	}
+
+	@Test
+	public void cornerSpr10115() {
+		Spr10115Bean foo = new Spr10115Bean();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+		bwi.setPropertyValue("prop1", "val1");
+		assertEquals("val1", Spr10115Bean.prop1);
+	}
+
+
+	static class Spr10115Bean {
+		private static String prop1;
+
+		public static void setProp1(String prop1) {
+			Spr10115Bean.prop1 = prop1;
+		}
 	}
 
 

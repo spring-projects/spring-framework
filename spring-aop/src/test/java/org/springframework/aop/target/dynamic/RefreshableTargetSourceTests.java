@@ -19,8 +19,8 @@ package org.springframework.aop.target.dynamic;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.build.junit.Assume;
-import org.springframework.build.junit.TestGroup;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * @author Rob Harrop

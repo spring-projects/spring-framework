@@ -16,12 +16,14 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
 import test.beans.ITestBean;
@@ -40,7 +42,8 @@ public final class ExposeInvocationInterceptorTests {
 
 	@Test
 	public void testXmlConfig() {
-		XmlBeanFactory bf = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
 		String name= "tony";
 		tb.setName(name);

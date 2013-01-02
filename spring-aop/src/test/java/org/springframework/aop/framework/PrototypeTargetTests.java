@@ -22,7 +22,8 @@ import static test.util.TestResourceUtils.qualifiedResource;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
 /**
@@ -37,12 +38,13 @@ public final class PrototypeTargetTests {
 	@Test
 	public void testPrototypeProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
-		XmlBeanFactory xbf = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		for (int i = 0; i < 10; i++) {
-			TestBean tb = (TestBean) xbf.getBean("testBeanPrototype");
+			TestBean tb = (TestBean) bf.getBean("testBeanPrototype");
 			tb.doSomething();
 		}
-		TestInterceptor interceptor = (TestInterceptor) xbf.getBean("testInterceptor");
+		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
 		assertEquals(10, TestBeanImpl.constructionCount);
 		assertEquals(10, interceptor.invocationCount);
 	}
@@ -50,12 +52,13 @@ public final class PrototypeTargetTests {
 	@Test
 	public void testSingletonProxyWithPrototypeTarget() {
 		TestBeanImpl.constructionCount = 0;
-		XmlBeanFactory xbf = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		for (int i = 0; i < 10; i++) {
-			TestBean tb = (TestBean) xbf.getBean("testBeanSingleton");
+			TestBean tb = (TestBean) bf.getBean("testBeanSingleton");
 			tb.doSomething();
 		}
-		TestInterceptor interceptor = (TestInterceptor) xbf.getBean("testInterceptor");
+		TestInterceptor interceptor = (TestInterceptor) bf.getBean("testInterceptor");
 		assertEquals(1, TestBeanImpl.constructionCount);
 		assertEquals(10, interceptor.invocationCount);
 	}

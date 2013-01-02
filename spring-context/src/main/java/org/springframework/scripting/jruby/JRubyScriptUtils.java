@@ -75,6 +75,7 @@ public abstract class JRubyScriptUtils {
 	 * @return the scripted Java object
 	 * @throws JumpException in case of JRuby parsing failure
 	 */
+	@SuppressWarnings("deprecation")
 	public static Object createJRubyObject(String scriptSource, Class[] interfaces, ClassLoader classLoader) {
 		Ruby ruby = initializeRuntime();
 

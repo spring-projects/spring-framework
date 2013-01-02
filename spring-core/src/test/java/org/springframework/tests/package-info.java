@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.mvc.mapping;
-
-import org.springframework.web.servlet.mvc.SimpleFormController;
-
 /**
- * @author Rob Harrop
+ * Shared utilities that are used internally throughout the test suite but are not
+ * published. This package should not be confused with {@code org.springframework.test}
+ * which contains published code from the 'spring-test' module.
  */
-@Deprecated
-public class BuyForm extends SimpleFormController {
-
-}
+package org.springframework.tests;

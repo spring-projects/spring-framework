@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -77,11 +77,11 @@ public class VariableAndFunctionTests extends ExpressionTestCase {
 		try {
 			@SuppressWarnings("unused")
 			Object v = parser.parseRaw("#notStatic()").getValue(ctx);
-			Assert.fail("Should have failed with exception - cannot call non static method that way");
+			fail("Should have failed with exception - cannot call non static method that way");
 		} catch (SpelEvaluationException se) {
 			if (se.getMessageCode() != SpelMessage.FUNCTION_MUST_BE_STATIC) {
 				se.printStackTrace();
-				Assert.fail("Should have failed a message about the function needing to be static, not: "
+				fail("Should have failed a message about the function needing to be static, not: "
 						+ se.getMessageCode());
 			}
 		}
