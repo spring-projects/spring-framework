@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 public class PrioritizedParameterNameDiscovererTests extends TestCase {
 
@@ -56,7 +56,7 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 	private final Class anyClass = Object.class;
 
 	public PrioritizedParameterNameDiscovererTests() throws SecurityException, NoSuchMethodException {
-		anyMethod = TestBean.class.getMethod("getAge", (Class[]) null);
+		anyMethod = TestObject.class.getMethod("getAge", (Class[]) null);
 	}
 
 	public void testNoParametersDiscoverers() {

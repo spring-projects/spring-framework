@@ -17,7 +17,7 @@ import java.io.Serializable;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * Utilities for testing serializability of objects.
@@ -64,7 +64,7 @@ public class SerializationTestUtils extends TestCase {
 	}
 
 	public void testWithNonSerializableObject() throws IOException {
-		TestBean o = new TestBean();
+		TestObject o = new TestObject();
 		assertFalse(o instanceof Serializable);
 
 		assertFalse(isSerializable(o));

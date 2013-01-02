@@ -20,7 +20,7 @@ import java.util.LinkedList;
 
 import junit.framework.*;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * @author Rob Harrop
@@ -29,11 +29,11 @@ import org.springframework.beans.TestBean;
 public class AutoPopulatingListTests extends TestCase {
 
 	public void testWithClass() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(TestBean.class));
+		doTestWithClass(new AutoPopulatingList<Object>(TestObject.class));
 	}
 
 	public void testWithClassAndUserSuppliedBackingList() throws Exception {
-		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<Object>(), TestBean.class));
+		doTestWithClass(new AutoPopulatingList<Object>(new LinkedList<Object>(), TestObject.class));
 	}
 
 	public void testWithElementFactory() throws Exception {
@@ -49,7 +49,7 @@ public class AutoPopulatingListTests extends TestCase {
 		for (int x = 0; x < 10; x++) {
 			Object element = list.get(x);
 			assertNotNull("Element is null", list.get(x));
-			assertTrue("Element is incorrect type", element instanceof TestBean);
+			assertTrue("Element is incorrect type", element instanceof TestObject);
 			assertNotSame(lastElement, element);
 			lastElement = element;
 		}
@@ -59,10 +59,10 @@ public class AutoPopulatingListTests extends TestCase {
 		list.add(11, helloWorld);
 		assertEquals(helloWorld, list.get(11));
 
-		assertTrue(list.get(10) instanceof TestBean);
-		assertTrue(list.get(12) instanceof TestBean);
-		assertTrue(list.get(13) instanceof TestBean);
-		assertTrue(list.get(20) instanceof TestBean);
+		assertTrue(list.get(10) instanceof TestObject);
+		assertTrue(list.get(12) instanceof TestObject);
+		assertTrue(list.get(13) instanceof TestObject);
+		assertTrue(list.get(20) instanceof TestObject);
 	}
 
 	private void doTestWithElementFactory(AutoPopulatingList<Object> list) {
@@ -70,14 +70,14 @@ public class AutoPopulatingListTests extends TestCase {
 
 		for(int x = 0; x < list.size(); x++) {
 			Object element = list.get(x);
-			if(element instanceof TestBean) {
-				assertEquals(x, ((TestBean) element).getAge());
+			if(element instanceof TestObject) {
+				assertEquals(x, ((TestObject) element).getAge());
 			}
 		}
 	}
 
 	public void testSerialization() throws Exception {
-		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestBean.class);
+		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestObject.class);
 		assertEquals(list, SerializationTestUtils.serializeAndDeserialize(list));
 	}
 
@@ -86,7 +86,7 @@ public class AutoPopulatingListTests extends TestCase {
 
 		@Override
 		public Object createElement(int index) {
-			TestBean bean = new TestBean();
+			TestObject bean = new TestObject();
 			bean.setAge(index);
 			return bean;
 		}

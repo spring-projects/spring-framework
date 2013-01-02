@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.beans;
+package org.springframework.tests.sample.objects;
 
-import org.springframework.core.enums.ShortCodedLabeledEnum;
 
-/**
- * @author Rob Harrop
- */
-@SuppressWarnings("serial")
-public class Colour extends ShortCodedLabeledEnum {
+public interface ITestInterface {
 
-	public static final Colour RED = new Colour(0, "RED");
-	public static final Colour BLUE = new Colour(1, "BLUE");
-	public static final Colour GREEN = new Colour(2, "GREEN");
-	public static final Colour PURPLE = new Colour(3, "PURPLE");
-
-	private Colour(int code, String label) {
-		super(code, label);
-	}
+	void absquatulate();
 
 }
