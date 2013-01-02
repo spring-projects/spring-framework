@@ -19,9 +19,9 @@ package org.springframework.web.bind;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import org.springframework.build.junit.Assume;
-import org.springframework.build.junit.TestGroup;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
 /**

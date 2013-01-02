@@ -22,7 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.build.test.hamcrest.Matchers.exceptionCause;
+import static org.springframework.tests.Matchers.exceptionCause;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

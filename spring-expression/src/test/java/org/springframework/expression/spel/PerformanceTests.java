@@ -20,8 +20,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import org.springframework.build.junit.Assume;
-import org.springframework.build.junit.TestGroup;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;

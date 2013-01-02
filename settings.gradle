@@ -22,7 +22,6 @@ include "spring-web"
 include "spring-webmvc"
 include "spring-webmvc-portlet"
 include "spring-webmvc-tiles3"
-include "spring-build-junit"
 
 // Exposes gradle buildSrc for IDE support
 include "buildSrc"

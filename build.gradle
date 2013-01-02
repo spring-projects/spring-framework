@@ -111,7 +111,7 @@ configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
 	}
 }
 
-configure(subprojects - project(":spring-build-junit")) { subproject ->
+configure(subprojects) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
@@ -160,15 +160,11 @@ configure(subprojects - project(":spring-build-junit")) { subproject ->
 	}
 }
 
-configure(allprojects - project(":spring-build-junit")) {
+configure(allprojects) {
 	dependencies {
-		testCompile(project(":spring-build-junit"))
+		testCompile("junit:junit:${junitVersion}")
+		testCompile("org.hamcrest:hamcrest-all:1.3")
 	}
-
-	eclipse.classpath.file.whenMerged { classpath ->
-		classpath.entries.find{it.path == "/spring-build-junit"}.exported = false
-	}
-
 	test.systemProperties.put("testGroups", properties.get("testGroups"))
 }
 
@@ -183,23 +179,6 @@ project("spring-build-src") {
 
 	configurations.archives.artifacts.clear()
 }
-
-project("spring-build-junit") {
-	description = "Build-time JUnit dependencies and utilities"
-
-	// NOTE: This is an internal project and is not published.
-
-	dependencies {
-		compile("commons-logging:commons-logging:1.1.1")
-		compile("junit:junit:${junitVersion}")
-		compile("org.hamcrest:hamcrest-all:1.3")
-		compile("org.easymock:easymock:${easymockVersion}")
-	}
-
-	// Don't actually generate any artifacts
-	configurations.archives.artifacts.clear()
-}
-
 
 project("spring-core") {
 	description = "Spring Core"
@@ -549,7 +528,6 @@ project("spring-orm") {
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile(project(":spring-web").sourceSets.test.output)
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		optional(project(":spring-aop"))
@@ -799,6 +777,7 @@ configure(rootProject) {
 
 	dependencies { // for integration tests
 		testCompile(project(":spring-core"))
+		testCompile(project(":spring-core").sourceSets.test.output)
 		testCompile(project(":spring-beans"))
 		testCompile(project(":spring-aop"))
 		testCompile(project(":spring-expression"))
