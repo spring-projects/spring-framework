@@ -111,7 +111,7 @@ configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
 	}
 }
 
-configure(subprojects) { subproject ->
+configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
