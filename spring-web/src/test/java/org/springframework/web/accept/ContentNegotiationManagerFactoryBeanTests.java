@@ -19,7 +19,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,9 +75,9 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Test
 	public void addMediaTypes() throws Exception {
-		Properties mediaTypes = new Properties();
-		mediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
-		this.factoryBean.setMediaTypes(mediaTypes);
+		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		mediaTypes.put("json", MediaType.APPLICATION_JSON);
+		this.factoryBean.addMediaTypes(mediaTypes);
 
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
@@ -89,9 +90,9 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	public void favorParameter() throws Exception {
 		this.factoryBean.setFavorParameter(true);
 
-		Properties mediaTypes = new Properties();
-		mediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
-		this.factoryBean.setMediaTypes(mediaTypes);
+		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
+		mediaTypes.put("json", MediaType.APPLICATION_JSON);
+		this.factoryBean.addMediaTypes(mediaTypes);
 
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
