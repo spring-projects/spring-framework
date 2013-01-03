@@ -8,6 +8,11 @@ buildscript {
 	}
 }
 
+configure(rootProject) {
+    def splitFound = new org.springframework.build.gradle.SplitPackageDetector('.', logger).diagnoseSplitPackages();
+    assert !splitFound // see error log messages for details of split packages
+}
+
 configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
@@ -954,6 +959,7 @@ configure(rootProject) {
 				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
 		}
 	}
+
 }
 
 /*
