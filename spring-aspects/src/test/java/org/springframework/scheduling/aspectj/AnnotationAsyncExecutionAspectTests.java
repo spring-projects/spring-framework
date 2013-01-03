@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.Matchers.startsWith;
-
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
 /**
@@ -54,6 +55,8 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Test
 	public void asyncMethodGetsRoutedAsynchronously() {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		ClassWithoutAsyncAnnotation obj = new ClassWithoutAsyncAnnotation();
 		obj.incrementAsync();
 		executor.waitForCompletion();
@@ -84,6 +87,8 @@ public class AnnotationAsyncExecutionAspectTests {
 
 	@Test
 	public void voidMethodInAsyncClassGetsRoutedAsynchronously() {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		ClassWithAsyncAnnotation obj = new ClassWithAsyncAnnotation();
 		obj.increment();
 		executor.waitForCompletion();

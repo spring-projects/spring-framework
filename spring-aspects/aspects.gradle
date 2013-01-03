@@ -8,6 +8,10 @@ configurations {
 	ajInpath
 }
 
+// exclude spring-aspects as a module within IDEA until IDEA-64446 is resolved
+tasks.getByName("idea").onlyIf { false }
+tasks.getByName("ideaModule").onlyIf { false }
+
 task compileJava(overwrite: true)  {
 	dependsOn JavaPlugin.PROCESS_RESOURCES_TASK_NAME
 	dependsOn configurations.ajc.getTaskDependencyFromProjectDependency(true, "compileJava")
