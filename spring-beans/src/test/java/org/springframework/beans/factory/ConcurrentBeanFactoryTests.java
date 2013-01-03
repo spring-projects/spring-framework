@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.beans.factory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.text.DateFormat;
@@ -34,7 +35,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.io.Resource;
 
@@ -70,7 +72,8 @@ public final class ConcurrentBeanFactoryTests {
 
 	@Before
 	public void setUp() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(CONTEXT);
 		factory.addPropertyEditorRegistrar(new PropertyEditorRegistrar() {
 			@Override
 			public void registerCustomEditors(PropertyEditorRegistry registry) {

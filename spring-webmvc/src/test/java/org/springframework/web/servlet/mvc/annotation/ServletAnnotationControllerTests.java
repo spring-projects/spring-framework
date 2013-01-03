@@ -30,9 +30,11 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -1517,7 +1519,7 @@ public class ServletAnnotationControllerTests {
 		request.setCookies(new Cookie("date", "2008-11-18"));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-108", response.getContentAsString());
+		assertEquals("test-2008", response.getContentAsString());
 	}
 
 	@Test
@@ -3052,8 +3054,10 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle(@CookieValue("date") Date date, Writer writer) throws IOException {
-			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
-			writer.write("test-" + date.getYear());
+			assertEquals("Invalid path variable value", new GregorianCalendar(2008, 10, 18).getTime(), date);
+			Calendar c = new GregorianCalendar();
+			c.setTime(date);
+			writer.write("test-" + c.get(Calendar.YEAR));
 		}
 	}
 

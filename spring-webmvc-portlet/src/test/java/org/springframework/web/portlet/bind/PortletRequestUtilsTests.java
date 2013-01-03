@@ -19,8 +19,8 @@ package org.springframework.web.portlet.bind;
 import junit.framework.TestCase;
 
 import org.junit.Test;
-import org.springframework.build.junit.Assume;
-import org.springframework.build.junit.TestGroup;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.util.StopWatch;
 

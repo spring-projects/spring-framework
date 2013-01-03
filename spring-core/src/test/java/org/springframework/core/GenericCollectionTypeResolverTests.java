@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import junit.framework.Assert;
 
 import org.springframework.beans.GenericBean;
 import org.springframework.core.io.Resource;
@@ -96,11 +94,11 @@ public class GenericCollectionTypeResolverTests extends AbstractGenericsTests {
 
 	public void testProgrammaticListIntrospection() throws Exception {
 		Method setter = GenericBean.class.getMethod("setResourceList", List.class);
-		Assert.assertEquals(Resource.class,
+		assertEquals(Resource.class,
 				GenericCollectionTypeResolver.getCollectionParameterType(new MethodParameter(setter, 0)));
 
 		Method getter = GenericBean.class.getMethod("getResourceList");
-		Assert.assertEquals(Resource.class,
+		assertEquals(Resource.class,
 				GenericCollectionTypeResolver.getCollectionReturnType(getter));
 	}
 

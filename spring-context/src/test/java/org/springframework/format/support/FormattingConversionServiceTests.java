@@ -36,6 +36,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -112,7 +113,9 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForValueInjectionUsingMetaAnnotations() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
-		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(MetaValueBean.class, false));
+		RootBeanDefinition bd = new RootBeanDefinition(MetaValueBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("valueBean", bd);
 		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
 		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
 		ac.refresh();

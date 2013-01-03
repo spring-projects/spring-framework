@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
+
 import javax.activation.FileTypeMap;
 import javax.mail.Address;
 import javax.mail.Message;
@@ -59,7 +61,7 @@ public class JavaMailSenderTests extends TestCase {
 		simpleMessage.setTo("you@mail.org");
 		simpleMessage.setCc(new String[] {"he@mail.org", "she@mail.org"});
 		simpleMessage.setBcc(new String[] {"us@mail.org", "them@mail.org"});
-		Date sentDate = new Date(2004, 1, 1);
+		Date sentDate = new GregorianCalendar(2004, 1, 1).getTime();
 		simpleMessage.setSentDate(sentDate);
 		simpleMessage.setSubject("my subject");
 		simpleMessage.setText("my text");
@@ -334,7 +336,7 @@ public class JavaMailSenderTests extends TestCase {
 		MimeMessage mimeMessage = sender.createMimeMessage();
 		mimeMessage.setSubject("custom");
 		mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress("you@mail.org"));
-		mimeMessage.setSentDate(new Date(2005, 3, 1));
+		mimeMessage.setSentDate(new GregorianCalendar(2005, 3, 1).getTime());
 		sender.send(mimeMessage);
 
 		assertEquals("host", sender.transport.getConnectedHost());
@@ -559,7 +561,7 @@ public class JavaMailSenderTests extends TestCase {
 				throw new MessagingException("No sentDate specified");
 			}
 			if (message.getSubject() != null && message.getSubject().contains("custom")) {
-				assertEquals(new Date(2005, 3, 1), message.getSentDate());
+				assertEquals(new GregorianCalendar(2005, 3, 1).getTime(), message.getSentDate());
 			}
 			this.sentMessages.add(message);
 		}

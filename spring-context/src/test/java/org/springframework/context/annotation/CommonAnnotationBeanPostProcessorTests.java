@@ -34,6 +34,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -171,9 +172,15 @@ public class CommonAnnotationBeanPostProcessorTests {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setResourceFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ResourceInjectionBean.class, false));
-		bf.registerBeanDefinition("testBean", new RootBeanDefinition(TestBean.class, false));
-		bf.registerBeanDefinition("testBean2", new RootBeanDefinition(TestBean.class, false));
+		RootBeanDefinition abd = new RootBeanDefinition(ResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd1 = new RootBeanDefinition(TestBean.class);
+		tbd1.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tbd1);
+		RootBeanDefinition tbd2 = new RootBeanDefinition(TestBean.class);
+		tbd2.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean2", tbd2);
 
 		ResourceInjectionBean bean = (ResourceInjectionBean) bf.getBean("annotatedBean");
 		assertTrue(bean.initCalled);
@@ -202,8 +209,12 @@ public class CommonAnnotationBeanPostProcessorTests {
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ExtendedResourceInjectionBean.class, false));
-		bf.registerBeanDefinition("testBean4", new RootBeanDefinition(TestBean.class, false));
+		RootBeanDefinition abd = new RootBeanDefinition(ExtendedResourceInjectionBean.class);
+		abd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", abd);
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean4", tbd);
 
 		bf.registerResolvableDependency(BeanFactory.class, bf);
 		bf.registerResolvableDependency(INestedTestBean.class, new ObjectFactory<Object>() {

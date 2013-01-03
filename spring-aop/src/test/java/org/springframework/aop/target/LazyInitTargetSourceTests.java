@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 
 package org.springframework.aop.target;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static test.util.TestResourceUtils.qualifiedResource;
 
 import java.util.Set;
 
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 
 import test.beans.ITestBean;
@@ -43,7 +46,8 @@ public final class LazyInitTargetSourceTests {
 
 	@Test
 	public void testLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(SINGLETON_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(SINGLETON_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -54,7 +58,8 @@ public final class LazyInitTargetSourceTests {
 
 	@Test
 	public void testCustomLazyInitSingletonTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(CUSTOM_TARGET_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CUSTOM_TARGET_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
@@ -65,7 +70,8 @@ public final class LazyInitTargetSourceTests {
 
 	@Test
 	public void testLazyInitFactoryBeanTargetSource() {
-		XmlBeanFactory bf = new XmlBeanFactory(FACTORY_BEAN_CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(FACTORY_BEAN_CONTEXT);
 		bf.preInstantiateSingletons();
 
 		Set<?> set1 = (Set<?>) bf.getBean("proxy1");

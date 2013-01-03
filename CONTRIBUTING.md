@@ -23,7 +23,7 @@ truly trivial, e.g. typo fixes, removing compiler warnings, etc.
 
 If you're considering anything more than correcting a typo or fixing a minor
 bug, please discuss it on the [spring-framework-contrib][] mailing list before
-submitting a pull request. We're happy to provide guidance but please spend an
+submitting a pull request. We're happy to provide guidance, but please spend an
 hour or two researching the subject on your own including searching the mailing
 list for prior discussions.
 
@@ -31,26 +31,26 @@ list for prior discussions.
 
 If you have not previously done so, please fill out and submit the
 [SpringSource CLA form][]. You'll receive a token when this process is complete.
-Keep track of this, you may be asked for it later!
+Keep track of this; you may be asked for it later!
 
 Note that emailing/postal mailing a signed copy is _not_ necessary. Submission
 of the web form is all that is required.
 
-When you've completed the web form, simply add the following in a comment on
+Once you've completed the web form, simply add the following in a comment on
 your pull request:
 
     I have signed and agree to the terms of the SpringSource Individual
     Contributor License Agreement.
 
 You do not need to include your token/id. Please add the statement above to all
-future pull requests as well, simply so the Spring Framework team knows
+future pull requests as well, simply so that the Spring Framework team knows
 immediately that this process is complete.
 
 
 ## Create your branch from `3.2.x`
 
 If your pull request addresses a bug or improvement, please create your branch
-Spring Framework's `3.2.x` branch. `master` is reserved for work on new features
+from Spring Framework's `3.2.x` branch. `master` is reserved for work on new features
 for the next major version of the framework. Rest assured that if your pull
 request is accepted and merged into `3.2.x`, these changes will also eventually
 be merged into `master`.
@@ -72,7 +72,7 @@ Please carefully follow the whitespace and formatting conventions already
 present in the framework.
 
 1. Tabs, not spaces
-1. Unix (LF), not dos (CRLF) line endings
+1. Unix (LF), not DOS (CRLF) line endings
 1. Eliminate all trailing whitespace
 1. Wrap Javadoc at 90 characters
 1. Aim to wrap code at 90 characters, but favor readability over wrapping
@@ -228,11 +228,11 @@ Most importantly, please format your commit messages in the following way
 
 1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link"
 1. Begin the subject line sentence with a capitalized verb, e.g. "Add, Prune,
-   Fix, Introduce, Avoid, etc"
+   Fix, Introduce, Avoid, etc."
 1. Do not end the subject line with a period
 1. Keep the subject line to 50 characters or less if possible
 1. Wrap lines in the body at 72 characters or less
-1. Mention associated jira issue(s) at the end of the commit comment, prefixed
+1. Mention associated JIRA issue(s) at the end of the commit comment, prefixed
    with "Issue: " as above
 1. In the body of the commit message, explain how things worked before this
    commit, what has changed, and how things work now

@@ -52,6 +52,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 11.03.2005
  */
+@Deprecated
 public class TestXsltViewTests extends TestCase {
 
 	private TestXsltView view;
