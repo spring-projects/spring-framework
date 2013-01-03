@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2012 the original author or authors.
+ * Copyright 2010-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,13 @@ import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.config.CacheConfiguration;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.cache.Cache;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -95,6 +98,7 @@ public class EhCacheCacheTests {
 
 	@Test
 	public void testExpiredElements() throws Exception {
+		Assume.group(TestGroup.LONG_RUNNING);
 		String key = "brancusi";
 		String value = "constantin";
 		Element brancusi = new Element(key, value);
