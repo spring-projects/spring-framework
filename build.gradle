@@ -9,8 +9,11 @@ buildscript {
 }
 
 configure(rootProject) {
-    def splitFound = new org.springframework.build.gradle.SplitPackageDetector('.', logger).diagnoseSplitPackages();
-    assert !splitFound // see error log messages for details of split packages
+    apply plugin: org.springframework.build.gradle.SplitPackageDetectorPlugin
+
+	diagnoseSplitPackages {
+		inputDir = project.projectDir
+	}
 }
 
 configure(allprojects) { project ->
