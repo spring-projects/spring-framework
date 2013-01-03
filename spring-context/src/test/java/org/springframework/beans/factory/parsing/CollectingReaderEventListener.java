@@ -19,11 +19,10 @@ package org.springframework.beans.factory.parsing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.core.CollectionFactory;
 
 /**
  * @author Rob Harrop
@@ -33,9 +32,9 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 
 	private final List<DefaultsDefinition> defaults = new LinkedList<DefaultsDefinition>();
 
-	private final Map<String, ComponentDefinition> componentDefinitions = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, ComponentDefinition> componentDefinitions = new LinkedHashMap<>(8);
 
-	private final Map<String, List<AliasDefinition>> aliasMap = CollectionFactory.createLinkedMapIfPossible(8);
+	private final Map<String, List<AliasDefinition>> aliasMap = new LinkedHashMap<>(8);
 
 	private final List<ImportDefinition> imports = new LinkedList<ImportDefinition>();
 

@@ -16,15 +16,17 @@
 
 package org.springframework.mock.staticmock;
 
-import javax.persistence.PersistenceException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectReturn;
+import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.expectThrow;
+import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.playback;
 
-import junit.framework.Assert;
+import javax.persistence.PersistenceException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-
-import static org.springframework.mock.staticmock.AnnotationDrivenStaticEntityMockingControl.*;
 
 
 /**
@@ -43,7 +45,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		Person.countPeople();
 		expectReturn(expectedCount);
 		playback();
-		Assert.assertEquals(expectedCount, Person.countPeople());
+		assertEquals(expectedCount, Person.countPeople());
 	}
 
 	@Test(expected=PersistenceException.class)
@@ -61,7 +63,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		Person.findPerson(id);
 		expectReturn(found);
 		playback();
-		Assert.assertEquals(found, Person.findPerson(id));
+		assertEquals(found, Person.findPerson(id));
 	}
 
 
@@ -81,10 +83,10 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 		expectReturn(0);
 		playback();
 
-		Assert.assertEquals(found1, Person.findPerson(id1));
-		Assert.assertEquals(found2, Person.findPerson(id2));
-		Assert.assertEquals(found1, Person.findPerson(id1));
-		Assert.assertEquals(0, Person.countPeople());
+		assertEquals(found1, Person.findPerson(id1));
+		assertEquals(found2, Person.findPerson(id2));
+		assertEquals(found1, Person.findPerson(id1));
+		assertEquals(0, Person.countPeople());
 	}
 
 	// Note delegation is used when tests are invalid and should fail, as otherwise
@@ -94,7 +96,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 	public void testArgMethodNoMatchExpectReturn() {
 		try {
 			new Delegate().testArgMethodNoMatchExpectReturn();
-			Assert.fail();
+			fail();
 		} catch (IllegalArgumentException expected) {
 		}
 	}
@@ -105,7 +107,7 @@ public class AnnotationDrivenStaticEntityMockingControlTest {
 	}
 
 	private void called(Person found, long id) {
-		Assert.assertEquals(found, Person.findPerson(id));
+		assertEquals(found, Person.findPerson(id));
 	}
 
 	@Test

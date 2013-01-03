@@ -19,7 +19,6 @@ package org.springframework.util;
 import java.util.LinkedList;
 
 import junit.framework.*;
-import junit.framework.Assert;
 
 import org.springframework.beans.TestBean;
 
@@ -72,14 +71,14 @@ public class AutoPopulatingListTests extends TestCase {
 		for(int x = 0; x < list.size(); x++) {
 			Object element = list.get(x);
 			if(element instanceof TestBean) {
-				junit.framework.Assert.assertEquals(x, ((TestBean) element).getAge());
+				assertEquals(x, ((TestBean) element).getAge());
 			}
 		}
 	}
 
 	public void testSerialization() throws Exception {
 		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestBean.class);
-		Assert.assertEquals(list, SerializationTestUtils.serializeAndDeserialize(list));
+		assertEquals(list, SerializationTestUtils.serializeAndDeserialize(list));
 	}
 
 

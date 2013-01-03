@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -27,11 +28,13 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class MetadataAttachmentTests extends TestCase {
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	@Override
 	protected void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("withMeta.xml", getClass()));
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				new ClassPathResource("withMeta.xml", getClass()));
 	}
 
 	public void testMetadataAttachment() throws Exception {

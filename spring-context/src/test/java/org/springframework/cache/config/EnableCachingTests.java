@@ -16,11 +16,10 @@
 
 package org.springframework.cache.config;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -53,7 +52,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Test
 	public void testKeyStrategy() throws Exception {
 		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		Assert.assertSame(ctx.getBean(KeyGenerator.class), ci.getKeyGenerator());
+		assertSame(ctx.getBean(KeyGenerator.class), ci.getKeyGenerator());
 	}
 
 	// --- local tests -------

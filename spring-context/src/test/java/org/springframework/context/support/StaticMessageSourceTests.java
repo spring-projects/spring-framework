@@ -208,7 +208,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		parent.registerPrototype("father", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
-		parent.addListener(parentListener);
+		parent.addApplicationListener(parentListener);
 
 		this.sac = new StaticApplicationContext(parent);
 
@@ -221,7 +221,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
-		sac.addListener(listener);
+		sac.addApplicationListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
 		Map<String, String> usMessages = new HashMap<String, String>(3);

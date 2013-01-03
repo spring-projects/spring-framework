@@ -27,6 +27,7 @@ import junit.framework.TestCase;
  * @author Keith Donald
  * @author Juergen Hoeller
  */
+@Deprecated
 public class CachingMapDecoratorTests extends TestCase {
 
 	public void testValidCache() {

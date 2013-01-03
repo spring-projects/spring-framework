@@ -45,6 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 18.12.2003
  */
+@Deprecated
 public class JaxRpcSupportTests extends TestCase {
 
 	public void testLocalJaxRpcServiceFactoryBeanWithServiceNameAndNamespace() throws Exception {

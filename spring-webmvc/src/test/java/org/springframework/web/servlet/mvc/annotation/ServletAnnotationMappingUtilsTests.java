@@ -22,7 +22,10 @@ import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
+@Deprecated
 public class ServletAnnotationMappingUtilsTests {
 
 	@Test

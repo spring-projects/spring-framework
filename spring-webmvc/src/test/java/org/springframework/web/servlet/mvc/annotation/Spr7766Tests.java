@@ -29,6 +29,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 public class Spr7766Tests {
 
 	@Test
+	@Deprecated
 	public void test() throws Exception {
 		AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
 		ConfigurableWebBindingInitializer binder = new ConfigurableWebBindingInitializer();

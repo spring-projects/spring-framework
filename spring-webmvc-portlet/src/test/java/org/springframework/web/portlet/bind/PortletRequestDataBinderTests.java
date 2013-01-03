@@ -20,6 +20,7 @@ import java.beans.PropertyEditorSupport;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -28,7 +29,6 @@ import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.core.CollectionFactory;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.validation.BindingResult;
 
@@ -166,7 +166,7 @@ public class PortletRequestDataBinderTests extends TestCase {
 
 	public void testBindingSet() {
 		TestBean bean = new TestBean();
-		Set set = CollectionFactory.createLinkedSetIfPossible(2);
+		Set set = new LinkedHashSet<>(2);
 		set.add(new TestBean("test1"));
 		set.add(new TestBean("test2"));
 		bean.setSomeSet(set);

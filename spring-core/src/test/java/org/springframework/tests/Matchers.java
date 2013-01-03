@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.build.test.hamcrest;
+package org.springframework.tests;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

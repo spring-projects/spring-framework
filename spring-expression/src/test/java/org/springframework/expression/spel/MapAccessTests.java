@@ -16,10 +16,10 @@
 
 package org.springframework.expression.spel;
 
-import java.util.Map;
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.Assert;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.expression.AccessException;
@@ -56,7 +56,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap.monday");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("montag", value);
+		assertEquals("montag", value);
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap[#day]");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("samstag", value);
+		assertEquals("samstag", value);
 	}
 
 	@Test

@@ -205,7 +205,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 
 		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
-		scriptedBeanBuilder.setSingleton(false);
+		scriptedBeanBuilder.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		scriptedBeanBuilder.addConstructorArgValue(DELEGATING_SCRIPT);
 		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
 

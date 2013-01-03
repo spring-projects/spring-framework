@@ -29,6 +29,7 @@ import junit.framework.TestCase;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@Deprecated
 public class LabeledEnumTests extends TestCase {
 
 	private byte[] serializeObject(final Object obj) throws IOException {

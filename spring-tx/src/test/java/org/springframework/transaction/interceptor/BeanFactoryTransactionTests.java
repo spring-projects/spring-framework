@@ -21,10 +21,10 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
@@ -32,7 +32,8 @@ import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.ITestBean;
 import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,11 +49,13 @@ import org.springframework.transaction.TransactionStatus;
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
-	private XmlBeanFactory factory;
+	private DefaultListableBeanFactory factory;
 
 	@Override
 	public void setUp() {
-		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
+		this.factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(
+				new ClassPathResource("transactionalBeanFactory.xml", getClass()));
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
@@ -167,7 +170,8 @@ public class BeanFactoryTransactionTests extends TestCase {
 	 */
 	public void testNoTransactionAttributeSource() {
 		try {
-			XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
 			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
 			fail("Should require TransactionAttributeSource to be set");
 		}

@@ -32,7 +32,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
@@ -144,7 +143,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(1, listener.counter);
+		assertEquals(1, listener.counter);
 	}
 
 	public void testPublishEventsOff() throws Exception {
@@ -155,7 +154,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(0, listener.counter);
+		assertEquals(0, listener.counter);
 	}
 
 	public void testFormRequest() throws Exception {

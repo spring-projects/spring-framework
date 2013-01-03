@@ -86,7 +86,7 @@ public class EventPublicationInterceptorTests {
 		class TestContext extends StaticApplicationContext {
 			@Override
 			protected void onRefresh() throws BeansException {
-				addListener(listener);
+				addApplicationListener(listener);
 			}
 		}
 

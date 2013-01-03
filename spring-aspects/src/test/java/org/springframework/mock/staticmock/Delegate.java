@@ -16,11 +16,11 @@
 
 package org.springframework.mock.staticmock;
 
+import static org.junit.Assert.assertEquals;
+
 import java.rmi.RemoteException;
 
 import javax.persistence.PersistenceException;
-
-import junit.framework.Assert;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +40,7 @@ public class Delegate {
 		Person.findPerson(id);
 		AnnotationDrivenStaticEntityMockingControl.expectReturn(found);
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id + 1));
+		assertEquals(found, Person.findPerson(id + 1));
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class Delegate {
 		Person.findPerson(id);
 		AnnotationDrivenStaticEntityMockingControl.expectThrow(new PersistenceException());
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id + 1));
+		assertEquals(found, Person.findPerson(id + 1));
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class Delegate {
 		Person.countPeople();
 		AnnotationDrivenStaticEntityMockingControl.expectReturn(25);
 		AnnotationDrivenStaticEntityMockingControl.playback();
-		Assert.assertEquals(found, Person.findPerson(id));
+		assertEquals(found, Person.findPerson(id));
 	}
 
 	@Test

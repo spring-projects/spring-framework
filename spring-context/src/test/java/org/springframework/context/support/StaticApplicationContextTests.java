@@ -48,7 +48,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 		m.put("name", "Albert");
 		parent.registerPrototype("father", TestBean.class, new MutablePropertyValues(m));
 		parent.refresh();
-		parent.addListener(parentListener) ;
+		parent.addApplicationListener(parentListener) ;
 
 		parent.getStaticMessageSource().addMessage("code1", Locale.getDefault(), "message1");
 
@@ -59,7 +59,7 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
-		sac.addListener(listener);
+		sac.addApplicationListener(listener);
 
 		sac.getStaticMessageSource().addMessage("code2", Locale.getDefault(), "message2");
 

@@ -25,6 +25,7 @@ import org.apache.struts.tiles.ComponentContext;
  * @author Juergen Hoeller
  * @since 22.08.2003
  */
+@Deprecated
 public class TestComponentController extends ComponentControllerSupport {
 
 	@Override

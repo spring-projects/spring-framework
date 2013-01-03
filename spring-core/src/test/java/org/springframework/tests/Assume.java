@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.build.junit;
+package org.springframework.tests;
 
 import static org.junit.Assume.assumeFalse;
 
@@ -24,8 +24,9 @@ import org.apache.commons.logging.Log;
 import org.junit.internal.AssumptionViolatedException;
 
 /**
- * Provides utility methods that allow JUnit tests to {@link Assume} certain conditions
- * hold {@code true}. If the assumption fails, it means the test should be skipped.
+ * Provides utility methods that allow JUnit tests to {@link org.junit.Assume} certain
+ * conditions hold {@code true}. If the assumption fails, it means the test should be
+ * skipped.
  *
  * <p>For example, if a set of tests require at least JDK 1.7 it can use
  * {@code Assume#atLeast(JdkVersion.JAVA_17)} as shown below:

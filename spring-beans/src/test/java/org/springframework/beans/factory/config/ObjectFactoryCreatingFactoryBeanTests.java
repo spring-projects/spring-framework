@@ -16,21 +16,25 @@
 
 package org.springframework.beans.factory.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static test.util.TestResourceUtils.qualifiedResource;
+
 import java.util.Date;
+
 import javax.inject.Provider;
 
 import org.junit.After;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Before;
 import org.junit.Test;
-import static test.util.TestResourceUtils.*;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.SerializationTestUtils;
 
@@ -45,11 +49,12 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 	private static final Resource CONTEXT =
 		qualifiedResource(ObjectFactoryCreatingFactoryBeanTests.class, "context.xml");
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
 	@Before
 	public void setUp() {
-		this.beanFactory = new XmlBeanFactory(CONTEXT);
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(CONTEXT);
 		this.beanFactory.setSerializationId("test");
 	}
 

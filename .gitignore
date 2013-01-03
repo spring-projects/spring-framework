@@ -13,11 +13,14 @@ jmx.log
 derby.log
 spring-test/test-output/
 .gradle
-build
 .classpath
 .project
 argfile*
 pom.xml
+
+/build
+buildSrc/build
+/spring-*/build
 
 # IDEA artifacts and output dirs
 *.iml

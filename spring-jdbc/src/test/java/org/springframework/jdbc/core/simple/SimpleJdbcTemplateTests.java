@@ -54,6 +54,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * @author Juergen Hoeller
  * @author Thomas Risberg
  */
+@Deprecated
 public class SimpleJdbcTemplateTests {
 
 	private static final String SQL = "sql";

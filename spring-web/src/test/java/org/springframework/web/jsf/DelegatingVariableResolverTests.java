@@ -30,6 +30,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  * @author Juergen Hoeller
  * @since 02.08.2004
  */
+@Deprecated
 public class DelegatingVariableResolverTests extends TestCase {
 
 	public void testDelegatingVariableResolver() {
