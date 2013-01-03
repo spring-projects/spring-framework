@@ -967,7 +967,8 @@ def qualifyVersionIfNecessary(version) {
 	if (rootProject.hasProperty("BRANCH_NAME")) {
 		def qualifier = rootProject.getProperty("BRANCH_NAME")
 		if (qualifier.startsWith("SPR-")) {
-			version = version.replace('BUILD', qualifier)
+			return version.replace('BUILD', qualifier)
 		}
 	}
+	return version
 }
