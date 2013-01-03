@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -338,6 +338,17 @@ public class ResourceBundleMessageSourceTests extends TestCase {
 
 		filenames = ms.calculateFilenamesForLocale("messages", new Locale("", "", "POSIX"));
 		assertEquals(0, filenames.size());
+	}
+
+	public void testMessageSourceResourceBundle() {
+		ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+		ms.setBasename("org/springframework/context/support/messages");
+		MessageSourceResourceBundle rbe = new MessageSourceResourceBundle(ms, Locale.ENGLISH);
+		assertEquals("message1", rbe.getString("code1"));
+		assertTrue(rbe.containsKey("code1"));
+		MessageSourceResourceBundle rbg = new MessageSourceResourceBundle(ms, Locale.GERMAN);
+		assertEquals("nachricht2", rbg.getString("code2"));
+		assertTrue(rbg.containsKey("code2"));
 	}
 
 	@Override
