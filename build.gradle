@@ -8,7 +8,7 @@ buildscript {
 	}
 }
 
-configure(allprojects) {
+configure(allprojects) { project ->
 	ext.aspectjVersion  = "1.7.1"
 	ext.easymockVersion = "2.5.2"
 	ext.hsqldbVersion   = "1.8.0.10"
@@ -65,7 +65,10 @@ configure(allprojects) {
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
-	test.systemProperty("java.awt.headless", "true")
+	test {
+		systemProperty("java.awt.headless", "true")
+		systemProperty("testGroups", properties.get("testGroups"))
+	}
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
@@ -76,6 +79,13 @@ configure(allprojects) {
 		testCompile("junit:junit:${junitVersion}")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
 		testCompile("org.mockito:mockito-core:1.9.5")
+		if (project.name in ["spring", "spring-jms", "spring-orm",
+				"spring-orm-hibernate4", "spring-oxm", "spring-struts",
+				"spring-test", "spring-test-mvc", "spring-tx", "spring-web",
+				"spring-webmvc", "spring-webmvc-portlet", "spring-webmvc-tiles3"]) {
+			testCompile("org.easymock:easymock:${easymockVersion}")
+			testCompile "org.easymock:easymockclassextension:${easymockVersion}"
+		}
 	}
 
 	ext.javadocLinks = [
@@ -99,16 +109,6 @@ configure(allprojects) {
 		"http://tiles.apache.org/framework/apidocs",
 		"http://commons.apache.org/dbcp/api-1.2.2",
 	] as String[]
-}
-
-configure(allprojects.findAll{it.name in ["spring", "spring-jms", "spring-orm",
-		"spring-orm-hibernate4", "spring-oxm", "spring-struts", "spring-test",
-		"spring-test-mvc", "spring-tx", "spring-web", "spring-webmvc",
-		"spring-webmvc-portlet", "spring-webmvc-tiles3"]}) {
-	dependencies {
-		testCompile("org.easymock:easymock:${easymockVersion}")
-		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
-	}
 }
 
 configure(subprojects - project(":spring-build-src")) { subproject ->
@@ -158,14 +158,6 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 		archives sourcesJar
 		archives javadocJar
 	}
-}
-
-configure(allprojects) {
-	dependencies {
-		testCompile("junit:junit:${junitVersion}")
-		testCompile("org.hamcrest:hamcrest-all:1.3")
-	}
-	test.systemProperties.put("testGroups", properties.get("testGroups"))
 }
 
 project("spring-build-src") {
