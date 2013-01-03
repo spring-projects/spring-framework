@@ -33,7 +33,7 @@ class TestSourceSetDependenciesPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
 		project.afterEvaluate {
-			Set<ProjectDependency> projectDependencies = new LinkedHashSet<>()
+			Set<ProjectDependency> projectDependencies = new LinkedHashSet<ProjectDependency>()
 			collectProjectDependencies(projectDependencies, project)
 			projectDependencies.each {
 				project.dependencies.add("testCompile", it.dependencyProject.sourceSets.test.output)
