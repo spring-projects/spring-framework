@@ -27,6 +27,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
 
@@ -55,7 +56,7 @@ public class ContentNegotiationManagerFactoryBean
 
 	private Boolean useJaf;
 
-	private String parameterName;
+	private String parameterName = "format";
 
 	private MediaType defaultContentType;
 
@@ -126,6 +127,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p>The default parameter name is {@code "format"}.
 	 */
 	public void setParameterName(String parameterName) {
+		Assert.notNull(parameterName, "parameterName is required");
 		this.parameterName = parameterName;
 	}
 

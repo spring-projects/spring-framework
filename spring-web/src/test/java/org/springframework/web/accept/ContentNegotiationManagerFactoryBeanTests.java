@@ -88,7 +88,6 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	@Test
 	public void favorParameter() throws Exception {
 		this.factoryBean.setFavorParameter(true);
-		this.factoryBean.setParameterName("f");
 
 		Properties mediaTypes = new Properties();
 		mediaTypes.put("json", MediaType.APPLICATION_JSON_VALUE);
@@ -98,7 +97,7 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
 		this.servletRequest.setRequestURI("/flower");
-		this.servletRequest.addParameter("f", "json");
+		this.servletRequest.addParameter("format", "json");
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
 	}
