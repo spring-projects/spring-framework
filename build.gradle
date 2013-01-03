@@ -72,7 +72,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
-		maven { url "http://repo.springsource.org/ebr-maven-external" }
 	}
 
 	dependencies {
@@ -332,7 +331,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
-		testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
+		testCompile("javax.inject:javax.inject-tck:1")
 	}
 
 	test {
