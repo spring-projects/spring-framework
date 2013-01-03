@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.activation.FileTypeMap;
@@ -196,7 +197,9 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport 
 	@Deprecated
 	public void setMediaTypes(Map<String, String> mediaTypes) {
 		if (mediaTypes != null) {
-			this.cnManagerFactoryBean.getMediaTypes().putAll(mediaTypes);
+			Properties props = new Properties();
+			props.putAll(mediaTypes);
+			this.cnManagerFactoryBean.setMediaTypes(props);
 		}
 	}
 

@@ -26,12 +26,23 @@ import java.util.Set;
  *
  * @see Assume#group(TestGroup)
  * @author Phillip Webb
+ * @author Chris Beams
  */
 public enum TestGroup {
 
 
 	/**
-	 * Performance related tests that may take a considerable time to run.
+	 * Tests that take a considerable amount of time to run. Any test lasting longer than
+	 * 500ms should be considered a candidate in order to avoid making the overall test
+	 * suite too slow to run during the normal development cycle.
+	 */
+	LONG_RUNNING,
+
+	/**
+	 * Performance-related tests that may fail unpredictably based on CPU profile and load.
+	 * Any test using {@link Thread#sleep}, {@link Object#wait}, Spring's
+	 * {@code StopWatch}, etc. should be considered a candidate as their successful
+	 * execution is likely to be based on events occurring within a given time window.
 	 */
 	PERFORMANCE;
 

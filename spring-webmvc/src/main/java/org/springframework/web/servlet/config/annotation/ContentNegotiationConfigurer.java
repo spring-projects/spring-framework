@@ -15,6 +15,7 @@
  */
 package org.springframework.web.servlet.config.annotation;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -36,7 +37,9 @@ import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
  */
 public class ContentNegotiationConfigurer {
 
-	private ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+	private final ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+
+	private final Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 
 
 	/**
@@ -64,7 +67,7 @@ public class ContentNegotiationConfigurer {
 	 * still be used in conjunction with {@link #favorPathExtension(boolean)}.
 	 */
 	public ContentNegotiationConfigurer mediaType(String extension, MediaType mediaType) {
-		this.factoryBean.getMediaTypes().put(extension, mediaType);
+		this.mediaTypes.put(extension, mediaType);
 		return this;
 	}
 
@@ -75,7 +78,7 @@ public class ContentNegotiationConfigurer {
 	 */
 	public ContentNegotiationConfigurer mediaTypes(Map<String, MediaType> mediaTypes) {
 		if (mediaTypes != null) {
-			this.factoryBean.getMediaTypes().putAll(mediaTypes);
+			this.mediaTypes.putAll(mediaTypes);
 		}
 		return this;
 	}
@@ -86,7 +89,7 @@ public class ContentNegotiationConfigurer {
 	 * still be used in conjunction with {@link #favorPathExtension(boolean)}.
 	 */
 	public ContentNegotiationConfigurer replaceMediaTypes(Map<String, MediaType> mediaTypes) {
-		this.factoryBean.getMediaTypes().clear();
+		this.mediaTypes.clear();
 		mediaTypes(mediaTypes);
 		return this;
 	}
@@ -157,6 +160,9 @@ public class ContentNegotiationConfigurer {
 	 * Return the configured {@link ContentNegotiationManager} instance
 	 */
 	protected ContentNegotiationManager getContentNegotiationManager() throws Exception {
+		if (!this.mediaTypes.isEmpty()) {
+			this.factoryBean.addMediaTypes(mediaTypes);
+		}
 		this.factoryBean.afterPropertiesSet();
 		return this.factoryBean.getObject();
 	}

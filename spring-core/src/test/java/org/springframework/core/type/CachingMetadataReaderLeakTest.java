@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * Unit test checking the behaviour of {@link CachingMetadataReaderFactory under load.
@@ -47,6 +49,8 @@ public class CachingMetadataReaderLeakTest {
 
 	@Test
 	public void testSignificantLoad() throws Exception {
+		Assume.group(TestGroup.LONG_RUNNING);
+
 		// the biggest public class in the JDK (>60k)
 		URL url = getClass().getResource("/java/awt/Component.class");
 		assertThat(url, notNullValue());

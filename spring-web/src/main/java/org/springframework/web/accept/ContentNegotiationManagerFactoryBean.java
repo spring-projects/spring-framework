@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -27,6 +28,7 @@ import javax.servlet.ServletContext;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.MediaType;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.ServletContextAware;
 
@@ -51,18 +53,17 @@ public class ContentNegotiationManagerFactoryBean
 
 	private boolean ignoreAcceptHeader = false;
 
-	private Properties mediaTypes = new Properties();
+	private Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 
 	private Boolean useJaf;
 
-	private String parameterName;
+	private String parameterName = "format";
 
 	private MediaType defaultContentType;
 
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private ServletContext servletContext;
-
 
 	/**
 	 * Indicate whether the extension of the request path should be used to determine
@@ -76,21 +77,43 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Add mappings from file extensions to media types.
-	 * <p>If this property is not set, the Java Action Framework, if available, may
-	 * still be used in conjunction with {@link #setFavorPathExtension(boolean)}.
+	 * Add mappings from file extensions to media types represented as strings.
+	 * <p>When this mapping is not set or when an extension is not found, the Java
+	 * Action Framework, if available, may be used if enabled via
+	 * {@link #setFavorPathExtension(boolean)}.
+	 *
+	 * @see #addMediaType(String, MediaType)
+	 * @see #addMediaTypes(Map)
 	 */
 	public void setMediaTypes(Properties mediaTypes) {
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
-			for (Map.Entry<Object, Object> entry : mediaTypes.entrySet()) {
-				String extension = ((String) entry.getKey()).toLowerCase(Locale.ENGLISH);
+			for (Entry<Object, Object> entry : mediaTypes.entrySet()) {
+				String extension = ((String)entry.getKey()).toLowerCase(Locale.ENGLISH);
 				this.mediaTypes.put(extension, MediaType.valueOf((String) entry.getValue()));
 			}
 		}
 	}
 
-	public Properties getMediaTypes() {
-		return this.mediaTypes;
+	/**
+	 * Add a mapping from a file extension to a media type.
+	 * <p>If no mapping is added or when an extension is not found, the Java
+	 * Action Framework, if available, may be used if enabled via
+	 * {@link #setFavorPathExtension(boolean)}.
+	 */
+	public void addMediaType(String fileExtension, MediaType mediaType) {
+		this.mediaTypes.put(fileExtension, mediaType);
+	}
+
+	/**
+	 * Add mappings from file extensions to media types.
+	 * <p>If no mappings are added or when an extension is not found, the Java
+	 * Action Framework, if available, may be used if enabled via
+	 * {@link #setFavorPathExtension(boolean)}.
+	 */
+	public void addMediaTypes(Map<String, MediaType> mediaTypes) {
+		if (mediaTypes != null) {
+			this.mediaTypes.putAll(mediaTypes);
+		}
 	}
 
 	/**
@@ -98,6 +121,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * to map from file extensions to media types. This is used only when
 	 * {@link #setFavorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
+	 *
 	 * @see #parameterName
 	 * @see #setMediaTypes(Properties)
 	 */
@@ -114,6 +138,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * {@code "application/pdf"} regardless of the {@code Accept} header.
 	 * <p>To use this option effectively you must also configure the MediaType
 	 * type mappings via {@link #setMediaTypes(Properties)}.
+	 *
 	 * @see #setParameterName(String)
 	 */
 	public void setFavorParameter(boolean favorParameter) {
@@ -126,6 +151,7 @@ public class ContentNegotiationManagerFactoryBean
 	 * <p>The default parameter name is {@code "format"}.
 	 */
 	public void setParameterName(String parameterName) {
+		Assert.notNull(parameterName, "parameterName is required");
 		this.parameterName = parameterName;
 	}
 
@@ -143,8 +169,8 @@ public class ContentNegotiationManagerFactoryBean
 	/**
 	 * Set the default content type.
 	 * <p>This content type will be used when neither the request path extension,
-	 * nor a request parameter, nor the {@code Accept} header could help determine
-	 * the requested content type.
+	 * nor a request parameter, nor the {@code Accept} header could help
+	 * determine the requested content type.
 	 */
 	public void setDefaultContentType(MediaType defaultContentType) {
 		this.defaultContentType = defaultContentType;
@@ -157,16 +183,12 @@ public class ContentNegotiationManagerFactoryBean
 	public void afterPropertiesSet() throws Exception {
 		List<ContentNegotiationStrategy> strategies = new ArrayList<ContentNegotiationStrategy>();
 
-		Map<String, MediaType> mediaTypesMap = new HashMap<String, MediaType>();
-		CollectionUtils.mergePropertiesIntoMap(this.mediaTypes, mediaTypesMap);
-
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
 			if (this.servletContext != null) {
-				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, mediaTypesMap);
-			}
-			else {
-				strategy = new PathExtensionContentNegotiationStrategy(mediaTypesMap);
+				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
+			} else {
+				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
 			}
 			if (this.useJaf != null) {
 				strategy.setUseJaf(this.useJaf);
@@ -175,7 +197,7 @@ public class ContentNegotiationManagerFactoryBean
 		}
 
 		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(mediaTypesMap);
+			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
 			strategy.setParameterName(this.parameterName);
 			strategies.add(strategy);
 		}

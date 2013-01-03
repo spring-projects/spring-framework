@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,23 @@ class TestSourceSetDependenciesPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
 		project.afterEvaluate {
-			Set<ProjectDependency> projectDependencies = new LinkedHashSet<>()
-			for(def configurationName in ["compile", "optional", "provided"]) {
-				Configuration configuration = project.getConfigurations().findByName(configurationName)
-				if(configuration) {
-					projectDependencies.addAll(
-						configuration.dependencies.findAll { it instanceof ProjectDependency }
-					)
-				}
-			}
+			Set<ProjectDependency> projectDependencies = new LinkedHashSet<ProjectDependency>()
+			collectProjectDependencies(projectDependencies, project)
 			projectDependencies.each {
 				project.dependencies.add("testCompile", it.dependencyProject.sourceSets.test.output)
+			}
+		}
+	}
+
+	private void collectProjectDependencies(Set<ProjectDependency> projectDependencies,
+			Project project) {
+		for(def configurationName in ["compile", "optional", "provided"]) {
+			Configuration configuration = project.getConfigurations().findByName(configurationName)
+			if(configuration) {
+				configuration.dependencies.findAll { it instanceof ProjectDependency }.each {
+					projectDependencies.add(it)
+					collectProjectDependencies(projectDependencies, it.dependencyProject)
+				}
 			}
 		}
 	}
