@@ -641,6 +641,10 @@ project("spring-webmvc-portlet") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
+	test {
+		useJUnit()
+		useTestNG()
+	}
 	dependencies {
 		compile(project(":spring-core"))
 		optional(project(":spring-beans"))

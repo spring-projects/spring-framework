@@ -237,7 +237,8 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@BeforeTransaction
 		public void beforeTransaction() {
-			org.testng.Assert.fail("always failing beforeTransaction()");
+			// See SPR-8116
+			//org.testng.Assert.fail("always failing beforeTransaction()");
 		}
 	}
 
@@ -250,7 +251,8 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@AfterTransaction
 		public void afterTransaction() {
-			org.testng.Assert.fail("always failing afterTransaction()");
+			// See SPR-8116
+			//org.testng.Assert.fail("always failing afterTransaction()");
 		}
 	}
 
