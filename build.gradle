@@ -9,6 +9,9 @@ buildscript {
 }
 
 configure(allprojects) { project ->
+	group = "org.springframework"
+	version = qualifyVersionIfNecessary(version)
+
 	ext.aspectjVersion  = "1.7.1"
 	ext.easymockVersion = "2.5.2"
 	ext.hsqldbVersion   = "1.8.0.10"
@@ -16,22 +19,12 @@ configure(allprojects) { project ->
 	ext.slf4jVersion    = "1.6.1"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
-	if (rootProject.hasProperty("VERSION_QUALIFIER")) {
-		def qualifier = rootProject.getProperty("VERSION_QUALIFIER")
-		if (qualifier.startsWith("SPR-")) { // topic branch, e.g. SPR-1234
-			// replace 3.2.0.BUILD-SNAPSHOT for 3.2.0.SPR-1234-SNAPSHOT
-			version = version.replace('BUILD', qualifier)
-		}
-	}
-
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "propdeps-eclipse"
 	apply plugin: "propdeps-idea"
 	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
-
-	group = "org.springframework"
 
 	compileJava {
 		sourceCompatibility=1.5
@@ -955,6 +948,22 @@ configure(rootProject) {
 			File wrapperBatFile = file("gradlew.bat")
 			wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
 				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
+		}
+	}
+}
+
+/*
+ * Support publication of artifacts versioned by topic branch.
+ * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
+ * If <TOPIC> starts with 'SPR-', change version
+ *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
+ *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
+ */
+def qualifyVersionIfNecessary(version) {
+	if (rootProject.hasProperty("BRANCH_NAME")) {
+		def qualifier = rootProject.getProperty("BRANCH_NAME")
+		if (qualifier.startsWith("SPR-")) {
+			version = version.replace('BUILD', qualifier)
 		}
 	}
 }
