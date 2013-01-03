@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.aop.target;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,12 +30,12 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.SideEffectBean;
+import org.springframework.util.SerializationTestUtils;
 
-import test.aop.SerializableNopInterceptor;
-import test.beans.Person;
-import test.beans.SerializablePerson;
-import test.beans.SideEffectBean;
-import test.util.SerializationTestUtils;
 
 
 /**

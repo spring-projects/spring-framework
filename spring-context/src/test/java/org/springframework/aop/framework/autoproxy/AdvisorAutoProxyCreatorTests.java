@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -29,13 +31,13 @@ import org.springframework.aop.target.CommonsPoolTargetSource;
 import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.aop.target.PrototypeTargetSource;
 import org.springframework.aop.target.ThreadLocalTargetSource;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.aop.advice.CountingBeforeAdvice;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.CountingTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 
-import test.advice.CountingBeforeAdvice;
-import test.interceptor.NopInterceptor;
 import test.mixin.Lockable;
 
 /**
@@ -203,18 +205,6 @@ public final class AdvisorAutoProxyCreatorTests {
 	}
 
 }
-
-
-class CountingTestBean extends TestBean {
-
-	public static int count = 0;
-
-	public CountingTestBean() {
-		count++;
-	}
-
-}
-
 
 class SelectivePrototypeTargetSourceCreator extends AbstractBeanFactoryBasedTargetSourceCreator {
 

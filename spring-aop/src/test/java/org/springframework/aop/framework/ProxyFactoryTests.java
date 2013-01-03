@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,28 +16,33 @@
 
 package org.springframework.aop.framework;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import javax.accessibility.Accessible;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.RootPaneContainer;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 import org.junit.Ignore;
 import org.junit.Test;
-import test.aop.CountingBeforeAdvice;
-import test.aop.NopInterceptor;
-import test.beans.IOther;
-import test.beans.ITestBean;
-import test.beans.TestBean;
-import test.util.TimeStamped;
-
 import org.springframework.aop.Advisor;
 import org.springframework.aop.interceptor.DebugInterceptor;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.DelegatingIntroductionInterceptor;
+import org.springframework.tests.TimeStamped;
+import org.springframework.tests.aop.advice.CountingBeforeAdvice;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Also tests AdvisedSupport and ProxyCreatorSupport superclasses.
@@ -190,7 +195,7 @@ public final class ProxyFactoryTests {
 		TestBeanSubclass raw = new TestBeanSubclass();
 		ProxyFactory factory = new ProxyFactory(raw);
 		//System.out.println("Proxied interfaces are " + StringUtils.arrayToDelimitedString(factory.getProxiedInterfaces(), ","));
-		assertEquals("Found correct number of interfaces", 3, factory.getProxiedInterfaces().length);
+		assertEquals("Found correct number of interfaces", 5, factory.getProxiedInterfaces().length);
 		ITestBean tb = (ITestBean) factory.getProxy();
 		assertThat("Picked up secondary interface", tb, instanceOf(IOther.class));
 

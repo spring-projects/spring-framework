@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,16 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.junit.Ignore;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.tests.context.SimpleMapScope;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
 

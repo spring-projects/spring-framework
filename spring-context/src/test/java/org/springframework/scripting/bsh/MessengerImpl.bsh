@@ -1,4 +1,4 @@
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.scripting.TestBeanAwareMessenger;
 
 public class MyMessenger implements TestBeanAwareMessenger {

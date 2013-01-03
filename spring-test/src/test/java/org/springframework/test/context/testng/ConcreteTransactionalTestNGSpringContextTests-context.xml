@@ -5,10 +5,10 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
-	<bean id="employee" class="org.springframework.beans.Employee" p:name="John Smith" p:age="42"
+	<bean id="employee" class="org.springframework.tests.sample.beans.Employee" p:name="John Smith" p:age="42"
 		p:company="Acme Widgets, Inc." />
 
-	<bean id="pet" class="org.springframework.beans.Pet" c:_="Fido" />
+	<bean id="pet" class="org.springframework.tests.sample.beans.Pet" c:_="Fido" />
 
 	<bean id="foo" class="java.lang.String" c:_="Foo" />
 

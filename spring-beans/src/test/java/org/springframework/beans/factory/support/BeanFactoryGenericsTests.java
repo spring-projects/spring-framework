@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,13 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 
-import test.beans.GenericBean;
-import test.beans.GenericIntegerBean;
-import test.beans.GenericSetOfIntegerBean;
-import test.beans.TestBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.GenericBean;
+import org.springframework.tests.sample.beans.GenericIntegerBean;
+import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
+import org.springframework.tests.sample.beans.TestBean;
+
 
 /**
  * @author Juergen Hoeller

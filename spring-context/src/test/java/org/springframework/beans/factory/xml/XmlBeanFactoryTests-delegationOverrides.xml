@@ -58,7 +58,7 @@
 
 	</bean>
 
-	<bean id="jenny" class="org.springframework.beans.TestBean"
+	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean"
 		scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
@@ -68,7 +68,7 @@
 		</property>
 	</bean>
 
-	<bean id="david" class="org.springframework.beans.TestBean"
+	<bean id="david" class="org.springframework.tests.sample.beans.TestBean"
 		scope="singleton">
 		<description>
 			Simple bean, without any collections.

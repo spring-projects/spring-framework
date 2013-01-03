@@ -3,11 +3,11 @@
 
 <beans>
 
-	<bean id="a" class="org.springframework.beans.factory.xml.DependenciesBean" dependency-check="objects">
+	<bean id="a" class="org.springframework.tests.sample.beans.DependenciesBean" dependency-check="objects">
 		<property name="spouse"><ref local="kerry"/></property>
 	</bean>
 	
-	<bean id="kerry" class="org.springframework.beans.TestBean" dependency-check="none">
+	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean" dependency-check="none">
 	</bean>
 
 </beans>

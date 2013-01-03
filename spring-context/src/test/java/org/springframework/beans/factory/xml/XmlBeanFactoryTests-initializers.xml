@@ -11,7 +11,7 @@
 	<bean id="init-method2" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$BadInitializer"
 			init-method="init2" scope="prototype"/>
 
-	<bean id="init-method3" class="org.springframework.beans.TestBean"
+	<bean id="init-method3" class="org.springframework.tests.sample.beans.TestBean"
 			init-method="init" scope="prototype"/>
 
 	<bean id="init-and-ib" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$InitAndIB"

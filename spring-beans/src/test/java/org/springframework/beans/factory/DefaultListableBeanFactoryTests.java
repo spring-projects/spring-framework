@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,17 @@
  */
 
 package org.springframework.beans.factory;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.Closeable;
 import java.lang.reflect.Field;
@@ -32,19 +43,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.security.auth.Subject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
 import org.junit.Test;
-import test.beans.DerivedTestBean;
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.LifecycleBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -70,20 +75,24 @@ import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
-import org.springframework.beans.factory.xml.DependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.DependenciesBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.SideEffectBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.StopWatch;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Tests properties population and autowire behavior.
@@ -2598,29 +2607,6 @@ public class DefaultListableBeanFactoryTests {
 		public String getUserName() {
 			return this.userName;
 		}
-	}
-
-	/**
-	 * Bean that changes state on a business invocation, so that
-	 * we can check whether it's been invoked
-	 * @author Rod Johnson
-	 */
-	private static class SideEffectBean {
-
-		private int count;
-
-		public void setCount(int count) {
-			this.count = count;
-		}
-
-		public int getCount() {
-			return this.count;
-		}
-
-		public void doWork() {
-			++count;
-		}
-
 	}
 
 	private static class KnowsIfInstantiated {
