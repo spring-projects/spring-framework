@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,28 @@ package org.springframework.beans.support;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 import test.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
  * @author Jean-Pierre PAWLAK
+ * @author Chris Beams
  * @since 20.05.2003
  */
-public class PagedListHolderTests extends TestCase {
+public class PagedListHolderTests {
 
+	@Test
 	public void testPagedListHolder() {
+		Assume.group(TestGroup.LONG_RUNNING);
+
 		TestBean tb1 = new TestBean();
 		tb1.setName("eva");
 		tb1.setAge(25);
