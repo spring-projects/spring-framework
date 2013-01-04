@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Costin Leau
  */
-public class ComponentBeanDefinitionParserTest {
+public class ComponentBeanDefinitionParserTests {
 
 	private static DefaultListableBeanFactory bf;
 
