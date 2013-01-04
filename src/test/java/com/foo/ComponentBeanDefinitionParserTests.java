@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.foo;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,7 +31,7 @@ import org.springframework.core.io.ClassPathResource;
 /**
  * @author Costin Leau
  */
-public class ComponentBeanDefinitionParserTest {
+public class ComponentBeanDefinitionParserTests {
 
 	private static DefaultListableBeanFactory bf;
 

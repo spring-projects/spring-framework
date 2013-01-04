@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.autoproxy;
+package com.foo;
 
-import org.aspectj.lang.annotation.SuppressAjWarnings;
+import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
-/**
- * @author Adrian Colyer
- */
-public aspect CodeStyleAspect {
-
-	private String foo;
-
-	pointcut somePC() : call(* someMethod());
-
-	@SuppressAjWarnings("adviceDidNotMatch")
-	before() : somePC() {
-		System.out.println("match");
+public class ComponentNamespaceHandler extends NamespaceHandlerSupport {
+	@Override
+	public void init() {
+		registerBeanDefinitionParser("component",
+				new ComponentBeanDefinitionParser());
 	}
-
-	public void setFoo(String foo) {
-		this.foo = foo;
-	}
-
 }

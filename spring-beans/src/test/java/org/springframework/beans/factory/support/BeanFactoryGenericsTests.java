@@ -47,8 +47,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import org.springframework.tests.Assume;
-import org.springframework.tests.TestGroup;
 import org.springframework.tests.sample.beans.GenericBean;
 import org.springframework.tests.sample.beans.GenericIntegerBean;
 import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;

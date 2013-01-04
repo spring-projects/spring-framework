@@ -17,7 +17,6 @@
 package org.springframework.context.annotation;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 
 import javax.annotation.Resource;
 

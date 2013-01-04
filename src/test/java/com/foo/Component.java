@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.aop.aspectj.autoproxy;
+package com.foo;
 
-import org.aspectj.lang.annotation.SuppressAjWarnings;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author Adrian Colyer
- */
-public aspect CodeStyleAspect {
+public class Component {
+	private String name;
+	private List<Component> components = new ArrayList<Component>();
 
-	private String foo;
-
-	pointcut somePC() : call(* someMethod());
-
-	@SuppressAjWarnings("adviceDidNotMatch")
-	before() : somePC() {
-		System.out.println("match");
+	// mmm, there is no setter method for the 'components'
+	public void addComponent(Component component) {
+		this.components.add(component);
 	}
 
-	public void setFoo(String foo) {
-		this.foo = foo;
+	public List<Component> getComponents() {
+		return components;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 }
