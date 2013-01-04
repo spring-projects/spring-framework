@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,110 +16,116 @@
 
 package org.springframework.build.gradle
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.gradle.api.*
+import org.gradle.api.DefaultTask
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.maven.Conf2ScopeMapping
 import org.gradle.api.plugins.MavenPlugin
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
-import org.gradle.plugins.ide.eclipse.model.EclipseClasspath;
+import org.gradle.plugins.ide.eclipse.model.EclipseClasspath
 import org.gradle.plugins.ide.idea.IdeaPlugin
-import org.gradle.api.invocation.*
-
 
 class SplitPackageDetectorPlugin implements Plugin<Project> {
-	public void apply(Project project) {
-		Task diagnoseSplitPackages = project.tasks.add('diagnoseSplitPackages', SplitPackageDetectorTask.class)
-		diagnoseSplitPackages.setDescription('Detects split packages')
-		//project.tasks.findByName('build').dependsOn(diagnoseSplitPackages)
-	}
+    public void apply(Project project) {
+        Task diagnoseSplitPackages = project.tasks.add('diagnoseSplitPackages', SplitPackageDetectorTask.class)
+        diagnoseSplitPackages.setDescription('Detects packages which will be split across JARs')
+    }
 }
 
 public class SplitPackageDetectorTask extends DefaultTask {
-	@InputDirectory
-	File inputDir
+    @Input
+    Set<Project> projectsToScan
 
-	@TaskAction
-	public final void diagnoseSplitPackages() {
-		def projects = project.subprojects.findAll { it.plugins.findPlugin(org.springframework.build.gradle.MergePlugin) }.findAll { it.merge.into }
-		projects.each { p ->
-			println '    > The project directory '+ p.projectDir + ' will merge into ' + p.merge.into.projectDir
-		}
-		def splitFound = new org.springframework.build.gradle.SplitPackageDetector(inputDir.absolutePath, project.logger).diagnoseSplitPackages();
-		assert !splitFound
-	}
+    @TaskAction
+    public final void diagnoseSplitPackages() {
+        def Map<Project, Project> mergeMap = [:]
+        def projects = projectsToScan.findAll { it.plugins.findPlugin(org.springframework.build.gradle.MergePlugin) }.findAll { it.merge.into }
+        projects.each { p ->
+            mergeMap.put(p, p.merge.into)
+        }
+        def splitFound = new org.springframework.build.gradle.SplitPackageDetector(projectsToScan, mergeMap, project.logger).diagnoseSplitPackages();
+        assert !splitFound // see error log messages for details of split packages
+    }
 }
 
 class SplitPackageDetector {
 
-	private static final String HIDDEN_DIRECTORY_PREFIX = "."
+    private static final String HIDDEN_DIRECTORY_PREFIX = "."
 
-	private static final String JAVA_FILE_SUFFIX = ".java"
+    private static final String JAVA_FILE_SUFFIX = ".java"
 
-	private static final String SRC_MAIN_JAVA = "src" + File.separator + "main" + File.separator + "java"
+    private static final String SRC_MAIN_JAVA = "src" + File.separator + "main" + File.separator + "java"
 
-	private final Map<File, Set<String>> pkgMap = [:]
+    private static final String PACKAGE_SEPARATOR = "."
 
-	private final logger
+    private final Map<Project, Project> mergeMap
 
-	SplitPackageDetector(baseDir, logger) {
-		this.logger = logger
-		dirList(baseDir).each { File dir ->
-			def packages = getPackagesInDirectory(dir)
-			if (!packages.isEmpty()) {
-				pkgMap.put(dir, packages)
-			}
-		}
-	}
+    private final Map<Project, Set<String>> pkgMap = [:]
 
-	private File[] dirList(String dir) {
-		dirList(new File(dir))
-	}
+    private final logger
 
-	private File[] dirList(File dir) {
-		dir.listFiles({ file -> file.isDirectory() && !file.getName().startsWith(HIDDEN_DIRECTORY_PREFIX) } as FileFilter)
-	}
+    SplitPackageDetector(projectsToScan, mergeMap, logger) {
+        this.mergeMap = mergeMap
+        this.logger = logger
+        projectsToScan.each { Project p ->
+            def dir = p.projectDir
+            def packages = getPackagesInDirectory(dir)
+            if (!packages.isEmpty()) {
+                pkgMap.put(p, packages)
+            }
+        }
+    }
 
-	private Set<String> getPackagesInDirectory(File dir) {
-		def pkgs = new HashSet<String>()
-		addPackagesInDirectory(pkgs, new File(dir, SRC_MAIN_JAVA), "")
-		return pkgs;
-	}
+    private File[] dirList(String dir) {
+        dirList(new File(dir))
+    }
 
-	boolean diagnoseSplitPackages() {
-		def splitFound = false;
-		def dirs = pkgMap.keySet().toArray()
-		def numDirs = dirs.length
-		for (int i = 0; i < numDirs - 1; i++) {
-			for (int j = i + 1; j < numDirs - 1; j++) {
-				def di = dirs[i]
-				def pi = new HashSet(pkgMap.get(di))
-				def dj = dirs[j]
-				def pj = pkgMap.get(dj)
-				pi.retainAll(pj)
-				if (!pi.isEmpty()) {
-					logger.error("Packages $pi are split between directories '$di' and '$dj'")
-					splitFound = true
-				}
-			}
-		}
-		return splitFound
-	}
+    private File[] dirList(File dir) {
+        dir.listFiles({ file -> file.isDirectory() && !file.getName().startsWith(HIDDEN_DIRECTORY_PREFIX) } as FileFilter)
+    }
 
-	private void addPackagesInDirectory(HashSet<String> packages, File dir, String pkg) {
-		def scanDir = new File(dir, pkg)
-		def File[] javaFiles = scanDir.listFiles({ file -> !file.isDirectory() && file.getName().endsWith(JAVA_FILE_SUFFIX) } as FileFilter)
-		if (javaFiles != null && javaFiles.length != 0) {
-			packages.add(pkg)
-		}
-		dirList(scanDir).each { File subDir ->
-			addPackagesInDirectory(packages, dir, pkg + File.separator + subDir.getName())
-		}
-	}
+    private Set<String> getPackagesInDirectory(File dir) {
+        def pkgs = new HashSet<String>()
+        addPackagesInDirectory(pkgs, new File(dir, SRC_MAIN_JAVA), "")
+        return pkgs;
+    }
+
+    boolean diagnoseSplitPackages() {
+        def splitFound = false;
+        def projs = pkgMap.keySet().toArray()
+        def numProjects = projs.length
+        for (int i = 0; i < numProjects - 1; i++) {
+            for (int j = i + 1; j < numProjects - 1; j++) {
+                def pi = projs[i]
+                def pkgi = new HashSet(pkgMap.get(pi))
+                def pj = projs[j]
+                def pkgj = pkgMap.get(pj)
+                pkgi.retainAll(pkgj)
+                if (!pkgi.isEmpty() && mergeMap.get(pi) != pj && mergeMap.get(pj) != pi) {
+                    pkgi.each { pkg ->
+                        def readablePkg = pkg.substring(1).replaceAll(File.separator, PACKAGE_SEPARATOR)
+                        logger.error("Package '$readablePkg' is split between $pi and $pj")
+                    }
+                    splitFound = true
+                }
+            }
+        }
+        return splitFound
+    }
+
+    private void addPackagesInDirectory(HashSet<String> packages, File dir, String pkg) {
+        def scanDir = new File(dir, pkg)
+        def File[] javaFiles = scanDir.listFiles({ file -> !file.isDirectory() && file.getName().endsWith(JAVA_FILE_SUFFIX) } as FileFilter)
+        if (javaFiles != null && javaFiles.length != 0) {
+            packages.add(pkg)
+        }
+        dirList(scanDir).each { File subDir ->
+            addPackagesInDirectory(packages, dir, pkg + File.separator + subDir.getName())
+        }
+    }
 }
