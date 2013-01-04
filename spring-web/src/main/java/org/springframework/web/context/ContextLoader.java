@@ -38,6 +38,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
@@ -490,7 +491,10 @@ public class ContextLoader {
 			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
 		}
 
-		applicationContext.getEnvironment().initPropertySources(servletContext, null);
+		ConfigurableEnvironment env = applicationContext.getEnvironment();
+		if (env instanceof ConfigurableWebEnvironment) {
+			((ConfigurableWebEnvironment)env).initPropertySources(servletContext, null);
+		}
 
 		Collections.sort(initializerInstances, new AnnotationAwareOrderComparator());
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {

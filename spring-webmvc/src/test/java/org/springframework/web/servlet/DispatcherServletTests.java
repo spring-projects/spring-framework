@@ -833,7 +833,7 @@ public class DispatcherServletTests extends TestCase {
 
 	public void testEnvironmentOperations() {
 		DispatcherServlet servlet = new DispatcherServlet();
-		ConfigurableWebEnvironment defaultEnv = servlet.getEnvironment();
+		ConfigurableEnvironment defaultEnv = servlet.getEnvironment();
 		assertThat(defaultEnv, notNullValue());
 		ConfigurableEnvironment env1 = new StandardServletEnvironment();
 		servlet.setEnvironment(env1); // should succeed
