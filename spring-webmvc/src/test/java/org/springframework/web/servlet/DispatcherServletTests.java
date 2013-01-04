@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertThat;
-
 import java.io.IOException;
 import java.util.Locale;
 
@@ -36,15 +30,15 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.DummyEnvironment;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletConfig;
 import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.bind.EscapedErrors;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ServletConfigAwareBean;
@@ -64,6 +58,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.util.WebUtils;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
@@ -842,8 +839,8 @@ public class DispatcherServletTests extends TestCase {
 		servlet.setEnvironment(env1); // should succeed
 		assertThat(servlet.getEnvironment(), sameInstance(env1));
 		try {
-			servlet.setEnvironment(new StandardEnvironment());
-			fail("expected exception");
+			servlet.setEnvironment(new DummyEnvironment());
+			fail("expected IllegalArgumentException for non-configurable Environment");
 		}
 		catch (IllegalArgumentException ex) {
 		}
