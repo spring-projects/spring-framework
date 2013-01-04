@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.IOther;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.DerivedTestObject;
+import org.springframework.tests.sample.objects.ITestInterface;
+import org.springframework.tests.sample.objects.ITestObject;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * @author Colin Sampaleanu
@@ -61,11 +61,11 @@ public class ClassUtilsTests extends TestCase {
 		assertEquals(String[].class, ClassUtils.forName(String[].class.getName(), classLoader));
 		assertEquals(String[][].class, ClassUtils.forName(String[][].class.getName(), classLoader));
 		assertEquals(String[][][].class, ClassUtils.forName(String[][][].class.getName(), classLoader));
-		assertEquals(TestBean.class, ClassUtils.forName("org.springframework.beans.TestBean", classLoader));
-		assertEquals(TestBean[].class, ClassUtils.forName("org.springframework.beans.TestBean[]", classLoader));
-		assertEquals(TestBean[].class, ClassUtils.forName(TestBean[].class.getName(), classLoader));
-		assertEquals(TestBean[][].class, ClassUtils.forName("org.springframework.beans.TestBean[][]", classLoader));
-		assertEquals(TestBean[][].class, ClassUtils.forName(TestBean[][].class.getName(), classLoader));
+		assertEquals(TestObject.class, ClassUtils.forName("org.springframework.tests.sample.objects.TestObject", classLoader));
+		assertEquals(TestObject[].class, ClassUtils.forName("org.springframework.tests.sample.objects.TestObject[]", classLoader));
+		assertEquals(TestObject[].class, ClassUtils.forName(TestObject[].class.getName(), classLoader));
+		assertEquals(TestObject[][].class, ClassUtils.forName("org.springframework.tests.sample.objects.TestObject[][]", classLoader));
+		assertEquals(TestObject[][].class, ClassUtils.forName(TestObject[][].class.getName(), classLoader));
 		assertEquals(short[][][].class, ClassUtils.forName("[[[S", classLoader));
 	}
 
@@ -201,11 +201,11 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testCountOverloadedMethods() {
-		assertFalse(ClassUtils.hasAtLeastOneMethodWithName(TestBean.class, "foobar"));
+		assertFalse(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "foobar"));
 		// no args
-		assertTrue(ClassUtils.hasAtLeastOneMethodWithName(TestBean.class, "hashCode"));
+		assertTrue(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "hashCode"));
 		// matches although it takes an arg
-		assertTrue(ClassUtils.hasAtLeastOneMethodWithName(TestBean.class, "setAge"));
+		assertTrue(ClassUtils.hasAtLeastOneMethodWithName(TestObject.class, "setAge"));
 	}
 
 	public void testNoArgsStaticMethod() throws IllegalAccessException, InvocationTargetException {
@@ -260,12 +260,12 @@ public class ClassUtilsTests extends TestCase {
 	}
 
 	public void testGetAllInterfaces() {
-		DerivedTestBean testBean = new DerivedTestBean();
+		DerivedTestObject testBean = new DerivedTestObject();
 		List ifcs = Arrays.asList(ClassUtils.getAllInterfaces(testBean));
 		assertEquals("Correct number of interfaces", 4, ifcs.size());
 		assertTrue("Contains Serializable", ifcs.contains(Serializable.class));
-		assertTrue("Contains ITestBean", ifcs.contains(ITestBean.class));
-		assertTrue("Contains IOther", ifcs.contains(IOther.class));
+		assertTrue("Contains ITestBean", ifcs.contains(ITestObject.class));
+		assertTrue("Contains IOther", ifcs.contains(ITestInterface.class));
 	}
 
 	public void testClassNamesToString() {

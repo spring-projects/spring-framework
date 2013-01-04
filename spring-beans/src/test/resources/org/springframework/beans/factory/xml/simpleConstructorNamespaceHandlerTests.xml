@@ -5,43 +5,43 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
  <!-- 
-	<bean id="simple1" class="test.beans.DummyBean">
+	<bean id="simple1" class="org.springframework.tests.sample.beans.DummyBean">
 		<constructor-arg value="name"/>
 	</bean>
  -->	
-	<bean id="simple" class="test.beans.DummyBean" c:_="simple"/>
+	<bean id="simple" class="org.springframework.tests.sample.beans.DummyBean" c:_="simple"/>
 
 <!-- 
-	<bean id="simple1-ref" class="test.beans.DummyBean">
+	<bean id="simple1-ref" class="org.springframework.tests.sample.beans.DummyBean">
 		<constructor-arg ref="name"/>
 	</bean>
  -->
-	<bean id="simple-ref" class="test.beans.DummyBean" c:_-ref="name"/>
+	<bean id="simple-ref" class="org.springframework.tests.sample.beans.DummyBean" c:_-ref="name"/>
 
 	<bean id="name" class="java.lang.String">
 		<constructor-arg type="java.lang.String" value="some-name" index="0"/>
 	</bean>
 	
 <!-- 
-	<bean id="name-value1" class="test.beans.TestBean">
+	<bean id="name-value1" class="org.springframework.tests.sample.beans.TestBean">
 		<constructor-arg name="name" value="foo"/>
 		<constructor-arg name="age" value="10"/>
 	</bean>
  -->	
-	<bean id="name-value" class="test.beans.TestBean" c:age="10" c:name="name-value"/>
+	<bean id="name-value" class="org.springframework.tests.sample.beans.TestBean" c:age="10" c:name="name-value"/>
 
 <!-- 	
-	<bean id="name-ref1" class="test.beans.DummyBean">
+	<bean id="name-ref1" class="org.springframework.tests.sample.beans.DummyBean">
 		<constructor-arg name="name" ref="name"/>
 		<constructor-arg name="spouse" ref="name-value"/>
 	</bean>
  -->
-	<bean id="name-ref" class="test.beans.DummyBean" c:name-ref="name" c:spouse-ref="name-value"/>
+	<bean id="name-ref" class="org.springframework.tests.sample.beans.DummyBean" c:name-ref="name" c:spouse-ref="name-value"/>
 	
-	<bean id="indexed-value" class="test.beans.DummyBean" c:_1="austria" c:_0="at" c:_2="10"/>
+	<bean id="indexed-value" class="org.springframework.tests.sample.beans.DummyBean" c:_1="austria" c:_0="at" c:_2="10"/>
 	
-	<bean id="indexed-ref" class="test.beans.DummyBean" c:_0-ref="name" c:_1-ref="name-value"/>
+	<bean id="indexed-ref" class="org.springframework.tests.sample.beans.DummyBean" c:_0-ref="name" c:_1-ref="name-value"/>
  
-	<bean id="beanWithRefConstructorArg" class="test.beans.DummyBean" c:nameRef="silly name" c:ageRef="10"/>
+	<bean id="beanWithRefConstructorArg" class="org.springframework.tests.sample.beans.DummyBean" c:nameRef="silly name" c:ageRef="10"/>
 
 </beans>

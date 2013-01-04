@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="listOfArrays" class="test.beans.GenericBean">
+	<bean id="listOfArrays" class="org.springframework.tests.sample.beans.GenericBean">
 		<property name="listOfArrays">
 			<list>
 				<list>
@@ -43,7 +43,7 @@
 			autowire="constructor">
 	</bean>
 
-  <bean id="integerBean" class="test.beans.GenericIntegerBean">
+  <bean id="integerBean" class="org.springframework.tests.sample.beans.GenericIntegerBean">
     <property name="genericProperty" value="10"/>
     <property name="genericListProperty">
       <list>
@@ -53,7 +53,7 @@
     </property>
   </bean>
 
-  <bean id="setOfIntegerBean" class="test.beans.GenericSetOfIntegerBean">
+  <bean id="setOfIntegerBean" class="org.springframework.tests.sample.beans.GenericSetOfIntegerBean">
     <property name="genericProperty" value="10"/>
     <property name="genericListProperty">
       <list>

@@ -13,7 +13,7 @@
 		<constructor-arg><ref bean="other"/></constructor-arg>
 	</bean>
 
-	<bean id="rod2Accessor" class="org.springframework.beans.TestBean" lazy-init="true">
+	<bean id="rod2Accessor" class="org.springframework.tests.sample.beans.TestBean" lazy-init="true">
 		<property name="friends">
 			<list>
 				<ref bean="rod2"/>
@@ -117,7 +117,7 @@
 	<bean id="rod18" class="org.springframework.beans.factory.xml.SimpleConstructorArgBean" scope="prototype">
 	</bean>
 
-	<bean id="kerry1" class="org.springframework.beans.TestBean">
+	<bean id="kerry1" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name">
 			<value>Kerry1</value>
 		</property>
@@ -126,7 +126,7 @@
 		</property>
 	</bean>
 
-	<bean id="kerry2" class="org.springframework.beans.TestBean">
+	<bean id="kerry2" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name">
 			<value>Kerry2</value>
 		</property>
@@ -135,7 +135,7 @@
 		</property>
 	</bean>
 
-	<bean id="other" class="org.springframework.beans.IndexedTestBean"/>
+	<bean id="other" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
 
 	<bean id="file" class="java.io.File">
 		<constructor-arg><value>/test</value></constructor-arg>
@@ -187,13 +187,13 @@
 
 	<bean id="lenientDependencyTestBean" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype">
 		<constructor-arg>
-			<bean class="org.springframework.beans.DerivedTestBean"/>
+			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
 		</constructor-arg>
 	</bean>
 
 	<bean id="lenientDependencyTestBeanFactoryMethod" class="org.springframework.beans.factory.xml.XmlBeanFactoryTests$LenientDependencyTestBean" scope="prototype" factory-method="create">
 		<constructor-arg>
-			<bean class="org.springframework.beans.DerivedTestBean"/>
+			<bean class="org.springframework.tests.sample.beans.DerivedTestBean"/>
 		</constructor-arg>
 	</bean>
 

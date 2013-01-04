@@ -102,7 +102,7 @@
 	<bean id="listInstance" class="org.springframework.beans.factory.xml.FactoryMethods"
 		  factory-method="listInstance"/>
 
-	<bean id="juergen" class="test.beans.TestBean">
+	<bean id="juergen" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Juergen</value></property>
 	</bean>
 
@@ -127,7 +127,7 @@
 	<!-- Unnamed bean with factory-bean declaration -->
 	<bean factory-bean="instanceFactory" factory-method="defaultInstance"/>
 
-	<bean id="testBeanWithInnerFactoryMethod" class="test.beans.TestBean">
+	<bean id="testBeanWithInnerFactoryMethod" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="friends">
 			<list>
 				<!-- Unnamed bean with factory-bean declaration -->

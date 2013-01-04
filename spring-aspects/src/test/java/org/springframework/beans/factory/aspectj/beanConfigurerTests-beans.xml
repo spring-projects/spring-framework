@@ -37,7 +37,7 @@
 			autowire-candidate="false"/>
 
 	<!-- Used as a target for autowiring by type -->
-	<bean id="ramnivas" class="org.springframework.beans.TestBean" depends-on="circular">
+	<bean id="ramnivas" class="org.springframework.tests.sample.beans.TestBean" depends-on="circular">
 		<property name="name" value="Ramnivas"/>
 		<property name="spouse" ref="circular"/>
 	</bean>

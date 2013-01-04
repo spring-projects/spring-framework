@@ -17,7 +17,7 @@
 		<property name="scopes">
 			<map>
 				<entry key="${scopeName}">
-					<bean class="org.springframework.beans.factory.config.SimpleMapScope"/>
+					<bean class="org.springframework.tests.context.SimpleMapScope"/>
 				</entry>
 			</map>
 		</property>

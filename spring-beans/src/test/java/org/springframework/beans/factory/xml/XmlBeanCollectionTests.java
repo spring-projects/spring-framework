@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -34,7 +33,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -44,8 +42,9 @@ import org.springframework.beans.factory.config.MapFactoryBean;
 import org.springframework.beans.factory.config.SetFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.HasMap;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
 
 /**
  * Tests for collections in XML bean definitions.
@@ -451,95 +450,4 @@ public class XmlBeanCollectionTests {
 			return obj;
 		}
 	}
-}
-
-
-/**
- * Bean exposing a map. Used for bean factory tests.
- *
- * @author Rod Johnson
- * @since 05.06.2003
- */
-class HasMap {
-
-	private Map map;
-
-	private IdentityHashMap identityMap;
-
-	private Set set;
-
-	private CopyOnWriteArraySet concurrentSet;
-
-	private Properties props;
-
-	private Object[] objectArray;
-
-	private Class[] classArray;
-
-	private Integer[] intArray;
-
-	public Map getMap() {
-		return map;
-	}
-
-	public void setMap(Map map) {
-		this.map = map;
-	}
-
-	public IdentityHashMap getIdentityMap() {
-		return identityMap;
-	}
-
-	public void setIdentityMap(IdentityHashMap identityMap) {
-		this.identityMap = identityMap;
-	}
-
-	public Set getSet() {
-		return set;
-	}
-
-	public void setSet(Set set) {
-		this.set = set;
-	}
-
-	public CopyOnWriteArraySet getConcurrentSet() {
-		return concurrentSet;
-	}
-
-	public void setConcurrentSet(CopyOnWriteArraySet concurrentSet) {
-		this.concurrentSet = concurrentSet;
-	}
-
-	public Properties getProps() {
-		return props;
-	}
-
-	public void setProps(Properties props) {
-		this.props = props;
-	}
-
-	public Object[] getObjectArray() {
-		return objectArray;
-	}
-
-	public void setObjectArray(Object[] objectArray) {
-		this.objectArray = objectArray;
-	}
-
-	public Class[] getClassArray() {
-		return classArray;
-	}
-
-	public void setClassArray(Class[] classArray) {
-		this.classArray = classArray;
-	}
-
-	public Integer[] getIntegerArray() {
-		return intArray;
-	}
-
-	public void setIntegerArray(Integer[] is) {
-		intArray = is;
-	}
-
 }

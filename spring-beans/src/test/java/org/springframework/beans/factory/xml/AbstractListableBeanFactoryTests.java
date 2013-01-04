@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -51,13 +51,13 @@ public abstract class AbstractListableBeanFactoryTests extends AbstractBeanFacto
 
 	public void assertTestBeanCount(int count) {
 		String[] defNames = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, false);
-		assertTrue("We should have " + count + " beans for class org.springframework.beans.TestBean, not " +
+		assertTrue("We should have " + count + " beans for class org.springframework.tests.sample.beans.TestBean, not " +
 				defNames.length, defNames.length == count);
 
 		int countIncludingFactoryBeans = count + 2;
 		String[] names = getListableBeanFactory().getBeanNamesForType(TestBean.class, true, true);
 		assertTrue("We should have " + countIncludingFactoryBeans +
-				" beans for class org.springframework.beans.TestBean, not " + names.length,
+				" beans for class org.springframework.tests.sample.beans.TestBean, not " + names.length,
 				names.length == countIncludingFactoryBeans);
 	}
 

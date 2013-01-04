@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -484,10 +484,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
 		Properties classCache = new Properties();
-		classCache.setProperty("org.springframework.beans.TestBean", "read-write");
+		classCache.setProperty("org.springframework.tests.sample.beans.TestBean", "read-write");
 		sfb.setEntityCacheStrategies(classCache);
 		Properties collectionCache = new Properties();
-		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only");
+		collectionCache.setProperty("org.springframework.tests.sample.beans.TestBean.friends", "read-only");
 		sfb.setCollectionCacheStrategies(collectionCache);
 		sfb.afterPropertiesSet();
 
@@ -523,10 +523,10 @@ public class LocalSessionFactoryBeanTests extends TestCase {
 		sfb.setMappingResources(new String[0]);
 		sfb.setDataSource(new DriverManagerDataSource());
 		Properties classCache = new Properties();
-		classCache.setProperty("org.springframework.beans.TestBean", "read-write,myRegion");
+		classCache.setProperty("org.springframework.tests.sample.beans.TestBean", "read-write,myRegion");
 		sfb.setEntityCacheStrategies(classCache);
 		Properties collectionCache = new Properties();
-		collectionCache.setProperty("org.springframework.beans.TestBean.friends", "read-only,myRegion");
+		collectionCache.setProperty("org.springframework.tests.sample.beans.TestBean.friends", "read-only,myRegion");
 		sfb.setCollectionCacheStrategies(collectionCache);
 		sfb.afterPropertiesSet();
 

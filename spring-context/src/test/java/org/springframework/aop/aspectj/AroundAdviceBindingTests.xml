@@ -17,6 +17,6 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AroundAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>
