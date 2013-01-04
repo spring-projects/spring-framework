@@ -146,6 +146,7 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 		filter2.init(filterConfig2);
 
 		final FilterChain filterChain = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse) {
 				assertTrue(TransactionSynchronizationManager.hasResource(pmf));
 				servletRequest.setAttribute("invoked", Boolean.TRUE);
@@ -153,6 +154,7 @@ public class OpenPersistenceManagerInViewTests extends TestCase {
 		};
 
 		final FilterChain filterChain2 = new FilterChain() {
+			@Override
 			public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse)
 				throws IOException, ServletException {
 				assertTrue(TransactionSynchronizationManager.hasResource(pmf2));

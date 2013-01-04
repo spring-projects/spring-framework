@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockPageContext;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -54,17 +54,21 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 	private SelectTag selectTag;
 	private OptionsTag tag;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new OptionsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
 		};
 		selectTag = new SelectTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
+			@Override
 			public String getName() {
 				// Should not be used other than to delegate to
 				// RequestDataValueDataProcessor
@@ -276,6 +280,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		assertEquals(value2, rootElement.selectSingleNode("option[@selected]"));
 	}
 
+	@Override
 	protected void extendRequest(MockHttpServletRequest request) {
 		TestBean bean = new TestBean();
 		bean.setName("foo");
@@ -295,6 +300,7 @@ public final class OptionsTagTests extends AbstractHtmlElementTagTests {
 		request.setAttribute("floats", floats);
 	}
 
+	@Override
 	protected void exposeBindingResult(Errors errors) {
 		// wrap errors in a Model
 		Map model = new HashMap();

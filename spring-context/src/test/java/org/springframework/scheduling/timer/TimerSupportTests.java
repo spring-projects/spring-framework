@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,13 @@ import java.util.TimerTask;
 
 import junit.framework.TestCase;
 
-import org.springframework.scheduling.TestMethodInvokingTask;
+import org.springframework.tests.context.TestMethodInvokingTask;
 
 /**
  * @author Juergen Hoeller
  * @since 20.02.2004
  */
+@Deprecated
 public class TimerSupportTests extends TestCase {
 
 	public void testTimerFactoryBean() throws Exception {
@@ -50,27 +51,32 @@ public class TimerSupportTests extends TestCase {
 
 		final List<Boolean> success = new ArrayList<Boolean>(3);
 		final Timer timer = new Timer(true) {
+			@Override
 			public void schedule(TimerTask task, long delay, long period) {
 				if (task == timerTask0 && delay == 0 && period == 10) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void scheduleAtFixedRate(TimerTask task, long delay, long period) {
 				if (task == timerTask1 && delay == 10 && period == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void schedule(TimerTask task, long delay) {
 				if (task instanceof DelegatingTimerTask && delay == 20) {
 					success.add(Boolean.TRUE);
 				}
 			}
+			@Override
 			public void cancel() {
 				success.add(Boolean.TRUE);
 			}
 		};
 
 		TimerFactoryBean timerFactoryBean = new TimerFactoryBean() {
+			@Override
 			protected Timer createTimer(String name, boolean daemon) {
 				return timer;
 			}
@@ -104,6 +110,7 @@ public class TimerSupportTests extends TestCase {
 
 		private int counter = 0;
 
+		@Override
 		public void run() {
 			counter++;
 		}
@@ -114,6 +121,7 @@ public class TimerSupportTests extends TestCase {
 
 		private int counter = 0;
 
+		@Override
 		public void run() {
 			counter++;
 		}

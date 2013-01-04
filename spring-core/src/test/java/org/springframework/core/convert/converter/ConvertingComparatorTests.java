@@ -120,6 +120,7 @@ public class ConvertingComparatorTests {
 
 	private static class StringToInteger implements Converter<String, Integer> {
 
+		@Override
 		public Integer convert(String source) {
 			return new Integer(source);
 		}
@@ -131,6 +132,7 @@ public class ConvertingComparatorTests {
 
 		private boolean called;
 
+		@Override
 		public int compare(Integer o1, Integer o2) {
 			assertThat(o1, instanceOf(Integer.class));
 			assertThat(o2, instanceOf(Integer.class));

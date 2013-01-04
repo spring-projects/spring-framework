@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
 
 package org.springframework.web.portlet.context;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
 import javax.servlet.ServletContextEvent;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
-import org.springframework.beans.DerivedTestBean;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
-import org.springframework.mock.web.MockServletContext;
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.ServletWrappingPortletContext;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.web.context.ContextCleanupListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestContextHolder;

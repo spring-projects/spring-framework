@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import org.springframework.beans.ResourceTestBean;
+import org.springframework.tests.sample.beans.ResourceTestBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
@@ -54,14 +54,17 @@ public class ConversionServiceFactoryBeanTests {
 		ConversionServiceFactoryBean factory = new ConversionServiceFactoryBean();
 		Set<Object> converters = new HashSet<Object>();
 		converters.add(new Converter<String, Foo>() {
+			@Override
 			public Foo convert(String source) {
 				return new Foo();
 			}
 		});
 		converters.add(new ConverterFactory<String, Bar>() {
+			@Override
 			public <T extends Bar> Converter<String, T> getConverter(Class<T> targetType) {
 				return new Converter<String, T> () {
 					@SuppressWarnings("unchecked")
+					@Override
 					public T convert(String source) {
 						return (T) new Bar();
 					}
@@ -69,9 +72,11 @@ public class ConversionServiceFactoryBeanTests {
 			}
 		});
 		converters.add(new GenericConverter() {
+			@Override
 			public Set<ConvertiblePair> getConvertibleTypes() {
 				return Collections.singleton(new ConvertiblePair(String.class, Baz.class));
 			}
+			@Override
 			public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 				return new Baz();
 			}

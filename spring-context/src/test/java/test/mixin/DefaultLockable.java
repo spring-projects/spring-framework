@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,17 @@ public class DefaultLockable implements Lockable {
 
 	private boolean locked;
 
+	@Override
 	public void lock() {
 		this.locked = true;
 	}
 
+	@Override
 	public void unlock() {
 		this.locked = false;
 	}
 
+	@Override
 	public boolean locked() {
 		return this.locked;
 	}

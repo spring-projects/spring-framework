@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @since 16.09.2003
  */
+@Deprecated
 public class ExpressionEvaluationUtilsTests {
 
 	@Test
@@ -270,6 +271,7 @@ public class ExpressionEvaluationUtilsTests {
 
 		private ExpressionEvaluator eval = new CountingMockExpressionEvaluator(this);
 
+		@Override
 		public ExpressionEvaluator getExpressionEvaluator() {
 			return eval;
 		}
@@ -286,11 +288,13 @@ public class ExpressionEvaluationUtilsTests {
 			super(pageContext);
 		}
 
+		@Override
 		public Expression parseExpression(String expression, Class expectedType, FunctionMapper functionMapper) throws ELException {
 			this.parseExpressionCount++;
 			return super.parseExpression(expression, expectedType, functionMapper);
 		}
 
+		@Override
 		public Object evaluate(String expression, Class expectedType, VariableResolver variableResolver, FunctionMapper functionMapper) throws ELException {
 			this.evaluateCount++;
 			return super.evaluate(expression, expectedType, variableResolver, functionMapper);

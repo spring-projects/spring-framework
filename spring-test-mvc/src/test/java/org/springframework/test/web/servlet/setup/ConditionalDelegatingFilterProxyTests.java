@@ -253,10 +253,12 @@ public class ConditionalDelegatingFilterProxyTests {
 		private FilterChain chain;
 		private boolean destroy;
 
+		@Override
 		public void init(FilterConfig filterConfig) throws ServletException {
 			this.filterConfig = filterConfig;
 		}
 
+		@Override
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
 				ServletException {
 			this.request = request;
@@ -264,6 +266,7 @@ public class ConditionalDelegatingFilterProxyTests {
 			this.chain = chain;
 		}
 
+		@Override
 		public void destroy() {
 			this.destroy = true;
 		}

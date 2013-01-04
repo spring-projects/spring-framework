@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.tests.sample.beans.BooleanTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NumberTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * Unit tests for the various PropertyEditors in Spring.
@@ -113,6 +113,7 @@ public class CustomEditorTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -130,6 +131,7 @@ public class CustomEditorTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -148,6 +150,7 @@ public class CustomEditorTests {
 		tb.setSpouse(new TestBean());
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, "spouse.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -166,6 +169,7 @@ public class CustomEditorTests {
 		tb.setSpouse(new TestBean());
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -588,9 +592,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("test.beans.TestBean[]");
+		classEditor.setAsText("org.springframework.tests.sample.beans.TestBean[]");
 		assertEquals(TestBean[].class, classEditor.getValue());
-		assertEquals("test.beans.TestBean[]", classEditor.getAsText());
+		assertEquals("org.springframework.tests.sample.beans.TestBean[]", classEditor.getAsText());
 	}
 
 	/*
@@ -853,6 +857,7 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
@@ -905,16 +910,19 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "map.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("map" + text);
 			}
@@ -969,31 +977,37 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean(false);
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array[0].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array0" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "array[1].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array1" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "list[0].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list0" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "list[1].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list1" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "map[key1].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("mapkey1" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "map[key2].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("mapkey2" + text);
 			}
@@ -1060,28 +1074,34 @@ public class CustomEditorTests {
 		tb5.setNestedIndexedBean(new IndexedTestBean());
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array.nestedIndexedBean.array.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
 
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(5);
 			}
 		});
 		bw.registerCustomEditor(String.class, "list.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
 
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
 		});
 		bw.registerCustomEditor(String.class, "map.nestedIndexedBean.map.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("map" + text);
 			}
 
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1138,16 +1158,19 @@ public class CustomEditorTests {
 		tb5.setNestedIndexedBean(new IndexedTestBean());
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(String.class, "array[0].nestedIndexedBean.array[0].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "list.nestedIndexedBean.list[1].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
 		});
 		bw.registerCustomEditor(String.class, "map[key1].nestedIndexedBean.map.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("map" + text);
 			}
@@ -1174,28 +1197,34 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "list", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("map" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1222,55 +1251,67 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(TestBean.class, "array[0]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array0" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "array[1]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("array1" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "list[0]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list0" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "list[1]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("list1" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "map[key1]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey1" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
 		});
 		bw.registerCustomEditor(TestBean.class, "map[key2]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean("mapkey2" + text, 99));
 			}
 
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1297,6 +1338,7 @@ public class CustomEditorTests {
 		IndexedTestBean bean = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(bean);
 		bw.registerCustomEditor(List.class, "list", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				List<TestBean> result = new ArrayList<TestBean>();
 				result.add(new TestBean("list" + text, 99));
@@ -1347,6 +1389,7 @@ public class CustomEditorTests {
 		IndexedTestBean tb = new IndexedTestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text, 99));
 			}
@@ -1362,6 +1405,7 @@ public class CustomEditorTests {
 		TestBean tb = new TestBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
 		bw.registerCustomEditor(String.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("-" + text + "-");
 			}
@@ -1436,6 +1480,7 @@ public class CustomEditorTests {
 
 	private static class TestBeanEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");
@@ -1448,6 +1493,7 @@ public class CustomEditorTests {
 
 	private static class OldValueAccessingTestBeanEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) {
 			TestBean tb = new TestBean();
 			StringTokenizer st = new StringTokenizer(text, "_");

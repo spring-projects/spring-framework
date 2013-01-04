@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,14 @@
 
 package org.springframework.http.converter.xml;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -27,19 +32,17 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-
-/** @author Arjen Poutsma */
-@SuppressWarnings("unchecked")
+/**
+ * @author Arjen Poutsma
+ */
 public class SourceHttpMessageConverterTests {
 
 	private SourceHttpMessageConverter<Source> converter;

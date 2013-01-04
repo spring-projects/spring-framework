@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import junit.framework.TestCase;
 
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 /**
@@ -27,10 +28,13 @@ import org.springframework.core.io.ClassPathResource;
  */
 public class MetadataAttachmentTests extends TestCase {
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 
+	@Override
 	protected void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(new ClassPathResource("withMeta.xml", getClass()));
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.beanFactory).loadBeanDefinitions(
+				new ClassPathResource("withMeta.xml", getClass()));
 	}
 
 	public void testMetadataAttachment() throws Exception {

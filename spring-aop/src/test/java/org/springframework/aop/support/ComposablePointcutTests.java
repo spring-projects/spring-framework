@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.aop.MethodMatcher;
 import org.springframework.aop.Pointcut;
 import org.springframework.core.NestedRuntimeException;
 
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -35,24 +35,28 @@ import test.beans.TestBean;
 public final class ComposablePointcutTests {
 
 	public static MethodMatcher GETTER_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
 	};
 
 	public static MethodMatcher GET_AGE_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().equals("getAge");
 		}
 	};
 
 	public static MethodMatcher ABSQUATULATE_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().equals("absquatulate");
 		}
 	};
 
 	public static MethodMatcher SETTER_METHOD_MATCHER = new StaticMethodMatcher() {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("set");
 		}

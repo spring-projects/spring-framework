@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import org.springframework.beans.Pet;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.Pet;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -43,9 +43,11 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -251,6 +253,7 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 		return new Float("12.99");
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setSex("M");
@@ -262,10 +265,12 @@ public class RadioButtonTagTests extends AbstractFormTagTests {
 
 	private static class MyFloatEditor extends PropertyEditorSupport {
 
+		@Override
 		public void setAsText(String text) throws IllegalArgumentException {
 			setValue(text.substring(1));
 		}
 
+		@Override
 		public String getAsText() {
 			return "F" + getValue();
 		}

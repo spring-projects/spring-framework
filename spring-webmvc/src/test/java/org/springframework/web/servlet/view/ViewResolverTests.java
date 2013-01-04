@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.io.ClassPathResource;
@@ -249,8 +249,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -287,8 +289,10 @@ public class ViewResolverTests {
 		vr.setApplicationContext(wac);
 
 		MockHttpServletRequest request = new MockHttpServletRequest(sc) {
+			@Override
 			public RequestDispatcher getRequestDispatcher(String path) {
 				return new MockRequestDispatcher(path) {
+					@Override
 					public void forward(ServletRequest forwardRequest, ServletResponse forwardResponse) {
 						assertTrue("Correct rc attribute", forwardRequest.getAttribute("rc") == null);
 						assertEquals("value1", forwardRequest.getAttribute("key1"));
@@ -432,6 +436,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverDefaultLocation() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);
@@ -453,6 +458,7 @@ public class ViewResolverTests {
 	@Test
 	public void testXmlViewResolverWithoutCache() throws Exception {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext() {
+			@Override
 			protected Resource getResourceByPath(String path) {
 				assertTrue("Correct default location", XmlViewResolver.DEFAULT_LOCATION.equals(path));
 				return super.getResourceByPath(path);

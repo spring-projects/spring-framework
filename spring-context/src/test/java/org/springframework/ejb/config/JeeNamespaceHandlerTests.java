@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -125,7 +125,7 @@ public class JeeNamespaceHandlerTests {
 		assertPropertyValue(beanDefinition, "lookupHomeOnStartup", "true");
 		assertPropertyValue(beanDefinition, "resourceRef", "true");
 		assertPropertyValue(beanDefinition, "jndiEnvironment", "foo=bar");
-		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.beans.ITestBean");
+		assertPropertyValue(beanDefinition, "homeInterface", "org.springframework.tests.sample.beans.ITestBean");
 		assertPropertyValue(beanDefinition, "refreshHomeOnConnectFailure", "true");
 		assertPropertyValue(beanDefinition, "cacheSessionBean", "true");
 	}

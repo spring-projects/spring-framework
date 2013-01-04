@@ -13,8 +13,8 @@ _Within your locally cloned spring-framework working directory:_
 ## Known issues
 
 1. `spring-aspects` does not compile out of the box due to references to aspect types unknown to IDEA.
-See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, you may want to
-exclude `spring-aspects` from the overall project to avoid compilation errors.
+See http://youtrack.jetbrains.com/issue/IDEA-64446 for details. In the meantime, the 'spring-aspects'
+module has been excluded from the overall project to avoid compilation errors.
 2. While all JUnit tests pass from the command line with Gradle, many will fail when run from IDEA.
 Resolving this is a work in progress. If attempting to run all JUnit tests from within IDEA, you will
 likely need to set the following VM options to avoid out of memory errors:

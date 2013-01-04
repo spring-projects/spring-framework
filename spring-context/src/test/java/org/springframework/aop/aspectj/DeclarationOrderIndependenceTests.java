@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public final class DeclarationOrderIndependenceTests {
 		/* (non-Javadoc)
 		 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 		 */
+		@Override
 		public void setBeanName(String name) {
 			this.beanName = name;
 		}
@@ -148,6 +149,7 @@ class TopsyTurvyTargetImpl implements TopsyTurvyTarget {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyTarget#doSomething()
 	 */
+	@Override
 	public void doSomething() {
 		this.x = 10;
 	}
@@ -155,6 +157,7 @@ class TopsyTurvyTargetImpl implements TopsyTurvyTarget {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyTarget#getX()
 	 */
+	@Override
 	public int getX() {
 		return x;
 	}
@@ -171,6 +174,7 @@ class AspectCollaborator implements TopsyTurvyAspect.Collaborator {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyAspect.Collaborator#afterReturningAdviceFired()
 	 */
+	@Override
 	public void afterReturningAdviceFired() {
 		this.afterReturningFired = true;
 	}
@@ -178,6 +182,7 @@ class AspectCollaborator implements TopsyTurvyAspect.Collaborator {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyAspect.Collaborator#aroundAdviceFired()
 	 */
+	@Override
 	public void aroundAdviceFired() {
 		this.aroundFired = true;
 	}
@@ -185,6 +190,7 @@ class AspectCollaborator implements TopsyTurvyAspect.Collaborator {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.aspectj.TopsyTurvyAspect.Collaborator#beforeAdviceFired()
 	 */
+	@Override
 	public void beforeAdviceFired() {
 		this.beforeFired = true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.beans.factory;
 
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -38,14 +41,16 @@ public final class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeanReturnsNull() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(RETURNS_NULL_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(RETURNS_NULL_CONTEXT);
 		Object result = factory.getBean("factoryBean");
 		assertNull(result);
 	}
 
 	@Test
 	public void testFactoryBeansWithAutowiring() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
@@ -62,7 +67,8 @@ public final class FactoryBeanTests {
 
 	@Test
 	public void testFactoryBeansWithIntermediateFactoryBeanAutowiringFailure() throws Exception {
-		XmlBeanFactory factory = new XmlBeanFactory(WITH_AUTOWIRING_CONTEXT);
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(WITH_AUTOWIRING_CONTEXT);
 
 		BeanFactoryPostProcessor ppc = (BeanFactoryPostProcessor) factory.getBean("propertyPlaceholderConfigurer");
 		ppc.postProcessBeanFactory(factory);
@@ -77,14 +83,17 @@ public final class FactoryBeanTests {
 
 	public static class NullReturningFactoryBean implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			return null;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -103,6 +112,7 @@ public final class FactoryBeanTests {
 			return beta;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			Assert.notNull(beta, "'beta' property is required");
 		}
@@ -131,6 +141,7 @@ public final class FactoryBeanTests {
 			return name;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			Assert.notNull(gamma, "'gamma' property is required");
 		}
@@ -149,14 +160,17 @@ public final class FactoryBeanTests {
 			this.beta = beta;
 		}
 
+		@Override
 		public Object getObject() {
 			return this.beta;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

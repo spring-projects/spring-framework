@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,28 @@
  */
 package org.springframework.jdbc.core.support;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.Date;
 
-import junit.framework.TestCase;
-import org.easymock.ArgumentsMatcher;
-import org.easymock.MockControl;
-
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
@@ -46,172 +56,96 @@ import org.springframework.jdbc.support.lob.LobHandler;
  *
  * @author Alef Arendsen
  */
-public class SqlLobValueTests extends TestCase {
+public class SqlLobValueTests  {
 
-	private MockControl psControl;
-	private PreparedStatement ps;
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
-	private MockControl lobHandlerControl;
+	private PreparedStatement preparedStatement;
 	private LobHandler handler;
-
-	private MockControl lobCreatorControl;
 	private LobCreator creator;
 
+	@Captor
+	private ArgumentCaptor<InputStream> inputStreamCaptor;
+
+	@Before
 	public void setUp() {
-		//	create preparedstatement
-		psControl = MockControl.createControl(PreparedStatement.class);
-		ps = (PreparedStatement) psControl.getMock();
-
-		// create handler controler
-		lobHandlerControl = MockControl.createControl(LobHandler.class);
-		handler = (LobHandler) lobHandlerControl.getMock();
-
-		// create creator control
-		lobCreatorControl = MockControl.createControl(LobCreator.class);
-		creator = (LobCreator) lobCreatorControl.getMock();
-
-		// set initial state
-		handler.getLobCreator();
-		lobHandlerControl.setReturnValue(creator);
+		MockitoAnnotations.initMocks(this);
+		preparedStatement = mock(PreparedStatement.class);
+		handler = mock(LobHandler.class);
+		creator = mock(LobCreator.class);
+		given(handler.getLobCreator()).willReturn(creator);
 	}
 
-	private void replay() {
-		psControl.replay();
-		lobHandlerControl.replay();
-		lobCreatorControl.replay();
-	}
-
+	@Test
 	public void test1() throws SQLException {
 		byte[] testBytes = "Bla".getBytes();
-		creator.setBlobAsBytes(ps, 1, testBytes);
-		replay();
 		SqlLobValue lob = new SqlLobValue(testBytes, handler);
-		lob.setTypeValue(ps, 1, Types.BLOB, "test");
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
+		verify(creator).setBlobAsBytes(preparedStatement, 1, testBytes);
 	}
 
+	@Test
 	public void test2() throws SQLException {
 		String testString = "Bla";
-
-		creator.setBlobAsBytes(ps, 1, testString.getBytes());
-		// set a matcher to match the byte array!
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] arg0, Object[] arg1) {
-				byte[] one = (byte[]) arg0[2];
-				byte[] two = (byte[]) arg1[2];
-				return Arrays.equals(one, two);
-			}
-			public String toString(Object[] arg0) {
-				return "bla";
-			}
-		});
-
-		replay();
-
 		SqlLobValue lob = new SqlLobValue(testString, handler);
-		lob.setTypeValue(ps, 1, Types.BLOB, "test");
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
-
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
+		verify(creator).setBlobAsBytes(preparedStatement, 1, testString.getBytes());
 	}
 
-	public void test3()
-	throws SQLException {
-
-		Date testContent = new Date();
-
-		SqlLobValue lob =
-			new SqlLobValue(new InputStreamReader(new ByteArrayInputStream("Bla".getBytes())), 12);
-		try {
-			lob.setTypeValue(ps, 1, Types.BLOB, "test");
-			fail("IllegalArgumentException should have been thrown");
-		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
+	@Test
+	public void test3() throws SQLException {
+		SqlLobValue lob = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream("Bla".getBytes())), 12);
+		thrown.expect(IllegalArgumentException.class);
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 	}
 
+	@Test
 	public void test4() throws SQLException {
 		String testContent = "Bla";
-		creator.setClobAsString(ps, 1, testContent);
-
-		replay();
-
 		SqlLobValue lob = new SqlLobValue(testContent, handler);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
+		verify(creator).setClobAsString(preparedStatement, 1, testContent);
 	}
 
-	public void test5() throws SQLException {
+	@Test
+	public void test5() throws Exception {
 		byte[] testContent = "Bla".getBytes();
-		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
-		creator.setClobAsAsciiStream(ps, 1, bais, 3);
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] arg0, Object[] arg1) {
-				// for now, match always
-				return true;
-			}
-			public String toString(Object[] arg0) {
-				return null;
-			}
-		});
-
-		replay();
-
 		SqlLobValue lob = new SqlLobValue(new ByteArrayInputStream(testContent), 3, handler);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
+		verify(creator).setClobAsAsciiStream(eq(preparedStatement), eq(1), inputStreamCaptor.capture(), eq(3));
+		byte[] bytes = new byte[3];
+		inputStreamCaptor.getValue().read(bytes );
+		assertThat(bytes, equalTo(testContent));
 	}
 
-	public void test6()throws SQLException {
+	@Test
+	public void test6() throws SQLException {
 		byte[] testContent = "Bla".getBytes();
 		ByteArrayInputStream bais = new ByteArrayInputStream(testContent);
 		InputStreamReader reader = new InputStreamReader(bais);
-		creator.setClobAsCharacterStream(ps, 1, reader, 3);
-		lobCreatorControl.setMatcher(new ArgumentsMatcher() {
-			public boolean matches(Object[] arg0, Object[] arg1) {
-				// for now, match always
-				return true;
-			}
-			public String toString(Object[] arg0) {
-				return null;
-			}
-		});
-
-		replay();
-
 		SqlLobValue lob = new SqlLobValue(reader, 3, handler);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
-		lobHandlerControl.verify();
-		lobCreatorControl.verify();
-
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
+		verify(creator).setClobAsCharacterStream(eq(preparedStatement), eq(1), eq(reader), eq(3));
 	}
 
+	@Test
 	public void test7() throws SQLException {
-		Date testContent = new Date();
-
 		SqlLobValue lob = new SqlLobValue("bla".getBytes());
-		try {
-			lob.setTypeValue(ps, 1, Types.CLOB, "test");
-			fail("IllegalArgumentException should have been thrown");
-		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
+		thrown.expect(IllegalArgumentException.class);
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 	}
 
+	@Test
 	public void testOtherConstructors() throws SQLException {
 		// a bit BS, but we need to test them, as long as they don't throw exceptions
 
 		SqlLobValue lob = new SqlLobValue("bla");
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 
 		try {
 			lob = new SqlLobValue("bla".getBytes());
-			lob.setTypeValue(ps, 1, Types.CLOB, "test");
+			lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
 		}
 		catch (IllegalArgumentException e) {
@@ -219,27 +153,27 @@ public class SqlLobValueTests extends TestCase {
 		}
 
 		lob = new SqlLobValue(new ByteArrayInputStream("bla".getBytes()), 3);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 
-		lob = new SqlLobValue(new InputStreamReader(
-				new ByteArrayInputStream("bla".getBytes())), 3);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
+		lob = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream(
+				"bla".getBytes())), 3);
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 
 		// same for BLOB
 		lob = new SqlLobValue("bla");
-		lob.setTypeValue(ps, 1, Types.BLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 
 		lob = new SqlLobValue("bla".getBytes());
-		lob.setTypeValue(ps, 1, Types.BLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 
 		lob = new SqlLobValue(new ByteArrayInputStream("bla".getBytes()), 3);
-		lob.setTypeValue(ps, 1, Types.BLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 
-		lob = new SqlLobValue(new InputStreamReader(
-				new ByteArrayInputStream("bla".getBytes())), 3);
+		lob = new SqlLobValue(new InputStreamReader(new ByteArrayInputStream(
+				"bla".getBytes())), 3);
 
 		try {
-			lob.setTypeValue(ps, 1, Types.BLOB, "test");
+			lob.setTypeValue(preparedStatement, 1, Types.BLOB, "test");
 			fail("IllegalArgumentException should have been thrown");
 		}
 		catch (IllegalArgumentException e) {
@@ -247,28 +181,20 @@ public class SqlLobValueTests extends TestCase {
 		}
 	}
 
-	public void testCorrectCleanup()  throws SQLException {
-		creator.setClobAsString(ps, 1, "Bla");
-		creator.close();
-
-		replay();
+	@Test
+	public void testCorrectCleanup() throws SQLException {
 		SqlLobValue lob = new SqlLobValue("Bla", handler);
-		lob.setTypeValue(ps, 1, Types.CLOB, "test");
+		lob.setTypeValue(preparedStatement, 1, Types.CLOB, "test");
 		lob.cleanup();
-
-		lobCreatorControl.verify();
+		verify(creator).setClobAsString(preparedStatement, 1, "Bla");
+		verify(creator).close();
 	}
 
+	@Test
 	public void testOtherSqlType() throws SQLException {
-		replay();
 		SqlLobValue lob = new SqlLobValue("Bla", handler);
-		try {
-			lob.setTypeValue(ps, 1, Types.SMALLINT, "test");
-			fail("IllegalArgumentException should have been thrown");
-		}
-		catch (IllegalArgumentException e) {
-			// expected
-		}
+		thrown.expect(IllegalArgumentException.class);
+		lob.setTypeValue(preparedStatement, 1, Types.SMALLINT, "test");
 	}
 
 }

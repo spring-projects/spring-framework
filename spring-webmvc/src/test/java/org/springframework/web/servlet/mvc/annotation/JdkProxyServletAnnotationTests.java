@@ -110,6 +110,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class TypeLevelImpl implements TypeLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}
@@ -126,6 +127,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class MethodLevelImpl implements MethodLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}
@@ -142,6 +144,7 @@ public class JdkProxyServletAnnotationTests {
 
 	public static class TypeAndMethodLevelImpl implements TypeAndMethodLevel {
 
+		@Override
 		public void doIt(Writer writer) throws IOException {
 			writer.write("doIt");
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.springframework.jdbc.object;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,116 +31,88 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.easymock.EasyMock;
-import org.apache.commons.logging.LogFactory;
-import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runners.JUnit4;
-import org.junit.runner.RunWith;
+import javax.sql.DataSource;
 
-import org.springframework.jdbc.AbstractJdbcTests;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Thomas Risberg
  */
-@RunWith(JUnit4.class)
-public class GenericSqlQueryTests extends AbstractJdbcTests {
+public class GenericSqlQueryTests  {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
 		"select id, forename from custmr where id = ? and country = ?";
 
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+	private BeanFactory beanFactory;
 
-	private PreparedStatement mockPreparedStatement;
-	private ResultSet mockResultSet;
+	private Connection connection;
 
-	private BeanFactory bf;
+	private PreparedStatement preparedStatement;
 
+	private ResultSet resultSet;
 
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-		mockPreparedStatement =	createMock(PreparedStatement.class);
-		mockResultSet = createMock(ResultSet.class);
-		this.bf = new XmlBeanFactory(
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericSqlQueryTests-context.xml"));
-		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) bf.getBean("dataSource");
-		testDataSource.setTarget(mockDataSource);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		super.tearDown();
-		if (shouldVerify()) {
-			EasyMock.verify(mockPreparedStatement);
-			EasyMock.verify(mockResultSet);
-		}
-	}
-
-	protected void replay() {
-		super.replay();
-		EasyMock.replay(mockPreparedStatement);
-		EasyMock.replay(mockResultSet);
+		DataSource dataSource = mock(DataSource.class);
+		this.connection = mock(Connection.class);
+		this.preparedStatement = mock(PreparedStatement.class);
+		this.resultSet = mock(ResultSet.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		TestDataSourceWrapper testDataSource = (TestDataSourceWrapper) beanFactory.getBean("dataSource");
+		testDataSource.setTarget(dataSource);
 	}
 
 	@Test
 	public void testPlaceHoldersCustomerQuery() throws SQLException {
-		SqlQuery query = (SqlQuery) bf.getBean("queryWithPlaceHolders");
-		testCustomerQuery(query, false);
+		SqlQuery query = (SqlQuery) beanFactory.getBean("queryWithPlaceHolders");
+		doTestCustomerQuery(query, false);
 	}
 
 	@Test
 	public void testNamedParameterCustomerQuery() throws SQLException {
-		SqlQuery query = (SqlQuery) bf.getBean("queryWithNamedParameters");
-		testCustomerQuery(query, true);
+		SqlQuery query = (SqlQuery) beanFactory.getBean("queryWithNamedParameters");
+		doTestCustomerQuery(query, true);
 	}
 
-	private void testCustomerQuery(SqlQuery query, boolean namedParameters) throws SQLException {
-		expect(mockResultSet.next()).andReturn(true);
-		expect(mockResultSet.getInt("id")).andReturn(1);
-		expect(mockResultSet.getString("forename")).andReturn("rod");
-		expect(mockResultSet.next()).andReturn(false);
-		mockResultSet.close();
-		expectLastCall();
+	private void doTestCustomerQuery(SqlQuery query, boolean namedParameters) throws SQLException {
+		given(resultSet.next()).willReturn(true);
+		given(resultSet.getInt("id")).willReturn(1);
+		given(resultSet.getString("forename")).willReturn("rod");
+		given(resultSet.next()).willReturn(true, false);
+		given(preparedStatement.executeQuery()).willReturn(resultSet);
+		given(connection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED)).willReturn(preparedStatement);
 
-		mockPreparedStatement.setObject(1, new Integer(1), Types.INTEGER);
-		expectLastCall();
-		mockPreparedStatement.setString(2, "UK");
-		expectLastCall();
-		expect(mockPreparedStatement.executeQuery()).andReturn(mockResultSet);
-		if (debugEnabled) {
-			expect(mockPreparedStatement.getWarnings()).andReturn(null);
-		}
-		mockPreparedStatement.close();
-		expectLastCall();
-
-		mockConnection.prepareStatement(SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		replay();
-
-		List l;
+		List queryResults;
 		if (namedParameters) {
 			Map<String, Object> params = new HashMap<String, Object>(2);
 			params.put("id", new Integer(1));
 			params.put("country", "UK");
-			l = query.executeByNamedParam(params);
+			queryResults = query.executeByNamedParam(params);
 		}
 		else {
 			Object[] params = new Object[] {new Integer(1), "UK"};
-			l = query.execute(params);
+			queryResults = query.execute(params);
 		}
-		assertTrue("Customer was returned correctly", l.size() == 1);
-		Customer cust = (Customer) l.get(0);
+		assertTrue("Customer was returned correctly", queryResults.size() == 1);
+		Customer cust = (Customer) queryResults.get(0);
 		assertTrue("Customer id was assigned correctly", cust.getId() == 1);
 		assertTrue("Customer forename was assigned correctly", cust.getForename().equals("rod"));
+
+		verify(resultSet).close();
+		verify(preparedStatement).setObject(1, new Integer(1), Types.INTEGER);
+		verify(preparedStatement).setString(2, "UK");
+		verify(preparedStatement).close();
 	}
 
 }

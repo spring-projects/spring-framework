@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,6 +242,7 @@ public class JpaInterceptorTests extends TestCase {
 			this.entityManagerFactory = entityManagerFactory;
 		}
 
+		@Override
 		public Object proceed() throws Throwable {
 			if (!TransactionSynchronizationManager.hasResource(this.entityManagerFactory)) {
 				throw new IllegalStateException("Session not bound");
@@ -261,10 +262,12 @@ public class JpaInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Method getMethod() {
 			return null;
 		}
 
+		@Override
 		public AccessibleObject getStaticPart() {
 			return null;
 		}
@@ -273,6 +276,7 @@ public class JpaInterceptorTests extends TestCase {
 			return null;
 		}
 
+		@Override
 		public Object[] getArguments() {
 			return null;
 		}
@@ -284,6 +288,7 @@ public class JpaInterceptorTests extends TestCase {
 			return 0;
 		}
 
+		@Override
 		public Object getThis() {
 			return null;
 		}

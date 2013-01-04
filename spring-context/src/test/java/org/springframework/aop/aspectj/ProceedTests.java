@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,34 +101,42 @@ class SimpleBeanImpl implements SimpleBean {
 	private String name;
 	private String sex;
 
+	@Override
 	public int getAge() {
 		return age;
 	}
 
+	@Override
 	public float getMyFloat() {
 		return aFloat;
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public String getSex() {
 		return sex;
 	}
 
+	@Override
 	public void setAge(int age) {
 		this.age = age;
 	}
 
+	@Override
 	public void setMyFloat(float f) {
 		this.aFloat = f;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public void setSex(String sex) {
 		this.sex = sex;
 	}
@@ -143,6 +151,7 @@ class ProceedTestingAspect implements Ordered {
 	private int order;
 
 	public void setOrder(int order) { this.order = order; }
+	@Override
 	public int getOrder() { return this.order; }
 
 	public Object capitalize(ProceedingJoinPoint pjp, String value) throws Throwable {

@@ -32,6 +32,7 @@ import org.junit.Ignore;
 @Ignore("this test causes gradle to hang")
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
+	@Override
 	protected String[] getConfigLocations() {
 		return new String[] {
 				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml",

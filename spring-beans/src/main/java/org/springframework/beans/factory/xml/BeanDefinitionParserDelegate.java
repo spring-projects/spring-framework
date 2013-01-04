@@ -716,6 +716,7 @@ public class BeanDefinitionParserDelegate {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public int getAutowireMode(String attValue) {
 		String att = attValue;
 		if (DEFAULT_VALUE.equals(att)) {

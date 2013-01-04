@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 
 /**
  * @author Rob Harrop
@@ -41,11 +41,13 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 	private ConfigurableApplicationContext context;
 
+	@Override
 	public void setUp() {
 		this.context = new ClassPathXmlApplicationContext(
 				"org/springframework/transaction/annotation/annotationTransactionNamespaceHandlerTests.xml");
 	}
 
+	@Override
 	protected void tearDown() {
 		this.context.close();
 	}

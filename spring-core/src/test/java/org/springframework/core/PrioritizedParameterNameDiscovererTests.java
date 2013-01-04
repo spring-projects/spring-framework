@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 public class PrioritizedParameterNameDiscovererTests extends TestCase {
 
@@ -31,18 +31,22 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 	private static final String[] SOMETHING_ELSE = new String[] { "something", "else" };
 
 	ParameterNameDiscoverer returnsFooBar = new ParameterNameDiscoverer() {
+		@Override
 		public String[] getParameterNames(Method m) {
 			return FOO_BAR;
 		}
+		@Override
 		public String[] getParameterNames(Constructor ctor) {
 			return FOO_BAR;
 		}
 	};
 
 	ParameterNameDiscoverer returnsSomethingElse = new ParameterNameDiscoverer() {
+		@Override
 		public String[] getParameterNames(Method m) {
 			return SOMETHING_ELSE;
 		}
+		@Override
 		public String[] getParameterNames(Constructor ctor) {
 			return SOMETHING_ELSE;
 		}
@@ -52,7 +56,7 @@ public class PrioritizedParameterNameDiscovererTests extends TestCase {
 	private final Class anyClass = Object.class;
 
 	public PrioritizedParameterNameDiscovererTests() throws SecurityException, NoSuchMethodException {
-		anyMethod = TestBean.class.getMethod("getAge", (Class[]) null);
+		anyMethod = TestObject.class.getMethod("getAge", (Class[]) null);
 	}
 
 	public void testNoParametersDiscoverers() {

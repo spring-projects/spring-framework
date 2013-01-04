@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,24 +75,29 @@ public class InterfaceBasedMBeanInfoAssemblerMappedTests extends AbstractJmxAsse
 		assertNickName(attr);
 	}
 
+	@Override
 	protected String getObjectName() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 7;
 	}
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 3;
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() throws Exception {
 		return getWithMapping(
 				"org.springframework.jmx.export.assembler.IAdditionalTestMethods, " +
 				"org.springframework.jmx.export.assembler.ICustomJmxBean");
 	}
 
+	@Override
 	protected String getApplicationContextPath() {
 		return "org/springframework/jmx/export/assembler/interfaceAssemblerMapped.xml";
 	}

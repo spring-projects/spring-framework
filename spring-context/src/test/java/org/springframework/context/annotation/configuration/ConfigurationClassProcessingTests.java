@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -284,12 +284,14 @@ public class ConfigurationClassProcessingTests {
 				public void setNameSuffix(String nameSuffix) {
 					this.nameSuffix = nameSuffix;
 				}
+				@Override
 				public Object postProcessBeforeInitialization(Object bean, String beanName) {
 					if (bean instanceof ITestBean) {
 						((ITestBean) bean).setName(((ITestBean) bean).getName() + nameSuffix);
 					}
 					return bean;
 				}
+				@Override
 				public Object postProcessAfterInitialization(Object bean, String beanName) {
 					return bean;
 				}
@@ -302,6 +304,7 @@ public class ConfigurationClassProcessingTests {
 		//@Bean
 		public BeanFactoryPostProcessor beanFactoryPostProcessor() {
 			return new BeanFactoryPostProcessor() {
+				@Override
 				public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 					BeanDefinition bd = beanFactory.getBeanDefinition("beanPostProcessor");
 					bd.getPropertyValues().addPropertyValue("nameSuffix", "-processed-" + myProp);
@@ -334,6 +337,7 @@ public class ConfigurationClassProcessingTests {
 			super.setSpouse(spouse);
 		}
 
+		@Override
 		public void onApplicationEvent(ContextRefreshedEvent event) {
 			this.refreshed = true;
 		}

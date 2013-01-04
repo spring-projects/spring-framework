@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.MethodBeforeAdvice;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.Ordered;
@@ -110,26 +110,32 @@ public final class AspectAndAdvicePrecedenceTests {
 			}
 		}
 
+		@Override
 		public void beforeAdviceOne(String beanName) {
 			checkAdvice("beforeAdviceOne(" + beanName + ")");
 		}
 
+		@Override
 		public void beforeAdviceTwo(String beanName) {
 			checkAdvice("beforeAdviceTwo(" + beanName + ")");
 		}
 
+		@Override
 		public void aroundAdviceOne(String beanName) {
 			checkAdvice("aroundAdviceOne(" + beanName + ")");
 		}
 
+		@Override
 		public void aroundAdviceTwo(String beanName) {
 			checkAdvice("aroundAdviceTwo(" + beanName + ")");
 		}
 
+		@Override
 		public void afterAdviceOne(String beanName) {
 			checkAdvice("afterAdviceOne(" + beanName + ")");
 		}
 
+		@Override
 		public void afterAdviceTwo(String beanName) {
 			checkAdvice("afterAdviceTwo(" + beanName + ")");
 		}
@@ -147,6 +153,7 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 	private Collaborator collaborator;
 
 
+	@Override
 	public void setBeanName(String name) {
 		this.name = name;
 	}
@@ -155,6 +162,7 @@ class PrecedenceTestAspect implements BeanNameAware, Ordered {
 		this.order = order;
 	}
 
+	@Override
 	public int getOrder() {
 		return order;
 	}
@@ -223,6 +231,7 @@ class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
 	/* (non-Javadoc)
 	 * @see org.springframework.aop.MethodBeforeAdvice#before(java.lang.reflect.Method, java.lang.Object[], java.lang.Object)
 	 */
+	@Override
 	public void before(Method method, Object[] args, Object target)
 			throws Throwable {
 		this.collaborator.beforeAdviceOne(this.name);
@@ -235,6 +244,7 @@ class SimpleSpringBeforeAdvice implements MethodBeforeAdvice, BeanNameAware {
 	/* (non-Javadoc)
 	 * @see org.springframework.beans.factory.BeanNameAware#setBeanName(java.lang.String)
 	 */
+	@Override
 	public void setBeanName(String name) {
 		this.name = name;
 	}

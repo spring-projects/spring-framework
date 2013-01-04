@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.aop.framework.autoproxy;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -24,17 +27,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.tests.TimeStamped;
+import org.springframework.tests.aop.advice.CountingBeforeAdvice;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.advice.CountingBeforeAdvice;
-import test.interceptor.NopInterceptor;
 import test.mixin.Lockable;
 import test.mixin.LockedException;
-import test.util.TimeStamped;
 
 /**
  * @author Rod Johnson
@@ -205,6 +208,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
+	@Override
 	public Object getObject() throws Exception {
 		return new TestBean();
 	}
@@ -212,6 +216,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#getObjectType()
 	 */
+	@Override
 	public Class<?> getObjectType() {
 		return TestBean.class;
 	}
@@ -219,6 +224,7 @@ class CreatesTestBean implements FactoryBean<Object> {
 	/**
 	 * @see org.springframework.beans.factory.FactoryBean#isSingleton()
 	 */
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

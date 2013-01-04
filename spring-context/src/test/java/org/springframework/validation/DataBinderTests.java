@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,16 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeanWithObjectProperty;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.BeanWithObjectProperty;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
-import org.springframework.beans.SerializablePerson;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -254,17 +254,21 @@ public class DataBinderTests extends TestCase {
 		TestBean rod = new TestBean();
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.registerCustomEditor(String.class, "touchy", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix_" + text);
 			}
+			@Override
 			public String getAsText() {
 				return getValue().toString().substring(7);
 			}
 		});
 		binder.registerCustomEditor(TestBean.class, "spouse", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text, 0));
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -381,9 +385,11 @@ public class DataBinderTests extends TestCase {
 		FormattingConversionService conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 		conversionService.addFormatterForFieldType(String.class, new Formatter<String>() {
+			@Override
 			public String parse(String text, Locale locale) throws ParseException {
 				throw new ParseException(text, 0);
 			}
+			@Override
 			public String print(String object, Locale locale) {
 				return object;
 			}
@@ -669,6 +675,7 @@ public class DataBinderTests extends TestCase {
 
 		DataBinder binder = new DataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}
@@ -689,9 +696,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, "name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -725,9 +734,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(int.class, "age", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new Integer(99));
 			}
+			@Override
 			public String getAsText() {
 				return "argh";
 			}
@@ -746,9 +757,11 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("prefix" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(6);
 			}
@@ -775,6 +788,7 @@ public class DataBinderTests extends TestCase {
 		DataBinder binder = new DataBinder(tb, "tb");
 
 		binder.registerCustomEditor(String.class, null, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				if (getValue() == null || !text.equalsIgnoreCase(getValue().toString())) {
 					setValue(text);
@@ -1053,6 +1067,7 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(Set.class, new CustomCollectionEditor(TreeSet.class) {
+			@Override
 			protected Object convertElement(Object element) {
 				return new Integer(element.toString());
 			}
@@ -1091,6 +1106,7 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("array" + text);
 			}
@@ -1130,6 +1146,7 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
@@ -1166,9 +1183,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1177,8 +1196,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("listtest2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("listtest2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1189,9 +1208,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array[0].nestedIndexedBean.list.name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1200,8 +1221,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1212,9 +1233,11 @@ public class DataBinderTests extends TestCase {
 		tb.getArray()[1].setNestedIndexedBean(new IndexedTestBean());
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "array.nestedIndexedBean.list[0].name", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("list" + text);
 			}
+			@Override
 			public String getAsText() {
 				return ((String) getValue()).substring(4);
 			}
@@ -1223,8 +1246,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1233,11 +1256,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "array", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1257,7 +1282,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 
@@ -1267,7 +1292,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.map", errors.getFieldError("map[key1]").getCodes()[1]);
 		assertEquals("NOT_ROD.map[key1]", errors.getFieldError("map[key1]").getCodes()[2]);
 		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[5]);
 
 		assertEquals(1, errors.getFieldErrorCount("map[key0]"));
@@ -1283,11 +1308,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "map[key0]", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1303,7 +1330,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
 		// This next code is only generated because of the registered editor, using the
 		// registered type of the editor as guess for the content type of the collection.
-		assertEquals("NOT_NULL.org.springframework.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
+		assertEquals("NOT_NULL.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
@@ -1311,11 +1338,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, "map", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1331,7 +1360,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
 		// This next code is only generated because of the registered editor, using the
 		// registered type of the editor as guess for the content type of the collection.
-		assertEquals("NOT_NULL.org.springframework.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
+		assertEquals("NOT_NULL.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
@@ -1339,11 +1368,13 @@ public class DataBinderTests extends TestCase {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				DerivedTestBean tb = new DerivedTestBean();
 				tb.setName("array" + text);
 				setValue(tb);
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -1361,7 +1392,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 	}
@@ -1370,6 +1401,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String[].class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(StringUtils.delimitedListToStringArray(text, "-"));
 			}
@@ -1387,6 +1419,7 @@ public class DataBinderTests extends TestCase {
 		TestBean tb = new TestBean();
 		DataBinder binder = new DataBinder(tb, "tb");
 		binder.registerCustomEditor(String.class, "stringArray", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue("X" + text);
 			}
@@ -1647,10 +1680,12 @@ public class DataBinderTests extends TestCase {
 
 	private static class TestBeanValidator implements Validator {
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb.getAge() < 32) {
@@ -1674,10 +1709,12 @@ public class DataBinderTests extends TestCase {
 
 	private static class SpouseValidator implements Validator {
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return TestBean.class.isAssignableFrom(clazz);
 		}
 
+		@Override
 		public void validate(Object obj, Errors errors) {
 			TestBean tb = (TestBean) obj;
 			if (tb == null || "XXX".equals(tb.getName())) {
@@ -1703,6 +1740,7 @@ public class DataBinderTests extends TestCase {
 			return list;
 		}
 
+		@Override
 		public E get(int index) {
 			if (index >= list.size()) {
 				for (int i = list.size(); i < index; i++) {
@@ -1716,50 +1754,62 @@ public class DataBinderTests extends TestCase {
 			}
 		}
 
+		@Override
 		public int size() {
 			return list.size();
 		}
 
+		@Override
 		public boolean add(E o) {
 			return list.add(o);
 		}
 
+		@Override
 		public void add(int index, E element) {
 			list.add(index, element);
 		}
 
+		@Override
 		public boolean addAll(int index, Collection<? extends E> c) {
 			return list.addAll(index, c);
 		}
 
+		@Override
 		public void clear() {
 			list.clear();
 		}
 
+		@Override
 		public int indexOf(Object o) {
 			return list.indexOf(o);
 		}
 
+		@Override
 		public Iterator<E> iterator() {
 			return list.iterator();
 		}
 
+		@Override
 		public int lastIndexOf(Object o) {
 			return list.lastIndexOf(o);
 		}
 
+		@Override
 		public ListIterator<E> listIterator() {
 			return list.listIterator();
 		}
 
+		@Override
 		public ListIterator<E> listIterator(int index) {
 			return list.listIterator(index);
 		}
 
+		@Override
 		public E remove(int index) {
 			return list.remove(index);
 		}
 
+		@Override
 		public E set(int index, E element) {
 			return list.set(index, element);
 		}

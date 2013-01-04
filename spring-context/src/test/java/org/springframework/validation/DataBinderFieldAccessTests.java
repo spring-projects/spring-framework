@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,12 @@ import java.beans.PropertyEditorSupport;
 import java.util.Map;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 
-import org.springframework.beans.FieldAccessBean;
+import org.springframework.tests.sample.beans.FieldAccessBean;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Juergen Hoeller
@@ -106,7 +105,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
 			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
-			Assert.assertEquals(0, tb.getAge());
+			assertEquals(0, tb.getAge());
 		}
 	}
 
@@ -115,9 +114,11 @@ public class DataBinderFieldAccessTests extends TestCase {
 		DataBinder binder = new DataBinder(rod, "person");
 		binder.initDirectFieldAccess();
 		binder.registerCustomEditor(TestBean.class, "spouse", new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean(text, 0));
 			}
+			@Override
 			public String getAsText() {
 				return ((TestBean) getValue()).getName();
 			}
@@ -150,7 +151,7 @@ public class DataBinderFieldAccessTests extends TestCase {
 			assertTrue("Correct number of age errors", br.getFieldErrorCount("age") == 1);
 			assertEquals("32x", binder.getBindingResult().getFieldValue("age"));
 			assertEquals("32x", binder.getBindingResult().getFieldError("age").getRejectedValue());
-			Assert.assertEquals(0, tb.getAge());
+			assertEquals(0, tb.getAge());
 
 			assertTrue("Does not have spouse errors", !br.hasFieldErrors("spouse"));
 			assertEquals("Kerry", binder.getBindingResult().getFieldValue("spouse"));

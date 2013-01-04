@@ -33,21 +33,25 @@ import org.springframework.util.MultiValueMap;
  */
 public class CollectionFactoryTests extends TestCase {
 
+	@SuppressWarnings("deprecation")
 	public void testLinkedSet() {
 		Set set = CollectionFactory.createLinkedSetIfPossible(16);
 		assertTrue(set instanceof LinkedHashSet);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void testLinkedMap() {
 		Map map = CollectionFactory.createLinkedMapIfPossible(16);
 		assertTrue(map instanceof LinkedHashMap);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void testIdentityMap() {
 		Map map = CollectionFactory.createIdentityMapIfPossible(16);
 		assertTrue(map instanceof IdentityHashMap);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void testConcurrentMap() {
 		Map map = CollectionFactory.createConcurrentMapIfPossible(16);
 		assertTrue(map.getClass().getName().endsWith("ConcurrentHashMap"));
@@ -58,6 +62,7 @@ public class CollectionFactoryTests extends TestCase {
 		assertTrue(map.getClass().getName().endsWith("MultiValueMap"));
 	}
 
+	@SuppressWarnings("deprecation")
 	public void testConcurrentMapWithExplicitInterface() {
 		ConcurrentMap map = CollectionFactory.createConcurrentMap(16);
 		assertTrue(map.getClass().getSuperclass().getName().endsWith("ConcurrentHashMap"));

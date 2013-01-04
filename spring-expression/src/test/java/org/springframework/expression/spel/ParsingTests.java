@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.springframework.expression.ParseException;
@@ -462,12 +463,12 @@ public class ParsingTests {
 				SpelUtilities.printAbstractSyntaxTree(System.err, e);
 			}
 			if (e == null) {
-				Assert.fail("Parsed exception was null");
+				fail("Parsed exception was null");
 			}
-			Assert.assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
+			assertEquals("String form of AST does not match expected output", expectedStringFormOfAST, e.toStringAST());
 		} catch (ParseException ee) {
 			ee.printStackTrace();
-			Assert.fail("Unexpected Exception: " + ee.getMessage());
+			fail("Unexpected Exception: " + ee.getMessage());
 		}
 	}
 

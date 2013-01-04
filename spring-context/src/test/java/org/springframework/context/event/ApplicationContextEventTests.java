@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aopalliance.intercept.MethodInvocation;
-import org.easymock.EasyMock;
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -50,14 +53,12 @@ public class ApplicationContextEventTests {
 		@SuppressWarnings("unchecked")
 		ApplicationListener<ApplicationEvent> listener = mock(ApplicationListener.class);
 		ApplicationEvent evt = new ContextClosedEvent(new StaticApplicationContext());
-		listener.onApplicationEvent(evt);
 
 		SimpleApplicationEventMulticaster smc = new SimpleApplicationEventMulticaster();
 		smc.addApplicationListener(listener);
 
-		replay(listener);
 		smc.multicastEvent(evt);
-		verify(listener);
+		verify(listener).onApplicationEvent(evt);
 	}
 
 	@Test
@@ -91,20 +92,18 @@ public class ApplicationContextEventTests {
 
 	@Test
 	public void testEventPublicationInterceptor() throws Throwable {
-		MethodInvocation invocation = EasyMock.createMock(MethodInvocation.class);
-		ApplicationContext ctx = EasyMock.createMock(ApplicationContext.class);
+		MethodInvocation invocation = mock(MethodInvocation.class);
+		ApplicationContext ctx = mock(ApplicationContext.class);
 
 		EventPublicationInterceptor interceptor = new EventPublicationInterceptor();
 		interceptor.setApplicationEventClass(MyEvent.class);
 		interceptor.setApplicationEventPublisher(ctx);
 		interceptor.afterPropertiesSet();
 
-		expect(invocation.proceed()).andReturn(new Object());
-		expect(invocation.getThis()).andReturn(new Object());
-		ctx.publishEvent(isA(MyEvent.class));
-		replay(invocation, ctx);
+		given(invocation.proceed()).willReturn(new Object());
+		given(invocation.getThis()).willReturn(new Object());
 		interceptor.invoke(invocation);
-		verify(invocation, ctx);
+		verify(ctx).publishEvent(isA(MyEvent.class));
 	}
 
 	@Test
@@ -214,10 +213,12 @@ public class ApplicationContextEventTests {
 
 		public final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			this.seenEvents.add(event);
 		}
 
+		@Override
 		public int getOrder() {
 			return 0;
 		}
@@ -230,6 +231,7 @@ public class ApplicationContextEventTests {
 
 	public static abstract class MyOrderedListenerBase implements MyOrderedListenerIfc<MyEvent> {
 
+		@Override
 		public int getOrder() {
 			return 1;
 		}
@@ -244,6 +246,7 @@ public class ApplicationContextEventTests {
 			this.otherListener = otherListener;
 		}
 
+		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertTrue(otherListener.seenEvents.contains(event));
 		}
@@ -254,6 +257,7 @@ public class ApplicationContextEventTests {
 
 		public static final Set<ApplicationEvent> seenEvents = new HashSet<ApplicationEvent>();
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			seenEvents.add(event);
 		}

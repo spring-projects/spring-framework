@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -53,14 +53,17 @@ public final class PointcutsTests {
 	 * Matches only TestBean class, not subclasses
 	 */
 	public static Pointcut allTestBeanMethodsPointcut = new StaticMethodMatcherPointcut() {
+		@Override
 		public ClassFilter getClassFilter() {
 			return new ClassFilter() {
+				@Override
 				public boolean matches(Class<?> clazz) {
 					return clazz.equals(TestBean.class);
 				}
 			};
 		}
 
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return true;
 		}
@@ -73,10 +76,12 @@ public final class PointcutsTests {
 	}
 
 	public static Pointcut myTestBeanSetterPointcut = new StaticMethodMatcherPointcut() {
+		@Override
 		public ClassFilter getClassFilter() {
 			return new RootClassFilter(MyTestBean.class);
 		}
 
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("set");
 		}
@@ -84,10 +89,12 @@ public final class PointcutsTests {
 
 	// Will match MyTestBeanSubclass
 	public static Pointcut myTestBeanGetterPointcut = new StaticMethodMatcherPointcut() {
+		@Override
 		public ClassFilter getClassFilter() {
 			return new RootClassFilter(MyTestBean.class);
 		}
 
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}
@@ -98,10 +105,12 @@ public final class PointcutsTests {
 	}
 
 	public static Pointcut myTestBeanSubclassGetterPointcut = new StaticMethodMatcherPointcut() {
+		@Override
 		public ClassFilter getClassFilter() {
 			return new RootClassFilter(MyTestBeanSubclass.class);
 		}
 
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith("get");
 		}

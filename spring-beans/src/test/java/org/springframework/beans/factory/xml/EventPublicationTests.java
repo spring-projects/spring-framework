@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.factory.parsing.ImportDefinition;
 import org.springframework.beans.factory.parsing.PassThroughSourceExtractor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.beans.CollectingReaderEventListener;
 
 /**
  * @author Rob Harrop
@@ -42,6 +43,7 @@ public class EventPublicationTests extends TestCase {
 	private final CollectingReaderEventListener eventListener = new CollectingReaderEventListener();
 
 
+	@Override
 	protected void setUp() throws Exception {
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.beanFactory);
 		reader.setEventListener(this.eventListener);

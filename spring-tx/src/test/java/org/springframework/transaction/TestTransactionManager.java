@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,17 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		setTransactionSynchronization(SYNCHRONIZATION_NEVER);
 	}
 
+	@Override
 	protected Object doGetTransaction() {
 		return TRANSACTION;
 	}
 
+	@Override
 	protected boolean isExistingTransaction(Object transaction) {
 		return existingTransaction;
 	}
 
+	@Override
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		if (!TRANSACTION.equals(transaction)) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -64,6 +67,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.begin = true;
 	}
 
+	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -71,6 +75,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.commit = true;
 	}
 
+	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");
@@ -78,6 +83,7 @@ class TestTransactionManager extends AbstractPlatformTransactionManager {
 		this.rollback = true;
 	}
 
+	@Override
 	protected void doSetRollbackOnly(DefaultTransactionStatus status) {
 		if (!TRANSACTION.equals(status.getTransaction())) {
 			throw new IllegalArgumentException("Not the same transaction object");

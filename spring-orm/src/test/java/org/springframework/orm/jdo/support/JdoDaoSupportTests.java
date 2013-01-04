@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class JdoDaoSupportTests extends TestCase {
 		pmfControl.replay();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}
@@ -56,6 +57,7 @@ public class JdoDaoSupportTests extends TestCase {
 		JdoTemplate template = new JdoTemplate();
 		final List test = new ArrayList();
 		JdoDaoSupport dao = new JdoDaoSupport() {
+			@Override
 			protected void initDao() {
 				test.add("test");
 			}

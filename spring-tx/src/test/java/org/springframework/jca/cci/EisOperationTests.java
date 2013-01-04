@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,10 +233,12 @@ public class EisOperationTests {
 			this.callDetector = callDetector;
 		}
 
+		@Override
 		protected Record createInputRecord(RecordFactory recordFactory, Object inputObject) {
 			return this.callDetector.callCreateInputRecord(recordFactory, inputObject);
 		}
 
+		@Override
 		protected Object extractOutputData(Record outputRecord) throws ResourceException {
 			return this.callDetector.callExtractOutputData(outputRecord);
 		}

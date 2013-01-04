@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ public class JmsTemplate102Tests extends TestCase {
 	/**
 	 * Create the mock objects for testing.
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		mockJndiControl = MockControl.createControl(Context.class);
 		mockJndiContext = (Context) this.mockJndiControl.getMock();
@@ -169,6 +170,7 @@ public class JmsTemplate102Tests extends TestCase {
 		JmsTemplate102 template = new JmsTemplate102();
 		JndiDestinationResolver destMan = new JndiDestinationResolver();
 		destMan.setJndiTemplate(new JndiTemplate() {
+			@Override
 			protected Context createInitialContext() {
 				return mockJndiContext;
 			}
@@ -203,6 +205,7 @@ public class JmsTemplate102Tests extends TestCase {
 		topicConnectionControl.replay();
 
 		template.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session session) throws JMSException {
 				boolean b = session.getTransacted();
 				return null;
@@ -244,6 +247,7 @@ public class JmsTemplate102Tests extends TestCase {
 		topicConnectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
@@ -292,6 +296,7 @@ public class JmsTemplate102Tests extends TestCase {
 		topicConnectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
@@ -324,6 +329,7 @@ public class JmsTemplate102Tests extends TestCase {
 		queueConnectionControl.replay();
 
 		template.execute(new SessionCallback() {
+			@Override
 			public Object doInJms(Session session) throws JMSException {
 				boolean b = session.getTransacted();
 				return null;
@@ -365,6 +371,7 @@ public class JmsTemplate102Tests extends TestCase {
 		queueConnectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer)
 				throws JMSException {
 				boolean b = session.getTransacted();
@@ -411,6 +418,7 @@ public class JmsTemplate102Tests extends TestCase {
 		queueConnectionControl.replay();
 
 		template.execute(new ProducerCallback() {
+			@Override
 			public Object doInJms(Session session, MessageProducer producer) throws JMSException {
 				boolean b = session.getTransacted();
 				int i = producer.getPriority();
@@ -611,6 +619,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 		if (useDefaultDestination) {
 			template.send(new MessageCreator() {
+				@Override
 				public Message createMessage(Session session) throws JMSException {
 					return session.createTextMessage("just testing");
 				}
@@ -619,6 +628,7 @@ public class JmsTemplate102Tests extends TestCase {
 		else {
 			if (explicitQueue) {
 				template.send(mockQueue, new MessageCreator() {
+					@Override
 					public Message createMessage(Session session) throws JMSException {
 						return session.createTextMessage("just testing");
 					}
@@ -626,6 +636,7 @@ public class JmsTemplate102Tests extends TestCase {
 			}
 			else {
 				template.send("testQueue", new MessageCreator() {
+					@Override
 					public Message createMessage(Session session)
 						throws JMSException {
 						return session.createTextMessage("just testing");
@@ -689,6 +700,7 @@ public class JmsTemplate102Tests extends TestCase {
 
 		if (explicitTopic) {
 			template.send(mockTopic, new MessageCreator() {
+				@Override
 				public Message createMessage(Session session)
 					throws JMSException {
 					return session.createTextMessage("just testing");
@@ -697,6 +709,7 @@ public class JmsTemplate102Tests extends TestCase {
 		}
 		else {
 			template.send("testTopic", new MessageCreator() {
+				@Override
 				public Message createMessage(Session session)
 					throws JMSException {
 					return session.createTextMessage("just testing");

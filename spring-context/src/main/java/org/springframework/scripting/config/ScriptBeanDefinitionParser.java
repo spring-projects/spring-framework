@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,6 +99,7 @@ class ScriptBeanDefinitionParser extends AbstractBeanDefinitionParser {
 	 * Registers a {@link ScriptFactoryPostProcessor} if needed.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		// Resolve the script source.
 		String value = resolveScriptSource(element, parserContext.getReaderContext());

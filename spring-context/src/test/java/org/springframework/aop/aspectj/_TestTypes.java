@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,22 +118,27 @@ final class Counter implements ICounter {
 	public Counter() {
 	}
 
+	@Override
 	public void increment() {
 		count++;
 	}
 
+	@Override
 	public void decrement() {
 		count--;
 	}
 
+	@Override
 	public int getCount() {
 		return count;
 	}
 
+	@Override
 	public void setCount(int counter) {
 		this.count = counter;
 	}
 
+	@Override
 	public void reset() {
 		this.count = 0;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import javax.servlet.http.HttpServletResponse;
 import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInvocation;
 
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -73,6 +73,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceUrl("http://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
@@ -138,6 +139,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceUrl("http://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
+			@Override
 			public RemoteInvocationResult executeRequest(
 					HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws IOException {
 				throw new IOException("argh");
@@ -160,6 +162,7 @@ public class HttpInvokerTests extends TestCase {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
+			@Override
 			protected InputStream decorateInputStream(HttpServletRequest request, InputStream is) throws IOException {
 				if ("gzip".equals(request.getHeader("Compression"))) {
 					return new GZIPInputStream(is);
@@ -168,6 +171,7 @@ public class HttpInvokerTests extends TestCase {
 					return is;
 				}
 			}
+			@Override
 			protected OutputStream decorateOutputStream(
 					HttpServletRequest request, HttpServletResponse response, OutputStream os) throws IOException {
 				if ("gzip".equals(request.getHeader("Compression"))) {
@@ -187,6 +191,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceUrl("http://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos)
 					throws IOException, ClassNotFoundException {
@@ -204,9 +209,11 @@ public class HttpInvokerTests extends TestCase {
 				return readRemoteInvocationResult(
 						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
+			@Override
 			protected OutputStream decorateOutputStream(OutputStream os) throws IOException {
 				return new GZIPOutputStream(os);
 			}
+			@Override
 			protected InputStream decorateInputStream(InputStream is) throws IOException {
 				return new GZIPInputStream(is);
 			}
@@ -239,6 +246,7 @@ public class HttpInvokerTests extends TestCase {
 		TestBean target = new TestBean("myname", 99);
 
 		final HttpInvokerServiceExporter exporter = new HttpInvokerServiceExporter() {
+			@Override
 			protected RemoteInvocation doReadRemoteInvocation(ObjectInputStream ois)
 					throws IOException, ClassNotFoundException {
 				Object obj = ois.readObject();
@@ -248,6 +256,7 @@ public class HttpInvokerTests extends TestCase {
 				}
 				return ((TestRemoteInvocationWrapper) obj).remoteInvocation;
 			}
+			@Override
 			protected void doWriteRemoteInvocationResult(RemoteInvocationResult result, ObjectOutputStream oos)
 					throws IOException {
 				oos.writeObject(new TestRemoteInvocationResultWrapper(result));
@@ -262,6 +271,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceUrl("http://myurl");
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
@@ -272,9 +282,11 @@ public class HttpInvokerTests extends TestCase {
 				return readRemoteInvocationResult(
 						new ByteArrayInputStream(response.getContentAsByteArray()), config.getCodebaseUrl());
 			}
+			@Override
 			protected void doWriteRemoteInvocation(RemoteInvocation invocation, ObjectOutputStream oos) throws IOException {
 				oos.writeObject(new TestRemoteInvocationWrapper(invocation));
 			}
+			@Override
 			protected RemoteInvocationResult doReadRemoteInvocationResult(ObjectInputStream ois)
 					throws IOException, ClassNotFoundException {
 				Object obj = ois.readObject();
@@ -316,6 +328,7 @@ public class HttpInvokerTests extends TestCase {
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
 		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
+			@Override
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 				assertNotNull(invocation.getAttributes());
@@ -331,6 +344,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceInterface(ITestBean.class);
 		pfb.setServiceUrl("http://myurl");
 		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
+			@Override
 			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
 				RemoteInvocation invocation = new RemoteInvocation(methodInvocation);
 				invocation.addAttribute("myKey", "myValue");
@@ -350,6 +364,7 @@ public class HttpInvokerTests extends TestCase {
 		});
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
@@ -375,6 +390,7 @@ public class HttpInvokerTests extends TestCase {
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setService(target);
 		exporter.setRemoteInvocationExecutor(new DefaultRemoteInvocationExecutor() {
+			@Override
 			public Object invoke(RemoteInvocation invocation, Object targetObject)
 					throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 				assertTrue(invocation instanceof TestRemoteInvocation);
@@ -389,6 +405,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceInterface(ITestBean.class);
 		pfb.setServiceUrl("http://myurl");
 		pfb.setRemoteInvocationFactory(new RemoteInvocationFactory() {
+			@Override
 			public RemoteInvocation createRemoteInvocation(MethodInvocation methodInvocation) {
 				RemoteInvocation invocation = new TestRemoteInvocation(methodInvocation);
 				assertNull(invocation.getAttributes());
@@ -398,6 +415,7 @@ public class HttpInvokerTests extends TestCase {
 		});
 
 		pfb.setHttpInvokerRequestExecutor(new AbstractHttpInvokerRequestExecutor() {
+			@Override
 			protected RemoteInvocationResult doExecuteRequest(
 					HttpInvokerClientConfiguration config, ByteArrayOutputStream baos) throws Exception {
 				assertEquals("http://myurl", config.getServiceUrl());
@@ -423,6 +441,7 @@ public class HttpInvokerTests extends TestCase {
 		pfb.setServiceUrl(serviceUrl);
 
 		pfb.setHttpInvokerRequestExecutor(new HttpInvokerRequestExecutor() {
+			@Override
 			public RemoteInvocationResult executeRequest(
 					HttpInvokerClientConfiguration config, RemoteInvocation invocation) throws IOException {
 				throw new IOException("argh");

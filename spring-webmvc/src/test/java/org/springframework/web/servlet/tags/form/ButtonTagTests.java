@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.io.Writer;
 
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rossen Stoyanchev
@@ -29,6 +29,7 @@ public class ButtonTagTests extends AbstractFormTagTests {
 
 	private ButtonTag tag;
 
+	@Override
 	protected void onSetUp() {
 		this.tag = createTag(getWriter());
 		this.tag.setParent(getFormTag());
@@ -82,6 +83,7 @@ public class ButtonTagTests extends AbstractFormTagTests {
 	@SuppressWarnings("serial")
 	protected ButtonTag createTag(final Writer writer) {
 		return new ButtonTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);
 			}

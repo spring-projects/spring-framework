@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Arjen Poutsma
  */
+@Deprecated
 public class RequestSpecificMappingInfoComparatorTests {
 
 	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator comparator;
@@ -124,6 +125,7 @@ public class RequestSpecificMappingInfoComparatorTests {
 
 	private static class MockComparator implements Comparator<String> {
 
+		@Override
 		public int compare(String s1, String s2) {
 			return 0;
 		}

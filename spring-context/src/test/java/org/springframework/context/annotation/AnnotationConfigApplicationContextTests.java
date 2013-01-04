@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,18 +159,22 @@ public class AnnotationConfigApplicationContextTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(AutowiredConfig.class);
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return (bean instanceof TestBean ? null : bean);
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
 			}
 		});
 		context.getBeanFactory().addBeanPostProcessor(new BeanPostProcessor() {
+			@Override
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				bean.getClass().getName();
 				return bean;
 			}
+			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				bean.getClass().getName();
 				return bean;
@@ -230,14 +234,17 @@ public class AnnotationConfigApplicationContextTests {
 
 	static class UntypedFactoryBean implements FactoryBean<Object> {
 
+		@Override
 		public Object getObject() {
 			return null;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return false;
 		}

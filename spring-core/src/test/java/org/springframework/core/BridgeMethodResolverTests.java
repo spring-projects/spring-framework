@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -356,9 +356,11 @@ public class BridgeMethodResolverTests {
 		public void someMethod(Integer theArg, Object otherArg) {
 		}
 
+		@Override
 		public void someMethod(String theArg, Object otherArg) {
 		}
 
+		@Override
 		public void someVarargMethod(String theArg, Object... otherArgs) {
 		}
 	}
@@ -383,6 +385,7 @@ public class BridgeMethodResolverTests {
 
 	public static class MyBar extends InterBar<String> {
 
+		@Override
 		public void someMethod(String theArg, Object otherArg) {
 		}
 
@@ -399,6 +402,7 @@ public class BridgeMethodResolverTests {
 
 	public abstract class AbstractDateAdder implements Adder<Date> {
 
+		@Override
 		public abstract void add(Date date);
 	}
 
@@ -430,6 +434,7 @@ public class BridgeMethodResolverTests {
 
 			public class ExtendsReallyDeepNow extends ReallyDeepNow<Long> {
 
+				@Override
 				void someMethod(Integer s, String t, Long r) {
 					throw new UnsupportedOperationException();
 				}
@@ -448,10 +453,12 @@ public class BridgeMethodResolverTests {
 
 	public class MyBoo implements Boo<String, Integer> {
 
+		@Override
 		public void foo(String e) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void foo(Integer t) {
 			throw new UnsupportedOperationException();
 		}
@@ -478,12 +485,14 @@ public class BridgeMethodResolverTests {
 
 	public interface SettingsDao<T extends Settings, S> extends Dao<T, S> {
 
+		@Override
 		T load();
 	}
 
 
 	public interface ConcreteSettingsDao extends SettingsDao<ConcreteSettings, String> {
 
+		@Override
 		String loadFromParent();
 	}
 
@@ -500,6 +509,7 @@ public class BridgeMethodResolverTests {
 		}
 
 		//@Transactional(readOnly = true)
+		@Override
 		public S loadFromParent() {
 			return otherObject;
 		}
@@ -513,6 +523,7 @@ public class BridgeMethodResolverTests {
 		}
 
 		//@Transactional(readOnly = true)
+		@Override
 		public ConcreteSettings load() {
 			return super.object;
 		}
@@ -527,6 +538,7 @@ public class BridgeMethodResolverTests {
 
 	private static class AbstractBounded<E> implements Bounded<E> {
 
+		@Override
 		public boolean boundedOperation(E myE) {
 			return true;
 		}
@@ -535,6 +547,7 @@ public class BridgeMethodResolverTests {
 
 	private static class SerializableBounded<E extends HashMap & Delayed> extends AbstractBounded<E> {
 
+		@Override
 		public boolean boundedOperation(E myE) {
 			return false;
 		}
@@ -549,6 +562,7 @@ public class BridgeMethodResolverTests {
 
 	private static class StringGenericParameter implements GenericParameter<String> {
 
+		@Override
 		public String getFor(Class<String> cls) {
 			return "foo";
 		}
@@ -561,94 +575,117 @@ public class BridgeMethodResolverTests {
 
 	private static class StringList implements List<String> {
 
+		@Override
 		public int size() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean isEmpty() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean contains(Object o) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Iterator<String> iterator() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public Object[] toArray() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public <T> T[] toArray(T[] a) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean add(String o) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean remove(Object o) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean containsAll(Collection<?> c) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean addAll(Collection<? extends String> c) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean addAll(int index, Collection<? extends String> c) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean removeAll(Collection<?> c) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public boolean retainAll(Collection<?> c) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void clear() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String get(int index) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String set(int index, String element) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void add(int index, String element) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public String remove(int index) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int indexOf(Object o) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public int lastIndexOf(Object o) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public ListIterator<String> listIterator() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public ListIterator<String> listIterator(int index) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public List<String> subList(int fromIndex, int toIndex) {
 			throw new UnsupportedOperationException();
 		}
@@ -665,6 +702,7 @@ public class BridgeMethodResolverTests {
 
 		private int priority;
 
+		@Override
 		public int getPriority() {
 			return priority;
 		}
@@ -743,6 +781,7 @@ public class BridgeMethodResolverTests {
 		 */
 		public abstract Receiver<T> getInstance();
 
+		@Override
 		public void setChannel(Channel channel) {
 			this.channel = channel;
 		}
@@ -753,10 +792,12 @@ public class BridgeMethodResolverTests {
 			this.beanName = name;
 		}
 
+		@Override
 		public void subscribe() {
 
 		}
 
+		@Override
 		public void unsubscribe() {
 
 		}
@@ -800,6 +841,7 @@ public class BridgeMethodResolverTests {
 			super(NewMessageEvent.class);
 		}
 
+		@Override
 		public void receive(MessageEvent event) {
 			throw new UnsupportedOperationException("should not be called, use subclassed events");
 		}
@@ -861,6 +903,7 @@ public class BridgeMethodResolverTests {
 		public void setRepos(R... reps) {
 		}
 
+		@Override
 		public <T> SimpleGenericRepository<T> getFor(Class<T> entityType) {
 			return null;
 		}
@@ -896,40 +939,50 @@ public class BridgeMethodResolverTests {
 		public void setPersistentClass(Class<T> c) {
 		}
 
+		@Override
 		public Class<T> getPersistentClass() {
 			return null;
 		}
 
+		@Override
 		public T findById(ID id, boolean lock) {
 			return null;
 		}
 
+		@Override
 		public List<T> findAll() {
 			return null;
 		}
 
+		@Override
 		public List<T> findByExample(T exampleInstance) {
 			return null;
 		}
 
+		@Override
 		public List<T> findByQuery() {
 			return null;
 		}
 
+		@Override
 		public T saveOrUpdate(T entity) {
 			return null;
 		}
 
+		@Override
 		public void delete(T entity) {
 		}
 
+		@Override
 		public T refresh(T entity) {
 			return null;
 		}
 
+		@Override
 		public void delete(ID id) {
 		}
 
+		@Override
 		public void delete(Collection<T> entities) {
 		}
 	}
@@ -937,9 +990,11 @@ public class BridgeMethodResolverTests {
 
 	public class HibernateRepositoryRegistry extends SettableRepositoryRegistry<GenericHibernateRepository<?, ?>> {
 
+		@Override
 		public void injectInto(GenericHibernateRepository<?, ?> rep) {
 		}
 
+		@Override
 		public <T> GenericHibernateRepository<T, ?> getFor(Class<T> entityType) {
 			return null;
 		}
@@ -958,6 +1013,7 @@ public class BridgeMethodResolverTests {
 
 	public class MyHomer<T extends Bounded<T>, L extends T> implements Homer<L> {
 
+		@Override
 		public void foo(L t) {
 			throw new UnsupportedOperationException();
 		}
@@ -966,6 +1022,7 @@ public class BridgeMethodResolverTests {
 
 	public class YourHomer<T extends AbstractBounded<T>, L extends T> extends MyHomer<T, L> {
 
+		@Override
 		public void foo(L t) {
 			throw new UnsupportedOperationException();
 		}
@@ -984,6 +1041,7 @@ public class BridgeMethodResolverTests {
 
 	public class GenericSqlMapDao<T extends Serializable> implements ConvenienceGenericDao<T> {
 
+		@Override
 		public void saveOrUpdate(T t) {
 			throw new UnsupportedOperationException();
 		}
@@ -992,6 +1050,7 @@ public class BridgeMethodResolverTests {
 
 	public class GenericSqlMapIntegerDao<T extends Integer> extends GenericSqlMapDao<T> {
 
+		@Override
 		public void saveOrUpdate(T t) {
 		}
 	}
@@ -1027,9 +1086,11 @@ public class BridgeMethodResolverTests {
 
 	public class UserDaoImpl extends AbstractDao<User> implements UserDao {
 
+		@Override
 		public void save(Permission perm) {
 		}
 
+		@Override
 		public void saveVararg(User user, Object... args) {
 		}
 	}
@@ -1053,9 +1114,11 @@ public class BridgeMethodResolverTests {
 
 	public class BusinessDao extends BusinessGenericDao<Business<?>, Long> {
 
+	@Override
 	public void save(Business<?> business) {
 	}
 
+		@Override
 		public Business<?> get(Long id) {
 			return null;
 		}
@@ -1110,6 +1173,7 @@ public class BridgeMethodResolverTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void receive(MegaMessageEvent event) {
 			throw new UnsupportedOperationException();
 		}
@@ -1136,6 +1200,7 @@ public class BridgeMethodResolverTests {
 
 	private static abstract class AbstractImplementsInterface<D extends DomainObjectSuper> implements IGenericInterface<D> {
 
+		@Override
 		public <T> void doSomething(D domainObject, T value) {
 		}
 
@@ -1175,10 +1240,12 @@ public class BridgeMethodResolverTests {
 
 	private static class DomainObject extends AbstractDomainObject<ParameterType, byte[]> {
 
+		@Override
 		public byte[] method1(ParameterType p) {
 			return super.method1(p);
 		}
 
+		@Override
 		public void method2(ParameterType p, byte[] r) {
 			super.method2(p, r);
 		}
@@ -1215,6 +1282,7 @@ public class BridgeMethodResolverTests {
 	public static class ExternalMessageProvider<S extends ExternalMessage, T extends ExternalMessageSearchConditions<S>>
 			implements IExternalMessageProvider<S, T> {
 
+		@Override
 		public Collection<S> findBy(T conditions) {
 			return null;
 		}
@@ -1235,6 +1303,7 @@ public class BridgeMethodResolverTests {
 
 	public static class TestEmailProvider extends EmailMessageProvider {
 
+		@Override
 		public Collection<EmailMessage> findBy(EmailSearchConditions conditions) {
 			return null;
 		}

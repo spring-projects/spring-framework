@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,16 @@ import org.hibernate.ejb.HibernateEntityManager;
 import org.junit.Ignore;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.config.SimpleMapScope;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.orm.jpa.AbstractEntityManagerFactoryBeanTests;
 import org.springframework.orm.jpa.DefaultJpaDialect;
 import org.springframework.orm.jpa.EntityManagerFactoryInfo;
 import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.tests.context.SimpleMapScope;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
 
@@ -734,14 +734,17 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 		@PersistenceContext
 		private EntityManager em;
 
+		@Override
 		public Object getObject() throws Exception {
 			return null;
 		}
 
+		@Override
 		public Class getObjectType() {
 			return null;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
@@ -785,6 +788,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	@SuppressWarnings("serial")
 	public static class SpecificPublicPersistenceContextSetter extends DefaultPublicPersistenceContextSetter {
 
+		@Override
 		@PersistenceContext(unitName="unit2", type = PersistenceContextType.EXTENDED)
 		public void setEntityManager(EntityManager em) {
 			super.setEntityManager(em);
@@ -880,6 +884,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 
 		public static boolean closed;
 
+		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if ("isOpen".equals(method.getName())) {
 				return true;

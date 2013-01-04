@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import javax.transaction.UserTransaction;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
 
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.transaction.jta.UserTransactionAdapter;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -112,6 +112,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -157,6 +158,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -206,6 +208,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 		assertTrue(!TransactionSynchronizationManager.isSynchronizationActive());
 		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -215,6 +218,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 
 		ptm.setJndiTemplate(new ExpectedLookupTemplate("java:comp/UserTransaction", ut2));
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				// something transactional
 				assertTrue(TransactionSynchronizationManager.isSynchronizationActive());
@@ -232,6 +236,7 @@ public class JndiJtaTransactionManagerTests extends TestCase {
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
+	@Override
 	protected void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());

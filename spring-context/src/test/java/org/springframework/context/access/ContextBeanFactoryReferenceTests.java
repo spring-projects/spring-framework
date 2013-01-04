@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.context.access;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -32,10 +33,7 @@ public class ContextBeanFactoryReferenceTests {
 
 	@Test
 	public void testAllOperations() {
-		ConfigurableApplicationContext ctx = createMock(ConfigurableApplicationContext.class);
-
-		ctx.close();
-		replay(ctx);
+		ConfigurableApplicationContext ctx = mock(ConfigurableApplicationContext.class);
 
 		ContextBeanFactoryReference bfr = new ContextBeanFactoryReference(ctx);
 
@@ -49,6 +47,6 @@ public class ContextBeanFactoryReferenceTests {
 			// expected
 		}
 
-		verify(ctx);
+		verify(ctx).close();
 	}
 }

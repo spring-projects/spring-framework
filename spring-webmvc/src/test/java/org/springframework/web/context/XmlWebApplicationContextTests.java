@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.util.Locale;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.AbstractApplicationContextTests;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.TestListener;
@@ -45,6 +46,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 
 	private ConfigurableWebApplicationContext root;
 
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		InitAndIB.constructed = false;
 		root = new XmlWebApplicationContext();
@@ -53,8 +55,10 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		root.setServletContext(sc);
 		root.setConfigLocations(new String[] {"/org/springframework/web/context/WEB-INF/applicationContext.xml"});
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
+			@Override
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+					@Override
 					@SuppressWarnings("unchecked")
 					public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
 						if (bean instanceof TestBean) {
@@ -62,6 +66,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 						}
 						return bean;
 					}
+					@Override
 					public Object postProcessAfterInitialization(Object bean, String name) throws BeansException {
 						return bean;
 					}
@@ -90,6 +95,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 	 * Overridden as we can't trust superclass method
 	 * @see org.springframework.context.AbstractApplicationContextTests#testEvents()
 	 */
+	@Override
 	public void testEvents() throws Exception {
 		TestListener listener = (TestListener) this.applicationContext.getBean("testListener");
 		listener.zeroCounter();
@@ -104,6 +110,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 		assertTrue("1 parent events after publication", parentListener.getEventCount() == 1);
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 14 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 			this.applicationContext.getBeanDefinitionCount() == 14);
@@ -169,6 +176,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 			constructed = true;
 		}
 
+		@Override
 		public void afterPropertiesSet() {
 			if (this.initMethodInvoked)
 				fail();
@@ -182,6 +190,7 @@ public class XmlWebApplicationContextTests extends AbstractApplicationContextTes
 			this.initMethodInvoked = true;
 		}
 
+		@Override
 		public void destroy() {
 			if (this.customDestroyed)
 				fail();

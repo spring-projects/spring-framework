@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.validation.BindException;
@@ -265,14 +265,17 @@ public class ModelAttributeMethodProcessorTests {
 			return validateInvoked;
 		}
 
+		@Override
 		public void bind(WebRequest request) {
 			bindInvoked = true;
 		}
 
+		@Override
 		public void validate() {
 			validateInvoked = true;
 		}
 
+		@Override
 		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}

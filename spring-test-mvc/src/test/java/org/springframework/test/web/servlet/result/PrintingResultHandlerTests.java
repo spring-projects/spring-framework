@@ -63,6 +63,7 @@ public class PrintingResultHandlerTests {
 	public void setup() {
 		this.handler = new TestPrintingResultHandler();
 		this.request = new MockHttpServletRequest("GET", "/") {
+			@Override
 			public boolean isAsyncStarted() {
 				return false;
 			}
@@ -228,11 +229,13 @@ public class PrintingResultHandlerTests {
 
 			private Map<String, Map<String, Object>> printedValues = new HashMap<String, Map<String, Object>>();
 
+			@Override
 			public void printHeading(String heading) {
 				this.printedHeading = heading;
 				this.printedValues.put(heading, new HashMap<String, Object>());
 			}
 
+			@Override
 			public void printValue(String label, Object value) {
 				Assert.notNull(this.printedHeading,
 						"Heading not printed before label " + label + " with value " + value);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.ejb.access;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import java.lang.reflect.Proxy;
 
@@ -42,16 +45,14 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		final int value = 11;
 		final String jndiName = "foo";
 
-		MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		myEjb.remove();
-		replay(myEjb);
+		MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
 
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andReturn(myEjb);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willReturn(myEjb);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -71,8 +72,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertTrue(mbm.getValue() == value);
-		verify(myEjb);
-		verify(home);
+		verify(myEjb).remove();
 	}
 
 	@Test
@@ -80,11 +80,11 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		final int value = 11;
 		final String jndiName = "foo";
 
-		final MyEjb myEjb = createMock(MyEjb.class);
-		expect(myEjb.getValue()).andReturn(value);
-		replay(myEjb);
+		final MyEjb myEjb = mock(MyEjb.class);
+		given(myEjb.getValue()).willReturn(value);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -104,7 +104,6 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		MyBusinessMethods mbm = (MyBusinessMethods) fb.getObject();
 		assertTrue(Proxy.isProxyClass(mbm.getClass()));
 		assertTrue(mbm.getValue() == value);
-		verify(myEjb);
 	}
 
 	@Test
@@ -112,11 +111,11 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		final String jndiName = "foo";
 
 		final CreateException cex = new CreateException();
-		final MyHome home = createMock(MyHome.class);
-		expect(home.create()).andThrow(cex);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
+		given(home.create()).willThrow(cex);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals(jndiName));
@@ -144,8 +143,6 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		catch (EjbAccessException ex) {
 			assertSame(cex, ex.getCause());
 		}
-
-		verify(home);
 	}
 
 	@Test
@@ -154,10 +151,10 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		// Could actually try to figure out interface from create?
 		final String jndiName = "foo";
 
-		final MyHome home = createMock(MyHome.class);
-		replay(home);
+		final MyHome home = mock(MyHome.class);
 
 		JndiTemplate jt = new JndiTemplate() {
+			@Override
 			public Object lookup(String name) throws NamingException {
 				// parameterize
 				assertTrue(name.equals("java:comp/env/" + jndiName));
@@ -184,7 +181,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 		}
 
 		// Expect no methods on home
-		verify(home);
+		verifyZeroInteractions(home);
 	}
 
 

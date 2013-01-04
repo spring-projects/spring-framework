@@ -17,7 +17,7 @@
 			name
   "/>
 
-	<bean id="testBean" class="test.beans.TestBean" scope="prototype">
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name">
 			<util:property-path path="configuredBean.name"/>
 		</property>
@@ -26,13 +26,13 @@
 		</property>
 	</bean>
 
-	<bean id="constructedTestBean" class="test.beans.TestBean">
+	<bean id="constructedTestBean" class="org.springframework.tests.sample.beans.TestBean">
 		<constructor-arg index="0">
 			<util:property-path path="configuredBean.name"/>
 		</constructor-arg>
 	</bean>
 
-	<bean id="configuredBean" class="test.beans.TestBean">
+	<bean id="configuredBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
@@ -67,7 +67,7 @@
 		<value>Rob Harrop</value>
 	</util:set>
 
-	<bean id="nestedCollectionsBean" class="test.beans.TestBean" scope="prototype">
+	<bean id="nestedCollectionsBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="someList">
 			<util:list>
 				<value>foo</value>
@@ -89,13 +89,13 @@
 		</property>
 	</bean>
 
-	<bean id="nestedShortcutCollections" class="test.beans.TestBean" scope="prototype">
+	<bean id="nestedShortcutCollections" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="stringArray" value="fooStr"/>
 		<property name="someList" value="foo"/>
 		<property name="someSet" value="bar"/>
 	</bean>
 
-	<bean id="nestedCustomTagBean" class="test.beans.TestBean" scope="prototype">
+	<bean id="nestedCustomTagBean" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="someList">
 			<list>
 				<util:constant static-field="java.lang.Integer.MIN_VALUE"/>
@@ -111,13 +111,13 @@
 			<map>
 				<entry>
 					<key><value>min</value></key>
-					<util:constant static-field="test.beans.CustomEnum.VALUE_1"/>
+					<util:constant static-field="org.springframework.tests.sample.beans.CustomEnum.VALUE_1"/>
 				</entry>
 			</map>
 	  </property>
 	</bean>
 
-	<bean id="circularCollectionsBean" class="test.beans.TestBean">
+	<bean id="circularCollectionsBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="someList">
 			<util:list>
 				<ref bean="circularCollectionsBean"/>
@@ -147,7 +147,7 @@
 		<entry key="foo" value-ref="circularCollectionBeansBean"/>
 	</util:map>
 
-	<bean id="circularCollectionBeansBean" class="test.beans.TestBean">
+	<bean id="circularCollectionBeansBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="someList" ref="circularList"/>
 		<property name="someSet" ref="circularSet"/>
 		<property name="someMap" ref="circularMap"/>

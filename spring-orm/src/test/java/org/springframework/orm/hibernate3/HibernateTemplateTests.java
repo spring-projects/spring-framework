@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -75,6 +75,7 @@ public class HibernateTemplateTests extends TestCase {
 	private MockControl sessionControl;
 	private Session session;
 
+	@Override
 	protected void setUp() {
 		sfControl = MockControl.createControl(SessionFactory.class);
 		sf = (SessionFactory) sfControl.getMock();
@@ -100,6 +101,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -124,6 +126,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -150,6 +153,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -178,6 +182,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -195,6 +200,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setAllowCreate(false);
 		try {
 			ht.execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return null;
 				}
@@ -217,6 +223,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -244,6 +251,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return l;
 				}
@@ -275,6 +283,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return l;
 				}
@@ -310,6 +319,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return l;
 				}
@@ -407,6 +417,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return l;
 				}
@@ -448,6 +459,7 @@ public class HibernateTemplateTests extends TestCase {
 			final List l = new ArrayList();
 			l.add("test");
 			List result = ht.executeFind(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					return l;
 				}
@@ -479,6 +491,7 @@ public class HibernateTemplateTests extends TestCase {
 		final List l = new ArrayList();
 		l.add("test");
 		List result = ht.executeFind(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 				return l;
 			}
@@ -523,6 +536,7 @@ public class HibernateTemplateTests extends TestCase {
 		HibernateTemplate ht = new HibernateTemplate(sf);
 		ht.setCacheQueries(true);
 		ht.execute(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 				assertNotSame(session, sess);
 				assertTrue(Proxy.isProxyClass(sess.getClass()));
@@ -584,6 +598,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setCacheQueries(true);
 		ht.setQueryCacheRegion("myRegion");
 		ht.execute(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 				assertNotSame(session, sess);
 				assertTrue(Proxy.isProxyClass(sess.getClass()));
@@ -634,6 +649,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setCacheQueries(true);
 		ht.setQueryCacheRegion("myRegion");
 		ht.execute(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 				assertSame(session, sess);
 				sess.createQuery("some query");
@@ -692,6 +708,7 @@ public class HibernateTemplateTests extends TestCase {
 		ht.setFetchSize(10);
 		ht.setMaxResults(20);
 		ht.execute(new HibernateCallback() {
+			@Override
 			public Object doInHibernate(org.hibernate.Session sess) throws HibernateException {
 				sess.createQuery("some query");
 				sess.getNamedQuery("some query name");
@@ -2273,6 +2290,7 @@ public class HibernateTemplateTests extends TestCase {
 		final JDBCConnectionException jcex = new JDBCConnectionException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw jcex;
 				}
@@ -2288,6 +2306,7 @@ public class HibernateTemplateTests extends TestCase {
 		final SQLGrammarException sgex = new SQLGrammarException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw sgex;
 				}
@@ -2303,6 +2322,7 @@ public class HibernateTemplateTests extends TestCase {
 		final LockAcquisitionException laex = new LockAcquisitionException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw laex;
 				}
@@ -2318,6 +2338,7 @@ public class HibernateTemplateTests extends TestCase {
 		final ConstraintViolationException cvex = new ConstraintViolationException("mymsg", sqlEx, "myconstraint");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw cvex;
 				}
@@ -2333,6 +2354,7 @@ public class HibernateTemplateTests extends TestCase {
 		final DataException dex = new DataException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw dex;
 				}
@@ -2348,6 +2370,7 @@ public class HibernateTemplateTests extends TestCase {
 		final JDBCException jdex = new JDBCException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw jdex;
 				}
@@ -2363,6 +2386,7 @@ public class HibernateTemplateTests extends TestCase {
 		final PropertyValueException pvex = new PropertyValueException("mymsg", "myentity", "myproperty");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw pvex;
 				}
@@ -2377,6 +2401,7 @@ public class HibernateTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw new PersistentObjectException("");
 				}
@@ -2389,6 +2414,7 @@ public class HibernateTemplateTests extends TestCase {
 
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw new TransientObjectException("");
 				}
@@ -2402,6 +2428,7 @@ public class HibernateTemplateTests extends TestCase {
 		final ObjectDeletedException odex = new ObjectDeletedException("msg", "id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw odex;
 				}
@@ -2417,6 +2444,7 @@ public class HibernateTemplateTests extends TestCase {
 		qex.setQueryString("query");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw qex;
 				}
@@ -2432,6 +2460,7 @@ public class HibernateTemplateTests extends TestCase {
 		final UnresolvableObjectException uoex = new UnresolvableObjectException("id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw uoex;
 				}
@@ -2448,6 +2477,7 @@ public class HibernateTemplateTests extends TestCase {
 		final ObjectNotFoundException onfe = new ObjectNotFoundException("id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw onfe;
 				}
@@ -2464,6 +2494,7 @@ public class HibernateTemplateTests extends TestCase {
 		final WrongClassException wcex = new WrongClassException("msg", "id", TestBean.class.getName());
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw wcex;
 				}
@@ -2480,6 +2511,7 @@ public class HibernateTemplateTests extends TestCase {
 		final NonUniqueResultException nuex = new NonUniqueResultException(2);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw nuex;
 				}
@@ -2495,6 +2527,7 @@ public class HibernateTemplateTests extends TestCase {
 		final StaleObjectStateException sosex = new StaleObjectStateException(TestBean.class.getName(), "id");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw sosex;
 				}
@@ -2511,6 +2544,7 @@ public class HibernateTemplateTests extends TestCase {
 		final StaleStateException ssex = new StaleStateException("msg");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw ssex;
 				}
@@ -2527,6 +2561,7 @@ public class HibernateTemplateTests extends TestCase {
 		final HibernateException hex = new HibernateException("msg");
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw hex;
 				}
@@ -2545,6 +2580,7 @@ public class HibernateTemplateTests extends TestCase {
 		final GenericJDBCException gjex = new GenericJDBCException("mymsg", sqlEx);
 		try {
 			createTemplate().execute(new HibernateCallback() {
+				@Override
 				public Object doInHibernate(org.hibernate.Session session) throws HibernateException {
 					throw gjex;
 				}
@@ -2572,6 +2608,7 @@ public class HibernateTemplateTests extends TestCase {
 		return new HibernateTemplate(sf);
 	}
 
+	@Override
 	protected void tearDown() {
 		try {
 			sfControl.verify();

@@ -258,6 +258,7 @@ public class AnnotationUtilsTests {
 
 		}
 
+		@Override
 		public void fromInterfaceImplementedByRoot() {
 
 		}
@@ -290,6 +291,7 @@ public class AnnotationUtilsTests {
 
 	public static class SimpleFoo extends Foo<String> {
 
+		@Override
 		@Transactional
 		public void something(final String arg) {
 
@@ -339,12 +341,14 @@ public class AnnotationUtilsTests {
 
 	public static class ImplementsInterfaceWithAnnotatedMethod implements InterfaceWithAnnotatedMethod {
 
+		@Override
 		public void foo() {
 		}
 	}
 
 	public static class SubOfImplementsInterfaceWithAnnotatedMethod extends ImplementsInterfaceWithAnnotatedMethod {
 
+		@Override
 		public void foo() {
 		}
 	}
@@ -354,6 +358,7 @@ public class AnnotationUtilsTests {
 
 	public static class SubOfAbstractImplementsInterfaceWithAnnotatedMethod extends AbstractDoesNotImplementInterfaceWithAnnotatedMethod {
 
+		@Override
 		public void foo() {
 		}
 	}

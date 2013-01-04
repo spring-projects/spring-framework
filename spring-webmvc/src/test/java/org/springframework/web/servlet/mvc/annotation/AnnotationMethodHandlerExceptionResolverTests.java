@@ -43,6 +43,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  */
+@Deprecated
 public class AnnotationMethodHandlerExceptionResolverTests {
 
 	private AnnotationMethodHandlerExceptionResolver exceptionResolver;

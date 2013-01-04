@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,12 +95,15 @@ class DummyBean {
 
 
 class MyFactoryBean implements FactoryBean<String> {
+	@Override
 	public String getObject() throws Exception {
 		return "foo";
 	}
+	@Override
 	public Class<String> getObjectType() {
 		return String.class;
 	}
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}
@@ -115,15 +118,18 @@ class MyParameterizedFactoryBean<T> implements FactoryBean<T> {
 		this.obj = obj;
 	}
 
+	@Override
 	public T getObject() throws Exception {
 		return obj;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class<T> getObjectType() {
 		return (Class<T>)obj.getClass();
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class MockFacesContext extends FacesContext {
 	private UIViewRoot viewRoot;
 
 
+	@Override
 	public Application getApplication() {
 		return application;
 	}
@@ -52,10 +53,12 @@ public class MockFacesContext extends FacesContext {
 		this.application = application;
 	}
 
+	@Override
 	public Iterator getClientIdsWithMessages() {
 		return null;
 	}
 
+	@Override
 	public ExternalContext getExternalContext() {
 		return externalContext;
 	}
@@ -64,61 +67,77 @@ public class MockFacesContext extends FacesContext {
 		this.externalContext = externalContext;
 	}
 
+	@Override
 	public Severity getMaximumSeverity() {
 		return null;
 	}
 
+	@Override
 	public Iterator getMessages() {
 		return null;
 	}
 
+	@Override
 	public Iterator getMessages(String arg0) {
 		return null;
 	}
 
+	@Override
 	public RenderKit getRenderKit() {
 		return null;
 	}
 
+	@Override
 	public boolean getRenderResponse() {
 		return false;
 	}
 
+	@Override
 	public boolean getResponseComplete() {
 		return false;
 	}
 
+	@Override
 	public ResponseStream getResponseStream() {
 		return null;
 	}
 
+	@Override
 	public void setResponseStream(ResponseStream arg0) {
 	}
 
+	@Override
 	public ResponseWriter getResponseWriter() {
 		return null;
 	}
 
+	@Override
 	public void setResponseWriter(ResponseWriter arg0) {
 	}
 
+	@Override
 	public UIViewRoot getViewRoot() {
 		return viewRoot;
 	}
 
+	@Override
 	public void setViewRoot(UIViewRoot viewRoot) {
 		this.viewRoot = viewRoot;
 	}
 
+	@Override
 	public void addMessage(String arg0, FacesMessage arg1) {
 	}
 
+	@Override
 	public void release() {
 	}
 
+	@Override
 	public void renderResponse() {
 	}
 
+	@Override
 	public void responseComplete() {
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,8 +32,7 @@ import org.springframework.jmx.JmxTestBean;
 import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
 import org.springframework.jmx.support.ObjectNameManager;
-
-import test.interceptor.NopInterceptor;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
 
 /**
  * @author Rob Harrop
@@ -204,12 +203,15 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		assertNull("Metric Category should not be populated", desc.getFieldValue("metricCategory"));
 	}
 
+	@Override
 	protected abstract String getObjectName();
 
+	@Override
 	protected int getExpectedAttributeCount() {
 		return 6;
 	}
 
+	@Override
 	protected int getExpectedOperationCount() {
 		return 9;
 	}
@@ -218,6 +220,7 @@ public abstract class AbstractMetadataAssemblerTests extends AbstractJmxAssemble
 		return new JmxTestBean();
 	}
 
+	@Override
 	protected MBeanInfoAssembler getAssembler() {
 		MetadataMBeanInfoAssembler assembler = new MetadataMBeanInfoAssembler();
 		assembler.setAttributeSource(getAttributeSource());

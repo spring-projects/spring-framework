@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,14 @@
 package org.springframework.beans.factory.xml;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.TestBean;
 
+import org.junit.Test;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+
 
 /**
  * @author Rob Harrop
@@ -33,8 +35,9 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test
 	public void simpleBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		ITestBean rob = (TestBean) beanFactory.getBean("rob");
 		ITestBean sally = (TestBean) beanFactory.getBean("sally");
 		assertEquals("Rob Harrop", rob.getName());
@@ -44,8 +47,9 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test
 	public void innerBeanConfigured() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		TestBean sally = (TestBean) beanFactory.getBean("sally2");
 		ITestBean rob = sally.getSpouse();
 		assertEquals("Rob Harrop", rob.getName());
@@ -55,13 +59,16 @@ public class SimplePropertyNamespaceHandlerTests {
 
 	@Test(expected = BeanDefinitionStoreException.class)
 	public void withPropertyDefinedTwice() throws Exception {
-		new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+				new ClassPathResource("simplePropertyNamespaceHandlerTestsWithErrors.xml", getClass()));
 	}
 
 	@Test
 	public void propertyWithNameEndingInRef() throws Exception {
-		XmlBeanFactory beanFactory =
-				new XmlBeanFactory(new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
+		DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(
+				new ClassPathResource("simplePropertyNamespaceHandlerTests.xml", getClass()));
 		ITestBean sally = (TestBean) beanFactory.getBean("derivedSally");
 		assertEquals("r", sally.getSpouse().getName());
 	}

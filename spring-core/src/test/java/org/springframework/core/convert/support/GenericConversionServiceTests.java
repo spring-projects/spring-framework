@@ -44,6 +44,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -143,6 +145,7 @@ public class GenericConversionServiceTests {
 	public void addConverterNoSourceTargetClassInfoAvailable() {
 		try {
 			conversionService.addConverter(new Converter() {
+				@Override
 				public Object convert(Object source) {
 					return source;
 				}
@@ -201,6 +204,7 @@ public class GenericConversionServiceTests {
 	@Test
 	public void convertSuperSourceType() {
 		conversionService.addConverter(new Converter<CharSequence, Integer>() {
+			@Override
 			public Integer convert(CharSequence source) {
 				return Integer.valueOf(source.toString());
 			}
@@ -218,6 +222,7 @@ public class GenericConversionServiceTests {
 	}
 
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 
@@ -395,6 +400,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance1() {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -412,6 +418,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance2() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -439,6 +446,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance3() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -503,6 +511,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyBaseInterfaceConverter implements Converter<MyBaseInterface, String> {
 
+		@Override
 		public String convert(MyBaseInterface source) {
 			return "RESULT";
 		}
@@ -511,6 +520,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringArrayToResourceArrayConverter implements Converter<String[], Resource[]>	{
 
+		@Override
 		public Resource[] convert(String[] source) {
 			Resource[] result = new Resource[source.length];
 			for (int i = 0; i < source.length; i++) {
@@ -523,6 +533,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringArrayToIntegerArrayConverter implements Converter<String[], Integer[]>	{
 
+		@Override
 		public Integer[] convert(String[] source) {
 			Integer[] result = new Integer[source.length];
 			for (int i = 0; i < source.length; i++) {
@@ -535,6 +546,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
 
+		@Override
 		public Integer[] convert(String source) {
 			String[] srcArray = StringUtils.commaDelimitedListToStringArray(source);
 			Integer[] result = new Integer[srcArray.length];
@@ -673,10 +685,12 @@ public class GenericConversionServiceTests {
 		GenericConversionService conversionService = new GenericConversionService();
 		GenericConverter converter = new GenericConverter() {
 
+			@Override
 			public Set<ConvertiblePair> getConvertibleTypes() {
 				return null;
 			}
 
+			@Override
 			public Object convert(Object source, TypeDescriptor sourceType,
 					TypeDescriptor targetType) {
 				return null;
@@ -716,6 +730,7 @@ public class GenericConversionServiceTests {
 	public void convertCannotOptimizeArray() throws Exception {
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new Converter<Byte, Byte>() {
+			@Override
 			public Byte convert(Byte source) {
 				return (byte) (source + 1);
 			}
@@ -764,11 +779,13 @@ public class GenericConversionServiceTests {
 
 		private int matchAttempts = 0;
 
+		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			matchAttempts++;
 			return false;
 		}
 
+		@Override
 		public Color convert(String source) {
 			throw new IllegalStateException();
 		}
@@ -783,15 +800,18 @@ public class GenericConversionServiceTests {
 
 		private List<TypeDescriptor> sourceTypes = new ArrayList<TypeDescriptor>();
 
+		@Override
 		public Set<ConvertiblePair> getConvertibleTypes() {
 			return null;
 		}
 
+		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			sourceTypes.add(sourceType);
 			return false;
 		}
 
+		@Override
 		public Object convert(Object source, TypeDescriptor sourceType,
 				TypeDescriptor targetType) {
 			return null;
@@ -809,11 +829,13 @@ public class GenericConversionServiceTests {
 
 		private int matchAttempts = 0;
 
+		@Override
 		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 			matchAttempts++;
 			return true;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public <T extends Color> Converter<String, T> getConverter(Class<T> targetType) {
 			return (Converter<String, T>) converter;
@@ -834,6 +856,7 @@ public class GenericConversionServiceTests {
 
 	public static enum MyEnum implements MyEnumInterface {
 		A {
+			@Override
 			public String getCode() {
 				return "1";
 			}
@@ -842,6 +865,7 @@ public class GenericConversionServiceTests {
 
 	private static class MyEnumInterfaceToStringConverter<T extends MyEnumInterface>
 			implements Converter<T, String> {
+		@Override
 		public String convert(T source) {
 			return source.getCode();
 		}

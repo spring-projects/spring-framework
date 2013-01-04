@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		assertValueAttribute(output, "");
 	}
 
+	@Override
 	public void testDynamicTypeAttribute() throws JspException {
 		try {
 			this.getTag().setDynamicAttribute(null, "type", "email");
@@ -88,6 +89,7 @@ public class PasswordInputTagTests extends InputTagTests {
 		}
 	}
 
+	@Override
 	protected void assertValueAttribute(String output, String expectedValue) {
 		if (this.getPasswordTag().isShowPassword()) {
 			super.assertValueAttribute(output, expectedValue);
@@ -96,13 +98,16 @@ public class PasswordInputTagTests extends InputTagTests {
 		}
 	}
 
+	@Override
 	protected String getType() {
 		return "password";
 	}
 
+	@Override
 	@SuppressWarnings("serial")
 	protected InputTag createTag(final Writer writer) {
 		return new PasswordInputTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(writer);
 			}

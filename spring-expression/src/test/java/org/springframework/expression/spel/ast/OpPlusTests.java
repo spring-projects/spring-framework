@@ -199,6 +199,7 @@ public class OpPlusTests {
 
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new Converter<Time, String>() {
+			@Override
 			public String convert(Time source) {
 				return format.format(source);
 			}

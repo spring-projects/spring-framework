@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
 
 package org.springframework.aop.framework.adapter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
+
 import javax.transaction.TransactionRolledbackException;
 
 import org.aopalliance.intercept.MethodInvocation;
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import org.junit.Test;
-import test.aop.MethodCounter;
-
 import org.springframework.aop.ThrowsAdvice;
+import org.springframework.tests.aop.advice.MethodCounter;
+
 
 /**
  * @author Rod Johnson
@@ -47,12 +51,10 @@ public final class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		Object ret = new Object();
-		MethodInvocation mi = createMock(MethodInvocation.class);
-		expect(mi.proceed()).andReturn(ret);
-		replay(mi);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.proceed()).willReturn(ret);
 		assertEquals(ret, ti.invoke(mi));
 		assertEquals(0, th.getCalls());
-		verify(mi);
 	}
 
 	@Test
@@ -61,9 +63,8 @@ public final class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		assertEquals(2, ti.getHandlerMethodCount());
 		Exception ex = new Exception();
-		MethodInvocation mi = createMock(MethodInvocation.class);
-		expect(mi.proceed()).andThrow(ex);
-		replay(mi);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.proceed()).willThrow(ex);
 		try {
 			ti.invoke(mi);
 			fail();
@@ -72,7 +73,6 @@ public final class ThrowsAdviceInterceptorTests {
 			assertEquals(ex, caught);
 		}
 		assertEquals(0, th.getCalls());
-		verify(mi);
 	}
 
 	@Test
@@ -80,12 +80,10 @@ public final class ThrowsAdviceInterceptorTests {
 		MyThrowsHandler th = new MyThrowsHandler();
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		FileNotFoundException ex = new FileNotFoundException();
-		MethodInvocation mi = createMock(MethodInvocation.class);
-		expect(mi.getMethod()).andReturn(Object.class.getMethod("hashCode", (Class[]) null));
-		expect(mi.getArguments()).andReturn(null);
-		expect(mi.getThis()).andReturn(new Object());
-		expect(mi.proceed()).andThrow(ex);
-		replay(mi);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.getMethod()).willReturn(Object.class.getMethod("hashCode", (Class[]) null));
+		given(mi.getThis()).willReturn(new Object());
+		given(mi.proceed()).willThrow(ex);
 		try {
 			ti.invoke(mi);
 			fail();
@@ -95,7 +93,6 @@ public final class ThrowsAdviceInterceptorTests {
 		}
 		assertEquals(1, th.getCalls());
 		assertEquals(1, th.getCalls("ioException"));
-		verify(mi);
 	}
 
 	@Test
@@ -104,9 +101,8 @@ public final class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		TransactionRolledbackException ex = new TransactionRolledbackException();
-		MethodInvocation mi = createMock(MethodInvocation.class);
-		expect(mi.proceed()).andThrow(ex);
-		replay(mi);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.proceed()).willThrow(ex);
 		try {
 			ti.invoke(mi);
 			fail();
@@ -116,7 +112,6 @@ public final class ThrowsAdviceInterceptorTests {
 		}
 		assertEquals(1, th.getCalls());
 		assertEquals(1, th.getCalls("remoteException"));
-		verify(mi);
 	}
 
 	@Test
@@ -125,6 +120,7 @@ public final class ThrowsAdviceInterceptorTests {
 
 		@SuppressWarnings("serial")
 		MyThrowsHandler th = new MyThrowsHandler() {
+			@Override
 			public void afterThrowing(RemoteException ex) throws Throwable {
 				super.afterThrowing(ex);
 				throw t;
@@ -134,9 +130,8 @@ public final class ThrowsAdviceInterceptorTests {
 		ThrowsAdviceInterceptor ti = new ThrowsAdviceInterceptor(th);
 		// Extends RemoteException
 		TransactionRolledbackException ex = new TransactionRolledbackException();
-		MethodInvocation mi = createMock(MethodInvocation.class);
-		expect(mi.proceed()).andThrow(ex);
-		replay(mi);
+		MethodInvocation mi = mock(MethodInvocation.class);
+		given(mi.proceed()).willThrow(ex);
 		try {
 			ti.invoke(mi);
 			fail();
@@ -146,7 +141,6 @@ public final class ThrowsAdviceInterceptorTests {
 		}
 		assertEquals(1, th.getCalls());
 		assertEquals(1, th.getCalls("remoteException"));
-		verify(mi);
 	}
 
 	@SuppressWarnings("serial")

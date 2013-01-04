@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.AppenderSkeleton#append(org.apache.log4j.spi.LoggingEvent)
 	 */
+	@Override
 	protected void append(LoggingEvent evt) {
 		//System.out.println("Adding " + evt.getMessage());
 		loggingStrings.add(evt.getMessage());
@@ -42,6 +43,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.Appender#close()
 	 */
+	@Override
 	public void close() {
 		closeCalled = true;
 	}
@@ -49,6 +51,7 @@ public class MockLog4jAppender extends AppenderSkeleton {
 	/* (non-Javadoc)
 	 * @see org.apache.log4j.Appender#requiresLayout()
 	 */
+	@Override
 	public boolean requiresLayout() {
 		return false;
 	}

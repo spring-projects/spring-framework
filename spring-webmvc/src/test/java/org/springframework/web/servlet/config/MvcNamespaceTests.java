@@ -516,10 +516,12 @@ public class MvcNamespaceTests {
 
 		boolean validatorInvoked;
 
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
 		}
 
+		@Override
 		public void validate(Object target, Errors errors) {
 			this.validatorInvoked = true;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import org.springframework.beans.Colour;
-import org.springframework.beans.Pet;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.Colour;
+import org.springframework.tests.sample.beans.Pet;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -50,9 +50,11 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new CheckboxTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -636,6 +638,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -678,6 +681,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			super.setAsText(text);
@@ -689,6 +693,7 @@ public class CheckboxTagTests extends AbstractFormTagTests {
 
 		public int count = 0;
 
+		@Override
 		public void setAsText(String text) {
 			this.count++;
 			setValue(new Integer(text.trim()));

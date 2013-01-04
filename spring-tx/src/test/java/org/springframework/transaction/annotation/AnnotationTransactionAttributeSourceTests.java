@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
@@ -311,18 +311,22 @@ public class AnnotationTransactionAttributeSourceTests {
 			this.age = age;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -344,19 +348,23 @@ public class AnnotationTransactionAttributeSourceTests {
 			this.age = age;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		@Transactional(rollbackFor=Exception.class)
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -377,18 +385,22 @@ public class AnnotationTransactionAttributeSourceTests {
 			this.age = age;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -409,20 +421,24 @@ public class AnnotationTransactionAttributeSourceTests {
 			this.age = age;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		@Transactional(propagation=Propagation.REQUIRES_NEW, isolation=Isolation.REPEATABLE_READ, timeout=5,
 				readOnly=true, rollbackFor=Exception.class, noRollbackFor={IOException.class})
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -444,18 +460,22 @@ public class AnnotationTransactionAttributeSourceTests {
 			this.age = age;
 		}
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -495,6 +515,7 @@ public class AnnotationTransactionAttributeSourceTests {
 
 	public static class MyFoo implements Foo<String> {
 
+		@Override
 		@Transactional
 		public void doSomething(String theArgument) {
 			System.out.println(theArgument);
@@ -508,20 +529,24 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		private int age;
 
+		@Override
 		@javax.ejb.TransactionAttribute(TransactionAttributeType.SUPPORTS)
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		@javax.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -535,19 +560,23 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		private int age;
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		@javax.ejb.TransactionAttribute
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}
@@ -574,18 +603,22 @@ public class AnnotationTransactionAttributeSourceTests {
 
 		private int age;
 
+		@Override
 		public String getName() {
 			return name;
 		}
 
+		@Override
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		@Override
 		public int getAge() {
 			return age;
 		}
 
+		@Override
 		public void setAge(int age) {
 			this.age = age;
 		}

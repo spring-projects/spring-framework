@@ -45,6 +45,7 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 18.12.2003
  */
+@Deprecated
 public class JaxRpcSupportTests extends TestCase {
 
 	public void testLocalJaxRpcServiceFactoryBeanWithServiceNameAndNamespace() throws Exception {
@@ -495,6 +496,7 @@ public class JaxRpcSupportTests extends TestCase {
 			service1Control.setReturnValue(new RemoteBean());
 		}
 
+		@Override
 		public Service createService(QName qName) throws ServiceException {
 			if (!"myNamespace".equals(qName.getNamespaceURI()) || !"myService1".equals(qName.getLocalPart())) {
 				throw new ServiceException("not supported");
@@ -503,6 +505,7 @@ public class JaxRpcSupportTests extends TestCase {
 			return service1;
 		}
 
+		@Override
 		public Service createService(URL url, QName qName) throws ServiceException {
 			try {
 				if (!(new URL("http://myUrl1")).equals(url) || !"".equals(qName.getNamespaceURI()) ||
@@ -516,6 +519,7 @@ public class JaxRpcSupportTests extends TestCase {
 			return service2;
 		}
 
+		@Override
 		public Service loadService(URL url, QName qName, Properties props) throws ServiceException {
 			try {
 				if (!(new URL("http://myUrl1")).equals(url) || !"".equals(qName.getNamespaceURI()) ||
@@ -532,6 +536,7 @@ public class JaxRpcSupportTests extends TestCase {
 			return service1;
 		}
 
+		@Override
 		public Service loadService(Class ifc) throws ServiceException {
 			if (!IRemoteBean.class.equals(ifc)) {
 				throw new ServiceException("not supported");
@@ -540,6 +545,7 @@ public class JaxRpcSupportTests extends TestCase {
 			return service2;
 		}
 
+		@Override
 		public Service loadService(URL url, Class ifc, Properties props) throws ServiceException {
 			try {
 				if (!(new URL("http://myUrl1")).equals(url) || !IRemoteBean.class.equals(ifc)) {
@@ -563,6 +569,7 @@ public class JaxRpcSupportTests extends TestCase {
 			super();
 		}
 
+		@Override
 		protected void initMocks() throws Exception {
 			super.initMocks();
 			service1.getPort(new QName("myNamespace", "myPort"), IRemoteBean.class);
@@ -580,6 +587,7 @@ public class JaxRpcSupportTests extends TestCase {
 			super();
 		}
 
+		@Override
 		protected void initMocks() throws Exception {
 			initStandardCall(1);
 		}
@@ -591,9 +599,11 @@ public class JaxRpcSupportTests extends TestCase {
 			service1Control.setReturnValue(call1, count);
 			call1.invoke(new Object[] {"myName"});
 			call1Control.setMatcher(new ArgumentsMatcher() {
+				@Override
 				public boolean matches(Object[] objects, Object[] objects1) {
 					return Arrays.equals((Object[]) objects[0], (Object[]) objects1[0]);
 				}
+				@Override
 				public String toString(Object[] objects) {
 					return ObjectUtils.nullSafeToString(objects[0]);
 				}
@@ -616,6 +626,7 @@ public class JaxRpcSupportTests extends TestCase {
 		public ExceptionCallMockServiceFactory() throws Exception {
 		}
 
+		@Override
 		protected void initMocks() throws Exception {
 			initExceptionCall();
 			initStandardCall(2);
@@ -628,9 +639,11 @@ public class JaxRpcSupportTests extends TestCase {
 			service1Control.setReturnValue(call2);
 			call2.invoke(new Object[] {"exception"});
 			call2Control.setMatcher(new ArgumentsMatcher() {
+				@Override
 				public boolean matches(Object[] objects, Object[] objects1) {
 					return Arrays.equals((Object[]) objects[0], (Object[]) objects1[0]);
 				}
+				@Override
 				public String toString(Object[] objects) {
 					return ObjectUtils.nullSafeToString(objects[0]);
 				}
@@ -646,6 +659,7 @@ public class JaxRpcSupportTests extends TestCase {
 		public CallWithPropertiesMockServiceFactory() throws Exception {
 		}
 
+		@Override
 		protected void extendStandardCall() {
 			call1.setProperty(Call.USERNAME_PROPERTY, "user");
 			call1Control.setVoidCallable();
@@ -682,6 +696,7 @@ public class JaxRpcSupportTests extends TestCase {
 			properties = new HashMap();
 		}
 
+		@Override
 		public void setName(String nam) throws RemoteException {
 			if ("exception".equals(nam)) {
 				throw new RemoteException();
@@ -689,14 +704,17 @@ public class JaxRpcSupportTests extends TestCase {
 			name = nam;
 		}
 
+		@Override
 		public void _setProperty(String key, Object o) {
 			properties.put(key, o);
 		}
 
+		@Override
 		public Object _getProperty(String key) {
 			return properties.get(key);
 		}
 
+		@Override
 		public Iterator _getPropertyNames() {
 			return properties.keySet().iterator();
 		}

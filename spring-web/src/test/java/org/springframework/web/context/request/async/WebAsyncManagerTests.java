@@ -432,6 +432,7 @@ public class WebAsyncManagerTests {
 			this.value = value;
 		}
 
+		@Override
 		public Object call() throws Exception {
 			if (this.value instanceof Exception) {
 				throw ((Exception) this.value);

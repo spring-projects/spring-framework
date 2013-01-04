@@ -29,6 +29,7 @@ import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 public class Spr7766Tests {
 
 	@Test
+	@Deprecated
 	public void test() throws Exception {
 		AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
 		ConfigurableWebBindingInitializer binder = new ConfigurableWebBindingInitializer();
@@ -46,6 +47,7 @@ public class Spr7766Tests {
 	}
 
 	public class ColorConverter implements Converter<String, Color> {
+		@Override
 		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
 	}
 

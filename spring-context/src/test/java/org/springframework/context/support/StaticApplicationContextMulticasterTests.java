@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATester;
 import org.springframework.context.AbstractApplicationContextTests;
@@ -43,6 +43,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	protected StaticApplicationContext sac;
 
 	/** Run for each test */
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
 		Map<String, String> m = new HashMap<String, String>();
@@ -53,7 +54,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		parent.registerSingleton(StaticApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME,
 				TestApplicationEventMulticaster.class, null);
 		parent.refresh();
-		parent.addListener(parentListener) ;
+		parent.addApplicationListener(parentListener) ;
 
 		parent.getStaticMessageSource().addMessage("code1", Locale.getDefault(), "message1");
 
@@ -65,7 +66,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		Resource resource = new ClassPathResource("testBeans.properties", getClass());
 		reader.loadBeanDefinitions(new EncodedResource(resource, "ISO-8859-1"));
 		sac.refresh();
-		sac.addListener(listener);
+		sac.addApplicationListener(listener);
 
 		sac.getStaticMessageSource().addMessage("code2", Locale.getDefault(), "message2");
 
@@ -73,10 +74,12 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 	}
 
 	/** Overridden */
+	@Override
 	public void testCount() {
 		assertCount(15);
 	}
 
+	@Override
 	public void testEvents() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
 		super.testEvents();
@@ -88,6 +91,7 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 
 		private static int counter = 0;
 
+		@Override
 		public void multicastEvent(ApplicationEvent event) {
 			super.multicastEvent(event);
 			counter++;

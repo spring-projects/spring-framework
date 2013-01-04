@@ -198,7 +198,7 @@ public class JasperReportsUtilsTests extends TestCase {
 		HSSFRow row = sheet.getRow(3);
 		HSSFCell cell = row.getCell((short) 1);
 		assertNotNull("Cell should not be null", cell);
-		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getStringCellValue());
+		assertEquals("Cell content should be Dear Lord!", "Dear Lord!", cell.getRichStringCellValue().getString());
 	}
 
 	private JasperReport getReport() throws Exception {
@@ -236,6 +236,7 @@ public class JasperReportsUtilsTests extends TestCase {
 
 		private boolean invoked = false;
 
+		@Override
 		public void afterPageExport() {
 			this.invoked = true;
 		}

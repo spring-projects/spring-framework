@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.portlet.PortletConfig;
 import javax.portlet.PortletContext;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -41,6 +41,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 
 	private ConfigurablePortletApplicationContext root;
 
+	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		root = new XmlPortletApplicationContext();
 		PortletContext portletContext = new MockPortletContext();
@@ -48,8 +49,10 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		root.setPortletConfig(portletConfig);
 		root.setConfigLocations(new String[] {"/org/springframework/web/portlet/context/WEB-INF/applicationContext.xml"});
 		root.addBeanFactoryPostProcessor(new BeanFactoryPostProcessor() {
+			@Override
 			public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 				beanFactory.addBeanPostProcessor(new BeanPostProcessor() {
+					@Override
 					public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 						if(bean instanceof TestBean) {
 							((TestBean) bean).getFriends().add("myFriend");
@@ -57,6 +60,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 						return bean;
 					}
 
+					@Override
 					public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 						return bean;
 					}
@@ -101,6 +105,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 	 * Overridden in order to access the root ApplicationContext
 	 * @see org.springframework.web.context.XmlWebApplicationContextTests#testContextNesting()
 	 */
+	@Override
 	public void testContextNesting() {
 		TestBean father = (TestBean) this.applicationContext.getBean("father");
 		assertTrue("Bean from root context", father != null);
@@ -116,6 +121,7 @@ public class XmlPortletApplicationContextTests extends AbstractXmlWebApplication
 		assertTrue("Custom BeanPostProcessor applied", rod.getFriends().contains("myFriend"));
 	}
 
+	@Override
 	public void testCount() {
 		assertTrue("should have 16 beans, not "+ this.applicationContext.getBeanDefinitionCount(),
 				this.applicationContext.getBeanDefinitionCount() == 16);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package org.springframework.jdbc.datasource.embedded;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassRelativeResourceLoader;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
@@ -59,6 +61,8 @@ public class EmbeddedDatabaseBuilderTests {
 
 	@Test
 	public void testBuildDerby() {
+		Assume.group(TestGroup.LONG_RUNNING);
+
 		EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder(new ClassRelativeResourceLoader(getClass()));
 		EmbeddedDatabase db = builder.setType(EmbeddedDatabaseType.DERBY).addScript("db-schema-derby.sql").addScript("db-test-data.sql").build();
 		assertDatabaseCreatedAndShutdown(db);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ public class CciLocalTransactionTests {
 		TransactionTemplate tt = new TransactionTemplate(tm);
 
 		tt.execute(new TransactionCallbackWithoutResult() {
+			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 				CciTemplate ct = new CciTemplate(connectionFactory);
@@ -131,6 +132,7 @@ public class CciLocalTransactionTests {
 
 		try {
 			tt.execute(new TransactionCallback() {
+				@Override
 				public Object doInTransaction(TransactionStatus status) {
 					assertTrue("Has thread connection", TransactionSynchronizationManager.hasResource(connectionFactory));
 					CciTemplate ct = new CciTemplate(connectionFactory);

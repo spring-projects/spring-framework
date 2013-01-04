@@ -6,35 +6,35 @@
 -->
 <beans>
 
-	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor"/>
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
-	<bean id="serializableNopInterceptor" class="test.interceptor.SerializableNopInterceptor"/>
+	<bean id="serializableNopInterceptor" class="org.springframework.tests.aop.interceptor.SerializableNopInterceptor"/>
 
 	<bean id="serializableSingleton" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="interceptorNames"><value>serializableNopInterceptor</value></property>	
-		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>		
+		<property name="interceptorNames"><value>serializableNopInterceptor</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.Person</value></property>
 		<property name="target">
-			<bean class="org.springframework.beans.SerializablePerson">
+			<bean class="org.springframework.tests.sample.beans.SerializablePerson">
 				<property name="name"><value>serializableSingleton</value></property>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="prototypeTarget" class="org.springframework.beans.SerializablePerson">
+	<bean id="prototypeTarget" class="org.springframework.tests.sample.beans.SerializablePerson">
 		<property name="name"><value>serializablePrototype</value></property>
 	</bean>
 
 	<bean id="serializablePrototype" class="org.springframework.aop.framework.ProxyFactoryBean">
-		<property name="interceptorNames"><value>serializableNopInterceptor,prototypeTarget</value></property>		
-		<property name="proxyInterfaces"><value>org.springframework.beans.Person</value></property>	
+		<property name="interceptorNames"><value>serializableNopInterceptor,prototypeTarget</value></property>
+		<property name="proxyInterfaces"><value>org.springframework.tests.sample.beans.Person</value></property>
 		<property name="singleton"><value>false</value></property>
 	</bean>
 
 	<bean id="interceptorNotSerializableSingleton" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="interceptorNames"><value>nopInterceptor</value></property>
 		<property name="target">
-			<bean class="org.springframework.beans.SerializablePerson"/>
+			<bean class="org.springframework.tests.sample.beans.SerializablePerson"/>
 		</property>
 	</bean>
 
-</beans>		
+</beans>

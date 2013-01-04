@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 /**
@@ -31,9 +31,11 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new HiddenInputTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -120,6 +122,7 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertTrue(output.startsWith("<input "));
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		this.bean = new TestBean();
 		bean.setName("Sally Greenwood");

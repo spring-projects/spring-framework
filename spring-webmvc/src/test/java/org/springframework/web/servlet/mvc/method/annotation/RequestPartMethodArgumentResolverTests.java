@@ -275,6 +275,7 @@ public class RequestPartMethodArgumentResolverTests {
 	}
 
 	private final class ValidatingBinderFactory implements WebDataBinderFactory {
+		@Override
 		public WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName) throws Exception {
 			LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
 			validator.afterPropertiesSet();

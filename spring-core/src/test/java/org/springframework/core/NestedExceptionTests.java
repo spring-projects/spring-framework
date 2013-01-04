@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 
 /**
  * @author Rod Johnson
@@ -52,7 +51,7 @@ public class NestedExceptionTests extends TestCase {
 		Exception rootCause = new Exception(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedRuntimeException nex = new NestedRuntimeException(myMessage, rootCause) {};
-		Assert.assertEquals(nex.getCause(), rootCause);
+		assertEquals(nex.getCause(), rootCause);
 		assertTrue(nex.getMessage().indexOf(myMessage) != -1);
 		assertTrue(nex.getMessage().indexOf(rootCauseMesg) != -1);
 
@@ -90,7 +89,7 @@ public class NestedExceptionTests extends TestCase {
 		Exception rootCause = new Exception(rootCauseMesg);
 		// Making a class abstract doesn't _really_ prevent instantiation :-)
 		NestedCheckedException nex = new NestedCheckedException(myMessage, rootCause) {};
-		Assert.assertEquals(nex.getCause(), rootCause);
+		assertEquals(nex.getCause(), rootCause);
 		assertTrue(nex.getMessage().indexOf(myMessage) != -1);
 		assertTrue(nex.getMessage().indexOf(rootCauseMesg) != -1);
 

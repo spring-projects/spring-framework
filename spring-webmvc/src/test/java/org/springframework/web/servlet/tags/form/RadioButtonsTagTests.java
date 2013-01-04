@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
-import org.springframework.beans.Colour;
-import org.springframework.beans.Pet;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.Colour;
+import org.springframework.tests.sample.beans.Pet;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -53,9 +53,11 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 
 	private TestBean bean;
 
+	@Override
 	@SuppressWarnings("serial")
 	protected void onSetUp() {
 		this.tag = new RadioButtonsTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(getWriter());
 			}
@@ -582,6 +584,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 		return cal.getTime();
 	}
 
+	@Override
 	protected TestBean createTestBean() {
 		List colours = new ArrayList();
 		colours.add(Colour.BLUE);
@@ -619,6 +622,7 @@ public final class RadioButtonsTagTests extends AbstractFormTagTests {
 			super(false);
 		}
 
+		@Override
 		public void setAsText(String text) {
 			super.setAsText(text);
 			this.allProcessedValues.add(getValue());

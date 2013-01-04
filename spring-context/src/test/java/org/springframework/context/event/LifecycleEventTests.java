@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ public class LifecycleEventTests extends TestCase {
 
 		private int stoppedCount;
 
+		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			if (event instanceof ContextStartedEvent) {
 				this.context = ((ContextStartedEvent) event).getApplicationContext();
@@ -100,14 +101,17 @@ public class LifecycleEventTests extends TestCase {
 
 		private boolean running;
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public void start() {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			this.running = false;
 		}

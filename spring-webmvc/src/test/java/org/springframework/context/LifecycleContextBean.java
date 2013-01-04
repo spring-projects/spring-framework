@@ -3,7 +3,7 @@ package org.springframework.context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.LifecycleBean;
+import org.springframework.tests.sample.beans.LifecycleBean;
 
 /**
  * Simple bean to test ApplicationContext lifecycle methods for beans
@@ -15,18 +15,21 @@ public class LifecycleContextBean extends LifecycleBean implements ApplicationCo
 
 	protected ApplicationContext owningContext;
 
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
 		if (this.owningContext != null)
 			throw new RuntimeException("Factory called setBeanFactory after setApplicationContext");
 	}
 
+	@Override
 	public void afterPropertiesSet() {
 		super.afterPropertiesSet();
 		if (this.owningContext == null)
 			throw new RuntimeException("Factory didn't call setAppliationContext before afterPropertiesSet on lifecycle bean");
 	}
 
+	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		if (this.owningFactory == null)
 			throw new RuntimeException("Factory called setApplicationContext before setBeanFactory");

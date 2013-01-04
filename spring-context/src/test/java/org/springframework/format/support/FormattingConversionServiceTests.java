@@ -36,6 +36,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -86,6 +87,7 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForTypeWithPrinterParserWithCoercion() throws ParseException {
 		formattingService.addConverter(new Converter<DateTime, LocalDate>() {
+			@Override
 			public LocalDate convert(DateTime source) {
 				return source.toLocalDate();
 			}
@@ -111,7 +113,9 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForValueInjectionUsingMetaAnnotations() {
 		AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext();
-		ac.registerBeanDefinition("valueBean", new RootBeanDefinition(MetaValueBean.class, false));
+		RootBeanDefinition bd = new RootBeanDefinition(MetaValueBean.class);
+		bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		ac.registerBeanDefinition("valueBean", bd);
 		ac.registerBeanDefinition("conversionService", new RootBeanDefinition(FormattingConversionServiceFactoryBean.class));
 		ac.registerBeanDefinition("ppc", new RootBeanDefinition(PropertyPlaceholderConfigurer.class));
 		ac.refresh();
@@ -170,11 +174,13 @@ public class FormattingConversionServiceTests {
 	@SuppressWarnings("unchecked")
 	private void doTestFormatFieldForAnnotation(Class<?> modelClass, boolean directFieldAccess) throws Exception {
 		formattingService.addConverter(new Converter<Date, Long>() {
+			@Override
 			public Long convert(Date source) {
 				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<DateTime, Date>() {
+			@Override
 			public Date convert(DateTime source) {
 				return source.toDate();
 			}
@@ -277,17 +283,20 @@ public class FormattingConversionServiceTests {
 	@Test
 	public void testFormatFieldForAnnotationWithSubclassAsFieldType() throws Exception {
 		formattingService.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory() {
+			@Override
 			public Printer<?> getPrinter(org.springframework.format.annotation.DateTimeFormat annotation, Class<?> fieldType) {
 				assertEquals(MyDate.class, fieldType);
 				return super.getPrinter(annotation, fieldType);
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Long>() {
+			@Override
 			public Long convert(MyDate source) {
 				return source.getTime();
 			}
 		});
 		formattingService.addConverter(new Converter<MyDate, Date>() {
+			@Override
 			public Date convert(MyDate source) {
 				return source;
 			}
@@ -364,10 +373,12 @@ public class FormattingConversionServiceTests {
 
 	public static class NullReturningFormatter implements Formatter<Integer> {
 
+		@Override
 		public String print(Integer object, Locale locale) {
 			return null;
 		}
 
+		@Override
 		public Integer parse(String text, Locale locale) throws ParseException {
 			return null;
 		}

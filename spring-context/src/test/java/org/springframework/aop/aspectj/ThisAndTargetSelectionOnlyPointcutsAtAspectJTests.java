@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,7 @@ public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 	}
 
 	public static class TestImpl implements TestInterface {
+		@Override
 		public void doIt() {
 		}
 	}
@@ -119,11 +120,13 @@ public final class ThisAndTargetSelectionOnlyPointcutsAtAspectJTests {
 
 	@TestAnnotation
 	public static class AnnotatedClassTestImpl implements TestInterface {
+		@Override
 		public void doIt() {
 		}
 	}
 
 	public static class AnnotatedMethodTestImpl implements TestInterface {
+		@Override
 		@TestAnnotation
 		public void doIt() {
 		}

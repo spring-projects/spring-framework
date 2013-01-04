@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import javax.validation.Valid;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.MethodParameter;
@@ -394,28 +394,33 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	}
 
 	private static class StubValidator implements Validator {
+		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
 		}
 
+		@Override
 		public void validate(Object target, Errors errors) {
 			errors.reject("error");
 		}
 	}
 
 	private static class ColorArgumentResolver implements WebArgumentResolver {
+		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
 			return new Color(0);
 		}
 	}
 
 	private static class User implements Principal {
+		@Override
 		public String getName() {
 			return "user";
 		}
 	}
 
 	private static class OtherUser implements Principal {
+		@Override
 		public String getName() {
 			return "other user";
 		}

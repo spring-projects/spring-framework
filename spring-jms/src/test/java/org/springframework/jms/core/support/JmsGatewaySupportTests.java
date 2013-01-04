@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		connectionFactoryControl.replay();
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
+			@Override
 			protected void initGateway() {
 				test.add("test");
 			}
@@ -53,6 +54,7 @@ public class JmsGatewaySupportTests extends TestCase {
 		JmsTemplate template = new JmsTemplate();
 		final List test = new ArrayList();
 		JmsGatewaySupport gateway = new JmsGatewaySupport() {
+			@Override
 			protected void initGateway() {
 				test.add("test");
 			}

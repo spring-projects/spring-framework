@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="inheritedTestBean" class="org.springframework.beans.TestBean" abstract="true" scope="prototype">
+	<bean id="inheritedTestBean" class="org.springframework.tests.sample.beans.TestBean" abstract="true" scope="prototype">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>1</value></property>
 	</bean>
@@ -13,11 +13,11 @@
 		<property name="age"><value>1</value></property>
 	</bean>
 
-	<bean id="inheritedTestBeanPrototype" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="inheritedTestBeanPrototype" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>parent</value></property>
 		<property name="age"><value>2</value></property>
 	</bean>
 
-	<bean id="inheritedTestBeanSingleton" class="org.springframework.beans.TestBean"/>
+	<bean id="inheritedTestBeanSingleton" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

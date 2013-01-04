@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package org.springframework.beans.factory.config;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.beans.factory.support.BeanDefinitionBuilder.genericBeanDefinition;
 
 import org.junit.Before;
@@ -269,17 +269,13 @@ public final class ServiceLocatorFactoryBeanTests {
 
 	@Test
 	public void testRequiresListableBeanFactoryAndChokesOnAnythingElse() throws Exception {
-		final BeanFactory beanFactory = createMock(BeanFactory.class);
-		replay(beanFactory);
-
+		BeanFactory beanFactory = mock(BeanFactory.class);
 		try {
 			ServiceLocatorFactoryBean factory = new ServiceLocatorFactoryBean();
 			factory.setBeanFactory(beanFactory);
 		} catch (FatalBeanException ex) {
 			// expected
 		}
-
-		verify(beanFactory);
 	}
 
 

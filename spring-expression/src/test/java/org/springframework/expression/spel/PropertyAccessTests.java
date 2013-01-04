@@ -16,12 +16,14 @@
 
 package org.springframework.expression.spel;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.core.convert.TypeDescriptor;
@@ -78,14 +80,14 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		EvaluationContext context = new StandardEvaluationContext(null);
 		try {
 			expr.getValue(context);
-			Assert.fail("Should have failed - default property resolver cannot resolve on null");
+			fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
 			checkException(e,SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL);
 		}
-		Assert.assertFalse(expr.isWritable(context));
+		assertFalse(expr.isWritable(context));
 		try {
 			expr.setValue(context,"abc");
-			Assert.fail("Should have failed - default property resolver cannot resolve on null");
+			fail("Should have failed - default property resolver cannot resolve on null");
 		} catch (Exception e) {
 			checkException(e,SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
@@ -94,9 +96,9 @@ public class PropertyAccessTests extends ExpressionTestCase {
 	private void checkException(Exception e, SpelMessage expectedMessage) {
 		if (e instanceof SpelEvaluationException) {
 			SpelMessage sm = ((SpelEvaluationException)e).getMessageCode();
-			Assert.assertEquals("Expected exception type did not occur",expectedMessage,sm);
+			assertEquals("Expected exception type did not occur",expectedMessage,sm);
 		} else {
-			Assert.fail("Should be a SpelException "+e);
+			fail("Should be a SpelException "+e);
 		}
 	}
 
@@ -112,22 +114,22 @@ public class PropertyAccessTests extends ExpressionTestCase {
 		ctx.addPropertyAccessor(new StringyPropertyAccessor());
 		Expression expr = parser.parseRaw("new String('hello').flibbles");
 		Integer i = expr.getValue(ctx, Integer.class);
-		Assert.assertEquals((int) i, 7);
+		assertEquals((int) i, 7);
 
 		// The reflection one will be used for other properties...
 		expr = parser.parseRaw("new String('hello').CASE_INSENSITIVE_ORDER");
 		Object o = expr.getValue(ctx);
-		Assert.assertNotNull(o);
+		assertNotNull(o);
 
 		expr = parser.parseRaw("new String('hello').flibbles");
 		expr.setValue(ctx, 99);
 		i = expr.getValue(ctx, Integer.class);
-		Assert.assertEquals((int) i, 99);
+		assertEquals((int) i, 99);
 
 		// Cannot set it to a string value
 		try {
 			expr.setValue(ctx, "not allowed");
-			Assert.fail("Should not have been allowed");
+			fail("Should not have been allowed");
 		} catch (EvaluationException e) {
 			// success - message will be: EL1063E:(pos 20): A problem occurred whilst attempting to set the property
 			// 'flibbles': 'Cannot set flibbles to an object of type 'class java.lang.String''
@@ -141,20 +143,20 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		// reflective property accessor is the only one by default
 		List<PropertyAccessor> propertyAccessors = ctx.getPropertyAccessors();
-		Assert.assertEquals(1,propertyAccessors.size());
+		assertEquals(1,propertyAccessors.size());
 
 		StringyPropertyAccessor spa = new StringyPropertyAccessor();
 		ctx.addPropertyAccessor(spa);
-		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
+		assertEquals(2,ctx.getPropertyAccessors().size());
 
 		List<PropertyAccessor> copy = new ArrayList<PropertyAccessor>();
 		copy.addAll(ctx.getPropertyAccessors());
-		Assert.assertTrue(ctx.removePropertyAccessor(spa));
-		Assert.assertFalse(ctx.removePropertyAccessor(spa));
-		Assert.assertEquals(1,ctx.getPropertyAccessors().size());
+		assertTrue(ctx.removePropertyAccessor(spa));
+		assertFalse(ctx.removePropertyAccessor(spa));
+		assertEquals(1,ctx.getPropertyAccessors().size());
 
 		ctx.setPropertyAccessors(copy);
-		Assert.assertEquals(2,ctx.getPropertyAccessors().size());
+		assertEquals(2,ctx.getPropertyAccessors().size());
 	}
 
 	@Test
@@ -170,28 +172,33 @@ public class PropertyAccessTests extends ExpressionTestCase {
 
 		int flibbles = 7;
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { String.class };
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!(target instanceof String))
 				throw new RuntimeException("Assertion Failed! target should be String");
 			return (name.equals("flibbles"));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!(target instanceof String))
 				throw new RuntimeException("Assertion Failed! target should be String");
 			return (name.equals("flibbles"));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (!name.equals("flibbles"))
 				throw new RuntimeException("Assertion Failed! name should be flibbles");
 			return new TypedValue(flibbles);
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			if (!name.equals("flibbles"))

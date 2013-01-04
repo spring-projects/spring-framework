@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package org.springframework.cache.config;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.beans.factory.BeanCreationException;
@@ -53,7 +52,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Test
 	public void testKeyStrategy() throws Exception {
 		CacheInterceptor ci = ctx.getBean(CacheInterceptor.class);
-		Assert.assertSame(ctx.getBean(KeyGenerator.class), ci.getKeyGenerator());
+		assertSame(ctx.getBean(KeyGenerator.class), ci.getKeyGenerator());
 	}
 
 	// --- local tests -------
@@ -115,6 +114,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 	@Configuration
 	@EnableCaching
 	static class EnableCachingConfig implements CachingConfigurer {
+		@Override
 		@Bean
 		public CacheManager cacheManager() {
 			SimpleCacheManager cm = new SimpleCacheManager();
@@ -135,6 +135,7 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 			return new AnnotatedClassCacheableService();
 		}
 
+		@Override
 		@Bean
 		public KeyGenerator keyGenerator() {
 			return new SomeKeyGenerator();
@@ -174,9 +175,11 @@ public class EnableCachingTests extends AbstractAnnotationTests {
 		@Bean
 		public CacheManager cm2() { return new NoOpCacheManager(); }
 
+		@Override
 		public CacheManager cacheManager() {
 			return cm1();
 		}
+		@Override
 		public KeyGenerator keyGenerator() {
 			return null;
 		}

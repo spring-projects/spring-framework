@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,12 +85,14 @@ public class FreeMarkerConfigurerTests extends TestCase {
 		settings.setProperty("localized_lookup", "false");
 		fcfb.setFreemarkerSettings(settings);
 		fcfb.setResourceLoader(new ResourceLoader() {
+			@Override
 			public Resource getResource(String location) {
 				if (!("file:/mydir".equals(location) || "file:/mydir/test".equals(location))) {
 					throw new IllegalArgumentException(location);
 				}
 				return new ByteArrayResource("test".getBytes(), "test");
 			}
+			@Override
 			public ClassLoader getClassLoader() {
 				return getClass().getClassLoader();
 			}

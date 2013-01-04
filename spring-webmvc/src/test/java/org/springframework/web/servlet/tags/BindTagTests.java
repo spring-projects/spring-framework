@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 
-import org.springframework.beans.IndexedTestBean;
-import org.springframework.beans.NestedTestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -509,6 +509,7 @@ public class BindTagTests extends AbstractTagTests {
 		IndexedTestBean tb = new IndexedTestBean();
 		DataBinder binder = new ServletRequestDataBinder(tb, "tb");
 		binder.registerCustomEditor(TestBean.class, null, new PropertyEditorSupport() {
+			@Override
 			public String getAsText() {
 				return "something";
 			}
@@ -987,6 +988,7 @@ public class BindTagTests extends AbstractTagTests {
 		pc.getRequest().setAttribute(BindingResult.MODEL_KEY_PREFIX + "tb", binder.getBindingResult());
 
 		FormTag formTag = new FormTag() {
+			@Override
 			protected TagWriter createTagWriter() {
 				return new TagWriter(new StringWriter());
 			}

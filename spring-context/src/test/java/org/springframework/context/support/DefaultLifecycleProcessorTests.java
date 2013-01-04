@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.context.support;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Test;
-
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -27,6 +26,8 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.LifecycleProcessor;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
@@ -251,6 +252,8 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void smartLifecycleGroupShutdown() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 300, stoppedBeans);
 		TestSmartLifecycleBean bean2 = TestSmartLifecycleBean.forShutdownTests(3, 100, stoppedBeans);
@@ -280,6 +283,8 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void singleSmartLifecycleShutdown() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
 		TestSmartLifecycleBean bean = TestSmartLifecycleBean.forShutdownTests(99, 300, stoppedBeans);
 		StaticApplicationContext context = new StaticApplicationContext();
@@ -386,6 +391,8 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependentShutdownFirstEvenIfItsPhaseIsLower() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 100, stoppedBeans);
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
@@ -458,6 +465,8 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependentShutdownFirstAndIsSmartLifecycle() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
 		TestSmartLifecycleBean beanMin = TestSmartLifecycleBean.forShutdownTests(Integer.MIN_VALUE, 400, stoppedBeans);
 		TestSmartLifecycleBean beanNegative = TestSmartLifecycleBean.forShutdownTests(-99, 100, stoppedBeans);
@@ -521,6 +530,8 @@ public class DefaultLifecycleProcessorTests {
 
 	@Test
 	public void dependentShutdownFirstButNotSmartLifecycle() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CopyOnWriteArrayList<Lifecycle> stoppedBeans = new CopyOnWriteArrayList<Lifecycle>();
 		TestSmartLifecycleBean bean1 = TestSmartLifecycleBean.forShutdownTests(1, 200, stoppedBeans);
 		TestLifecycleBean simpleBean = TestLifecycleBean.forShutdownTests(stoppedBeans);
@@ -585,10 +596,12 @@ public class DefaultLifecycleProcessorTests {
 			this.stoppedBeans = stoppedBeans;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public void start() {
 			if (this.startedBeans != null) {
 				this.startedBeans.add(this);
@@ -596,6 +609,7 @@ public class DefaultLifecycleProcessorTests {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			if (this.stoppedBeans != null) {
 				this.stoppedBeans.add(this);
@@ -627,10 +641,12 @@ public class DefaultLifecycleProcessorTests {
 			this.shutdownDelay = shutdownDelay;
 		}
 
+		@Override
 		public int getPhase() {
 			return this.phase;
 		}
 
+		@Override
 		public boolean isAutoStartup() {
 			return this.autoStartup;
 		}
@@ -639,12 +655,14 @@ public class DefaultLifecycleProcessorTests {
 			this.autoStartup = autoStartup;
 		}
 
+		@Override
 		public void stop(final Runnable callback) {
 			// calling stop() before the delay to preserve
 			// invocation order in the 'stoppedBeans' list
 			stop();
 			final int delay = this.shutdownDelay;
 			new Thread(new Runnable() {
+				@Override
 				public void run() {
 					try {
 						Thread.sleep(delay);
@@ -665,27 +683,33 @@ public class DefaultLifecycleProcessorTests {
 
 		public boolean running = false;
 
+		@Override
 		public boolean isAutoStartup() {
 			return true;
 		}
 
+		@Override
 		public void stop(Runnable callback) {
 			this.running = false;
 			callback.run();
 		}
 
+		@Override
 		public void start() {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			this.running = false;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public int getPhase() {
 			return 0;
 		}
@@ -698,39 +722,48 @@ public class DefaultLifecycleProcessorTests {
 
 		DummySmartLifecycleBean bean = new DummySmartLifecycleBean();
 
+		@Override
 		public Object getObject() throws Exception {
 			return this.bean;
 		}
 
+		@Override
 		public Class<?> getObjectType() {
 			return DummySmartLifecycleBean.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}
 
+		@Override
 		public boolean isAutoStartup() {
 			return true;
 		}
 
+		@Override
 		public void stop(Runnable callback) {
 			this.running = false;
 			callback.run();
 		}
 
+		@Override
 		public void start() {
 			this.running = true;
 		}
 
+		@Override
 		public void stop() {
 			this.running = false;
 		}
 
+		@Override
 		public boolean isRunning() {
 			return this.running;
 		}
 
+		@Override
 		public int getPhase() {
 			return 0;
 		}

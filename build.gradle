@@ -8,7 +8,10 @@ buildscript {
 	}
 }
 
-configure(allprojects) {
+configure(allprojects) { project ->
+	group = "org.springframework"
+	version = qualifyVersionIfNecessary(version)
+
 	ext.aspectjVersion  = "1.7.1"
 	ext.easymockVersion = "2.5.2"
 	ext.hsqldbVersion   = "1.8.0.10"
@@ -16,24 +19,21 @@ configure(allprojects) {
 	ext.slf4jVersion    = "1.6.1"
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
-	if (rootProject.hasProperty("VERSION_QUALIFIER")) {
-		def qualifier = rootProject.getProperty("VERSION_QUALIFIER")
-		if (qualifier.startsWith("SPR-")) { // topic branch, e.g. SPR-1234
-			// replace 3.2.0.BUILD-SNAPSHOT for 3.2.0.SPR-1234-SNAPSHOT
-			version = version.replace('BUILD', qualifier)
-		}
-	}
-
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "propdeps-eclipse"
 	apply plugin: "propdeps-idea"
+	apply plugin: "test-source-set-dependencies"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
-	group = "org.springframework"
-
-	sourceCompatibility=1.5
-	targetCompatibility=1.5
+	compileJava {
+		sourceCompatibility=1.5
+		targetCompatibility=1.5
+	}
+	compileTestJava {
+		sourceCompatibility=1.7
+		targetCompatibility=1.7
+	}
 
 	[compileJava, compileTestJava]*.options*.compilerArgs = [
 		"-Xlint:serial",
@@ -58,17 +58,26 @@ configure(allprojects) {
 
 	sourceSets.test.resources.srcDirs = ["src/test/resources", "src/test/java"]
 
-	test.systemProperty("java.awt.headless", "true")
+	test {
+		systemProperty("java.awt.headless", "true")
+		systemProperty("testGroups", properties.get("testGroups"))
+	}
 
 	repositories {
 		maven { url "http://repo.springsource.org/libs-release" }
-		maven { url "http://repo.springsource.org/ebr-maven-external" }
 	}
 
 	dependencies {
 		testCompile("junit:junit:${junitVersion}")
 		testCompile("org.hamcrest:hamcrest-all:1.3")
-		testCompile("org.easymock:easymock:${easymockVersion}")
+		testCompile("org.mockito:mockito-core:1.9.5")
+		if (project.name in ["spring", "spring-jms", "spring-orm",
+				"spring-orm-hibernate4", "spring-oxm", "spring-struts",
+				"spring-test", "spring-test-mvc", "spring-tx", "spring-web",
+				"spring-webmvc", "spring-webmvc-portlet", "spring-webmvc-tiles3"]) {
+			testCompile("org.easymock:easymock:${easymockVersion}")
+			testCompile "org.easymock:easymockclassextension:${easymockVersion}"
+		}
 	}
 
 	ext.javadocLinks = [
@@ -94,7 +103,7 @@ configure(allprojects) {
 	] as String[]
 }
 
-configure(subprojects) { subproject ->
+configure(subprojects - project(":spring-build-src")) { subproject ->
 	apply plugin: "merge"
 	apply from: "${gradleScriptDir}/publish-maven.gradle"
 
@@ -143,6 +152,17 @@ configure(subprojects) { subproject ->
 	}
 }
 
+project("spring-build-src") {
+	description = "Exposes gradle buildSrc for IDE support"
+	apply plugin: "groovy"
+
+	dependencies {
+		compile gradleApi()
+		groovy localGroovy()
+	}
+
+	configurations.archives.artifacts.clear()
+}
 
 project("spring-core") {
 	description = "Spring Core"
@@ -214,7 +234,7 @@ project("spring-core") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("net.sf.jopt-simple:jopt-simple:3.0")
 		optional("log4j:log4j:1.2.17")
-		testCompile("xmlunit:xmlunit:1.2")
+		testCompile("xmlunit:xmlunit:1.3")
 		testCompile("org.codehaus.woodstox:wstx-asl:3.2.7")
 	}
 
@@ -304,7 +324,7 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		testCompile("commons-dbcp:commons-dbcp:1.2.2")
-		testCompile("javax.inject:com.springsource.org.atinject.tck:1.0.0")
+		testCompile("javax.inject:javax.inject-tck:1")
 	}
 
 	test {
@@ -324,7 +344,6 @@ project("spring-tx") {
 		optional("javax.resource:connector-api:1.5")
 		optional("org.apache.geronimo.specs:geronimo-jta_1.1_spec:1.1")
 		optional("javax.ejb:ejb-api:3.0")
-		testCompile "org.easymock:easymockclassextension:${easymockVersion}"
 		testCompile("javax.persistence:persistence-api:1.0")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 	}
@@ -333,6 +352,14 @@ project("spring-tx") {
 project("spring-oxm") {
 	description = "Spring Object/XML Marshalling"
 	apply from: "oxm.gradle"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on jibx compilation
+		// see http://jira.codehaus.org/browse/JIBX-465
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
@@ -344,7 +371,7 @@ project("spring-oxm") {
 		optional("org.apache.xmlbeans:xmlbeans:2.4.0")
 		optional("org.codehaus.castor:castor-xml:1.3.2")
 		testCompile("org.codehaus.jettison:jettison:1.0.1")
-		testCompile("xmlunit:xmlunit:1.2")
+		testCompile("xmlunit:xmlunit:1.3")
 		testCompile("xmlpull:xmlpull:1.1.3.4a")
 		testCompile(files(genCastor.classesDir).builtBy(genCastor))
 		testCompile(files(genJaxb.classesDir).builtBy(genJaxb))
@@ -449,7 +476,7 @@ project("spring-web") {
 		}
 		optional("log4j:log4j:1.2.17")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
-		testCompile("xmlunit:xmlunit:1.2")
+		testCompile("xmlunit:xmlunit:1.3")
 	}
 
 	// pick up ContextLoader.properties in src/main
@@ -458,6 +485,14 @@ project("spring-web") {
 
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
+
+	compileTestJava {
+		// necessary to avoid java.lang.VerifyError on toplink compilation
+		// TODO: remove this block when we remove toplink
+		sourceCompatibility=1.6
+		targetCompatibility=1.6
+	}
+
 	dependencies {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.hibernate:hibernate-core:3.3.2.GA")
@@ -477,7 +512,6 @@ project("spring-orm") {
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.asm:1.0.1")
 		testCompile("org.eclipse.persistence:org.eclipse.persistence.antlr:1.0.1")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile(project(":spring-web").sourceSets.test.output)
 		compile(project(":spring-core"))
 		compile(project(":spring-beans"))
 		optional(project(":spring-aop"))
@@ -533,7 +567,7 @@ project("spring-webmvc") {
 		testCompile(project(":spring-aop"))
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("rhino:js:1.7R1")
-		testCompile("xmlunit:xmlunit:1.2")
+		testCompile("xmlunit:xmlunit:1.3")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
 		}
@@ -553,7 +587,6 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
 		testCompile("org.apache.httpcomponents:httpclient:4.2")
-		testCompile(project(":spring-web").sourceSets.test.output)
 	}
 
 	// pick up DispatcherServlet.properties in src/main
@@ -565,6 +598,7 @@ project("spring-webmvc-tiles3") {
 	merge.into = project(":spring-webmvc")
 	dependencies {
 		compile(project(":spring-context"))
+		compile(project(":spring-web"))
 		provided("javax.el:el-api:1.0")
 		provided("javax.servlet:jstl:1.2")
 		provided("javax.servlet.jsp:jsp-api:2.1")
@@ -583,7 +617,6 @@ project("spring-webmvc-tiles3") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		provided("javax.servlet:javax.servlet-api:3.0.1")
-		compile(project(":spring-web").sourceSets*.output) // mock request & response
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 }
@@ -607,6 +640,10 @@ project("spring-webmvc-portlet") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
+	test {
+		useJUnit()
+		useTestNG()
+	}
 	dependencies {
 		compile(project(":spring-core"))
 		optional(project(":spring-beans"))
@@ -642,7 +679,7 @@ project("spring-test-mvc") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional("org.hamcrest:hamcrest-core:1.3")
 		optional("com.jayway.jsonpath:json-path:0.8.1")
-		optional("xmlunit:xmlunit:1.2")
+		optional("xmlunit:xmlunit:1.3")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("javax.servlet:jstl:1.2")
 		testCompile("org.hibernate:hibernate-validator:4.3.0.Final")
@@ -656,7 +693,6 @@ project("spring-test-mvc") {
 		testCompile("javax.activation:activation:1.1")
 		testCompile("javax.mail:mail:1.4")
 		testCompile("javax.xml.bind:jaxb-api:2.2.6")
-		testCompile("org.easymock:easymockclassextension:${easymockVersion}")
 		testCompile("org.apache.tiles:tiles-request-api:1.0.1")
 		testCompile("org.apache.tiles:tiles-api:3.0.1")
 		testCompile("org.apache.tiles:tiles-core:3.0.1") {
@@ -763,18 +799,20 @@ configure(rootProject) {
 			project.sourceSets.main.allJava
 		}
 
-		classpath = files(
-			// ensure servlet 3.x and Hibernate 4.x have precedence on the Javadoc
-			// classpath over their respective 2.5 and 3.x variants
-			project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
-			rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
-			// ensure the javadoc process can resolve types compiled from .aj sources
-			project(":spring-aspects").sourceSets.main.output
-		)
-		classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
-
 		maxMemory = "1024m"
 		destinationDir = new File(buildDir, "api")
+
+		doFirst {
+			classpath = files(
+				// ensure servlet 3.x and Hibernate 4.x have precedence on the Javadoc
+				// classpath over their respective 2.5 and 3.x variants
+				project(":spring-webmvc").sourceSets.main.compileClasspath.files.find { it =~ "servlet-api" },
+				rootProject.sourceSets.test.compileClasspath.files.find { it =~ "hibernate-core" },
+				// ensure the javadoc process can resolve types compiled from .aj sources
+				project(":spring-aspects").sourceSets.main.output
+			)
+			classpath += files(subprojects.collect { it.sourceSets.main.compileClasspath })
+		}
 	}
 
 	task docsZip(type: Zip) {
@@ -916,4 +954,21 @@ configure(rootProject) {
 				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
 		}
 	}
+}
+
+/*
+ * Support publication of artifacts versioned by topic branch.
+ * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
+ * If <TOPIC> starts with 'SPR-', change version
+ *     from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
+ *     e.g. 3.2.1.BUILD-SNAPSHOT => 3.2.1.SPR-1234-SNAPSHOT
+ */
+def qualifyVersionIfNecessary(version) {
+	if (rootProject.hasProperty("BRANCH_NAME")) {
+		def qualifier = rootProject.getProperty("BRANCH_NAME")
+		if (qualifier.startsWith("SPR-")) {
+			return version.replace('BUILD', qualifier)
+		}
+	}
+	return version
 }

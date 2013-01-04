@@ -18,7 +18,7 @@
 			<aop:after-returning method="oneObjectArg" returning="bean" pointcut="execution(* returnsThis())"/>
 			<aop:after-returning method="oneTestBeanArg" returning="bean" pointcut="execution(* returnsThis())"/>
 			<aop:after-returning method="testBeanArrayArg" returning="beans"
-					pointcut="execution(org.springframework.beans.ITestBean[] *(..))"/>
+					pointcut="execution(org.springframework.tests.sample.beans.ITestBean[] *(..))"/>
 			<aop:after-returning method="oneString" returning="name" pointcut="execution(* getSpouse())"/>
 			<aop:after-returning method="objectMatchNoArgs" returning="java.lang.Object"
 					pointcut="execution(* returnsThis())"/>
@@ -30,6 +30,6 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AfterReturningAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 </beans>

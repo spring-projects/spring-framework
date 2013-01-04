@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,18 @@
 
 package org.springframework.scheduling.annotation;
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -28,15 +36,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.easymock.EasyMock.*;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Integration tests cornering bug SPR-8651, which revealed that @Scheduled methods may
@@ -47,6 +52,11 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class ScheduledAndTransactionalAnnotationIntegrationTests {
+
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Test
 	public void failsWhenJdkProxyAndScheduledMethodNotPresentOnInterface() {
@@ -153,6 +163,7 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}
@@ -168,12 +179,14 @@ public class ScheduledAndTransactionalAnnotationIntegrationTests {
 
 		private final AtomicInteger count = new AtomicInteger(0);
 
+		@Override
 		@Transactional
 		@Scheduled(fixedDelay = 5)
 		public void scheduled() {
 			this.count.incrementAndGet();
 		}
 
+		@Override
 		public int getInvocationCount() {
 			return this.count.get();
 		}

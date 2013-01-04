@@ -6,10 +6,10 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
 	<aop:aspectj-autoproxy/>
-	
-	<bean id="testBean1" class="org.springframework.beans.TestBean"/>
-	<bean id="testBean2" class="org.springframework.beans.TestBean"/>	
-	<bean id="testBean3" class="org.springframework.beans.TestBean"/>
+
+	<bean id="testBean1" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean"/>
+	<bean id="testBean3" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<bean id="counterAspect" class="org.springframework.aop.aspectj.CounterAspect"/>
 </beans>

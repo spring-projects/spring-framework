@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,26 @@
 
 package org.springframework.jdbc.core;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.tests.Matchers.exceptionCause;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -26,18 +46,19 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.LogFactory;
-import org.easymock.MockControl;
-
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.dao.UncategorizedDataAccessException;
-import org.springframework.jdbc.AbstractJdbcTests;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.SQLWarningException;
@@ -56,241 +77,184 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @author Rod Johnson
  * @author Thomas Risberg
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
-public class JdbcTemplateTests extends AbstractJdbcTests {
+public class JdbcTemplateTests {
 
-	private final boolean debugEnabled = LogFactory.getLog(JdbcTemplate.class).isDebugEnabled();
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
+	private Connection connection;
+	private DataSource dataSource;
+	private PreparedStatement preparedStatement;
+	private Statement statement;
+	private ResultSet resultSet;
+	private JdbcTemplate template;
+	private CallableStatement callableStatement;
 
+	@Before
+	public void setup() throws Exception {
+		this.connection = mock(Connection.class);
+		this.dataSource = mock(DataSource.class);
+		this.preparedStatement = mock(PreparedStatement.class);
+		this.statement = mock(Statement.class);
+		this.resultSet = mock(ResultSet.class);
+		this.template = new JdbcTemplate(this.dataSource);
+		this.callableStatement = mock(CallableStatement.class);
+		given(this.dataSource.getConnection()).willReturn(this.connection);
+		given(this.connection.prepareStatement(anyString())).willReturn(this.preparedStatement);
+		given(this.preparedStatement.executeQuery()).willReturn(this.resultSet);
+		given(this.preparedStatement.executeQuery(anyString())).willReturn(this.resultSet);
+		given(this.preparedStatement.getConnection()).willReturn(this.connection);
+		given(this.statement.getConnection()).willReturn(this.connection);
+		given(this.statement.executeQuery(anyString())).willReturn(this.resultSet);
+		given(this.connection.prepareCall(anyString())).willReturn(this.callableStatement);
+		given(this.callableStatement.getResultSet()).willReturn(this.resultSet);
+	}
+
+	@Test
 	public void testBeanProperties() throws Exception {
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		assertTrue("datasource ok", template.getDataSource() == mockDataSource);
-		assertTrue("ignores warnings by default", template.isIgnoreWarnings());
-		template.setIgnoreWarnings(false);
-		assertTrue("can set NOT to ignore warnings", !template.isIgnoreWarnings());
+		assertTrue("datasource ok", this.template.getDataSource() == this.dataSource);
+		assertTrue("ignores warnings by default", this.template.isIgnoreWarnings());
+		this.template.setIgnoreWarnings(false);
+		assertTrue("can set NOT to ignore warnings", !this.template.isIgnoreWarnings());
 	}
 
+	@Test
 	public void testUpdateCount() throws Exception {
-		final String sql =
-			"UPDATE INVOICE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE INVOICE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		int idParam = 11111;
-
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.setInt(1, idParam);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(1);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlPreparedStatement.replay();
-		replay();
-
+		given(this.preparedStatement.executeUpdate()).willReturn(1);
 		Dispatcher d = new Dispatcher(idParam, sql);
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		int rowsAffected = template.update(d);
+		int rowsAffected = this.template.update(d);
 		assertTrue("1 update affected 1 row", rowsAffected == 1);
-
-		/*
-		d = new Dispatcher(idParam);
-		rowsAffected = template.update(d);
-		assertTrue("bogus update affected 0 rows", rowsAffected == 0);
-		*/
-
-		ctrlPreparedStatement.verify();
+		verify(this.preparedStatement).setInt(1, idParam);
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testBogusUpdate() throws Exception {
-		final String sql =
-			"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
+		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int idParam = 6666;
 
 		// It's because Integers aren't canonical
-		SQLException sex = new SQLException("bad update");
-
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.setInt(1, idParam);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setThrowable(sex);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlPreparedStatement.replay();
-		replay();
+		SQLException sqlException = new SQLException("bad update");
+		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		Dispatcher d = new Dispatcher(idParam, sql);
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
+		this.thrown.expect(UncategorizedSQLException.class);
+		this.thrown.expect(exceptionCause(equalTo(sqlException)));
 		try {
-			template.update(d);
-			fail("Bogus update should throw exception");
+			this.template.update(d);
 		}
-		catch (UncategorizedDataAccessException ex) {
-			// pass
-			assertTrue(
-				"Correct exception",
-				ex instanceof UncategorizedSQLException);
-			assertTrue("Root cause is correct", ex.getCause() == sex);
-			//assertTrue("no update occurred", !je.getDataWasUpdated());
+		finally {
+			verify(this.preparedStatement).setInt(1, idParam);
+			verify(this.preparedStatement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlPreparedStatement.verify();
 	}
 
+	@Test
 	public void testStringsWithStaticSql() throws Exception {
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+		doTestStrings(false, null, null, null, null, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
-		}, false, null, null, null, null);
+		});
 	}
 
+	@Test
 	public void testStringsWithStaticSqlAndFetchSizeAndMaxRows() throws Exception {
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+		doTestStrings(false, 10, 20, 30, null, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
 				template.query(sql, rch);
 			}
-		}, false, new Integer(10), new Integer(20), new Integer(30), null);
+		});
 	}
 
+	@Test
 	public void testStringsWithEmptyPreparedStatementSetter() throws Exception {
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
 				template.query(sql, (PreparedStatementSetter) null, rch);
 			}
-		}, true, null, null, null, null);
+		});
 	}
 
+	@Test
 	public void testStringsWithPreparedStatementSetter() throws Exception {
-		final Integer argument = new Integer(99);
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+		final Integer argument = 99;
+		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
 				template.query(sql, new PreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps) throws SQLException {
 						ps.setObject(1, argument);
 					}
 				}, rch);
 			}
-		}, true, null, null, null, argument);
+		});
 	}
 
+	@Test
 	public void testStringsWithEmptyPreparedStatementArgs() throws Exception {
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
+		doTestStrings(true, null, null, null, null, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
 				template.query(sql, (Object[]) null, rch);
 			}
-		}, true, null, null, null, null);
+		});
 	}
 
+	@Test
 	public void testStringsWithPreparedStatementArgs() throws Exception {
-		final Integer argument = new Integer(99);
-		doTestStrings(new JdbcTemplateCallback() {
-			public void doInJdbcTemplate(JdbcTemplate template, String sql, RowCallbackHandler rch) {
-				template.query(sql, new Object[] {argument}, rch);
+		final Integer argument = 99;
+		doTestStrings(true, null, null, null, argument, new JdbcTemplateCallback() {
+			@Override
+			public void doInJdbcTemplate(JdbcTemplate template, String sql,
+					RowCallbackHandler rch) {
+				template.query(sql, new Object[] { argument }, rch);
 			}
-		}, true, null, null, null, argument);
+		});
 	}
 
 	private void doTestStrings(
-			JdbcTemplateCallback jdbcTemplateCallback, boolean usePreparedStatement,
-			Integer fetchSize, Integer maxRows, Integer queryTimeout, Object argument)
+			boolean usePreparedStatement,
+			Integer fetchSize, Integer maxRows, Integer queryTimeout, Object argument,
+			JdbcTemplateCallback jdbcTemplateCallback)
 			throws Exception {
 
 		String sql = "SELECT FORENAME FROM CUSTMR";
 		String[] results = { "rod", "gary", " portia" };
 
 		class StringHandler implements RowCallbackHandler {
-			private List list = new LinkedList();
+			private List<String> list = new LinkedList<String>();
+			@Override
 			public void processRow(ResultSet rs) throws SQLException {
-				list.add(rs.getString(1));
+				this.list.add(rs.getString(1));
 			}
 			public String[] getStrings() {
-				return (String[]) list.toArray(new String[list.size()]);
+				return this.list.toArray(new String[this.list.size()]);
 			}
 		}
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getString(1);
-		ctrlResultSet.setReturnValue(results[0]);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getString(1);
-		ctrlResultSet.setReturnValue(results[1]);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.getString(1);
-		ctrlResultSet.setReturnValue(results[2]);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		if (fetchSize != null) {
-			mockStatement.setFetchSize(fetchSize.intValue());
-		}
-		if (maxRows != null) {
-			mockStatement.setMaxRows(maxRows.intValue());
-		}
-		if (queryTimeout != null) {
-			mockStatement.setQueryTimeout(queryTimeout.intValue());
-		}
-		if (argument != null) {
-			mockStatement.setObject(1, argument);
-		}
-		if (usePreparedStatement) {
-			mockStatement.executeQuery();
-		}
-		else {
-			mockStatement.executeQuery(sql);
-		}
-		ctrlStatement.setReturnValue(mockResultSet);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		if (usePreparedStatement) {
-			mockConnection.prepareStatement(sql);
-		}
-		else {
-			mockConnection.createStatement();
-		}
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
+		given(this.resultSet.next()).willReturn(true, true, true, false);
+		given(this.resultSet.getString(1)).willReturn(results[0], results[1], results[2]);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
 		StringHandler sh = new StringHandler();
 		JdbcTemplate template = new JdbcTemplate();
-		template.setDataSource(mockDataSource);
+		template.setDataSource(this.dataSource);
 		if (fetchSize != null) {
 			template.setFetchSize(fetchSize.intValue());
 		}
@@ -309,619 +273,340 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			assertTrue("Row " + i + " matches", forenames[i].equals(results[i]));
 		}
 
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
+		if (fetchSize != null) {
+			verify(this.preparedStatement).setFetchSize(fetchSize.intValue());
+		}
+		if (maxRows != null) {
+			verify(this.preparedStatement).setMaxRows(maxRows.intValue());
+		}
+		if (queryTimeout != null) {
+			verify(this.preparedStatement).setQueryTimeout(queryTimeout.intValue());
+		}
+		if (argument != null) {
+			verify(this.preparedStatement).setObject(1, argument);
+		}
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testLeaveConnectionOpenOnRequest() throws Exception {
 		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		ctrlResultSet = MockControl.createControl(ResultSet.class);
-		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.isClosed();
-		ctrlConnection.setReturnValue(false, 2);
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
+		given(this.resultSet.next()).willReturn(false);
+		given(this.connection.isClosed()).willReturn(false);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 		// if close is called entire test will fail
-		mockConnection.close();
-		ctrlConnection.setDefaultThrowable(new RuntimeException());
+		willThrow(new RuntimeException()).given(this.connection).close();
 
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		SingleConnectionDataSource scf = new SingleConnectionDataSource(mockDataSource.getConnection(), false);
-		JdbcTemplate template2 = new JdbcTemplate(scf, false);
+		SingleConnectionDataSource scf = new SingleConnectionDataSource(this.dataSource.getConnection(), false);
+		this.template = new JdbcTemplate(scf, false);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		template2.query(sql, rcch);
+		this.template.query(sql, rcch);
 
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
 	}
 
+	@Test
 	public void testConnectionCallback() throws Exception {
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
-		Object result = template.execute(new ConnectionCallback() {
-			public Object doInConnection(Connection con) {
-				assertSame(mockConnection, con);
+		this.template.setNativeJdbcExtractor(new PlainNativeJdbcExtractor());
+		String result = this.template.execute(new ConnectionCallback<String>() {
+			@Override
+			public String doInConnection(Connection con) {
+				assertSame(JdbcTemplateTests.this.connection, con);
 				return "test";
 			}
 		});
-
 		assertEquals("test", result);
 	}
 
+	@Test
 	public void testConnectionCallbackWithStatementSettings() throws Exception {
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockConnection.prepareStatement("some SQL");
-		ctrlConnection.setReturnValue(mockStatement, 1);
-		mockStatement.setFetchSize(10);
-		ctrlStatement.setVoidCallable(1);
-		mockStatement.setMaxRows(20);
-		ctrlStatement.setVoidCallable(1);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable(1);
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		Object result = template.execute(new ConnectionCallback() {
-			public Object doInConnection(Connection con) throws SQLException {
+		String result = this.template.execute(new ConnectionCallback<String>() {
+			@Override
+			public String doInConnection(Connection con) throws SQLException {
 				PreparedStatement ps = con.prepareStatement("some SQL");
+				ps.setFetchSize(10);
+				ps.setMaxRows(20);
 				ps.close();
-				assertSame(mockConnection, new PlainNativeJdbcExtractor().getNativeConnection(con));
+				assertSame(JdbcTemplateTests.this.connection, new PlainNativeJdbcExtractor().getNativeConnection(con));
 				return "test";
 			}
 		});
 
 		assertEquals("test", result);
+		verify(this.preparedStatement).setFetchSize(10);
+		verify(this.preparedStatement).setMaxRows(20);
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testCloseConnectionOnRequest() throws Exception {
 		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
+		given(this.resultSet.next()).willReturn(false);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		template.query(sql, rcch);
+		this.template.query(sql, rcch);
 
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
 	/**
 	 * Test that we see a runtime exception come back.
 	 */
+	@Test
 	public void testExceptionComesBack() throws Exception {
 		final String sql = "SELECT ID FROM CUSTMR";
-		final RuntimeException rex = new RuntimeException("What I want to see");
+		final RuntimeException runtimeException = new RuntimeException("Expected");
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
+		given(this.resultSet.next()).willReturn(true);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		this.thrown.expect(sameInstance(runtimeException));
 		try {
-			template.query(sql, new RowCallbackHandler() {
+			this.template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) {
-					throw rex;
+					throw runtimeException;
 				}
 			});
-			fail("Should have thrown exception");
 		}
-		catch (RuntimeException ex) {
-			assertTrue("Wanted same exception back, not " + ex, ex == rex);
+		finally {
+			verify(this.resultSet).close();
+			verify(this.preparedStatement).close();
+			verify(this.connection).close();
 		}
 	}
 
 	/**
 	 * Test update with static SQL.
 	 */
+	@Test
 	public void testSqlUpdate() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.executeUpdate(sql);
-		ctrlStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.executeUpdate(sql)).willReturn(rowsAffected);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		int actualRowsAffected = template.update(sql);
+		int actualRowsAffected = this.template.update(sql);
 		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
-		ctrlStatement.verify();
+		verify(this.statement).close();
+		verify(this.connection).close();
 	}
 
 	/**
 	 * Test update with dynamic SQL.
 	 */
+	@Test
 	public void testSqlUpdateWithArguments() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ? and PR = ?";
 		int rowsAffected = 33;
+		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected);
 
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.setObject(1, new Integer(4));
-		ctrlStatement.setVoidCallable();
-		mockStatement.setObject(2, new Float(1.4142), Types.NUMERIC, 2);
-		ctrlStatement.setVoidCallable();
-		mockStatement.executeUpdate();
-		ctrlStatement.setReturnValue(33);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockStatement);
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		int actualRowsAffected = template.update(sql,
-				new Object[] {new Integer(4), new SqlParameterValue(Types.NUMERIC, 2, new Float(1.4142))});
+		int actualRowsAffected = this.template.update(sql,
+				new Object[] {4, new SqlParameterValue(Types.NUMERIC, 2, new Float(1.4142))});
 		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
-		ctrlStatement.verify();
+		verify(this.preparedStatement).setObject(1, 4);
+		verify(this.preparedStatement).setObject(2, new Float(1.4142), Types.NUMERIC, 2);
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testSqlUpdateEncountersSqlException() throws Exception {
-		SQLException sex = new SQLException("bad update");
+		SQLException sqlException = new SQLException("bad update");
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.executeUpdate(sql);
-		ctrlStatement.setThrowable(sex);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.executeUpdate(sql)).willThrow(sqlException);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
-			template.update(sql);
+			this.template.update(sql);
 		}
-		catch (DataAccessException ex) {
-			assertTrue("root cause is correct", ex.getCause() == sex);
+		finally {
+			verify(this.statement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlStatement.verify();
 	}
 
+	@Test
 	public void testSqlUpdateWithThreadConnection() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 4";
 		int rowsAffected = 33;
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.executeUpdate(sql);
-		ctrlStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.executeUpdate(sql)).willReturn(rowsAffected);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
+		int actualRowsAffected = this.template.update(sql);
+		assertTrue("Actual rows affected is correct", actualRowsAffected == rowsAffected);
 
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		int actualRowsAffected = template.update(sql);
-		assertTrue(
-			"Actual rows affected is correct",
-			actualRowsAffected == rowsAffected);
-
-		ctrlStatement.verify();
+		verify(this.statement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testBatchUpdate() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.getConnection();
-		ctrlStatement.setReturnValue(mockConnection);
-		mockStatement.addBatch(sql[0]);
-		ctrlStatement.setVoidCallable();
-		mockStatement.addBatch(sql[1]);
-		ctrlStatement.setVoidCallable();
-		mockStatement.executeBatch();
-		ctrlStatement.setReturnValue(new int[] {1, 1});
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.executeBatch()).willReturn(new int[] {1, 1});
+		mockDatabaseMetaData(true);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
-		ctrlStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.statement).addBatch(sql[0]);
+		verify(this.statement).addBatch(sql[1]);
+		verify(this.statement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithNoBatchSupport() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 2"};
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.getConnection();
-		ctrlStatement.setReturnValue(mockConnection);
-		mockStatement.execute(sql[0]);
-		ctrlStatement.setReturnValue(false);
-		mockStatement.getUpdateCount();
-		ctrlStatement.setReturnValue(1);
-		mockStatement.execute(sql[1]);
-		ctrlStatement.setReturnValue(false);
-		mockStatement.getUpdateCount();
-		ctrlStatement.setReturnValue(1);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.execute(sql[0])).willReturn(false);
+		given(this.statement.getUpdateCount()).willReturn(1, 1);
+		given(this.statement.execute(sql[1])).willReturn(false);
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(false);
+		mockDatabaseMetaData(false);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 
-		ctrlStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.statement, never()).addBatch(anyString());
+		verify(this.statement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithNoBatchSupportAndSelect() throws Exception {
 		final String[] sql = {"UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = 1",
 				"SELECT * FROM NOSUCHTABLE"};
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.getConnection();
-		ctrlStatement.setReturnValue(mockConnection);
-		mockStatement.execute(sql[0]);
-		ctrlStatement.setReturnValue(false);
-		mockStatement.getUpdateCount();
-		ctrlStatement.setReturnValue(1);
-		mockStatement.execute(sql[1]);
-		ctrlStatement.setReturnValue(true);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
+		given(this.statement.execute(sql[0])).willReturn(false);
+		given(this.statement.getUpdateCount()).willReturn(1);
+		given(this.statement.execute(sql[1])).willReturn(true);
+		mockDatabaseMetaData(false);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(false);
-
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+		this.thrown.expect(InvalidDataAccessApiUsageException.class);
 		try {
 			template.batchUpdate(sql);
-			fail("Shouldn't have executed batch statement with a select");
 		}
-		catch (DataAccessException ex) {
-			// pass
-			assertTrue("Check exception type", ex.getClass() == InvalidDataAccessApiUsageException.class);
+		finally {
+			verify(this.statement, never()).addBatch(anyString());
+			verify(this.statement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlStatement.verify();
-		ctrlDatabaseMetaData.verify();
 	}
 
+	@Test
 	public void testBatchUpdateWithPreparedStatement() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
 
 		BatchPreparedStatementSetter setter =
 			new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i)
 				throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
 		};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.preparedStatement, times(2)).addBatch();
+		verify(this.preparedStatement).setInt(1, ids[0]);
+		verify(this.preparedStatement).setInt(1, ids[1]);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testInterruptibleBatchUpdate() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
 
 		BatchPreparedStatementSetter setter =
 				new InterruptibleBatchPreparedStatementSetter() {
+					@Override
 					public void setValues(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
 						}
 					}
+					@Override
 					public int getBatchSize() {
 						return 1000;
 					}
+					@Override
 					public boolean isBatchExhausted(int i) {
 						return (i >= ids.length);
 					}
 				};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.preparedStatement, times(2)).addBatch();
+		verify(this.preparedStatement).setInt(1, ids[0]);
+		verify(this.preparedStatement).setInt(1, ids[1]);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testInterruptibleBatchUpdateWithBaseClass() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
 
 		BatchPreparedStatementSetter setter =
 				new AbstractInterruptibleBatchPreparedStatementSetter() {
+					@Override
 					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
@@ -933,59 +618,32 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 					}
 				};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.preparedStatement, times(2)).addBatch();
+		verify(this.preparedStatement).setInt(1, ids[0]);
+		verify(this.preparedStatement).setInt(1, ids[1]);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testInterruptibleBatchUpdateWithBaseClassAndNoBatchSupport() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected[0]);
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(false);
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
+		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
+		mockDatabaseMetaData(false);
 
 		BatchPreparedStatementSetter setter =
 				new AbstractInterruptibleBatchPreparedStatementSetter() {
+					@Override
 					protected boolean setValuesIfAvailable(PreparedStatement ps, int i) throws SQLException {
 						if (i < ids.length) {
 							ps.setInt(1, ids[i]);
@@ -997,129 +655,86 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 					}
 				};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.preparedStatement, never()).addBatch();
+		verify(this.preparedStatement).setInt(1, ids[0]);
+		verify(this.preparedStatement).setInt(1, ids[1]);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithPreparedStatementAndNoBatchSupport() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected[0]);
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(rowsAffected[1]);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlPreparedStatement.replay();
-		replay();
+		given(this.preparedStatement.executeUpdate()).willReturn(rowsAffected[0], rowsAffected[1]);
 
 		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
 		};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-
-		int[] actualRowsAffected = template.batchUpdate(sql, setter);
+		int[] actualRowsAffected = this.template.batchUpdate(sql, setter);
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		ctrlPreparedStatement.verify();
+		verify(this.preparedStatement, never()).addBatch();
+		verify(this.preparedStatement).setInt(1, ids[0]);
+		verify(this.preparedStatement).setInt(1, ids[1]);
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testBatchUpdateFails() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final int[] ids = new int[] { 100, 200 };
-		SQLException sex = new SQLException();
+		SQLException sqlException = new SQLException();
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids[0]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids[1]);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setThrowable(sex);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		ctrlConnection.reset();
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable(2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
+		given(this.preparedStatement.executeBatch()).willThrow(sqlException);
+		mockDatabaseMetaData(true);
 
 		BatchPreparedStatementSetter setter = new BatchPreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				ps.setInt(1, ids[i]);
 			}
+			@Override
 			public int getBatchSize() {
 				return ids.length;
 			}
 		};
 
+		this.thrown.expect(DataAccessException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
-			JdbcTemplate template = new JdbcTemplate(mockDataSource);
-			template.batchUpdate(sql, setter);
-			fail("Should have failed because of SQLException in bulk update");
+			this.template.batchUpdate(sql, setter);
 		}
-		catch (DataAccessException ex) {
-			assertTrue("Root cause is SQLException", ex.getCause() == sex);
+		finally {
+			verify(this.preparedStatement, times(2)).addBatch();
+			verify(this.preparedStatement).setInt(1, ids[0]);
+			verify(this.preparedStatement).setInt(1, ids[1]);
+			verify(this.preparedStatement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
 	}
 
+	@Test
 	public void testBatchUpdateWithListOfObjectArrays() throws Exception {
 
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
@@ -1128,22 +743,10 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		ids.add(new Object[] {200});
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
 
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, null, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
-				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
-				mockDatabaseMetaData);
-
-		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[] actualRowsAffected = template.batchUpdate(sql, ids);
 
@@ -1151,11 +754,15 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
 
-		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+		verify(this.preparedStatement, times(2)).addBatch();
+		verify(this.preparedStatement).setObject(1, 100);
+		verify(this.preparedStatement).setObject(1, 200);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithListOfObjectArraysPlusTypeInfo() throws Exception {
-
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
 		final List<Object[]> ids = new ArrayList<Object[]>();
 		ids.add(new Object[] {100});
@@ -1163,91 +770,40 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		final int[] sqlTypes = new int[] {Types.NUMERIC};
 		final int[] rowsAffected = new int[] { 1, 2 };
 
-		MockControl ctrlDataSource = MockControl.createControl(DataSource.class);
-		DataSource mockDataSource = (DataSource) ctrlDataSource.getMock();
-		MockControl ctrlConnection = MockControl.createControl(Connection.class);
-		Connection mockConnection = (Connection) ctrlConnection.getMock();
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected);
+		mockDatabaseMetaData(true);
 
-		BatchUpdateTestHelper.prepareBatchUpdateMocks(sql, ids, sqlTypes, rowsAffected, ctrlDataSource, mockDataSource, ctrlConnection,
-				mockConnection, ctrlPreparedStatement, mockPreparedStatement, ctrlDatabaseMetaData,
-				mockDatabaseMetaData);
-
-		BatchUpdateTestHelper.replayBatchUpdateMocks(ctrlDataSource, ctrlConnection, ctrlPreparedStatement, ctrlDatabaseMetaData);
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-
-		int[] actualRowsAffected = template.batchUpdate(sql, ids, sqlTypes);
+		this.template = new JdbcTemplate(this.dataSource, false);
+		int[] actualRowsAffected = this.template.batchUpdate(sql, ids, sqlTypes);
 
 		assertTrue("executed 2 updates", actualRowsAffected.length == 2);
 		assertEquals(rowsAffected[0], actualRowsAffected[0]);
 		assertEquals(rowsAffected[1], actualRowsAffected[1]);
-
-		BatchUpdateTestHelper.verifyBatchUpdateMocks(ctrlPreparedStatement, ctrlDatabaseMetaData);
+		verify(this.preparedStatement, times(2)).addBatch();
+		verify(this.preparedStatement).setObject(1, 100, sqlTypes[0]);
+		verify(this.preparedStatement).setObject(1, 200, sqlTypes[0]);
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testBatchUpdateWithCollectionOfObjects() throws Exception {
 		final String sql = "UPDATE NOSUCHTABLE SET DATE_DISPATCHED = SYSDATE WHERE ID = ?";
-		final List<Integer> ids = new ArrayList<Integer>();
-		ids.add(Integer.valueOf(100));
-		ids.add(Integer.valueOf(200));
-		ids.add(Integer.valueOf(300));
+		final List<Integer> ids = Arrays.asList(100, 200, 300);
 		final int[] rowsAffected1 = new int[] { 1, 2 };
 		final int[] rowsAffected2 = new int[] { 3 };
 
-		MockControl ctrlPreparedStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement = (PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.getConnection();
-		ctrlPreparedStatement.setReturnValue(mockConnection);
-		mockPreparedStatement.setInt(1, ids.get(0));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids.get(1));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.setInt(1, ids.get(2));
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected1);
-		mockPreparedStatement.addBatch();
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeBatch();
-		ctrlPreparedStatement.setReturnValue(rowsAffected2);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
+		given(this.preparedStatement.executeBatch()).willReturn(rowsAffected1, rowsAffected2);
+		mockDatabaseMetaData(true);
 
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-		mockDatabaseMetaData.supportsBatchUpdates();
-		ctrlDatabaseMetaData.setReturnValue(true);
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData, 2);
-
-		ctrlPreparedStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		ParameterizedPreparedStatementSetter setter = new ParameterizedPreparedStatementSetter<Integer>() {
+		ParameterizedPreparedStatementSetter<Integer> setter = new ParameterizedPreparedStatementSetter<Integer>() {
+			@Override
 			public void setValues(PreparedStatement ps, Integer argument) throws SQLException {
 				ps.setInt(1, argument.intValue());
 			}
 		};
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
 
 		int[][] actualRowsAffected = template.batchUpdate(sql, ids, 2, setter);
 		assertTrue("executed 2 updates", actualRowsAffected[0].length == 2);
@@ -1255,131 +811,47 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		assertEquals(rowsAffected1[1], actualRowsAffected[0][1]);
 		assertEquals(rowsAffected2[0], actualRowsAffected[1][0]);
 
-		ctrlPreparedStatement.verify();
-		ctrlDatabaseMetaData.verify();
+		verify(this.preparedStatement, times(3)).addBatch();
+		verify(this.preparedStatement).setInt(1, ids.get(0));
+		verify(this.preparedStatement).setInt(1, ids.get(1));
+		verify(this.preparedStatement).setInt(1, ids.get(2));
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
-	public void testCouldntGetConnectionOrExceptionTranslator() throws SQLException {
-		SQLException sex = new SQLException("foo", "07xxx");
-
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		// Expect two calls (one call after caching data product name): make get metadata fail also
-		ctrlDataSource.setThrowable(sex, 2);
-		replay();
-
-		try {
-			JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
-			fail("Shouldn't have executed query without a connection");
-		}
-		catch (CannotGetJdbcConnectionException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
-		}
-
-		ctrlDataSource.verify();
-	}
-
+	@Test
 	public void testCouldntGetConnectionForOperationOrExceptionTranslator() throws SQLException {
-		SQLException sex = new SQLException("foo", "07xxx");
-
-		// Change behavior in setUp() because we only expect one call to getConnection():
-		// none is necessary to get metadata for exception translator
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		// Expect two calls (one call after caching data product name): make get Metadata fail also
-		ctrlDataSource.setThrowable(sex, 2);
-		replay();
-
-		try {
-			JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
-			fail("Shouldn't have executed query without a connection");
-		}
-		catch (CannotGetJdbcConnectionException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
-		}
-
-		ctrlDataSource.verify();
+		SQLException sqlException = new SQLException("foo", "07xxx");
+		this.dataSource = mock(DataSource.class);
+		given(this.dataSource.getConnection()).willThrow(sqlException);
+		JdbcTemplate template = new JdbcTemplate(this.dataSource, false);
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+		this.thrown.expect(CannotGetJdbcConnectionException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
+		template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 	}
 
+	@Test
 	public void testCouldntGetConnectionForOperationWithLazyExceptionTranslator() throws SQLException {
-		SQLException sex = new SQLException("foo", "07xxx");
-
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex, 1);
-		replay();
-
-		try {
-			JdbcTemplate template2 = new JdbcTemplate();
-			template2.setDataSource(mockDataSource);
-			template2.afterPropertiesSet();
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
-			fail("Shouldn't have executed query without a connection");
-		}
-		catch (CannotGetJdbcConnectionException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
-		}
-
-		ctrlDataSource.verify();
+		SQLException sqlException = new SQLException("foo", "07xxx");
+		this.dataSource = mock(DataSource.class);
+		given(this.dataSource.getConnection()).willThrow(sqlException);
+		this.template = new JdbcTemplate();
+		this.template.setDataSource(this.dataSource);
+		this.template.afterPropertiesSet();
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+		this.thrown.expect(CannotGetJdbcConnectionException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
+		this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 	}
 
-	/**
-	 * Verify that afterPropertiesSet invokes exception translator.
-	 */
-	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitialized() throws SQLException {
-		SQLException sex = new SQLException("foo", "07xxx");
-
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		//mockConnection.getMetaData();
-		//ctrlConnection.setReturnValue(null, 1);
-		//mockConnection.close();
-		//ctrlConnection.setVoidCallable(1);
-		ctrlConnection.replay();
-
-		// Change behaviour in setUp() because we only expect one call to getConnection():
-		// none is necessary to get metadata for exception translator
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		// Upfront call for metadata - no longer the case
-		//mockDataSource.getConnection();
-		//ctrlDataSource.setReturnValue(mockConnection, 1);
-		// One call for operation
-		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex, 2);
-		ctrlDataSource.replay();
-
-		try {
-			JdbcTemplate template = new JdbcTemplate(mockDataSource, false);
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
-			fail("Shouldn't have executed query without a connection");
-		}
-		catch (CannotGetJdbcConnectionException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
-		}
-
-		ctrlDataSource.verify();
-		ctrlConnection.verify();
-	}
-
+	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedViaBeanProperty()
 			throws Exception {
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(true);
 	}
 
+	@Test
 	public void testCouldntGetConnectionInOperationWithExceptionTranslatorInitializedInAfterPropertiesSet()
 			throws Exception {
 		doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(false);
@@ -1391,364 +863,196 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 	 */
 	private void doTestCouldntGetConnectionInOperationWithExceptionTranslatorInitialized(boolean beanProperty)
 			throws SQLException {
-
-		SQLException sex = new SQLException("foo", "07xxx");
-
-		ctrlConnection = MockControl.createControl(Connection.class);
-		mockConnection = (Connection) ctrlConnection.getMock();
-		//mockConnection.getMetaData();
-		//ctrlConnection.setReturnValue(null, 1);
-		//mockConnection.close();
-		//ctrlConnection.setVoidCallable(1);
-		ctrlConnection.replay();
-
-		// Change behaviour in setUp() because we only expect one call to getConnection():
-		// none is necessary to get metadata for exception translator
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		// Upfront call for metadata - no longer the case
-		//mockDataSource.getConnection();
-		//ctrlDataSource.setReturnValue(mockConnection, 1);
-		// One call for operation
-		mockDataSource.getConnection();
-		ctrlDataSource.setThrowable(sex, 2);
-		ctrlDataSource.replay();
-
-		try {
-			JdbcTemplate template2 = new JdbcTemplate();
-			template2.setDataSource(mockDataSource);
-			template2.setLazyInit(false);
-			if (beanProperty) {
-				// This will get a connection.
-				template2.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(mockDataSource));
-			}
-			else {
-				// This will cause creation of default SQL translator.
-				// Note that only call should be effective.
-				template2.afterPropertiesSet();
-				template2.afterPropertiesSet();
-			}
-			RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-			template2.query(
-				"SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3",
-				rcch);
-			fail("Shouldn't have executed query without a connection");
+		SQLException sqlException = new SQLException("foo", "07xxx");
+		this.dataSource = mock(DataSource.class);
+		given(this.dataSource.getConnection()).willThrow(sqlException);
+		this.template = new JdbcTemplate();
+		this.template.setDataSource(this.dataSource);
+		this.template.setLazyInit(false);
+		if (beanProperty) {
+			// This will get a connection.
+			this.template.setExceptionTranslator(new SQLErrorCodeSQLExceptionTranslator(this.dataSource));
 		}
-		catch (CannotGetJdbcConnectionException ex) {
-			// pass
-			assertTrue("Check root cause", ex.getCause() == sex);
+		else {
+			// This will cause creation of default SQL translator.
+			this.template.afterPropertiesSet();
 		}
-
-		ctrlDataSource.verify();
-		ctrlConnection.verify();
+		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
+		this.thrown.expect(CannotGetJdbcConnectionException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
+		this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
 	}
 
+	@Test
 	public void testPreparedStatementSetterSucceeds() throws Exception {
 		final String sql = "UPDATE FOO SET NAME=? WHERE ID = 1";
 		final String name = "Gary";
 		int expectedRowsUpdated = 1;
 
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.setString(1, name);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setReturnValue(expectedRowsUpdated);
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlPreparedStatement.replay();
-		replay();
+		given(this.preparedStatement.executeUpdate()).willReturn(expectedRowsUpdated);
 
 		PreparedStatementSetter pss = new PreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setString(1, name);
 			}
 		};
-		int actualRowsUpdated =
-			new JdbcTemplate(mockDataSource).update(sql, pss);
-		assertTrue(
-			"updated correct # of rows",
-			actualRowsUpdated == expectedRowsUpdated);
-
-		ctrlPreparedStatement.verify();
+		int actualRowsUpdated = new JdbcTemplate(this.dataSource).update(sql, pss);
+		assertTrue("updated correct # of rows", actualRowsUpdated == expectedRowsUpdated);
+		verify(this.preparedStatement).setString(1, name);
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testPreparedStatementSetterFails() throws Exception {
 		final String sql = "UPDATE FOO SET NAME=? WHERE ID = 1";
 		final String name = "Gary";
-		SQLException sex = new SQLException();
-
-		MockControl ctrlPreparedStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockPreparedStatement =
-			(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.setString(1, name);
-		ctrlPreparedStatement.setVoidCallable();
-		mockPreparedStatement.executeUpdate();
-		ctrlPreparedStatement.setThrowable(sex);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.prepareStatement(sql);
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlPreparedStatement.replay();
-		replay();
+		SQLException sqlException = new SQLException();
+		given(this.preparedStatement.executeUpdate()).willThrow(sqlException);
 
 		PreparedStatementSetter pss = new PreparedStatementSetter() {
+			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
 				ps.setString(1, name);
 			}
 		};
+		this.thrown.expect(DataAccessException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
-			new JdbcTemplate(mockDataSource).update(sql, pss);
-			fail("Should have failed with SQLException");
+			new JdbcTemplate(this.dataSource).update(sql, pss);
 		}
-		catch (DataAccessException ex) {
-			assertTrue("root cause was preserved", ex.getCause() == sex);
+		finally {
+			verify(this.preparedStatement).setString(1, name);
+			verify(this.preparedStatement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlPreparedStatement.verify();
 	}
 
+	@Test
 	public void testCouldntClose() throws Exception {
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		Statement mockStatement = (Statement) ctrlStatement.getMock();
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-		String sql = "SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3";
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		SQLException sex = new SQLException("bar");
-		mockResultSet.close();
-		ctrlResultSet.setThrowable(sex);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setThrowable(sex);
-		mockConnection.close();
-		ctrlConnection.setThrowable(sex);
+		SQLException sqlException = new SQLException("bar");
+		given(this.connection.createStatement()).willReturn(this.statement);
+		given(this.resultSet.next()).willReturn(false);
+		willThrow(sqlException).given(this.resultSet).close();
+		willThrow(sqlException).given(this.statement).close();
+		willThrow(sqlException).given(this.connection).close();
 
-		ctrlStatement.replay();
-		ctrlResultSet.replay();
-		replay();
-
-		JdbcTemplate template2 = new JdbcTemplate(mockDataSource);
 		RowCountCallbackHandler rcch = new RowCountCallbackHandler();
-		template2.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
-
-		ctrlStatement.verify();
-		ctrlResultSet.verify();
+		this.template.query("SELECT ID, FORENAME FROM CUSTMR WHERE ID < 3", rcch);
+		verify(this.connection).close();
 	}
 
 	/**
 	 * Mock objects allow us to produce warnings at will
 	 */
+	@Test
 	public void testFatalWarning() throws Exception {
 		String sql = "SELECT forename from custmr";
 		SQLWarning warnings = new SQLWarning("My warning");
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
+		given(this.resultSet.next()).willReturn(false);
+		given(this.preparedStatement.getWarnings()).willReturn(warnings);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.getWarnings();
-		ctrlStatement.setReturnValue(warnings);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
-
-		JdbcTemplate t = new JdbcTemplate(mockDataSource);
+		JdbcTemplate t = new JdbcTemplate(this.dataSource);
 		t.setIgnoreWarnings(false);
+		this.thrown.expect(SQLWarningException.class);
+		this.thrown.expect(exceptionCause(sameInstance(warnings)));
 		try {
 			t.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
 					rs.getByte(1);
 				}
 			});
-			fail("Should have thrown exception on warning");
 		}
-		catch (SQLWarningException ex) {
-			// Pass
-			assertTrue(
-				"Root cause of warning was correct",
-				ex.getCause() == warnings);
+		finally {
+			verify(this.resultSet).close();
+			verify(this.preparedStatement).close();
+			verify(this.connection).close();
 		}
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
 	}
 
+	@Test
 	public void testIgnoredWarning() throws Exception {
 		String sql = "SELECT forename from custmr";
 		SQLWarning warnings = new SQLWarning("My warning");
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(false);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		MockControl ctrlStatement =
-			MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement =
-			(PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
+		given(this.resultSet.next()).willReturn(false);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
+		given(this.preparedStatement.getWarnings()).willReturn(warnings);
 
 		// Too long: truncation
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.setIgnoreWarnings(true);
-		template.query(sql, new RowCallbackHandler() {
-			public void processRow(ResultSet rs)
-				throws java.sql.SQLException {
+
+		this.template.setIgnoreWarnings(true);
+		this.template.query(sql, new RowCallbackHandler() {
+			@Override
+			public void processRow(ResultSet rs) throws java.sql.SQLException {
 				rs.getByte(1);
 			}
 		});
 
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
+		verify(this.resultSet).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection).close();
 	}
 
+	@Test
 	public void testSQLErrorCodeTranslation() throws Exception {
-		final SQLException sex = new SQLException("I have a known problem", "99999", 1054);
+		final SQLException sqlException = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
+		given(this.resultSet.next()).willReturn(true);
+		mockDatabaseMetaData(false);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		MockControl ctrlDatabaseMetaData = MockControl.createControl(DatabaseMetaData.class);
-		DatabaseMetaData mockDatabaseMetaData = (DatabaseMetaData) ctrlDatabaseMetaData.getMock();
-		mockDatabaseMetaData.getDatabaseProductName();
-		ctrlDatabaseMetaData.setReturnValue("MySQL");
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-		mockConnection.getMetaData();
-		ctrlConnection.setReturnValue(mockDatabaseMetaData);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		ctrlDatabaseMetaData.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		this.thrown.expect(BadSqlGrammarException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
-			template.query(sql, new RowCallbackHandler() {
+			this.template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
-					throw sex;
+					throw sqlException;
 				}
 			});
 			fail("Should have thrown BadSqlGrammarException");
 		}
-		catch (BadSqlGrammarException ex) {
-			// expected
-			assertTrue("Wanted same exception back, not " + ex, sex == ex.getCause());
+		finally {
+			verify(this.resultSet).close();
+			verify(this.preparedStatement).close();
+			verify(this.connection, atLeastOnce()).close();
 		}
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
-		ctrlDatabaseMetaData.verify();
 	}
 
+	@Test
 	public void testSQLErrorCodeTranslationWithSpecifiedDbName() throws Exception {
-		final SQLException sex = new SQLException("I have a known problem", "99999", 1054);
+		final SQLException sqlException = new SQLException("I have a known problem", "99999", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		replay();
+		given(this.resultSet.next()).willReturn(true);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
 		JdbcTemplate template = new JdbcTemplate();
-		template.setDataSource(mockDataSource);
+		template.setDataSource(this.dataSource);
 		template.setDatabaseProductName("MySQL");
 		template.afterPropertiesSet();
+
+		this.thrown.expect(BadSqlGrammarException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
 			template.query(sql, new RowCallbackHandler() {
+				@Override
 				public void processRow(ResultSet rs) throws SQLException {
-					throw sex;
+					throw sqlException;
 				}
 			});
-			fail("Should have thrown BadSqlGrammarException");
 		}
-		catch (BadSqlGrammarException ex) {
-			// expected
-			assertTrue("Wanted same exception back, not " + ex, sex == ex.getCause());
+		finally {
+			verify(this.resultSet).close();
+			verify(this.preparedStatement).close();
+			verify(this.connection).close();
 		}
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
 	}
 
 	/**
@@ -1756,265 +1060,147 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 	 * If we provide the SQLExceptionTranslator, we shouldn't use a connection
 	 * to get the metadata
 	 */
+	@Test
 	public void testUseCustomSQLErrorCodeTranslator() throws Exception {
 		// Bad SQL state
-		final SQLException sex = new SQLException("I have a known problem", "07000", 1054);
+		final SQLException sqlException = new SQLException("I have a known problem", "07000", 1054);
 		final String sql = "SELECT ID FROM CUSTOMER";
 
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		MockControl ctrlStatement = MockControl.createControl(PreparedStatement.class);
-		PreparedStatement mockStatement = (PreparedStatement) ctrlStatement.getMock();
-		mockStatement.executeQuery(sql);
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-
-		// Change behaviour in setUp() because we only expect one call to getConnection():
-		// none is necessary to get metadata for exception translator
-		ctrlConnection = MockControl.createControl(Connection.class);
-		mockConnection = (Connection) ctrlConnection.getMock();
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement, 1);
-		mockConnection.close();
-		ctrlConnection.setVoidCallable(1);
-		ctrlConnection.replay();
-
-		ctrlDataSource = MockControl.createControl(DataSource.class);
-		mockDataSource = (DataSource) ctrlDataSource.getMock();
-		mockDataSource.getConnection();
-		ctrlDataSource.setReturnValue(mockConnection, 1);
-		ctrlDataSource.replay();
-		///// end changed behaviour
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
+		given(this.resultSet.next()).willReturn(true);
+		given(this.connection.createStatement()).willReturn(this.preparedStatement);
 
 		JdbcTemplate template = new JdbcTemplate();
-		template.setDataSource(mockDataSource);
+		template.setDataSource(this.dataSource);
 		// Set custom exception translator
 		template.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		template.afterPropertiesSet();
+
+		this.thrown.expect(BadSqlGrammarException.class);
+		this.thrown.expect(exceptionCause(sameInstance(sqlException)));
 		try {
 			template.query(sql, new RowCallbackHandler() {
-				public void processRow(ResultSet rs)
-					throws SQLException {
-					throw sex;
+				@Override
+				public void processRow(ResultSet rs) throws SQLException {
+					throw sqlException;
 				}
 			});
-			fail("Should have thrown exception");
 		}
-		catch (BadSqlGrammarException ex) {
-			assertTrue(
-				"Wanted same exception back, not " + ex,
-				sex == ex.getCause());
+		finally {
+			verify(this.resultSet).close();
+			verify(this.preparedStatement).close();
+			verify(this.connection).close();
 		}
-
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
-
-		// We didn't call superclass replay() so we need to check these ourselves
-		ctrlDataSource.verify();
-		ctrlConnection.verify();
 	}
 
+	@Test
 	public void testNativeJdbcExtractorInvoked() throws Exception {
-		MockControl ctrlResultSet = MockControl.createControl(ResultSet.class);
-		final ResultSet mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable(2);
 
-		MockControl ctrlStatement = MockControl.createControl(Statement.class);
-		final Statement mockStatement = (Statement) ctrlStatement.getMock();
-		if (debugEnabled) {
-			mockStatement.getWarnings();
-			ctrlStatement.setReturnValue(null);
-		}
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-		MockControl ctrlStatement2 = MockControl.createControl(Statement.class);
-		final Statement mockStatement2 = (Statement) ctrlStatement2.getMock();
-		mockStatement2.executeQuery("my query");
-		ctrlStatement2.setReturnValue(mockResultSet, 1);
+		final Statement statement2 = mock(Statement.class);
+		given(statement2.executeQuery(anyString())).willReturn(this.resultSet);
 
-		MockControl ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
-		if (debugEnabled) {
-			mockPreparedStatement.getWarnings();
-			ctrlPreparedStatement.setReturnValue(null);
-		}
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-		MockControl ctrlPreparedStatement2 =	MockControl.createControl(PreparedStatement.class);
-		final PreparedStatement mockPreparedStatement2 =	(PreparedStatement) ctrlPreparedStatement2.getMock();
-		mockPreparedStatement2.executeQuery();
-		ctrlPreparedStatement2.setReturnValue(mockResultSet, 1);
+		final PreparedStatement preparedStatement2 = mock(PreparedStatement.class);
+		given(preparedStatement2.executeQuery()).willReturn(this.resultSet);
 
-		MockControl ctrlReturnResultSet = MockControl.createControl(ResultSet.class);
-		final ResultSet mockReturnResultSet = (ResultSet) ctrlReturnResultSet.getMock();
-		mockReturnResultSet.next();
-		ctrlReturnResultSet.setReturnValue(false);
-		mockReturnResultSet.close();
-		ctrlReturnResultSet.setVoidCallable(2);
+		final ResultSet returnResultSet = mock(ResultSet.class);
+		given(returnResultSet.next()).willReturn(false);
 
-		MockControl ctrlCallableStatement =	MockControl.createControl(CallableStatement.class);
-		final CallableStatement mockCallableStatement =	(CallableStatement) ctrlCallableStatement.getMock();
-		if (debugEnabled) {
-			mockCallableStatement.getWarnings();
-			ctrlCallableStatement.setReturnValue(null);
-		}
-		mockCallableStatement.close();
-		ctrlCallableStatement.setVoidCallable();
-		MockControl ctrlCallableStatement2 = MockControl.createControl(CallableStatement.class);
-		final CallableStatement mockCallableStatement2 = (CallableStatement) ctrlCallableStatement2.getMock();
-		mockCallableStatement2.execute();
-		ctrlCallableStatement2.setReturnValue(true);
-		mockCallableStatement2.getUpdateCount();
-		ctrlCallableStatement2.setReturnValue(-1);
-		mockCallableStatement2.getResultSet();
-		ctrlCallableStatement2.setReturnValue(mockReturnResultSet);
-		mockCallableStatement2.getMoreResults();
-		ctrlCallableStatement2.setReturnValue(false);
-		mockCallableStatement2.getUpdateCount();
-		ctrlCallableStatement2.setReturnValue(-1);
+		final CallableStatement callableStatement = mock(CallableStatement.class);
+		final CallableStatement callableStatement2 = mock(CallableStatement.class);
+		given(callableStatement2.execute()).willReturn(true);
+		given(callableStatement2.getUpdateCount()).willReturn(-1);
+		given(callableStatement2.getResultSet()).willReturn(returnResultSet);
+		given(callableStatement2.getUpdateCount()).willReturn(-1);
 
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		ctrlStatement2.replay();
-		ctrlPreparedStatement.replay();
-		ctrlPreparedStatement2.replay();
-		ctrlReturnResultSet.replay();;
-		ctrlCallableStatement.replay();
-		ctrlCallableStatement2.replay();
+		given(this.connection.createStatement()).willReturn(this.statement);
 
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement, 1);
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
+		this.template.setNativeJdbcExtractor(new NativeJdbcExtractor() {
+			@Override
 			public boolean isNativeConnectionNecessaryForNativeStatements() {
 				return false;
 			}
+			@Override
 			public boolean isNativeConnectionNecessaryForNativePreparedStatements() {
 				return false;
 			}
+			@Override
 			public boolean isNativeConnectionNecessaryForNativeCallableStatements() {
 				return false;
 			}
+			@Override
 			public Connection getNativeConnection(Connection con) {
 				return con;
 			}
+			@Override
 			public Connection getNativeConnectionFromStatement(Statement stmt) throws SQLException {
 				return stmt.getConnection();
 			}
+			@Override
 			public Statement getNativeStatement(Statement stmt) {
-				assertTrue(stmt == mockStatement);
-				return mockStatement2;
+				assertTrue(stmt == JdbcTemplateTests.this.statement);
+				return statement2;
 			}
+			@Override
 			public PreparedStatement getNativePreparedStatement(PreparedStatement ps) {
-				assertTrue(ps == mockPreparedStatement);
-				return mockPreparedStatement2;
+				assertTrue(ps == JdbcTemplateTests.this.preparedStatement);
+				return preparedStatement2;
 			}
+			@Override
 			public CallableStatement getNativeCallableStatement(CallableStatement cs) {
-				assertTrue(cs == mockCallableStatement);
-				return mockCallableStatement2;
+				assertTrue(cs == callableStatement);
+				return callableStatement2;
 			}
+			@Override
 			public ResultSet getNativeResultSet(ResultSet rs) {
 				return rs;
 			}
 		});
 
-		template.query("my query",	new ResultSetExtractor() {
+		this.template.query("my query", new ResultSetExtractor<Object>() {
+			@Override
 			public Object extractData(ResultSet rs2) {
-				assertEquals(mockResultSet, rs2);
+				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
 				return null;
 			}
 		});
 
-		template.query(new PreparedStatementCreator() {
+		this.template.query(new PreparedStatementCreator() {
+			@Override
 			public PreparedStatement createPreparedStatement(Connection conn) {
-				return mockPreparedStatement;
+				return JdbcTemplateTests.this.preparedStatement;
 			}
-		}, new ResultSetExtractor() {
+		}, new ResultSetExtractor<Object>() {
+			@Override
 			public Object extractData(ResultSet rs2) {
-				assertEquals(mockResultSet, rs2);
+				assertEquals(JdbcTemplateTests.this.resultSet, rs2);
 				return null;
 			}
 		});
 
-		template.call(new CallableStatementCreator() {
+		this.template.call(new CallableStatementCreator() {
+			@Override
 			public CallableStatement createCallableStatement(Connection con) {
-				return mockCallableStatement;
+				return callableStatement;
 			}
-		},
-		new ArrayList());
+		}, new ArrayList<SqlParameter>());
 
-		ctrlStatement.verify();
-		ctrlStatement2.verify();
-		ctrlPreparedStatement.verify();
-		ctrlPreparedStatement2.verify();
-		ctrlCallableStatement.verify();
-		ctrlCallableStatement2.verify();
+		verify(this.resultSet, times(2)).close();
+		verify(this.statement).close();
+		verify(this.preparedStatement).close();
+		verify(returnResultSet).close();
+		verify(callableStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testStaticResultSetClosed() throws Exception {
-		MockControl ctrlResultSet;
-		ResultSet mockResultSet;
-		MockControl ctrlStatement;
-		Statement mockStatement;
-		MockControl ctrlResultSet2;
-		ResultSet mockResultSet2;
-		MockControl ctrlPreparedStatement;
-		PreparedStatement mockPreparedStatement;
-
-		ctrlResultSet = MockControl.createControl(ResultSet.class);
-		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		ctrlStatement = MockControl.createControl(Statement.class);
-		mockStatement = (Statement) ctrlStatement.getMock();
-		mockStatement.executeQuery("my query");
-		ctrlStatement.setReturnValue(mockResultSet);
-		mockStatement.close();
-		ctrlStatement.setVoidCallable();
-
-		ctrlResultSet2 = MockControl.createControl(ResultSet.class);
-		mockResultSet2 = (ResultSet) ctrlResultSet2.getMock();
-		mockResultSet2.close();
-		ctrlResultSet2.setVoidCallable();
-
-		ctrlPreparedStatement =	MockControl.createControl(PreparedStatement.class);
-		mockPreparedStatement =	(PreparedStatement) ctrlPreparedStatement.getMock();
-		mockPreparedStatement.executeQuery();
-		ctrlPreparedStatement.setReturnValue(mockResultSet2);
-		mockPreparedStatement.close();
-		ctrlPreparedStatement.setVoidCallable();
-
-		mockConnection.createStatement();
-		ctrlConnection.setReturnValue(mockStatement);
-		mockConnection.prepareStatement("my query");
-		ctrlConnection.setReturnValue(mockPreparedStatement);
-
-		ctrlResultSet.replay();
-		ctrlStatement.replay();
-		ctrlResultSet2.replay();
-		ctrlPreparedStatement.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		ResultSet resultSet2 = mock(ResultSet.class);
+		reset(this.preparedStatement);
+		given(this.preparedStatement.executeQuery()).willReturn(resultSet2);
+		given(this.connection.createStatement()).willReturn(this.statement);
 
 		try {
-			template.query("my query", new ResultSetExtractor() {
+			this.template.query("my query", new ResultSetExtractor<Object>() {
+				@Override
 				public Object extractData(ResultSet rs) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
@@ -2026,14 +1212,14 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 		}
 
 		try {
-			template.query(new PreparedStatementCreator() {
-				public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+			this.template.query(new PreparedStatementCreator() {
+				@Override
+				public PreparedStatement createPreparedStatement(Connection con)
+						throws SQLException {
 					return con.prepareStatement("my query");
 				}
-				public String getSql() {
-					return null;
-				}
-			}, new ResultSetExtractor() {
+			}, new ResultSetExtractor<Object>() {
+				@Override
 				public Object extractData(ResultSet rs2) {
 					throw new InvalidDataAccessApiUsageException("");
 				}
@@ -2044,121 +1230,88 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			// ok
 		}
 
-		// verify confirms if test is successful by checking if close() called
-		ctrlResultSet.verify();
-		ctrlStatement.verify();
-		ctrlResultSet2.verify();
-		ctrlPreparedStatement.verify();
+		verify(this.resultSet).close();
+		verify(resultSet2).close();
+		verify(this.preparedStatement).close();
+		verify(this.connection, atLeastOnce()).close();
 	}
 
+	@Test
 	public void testExecuteClosed() throws Exception {
-		MockControl ctrlResultSet;
-		ResultSet mockResultSet;
-		MockControl ctrlCallable;
-		CallableStatement mockCallable;
+		given(this.resultSet.next()).willReturn(true);
+		given(this.callableStatement.execute()).willReturn(true);
+		given(this.callableStatement.getUpdateCount()).willReturn(-1);
 
-		ctrlResultSet = MockControl.createControl(ResultSet.class);
-		mockResultSet = (ResultSet) ctrlResultSet.getMock();
-		mockResultSet.next();
-		ctrlResultSet.setReturnValue(true);
-		mockResultSet.close();
-		ctrlResultSet.setVoidCallable();
-
-		ctrlCallable = MockControl.createControl(CallableStatement.class);
-		mockCallable = (CallableStatement) ctrlCallable.getMock();
-		mockCallable.execute();
-		ctrlCallable.setReturnValue(true);
-		mockCallable.getUpdateCount();
-		ctrlCallable.setReturnValue(-1);
-		mockCallable.getResultSet();
-		ctrlCallable.setReturnValue(mockResultSet);
-		mockCallable.close();
-		ctrlCallable.setVoidCallable();
-
-		mockConnection.prepareCall("my query");
-		ctrlConnection.setReturnValue(mockCallable);
-
-		ctrlResultSet.replay();
-		ctrlCallable.replay();
-		replay();
-
-		List params = new ArrayList();
+		List<SqlParameter> params = new ArrayList<SqlParameter>();
 		params.add(new SqlReturnResultSet("", new RowCallbackHandler() {
+			@Override
 			public void processRow(ResultSet rs) {
 				throw new InvalidDataAccessApiUsageException("");
 			}
 
 		}));
 
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
+		this.thrown.expect(InvalidDataAccessApiUsageException.class);
 		try {
-			template.call(new CallableStatementCreator() {
-				public CallableStatement createCallableStatement(Connection conn) throws SQLException {
+			this.template.call(new CallableStatementCreator() {
+				@Override
+				public CallableStatement createCallableStatement(Connection conn)
+						throws SQLException {
 					return conn.prepareCall("my query");
 				}
 			}, params);
 		}
-		catch (InvalidDataAccessApiUsageException idaauex) {
-			// ok
+		finally {
+			verify(this.resultSet).close();
+			verify(this.callableStatement).close();
+			verify(this.connection).close();
 		}
-
-		// verify confirms if test is successful by checking if close() called
-		ctrlResultSet.verify();
-		ctrlCallable.verify();
 	}
 
+	@Test
 	public void testCaseInsensitiveResultsMap() throws Exception {
 
-		MockControl ctrlCallable;
-		CallableStatement mockCallable;
+		given(this.callableStatement.execute()).willReturn(false);
+		given(this.callableStatement.getUpdateCount()).willReturn(-1);
+		given(this.callableStatement.getObject(1)).willReturn("X");
 
-		ctrlCallable = MockControl.createControl(CallableStatement.class);
-		mockCallable = (CallableStatement) ctrlCallable.getMock();
-		mockCallable.execute();
-		ctrlCallable.setReturnValue(false);
-		mockCallable.getUpdateCount();
-		ctrlCallable.setReturnValue(-1);
-		mockCallable.getObject(1);
-		ctrlCallable.setReturnValue("X");
-		if (debugEnabled) {
-			mockCallable.getWarnings();
-			ctrlCallable.setReturnValue(null);
-		}
-		mockCallable.close();
-		ctrlCallable.setVoidCallable();
+		assertTrue("default should have been NOT case insensitive",
+				!this.template.isResultsMapCaseInsensitive());
 
-		mockConnection.prepareCall("my query");
-		ctrlConnection.setReturnValue(mockCallable);
+		this.template.setResultsMapCaseInsensitive(true);
+		assertTrue("now it should have been set to case insensitive",
+				this.template.isResultsMapCaseInsensitive());
 
-		ctrlCallable.replay();
-		replay();
-
-		JdbcTemplate template = new JdbcTemplate(mockDataSource);
-		assertTrue("default should have been NOT case insensitive", !template.isResultsMapCaseInsensitive());
-
-		template.setResultsMapCaseInsensitive(true);
-		assertTrue("now it should have been set to case insensitive", template.isResultsMapCaseInsensitive());
-
-		List params = new ArrayList();
+		List<SqlParameter> params = new ArrayList<SqlParameter>();
 		params.add(new SqlOutParameter("a", 12));
 
-		Map out = template.call(new CallableStatementCreator() {
-			public CallableStatement createCallableStatement(Connection conn) throws SQLException {
+		Map out = this.template.call(new CallableStatementCreator() {
+			@Override
+			public CallableStatement createCallableStatement(Connection conn)
+					throws SQLException {
 				return conn.prepareCall("my query");
 			}
 		}, params);
-		assertTrue("this should have been a LinkedCaseInsensitiveMap", out instanceof LinkedCaseInsensitiveMap);
+
+		assertThat(out, instanceOf(LinkedCaseInsensitiveMap.class));
 		assertNotNull("we should have gotten the result with upper case", out.get("A"));
 		assertNotNull("we should have gotten the result with lower case", out.get("a"));
-
-		ctrlCallable.verify();
+		verify(this.callableStatement).close();
+		verify(this.connection).close();
 	}
 
+	private void mockDatabaseMetaData(boolean supportsBatchUpdates) throws SQLException {
+		DatabaseMetaData databaseMetaData = mock(DatabaseMetaData.class);
+		given(databaseMetaData.getDatabaseProductName()).willReturn("MySQL");
+		given(databaseMetaData.supportsBatchUpdates()).willReturn(supportsBatchUpdates);
+		given(this.connection.getMetaData()).willReturn(databaseMetaData);
+	}
 
 	private static class PlainNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
-		protected Connection doGetNativeConnection(Connection con) throws SQLException {
-			return con;
+		@Override
+		protected Connection doGetNativeConnection(Connection connection) throws SQLException {
+			return connection;
 		}
 	}
 
@@ -2179,15 +1332,16 @@ public class JdbcTemplateTests extends AbstractJdbcTests {
 			this.sql = sql;
 		}
 
-		public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setInt(1, id);
+		@Override
+		public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+			PreparedStatement ps = connection.prepareStatement(this.sql);
+			ps.setInt(1, this.id);
 			return ps;
 		}
 
+		@Override
 		public String getSql() {
-			return sql;
+			return this.sql;
 		}
 	}
-
 }

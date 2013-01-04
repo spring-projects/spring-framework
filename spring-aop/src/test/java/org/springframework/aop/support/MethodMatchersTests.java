@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package org.springframework.aop.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.springframework.aop.MethodMatcher;
-
-import test.beans.IOther;
-import test.beans.ITestBean;
-import test.beans.TestBean;
-import test.util.SerializationTestUtils;
+import org.springframework.tests.sample.beans.IOther;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Juergen Hoeller
@@ -107,6 +108,7 @@ public final class MethodMatchersTests {
 		public StartsWithMatcher(String s) {
 			this.prefix = s;
 		}
+		@Override
 		public boolean matches(Method m, Class<?> targetClass) {
 			return m.getName().startsWith(prefix);
 		}
@@ -114,12 +116,14 @@ public final class MethodMatchersTests {
 
 
 	private static class TestDynamicMethodMatcherWhichMatches extends DynamicMethodMatcher {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return true;
 		}
 	}
 
 	private static class TestDynamicMethodMatcherWhichDoesNotMatch extends DynamicMethodMatcher {
+		@Override
 		public boolean matches(Method m, Class<?> targetClass, Object[] args) {
 			return false;
 		}

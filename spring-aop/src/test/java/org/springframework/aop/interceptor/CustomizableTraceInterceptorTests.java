@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.lang.reflect.Method;
 
@@ -83,47 +88,32 @@ public final class CustomizableTraceInterceptorTests {
 
 	@Test
 	public void testSunnyDayPathLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
 
-		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock(MethodInvocation.class);
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(methodInvocation.getThis()).willReturn(this);
 
-		Method toString = String.class.getMethod("toString", new Class[]{});
-
-		expect(log.isTraceEnabled()).andReturn(true);
-		expect(methodInvocation.getMethod()).andReturn(toString).times(4);
-		expect(methodInvocation.getThis()).andReturn(this).times(2);
-		log.trace(isA(String.class));
-		expect(methodInvocation.proceed()).andReturn(null);
-		log.trace(isA(String.class));
-
-		replay(methodInvocation);
-		replay(log);
+		Log log = mock(Log.class);
+		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
 		interceptor.invoke(methodInvocation);
 
-		verify(log);
-		verify(methodInvocation);
+		verify(log, times(2)).trace(anyString());
 	}
 
 	@Test
 	public void testExceptionPathLogsCorrectly() throws Throwable {
-		Log log = createMock(Log.class);
 
-		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock(MethodInvocation.class);
 
-		Method toString = String.class.getMethod("toString", new Class[]{});
-
-		expect(log.isTraceEnabled()).andReturn(true);
-		expect(methodInvocation.getMethod()).andReturn(toString).times(4);
-		expect(methodInvocation.getThis()).andReturn(this).times(2);
-		log.trace(isA(String.class));
 		IllegalArgumentException exception = new IllegalArgumentException();
-		expect(methodInvocation.proceed()).andThrow(exception);
-		log.trace(isA(String.class), eq(exception));
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[]{}));
+		given(methodInvocation.getThis()).willReturn(this);
+		given(methodInvocation.proceed()).willThrow(exception);
 
-		replay(log);
-		replay(methodInvocation);
+		Log log = mock(Log.class);
+		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
 		try {
@@ -133,29 +123,22 @@ public final class CustomizableTraceInterceptorTests {
 		catch (IllegalArgumentException expected) {
 		}
 
-		verify(log);
-		verify(methodInvocation);
+		verify(log).trace(anyString());
+		verify(log).trace(anyString(), eq(exception));
 	}
 
 	@Test
 	public void testSunnyDayPathLogsCorrectlyWithPrettyMuchAllPlaceholdersMatching() throws Throwable {
-		Log log = createMock(Log.class);
 
-		MethodInvocation methodInvocation = createMock(MethodInvocation.class);
+		MethodInvocation methodInvocation = mock(MethodInvocation.class);
 
-		Method toString = String.class.getMethod("toString", new Class[0]);
-		Object[] arguments = new Object[]{"$ One \\$", new Long(2)};
+		given(methodInvocation.getMethod()).willReturn(String.class.getMethod("toString", new Class[0]));
+		given(methodInvocation.getThis()).willReturn(this);
+		given(methodInvocation.getArguments()).willReturn(new Object[]{"$ One \\$", new Long(2)});
+		given(methodInvocation.proceed()).willReturn("Hello!");
 
-		expect(log.isTraceEnabled()).andReturn(true);
-		expect(methodInvocation.getMethod()).andReturn(toString).times(7);
-		expect(methodInvocation.getThis()).andReturn(this).times(2);
-		expect(methodInvocation.getArguments()).andReturn(arguments).times(2);
-		log.trace(isA(String.class));
-		expect(methodInvocation.proceed()).andReturn("Hello!");
-		log.trace(isA(String.class));
-
-		replay(methodInvocation);
-		replay(log);
+		Log log = mock(Log.class);
+		given(log.isTraceEnabled()).willReturn(true);
 
 		CustomizableTraceInterceptor interceptor = new StubCustomizableTraceInterceptor(log);
 		interceptor.setEnterMessage(new StringBuffer()
@@ -174,8 +157,7 @@ public final class CustomizableTraceInterceptorTests {
 			.append("' this long.").toString());
 		interceptor.invoke(methodInvocation);
 
-		verify(log);
-		verify(methodInvocation);
+		verify(log, times(2)).trace(anyString());
 	}
 
 
@@ -189,6 +171,7 @@ public final class CustomizableTraceInterceptorTests {
 			this.log = log;
 		}
 
+		@Override
 		protected Log getLoggerForInvocation(MethodInvocation invocation) {
 			return this.log;
 		}

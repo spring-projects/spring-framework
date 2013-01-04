@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -223,50 +223,62 @@ public class CollectionToCollectionConverterTests {
 
 	public static abstract class BaseResource implements Resource {
 
+		@Override
 		public InputStream getInputStream() throws IOException {
 			return null;
 		}
 
+		@Override
 		public boolean exists() {
 			return false;
 		}
 
+		@Override
 		public boolean isReadable() {
 			return false;
 		}
 
+		@Override
 		public boolean isOpen() {
 			return false;
 		}
 
+		@Override
 		public URL getURL() throws IOException {
 			return null;
 		}
 
+		@Override
 		public URI getURI() throws IOException {
 			return null;
 		}
 
+		@Override
 		public File getFile() throws IOException {
 			return null;
 		}
 
+		@Override
 		public long contentLength() throws IOException {
 			return 0;
 		}
 
+		@Override
 		public long lastModified() throws IOException {
 			return 0;
 		}
 
+		@Override
 		public Resource createRelative(String relativePath) throws IOException {
 			return null;
 		}
 
+		@Override
 		public String getFilename() {
 			return null;
 		}
 
+		@Override
 		public String getDescription() {
 			return null;
 		}

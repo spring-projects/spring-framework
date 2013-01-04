@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.springframework.util.SerializationTestUtils;
  */
 public class TransactionInterceptorTests extends AbstractTransactionAspectTests {
 
+	@Override
 	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource[] tas) throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
@@ -49,6 +50,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	 * target object and transaction setup.
 	 * Creates a TransactionInterceptor and applies it.
 	 */
+	@Override
 	protected Object advised(Object target, PlatformTransactionManager ptm, TransactionAttributeSource tas) {
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionManager(ptm);
@@ -111,14 +113,17 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 	@SuppressWarnings("serial")
 	public static class SerializableTransactionManager implements PlatformTransactionManager, Serializable {
 
+		@Override
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void commit(TransactionStatus status) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		public void rollback(TransactionStatus status) throws TransactionException {
 			throw new UnsupportedOperationException();
 		}

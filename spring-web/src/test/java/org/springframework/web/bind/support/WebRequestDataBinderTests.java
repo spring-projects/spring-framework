@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
@@ -46,6 +46,7 @@ public class WebRequestDataBinderTests {
 
 		WebRequestDataBinder binder = new WebRequestDataBinder(tb, "person");
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+			@Override
 			public void setAsText(String text) throws IllegalArgumentException {
 				setValue(new TestBean());
 			}
@@ -62,7 +63,7 @@ public class WebRequestDataBinderTests {
 
 	@Test
 	public void testBindingWithNestedObjectCreationThroughAutoGrow() throws Exception {
-		TestBean tb = new TestBean();
+		TestBean tb = new TestBeanWithConcreteSpouse();
 
 		WebRequestDataBinder binder = new WebRequestDataBinder(tb, "person");
 		binder.setIgnoreUnknownFields(false);
@@ -304,21 +305,30 @@ public class WebRequestDataBinderTests {
 
 	public static class EnumHolder {
 
-	   private MyEnum myEnum;
+		private MyEnum myEnum;
 
-	   public MyEnum getMyEnum() {
-		   return myEnum;
-	   }
+		public MyEnum getMyEnum() {
+			return myEnum;
+		}
 
-	   public void setMyEnum(MyEnum myEnum) {
-		   this.myEnum = myEnum;
-	   }
-   }
+		public void setMyEnum(MyEnum myEnum) {
+			this.myEnum = myEnum;
+		}
+	}
 
+	public enum MyEnum {
+		FOO, BAR
+	}
 
-   public enum MyEnum {
+	static class TestBeanWithConcreteSpouse extends TestBean {
+		public void setConcreteSpouse(TestBean spouse) {
+			this.spouses = new ITestBean[] {spouse};
+		}
 
-	   FOO, BAR
-   }
+		public TestBean getConcreteSpouse() {
+			return (spouses != null ? (TestBean) spouses[0] : null);
+		}
+	}
+
 
 }

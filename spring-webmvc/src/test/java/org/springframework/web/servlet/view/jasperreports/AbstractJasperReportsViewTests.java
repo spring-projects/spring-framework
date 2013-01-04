@@ -411,10 +411,12 @@ public abstract class AbstractJasperReportsViewTests extends AbstractJasperRepor
 			super(clazz);
 		}
 
+		@Override
 		public JRDataSource create(JasperReport jasperReport) throws JRException {
 			return new JRBeanCollectionDataSource(getData());
 		}
 
+		@Override
 		public void dispose(JRDataSource jrDataSource) throws JRException {
 
 		}

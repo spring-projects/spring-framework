@@ -16,6 +16,6 @@
 		<property name="message" value="Hello World!"/>
 	</bean>
 
-	<bean id="advice" class="test.advice.CountingBeforeAdvice"/>
+	<bean id="advice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
 
 </beans>

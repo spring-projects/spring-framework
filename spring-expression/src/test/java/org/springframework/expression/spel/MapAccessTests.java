@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.expression.spel;
 
-import java.util.Map;
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.Assert;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.expression.AccessException;
@@ -56,7 +56,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap.monday");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("montag", value);
+		assertEquals("montag", value);
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class MapAccessTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseExpression("testMap[#day]");
 		Object value = expr.getValue(ctx, String.class);
-		Assert.assertEquals("samstag", value);
+		assertEquals("samstag", value);
 	}
 
 	@Test
@@ -149,24 +149,29 @@ public class MapAccessTests extends ExpressionTestCase {
 
 	public static class MapAccessor implements PropertyAccessor {
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return (((Map) target).containsKey(name));
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(((Map) target).get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return true;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 			((Map) target).put(name, newValue);
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return new Class[] { Map.class };
 		}

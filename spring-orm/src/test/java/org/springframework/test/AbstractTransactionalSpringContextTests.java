@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,6 +187,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @throws Exception simply let any exception propagate
 	 * @see #onTearDown()
 	 */
+	@Override
 	protected void onSetUp() throws Exception {
 		this.complete = !this.isRollback();
 
@@ -250,6 +251,7 @@ public abstract class AbstractTransactionalSpringContextTests extends AbstractDe
 	 * @throws Exception simply let any exception propagate
 	 * @see #onSetUp()
 	 */
+	@Override
 	protected void onTearDown() throws Exception {
 		// Call onTearDownInTransaction and end transaction if the transaction
 		// is still active.

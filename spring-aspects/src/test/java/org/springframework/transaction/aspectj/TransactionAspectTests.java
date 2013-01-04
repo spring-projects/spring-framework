@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import junit.framework.AssertionFailedError;
 
 import org.springframework.test.AbstractDependencyInjectionSpringContextTests;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.interceptor.TransactionAttribute;

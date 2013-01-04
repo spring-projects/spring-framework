@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 import org.springframework.expression.EvaluationException;
@@ -34,6 +34,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 
 	static class StringAndBooleanAddition implements OperatorOverloader {
 
+		@Override
 		public Object operate(Operation operation, Object leftOperand, Object rightOperand) throws EvaluationException {
 			if (operation==Operation.ADD) {
 				return ((String)leftOperand)+((Boolean)rightOperand).toString();
@@ -42,6 +43,7 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 			}
 		}
 
+		@Override
 		public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
 				throws EvaluationException {
 			if (leftOperand instanceof String && rightOperand instanceof Boolean) {
@@ -62,12 +64,12 @@ public class OperatorOverloaderTests extends ExpressionTestCase {
 		eContext.setOperatorOverloader(new StringAndBooleanAddition());
 
 		SpelExpression expr = (SpelExpression)parser.parseExpression("'abc'+true");
-		Assert.assertEquals("abctrue",expr.getValue(eContext));
+		assertEquals("abctrue",expr.getValue(eContext));
 
 		expr = (SpelExpression)parser.parseExpression("'abc'-true");
-		Assert.assertEquals("abc",expr.getValue(eContext));
+		assertEquals("abc",expr.getValue(eContext));
 
 		expr = (SpelExpression)parser.parseExpression("'abc'+null");
-		Assert.assertEquals("abcnull",expr.getValue(eContext));
+		assertEquals("abcnull",expr.getValue(eContext));
 	}
 }

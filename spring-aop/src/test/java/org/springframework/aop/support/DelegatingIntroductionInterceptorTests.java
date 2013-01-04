@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.springframework.aop.support;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 
@@ -26,16 +29,15 @@ import org.junit.Test;
 import org.springframework.aop.IntroductionAdvisor;
 import org.springframework.aop.IntroductionInterceptor;
 import org.springframework.aop.framework.ProxyFactory;
-
-import test.aop.SerializableNopInterceptor;
-import test.beans.INestedTestBean;
-import test.beans.ITestBean;
-import test.beans.NestedTestBean;
-import test.beans.Person;
-import test.beans.SerializablePerson;
-import test.beans.TestBean;
-import test.util.SerializationTestUtils;
-import test.util.TimeStamped;
+import org.springframework.tests.TimeStamped;
+import org.springframework.tests.aop.interceptor.SerializableNopInterceptor;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.Person;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.SerializationTestUtils;
 
 /**
  * @author Rod Johnson
@@ -56,17 +58,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(TimeStamped.class);
+		TimeStamped ts = mock(TimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts)));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -75,17 +74,14 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof SubTimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), SubTimeStamped.class));
 
 		SubTimeStamped tsp = (SubTimeStamped) factory.getProxy();
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
@@ -94,26 +90,25 @@ public final class DelegatingIntroductionInterceptorTests {
 		assertTrue(! (raw instanceof TimeStamped));
 		ProxyFactory factory = new ProxyFactory(raw);
 
-		TimeStamped ts = createMock(SubTimeStamped.class);
+		TimeStamped ts = mock(SubTimeStamped.class);
 		long timestamp = 111L;
-		expect(ts.getTimeStamp()).andReturn(timestamp);
-		replay(ts);
+		given(ts.getTimeStamp()).willReturn(timestamp);
 
 		factory.addAdvisor(0, new DefaultIntroductionAdvisor(new DelegatingIntroductionInterceptor(ts), TimeStamped.class));
 
 		TimeStamped tsp = (TimeStamped) factory.getProxy();
 		assertTrue(!(tsp instanceof SubTimeStamped));
 		assertTrue(tsp.getTimeStamp() == timestamp);
-
-		verify(ts);
 	}
 
 	@Test
 	public void testAutomaticInterfaceRecognitionInDelegate() throws Exception {
 		final long t = 1001L;
 		class Tester implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -141,8 +136,10 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped, ITester {
+			@Override
 			public void foo() throws Exception {
 			}
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -206,6 +203,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		String company = "Interface21";
 		target.setCompany(company);
 		TestBean delegate = new TestBean() {
+			@Override
 			public ITestBean getSpouse() {
 				return this;
 			}
@@ -250,6 +248,7 @@ public final class DelegatingIntroductionInterceptorTests {
 		final long t = 1001L;
 		@SuppressWarnings("serial")
 		class TestII extends DelegatingIntroductionInterceptor implements TimeStamped {
+			@Override
 			public long getTimeStamp() {
 				return t;
 			}
@@ -278,6 +277,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.ts = ts;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return ts;
 		}
@@ -292,6 +292,7 @@ public final class DelegatingIntroductionInterceptorTests {
 			this.t = t;
 		}
 
+		@Override
 		public long getTimeStamp() {
 			return t;
 		}

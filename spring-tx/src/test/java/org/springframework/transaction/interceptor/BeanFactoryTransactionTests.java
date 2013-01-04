@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,21 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.easymock.MockControl;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
-import org.springframework.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
 import org.springframework.beans.FatalBeanException;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
@@ -48,10 +49,13 @@ import org.springframework.transaction.TransactionStatus;
  */
 public class BeanFactoryTransactionTests extends TestCase {
 
-	private XmlBeanFactory factory;
+	private DefaultListableBeanFactory factory;
 
+	@Override
 	public void setUp() {
-		this.factory = new XmlBeanFactory(new ClassPathResource("transactionalBeanFactory.xml", getClass()));
+		this.factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(
+				new ClassPathResource("transactionalBeanFactory.xml", getClass()));
 	}
 
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
@@ -127,6 +131,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		final TransactionStatus ts = (TransactionStatus) statusControl.getMock();
 		ptm = new PlatformTransactionManager() {
 			private boolean invoked;
+			@Override
 			public TransactionStatus getTransaction(TransactionDefinition def) throws TransactionException {
 				if (invoked) {
 					throw new IllegalStateException("getTransaction should not get invoked more than once");
@@ -138,9 +143,11 @@ public class BeanFactoryTransactionTests extends TestCase {
 				}
 				return ts;
 			}
+			@Override
 			public void commit(TransactionStatus status) throws TransactionException {
 				assertTrue(status == ts);
 			}
+			@Override
 			public void rollback(TransactionStatus status) throws TransactionException {
 				throw new IllegalStateException("rollback should not get invoked");
 			}
@@ -163,7 +170,8 @@ public class BeanFactoryTransactionTests extends TestCase {
 	 */
 	public void testNoTransactionAttributeSource() {
 		try {
-			XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
+			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+			new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("noTransactionAttributeSource.xml", getClass()));
 			ITestBean testBean = (ITestBean) bf.getBean("noTransactionAttributeSource");
 			fail("Should require TransactionAttributeSource to be set");
 		}
@@ -204,6 +212,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 		int counter = 0;
 
+		@Override
 		public boolean matches(Method method, Class clazz) {
 			counter++;
 			return true;
@@ -215,6 +224,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 
 		int counter = 0;
 
+		@Override
 		public Object invoke(MethodInvocation methodInvocation) throws Throwable {
 			counter++;
 			return methodInvocation.proceed();

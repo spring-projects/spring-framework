@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * This implementation is final. Override {@code onSetUp} for custom behavior.
 	 * @see #onSetUp()
 	 */
+	@Override
 	protected final void setUp() throws Exception {
 		// lazy load, in case getApplicationContext() has not yet been called.
 		if (this.applicationContext == null) {
@@ -136,6 +137,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * custom behavior.
 	 * @see #onTearDown()
 	 */
+	@Override
 	protected final void tearDown() throws Exception {
 		onTearDown();
 	}
@@ -168,6 +170,7 @@ public abstract class AbstractSingleSpringContextTests extends AbstractSpringCon
 	 * {@code contextKey()} returns.
 	 * @see #getConfigLocations()
 	 */
+	@Override
 	protected ConfigurableApplicationContext loadContext(Object key) throws Exception {
 		return loadContextLocations((String[]) key);
 	}

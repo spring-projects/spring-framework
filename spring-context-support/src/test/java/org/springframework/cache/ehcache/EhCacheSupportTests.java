@@ -188,6 +188,7 @@ public class EhCacheSupportTests extends TestCase {
 			cacheFb.setCacheManager(cm);
 			cacheFb.setCacheName("myCache1");
 			cacheFb.setCacheEntryFactory(new CacheEntryFactory() {
+				@Override
 				public Object createEntry(Object key) throws Exception {
 					return key;
 				}
@@ -212,9 +213,11 @@ public class EhCacheSupportTests extends TestCase {
 			cacheFb.setCacheManager(cm);
 			cacheFb.setCacheName("myCache1");
 			cacheFb.setCacheEntryFactory(new UpdatingCacheEntryFactory() {
+				@Override
 				public Object createEntry(Object key) throws Exception {
 					return key;
 				}
+				@Override
 				public void updateEntryValue(Object key, Object value) throws Exception {
 				}
 			});

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Method;
 import java.util.List;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.core.MethodParameter;
@@ -54,15 +56,15 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 			ctx.setRootObject(new Person("Ben"));
 			Boolean value = expr.getValue(ctx,Boolean.class);
-			Assert.assertFalse(value);
+			assertFalse(value);
 
 			ctx.setRootObject(new Manager("Luke"));
 			value = expr.getValue(ctx,Boolean.class);
-			Assert.assertTrue(value);
+			assertTrue(value);
 
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			Assert.fail("Unexpected SpelException: " + ee.getMessage());
+			fail("Unexpected SpelException: " + ee.getMessage());
 		}
 	}
 
@@ -79,11 +81,11 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		ctx.setRootObject(new Person("Andy"));
 		Boolean value = expr.getValue(ctx,Boolean.class);
-		Assert.assertTrue(value);
+		assertTrue(value);
 
 		ctx.setRootObject(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertFalse(value);
+		assertFalse(value);
 
 		// (2) Or register an accessor that can understand 'p' and return the right person
 		expr = parser.parseRaw("p.name == principal.name");
@@ -94,11 +96,11 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		pAccessor.setPerson(new Person("Andy"));
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertTrue(value);
+		assertTrue(value);
 
 		pAccessor.setPerson(new Person("Christian"));
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertFalse(value);
+		assertFalse(value);
 	}
 
 	@Test
@@ -115,12 +117,12 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		ctx.setRootObject(new Supervisor("Ben")); // so non-qualified references 'hasRole()' 'hasIpAddress()' are invoked against it
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertTrue(value);
+		assertTrue(value);
 
 		ctx.setRootObject(new Manager("Luke"));
 		ctx.setVariable("a",1.043d);
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertFalse(value);
+		assertFalse(value);
 	}
 
 	// Here i'm going to change which hasRole() executes and make it one of my own Java methods
@@ -141,7 +143,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		ctx.setVariable("a",1.0d); // referenced as #a in the expression
 		value = expr.getValue(ctx,Boolean.class);
-		Assert.assertTrue(value);
+		assertTrue(value);
 
 //			ctx.setRootObject(new Manager("Luke"));
 //			ctx.setVariable("a",1.043d);
@@ -187,6 +189,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"MANAGER"};}
 	}
 
@@ -197,6 +200,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"TELLER"};}
 	}
 
@@ -207,6 +211,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			super(n);
 		}
 
+		@Override
 		public String[] getRoles() { return new String[]{"SUPERVISOR"};}
 	}
 
@@ -217,22 +222,27 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			public String name = "Andy";
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return name.equals("principal");
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(new Principal());
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
@@ -247,22 +257,27 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 
 		void setPerson(Person p) { this.activePerson = p; }
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return name.equals("p");
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(activePerson);
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
 
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
@@ -280,6 +295,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 				this.tc = typeConverter;
 			}
 
+			@Override
 			public TypedValue execute(EvaluationContext context, Object target, Object... arguments)
 					throws AccessException {
 				try {
@@ -303,6 +319,7 @@ public class ScenariosForSpringSecurity extends ExpressionTestCase {
 			}
 		}
 
+		@Override
 		public MethodExecutor resolve(EvaluationContext context, Object targetObject, String name, List<TypeDescriptor> arguments)
 				throws AccessException {
 			if (name.equals("hasRole")) {

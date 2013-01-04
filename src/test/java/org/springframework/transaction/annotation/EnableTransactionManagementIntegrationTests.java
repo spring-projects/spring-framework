@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.CallCountingTransactionManager;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
@@ -219,6 +219,7 @@ public class EnableTransactionManagementIntegrationTests {
 			return new CallCountingTransactionManager();
 		}
 
+		@Override
 		public PlatformTransactionManager annotationDrivenTransactionManager() {
 			return txManager1();
 		}
@@ -327,6 +328,7 @@ public class EnableTransactionManagementIntegrationTests {
 		public void setDataSource(DataSource dataSource) {
 		}
 
+		@Override
 		@Transactional
 		public List<Object> findAll() {
 			return Collections.emptyList();
@@ -336,6 +338,7 @@ public class EnableTransactionManagementIntegrationTests {
 	@Repository
 	static class DummyFooRepository implements FooRepository {
 
+		@Override
 		@Transactional
 		public List<Object> findAll() {
 			return Collections.emptyList();

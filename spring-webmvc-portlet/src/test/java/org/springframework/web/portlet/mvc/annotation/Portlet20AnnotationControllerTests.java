@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import javax.servlet.http.Cookie;
 import org.junit.Test;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -104,6 +104,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void standardHandleMethod() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyController.class));
@@ -122,6 +123,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void standardHandleMethodWithResources() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.setPortletConfig(getPortletConfig());
@@ -173,6 +175,7 @@ public class Portlet20AnnotationControllerTests {
 
 	private void doTestAdaptedHandleMethods(final Class controllerClass) throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(controllerClass));
@@ -217,12 +220,14 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void formController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyFormController.class));
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -240,12 +245,14 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void modelFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyModelFormController.class));
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -263,6 +270,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void commandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyCommandProvidingFormController.class));
@@ -272,6 +280,7 @@ public class Portlet20AnnotationControllerTests {
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -290,6 +299,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void typedCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyTypedCommandProvidingFormController.class));
@@ -301,6 +311,7 @@ public class Portlet20AnnotationControllerTests {
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -338,12 +349,14 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void binderInitializingCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				GenericWebApplicationContext wac = new GenericWebApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MyBinderInitializingCommandProvidingFormController.class));
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -362,12 +375,14 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void specificBinderInitializingCommandProvidingFormController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.registerBeanDefinition("controller", new RootBeanDefinition(MySpecificBinderInitializingCommandProvidingFormController.class));
 				wac.refresh();
 				return wac;
 			}
+			@Override
 			protected void render(ModelAndView mv, PortletRequest request, MimeResponse response) throws Exception {
 				new TestView().render(mv.getViewName(), mv.getModel(), request, response);
 			}
@@ -386,6 +401,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void parameterDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.setPortletContext(new MockPortletContext());
@@ -427,6 +443,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void typeLevelParameterDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.setPortletContext(new MockPortletContext());
@@ -513,6 +530,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void portlet20DispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.setPortletContext(new MockPortletContext());
@@ -613,6 +631,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void eventDispatchingController() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				wac.setPortletContext(new MockPortletContext());
@@ -697,6 +716,7 @@ public class Portlet20AnnotationControllerTests {
 	@Test
 	public void testPredicatePriorityComparisonAcrossControllers() throws Exception {
 		DispatcherPortlet portlet = new DispatcherPortlet() {
+			@Override
 			protected ApplicationContext createPortletApplicationContext(ApplicationContext parent) throws BeansException {
 				StaticPortletApplicationContext wac = new StaticPortletApplicationContext();
 				// The order of handler registration is important to get
@@ -762,6 +782,7 @@ public class Portlet20AnnotationControllerTests {
 	@RequestMapping("VIEW")
 	private static class MyController extends AbstractController {
 
+		@Override
 		protected ModelAndView handleRenderRequestInternal(RenderRequest request, RenderResponse response) throws Exception {
 			response.getWriter().write("test");
 			return null;
@@ -950,6 +971,7 @@ public class Portlet20AnnotationControllerTests {
 			return new TestBean(defaultName.getClass().getSimpleName() + ":" + defaultName.toString());
 		}
 
+		@Override
 		@RequestMapping("VIEW")
 		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
@@ -996,6 +1018,7 @@ public class Portlet20AnnotationControllerTests {
 	private static class MyOtherTypedCommandProvidingFormController
 			extends MyCommandProvidingFormController<Integer, TestBean, ITestBean> {
 
+		@Override
 		@RequestMapping("VIEW")
 		@RenderMapping
 		public String myHandle(@ModelAttribute("myCommand") TestBean tb, BindingResult errors, ModelMap model) {
@@ -1034,6 +1057,7 @@ public class Portlet20AnnotationControllerTests {
 
 	private static class MyWebBindingInitializer implements WebBindingInitializer {
 
+		@Override
 		public void initBinder(WebDataBinder binder, WebRequest request) {
 			assertNotNull(request.getLocale());
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1045,6 +1069,7 @@ public class Portlet20AnnotationControllerTests {
 
 	private static class MySpecialArgumentResolver implements WebArgumentResolver {
 
+		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) {
 			if (methodParameter.getParameterType().equals(MySpecialArg.class)) {
 				return new MySpecialArg("myValue");

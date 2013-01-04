@@ -33,6 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 
+@Deprecated
 public class Spr7839Tests {
 
 	AnnotationMethodHandlerAdapter adapter = new AnnotationMethodHandlerAdapter();
@@ -48,6 +49,7 @@ public class Spr7839Tests {
 		ConfigurableWebBindingInitializer binder = new ConfigurableWebBindingInitializer();
 		GenericConversionService service = new DefaultConversionService();
 		service.addConverter(new Converter<String, NestedBean>() {
+			@Override
 			public NestedBean convert(String source) {
 				return new NestedBean(source);
 			}

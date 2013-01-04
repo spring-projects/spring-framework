@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ public class SQLErrorCodeSQLExceptionTranslatorTests extends TestCase {
 		SQLException intVioEx = new SQLException("", "", 6);
 
 		SQLErrorCodeSQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator() {
+			@Override
 			protected DataAccessException customTranslate(String task, String sql, SQLException sqlex) {
 				assertEquals(TASK, task);
 				assertEquals(SQL, sql);

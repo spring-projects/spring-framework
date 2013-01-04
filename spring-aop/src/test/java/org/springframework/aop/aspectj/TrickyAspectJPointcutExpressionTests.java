@@ -137,6 +137,7 @@ public class TrickyAspectJPointcutExpressionTests {
 
 	@Log
 	public static class TestServiceImpl implements TestService {
+		@Override
 		public String sayHello() {
 			throw new TestException("TestServiceImpl");
 		}
@@ -148,6 +149,7 @@ public class TrickyAspectJPointcutExpressionTests {
 
 		private int countThrows = 0;
 
+		@Override
 		public void before(Method method, Object[] objects, Object o) throws Throwable {
 			countBefore++;
 		}

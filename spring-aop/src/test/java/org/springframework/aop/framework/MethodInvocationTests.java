@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
 
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -42,6 +42,7 @@ public final class MethodInvocationTests {
 		final Object returnValue = new Object();
 		List<Object> is = new LinkedList<Object>();
 		is.add(new MethodInterceptor() {
+			@Override
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				return returnValue;
 			}

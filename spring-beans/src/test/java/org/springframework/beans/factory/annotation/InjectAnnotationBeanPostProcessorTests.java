@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,20 @@ import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.junit.Test;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NestedTestBean;
-import test.beans.TestBean;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.SerializationTestUtils;
 
 import static org.junit.Assert.*;
@@ -406,7 +407,9 @@ public class InjectAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryQualifierFieldInjectionBean.class, false));
+		RootBeanDefinition annotatedBeanDefinition = new RootBeanDefinition(ObjectFactoryQualifierFieldInjectionBean.class);
+		annotatedBeanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", annotatedBeanDefinition);
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "testBean"));
 		bf.registerBeanDefinition("testBean", bd);
@@ -426,7 +429,9 @@ public class InjectAnnotationBeanPostProcessorTests {
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
 		bf.addBeanPostProcessor(bpp);
-		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(ObjectFactoryQualifierMethodInjectionBean.class, false));
+		RootBeanDefinition annotatedBeanDefinition = new RootBeanDefinition(ObjectFactoryQualifierMethodInjectionBean.class);
+		annotatedBeanDefinition.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", annotatedBeanDefinition);
 		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		bd.addQualifier(new AutowireCandidateQualifier(Qualifier.class, "testBean"));
 		bf.registerBeanDefinition("testBean", bd);
@@ -609,6 +614,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 		public ExtendedResourceInjectionBean() {
 		}
 
+		@Override
 		@Inject @Required
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -662,6 +668,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -708,6 +715,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 		private ITestBean testBean4;
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -779,6 +787,7 @@ public class InjectAnnotationBeanPostProcessorTests {
 			throw new UnsupportedOperationException();
 		}
 
+		@Override
 		@Inject
 		public void setTestBean2(TestBean testBean2) {
 			super.setTestBean2(testBean2);
@@ -1074,14 +1083,17 @@ public class InjectAnnotationBeanPostProcessorTests {
 
 	public static class StringFactoryBean implements FactoryBean<String> {
 
+		@Override
 		public String getObject() throws Exception {
 			return "";
 		}
 
+		@Override
 		public Class<String> getObjectType() {
 			return String.class;
 		}
 
+		@Override
 		public boolean isSingleton() {
 			return true;
 		}

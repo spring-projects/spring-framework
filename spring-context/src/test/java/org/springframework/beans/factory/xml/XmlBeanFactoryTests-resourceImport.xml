@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="resource1" class="org.springframework.beans.ResourceTestBean">
+	<bean id="resource1" class="org.springframework.tests.sample.beans.ResourceTestBean">
 		<property name="resource">
 			<value>classpath:org/springframework/beans/factory/xml/test.properties</value>
 		</property>

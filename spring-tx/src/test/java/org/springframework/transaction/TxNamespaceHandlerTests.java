@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -40,6 +41,7 @@ public class TxNamespaceHandlerTests extends TestCase {
 
 	private Method setAgeMethod;
 
+	@Override
 	public void setUp() throws Exception {
 		this.context = new ClassPathXmlApplicationContext("txNamespaceHandlerTests.xml", getClass());
 		this.getAgeMethod = ITestBean.class.getMethod("getAge", new Class[0]);

@@ -79,6 +79,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 	public void noExecution() throws Exception {
 		List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
 		interceptors.add(new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 				return responseMock;
@@ -101,6 +102,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 		final String headerName = "Foo";
 		final String headerValue = "Bar";
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 
@@ -134,6 +136,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 	public void changeURI() throws Exception {
 		final URI changedUri = new URI("http://example.com/2");
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 
@@ -166,6 +169,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 	public void changeMethod() throws Exception {
 		final HttpMethod changedMethod = HttpMethod.POST;
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 
@@ -198,6 +202,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 	public void changeBody() throws Exception {
 		final byte[] changedBody = "Foo".getBytes();
 		ClientHttpRequestInterceptor interceptor = new ClientHttpRequestInterceptor() {
+			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 					throws IOException {
 
@@ -217,6 +222,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 		private boolean invoked = false;
 
+		@Override
 		public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 				throws IOException {
 			invoked = true;
@@ -226,6 +232,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 	private class RequestFactoryMock implements ClientHttpRequestFactory {
 
+		@Override
 		public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 			requestMock.setURI(uri);
 			requestMock.setMethod(httpMethod);
@@ -249,6 +256,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 		private RequestMock() {
 		}
 
+		@Override
 		public URI getURI() {
 			return uri;
 		}
@@ -257,6 +265,7 @@ public class InterceptingClientHttpRequestFactoryTests {
 			this.uri = uri;
 		}
 
+		@Override
 		public HttpMethod getMethod() {
 			return method;
 		}
@@ -265,14 +274,17 @@ public class InterceptingClientHttpRequestFactoryTests {
 			this.method = method;
 		}
 
+		@Override
 		public HttpHeaders getHeaders() {
 			return headers;
 		}
 
+		@Override
 		public OutputStream getBody() throws IOException {
 			return body;
 		}
 
+		@Override
 		public ClientHttpResponse execute() throws IOException {
 			executed = true;
 			return responseMock;
@@ -287,26 +299,32 @@ public class InterceptingClientHttpRequestFactoryTests {
 
 		private HttpHeaders headers = new HttpHeaders();
 
+		@Override
 		public HttpStatus getStatusCode() throws IOException {
 			return statusCode;
 		}
 
+		@Override
 		public int getRawStatusCode() throws IOException {
 			return statusCode.value();
 		}
 
+		@Override
 		public String getStatusText() throws IOException {
 			return statusText;
 		}
 
+		@Override
 		public HttpHeaders getHeaders() {
 			return headers;
 		}
 
+		@Override
 		public InputStream getBody() throws IOException {
 			return null;
 		}
 
+		@Override
 		public void close() {
 		}
 	}

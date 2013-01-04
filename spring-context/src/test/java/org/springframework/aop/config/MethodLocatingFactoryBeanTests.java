@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,17 @@
 
 package org.springframework.aop.config;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 import java.lang.reflect.Method;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.BeanFactory;
 
 /**
@@ -39,40 +42,27 @@ public final class MethodLocatingFactoryBeanTests {
 	@Before
 	public void setUp() {
 		factory = new MethodLocatingFactoryBean();
-
-		// methods must set up expectations and call replay() manually for this mock
-		beanFactory = createMock(BeanFactory.class);
-	}
-
-	@After
-	public void tearDown() {
-		verify(beanFactory);
+		beanFactory = mock(BeanFactory.class);
 	}
 
 	@Test
 	public void testIsSingleton() {
-		replay(beanFactory);
 		assertTrue(factory.isSingleton());
 	}
 
 	@Test
 	public void testGetObjectType() {
-		replay(beanFactory);
 		assertEquals(Method.class, factory.getObjectType());
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNullTargetBeanName() {
-		replay(beanFactory);
-
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithEmptyTargetBeanName() {
-		replay(beanFactory);
-
 		factory.setTargetBeanName("");
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
@@ -80,16 +70,12 @@ public final class MethodLocatingFactoryBeanTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithNullTargetMethodName() {
-		replay(beanFactory);
-
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setBeanFactory(beanFactory);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWithEmptyTargetMethodName() {
-		replay(beanFactory);
-
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("");
 		factory.setBeanFactory(beanFactory);
@@ -97,20 +83,16 @@ public final class MethodLocatingFactoryBeanTests {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testWhenTargetBeanClassCannotBeResolved() {
-		expect(beanFactory.getType(BEAN_NAME)).andReturn(null);
-		replay(beanFactory);
-
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
+		verify(beanFactory).getType(BEAN_NAME);
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public void testSunnyDayPath() throws Exception {
-		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
-		replay(beanFactory);
-
+		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("toString()");
 		factory.setBeanFactory(beanFactory);
@@ -122,11 +104,9 @@ public final class MethodLocatingFactoryBeanTests {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public void testWhereMethodCannotBeResolved() {
-		expect((Class) beanFactory.getType(BEAN_NAME)).andReturn(String.class);
-		replay(beanFactory);
-
+		given(beanFactory.getType(BEAN_NAME)).willReturn((Class)String.class);
 		factory.setTargetBeanName(BEAN_NAME);
 		factory.setMethodName("loadOfOld()");
 		factory.setBeanFactory(beanFactory);

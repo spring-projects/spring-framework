@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,18 +23,22 @@ public class KeyNamingStrategyTests extends AbstractNamingStrategyTests {
 
 	private static final String OBJECT_NAME = "spring:name=test";
 
+	@Override
 	protected ObjectNamingStrategy getStrategy() throws Exception {
 		return new KeyNamingStrategy();
 	}
 
+	@Override
 	protected Object getManagedResource() {
 		return new Object();
 	}
 
+	@Override
 	protected String getKey() {
 		return OBJECT_NAME;
 	}
 
+	@Override
 	protected String getCorrectObjectName() {
 		return OBJECT_NAME;
 	}

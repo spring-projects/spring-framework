@@ -16,6 +16,7 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
 		this.children = children;
 	}
 
+	@Override
 	public Component getObject() throws Exception {
 		if (this.children != null && this.children.size() > 0) {
 			for (Component child : children) {
@@ -25,10 +26,12 @@ public class ComponentFactoryBean implements FactoryBean<Component> {
 		return this.parent;
 	}
 
+	@Override
 	public Class<Component> getObjectType() {
 		return Component.class;
 	}
 
+	@Override
 	public boolean isSingleton() {
 		return true;
 	}

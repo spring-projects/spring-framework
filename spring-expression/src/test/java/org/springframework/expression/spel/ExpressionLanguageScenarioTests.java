@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.AccessException;
@@ -76,14 +77,14 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 			// They are reusable
 			value = expr.getValue();
 
-			Assert.assertEquals("hello world", value);
-			Assert.assertEquals(String.class, value.getClass());
+			assertEquals("hello world", value);
+			assertEquals(String.class, value.getClass());
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			Assert.fail("Unexpected Exception: " + ee.getMessage());
+			fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			Assert.fail("Unexpected Exception: " + pe.getMessage());
+			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -103,16 +104,16 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 
 		Expression expr = parser.parseRaw("#favouriteColour");
 		Object value = expr.getValue(ctx);
-		Assert.assertEquals("blue", value);
+		assertEquals("blue", value);
 
 		expr = parser.parseRaw("#primes.get(1)");
 		value = expr.getValue(ctx);
-		Assert.assertEquals(3, value);
+		assertEquals(3, value);
 
 		// all prime numbers > 10 from the list (using selection ?{...})
 		expr = parser.parseRaw("#primes.?[#this>10]");
 		value = expr.getValue(ctx);
-		Assert.assertEquals("[11, 13, 17]", value.toString());
+		assertEquals("[11, 13, 17]", value.toString());
 	}
 
 
@@ -141,30 +142,30 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		// read it, set it, read it again
 		Expression expr = parser.parseRaw("str");
 		Object value = expr.getValue(ctx);
-		Assert.assertEquals("wibble", value);
+		assertEquals("wibble", value);
 		expr = parser.parseRaw("str");
 		expr.setValue(ctx, "wobble");
 		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
-		Assert.assertEquals("wobble", value);
+		assertEquals("wobble", value);
 		// or using assignment within the expression
 		expr = parser.parseRaw("str='wabble'");
 		value = expr.getValue(ctx);
 		expr = parser.parseRaw("str");
 		value = expr.getValue(ctx);
-		Assert.assertEquals("wabble", value);
+		assertEquals("wabble", value);
 
 		// private property will be accessed through getter()
 		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
-		Assert.assertEquals(42, value);
+		assertEquals(42, value);
 
 		// ... and set through setter
 		expr = parser.parseRaw("property=4");
 		value = expr.getValue(ctx);
 		expr = parser.parseRaw("property");
 		value = expr.getValue(ctx);
-		Assert.assertEquals(4,value);
+		assertEquals(4,value);
 	}
 
 	public static String repeat(String s) { return s+s; }
@@ -183,14 +184,14 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 
 			Expression expr = parser.parseRaw("#repeat('hello')");
 			Object value = expr.getValue(ctx);
-			Assert.assertEquals("hellohello", value);
+			assertEquals("hellohello", value);
 
 		} catch (EvaluationException ee) {
 			ee.printStackTrace();
-			Assert.fail("Unexpected Exception: " + ee.getMessage());
+			fail("Unexpected Exception: " + ee.getMessage());
 		} catch (ParseException pe) {
 			pe.printStackTrace();
-			Assert.fail("Unexpected Exception: " + pe.getMessage());
+			fail("Unexpected Exception: " + pe.getMessage());
 		}
 	}
 
@@ -207,13 +208,13 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		ctx.addPropertyAccessor(new FruitColourAccessor());
 		Expression expr = parser.parseRaw("orange");
 		Object value = expr.getValue(ctx);
-		Assert.assertEquals(Color.orange, value);
+		assertEquals(Color.orange, value);
 
 		try {
 			expr.setValue(ctx, Color.blue);
-			Assert.fail("Should not be allowed to set oranges to be blue !");
+			fail("Should not be allowed to set oranges to be blue !");
 		} catch (SpelEvaluationException ee) {
-			Assert.assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
@@ -227,14 +228,14 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		ctx.addPropertyAccessor(new VegetableColourAccessor());
 		Expression expr = parser.parseRaw("pea");
 		Object value = expr.getValue(ctx);
-		Assert.assertEquals(Color.green, value);
+		assertEquals(Color.green, value);
 
 		try {
 			expr.setValue(ctx, Color.blue);
-			Assert.fail("Should not be allowed to set peas to be blue !");
+			fail("Should not be allowed to set peas to be blue !");
 		}
 		catch (SpelEvaluationException ee) {
-			Assert.assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
+			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}
 
@@ -256,22 +257,27 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.containsKey(name);
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(propertyMap.get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue)
 				throws AccessException {
 		}
@@ -295,22 +301,27 @@ public class ExpressionLanguageScenarioTests extends ExpressionTestCase {
 		/**
 		 * Null means you might be able to read any property, if an earlier property resolver hasn't beaten you to it
 		 */
+		@Override
 		public Class<?>[] getSpecificTargetClasses() {
 			return null;
 		}
 
+		@Override
 		public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
 			return propertyMap.containsKey(name);
 		}
 
+		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			return new TypedValue(propertyMap.get(name));
 		}
 
+		@Override
 		public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
 			return false;
 		}
 
+		@Override
 		public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
 		}
 

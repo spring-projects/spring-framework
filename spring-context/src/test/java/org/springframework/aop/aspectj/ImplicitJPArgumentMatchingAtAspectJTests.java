@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -39,7 +39,7 @@ public final class ImplicitJPArgumentMatchingAtAspectJTests {
 
 	@Aspect
 	static class CounterAtAspectJAspect {
-		@Around(value="execution(* org.springframework.beans.TestBean.*(..)) and this(bean) and args(argument)",
+		@Around(value="execution(* org.springframework.tests.sample.beans.TestBean.*(..)) and this(bean) and args(argument)",
 				argNames="bean,argument")
 		public void increment(ProceedingJoinPoint pjp, TestBean bean, Object argument) throws Throwable {
 			pjp.proceed();

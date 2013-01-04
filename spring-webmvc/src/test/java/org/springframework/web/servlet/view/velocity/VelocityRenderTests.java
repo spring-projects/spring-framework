@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.internal.matchers.TypeSafeMatcher;
 import org.junit.rules.ExpectedException;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -64,6 +64,7 @@ public class VelocityRenderTests {
 
 		final Template expectedTemplate = new Template();
 		VelocityConfig vc = new VelocityConfig() {
+			@Override
 			public VelocityEngine getVelocityEngine() {
 				return new TestVelocityEngine("test.vm", expectedTemplate);
 			}
@@ -106,9 +107,11 @@ public class VelocityRenderTests {
 		thrown.expect(NestedServletException.class);
 
 		thrown.expect(new TypeSafeMatcher<Exception>() {
+			@Override
 			public boolean matchesSafely(Exception item) {
 				return item.getCause() instanceof MethodInvocationException;
 			}
+			@Override
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of MethodInvocationException");
 
@@ -138,9 +141,11 @@ public class VelocityRenderTests {
 		thrown.expect(NestedServletException.class);
 
 		thrown.expect(new TypeSafeMatcher<Exception>() {
+			@Override
 			public boolean matchesSafely(Exception item) {
 				return item.getCause() instanceof IOException;
 			}
+			@Override
 			public void describeTo(Description description) {
 				description.appendText("exception has cause of IOException");
 

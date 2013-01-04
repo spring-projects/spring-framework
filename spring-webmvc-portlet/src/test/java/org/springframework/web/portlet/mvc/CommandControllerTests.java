@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ import javax.portlet.WindowState;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.mock.web.portlet.MockActionRequest;
 import org.springframework.mock.web.portlet.MockActionResponse;
@@ -52,6 +52,7 @@ import org.springframework.web.portlet.handler.PortletSessionRequiredException;
 /**
  * @author Mark Fisher
  */
+@Deprecated
 public class CommandControllerTests extends TestCase {
 
 	private static final String ERRORS_KEY = "errors";
@@ -212,6 +213,7 @@ public class CommandControllerTests extends TestCase {
 
 	public void testSuppressBinding() throws Exception {
 		TestController tc = new TestController() {
+			@Override
 			protected boolean suppressBinding(PortletRequest request) {
 				return true;
 			}
@@ -236,6 +238,7 @@ public class CommandControllerTests extends TestCase {
 	public void testWithCustomDateEditor() throws Exception {
 		final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		TestController tc = new TestController() {
+			@Override
 			protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 			}
@@ -261,6 +264,7 @@ public class CommandControllerTests extends TestCase {
 	public void testWithCustomDateEditorEmptyNotAllowed() throws Exception {
 		final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		TestController tc = new TestController() {
+			@Override
 			protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 			}
@@ -287,6 +291,7 @@ public class CommandControllerTests extends TestCase {
 	public void testWithCustomDateEditorEmptyAllowed() throws Exception {
 		final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		TestController tc = new TestController() {
+			@Override
 			protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) {
 				binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
 			}
@@ -310,8 +315,10 @@ public class CommandControllerTests extends TestCase {
 
 	public void testNestedBindingWithPropertyEditor() throws Exception {
 		TestController tc = new TestController() {
+			@Override
 			protected void initBinder(PortletRequest request, PortletRequestDataBinder binder) {
 				binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
+					@Override
 					public void setAsText(String text) throws IllegalArgumentException {
 						setValue(new TestBean(text));
 					}
@@ -341,9 +348,11 @@ public class CommandControllerTests extends TestCase {
 
 	public void testWithValidatorNotSupportingCommandClass() throws Exception {
 		Validator v = new Validator() {
+			@Override
 			public boolean supports(Class c) {
 				return false;
 			}
+			@Override
 			public void validate(Object o, Errors e) {}
 		};
 		TestController tc = new TestController();
@@ -364,9 +373,11 @@ public class CommandControllerTests extends TestCase {
 		final String defaultMessage = "validation error!";
 		TestController tc = new TestController();
 		tc.setValidator(new Validator() {
+			@Override
 			public boolean supports(Class c) {
 				return TestBean.class.isAssignableFrom(c);
 			}
+			@Override
 			public void validate(Object o, Errors e) {
 				e.reject(errorCode, defaultMessage);
 			}
@@ -386,9 +397,11 @@ public class CommandControllerTests extends TestCase {
 		final String defaultMessage = "validation error!";
 		TestController tc = new TestController();
 		tc.setValidator(new Validator() {
+			@Override
 			public boolean supports(Class c) {
 				return TestBean.class.isAssignableFrom(c);
 			}
+			@Override
 			public void validate(Object o, Errors e) {
 				ValidationUtils.rejectIfEmpty(e, "name", errorCode, defaultMessage);
 			}
@@ -413,9 +426,11 @@ public class CommandControllerTests extends TestCase {
 		final String defaultMessage = "validation error!";
 		TestController tc = new TestController();
 		tc.setValidator(new Validator() {
+			@Override
 			public boolean supports(Class c) {
 				return TestBean.class.isAssignableFrom(c);
 			}
+			@Override
 			public void validate(Object o, Errors e) {
 				ValidationUtils.rejectIfEmptyOrWhitespace(e, "name", errorCode, defaultMessage);
 			}
@@ -444,10 +459,12 @@ public class CommandControllerTests extends TestCase {
 			super(TestBean.class, "testBean");
 		}
 
+		@Override
 		protected void handleAction(ActionRequest request, ActionResponse response, Object command, BindException errors) {
 			((TestBean)command).setJedi(true);
 		}
 
+		@Override
 		protected ModelAndView handleRender(RenderRequest request, RenderResponse response, Object command, BindException errors) {
 			assertNotNull(command);
 			assertNotNull(errors);
