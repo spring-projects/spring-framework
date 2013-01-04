@@ -3,9 +3,9 @@
 
 <beans>
 
-	<bean id="rob" class="test.beans.TestBean" scope="prototype" autowire="constructor"/>
+	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean" scope="prototype" autowire="constructor"/>
 
-	<bean id="sally" class="test.beans.TestBean" scope="prototype"/>
+	<bean id="sally" class="org.springframework.tests.sample.beans.TestBean" scope="prototype"/>
 
 	<bean id="props1" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 	  <property name="properties">

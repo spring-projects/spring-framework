@@ -28,7 +28,7 @@
 			autowire="byName">
 	</lang:jruby>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<lang:jruby id="calculator"
 			script-interfaces="org.springframework.scripting.Calculator">

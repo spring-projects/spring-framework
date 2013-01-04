@@ -47,10 +47,13 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import test.beans.GenericBean;
-import test.beans.GenericIntegerBean;
-import test.beans.GenericSetOfIntegerBean;
-import test.beans.TestBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.GenericBean;
+import org.springframework.tests.sample.beans.GenericIntegerBean;
+import org.springframework.tests.sample.beans.GenericSetOfIntegerBean;
+import org.springframework.tests.sample.beans.TestBean;
+
 
 /**
  * @author Juergen Hoeller

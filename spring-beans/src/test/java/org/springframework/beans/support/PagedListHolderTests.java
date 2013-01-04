@@ -24,9 +24,11 @@ import org.junit.Test;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.junit.Assert.*;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller

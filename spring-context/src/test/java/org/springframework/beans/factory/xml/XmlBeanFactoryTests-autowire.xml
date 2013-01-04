@@ -3,22 +3,22 @@
 
 <beans>
 
-	<bean id="rod1" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="rod1" class="org.springframework.tests.sample.beans.DependenciesBean"
 			autowire="byType" dependency-check="objects">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod1a" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="rod1a" class="org.springframework.tests.sample.beans.DependenciesBean"
 			autowire="autodetect" dependency-check="objects">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod2" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="rod2" class="org.springframework.tests.sample.beans.DependenciesBean"
 			autowire="byName" dependency-check="objects">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod2a" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="rod2a" class="org.springframework.tests.sample.beans.DependenciesBean"
 			autowire="byName" dependency-check="objects">
 		<property name="spouse" ref="spouse"/>
 	</bean>
@@ -38,12 +38,12 @@
 		<!-- Should not pick up spouse automatically -->
 	</bean>
 
-	<bean id="rod5" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="rod5" class="org.springframework.tests.sample.beans.DependenciesBean"
 			scope="prototype" autowire="constructor">
 		<!-- Should pick up spouse automatically -->
 	</bean>
 
-	<bean id="other" class="org.springframework.beans.IndexedTestBean"/>
+	<bean id="other" class="org.springframework.tests.sample.beans.IndexedTestBean"/>
 
 	<bean id="parentAppCtx" class="org.springframework.context.support.ClassPathXmlApplicationContext">
 		<constructor-arg>

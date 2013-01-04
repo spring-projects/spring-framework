@@ -11,7 +11,7 @@
 
 	<tx:annotation-driven/>
 
-	<bean id="transactionManager" class="org.springframework.transaction.CallCountingTransactionManager"/>
+	<bean id="transactionManager" class="org.springframework.tests.transaction.CallCountingTransactionManager"/>
 
 	<bean id="testBean"
 		  class="org.springframework.transaction.annotation.AnnotationTransactionNamespaceHandlerTests$TransactionalTestBean"/>

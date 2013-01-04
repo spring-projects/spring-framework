@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanIsNotAFactoryException;
 import org.springframework.beans.factory.BeanNotOfRequiredTypeException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.tests.sample.beans.LifecycleBean;
+import org.springframework.tests.sample.beans.MustBeInitialized;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 
-import test.beans.DummyFactory;
-import test.beans.LifecycleBean;
-import test.beans.TestBean;
 
 /**
  * Subclasses must implement setUp() to initialize bean factory
@@ -333,35 +333,6 @@ public abstract class AbstractBeanFactoryTests extends TestCase {
 			tb.setAge(Integer.parseInt(st.nextToken()));
 			setValue(tb);
 		}
-	}
-
-}
-
-
-/**
- * Simple test of BeanFactory initialization
- * @author Rod Johnson
- * @since 12.03.2003
- */
-class MustBeInitialized implements InitializingBean {
-
-	private boolean inited;
-
-	/**
-	 * @see InitializingBean#afterPropertiesSet()
-	 */
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		this.inited = true;
-	}
-
-	/**
-	 * Dummy business method that will fail unless the factory
-	 * managed the bean's lifecycle correctly
-	 */
-	public void businessMethod() {
-		if (!this.inited)
-			throw new RuntimeException("Factory didn't call afterPropertiesSet() on MustBeInitialized object");
 	}
 
 }

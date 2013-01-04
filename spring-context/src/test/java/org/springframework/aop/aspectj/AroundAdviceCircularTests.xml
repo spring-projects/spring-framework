@@ -17,11 +17,11 @@
 
 	<bean id="testAspect" class="org.springframework.aop.aspectj.AroundAdviceBindingTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean">
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="spouse" ref="testBean2"/>
 	</bean>
 
-	<bean id="testBean2" class="org.springframework.beans.TestBean" autowire-candidate="false">
+	<bean id="testBean2" class="org.springframework.tests.sample.beans.TestBean" autowire-candidate="false">
 		<property name="spouse" ref="testBean"/>
 	</bean>
 

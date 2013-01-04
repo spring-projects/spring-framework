@@ -8,13 +8,13 @@
 	<bean id="databaseSetup"
 		class="org.springframework.test.context.junit4.ConcreteTransactionalJUnit4SpringContextTests$DatabaseSetup" />
 
-	<bean id="employee" class="org.springframework.beans.Employee">
+	<bean id="employee" class="org.springframework.tests.sample.beans.Employee">
 		<property name="name" value="John Smith" />
 		<property name="age" value="42" />
 		<property name="company" value="Acme Widgets, Inc." />
 	</bean>
 
-	<bean id="pet" class="org.springframework.beans.Pet">
+	<bean id="pet" class="org.springframework.tests.sample.beans.Pet">
 		<constructor-arg value="Fido" />
 	</bean>
 

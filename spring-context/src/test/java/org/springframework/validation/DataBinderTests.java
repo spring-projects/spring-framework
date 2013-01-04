@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,16 +37,16 @@ import java.util.TreeSet;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.BeanWithObjectProperty;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.BeanWithObjectProperty;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
 import org.springframework.beans.NullValueInNestedPathException;
-import org.springframework.beans.SerializablePerson;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.SerializablePerson;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomCollectionEditor;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -1196,8 +1196,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("listtest2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("listtest2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1221,8 +1221,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1246,8 +1246,8 @@ public class DataBinderTests extends TestCase {
 		pvs.add("array[0].nestedIndexedBean.list[0].name", "test1");
 		pvs.add("array[1].nestedIndexedBean.list[1].name", "test2");
 		binder.bind(pvs);
-		assertEquals("listtest1", tb.getArray()[0].getNestedIndexedBean().getList().get(0).getName());
-		assertEquals("test2", tb.getArray()[1].getNestedIndexedBean().getList().get(1).getName());
+		assertEquals("listtest1", ((TestBean)tb.getArray()[0].getNestedIndexedBean().getList().get(0)).getName());
+		assertEquals("test2", ((TestBean)tb.getArray()[1].getNestedIndexedBean().getList().get(1)).getName());
 		assertEquals("test1", binder.getBindingResult().getFieldValue("array[0].nestedIndexedBean.list[0].name"));
 		assertEquals("test2", binder.getBindingResult().getFieldValue("array[1].nestedIndexedBean.list[1].name"));
 	}
@@ -1282,7 +1282,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 
@@ -1292,7 +1292,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.map", errors.getFieldError("map[key1]").getCodes()[1]);
 		assertEquals("NOT_ROD.map[key1]", errors.getFieldError("map[key1]").getCodes()[2]);
 		assertEquals("NOT_ROD.map", errors.getFieldError("map[key1]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key1]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("map[key1]").getCodes()[5]);
 
 		assertEquals(1, errors.getFieldErrorCount("map[key0]"));
@@ -1330,7 +1330,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
 		// This next code is only generated because of the registered editor, using the
 		// registered type of the editor as guess for the content type of the collection.
-		assertEquals("NOT_NULL.org.springframework.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
+		assertEquals("NOT_NULL.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
@@ -1360,7 +1360,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_NULL.map", errors.getFieldError("map[key0]").getCodes()[3]);
 		// This next code is only generated because of the registered editor, using the
 		// registered type of the editor as guess for the content type of the collection.
-		assertEquals("NOT_NULL.org.springframework.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
+		assertEquals("NOT_NULL.org.springframework.tests.sample.beans.TestBean", errors.getFieldError("map[key0]").getCodes()[4]);
 		assertEquals("NOT_NULL", errors.getFieldError("map[key0]").getCodes()[5]);
 	}
 
@@ -1392,7 +1392,7 @@ public class DataBinderTests extends TestCase {
 		assertEquals("NOT_ROD.tb.array", errors.getFieldError("array[0]").getCodes()[1]);
 		assertEquals("NOT_ROD.array[0]", errors.getFieldError("array[0]").getCodes()[2]);
 		assertEquals("NOT_ROD.array", errors.getFieldError("array[0]").getCodes()[3]);
-		assertEquals("NOT_ROD.org.springframework.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
+		assertEquals("NOT_ROD.org.springframework.tests.sample.beans.DerivedTestBean", errors.getFieldError("array[0]").getCodes()[4]);
 		assertEquals("NOT_ROD", errors.getFieldError("array[0]").getCodes()[5]);
 		assertEquals("arraya", errors.getFieldValue("array[0]"));
 	}

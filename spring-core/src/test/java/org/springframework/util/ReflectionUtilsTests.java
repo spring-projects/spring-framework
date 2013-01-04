@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.objects.TestObject;
 
 /**
  * @author Rob Harrop
@@ -47,19 +47,19 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void findField() {
-		Field field = ReflectionUtils.findField(TestBeanSubclassWithPublicField.class, "publicField", String.class);
+		Field field = ReflectionUtils.findField(TestObjectSubclassWithPublicField.class, "publicField", String.class);
 		assertNotNull(field);
 		assertEquals("publicField", field.getName());
 		assertEquals(String.class, field.getType());
 		assertTrue("Field should be public.", Modifier.isPublic(field.getModifiers()));
 
-		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "prot", String.class);
+		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "prot", String.class);
 		assertNotNull(field);
 		assertEquals("prot", field.getName());
 		assertEquals(String.class, field.getType());
 		assertTrue("Field should be protected.", Modifier.isProtected(field.getModifiers()));
 
-		field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 		assertNotNull(field);
 		assertEquals("name", field.getName());
 		assertEquals(String.class, field.getType());
@@ -68,8 +68,8 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void setField() {
-		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 
 		ReflectionUtils.makeAccessible(field);
 
@@ -83,8 +83,8 @@ public class ReflectionUtilsTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void setFieldIllegal() {
-		final TestBeanSubclassWithNewField testBean = new TestBeanSubclassWithNewField();
-		final Field field = ReflectionUtils.findField(TestBeanSubclassWithNewField.class, "name", String.class);
+		final TestObjectSubclassWithNewField testBean = new TestObjectSubclassWithNewField();
+		final Field field = ReflectionUtils.findField(TestObjectSubclassWithNewField.class, "name", String.class);
 		ReflectionUtils.setField(field, testBean, "FooBar");
 	}
 
@@ -92,11 +92,11 @@ public class ReflectionUtilsTests {
 	public void invokeMethod() throws Exception {
 		String rob = "Rob Harrop";
 
-		TestBean bean = new TestBean();
+		TestObject bean = new TestObject();
 		bean.setName(rob);
 
-		Method getName = TestBean.class.getMethod("getName", (Class[]) null);
-		Method setName = TestBean.class.getMethod("setName", new Class[] { String.class });
+		Method getName = TestObject.class.getMethod("getName", (Class[]) null);
+		Method setName = TestObject.class.getMethod("setName", new Class[] { String.class });
 
 		Object name = ReflectionUtils.invokeMethod(getName, bean);
 		assertEquals("Incorrect name returned", rob, name);
@@ -123,7 +123,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void copySrcToDestinationOfIncorrectClass() {
-		TestBean src = new TestBean();
+		TestObject src = new TestObject();
 		String dest = new String();
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -135,7 +135,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void rejectsNullSrc() {
-		TestBean src = null;
+		TestObject src = null;
 		String dest = new String();
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -147,7 +147,7 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void rejectsNullDest() {
-		TestBean src = new TestBean();
+		TestObject src = new TestObject();
 		String dest = null;
 		try {
 			ReflectionUtils.shallowCopyFieldState(src, dest);
@@ -159,15 +159,15 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopy() {
-		TestBean src = new TestBean();
-		TestBean dest = new TestBean();
+		TestObject src = new TestObject();
+		TestObject dest = new TestObject();
 		testValidCopy(src, dest);
 	}
 
 	@Test
 	public void validCopyOnSubTypeWithNewField() {
-		TestBeanSubclassWithNewField src = new TestBeanSubclassWithNewField();
-		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
+		TestObjectSubclassWithNewField src = new TestObjectSubclassWithNewField();
+		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		src.magic = 11;
 
 		// Will check inherited fields are copied
@@ -180,8 +180,8 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopyToSubType() {
-		TestBean src = new TestBean();
-		TestBeanSubclassWithNewField dest = new TestBeanSubclassWithNewField();
+		TestObject src = new TestObject();
+		TestObjectSubclassWithNewField dest = new TestObjectSubclassWithNewField();
 		dest.magic = 11;
 		testValidCopy(src, dest);
 		// Should have left this one alone
@@ -190,28 +190,27 @@ public class ReflectionUtilsTests {
 
 	@Test
 	public void validCopyToSubTypeWithFinalField() {
-		TestBeanSubclassWithFinalField src = new TestBeanSubclassWithFinalField();
-		TestBeanSubclassWithFinalField dest = new TestBeanSubclassWithFinalField();
+		TestObjectSubclassWithFinalField src = new TestObjectSubclassWithFinalField();
+		TestObjectSubclassWithFinalField dest = new TestObjectSubclassWithFinalField();
 		// Check that this doesn't fail due to attempt to assign final
 		testValidCopy(src, dest);
 	}
 
-	private void testValidCopy(TestBean src, TestBean dest) {
+	private void testValidCopy(TestObject src, TestObject dest) {
 		src.setName("freddie");
 		src.setAge(15);
-		src.setSpouse(new TestBean());
+		src.setSpouse(new TestObject());
 		assertFalse(src.getAge() == dest.getAge());
 
 		ReflectionUtils.shallowCopyFieldState(src, dest);
 		assertEquals(src.getAge(), dest.getAge());
 		assertEquals(src.getSpouse(), dest.getSpouse());
-		assertEquals(src.getDoctor(), dest.getDoctor());
 	}
 
 	@Test
 	public void doWithProtectedMethods() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestBean.class, mc, new ReflectionUtils.MethodFilter() {
+		ReflectionUtils.doWithMethods(TestObject.class, mc, new ReflectionUtils.MethodFilter() {
 			@Override
 			public boolean matches(Method m) {
 				return Modifier.isProtected(m.getModifiers());
@@ -227,7 +226,7 @@ public class ReflectionUtilsTests {
 	@Test
 	public void duplicatesFound() {
 		ListSavingMethodCallback mc = new ListSavingMethodCallback();
-		ReflectionUtils.doWithMethods(TestBeanSubclass.class, mc);
+		ReflectionUtils.doWithMethods(TestObjectSubclass.class, mc);
 		int absquatulateCount = 0;
 		for (String name : mc.getMethodNames()) {
 			if (name.equals("absquatulate")) {
@@ -370,7 +369,7 @@ public class ReflectionUtilsTests {
 		}
 	}
 
-	private static class TestBeanSubclass extends TestBean {
+	private static class TestObjectSubclass extends TestObject {
 
 		@Override
 		public void absquatulate() {
@@ -378,20 +377,20 @@ public class ReflectionUtilsTests {
 		}
 	}
 
-	private static class TestBeanSubclassWithPublicField extends TestBean {
+	private static class TestObjectSubclassWithPublicField extends TestObject {
 
 		@SuppressWarnings("unused")
 		public String publicField = "foo";
 	}
 
-	private static class TestBeanSubclassWithNewField extends TestBean {
+	private static class TestObjectSubclassWithNewField extends TestObject {
 
 		private int magic;
 
 		protected String prot = "foo";
 	}
 
-	private static class TestBeanSubclassWithFinalField extends TestBean {
+	private static class TestObjectSubclassWithFinalField extends TestObject {
 
 		@SuppressWarnings("unused")
 		private final String foo = "will break naive copy that doesn't exclude statics";

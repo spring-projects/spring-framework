@@ -22,7 +22,7 @@
 		<property name="interceptorNames"><value>interceptor</value></property>
 	</bean>
 	
-	<bean id="jenny" class="org.springframework.beans.TestBean" scope="prototype">
+	<bean id="jenny" class="org.springframework.tests.sample.beans.TestBean" scope="prototype">
 		<property name="name"><value>Jenny</value></property>
 		<property name="age"><value>30</value></property>
 	</bean>

@@ -11,24 +11,24 @@
 			</list>
 		</property>
 	</bean>
-	
-	<bean id="test" scope="prototype" class="org.springframework.beans.TestBean">
-		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
-	</bean>
-	
-	<bean id="prototypeTest" class="org.springframework.aop.framework.autoproxy.CountingTestBean">
-		<property name="name"><value>Rod</value></property>
-		<property name="spouse"><ref local="wife"/></property>
-	</bean>
-	
-	<bean id="lazyInitTest" class="org.springframework.aop.framework.autoproxy.CountingTestBean" lazy-init="true">
+
+	<bean id="test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
 
-	<bean id="wife" class="org.springframework.beans.TestBean">
+	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.CountingTestBean">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+
+	<bean id="lazyInitTest" class="org.springframework.tests.sample.beans.CountingTestBean" lazy-init="true">
+		<property name="name"><value>Rod</value></property>
+		<property name="spouse"><ref local="wife"/></property>
+	</bean>
+
+	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
 
-</beans>		
+</beans>
