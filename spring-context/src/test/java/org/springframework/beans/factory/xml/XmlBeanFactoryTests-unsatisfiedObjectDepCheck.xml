@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="a" class="org.springframework.beans.factory.xml.DependenciesBean"
+	<bean id="a" class="org.springframework.tests.sample.beans.DependenciesBean"
 		dependency-check="objects">
 		<!-- <property name="name"><value>Rod</value></property> -->
 	</bean>

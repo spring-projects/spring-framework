@@ -117,6 +117,8 @@ import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.UrlPathHelper;
 import org.springframework.web.util.WebUtils;
 
+import org.springframework.web.servlet.mvc.annotation.MethodInvokerIntercepterManager;
+
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface
  * that maps handler methods based on HTTP paths, HTTP methods and request parameters
@@ -192,7 +194,18 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 
 	private final Map<Class<?>, Boolean> sessionAnnotatedClassesCache = new ConcurrentHashMap<Class<?>, Boolean>(64);
 
+	/**
+	 * 添加成员变量
+	 */
+	//org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter
+	//添加成员变量和setter
+	MethodInvokerIntercepterManager methodInvokerIntercepterManager;
 
+	public void setMethodInvokerIntercepterManager(
+				MethodInvokerIntercepterManager methodInvokerIntercepterManager) {
+			this.methodInvokerIntercepterManager = methodInvokerIntercepterManager;
+	}
+		
 	public AnnotationMethodHandlerAdapter() {
 		// no restriction of HTTP methods by default
 		super(false);
@@ -437,7 +450,17 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		ExtendedModelMap implicitModel = new BindingAwareModelMap();
 
-		Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
+		//Object result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
+		Object result = null;
+		if(methodInvokerIntercepterManager != null)
+		{
+			result = methodInvokerIntercepterManager.doChain(methodInvoker, handler, handlerMethod,webRequest, implicitModel);
+		}
+		else
+		{
+			result = methodInvoker.invokeHandlerMethod(handlerMethod, handler, webRequest, implicitModel);
+		}
+		
 		ModelAndView mav =
 				methodInvoker.getModelAndView(handlerMethod, handler.getClass(), result, implicitModel, webRequest);
 		methodInvoker.updateModelAttributes(handler, (mav != null ? mav.getModel() : null), implicitModel, webRequest);

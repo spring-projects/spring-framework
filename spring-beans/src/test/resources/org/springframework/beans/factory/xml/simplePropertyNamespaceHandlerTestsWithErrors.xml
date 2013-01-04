@@ -8,10 +8,10 @@
 				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
 				http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
-	<bean id="rob" class="org.springframework.beans.TestBean" p:name="Rob Harrop" p:spouse-ref="sally">
+	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean" p:name="Rob Harrop" p:spouse-ref="sally">
 		<property name="name" value="Rob Harrop"/>
 	</bean>
 
-	<bean id="sally" class="org.springframework.beans.TestBean" p:name="Sally Greenwood" p:spouse-ref="rob"/>
+	<bean id="sally" class="org.springframework.tests.sample.beans.TestBean" p:name="Sally Greenwood" p:spouse-ref="rob"/>
 
 </beans>

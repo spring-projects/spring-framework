@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.springframework.core.convert.converter.Converter;
 /**
  * @author Juergen Hoeller
  */
-public class FooServiceDependentConverter implements Converter<String, org.springframework.beans.TestBean> {
+public class FooServiceDependentConverter implements Converter<String, org.springframework.tests.sample.beans.TestBean> {
 
 	private FooService fooService;
 
@@ -32,8 +32,8 @@ public class FooServiceDependentConverter implements Converter<String, org.sprin
 	}
 
 	@Override
-	public org.springframework.beans.TestBean convert(String source) {
-		return new org.springframework.beans.TestBean(source);
+	public org.springframework.tests.sample.beans.TestBean convert(String source) {
+		return new org.springframework.tests.sample.beans.TestBean(source);
 	}
 
 }

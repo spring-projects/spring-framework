@@ -3,7 +3,7 @@
 
 <beans>
 
-	<bean id="singletonFactory"	class="org.springframework.beans.factory.DummyFactory">
+	<bean id="singletonFactory"	class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="otherTestBean"><ref local="singletonFactory"/></property>
 	</bean>
 

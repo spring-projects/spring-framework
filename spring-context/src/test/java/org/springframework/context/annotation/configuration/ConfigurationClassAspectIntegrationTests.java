@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 
 /**
@@ -81,7 +81,7 @@ public class ConfigurationClassAspectIntegrationTests {
 			return new TestBean("name");
 		}
 
-		@Before("execution(* test.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
@@ -102,7 +102,7 @@ public class ConfigurationClassAspectIntegrationTests {
 
 	@Aspect
 	static class NameChangingAspect {
-		@Before("execution(* test.beans.TestBean.absquatulate(..)) && target(testBean)")
+		@Before("execution(* org.springframework.tests.sample.beans.TestBean.absquatulate(..)) && target(testBean)")
 		public void touchBean(TestBean testBean) {
 			testBean.setName("advisedName");
 		}
