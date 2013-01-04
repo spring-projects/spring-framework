@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -131,7 +131,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
 
 		pvs = new MutablePropertyValues();
-		pvs.add("commandClass", "org.springframework.beans.TestBean");
+		pvs.add("commandClass", "org.springframework.tests.sample.beans.TestBean");
 		pvs.add("formView", "form");
 		registerSingleton("formHandler", SimpleFormController.class, pvs);
 

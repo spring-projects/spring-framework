@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.sql.Statement;
 import javax.sql.DataSource;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
@@ -48,7 +48,7 @@ public class JdbcBeanDefinitionReaderTests {
 		given(resultSet.next()).willReturn(true, true, false);
 		given(resultSet.getString(1)).willReturn("one", "one");
 		given(resultSet.getString(2)).willReturn("(class)", "age");
-		given(resultSet.getString(3)).willReturn("org.springframework.beans.TestBean", "53");
+		given(resultSet.getString(3)).willReturn("org.springframework.tests.sample.beans.TestBean", "53");
 
 		Statement statement = mock(Statement.class);
 		given(statement.executeQuery(sql)).willReturn(resultSet);

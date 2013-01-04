@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import javax.naming.Context;
 import javax.naming.NamingException;
 
 import org.junit.Test;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -378,7 +378,7 @@ public class JndiObjectFactoryBeanTests {
 			fail("Should have thrown NamingException");
 		}
 		catch (NamingException ex) {
-			assertTrue(ex.getMessage().indexOf("org.springframework.beans.DerivedTestBean") != -1);
+			assertTrue(ex.getMessage().indexOf("org.springframework.tests.sample.beans.DerivedTestBean") != -1);
 		}
 	}
 

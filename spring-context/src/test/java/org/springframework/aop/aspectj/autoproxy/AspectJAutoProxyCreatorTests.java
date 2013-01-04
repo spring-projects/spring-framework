@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,18 @@ import org.springframework.aop.config.AopConfigUtils;
 import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcutAdvisor;
-import org.springframework.beans.INestedTestBean;
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.NestedTestBean;
+import org.springframework.tests.sample.beans.INestedTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.NestedTestBean;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -112,10 +114,8 @@ public final class AspectJAutoProxyCreatorTests {
 
 	@Test
 	public void testAspectsAndAdvisorAppliedToPrototypeIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
 		sw.start("Prototype Creation");
@@ -134,10 +134,8 @@ public final class AspectJAutoProxyCreatorTests {
 
 	@Test
 	public void testAspectsAndAdvisorNotAppliedToPrototypeIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		ClassPathXmlApplicationContext ac = newContext("aspectsPlusAdvisor.xml");
 		StopWatch sw = new StopWatch();
 		sw.start("Prototype Creation");
@@ -156,10 +154,8 @@ public final class AspectJAutoProxyCreatorTests {
 
 	@Test
 	public void testAspectsAndAdvisorNotAppliedToManySingletonsIsFastEnough() {
-		if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(factoryLog);
 		GenericApplicationContext ac = new GenericApplicationContext();
 		new XmlBeanDefinitionReader(ac).loadBeanDefinitions(new ClassPathResource(qName("aspectsPlusAdvisor.xml"),
 				getClass()));

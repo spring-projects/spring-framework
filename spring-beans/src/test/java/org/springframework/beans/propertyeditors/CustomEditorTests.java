@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,12 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
+import org.springframework.tests.sample.beans.BooleanTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NumberTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * Unit tests for the various PropertyEditors in Spring.
@@ -592,9 +592,9 @@ public class CustomEditorTests {
 	@Test
 	public void testClassEditorWithArray() {
 		PropertyEditor classEditor = new ClassEditor();
-		classEditor.setAsText("test.beans.TestBean[]");
+		classEditor.setAsText("org.springframework.tests.sample.beans.TestBean[]");
 		assertEquals(TestBean[].class, classEditor.getValue());
-		assertEquals("test.beans.TestBean[]", classEditor.getAsText());
+		assertEquals("org.springframework.tests.sample.beans.TestBean[]", classEditor.getAsText());
 	}
 
 	/*

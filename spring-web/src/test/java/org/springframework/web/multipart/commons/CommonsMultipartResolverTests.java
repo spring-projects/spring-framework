@@ -16,6 +16,10 @@
 
 package org.springframework.web.multipart.commons;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -41,9 +46,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import static org.junit.Assert.*;
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.mock.web.test.MockFilterConfig;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -220,7 +223,7 @@ public class CommonsMultipartResolverTests {
 			MultipartHttpServletRequest request) throws UnsupportedEncodingException {
 
 		MultipartTestBean1 mtb1 = new MultipartTestBean1();
-		assertEquals(null, mtb1.getField1());
+		assertArrayEquals(null, mtb1.getField1());
 		assertEquals(null, mtb1.getField2());
 		ServletRequestDataBinder binder = new ServletRequestDataBinder(mtb1, "mybean");
 		binder.registerCustomEditor(byte[].class, new ByteArrayMultipartFileEditor());
@@ -234,7 +237,7 @@ public class CommonsMultipartResolverTests {
 		assertEquals(new String(file2.getBytes()), new String(mtb1.getField2()));
 
 		MultipartTestBean2 mtb2 = new MultipartTestBean2();
-		assertEquals(null, mtb2.getField1());
+		assertArrayEquals(null, mtb2.getField1());
 		assertEquals(null, mtb2.getField2());
 		binder = new ServletRequestDataBinder(mtb2, "mybean");
 		binder.registerCustomEditor(String.class, "field1", new StringMultipartFileEditor());

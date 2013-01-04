@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import static org.junit.Assert.assertEquals;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import java.sql.Connection;
 
@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.TestBean;
 
-import test.beans.TestBean;
 
 /**
  * Unit tests for {@link FieldRetrievingFactoryBean}.
@@ -119,7 +119,7 @@ public final class FieldRetrievingFactoryBeanTests {
 	@Test
 	public void testWithConstantOnClassWithPackageLevelVisibility() throws Exception {
 		FieldRetrievingFactoryBean fr = new FieldRetrievingFactoryBean();
-		fr.setBeanName("test.beans.PackageLevelVisibleBean.CONSTANT");
+		fr.setBeanName("org.springframework.tests.sample.beans.PackageLevelVisibleBean.CONSTANT");
 		fr.afterPropertiesSet();
 		assertEquals("Wuby", fr.getObject());
 	}

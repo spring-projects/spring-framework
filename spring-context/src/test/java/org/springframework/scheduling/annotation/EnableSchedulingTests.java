@@ -19,8 +19,11 @@ package org.springframework.scheduling.annotation;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +45,11 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class EnableSchedulingTests {
+
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
 	@Test
 	public void withFixedRateTask() throws InterruptedException {

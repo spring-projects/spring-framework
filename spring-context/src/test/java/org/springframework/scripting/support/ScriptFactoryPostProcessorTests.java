@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.scripting.support;
 
 import static org.mockito.Mockito.mock;
-import junit.framework.TestCase;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,12 +30,17 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.scripting.Messenger;
 import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.groovy.GroovyScriptFactory;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Chris Beams
  */
-public class ScriptFactoryPostProcessorTests extends TestCase {
+public class ScriptFactoryPostProcessorTests {
 
 	private static final String MESSAGE_TEXT = "Bingo";
 
@@ -69,11 +76,17 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 			"  }\n" +
 			"}";
 
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
 
+	@Test
 	public void testDoesNothingWhenPostProcessingNonScriptFactoryTypeBeforeInstantiation() throws Exception {
 		assertNull(new ScriptFactoryPostProcessor().postProcessBeforeInstantiation(getClass(), "a.bean"));
 	}
 
+	@Test
 	public void testThrowsExceptionIfGivenNonAbstractBeanFactoryImplementation() throws Exception {
 		try {
 			new ScriptFactoryPostProcessor().setBeanFactory(mock(BeanFactory.class));
@@ -83,6 +96,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testChangeScriptWithRefreshableBeanFunctionality() throws Exception {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
@@ -103,6 +117,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, refreshedMessenger.getMessage());
 	}
 
+	@Test
 	public void testChangeScriptWithNoRefreshableBeanFunctionality() throws Exception {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(false);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
@@ -123,6 +138,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 				MESSAGE_TEXT, refreshedMessenger.getMessage());
 	}
 
+	@Test
 	public void testRefreshedScriptReferencePropagatesToCollaborators() throws Exception {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
@@ -150,6 +166,7 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		assertEquals(EXPECTED_CHANGED_MESSAGE_TEXT, collaborator.getMessage());
 	}
 
+	@Test
 	public void testReferencesAcrossAContainerHierarchy() throws Exception {
 		GenericApplicationContext businessContext = new GenericApplicationContext();
 		businessContext.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
@@ -165,11 +182,13 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		presentationCtx.refresh();
 	}
 
+	@Test
 	public void testScriptHavingAReferenceToAnotherBean() throws Exception {
 		// just tests that the (singleton) script-backed bean is able to be instantiated with references to its collaborators
 		new ClassPathXmlApplicationContext("org/springframework/scripting/support/groovyReferences.xml");
 	}
 
+	@Test
 	public void testForRefreshedScriptHavingErrorPickedUpOnFirstCall() throws Exception {
 		BeanDefinition processorBeanDefinition = createScriptFactoryPostProcessor(true);
 		BeanDefinition scriptedBeanDefinition = createScriptedGroovyBean();
@@ -200,12 +219,13 @@ public class ScriptFactoryPostProcessorTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testPrototypeScriptedBean() throws Exception {
 		GenericApplicationContext ctx = new GenericApplicationContext();
 		ctx.registerBeanDefinition("messenger", BeanDefinitionBuilder.rootBeanDefinition(StubMessenger.class).getBeanDefinition());
 
 		BeanDefinitionBuilder scriptedBeanBuilder = BeanDefinitionBuilder.rootBeanDefinition(GroovyScriptFactory.class);
-		scriptedBeanBuilder.setSingleton(false);
+		scriptedBeanBuilder.setScope(BeanDefinition.SCOPE_PROTOTYPE);
 		scriptedBeanBuilder.addConstructorArgValue(DELEGATING_SCRIPT);
 		scriptedBeanBuilder.addPropertyReference("messenger", "messenger");
 

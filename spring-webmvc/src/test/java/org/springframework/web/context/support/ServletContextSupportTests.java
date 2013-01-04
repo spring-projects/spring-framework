@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.springframework.web.context.support;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -28,7 +31,7 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
@@ -51,6 +54,7 @@ import org.springframework.mock.web.test.MockServletContext;
 public class ServletContextSupportTests {
 
 	@Test
+	@Deprecated
 	public void testServletContextFactoryBean() {
 		MockServletContext sc = new MockServletContext();
 
@@ -155,6 +159,7 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testServletContextPropertyPlaceholderConfigurer() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -168,7 +173,7 @@ public class ServletContextSupportTests {
 		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
@@ -185,6 +190,7 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testServletContextPropertyPlaceholderConfigurerWithLocalOverriding() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -198,7 +204,7 @@ public class ServletContextSupportTests {
 		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
@@ -215,6 +221,7 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testServletContextPropertyPlaceholderConfigurerWithContextOverride() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -228,7 +235,7 @@ public class ServletContextSupportTests {
 		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
@@ -246,6 +253,7 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testServletContextPropertyPlaceholderConfigurerWithContextOverrideAndAttributes() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -260,7 +268,7 @@ public class ServletContextSupportTests {
 		pvs.add("spouse", new RuntimeBeanReference("${ref}"));
 		wac.registerSingleton("tb1", TestBean.class, pvs);
 
-		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class, null);
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
 		wac.getDefaultListableBeanFactory().registerBeanDefinition("tb2", bd);
 
 		pvs = new MutablePropertyValues();
@@ -279,6 +287,7 @@ public class ServletContextSupportTests {
 	}
 
 	@Test
+	@Deprecated
 	public void testServletContextPropertyPlaceholderConfigurerWithAttributes() {
 		MockServletContext sc = new MockServletContext();
 		sc.addInitParameter("key4", "mykey4");
@@ -312,7 +321,9 @@ public class ServletContextSupportTests {
 		someMap.put("key2", "${age}name");
 		MutablePropertyValues innerPvs = new MutablePropertyValues();
 		innerPvs.add("touchy", "${os.name}");
-		someMap.put("key3", new RootBeanDefinition(TestBean.class, innerPvs));
+		RootBeanDefinition innerBd = new RootBeanDefinition(TestBean.class);
+		innerBd.setPropertyValues(innerPvs);
+		someMap.put("key3", innerBd);
 		MutablePropertyValues innerPvs2 = new MutablePropertyValues(innerPvs);
 		someMap.put("${key4}", new BeanDefinitionHolder(new ChildBeanDefinition("tb1", innerPvs2), "child"));
 		pvs.add("someMap", someMap);

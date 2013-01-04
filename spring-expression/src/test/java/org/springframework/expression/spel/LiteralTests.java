@@ -16,7 +16,8 @@
 
 package org.springframework.expression.spel;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Test;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -163,10 +164,10 @@ public class LiteralTests extends ExpressionTestCase {
 	@Test
 	public void testNotWritable() throws Exception {
 		SpelExpression expr = (SpelExpression)parser.parseExpression("37");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("37L");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 		expr = (SpelExpression)parser.parseExpression("true");
-		Assert.assertFalse(expr.isWritable(new StandardEvaluationContext()));
+		assertFalse(expr.isWritable(new StandardEvaluationContext()));
 	}
 }

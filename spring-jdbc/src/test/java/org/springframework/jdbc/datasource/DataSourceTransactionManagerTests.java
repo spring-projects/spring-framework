@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ import org.mockito.InOrder;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.support.nativejdbc.SimpleNativeJdbcExtractor;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -845,6 +847,8 @@ public class DataSourceTransactionManagerTests  {
 	}
 
 	private void doTestTransactionWithTimeout(int timeout) throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		PreparedStatement ps = mock(PreparedStatement.class);
 		given(con.getAutoCommit()).willReturn(true);
 		given(con.prepareStatement("some SQL statement")).willReturn(ps);

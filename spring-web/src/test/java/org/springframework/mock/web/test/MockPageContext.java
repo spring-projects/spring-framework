@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import javax.el.ELContext;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -262,7 +263,6 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Enumeration<String> getAttributeNamesInScope(int scope) {
 		switch (scope) {
 			case PAGE_SCOPE:
@@ -288,6 +288,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
+	@Deprecated
 	public ExpressionEvaluator getExpressionEvaluator() {
 		return new MockExpressionEvaluator(this);
 	}
@@ -298,6 +299,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	@Override
+	@Deprecated
 	public VariableResolver getVariableResolver() {
 		return null;
 	}

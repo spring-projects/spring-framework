@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import javax.portlet.PortletContext;
 import javax.portlet.PortletSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
-import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.test.MockHttpSession;
 
 /**
  * Mock implementation of the {@link javax.portlet.PortletSession} interface.

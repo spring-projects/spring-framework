@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
@@ -51,18 +52,19 @@ import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.spi.JobFactory;
-
-import org.springframework.beans.TestBean;
+import org.springframework.tests.context.TestMethodInvokingTask;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.scheduling.TestMethodInvokingTask;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Juergen Hoeller
@@ -381,15 +383,19 @@ public class QuartzSupportTests {
 		verify(scheduler).shutdown(false);
 	}
 
-	/*public void testMethodInvocationWithConcurrency() throws Exception {
+	@Ignore @Test
+	public void testMethodInvocationWithConcurrency() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		methodInvokingConcurrency(true);
-	}*/
+	}
 
 	// We can't test both since Quartz somehow seems to keep things in memory
 	// enable both and one of them will fail (order doesn't matter).
-	/*public void testMethodInvocationWithoutConcurrency() throws Exception {
+	@Ignore @Test
+	public void testMethodInvocationWithoutConcurrency() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		methodInvokingConcurrency(false);
-	}*/
+	}
 
 	private void methodInvokingConcurrency(boolean concurrent) throws Exception {
 		// Test the concurrency flag.
@@ -636,6 +642,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithTaskExecutor() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CountingTaskExecutor taskExecutor = new CountingTaskExecutor();
 		DummyJob.count = 0;
 
@@ -667,6 +675,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithRunnable() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyRunnable.count = 0;
 
 		JobDetail jobDetail = new JobDetailBean();
@@ -695,6 +705,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithQuartzJobBean() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -726,6 +738,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactory() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -759,6 +773,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndParamMismatchNotIgnored() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -793,6 +808,8 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndRunnable() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyRunnable.param = 0;
 		DummyRunnable.count = 0;
 
@@ -825,6 +842,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndQuartzJobBean() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJobBean.param = 0;
 		DummyJobBean.count = 0;
 
@@ -857,6 +875,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerWithSpringBeanJobFactoryAndJobSchedulingData() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
@@ -895,6 +914,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testWithTwoAnonymousMethodInvokingJobDetailFactoryBeans() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/multipleAnonymousMethodInvokingJobDetailFB.xml");
 		Thread.sleep(3000);
@@ -914,6 +934,7 @@ public class QuartzSupportTests {
 
 	@Test
 	public void testSchedulerAccessorBean() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
 		ClassPathXmlApplicationContext ctx =
 				new ClassPathXmlApplicationContext("/org/springframework/scheduling/quartz/schedulerAccessorBean.xml");
 		Thread.sleep(3000);
@@ -964,12 +985,14 @@ public class QuartzSupportTests {
 	// SPR-6038: detect HSQL and stop illegal locks being taken
 	@Test
 	public void testSchedulerWithHsqlDataSource() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		DummyJob.param = 0;
 		DummyJob.count = 0;
 
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
 				"/org/springframework/scheduling/quartz/databasePersistence.xml");
-		SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(ctx.getBean(DataSource.class));
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(ctx.getBean(DataSource.class));
 		assertTrue("No triggers were persisted", jdbcTemplate.queryForList("SELECT * FROM qrtz_triggers").size()>0);
 		Thread.sleep(3000);
 		try {

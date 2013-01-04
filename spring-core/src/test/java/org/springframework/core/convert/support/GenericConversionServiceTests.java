@@ -44,6 +44,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.DescriptiveResource;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
@@ -398,6 +400,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance1() {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("integer->string conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -415,6 +418,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance2() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("list<string> -> list<integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");
@@ -442,6 +446,7 @@ public class GenericConversionServiceTests {
 
 	@Test
 	public void testPerformance3() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		GenericConversionService conversionService = new DefaultConversionService();
 		StopWatch watch = new StopWatch("map<string, string> -> map<string, integer> conversionPerformance");
 		watch.start("convert 4,000,000 with conversion service");

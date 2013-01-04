@@ -4,35 +4,35 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
                 http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
 
-	<bean id="requestScopedObject" class="org.springframework.beans.TestBean" scope="request">
+	<bean id="requestScopedObject" class="org.springframework.tests.sample.beans.TestBean" scope="request">
         <property name="name" value="#{request.contextPath}"/>
 	</bean>
 
-	<bean id="requestScopedDisposableObject" class="org.springframework.beans.DerivedTestBean" scope="request"/>
+	<bean id="requestScopedDisposableObject" class="org.springframework.tests.sample.beans.DerivedTestBean" scope="request"/>
 
-	<bean id="requestScopedFactoryBean" class="org.springframework.beans.factory.DummyFactory" scope="request"/>
+	<bean id="requestScopedFactoryBean" class="org.springframework.tests.sample.beans.factory.DummyFactory" scope="request"/>
 
-	<bean id="requestScopedObjectCircle1" class="org.springframework.beans.TestBean" scope="request">
+	<bean id="requestScopedObjectCircle1" class="org.springframework.tests.sample.beans.TestBean" scope="request">
 		<property name="spouse" ref="requestScopedObjectCircle2"/>
 	</bean>
 
-	<bean id="requestScopedObjectCircle2" class="org.springframework.beans.TestBean" scope="request">
+	<bean id="requestScopedObjectCircle2" class="org.springframework.tests.sample.beans.TestBean" scope="request">
 		<property name="spouse" ref="requestScopedObjectCircle1"/>
 	</bean>
 
-  <bean id="requestScopedOuterBean" class="org.springframework.beans.DerivedTestBean" scope="request">
+  <bean id="requestScopedOuterBean" class="org.springframework.tests.sample.beans.DerivedTestBean" scope="request">
     <property name="name" value="outer"/>
     <property name="spouse">
-      <bean class="org.springframework.beans.DerivedTestBean">
+      <bean class="org.springframework.tests.sample.beans.DerivedTestBean">
         <property name="name" value="inner"/>
       </bean>
     </property>
   </bean>
 
-  <bean id="singletonOuterBean" class="org.springframework.beans.DerivedTestBean" lazy-init="true">
+  <bean id="singletonOuterBean" class="org.springframework.tests.sample.beans.DerivedTestBean" lazy-init="true">
     <property name="name" value="outer"/>
     <property name="spouse">
-      <bean class="org.springframework.beans.DerivedTestBean" scope="request">
+      <bean class="org.springframework.tests.sample.beans.DerivedTestBean" scope="request">
         <property name="name" value="inner"/>
       </bean>
     </property>

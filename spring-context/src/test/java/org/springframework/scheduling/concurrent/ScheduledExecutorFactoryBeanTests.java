@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,6 @@
 
 package org.springframework.scheduling.concurrent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.BDDMockito.willThrow;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -32,6 +23,11 @@ import java.util.concurrent.ThreadFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.task.NoOpRunnable;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * @author Rick Evans
@@ -97,6 +93,8 @@ public class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	public void testOneTimeExecutionIsSetUpAndFiresCorrectly() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorFactoryBean factory = new ScheduledExecutorFactoryBean();
@@ -112,6 +110,8 @@ public class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectly() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		Runnable runnable = mock(Runnable.class);
 
 		ScheduledExecutorTask task = new ScheduledExecutorTask(runnable);
@@ -129,6 +129,8 @@ public class ScheduledExecutorFactoryBeanTests {
 
 	@Test
 	public void testFixedRepeatedExecutionIsSetUpAndFiresCorrectlyAfterException() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		Runnable runnable = mock(Runnable.class);
 		willThrow(new IllegalStateException()).given(runnable).run();
 

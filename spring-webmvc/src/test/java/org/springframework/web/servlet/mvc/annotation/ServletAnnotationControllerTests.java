@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,11 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -57,12 +59,12 @@ import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreato
 import org.springframework.aop.interceptor.SimpleTraceInterceptor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.DerivedTestBean;
-import org.springframework.beans.GenericBean;
-import org.springframework.beans.ITestBean;
+import org.springframework.tests.sample.beans.DerivedTestBean;
+import org.springframework.tests.sample.beans.GenericBean;
+import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.beans.PropertyEditorRegistrar;
 import org.springframework.beans.PropertyEditorRegistry;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -327,7 +329,7 @@ public class ServletAnnotationControllerTests {
 		request.addParameter("testBeanSet", new String[] {"1", "2"});
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("[1, 2]-org.springframework.beans.TestBean", response.getContentAsString());
+		assertEquals("[1, 2]-org.springframework.tests.sample.beans.TestBean", response.getContentAsString());
 	}
 
 	@Test
@@ -1517,7 +1519,7 @@ public class ServletAnnotationControllerTests {
 		request.setCookies(new Cookie("date", "2008-11-18"));
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("test-108", response.getContentAsString());
+		assertEquals("test-2008", response.getContentAsString());
 	}
 
 	@Test
@@ -3052,8 +3054,10 @@ public class ServletAnnotationControllerTests {
 
 		@RequestMapping(method = RequestMethod.GET)
 		public void handle(@CookieValue("date") Date date, Writer writer) throws IOException {
-			assertEquals("Invalid path variable value", new Date(108, 10, 18), date);
-			writer.write("test-" + date.getYear());
+			assertEquals("Invalid path variable value", new GregorianCalendar(2008, 10, 18).getTime(), date);
+			Calendar c = new GregorianCalendar();
+			c.setTime(date);
+			writer.write("test-" + c.get(Calendar.YEAR));
 		}
 	}
 

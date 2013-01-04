@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package org.springframework.web.portlet.bind;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.util.StopWatch;
 
@@ -28,8 +29,9 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Mark Fisher
  */
-public class PortletRequestUtilsTests extends TestCase {
+public class PortletRequestUtilsTests {
 
+	@Test
 	public void testIntParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "5");
@@ -68,6 +70,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testIntParameters() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", new String[] {"1", "2", "3"});
@@ -90,9 +93,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		catch (PortletRequestBindingException ex) {
 			// expected
 		}
-
 	}
 
+	@Test
 	public void testLongParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "5");
@@ -131,6 +134,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLongParameters() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.setParameter("param", new String[] {"1", "2", "3"});
@@ -162,6 +166,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertEquals(2, values[1]);
 	}
 
+	@Test
 	public void testFloatParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "5.5");
@@ -200,6 +205,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testFloatParameters() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
@@ -224,6 +230,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDoubleParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "5.5");
@@ -262,6 +269,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testDoubleParameters() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", new String[] {"1.5", "2.5", "3"});
@@ -286,6 +294,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testBooleanParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "true");
@@ -319,6 +328,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertFalse(PortletRequestUtils.getRequiredBooleanParameter(request, "paramEmpty"));
 	}
 
+	@Test
 	public void testBooleanParameters() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param", new String[] {"true", "yes", "off", "1", "bogus"});
@@ -342,6 +352,7 @@ public class PortletRequestUtilsTests extends TestCase {
 		}
 	}
 
+	@Test
 	public void testStringParameter() throws PortletRequestBindingException {
 		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("param1", "str");
@@ -365,7 +376,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertEquals("", PortletRequestUtils.getRequiredStringParameter(request, "paramEmpty"));
 	}
 
+	@Test
 	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -376,7 +389,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertThat(sw.getTotalTimeMillis(), lessThan(250L));
 	}
 
+	@Test
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -387,7 +402,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertThat(sw.getTotalTimeMillis(), lessThan(250L));
 	}
 
+	@Test
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -398,7 +415,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertThat(sw.getTotalTimeMillis(), lessThan(350L));
 	}
 
+	@Test
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -409,7 +428,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertThat(sw.getTotalTimeMillis(), lessThan(250L));
 	}
 
+	@Test
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -420,7 +441,9 @@ public class PortletRequestUtilsTests extends TestCase {
 		assertThat(sw.getTotalTimeMillis(), lessThan(250L));
 	}
 
+	@Test
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockPortletRequest request = new MockPortletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();

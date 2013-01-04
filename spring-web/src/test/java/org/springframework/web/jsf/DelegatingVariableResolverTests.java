@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import javax.faces.el.VariableResolver;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -30,6 +30,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
  * @author Juergen Hoeller
  * @since 02.08.2004
  */
+@Deprecated
 public class DelegatingVariableResolverTests extends TestCase {
 
 	public void testDelegatingVariableResolver() {

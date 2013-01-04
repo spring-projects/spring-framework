@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.beans.support.DerivedFromProtectedBaseBean;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
+import org.springframework.tests.sample.beans.BooleanTestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.NumberTestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -56,11 +63,6 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 
-import test.beans.BooleanTestBean;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.NumberTestBean;
-import test.beans.TestBean;
 
 /**
  * @author Rod Johnson
@@ -1139,10 +1141,8 @@ public final class BeanWrapperTests {
 
 	@Test
 	public void testLargeMatchingPrimitiveArray() {
-		if (LogFactory.getLog(BeanWrapperTests.class).isTraceEnabled()) {
-			// Skip this test: Trace logging blows the time limit.
-			return;
-		}
+		Assume.group(TestGroup.PERFORMANCE);
+		Assume.notLogging(LogFactory.getLog(BeanWrapperTests.class));
 
 		PrimitiveArrayBean tb = new PrimitiveArrayBean();
 		BeanWrapper bw = new BeanWrapperImpl(tb);
@@ -1548,6 +1548,24 @@ public final class BeanWrapperTests {
 		BeanWrapper bw = new BeanWrapperImpl(consumer);
 		bw.setPropertyValue("enumValue", TestEnum.class.getName() + ".TEST_VALUE");
 		assertEquals(TestEnum.TEST_VALUE, consumer.getEnumValue());
+	}
+
+	@Test
+	public void cornerSpr10115() {
+		Spr10115Bean foo = new Spr10115Bean();
+		BeanWrapperImpl bwi = new BeanWrapperImpl();
+		bwi.setWrappedInstance(foo);
+		bwi.setPropertyValue("prop1", "val1");
+		assertEquals("val1", Spr10115Bean.prop1);
+	}
+
+
+	static class Spr10115Bean {
+		private static String prop1;
+
+		public static void setProp1(String prop1) {
+			Spr10115Bean.prop1 = prop1;
+		}
 	}
 
 

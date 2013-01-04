@@ -3,11 +3,11 @@
 
 <beans>
 
-	<bean id="optimizedTestBean" class="org.springframework.beans.TestBean">
+	<bean id="optimizedTestBean" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name" value="Optimized"/>
 	</bean>
 
-	<bean id="countingAdvice" class="test.advice.CountingBeforeAdvice"/>
+	<bean id="countingAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
 
 	<bean id="advisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice" ref="countingAdvice"/>

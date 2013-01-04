@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package org.springframework.aop.interceptor;
 
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.Resource;
-
-import test.beans.ITestBean;
-import test.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Non-XML tests are in AbstractAopProxyTests
@@ -40,7 +41,8 @@ public final class ExposeInvocationInterceptorTests {
 
 	@Test
 	public void testXmlConfig() {
-		XmlBeanFactory bf = new XmlBeanFactory(CONTEXT);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(CONTEXT);
 		ITestBean tb = (ITestBean) bf.getBean("proxy");
 		String name= "tony";
 		tb.setName(name);

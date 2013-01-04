@@ -20,6 +20,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.StopWatch;
 
 /**
@@ -399,6 +401,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetLongParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -412,6 +415,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetFloatParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -425,6 +429,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetDoubleParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -438,6 +443,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetBooleanParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
@@ -451,6 +457,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetStringParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();

@@ -4,9 +4,9 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
 		default-autowire-candidates="">
 
-	<bean id="rob" class="test.beans.TestBean" autowire="byType"/>
+	<bean id="rob" class="org.springframework.tests.sample.beans.TestBean" autowire="byType"/>
 
-	<bean id="sally" class="test.beans.TestBean" autowire-candidate="true"/>
+	<bean id="sally" class="org.springframework.tests.sample.beans.TestBean" autowire-candidate="true"/>
 
 	<bean id="props1" class="org.springframework.beans.factory.config.PropertiesFactoryBean" autowire-candidate="true">
 	  <property name="properties">

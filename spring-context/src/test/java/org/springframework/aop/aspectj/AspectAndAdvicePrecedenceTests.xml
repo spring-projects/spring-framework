@@ -85,6 +85,6 @@
 
 	<bean id="lowPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect"/>
 
-	<bean id="testBean" class="org.springframework.beans.TestBean"/>
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
 	
 </beans>

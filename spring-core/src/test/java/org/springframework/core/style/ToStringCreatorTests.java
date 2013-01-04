@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package org.springframework.core.style;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.CollectionFactory;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -65,7 +66,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	private Map getMap() {
-		Map map = CollectionFactory.createLinkedMapIfPossible(3);
+		Map map = new LinkedHashMap(3);
 		map.put("Keri", "Softball");
 		map.put("Scot", "Fishing");
 		map.put("Keith", "Flag Football");
@@ -96,7 +97,7 @@ public class ToStringCreatorTests extends TestCase {
 	}
 
 	public void testSet() {
-		Set set = CollectionFactory.createLinkedSetIfPossible(3);
+		Set set = new LinkedHashSet<>(3);
 		set.add(s1);
 		set.add(s2);
 		set.add(s3);

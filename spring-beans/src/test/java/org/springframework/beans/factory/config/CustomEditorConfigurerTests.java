@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Map;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import test.beans.TestBean;
 
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.MutablePropertyValues;
@@ -36,6 +35,7 @@ import org.springframework.beans.PropertyEditorRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Unit tests for {@link CustomEditorConfigurer}.
@@ -62,10 +62,14 @@ public final class CustomEditorConfigurerTests {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("date", "2.12.1975");
-		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb1", bd1);
 		pvs = new MutablePropertyValues();
 		pvs.add("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
-		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb2", bd2);
 
 		TestBean tb1 = (TestBean) bf.getBean("tb1");
 		assertEquals(df.parse("2.12.1975"), tb1.getDate());
@@ -85,10 +89,14 @@ public final class CustomEditorConfigurerTests {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("date", "2.12.1975");
-		bf.registerBeanDefinition("tb1", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb1", bd1);
 		pvs = new MutablePropertyValues();
 		pvs.add("someMap[myKey]", new TypedStringValue("2.12.1975", Date.class));
-		bf.registerBeanDefinition("tb2", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb2", bd2);
 
 		TestBean tb1 = (TestBean) bf.getBean("tb1");
 		assertEquals(df.parse("2.12.1975"), tb1.getDate());
@@ -107,7 +115,9 @@ public final class CustomEditorConfigurerTests {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("date", "2.12.1975");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb", bd);
 
 		TestBean tb = (TestBean) bf.getBean("tb");
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
@@ -125,7 +135,9 @@ public final class CustomEditorConfigurerTests {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("date", "2.12.1975");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb", bd);
 
 		TestBean tb = (TestBean) bf.getBean("tb");
 		DateFormat df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.GERMAN);
@@ -143,7 +155,9 @@ public final class CustomEditorConfigurerTests {
 
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("stringArray", "xxx");
-		bf.registerBeanDefinition("tb", new RootBeanDefinition(TestBean.class, pvs));
+		RootBeanDefinition bd = new RootBeanDefinition(TestBean.class);
+		bd.setPropertyValues(pvs);
+		bf.registerBeanDefinition("tb", bd);
 
 		TestBean tb = (TestBean) bf.getBean("tb");
 		assertTrue(tb.getStringArray() != null && tb.getStringArray().length == 1);

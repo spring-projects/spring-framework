@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.Customer;
 import org.springframework.jdbc.datasource.TestDataSourceWrapper;
@@ -59,7 +61,8 @@ public class GenericSqlQueryTests  {
 
 	@Before
 	public void setUp() throws Exception {
-		this.beanFactory = new XmlBeanFactory(
+		this.beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.beanFactory).loadBeanDefinitions(
 				new ClassPathResource("org/springframework/jdbc/object/GenericSqlQueryTests-context.xml"));
 		DataSource dataSource = mock(DataSource.class);
 		this.connection = mock(Connection.class);

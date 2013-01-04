@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,29 @@
 
 package org.springframework.beans.factory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.core.io.Resource;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.IndexedTestBean;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.ObjectUtils;
 
-import test.beans.DummyFactory;
-import test.beans.ITestBean;
-import test.beans.IndexedTestBean;
-import test.beans.TestBean;
-
-import static org.junit.Assert.*;
-import static test.util.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Rod Johnson
@@ -60,10 +62,17 @@ public final class BeanFactoryUtilsTests {
 	public void setUp() {
 		// Interesting hierarchical factory to test counts.
 		// Slow to read so we cache it.
-		XmlBeanFactory grandParent = new XmlBeanFactory(ROOT_CONTEXT);
-		XmlBeanFactory parent = new XmlBeanFactory(MIDDLE_CONTEXT, grandParent);
-		XmlBeanFactory child = new XmlBeanFactory(LEAF_CONTEXT, parent);
-		this.dependentBeansBF = new XmlBeanFactory(DEPENDENT_BEANS_CONTEXT);
+
+
+		DefaultListableBeanFactory grandParent = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(grandParent).loadBeanDefinitions(ROOT_CONTEXT);
+		DefaultListableBeanFactory parent = new DefaultListableBeanFactory(grandParent);
+		new XmlBeanDefinitionReader(parent).loadBeanDefinitions(MIDDLE_CONTEXT);
+		DefaultListableBeanFactory child = new DefaultListableBeanFactory(parent);
+		new XmlBeanDefinitionReader(child).loadBeanDefinitions(LEAF_CONTEXT);
+
+		this.dependentBeansBF = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.dependentBeansBF).loadBeanDefinitions(DEPENDENT_BEANS_CONTEXT);
 		dependentBeansBF.preInstantiateSingletons();
 		this.listableBeanFactory = child;
 	}

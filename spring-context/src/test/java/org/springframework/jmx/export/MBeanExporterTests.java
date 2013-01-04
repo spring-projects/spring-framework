@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,9 @@ import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.beans.TestBean;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jmx.AbstractMBeanServerTests;
 import org.springframework.jmx.IJmxTestBean;
@@ -48,8 +47,8 @@ import org.springframework.jmx.export.assembler.SimpleReflectiveMBeanInfoAssembl
 import org.springframework.jmx.export.naming.SelfNaming;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.jmx.support.RegistrationPolicy;
-
-import test.interceptor.NopInterceptor;
+import org.springframework.tests.aop.interceptor.NopInterceptor;
+import org.springframework.tests.sample.beans.TestBean;
 
 /**
  * Integration tests for the {@link MBeanExporter} class.
@@ -155,7 +154,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -171,7 +171,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectWithExclude() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -189,7 +190,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectLazyMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectLazyMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 			MBeanServer server = (MBeanServer) bf.getBean("server");
@@ -209,7 +211,8 @@ public final class MBeanExporterTests extends AbstractMBeanServerTests {
 	}
 
 	public void testAutodetectNoMBeans() throws Exception {
-		XmlBeanFactory bf = new XmlBeanFactory(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new ClassPathResource("autodetectNoMBeans.xml", getClass()));
 		try {
 			bf.getBean("exporter");
 		} finally {

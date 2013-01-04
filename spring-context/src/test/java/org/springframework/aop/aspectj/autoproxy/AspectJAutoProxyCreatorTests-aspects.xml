@@ -23,11 +23,11 @@
 		<property name="name" value="adrian"/>
 	</bean>
 
-	<bean id="adrian" class="org.springframework.beans.TestBean" parent="adrianParent">
+	<bean id="adrian" class="org.springframework.tests.sample.beans.TestBean" parent="adrianParent">
 		<property name="age" value="34"/>
 	</bean>
 
-	<bean id="adrian2Parent" class="org.springframework.beans.TestBean" abstract="true">
+	<bean id="adrian2Parent" class="org.springframework.tests.sample.beans.TestBean" abstract="true">
 		<property name="name" value="adrian"/>
 	</bean>
 

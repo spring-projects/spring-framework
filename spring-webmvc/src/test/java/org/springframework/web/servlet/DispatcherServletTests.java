@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -144,7 +143,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(1, listener.counter);
+		assertEquals(1, listener.counter);
 	}
 
 	public void testPublishEventsOff() throws Exception {
@@ -155,7 +154,7 @@ public class DispatcherServletTests extends TestCase {
 		ComplexWebApplicationContext.TestApplicationListener listener =
 				(ComplexWebApplicationContext.TestApplicationListener) complexDispatcherServlet
 						.getWebApplicationContext().getBean("testListener");
-		Assert.assertEquals(0, listener.counter);
+		assertEquals(0, listener.counter);
 	}
 
 	public void testFormRequest() throws Exception {

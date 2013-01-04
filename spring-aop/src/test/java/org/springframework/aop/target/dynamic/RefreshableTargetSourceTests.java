@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2012 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.aop.target.dynamic;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * @author Rob Harrop
@@ -75,6 +77,8 @@ public final class RefreshableTargetSourceTests {
 
 	@Test
 	public void testRefreshOverTime() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		CountingRefreshableTargetSource ts = new CountingRefreshableTargetSource(true);
 		ts.setRefreshCheckDelay(100);
 

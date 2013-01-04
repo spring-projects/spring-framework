@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 import org.easymock.MockControl;
 
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.mock.jndi.ExpectedLookupTemplate;
+import org.springframework.tests.mock.jndi.ExpectedLookupTemplate;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.NestedTransactionNotSupportedException;
 import org.springframework.transaction.TransactionDefinition;

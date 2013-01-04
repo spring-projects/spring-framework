@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory.support.security;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -56,7 +56,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.SecurityContextProvider;
 import org.springframework.beans.factory.support.security.support.ConstructorBean;
 import org.springframework.beans.factory.support.security.support.CustomCallbackBean;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
@@ -72,7 +72,7 @@ import org.springframework.core.io.Resource;
  */
 public class CallbacksSecurityTests {
 
-	private XmlBeanFactory beanFactory;
+	private DefaultListableBeanFactory beanFactory;
 	private SecurityContextProvider provider;
 
 	private static class NonPrivilegedBean {
@@ -312,7 +312,8 @@ public class CallbacksSecurityTests {
 		DefaultResourceLoader drl = new DefaultResourceLoader();
 		Resource config = drl
 				.getResource("/org/springframework/beans/factory/support/security/callbacks.xml");
-		beanFactory = new XmlBeanFactory(config);
+		beanFactory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(beanFactory).loadBeanDefinitions(config);
 		beanFactory.setSecurityContextProvider(provider);
 	}
 

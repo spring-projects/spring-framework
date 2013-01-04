@@ -2484,9 +2484,9 @@ deferredResult.setResult(data);
       resumes with the asynchronously produced result.
       </para>
 
-      <para>Explaining the motivation for async request processing, when or why to use it
-      is beyond the scope of this document. For further information you may wish to read
-      <link xl:href="http://http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/"> this blog post series</link>.
+      <para>Explaining the motivation for async request processing and when or why to use it
+      are beyond the scope of this document. For further information you may wish to read
+      <link xl:href="http://blog.springsource.org/2012/05/06/spring-mvc-3-2-preview-introducing-servlet-3-async-support/">this blog post series</link>.
       </para>
 
       <section xml:id="mvc-ann-async-exceptions">

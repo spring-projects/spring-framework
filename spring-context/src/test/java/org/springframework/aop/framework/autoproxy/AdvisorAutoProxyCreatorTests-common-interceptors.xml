@@ -20,7 +20,7 @@
 		</property>
 	</bean>
 
-	<bean id="nopInterceptor" class="test.interceptor.NopInterceptor" />
+	<bean id="nopInterceptor" class="org.springframework.tests.aop.interceptor.NopInterceptor" />
 
 	<!--
 		Stateful mixin. Will apply to all objects
@@ -32,12 +32,12 @@
 	/>
 	
 	<bean id="test1"
-		class="org.springframework.beans.TestBean">
+		class="org.springframework.tests.sample.beans.TestBean">
 		<property name="age"><value>4</value></property>
 	</bean>
 	
 	<bean id="test2"
-		class="org.springframework.beans.TestBean">
+		class="org.springframework.tests.sample.beans.TestBean">
 		<property name="age"><value>4</value></property>
 	</bean>
 	

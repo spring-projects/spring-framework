@@ -16,10 +16,10 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import junit.framework.Assert;
 
 import org.junit.Test;
 import org.springframework.expression.spel.standard.SpelExpression;
@@ -78,7 +78,7 @@ public class InProgressTests extends ExpressionTestCase {
 	@Test
 	public void testProjection06() throws Exception {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.![true]");
-		Assert.assertEquals("'abc'.![true]", expr.toStringAST());
+		assertEquals("'abc'.![true]", expr.toStringAST());
 	}
 
 	// SELECTION
@@ -141,11 +141,11 @@ public class InProgressTests extends ExpressionTestCase {
 	@Test
 	public void testSelectionAST() throws Exception {
 		SpelExpression expr = (SpelExpression) parser.parseExpression("'abc'.^[true]");
-		Assert.assertEquals("'abc'.^[true]", expr.toStringAST());
+		assertEquals("'abc'.^[true]", expr.toStringAST());
 		expr = (SpelExpression) parser.parseExpression("'abc'.?[true]");
-		Assert.assertEquals("'abc'.?[true]", expr.toStringAST());
+		assertEquals("'abc'.?[true]", expr.toStringAST());
 		expr = (SpelExpression) parser.parseExpression("'abc'.$[true]");
-		Assert.assertEquals("'abc'.$[true]", expr.toStringAST());
+		assertEquals("'abc'.$[true]", expr.toStringAST());
 	}
 
 	// Constructor invocation

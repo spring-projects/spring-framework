@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import java.lang.reflect.Method;
 import org.junit.Test;
 
 import org.springframework.core.JdkVersion;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.util.ClassUtils;
 
-import test.beans.TestBean;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
@@ -944,6 +944,30 @@ public class ExtendedBeanInfoTests {
 			assertThat(hasWriteMethodForProperty(bi, "address"), is(false));
 			assertThat(hasIndexedReadMethodForProperty(bi, "address"), is(true));
 			assertThat(hasIndexedWriteMethodForProperty(bi, "address"), is(true));
+		}
+	}
+
+	@Test
+	public void shouldSupportStaticWriteMethod() throws IntrospectionException {
+		{
+			BeanInfo bi = Introspector.getBeanInfo(WithStaticWriteMethod.class);
+			assertThat(hasReadMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasWriteMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasIndexedReadMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1"), is(false));
+		}
+		{
+			BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(WithStaticWriteMethod.class));
+			assertThat(hasReadMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasWriteMethodForProperty(bi, "prop1"), is(true));
+			assertThat(hasIndexedReadMethodForProperty(bi, "prop1"), is(false));
+			assertThat(hasIndexedWriteMethodForProperty(bi, "prop1"), is(false));
+		}
+	}
+
+	static class WithStaticWriteMethod {
+		@SuppressWarnings("unused")
+		public static void setProp1(String prop1) {
 		}
 	}
 }

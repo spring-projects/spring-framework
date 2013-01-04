@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,12 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
@@ -53,6 +54,8 @@ import org.springframework.scripting.ScriptCompilationException;
 import org.springframework.scripting.ScriptSource;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.stereotype.Component;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * @author Rob Harrop
@@ -63,6 +66,11 @@ import org.springframework.stereotype.Component;
  * @author Chris Beams
  */
 public class GroovyScriptFactoryTests {
+
+	@Before
+	public void setUp() {
+		Assume.group(TestGroup.LONG_RUNNING);
+	}
 
 	@Test
 	public void testStaticScript() throws Exception {
@@ -396,6 +404,8 @@ public class GroovyScriptFactoryTests {
 
 	@Test
 	public void testAnonymousScriptDetected() throws Exception {
+		Assume.group(TestGroup.LONG_RUNNING);
+
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());

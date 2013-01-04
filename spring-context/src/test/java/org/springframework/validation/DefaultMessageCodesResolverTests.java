@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.DefaultMessageCodesResolver.Format;
 
 /**
@@ -48,7 +48,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes, is(equalTo(new String[] {
 				"errorCode.objectName.field",
 				"errorCode.field",
-				"errorCode.org.springframework.beans.TestBean",
+				"errorCode.org.springframework.tests.sample.beans.TestBean",
 				"errorCode" })));
 	}
 
@@ -64,7 +64,7 @@ public class DefaultMessageCodesResolverTests {
 				"errorCode.a.b[3].c.d",
 				"errorCode.a.b.c.d",
 				"errorCode.d",
-				"errorCode.org.springframework.beans.TestBean",
+				"errorCode.org.springframework.tests.sample.beans.TestBean",
 				"errorCode" })));
 	}
 
@@ -85,7 +85,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes, is(equalTo(new String[] {
 				"prefix.errorCode.objectName.field",
 				"prefix.errorCode.field",
-				"prefix.errorCode.org.springframework.beans.TestBean",
+				"prefix.errorCode.org.springframework.tests.sample.beans.TestBean",
 				"prefix.errorCode" })));
 	}
 
@@ -97,7 +97,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes, is(equalTo(new String[] {
 				"errorCode.objectName.field",
 				"errorCode.field",
-				"errorCode.org.springframework.beans.TestBean",
+				"errorCode.org.springframework.tests.sample.beans.TestBean",
 				"errorCode" })));
 	}
 
@@ -108,7 +108,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes, is(equalTo(new String[] {
 				"errorCode.objectName.field[",
 				"errorCode.field[",
-				"errorCode.org.springframework.beans.TestBean",
+				"errorCode.org.springframework.tests.sample.beans.TestBean",
 				"errorCode" })));
 	}
 
@@ -139,7 +139,7 @@ public class DefaultMessageCodesResolverTests {
 		assertThat(codes, is(equalTo(new String[] {
 				"objectName.field.errorCode",
 				"field.errorCode",
-				"org.springframework.beans.TestBean.errorCode",
+				"org.springframework.tests.sample.beans.TestBean.errorCode",
 				"errorCode" })));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,12 +203,12 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 
 		Map<String, String> m = new HashMap<String, String>();
 		m.put("name", "Roderick");
-		parent.registerPrototype("rod", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("rod", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
 		m.put("name", "Albert");
-		parent.registerPrototype("father", org.springframework.beans.TestBean.class, new MutablePropertyValues(m));
+		parent.registerPrototype("father", org.springframework.tests.sample.beans.TestBean.class, new MutablePropertyValues(m));
 
 		parent.refresh();
-		parent.addListener(parentListener);
+		parent.addApplicationListener(parentListener);
 
 		this.sac = new StaticApplicationContext(parent);
 
@@ -221,7 +221,7 @@ public class StaticMessageSourceTests extends AbstractApplicationContextTests {
 		PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(sac.getDefaultListableBeanFactory());
 		reader.loadBeanDefinitions(new ClassPathResource("testBeans.properties", getClass()));
 		sac.refresh();
-		sac.addListener(listener);
+		sac.addApplicationListener(listener);
 
 		StaticMessageSource messageSource = sac.getStaticMessageSource();
 		Map<String, String> usMessages = new HashMap<String, String>(3);

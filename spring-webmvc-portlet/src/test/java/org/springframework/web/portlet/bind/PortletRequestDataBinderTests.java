@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import java.beans.PropertyEditorSupport;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.springframework.beans.ITestBean;
-import org.springframework.beans.TestBean;
+import org.springframework.tests.sample.beans.ITestBean;
+import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
-import org.springframework.core.CollectionFactory;
 import org.springframework.mock.web.portlet.MockPortletRequest;
 import org.springframework.validation.BindingResult;
 
@@ -166,7 +166,7 @@ public class PortletRequestDataBinderTests extends TestCase {
 
 	public void testBindingSet() {
 		TestBean bean = new TestBean();
-		Set set = CollectionFactory.createLinkedSetIfPossible(2);
+		Set set = new LinkedHashSet<>(2);
 		set.add(new TestBean("test1"));
 		set.add(new TestBean("test2"));
 		bean.setSomeSet(set);

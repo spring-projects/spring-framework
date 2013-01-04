@@ -397,6 +397,7 @@ public class UrlPathHelper {
 		return source;
 	}
 
+	@SuppressWarnings("deprecation")
 	private String decodeInternal(HttpServletRequest request, String source) {
 		String enc = determineEncoding(request);
 		try {

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 /**
  * @author Arjen Poutsma
  */
+@Deprecated
 public class RequestSpecificMappingInfoComparatorTests {
 
 	private AnnotationMethodHandlerAdapter.RequestSpecificMappingInfoComparator comparator;
