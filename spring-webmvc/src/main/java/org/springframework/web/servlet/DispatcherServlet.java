@@ -72,20 +72,23 @@ import org.springframework.web.util.WebUtils;
  *
  * <li>It can use any {@link HandlerMapping} implementation - pre-built or provided as part of an application - to
  * control the routing of requests to handler objects. Default is {@link org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping}
- * and {@link org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping}. HandlerMapping objects
+ * and {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping}. HandlerMapping objects
  * can be defined as beans in the servlet's application context, implementing the HandlerMapping interface, overriding
  * the default HandlerMapping if present. HandlerMappings can be given any bean name (they are tested by type).
  *
  * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface. Default adapters are {@link
  * org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter}, {@link org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter},
  * for Spring's {@link org.springframework.web.HttpRequestHandler} and {@link org.springframework.web.servlet.mvc.Controller}
- * interfaces, respectively. A default {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter}
- * will be registered as well. HandlerAdapter objects can be added as beans in the application context, overriding the
+ * interfaces, respectively. 
+ * A default {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
+ * will be registered as well for handlers annotated with {@link org.springframework.stereotype.Controller @Controller} 
+ * and {@link org.springframework.web.bind.annotation.RequestMapping @RequestMapping}. 
+ * HandlerAdapter objects can be added as beans in the application context, overriding the
  * default HandlerAdapters. Like HandlerMappings, HandlerAdapters can be given any bean name (they are tested by type).
  *
  * <li>The dispatcher's exception resolution strategy can be specified via a {@link HandlerExceptionResolver}, for
  * example mapping certain exceptions to error pages. Default are
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver},
+ * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver},
  * {@link org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver}, and
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver}. These HandlerExceptionResolvers can be overridden
  * through the application context. HandlerExceptionResolver can be given any bean name (they are tested by type).
@@ -101,7 +104,7 @@ import org.springframework.web.util.WebUtils;
  *
  * <li>The dispatcher's strategy for resolving multipart requests is determined by a {@link
  * org.springframework.web.multipart.MultipartResolver} implementation. Implementations for Jakarta Commons FileUpload
- * and Jason Hunter's COS are included; the typical choise is {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}.
+ * and Jason Hunter's COS are included; the typical choice is {@link org.springframework.web.multipart.commons.CommonsMultipartResolver}.
  * The MultipartResolver bean name is "multipartResolver"; default is none.
  *
  * <li>Its locale resolution strategy is determined by a {@link LocaleResolver}. Out-of-the-box implementations work via
@@ -116,7 +119,7 @@ import org.springframework.web.util.WebUtils;
  * {@code HandlerMapping} (for type level annotations) and/or {@code HandlerAdapter} (for method level
  * annotations) is present in the dispatcher.</b> This is the case by default. However, if you are defining custom
  * {@code HandlerMappings} or {@code HandlerAdapters}, then you need to make sure that a corresponding custom
- * {@code DefaultAnnotationHandlerMapping} and/or {@code AnnotationMethodHandlerAdapter} is defined as well -
+ * {@code RequestMappingHandlerMapping} and/or {@code RequestMappingHandlerAdapter} is defined as well -
  * provided that you intend to use {@code @RequestMapping}.
  *
  * <p><b>A web application can define any number of DispatcherServlets.</b> Each servlet will operate in its own
