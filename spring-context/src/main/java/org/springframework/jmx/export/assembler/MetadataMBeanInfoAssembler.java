@@ -256,7 +256,7 @@ public class MetadataMBeanInfoAssembler extends AbstractReflectiveMBeanInfoAssem
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
 		ManagedOperationParameter[] params = this.attributeSource.getManagedOperationParameters(method);
 		if (params == null || params.length == 0) {
-			return new MBeanParameterInfo[0];
+			return super.getOperationParameters(method, beanKey);
 		}
 
 		MBeanParameterInfo[] parameterInfo = new MBeanParameterInfo[params.length];
