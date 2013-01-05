@@ -30,6 +30,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.jmx.support.JmxUtils;
 
 /**
@@ -164,6 +165,11 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 */
 	protected static final String FIELD_METRIC_CATEGORY = "metricCategory";
 
+
+	/*
+	 * Thread safe, so reusing as widely as possible by making it static.
+	 */
+	protected static final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
 	/**
 	 * Default value for the JMX field "currencyTimeLimit".
@@ -341,7 +347,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 						(method.equals(pd.getWriteMethod()) && includeWriteAttribute(method, beanKey))) {
 					// Attributes need to have their methods exposed as
 					// operations to the JMX server as well.
-					info = createModelMBeanOperationInfo(method, pd.getName(), beanKey);
+					info = createModelMBeanOperationInfo(method, beanKey);
 					Descriptor desc = info.getDescriptor();
 					if (method.equals(pd.getReadMethod())) {
 						desc.setField(FIELD_ROLE, ROLE_GETTER);
@@ -359,7 +365,7 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 
 			// allow getters and setters to be marked as operations directly
 			if (info == null && includeOperation(method, beanKey)) {
-				info = createModelMBeanOperationInfo(method, method.getName(), beanKey);
+				info = createModelMBeanOperationInfo(method, beanKey);
 				Descriptor desc = info.getDescriptor();
 				desc.setField(FIELD_ROLE, ROLE_OPERATION);
 				if (isExposeClassDescriptor()) {
@@ -386,13 +392,13 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * of the {@code MBeanExporter}
 	 * @return the {@code ModelMBeanOperationInfo}
 	 */
-	protected ModelMBeanOperationInfo createModelMBeanOperationInfo(Method method, String name, String beanKey) {
+	protected ModelMBeanOperationInfo createModelMBeanOperationInfo(Method method, String beanKey) {
 		MBeanParameterInfo[] params = getOperationParameters(method, beanKey);
 		if (params.length == 0) {
 			return new ModelMBeanOperationInfo(getOperationDescription(method, beanKey), method);
 		}
 		else {
-			return new ModelMBeanOperationInfo(name,
+			return new ModelMBeanOperationInfo(method.getName(),
 				getOperationDescription(method, beanKey),
 				getOperationParameters(method, beanKey),
 				method.getReturnType().getName(),
@@ -483,7 +489,19 @@ public abstract class AbstractReflectiveMBeanInfoAssembler extends AbstractMBean
 	 * @return the {@code MBeanParameterInfo} array
 	 */
 	protected MBeanParameterInfo[] getOperationParameters(Method method, String beanKey) {
-		return new MBeanParameterInfo[0];
+		String[] parameterNames = discoverer.getParameterNames(method);
+		Class<?>[] typeParameters = method.getParameterTypes();
+		if(parameterNames == null || parameterNames.length == 0) {
+			return new MBeanParameterInfo[0];
+		}
+
+		MBeanParameterInfo[] info = new MBeanParameterInfo[parameterNames.length];
+		for(int i = 0; i < info.length; i++) {
+			String classname = typeParameters[i].getName();
+			info[i] = new MBeanParameterInfo(parameterNames[i], classname, parameterNames[i]);
+		}
+
+		return info;
 	}
 
 
