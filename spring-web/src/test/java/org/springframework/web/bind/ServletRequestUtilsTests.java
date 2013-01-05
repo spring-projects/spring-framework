@@ -388,6 +388,7 @@ public class ServletRequestUtilsTests {
 
 	@Test
 	public void testGetIntParameterWithDefaultValueHandlingIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		StopWatch sw = new StopWatch();
 		sw.start();
