@@ -788,6 +788,11 @@ configure(rootProject) {
 		description = "Generates aggregated Javadoc API documentation."
 		title = "${rootProject.description} ${version} API"
 
+		dependsOn {
+			subprojects.collect {
+				it.tasks.getByName("jar")
+			}
+		}
 		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 		options.author = true
 		options.header = rootProject.description
