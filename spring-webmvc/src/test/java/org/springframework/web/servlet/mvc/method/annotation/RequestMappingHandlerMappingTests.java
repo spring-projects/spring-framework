@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.support.StaticWebApplicationContext;
@@ -76,6 +77,20 @@ public class RequestMappingHandlerMappingTests {
 		this.handlerMapping.setUseRegisteredSuffixPatternMatch(true);
 		assertTrue("'true' registeredSuffixPatternMatch should enable suffixPatternMatch",
 				this.handlerMapping.useSuffixPatternMatch());
+	}
+
+	@Test
+	public void resolveEmbeddedValuesInPatterns() {
+		this.handlerMapping.setEmbeddedValueResolver(new StringValueResolver() {
+			public String resolveStringValue(String value) {
+				return "/${pattern}/bar".equals(value) ? "/foo/bar" : value;
+			}
+		});
+
+		String[] patterns = new String[] { "/foo", "/${pattern}/bar" };
+		String[] result = this.handlerMapping.resolveEmbeddedValuesInPatterns(patterns);
+
+		assertArrayEquals(new String[] { "/foo", "/foo/bar" }, result);
 	}
 
 }

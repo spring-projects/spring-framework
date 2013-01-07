@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
@@ -46,7 +48,8 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  * @author Rossen Stoyanchev
  * @since 3.1
  */
-public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping {
+public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
+		implements EmbeddedValueResolverAware {
 
 	private boolean useSuffixPatternMatch = true;
 
@@ -57,6 +60,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
 	private final List<String> fileExtensions = new ArrayList<String>();
+
+	private StringValueResolver embeddedValueResolver;
 
 
 	/**
@@ -101,6 +106,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		this.useTrailingSlashMatch = useTrailingSlashMatch;
 	}
 
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.embeddedValueResolver  = resolver;
+	}
+
 	/**
 	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
 	 * If not set, the default constructor is used.
@@ -142,7 +152,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
 	public List<String> getFileExtensions() {
-		return fileExtensions;
+		return this.fileExtensions;
 	}
 
 	@Override
@@ -227,8 +237,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Created a RequestMappingInfo from a RequestMapping annotation.
 	 */
 	private RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
+		String[] patterns = resolveEmbeddedValuesInPatterns(annotation.value());
 		return new RequestMappingInfo(
-				new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(),
+				new PatternsRequestCondition(patterns, getUrlPathHelper(), getPathMatcher(),
 						this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions),
 				new RequestMethodsRequestCondition(annotation.method()),
 				new ParamsRequestCondition(annotation.params()),
@@ -236,6 +247,23 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 				new ConsumesRequestCondition(annotation.consumes(), annotation.headers()),
 				new ProducesRequestCondition(annotation.produces(), annotation.headers(), getContentNegotiationManager()),
 				customCondition);
+	}
+
+	/**
+	 * Resolve placeholder values in the given array of patterns.
+	 * @return a new array with updated patterns
+	 */
+	protected String[] resolveEmbeddedValuesInPatterns(String[] patterns) {
+		if (this.embeddedValueResolver == null) {
+			return patterns;
+		}
+		else {
+			String[] resolvedPatterns = new String[patterns.length];
+			for (int i=0; i < patterns.length; i++) {
+				resolvedPatterns[i] = this.embeddedValueResolver.resolveStringValue(patterns[i]);
+			}
+			return resolvedPatterns;
+		}
 	}
 
 }

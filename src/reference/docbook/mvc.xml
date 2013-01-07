@@ -1073,6 +1073,18 @@ public class RelativePathUriTemplateController {
         <filename>/owners/*/pets/{petId}</filename>).</para>
       </section>
 
+      <section xml:id="mvc-ann-requestmapping-placeholders">
+        <title>Patterns with Placeholders</title>
+
+        <para>Patterns in <interfacename>@RequestMapping</interfacename> annotations
+        support ${...} placeholders against local properties and/or system properties
+        and environment variables. This may be useful in cases where the path a
+        controller is mapped to may need to be customized through configuration.
+        For more information on placeholders see the Javadoc for
+        <classname>PropertyPlaceholderConfigurer</classname>.</para>
+
+      </section>
+
       <section xml:id="mvc-ann-matrix-variables">
         <title>Matrix Variables</title>
 
