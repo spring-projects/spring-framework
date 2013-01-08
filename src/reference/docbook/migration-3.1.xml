@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appendix xml:id="migration-3.1"
+    xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xmlns:xl="http://www.w3.org/1999/xlink"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+        http://www.w3.org/1999/xlink http://www.docbook.org/xml/5.0/xsd/xlink.xsd">
+  <title>Migrating to Spring Framework 3.1</title>
+
+  <para>In this appendix we discuss what users will want to know when upgrading to
+  Spring Framework 3.1. For a general overview of features, please see
+  <xref linkend="new-in-3.1"/></para>
+
+  <section xml:id="migration-3.1-component-scan">
+    <title>Component scanning against the "org" base package</title>
+    <para>Spring Framework 3.1 introduces a number of <literal>@Configuration</literal>
+    classes such as <literal>org.springframework.cache.annotation.ProxyCachingConfiguration
+    </literal> and
+    <literal>org.springframework.scheduling.annotation.ProxyAsyncConfiguration</literal>.
+    Because <literal>@Configuration</literal> is ultimately meta-annotated with Spring's
+    <literal>@Component</literal> annotation, these classes will inadvertently be scanned
+    and processed by the container for any component-scanning directive against the
+    unqualified "org" package, e.g.:
+    <programlisting language="xml">
+        &lt;context:component-scan base-package="org"/&gt;</programlisting>
+    Therefore, in order to avoid errors like the one reported in <link
+    xl:href="https://jira.springsource.org/browse/SPR-9843">SPR-9843</link>,
+    any such directives should be updated to at least one more level of qualification e.g.:
+    <programlisting language="xml">
+      &lt;context:component-scan base-package="org.xyz"/&gt;</programlisting>
+    Alternatively, an <literal>exclude-filter</literal> may be used. See
+    <link linkend="beans-scanning-filters"><literal>context:component-scan</literal></link>
+    documentation for details.</para>
+  </section>
+</appendix>
