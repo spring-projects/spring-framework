@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -486,6 +488,33 @@ public class UrlPathHelper {
 			Map<String, String> decodedVars = new LinkedHashMap<String, String>(vars.size());
 			for (Entry<String, String> entry : vars.entrySet()) {
 				decodedVars.put(entry.getKey(), decodeInternal(request, entry.getValue()));
+			}
+			return decodedVars;
+		}
+	}
+
+	/**
+	 * Decode the given matrix variables via
+	 * {@link #decodeRequestString(HttpServletRequest, String)} unless
+	 * {@link #setUrlDecode(boolean)} is set to {@code true} in which case it is
+	 * assumed the URL path from which the variables were extracted is already
+	 * decoded through a call to
+	 * {@link #getLookupPathForRequest(HttpServletRequest)}.
+	 *
+	 * @param request current HTTP request
+	 * @param vars URI variables extracted from the URL path
+	 * @return the same Map or a new Map instance
+	 */
+	public MultiValueMap<String, String> decodeMatrixVariables(HttpServletRequest request, MultiValueMap<String, String> vars) {
+		if (this.urlDecode) {
+			return vars;
+		}
+		else {
+			MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap	<String, String>(vars.size());
+			for (String key : vars.keySet()) {
+				for (String value : vars.get(key)) {
+					decodedVars.add(key, decodeInternal(request, value));
+				}
 			}
 			return decodedVars;
 		}
