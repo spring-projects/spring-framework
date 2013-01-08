@@ -753,18 +753,18 @@ configure(rootProject) {
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
-    apply plugin: org.springframework.build.gradle.SplitPackageDetectorPlugin
+	apply plugin: org.springframework.build.gradle.SplitPackageDetectorPlugin
 
-    reference {
+	reference {
 		sourceDir = file("src/reference/docbook")
 		pdfFilename = "spring-framework-reference.pdf"
 	}
 
-    diagnoseSplitPackages {
-        projectsToScan = project.subprojects - project(":spring-instrument-tomcat") // SPR-10150
-    }
+	diagnoseSplitPackages {
+		projectsToScan = project.subprojects - project(":spring-instrument-tomcat") // SPR-10150
+	}
 
-    // don"t publish the default jar for the root project
+	// don"t publish the default jar for the root project
 	configurations.archives.artifacts.clear()
 
 	dependencies { // for integration tests
@@ -788,7 +788,7 @@ configure(rootProject) {
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
-    check.dependsOn diagnoseSplitPackages
+	check.dependsOn diagnoseSplitPackages
 
 	task api(type: Javadoc) {
 		group = "Documentation"
