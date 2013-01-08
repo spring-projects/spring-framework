@@ -13,7 +13,8 @@
 
     <para>This is a list of new features for Spring 3.1. Most features do not
     yet have dedicated reference documentation but do have Javadoc. In such
-    cases, fully-qualified class names are given.</para>
+    cases, fully-qualified class names are given. See also <xref linkend="migration-3.1"/>
+    </para>
 
     <section id="new-in-3.1-cache-abstraction">
       <title>Cache Abstraction</title>

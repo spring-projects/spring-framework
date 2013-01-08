@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+ "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<appendix id="migration-3.1">
+  <title>Migrating to Spring Framework 3.1</title>
+
+  <para>In this appendix we discuss what users will want to know when upgrading to
+  Spring Framework 3.1. For a general overview of features, please see
+  <xref linkend="new-in-3.1"/></para>
+
+  <section xml:id="migration-3.1-component-scan">
+    <title>Component scanning against the "org" base package</title>
+    <para>Spring Framework 3.1 introduces a number of <literal>@Configuration</literal>
+    classes such as <literal>org.springframework.cache.annotation.ProxyCachingConfiguration
+    </literal> and
+    <literal>org.springframework.scheduling.annotation.ProxyAsyncConfiguration</literal>.
+    Because <literal>@Configuration</literal> is ultimately meta-annotated with Spring's
+    <literal>@Component</literal> annotation, these classes will inadvertently be scanned
+    and processed by the container for any component-scanning directive against the
+    unqualified "org" package, e.g.:
+    <programlisting language="xml">
+        &lt;context:component-scan base-package="org"/&gt;</programlisting>
+    Therefore, in order to avoid errors like the one reported in <ulink
+    url="https://jira.springsource.org/browse/SPR-9843">SPR-9843</ulink>,
+    any such directives should be updated to at least one more level of qualification e.g.:
+    <programlisting language="xml">
+      &lt;context:component-scan base-package="org.xyz"/&gt;</programlisting>
+    Alternatively, an <literal>exclude-filter</literal> may be used. See
+    <link linkend="beans-scanning-filters"><literal>context:component-scan</literal></link>
+    documentation for details.</para>
+  </section>
+</appendix>

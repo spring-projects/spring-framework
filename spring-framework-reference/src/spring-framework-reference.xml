@@ -497,6 +497,9 @@
     <xi:include href="classic-spring.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
 
+    <xi:include href="migration-3.1.xml"
+                xmlns:xi="http://www.w3.org/2001/XInclude" />
+
     <xi:include href="classic-aop-spring.xml"
                 xmlns:xi="http://www.w3.org/2001/XInclude" />
 
