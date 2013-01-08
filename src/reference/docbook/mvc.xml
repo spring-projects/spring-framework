@@ -867,7 +867,10 @@ public class ClinicController {
         <interfacename>@Transactional</interfacename> methods). Usually you
         will introduce an interface for the controller in order to use JDK
         dynamic proxies. To make this work you must move the
-        <interfacename>@RequestMapping</interfacename> annotations to the
+        <interfacename>@RequestMapping</interfacename> annotations, as well as
+        any other type and method-level annotations (e.g.
+        <interfacename>@ModelAttribute</interfacename>,
+        <interfacename>@InitBinder</interfacename>) to the
         interface as well as the mapping mechanism can only "see" the
         interface exposed by the proxy. Alternatively, you could activate
         <code>proxy-target-class="true"</code> in the configuration for the
@@ -876,6 +879,10 @@ public class ClinicController {
         that CGLIB-based subclass proxies should be used instead of
         interface-based JDK proxies. For more information on various proxying
         mechanisms see <xref linkend="aop-proxying" />.</para>
+
+        <para>Note however that method argument annotations, e.g.
+        <interfacename>@RequestParam</interfacename>, must be present in
+        the method signatures of the controller class.</para>
       </tip>
 
       <section xml:id="mvc-ann-requestmapping-31-vs-30">
