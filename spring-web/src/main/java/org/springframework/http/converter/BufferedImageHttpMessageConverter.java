@@ -132,7 +132,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	}
 
 	private boolean isWritable(MediaType mediaType) {
-		if (mediaType == null) {
+		if (mediaType == null || MediaType.ALL.equals(mediaType)) {
 			return true;
 		}
 		Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByMIMEType(mediaType.toString());
@@ -191,7 +191,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 	public void write(BufferedImage image, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
-		if (contentType == null) {
+		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType();
 		}
 		Assert.notNull(contentType,

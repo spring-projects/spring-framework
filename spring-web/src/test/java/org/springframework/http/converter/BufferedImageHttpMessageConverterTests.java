@@ -51,6 +51,7 @@ public class BufferedImageHttpMessageConverterTests {
 	public void canWrite() {
 		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, null));
 		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, new MediaType("image", "png")));
+		assertTrue("Image not supported", converter.canWrite(BufferedImage.class, new MediaType("*", "*")));
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class BufferedImageHttpMessageConverterTests {
 		converter.setDefaultContentType(contentType);
 		BufferedImage body = ImageIO.read(logo.getFile());
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		converter.write(body, contentType, outputMessage);
+		converter.write(body, new MediaType("*", "*"), outputMessage);
 		assertEquals("Invalid content type", contentType, outputMessage.getHeaders().getContentType());
 		assertTrue("Invalid size", outputMessage.getBodyAsBytes().length > 0);
 		BufferedImage result = ImageIO.read(new ByteArrayInputStream(outputMessage.getBodyAsBytes()));
