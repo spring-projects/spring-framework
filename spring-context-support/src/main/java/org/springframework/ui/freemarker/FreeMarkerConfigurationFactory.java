@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -147,7 +148,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setPostTemplateLoaders
 	 */
 	@Deprecated
-	public void setTemplateLoaders(TemplateLoader[] templateLoaders) {
+	public void setTemplateLoaders(TemplateLoader... templateLoaders) {
 		if (templateLoaders != null) {
 			this.templateLoaders.addAll(Arrays.asList(templateLoaders));
 		}
@@ -164,7 +165,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setTemplateLoaderPaths
 	 * @see #postProcessTemplateLoaders
 	 */
-	public void setPreTemplateLoaders(TemplateLoader[] preTemplateLoaders) {
+	public void setPreTemplateLoaders(TemplateLoader... preTemplateLoaders) {
 		this.preTemplateLoaders = Arrays.asList(preTemplateLoaders);
 	}
 
@@ -179,7 +180,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setTemplateLoaderPaths
 	 * @see #postProcessTemplateLoaders
 	 */
-	public void setPostTemplateLoaders(TemplateLoader[] postTemplateLoaders) {
+	public void setPostTemplateLoaders(TemplateLoader... postTemplateLoaders) {
 		this.postTemplateLoaders = Arrays.asList(postTemplateLoaders);
 	}
 
@@ -211,7 +212,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see SpringTemplateLoader
 	 * @see #setTemplateLoaders
 	 */
-	public void setTemplateLoaderPaths(String[] templateLoaderPaths) {
+	public void setTemplateLoaderPaths(String... templateLoaderPaths) {
 		this.templateLoaderPaths = templateLoaderPaths;
 	}
 
@@ -229,7 +230,7 @@ public class FreeMarkerConfigurationFactory {
 	 * Return the Spring ResourceLoader to use for loading FreeMarker template files.
 	 */
 	protected ResourceLoader getResourceLoader() {
-		return resourceLoader;
+		return this.resourceLoader;
 	}
 
 	/**
@@ -252,7 +253,7 @@ public class FreeMarkerConfigurationFactory {
 	 * Return whether to prefer file system access for template loading.
 	 */
 	protected boolean isPreferFileSystemAccess() {
-		return preferFileSystemAccess;
+		return this.preferFileSystemAccess;
 	}
 
 
@@ -293,25 +294,27 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
+		List<TemplateLoader> templateLoaders = new LinkedList<TemplateLoader>(this.templateLoaders);
+
 		// Register template loaders that are supposed to kick in early.
 		if (this.preTemplateLoaders != null) {
-			this.templateLoaders.addAll(this.preTemplateLoaders);
+			templateLoaders.addAll(this.preTemplateLoaders);
 		}
 
 		// Register default template loaders.
 		if (this.templateLoaderPaths != null) {
 			for (String path : this.templateLoaderPaths) {
-				this.templateLoaders.add(getTemplateLoaderForPath(path));
+				templateLoaders.add(getTemplateLoaderForPath(path));
 			}
 		}
-		postProcessTemplateLoaders(this.templateLoaders);
+		postProcessTemplateLoaders(templateLoaders);
 
 		// Register template loaders that are supposed to kick in late.
 		if (this.postTemplateLoaders != null) {
-			this.templateLoaders.addAll(this.postTemplateLoaders);
+			templateLoaders.addAll(this.postTemplateLoaders);
 		}
 
-		TemplateLoader loader = getAggregateTemplateLoader(this.templateLoaders);
+		TemplateLoader loader = getAggregateTemplateLoader(templateLoaders);
 		if (loader != null) {
 			config.setTemplateLoader(loader);
 		}
