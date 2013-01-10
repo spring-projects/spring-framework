@@ -640,10 +640,22 @@ project("spring-webmvc-portlet") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
-	test {
-		useJUnit()
+
+	task testNG(type: Test) {
 		useTestNG()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude "**/*TestCase.class"
+		// Generate TestNG reports alongside JUnit reports.
+		testReport true
 	}
+
+	test {
+		dependsOn testNG
+		useJUnit()
+		// "TestCase" classes are run by other test classes, not the build.
+		exclude "**/*TestCase.class"
+	}
+
 	dependencies {
 		compile(project(":spring-core"))
 		optional(project(":spring-beans"))

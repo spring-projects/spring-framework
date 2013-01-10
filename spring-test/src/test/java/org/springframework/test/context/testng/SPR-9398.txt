@@ -1,3 +1,0 @@
-TODO [SPR-9398] re-enable TestNG support for spring-test.
-
-These TestNG test classes are currently not run at all.
