@@ -21,6 +21,9 @@ task compileJava(overwrite: true)  {
 	inputs.files(project.sourceSets.main.allSource + project.sourceSets.main.compileClasspath)
 	outputs.dir outputDir
 
+	ext.sourceCompatibility = project(":spring-core").compileJava.sourceCompatibility
+	ext.targetCompatibility = project(":spring-core").compileJava.targetCompatibility
+
 	doLast{
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
 				classpath: configurations.ajc.asPath)
@@ -50,6 +53,9 @@ task compileTestJava(overwrite: true)  {
 
 	inputs.files(project.sourceSets.test.allSource + project.sourceSets.test.compileClasspath)
 	outputs.dir outputDir
+
+	ext.sourceCompatibility = project(":spring-core").compileTestJava.sourceCompatibility
+	ext.targetCompatibility = project(":spring-core").compileTestJava.targetCompatibility
 
 	doLast{
 		ant.taskdef(resource: "org/aspectj/tools/ant/taskdefs/aspectjTaskdefs.properties",
