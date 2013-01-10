@@ -3,7 +3,7 @@ SPRING FRAMEWORK CHANGELOG
 http://www.springsource.org
 
 
-Changes in version 3.1.4 (2013-01-02)
+Changes in version 3.1.4 (2013-01-23)
 -------------------------------------
 
 * overhauled non-void JavaBean write method support (SPR-10029)
@@ -11,12 +11,16 @@ Changes in version 3.1.4 (2013-01-02)
 * DefaultListableBeanFactory avoids wide/interleaved metadata locks to avoid deadlock potential (SPR-10020)
 * fixed CGLIB proxy class leaks through further equals/hashCode implementations in Spring AOP pointcuts (SPR-8008)
 * ConfigurationClassPostProcessor consistently uses ClassLoader, not loading core JDK classes via ASM (SPR-10058)
+* MessageSourceResourceBundle overrides JDK 1.6 containsKey method, avoiding NPE in getKeys (SPR-10136)
 * DefaultMessageListenerContainer allows for concurrent subscription consumers on WebLogic/ActiveMQ (SPR-10037)
 * DefaultMessageListenerContainer clears resources of paused tasks when shutting down after stop (SPR-10092)
 * tx timeouts for JPA translate to "javax.persistence.query.timeout" only (for EclipseLink compatibility; SPR-10068)
 * JmsTemplate uses configured receiveTimeout if shorter than remaining transaction timeout (SPR-10109)
 * added MappingJackson2MessageConverter for JMS (SPR-10099)
 * ResourceDatabasePopulator explicitly closes its LineNumberReader (SPR-9912)
+* MimeMessageHelper encodes attachment filename if not ASCII compliant (SPR-9258)
+* FreeMarkerConfigurationFactory properly supports TemplateLoaders when recreating Configurations (SPR-9389)
+* SpringContextResourceAdapter implements equals/hashCode according to the JCA 1.5 contract (SPR-9162)
 * AbstractCachingViewResolver uses a cache limit of 1024 by default, avoiding overflow for redirect URLs (SPR-10065)
 * fixed HierarchicalUriComponents equals implementation (SPR-10088)
 
