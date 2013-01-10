@@ -6,11 +6,18 @@ http://www.springsource.org
 Changes in version 3.2.1 (2013-01-24)
 --------------------------------------
 
+* AnnotationAwareOrderComparator is able to sort Class objects as well (SPR-10152)
+* added dedicated sort method to AnnotationAwareOrderComparator (SPR-9625)
 * fixed QualifierAnnotationAutowireCandidateResolver's detection of custom qualifier annotations (SPR-10107)
 * fixed AbstractAutoProxyCreator to accept null bean names again (SPR-10108)
+* AbstractAdvisingBeanPostProcessor caches per bean target class, working for null bean names as well (SPR-10144)
+* MessageSourceResourceBundle overrides JDK 1.6 containsKey method, avoiding NPE in getKeys (SPR-10136)
 * spring-task-3.2.xsd allows for SpEL expressions in initial-delay attribute (SPR-10102)
 * JmsTemplate uses configured receiveTimeout if shorter than remaining transaction timeout (SPR-10109)
 * added MappingJackson2MessageConverter for JMS (SPR-10099)
+* MimeMessageHelper encodes attachment filename if not ASCII compliant (SPR-9258)
+* FreeMarkerConfigurationFactory properly supports TemplateLoaders when recreating Configurations (SPR-9389)
+* SpringContextResourceAdapter implements equals/hashCode according to the JCA 1.5 contract (SPR-9162)
 
 
 Changes in version 3.2 GA (2012-12-13)
