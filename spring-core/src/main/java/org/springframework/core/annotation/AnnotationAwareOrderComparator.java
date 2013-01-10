@@ -50,7 +50,8 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			return ((Ordered) obj).getOrder();
 		}
 		if (obj != null) {
-			Order order = obj.getClass().getAnnotation(Order.class);
+			Class<?> clazz = (obj instanceof Class ? (Class) obj : obj.getClass());
+			Order order = clazz.getAnnotation(Order.class);
 			if (order != null) {
 				return order.value();
 			}
