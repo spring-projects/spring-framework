@@ -3,7 +3,7 @@ buildscript {
 		maven { url "http://repo.springsource.org/plugins-release" }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.1")
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.3")
 		classpath("org.springframework.build.gradle:docbook-reference-plugin:0.2.4")
 	}
 }
