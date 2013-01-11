@@ -24,6 +24,7 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
+
 /**
  * Gradle plugin that detects identically named, non-empty packages split across multiple
  * subprojects, e.g. "org.springframework.context.annotation" existing in both spring-core
@@ -48,9 +49,9 @@ import org.gradle.api.tasks.TaskAction
 public class DetectSplitPackagesPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		def tasks = project.tasks
-		Task detectSplitPackages = tasks.add('detectSplitPackages', DetectSplitPackagesTask.class)
-		if (tasks.asMap.containsKey('check')) {
-			tasks.getByName('check').dependsOn detectSplitPackages
+		Task detectSplitPackages = tasks.add("detectSplitPackages", DetectSplitPackagesTask.class)
+		if (tasks.asMap.containsKey("check")) {
+			tasks.getByName("check").dependsOn detectSplitPackages
 		}
 	}
 }
@@ -65,8 +66,8 @@ public class DetectSplitPackagesTask extends DefaultTask {
 	Set<Project> projectsToScan = project.subprojects
 
 	public DetectSplitPackagesTask() {
-		this.group = 'Verification'
-		this.description = 'Detects packages split across two or more subprojects.'
+		this.group = "Verification"
+		this.description = "Detects packages split across two or more subprojects."
 	}
 
 	@TaskAction
