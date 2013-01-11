@@ -1,7 +1,12 @@
 import org.gradle.plugins.ide.eclipse.model.ProjectDependency
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
 
+
+apply plugin: "propdeps-eclipse"
+apply plugin: "propdeps-idea"
+
+// Replace classpath entries with project dependencies (GRADLE-1116)
 eclipse.classpath.file.whenMerged { classpath ->
-	// GRADLE-1116
 	def regexp = /.*?\/([^\/]+)\/build\/[^\/]+\/(?:main|test)/ // only match those that end in main or test (avoids removing necessary entries like build/classes/jaxb)
 	def projectOutputDependencies = classpath.entries.findAll { entry -> entry.path =~ regexp }
 	projectOutputDependencies.each { entry ->
@@ -19,3 +24,46 @@ eclipse.classpath.file.whenMerged { classpath ->
 	}
 	classpath.entries.removeAll { entry -> (entry.path =~ /(?!.*?repack.*\.jar).*?\/([^\/]+)\/build\/libs\/[^\/]+\.jar/) }
 }
+
+
+// Use separate main/test outputs (prevents WTP from packaging test classes)
+eclipse.classpath.defaultOutputDir = file(project.name+"/eclipse/bin")
+eclipse.classpath.file.whenMerged { classpath ->
+	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+		it.output = "build/eclipse/" + it.path.split("/")[1]
+	}
+}
+
+// Allow projects to be used as WPT modules
+eclipse.project.natures "org.eclipse.wst.common.project.facet.core.nature"
+
+
+// Include project specific settings
+task eclipseSettings(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.jdt.ui.prefs",
+		"src/eclipse/org.eclipse.wst.common.project.facet.core.xml")
+	into project.file('.settings/')
+}
+
+task eclipseWstComponent(type: Copy) {
+	from rootProject.files(
+		"src/eclipse/org.eclipse.wst.common.component")
+	into project.file('.settings/')
+	expand(deployname: project.name)
+}
+
+task eclipseJdtPrepare(type: Copy) {
+	from rootProject.file("src/eclipse/org.eclipse.jdt.core.prefs")
+	into project.file(".settings/")
+}
+
+task cleanEclipseJdtUi(type: Delete) {
+	delete project.file(".settings/org.eclipse.jdt.ui.prefs");
+	delete project.file(".settings/org.eclipse.wst.common.component");
+	delete project.file(".settings/org.eclipse.wst.common.project.facet.core.xml");
+}
+
+tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
+tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
+tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
