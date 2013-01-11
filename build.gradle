@@ -766,11 +766,16 @@ configure(rootProject) {
 
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
+	apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
 
 	reference {
 		sourceDir = file("src/reference/docbook")
 		pdfFilename = "spring-framework-reference.pdf"
+	}
+
+	detectSplitPackages {
+		projectsToScan -= project(":spring-instrument-tomcat")
 	}
 
 	// don"t publish the default jar for the root project
@@ -973,6 +978,7 @@ configure(rootProject) {
 				"set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
 		}
 	}
+
 }
 
 /*
