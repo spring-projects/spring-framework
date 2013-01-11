@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import static org.junit.Assert.*;
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Clark Duplichien
+ * @author Phillip Webb
  */
 public class SpelReproTests extends ExpressionTestCase {
 
@@ -1657,6 +1658,15 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
+	public void SPR_10162_onlyBridgeMethodTest() throws Exception {
+		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Object target = new OnlyBridgeMethod();
+		TypedValue value = accessor.read(context, target , "property");
+		assertEquals(Integer.class, value.getTypeDescriptor().getType());
+	}
+
+	@Test
 	public void SPR_10091_simpleTestValueType() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
@@ -1720,6 +1730,17 @@ public class SpelReproTests extends ExpressionTestCase {
 		public Integer getProperty() {
 			return null;
 		}
+	}
+
+	static class PackagePrivateClassWithGetter {
+
+		public Integer getProperty() {
+			return null;
+		}
+	}
+
+	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
+
 	}
 
 }

@@ -21,6 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -310,13 +312,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a getter method for the specified property.
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] ms = clazz.getMethods();
+		Method[] ms = getSortedClassMethods(clazz);
 		String propertyMethodSuffix = getPropertyMethodSuffix(propertyName);
 
 		// Try "get*" method...
 		String getterName = "get" + propertyMethodSuffix;
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
@@ -324,7 +326,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		// Try "is*" method...
 		getterName = "is" + propertyMethodSuffix;
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
@@ -337,15 +339,29 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a setter method for the specified property.
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] methods = clazz.getMethods();
+		Method[] methods = getSortedClassMethods(clazz);
 		String setterName = "set" + getPropertyMethodSuffix(propertyName);
 		for (Method method : methods) {
-			if (!method.isBridge() && method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
+			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns class methods ordered with non bridge methods appearing higher.
+	 */
+	private Method[] getSortedClassMethods(Class<?> clazz) {
+		Method[] methods = clazz.getMethods();
+		Arrays.sort(methods, new Comparator<Method>() {
+			@Override
+			public int compare(Method o1, Method o2) {
+				return (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1);
+			}
+		});
+		return methods;
 	}
 
 	protected String getPropertyMethodSuffix(String propertyName) {
