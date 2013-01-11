@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -179,8 +180,13 @@ public class ClassLevelDirtiesContextTests {
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@TestExecutionListeners( { DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class })
-	@ContextConfiguration("/org/springframework/test/context/junit4/SpringJUnit4ClassRunnerAppCtxTests-context.xml")
+	@ContextConfiguration
 	public static abstract class BaseTestCase {
+
+		@Configuration
+		static class Config {
+			/* no beans */
+		}
 
 		@Autowired
 		protected ApplicationContext applicationContext;

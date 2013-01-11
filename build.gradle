@@ -655,7 +655,7 @@ project("spring-test") {
 		dependsOn testNG
 		useJUnit()
 		// "TestCase" classes are run by other test classes, not the build.
-		exclude "**/*TestCase.class"
+		exclude(["**/*TestCase.class", "**/*TestSuite.class"])
 	}
 
 	dependencies {

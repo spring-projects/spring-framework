@@ -76,16 +76,16 @@ public class TimedSpringRunnerTests {
 		}
 
 		// Should Fail due to timeout.
-		@Test(timeout = 200)
+		@Test(timeout = 10)
 		public void testJUnitTimeoutWithOneSecondWait() throws Exception {
-			Thread.sleep(1000);
+			Thread.sleep(20);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@Timed(millis = 200)
+		@Timed(millis = 10)
 		public void testSpringTimeoutWithOneSecondWait() throws Exception {
-			Thread.sleep(1000);
+			Thread.sleep(20);
 		}
 
 		// Should Fail due to duplicate configuration.

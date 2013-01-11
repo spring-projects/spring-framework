@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,15 +42,16 @@ import org.springframework.test.context.junit4.profile.xml.DevProfileXmlConfigTe
 
 /**
  * JUnit test suite for tests involving {@link SpringJUnit4ClassRunner} and the
- * <em>Spring TestContext Framework</em>.
+ * <em>Spring TestContext Framework</em>; only intended to be run manually as a
+ * convenience.
  *
  * <p>This test suite serves a dual purpose of verifying that tests run with
  * {@link SpringJUnit4ClassRunner} can be used in conjunction with JUnit's
  * {@link Suite} runner.
  *
  * <p>Note that tests included in this suite will be executed at least twice if
- * run from an automated build process, test runner, etc. that is configured to
- * run tests based on a &quot;*Tests.class&quot; pattern match.
+ * run from an automated build process, test runner, etc. that is not configured
+ * to exclude tests based on a &quot;*TestSuite.class&quot; pattern match.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -104,6 +105,6 @@ StandardJUnit4FeaturesTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
 	HibernateSessionFlushingTests.class //
 })
-public class SpringJUnit4SuiteTests {
+public class SpringJUnit4TestSuite {
 	/* this test case consists entirely of tests loaded as a suite. */
 }
