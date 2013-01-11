@@ -752,16 +752,16 @@ configure(rootProject) {
 
 	apply plugin: "docbook-reference"
 	apply plugin: "groovy"
+	apply plugin: "detect-split-packages"
 	apply from: "${gradleScriptDir}/jdiff.gradle"
-	apply plugin: org.springframework.build.gradle.SplitPackageDetectorPlugin
 
 	reference {
 		sourceDir = file("src/reference/docbook")
 		pdfFilename = "spring-framework-reference.pdf"
 	}
 
-	diagnoseSplitPackages {
-		projectsToScan = project.subprojects - project(":spring-instrument-tomcat") // SPR-10150
+	detectSplitPackages {
+		projectsToScan -= project(":spring-instrument-tomcat")
 	}
 
 	// don"t publish the default jar for the root project
@@ -787,8 +787,6 @@ configure(rootProject) {
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
-
-	check.dependsOn diagnoseSplitPackages
 
 	task api(type: Javadoc) {
 		group = "Documentation"
