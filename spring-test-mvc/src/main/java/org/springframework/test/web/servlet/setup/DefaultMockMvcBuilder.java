@@ -54,7 +54,7 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 	private final List<ResultMatcher> globalResultMatchers = new ArrayList<ResultMatcher>();
 
 	private final List<ResultHandler> globalResultHandlers = new ArrayList<ResultHandler>();
-	
+
 	private Boolean dispatchOptions = Boolean.FALSE;
 
 
@@ -180,17 +180,17 @@ public class DefaultMockMvcBuilder<Self extends MockMvcBuilder> extends MockMvcB
 		this.globalResultHandlers.add(resultHandler);
 		return (T) this;
 	}
-	
+
 	/**
-     * Should the {@link DispatcherServlet} dispatch OPTIONS request to controllers.
-     * @param dispatchOptions
-     * @see {@link DispatcherServlet#setDispatchOptionsRequest(boolean)}
-     */
+	 * Should the {@link DispatcherServlet} dispatch OPTIONS request to controllers.
+	 * @param dispatchOptions
+	 * @see DispatcherServlet#setDispatchOptionsRequest(boolean)
+	 */
 	@SuppressWarnings("unchecked")
-    public final <T extends Self> T dispatchOptions(boolean dispatchOptions) {
-        this.dispatchOptions = dispatchOptions;
-        return (T) this;
-    }
+	public final <T extends Self> T dispatchOptions(boolean dispatchOptions) {
+		this.dispatchOptions = dispatchOptions;
+		return (T) this;
+	}
 
 	/**
 	 * Build a {@link MockMvc} instance.
