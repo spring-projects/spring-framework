@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
@@ -312,11 +315,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * rest of the name is the same as the property name (with the first character uppercased).
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] ms = clazz.getMethods();
+		Method[] ms = getSortedClassMethods(clazz);
 		// Try "get*" method...
 		String getterName = "get" + StringUtils.capitalize(propertyName);
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
@@ -324,7 +327,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		// Try "is*" method...
 		getterName = "is" + StringUtils.capitalize(propertyName);
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
@@ -337,15 +340,29 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a setter method for the specified property.
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] methods = clazz.getMethods();
+		Method[] methods = getSortedClassMethods(clazz);
 		String setterName = "set" + StringUtils.capitalize(propertyName);
 		for (Method method : methods) {
-			if (!method.isBridge() && method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
+			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns class methods ordered with non bridge methods appearing higher.
+	 */
+	private Method[] getSortedClassMethods(Class<?> clazz) {
+		Method[] methods = clazz.getMethods();
+		Arrays.sort(methods, new Comparator<Method>() {
+			@Override
+			public int compare(Method o1, Method o2) {
+				return (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1);
+			}
+		});
+		return methods;
 	}
 
 	/**
