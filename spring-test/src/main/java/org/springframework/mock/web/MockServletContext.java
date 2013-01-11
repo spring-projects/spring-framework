@@ -163,6 +163,7 @@ public class MockServletContext implements ServletContext {
 	 * @param resourceLoader the ResourceLoader to use (or null for the default)
 	 * @see #registerNamedDispatcher
 	 */
+	@SuppressWarnings("javadoc")
 	public MockServletContext(String resourceBasePath, ResourceLoader resourceLoader) {
 		this.resourceLoader = (resourceLoader != null ? resourceLoader : new DefaultResourceLoader());
 		this.resourceBasePath = (resourceBasePath != null ? resourceBasePath : "");
@@ -344,6 +345,7 @@ public class MockServletContext implements ServletContext {
 	 * <p>Defaults to {@linkplain #COMMON_DEFAULT_SERVLET_NAME "default"}.
 	 * @see #setDefaultServletName
 	 */
+	@SuppressWarnings("javadoc")
 	public String getDefaultServletName() {
 		return this.defaultServletName;
 	}

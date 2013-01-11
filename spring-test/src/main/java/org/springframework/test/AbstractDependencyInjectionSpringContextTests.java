@@ -197,6 +197,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	 * test instance has not been configured
 	 * @see #populateProtectedVariables()
 	 */
+	@SuppressWarnings("javadoc")
 	protected void injectDependencies() throws Exception {
 		Assert.state(getApplicationContext() != null,
 				"injectDependencies() called without first configuring an ApplicationContext");
