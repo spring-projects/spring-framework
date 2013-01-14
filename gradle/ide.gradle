@@ -28,6 +28,13 @@ eclipse.classpath.file.whenMerged { classpath ->
 
 // Use separate main/test outputs (prevents WTP from packaging test classes)
 eclipse.classpath.defaultOutputDir = file(project.name+"/eclipse/bin")
+eclipse.classpath.file.beforeMerged { classpath ->
+	classpath.entries.findAll{ it instanceof SourceFolder }.each {
+		if(it.output.startsWith("build/eclipse")) {
+			it.output = null
+		}
+	}
+}
 eclipse.classpath.file.whenMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
 		it.output = "build/eclipse/" + it.path.split("/")[1]
