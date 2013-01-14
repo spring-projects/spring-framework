@@ -16,6 +16,11 @@
 
 package org.springframework.expression.spel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,8 +31,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.ExpectedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -48,8 +54,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 
-import static org.junit.Assert.*;
-
 /**
  * Reproduction tests cornering various SpEL JIRA issues.
  *
@@ -59,6 +63,9 @@ import static org.junit.Assert.*;
  * @author Phillip Webb
  */
 public class SpelReproTests extends ExpressionTestCase {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testNPE_SPR5661() {
@@ -1694,6 +1701,24 @@ public class SpelReproTests extends ExpressionTestCase {
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
 	}
 
+	@Test
+	public void SPR_10146_malformedExpressions() throws Exception {
+		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("<foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146(">foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("&&foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("||foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("&foo", "EL1069E:(pos 0): missing expected character '&'");
+		doTestSpr10146("|foo", "EL1069E:(pos 0): missing expected character '|'");
+	}
+
+	private void doTestSpr10146(String expression, String expectedMessage) {
+		thrown.expect(SpelParseException.class);
+		thrown.expectMessage(expectedMessage);
+		new SpelExpressionParser().parseExpression(expression);
+	}
 
 	public static class BooleanHolder {
 
