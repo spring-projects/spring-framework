@@ -16,8 +16,10 @@
 
 package org.springframework.expression.spel;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -1720,6 +1722,15 @@ public class SpelReproTests extends ExpressionTestCase {
 		new SpelExpressionParser().parseExpression(expression);
 	}
 
+	@Test
+	public void SPR_10125() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		String fromInterface = parser.parseExpression("T("+StaticFinalImpl1.class.getName()+").VALUE").getValue(context, String.class);
+		assertThat(fromInterface, is("interfaceValue"));
+		String fromClass = parser.parseExpression("T("+StaticFinalImpl2.class.getName()+").VALUE").getValue(context, String.class);
+		assertThat(fromClass, is("interfaceValue"));
+	}
+
 	public static class BooleanHolder {
 
 		private Boolean simpleProperty = true;
@@ -1768,4 +1779,16 @@ public class SpelReproTests extends ExpressionTestCase {
 
 	}
 
+	public static interface StaticFinal {
+		public static final String VALUE = "interfaceValue";
+	}
+
+	public abstract static class AbstractStaticFinal implements StaticFinal {
+	}
+
+	public static class StaticFinalImpl1 extends AbstractStaticFinal implements StaticFinal {
+	}
+
+	public static class StaticFinalImpl2 extends AbstractStaticFinal {
+	}
 }

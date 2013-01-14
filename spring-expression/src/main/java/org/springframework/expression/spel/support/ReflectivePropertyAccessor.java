@@ -383,6 +383,18 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return field;
 			}
 		}
+		if(clazz.getSuperclass() != null) {
+			Field field = findField(name, clazz.getSuperclass(), mustBeStatic);
+			if(field != null) {
+				return field;
+			}
+		}
+		for (Class<?> implementedInterface : clazz.getInterfaces()) {
+			Field field = findField(name, implementedInterface, mustBeStatic);
+			if(field != null) {
+				return field;
+			}
+		}
 		return null;
 	}
 
