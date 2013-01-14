@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,34 +64,34 @@ public class TimedSpringRunnerTests {
 
 		// Should Pass.
 		@Test(timeout = 2000)
-		public void testJUnitTimeoutWithNoOp() {
+		public void jUnitTimeoutWithNoOp() {
 			/* no-op */
 		}
 
 		// Should Pass.
 		@Test
 		@Timed(millis = 2000)
-		public void testSpringTimeoutWithNoOp() {
+		public void springTimeoutWithNoOp() {
 			/* no-op */
 		}
 
 		// Should Fail due to timeout.
 		@Test(timeout = 10)
-		public void testJUnitTimeoutWithOneSecondWait() throws Exception {
+		public void jUnitTimeoutWithSleep() throws Exception {
 			Thread.sleep(20);
 		}
 
 		// Should Fail due to timeout.
 		@Test
 		@Timed(millis = 10)
-		public void testSpringTimeoutWithOneSecondWait() throws Exception {
+		public void springTimeoutWithSleep() throws Exception {
 			Thread.sleep(20);
 		}
 
 		// Should Fail due to duplicate configuration.
 		@Test(timeout = 200)
 		@Timed(millis = 200)
-		public void testSpringAndJUnitTimeout() {
+		public void springAndJUnitTimeouts() {
 			/* no-op */
 		}
 	}
