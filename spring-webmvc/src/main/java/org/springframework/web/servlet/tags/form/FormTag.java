@@ -32,6 +32,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
@@ -411,6 +412,10 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected String resolveAction() throws JspException {
 		String action = getAction();
 		if (StringUtils.hasText(action)) {
+			String pathToServlet = getRequestContext().getPathToServlet();
+			if (action.startsWith("/") && !action.startsWith(getRequestContext().getContextPath())) {
+				action = pathToServlet + action;
+			}
 			action = getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
 			return processAction(action);
 		}

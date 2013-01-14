@@ -36,6 +36,7 @@ import org.springframework.ui.context.ThemeSource;
 import org.springframework.ui.context.support.ResourceBundleThemeSource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
@@ -422,14 +423,14 @@ public class RequestContext {
 	 * context path and the servlet path of the original request. This is useful
 	 * for building links to other resources within the application where a
 	 * servlet mapping of the style {@code "/main/*"} is used.
-	 * <p>Delegates to the UrlPathHelper for decoding the context path.
-	 * @see javax.servlet.http.HttpServletRequest#getContextPath
-	 * @see javax.servlet.http.HttpServletRequest#getServletPath()
-	 * @see #getUrlPathHelper
+	 * Delegates to the UrlPathHelper to determine the context and servlet path.
 	 */
 	public String getPathToServlet() {
-		return this.urlPathHelper.getOriginatingContextPath(this.request)
-				+ this.urlPathHelper.getOriginatingServletPath(this.request);
+		String path = this.urlPathHelper.getOriginatingContextPath(this.request);
+		if (StringUtils.hasText(this.urlPathHelper.getPathWithinServletMapping(this.request))) {
+			path += this.urlPathHelper.getOriginatingServletPath(this.request);
+		}
+		return path;
 	}
 
 	/**
