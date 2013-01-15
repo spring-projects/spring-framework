@@ -63,7 +63,7 @@ public class ContentAssertionTests {
 		this.mockMvc.perform(get("/handleUtf8"))
 			.andExpect(content().contentType(MediaType.valueOf("text/plain;charset=UTF-8")))
 			.andExpect(content().contentType("text/plain;charset=UTF-8"))
-			.andExpect(content().contentTypeCompatibleWith("text/plan"))
+			.andExpect(content().contentTypeCompatibleWith("text/plain"))
 			.andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_PLAIN));
 	}
 
