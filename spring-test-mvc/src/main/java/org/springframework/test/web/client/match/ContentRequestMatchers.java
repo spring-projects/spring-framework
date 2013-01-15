@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 package org.springframework.test.web.client.match;
 
 import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static org.springframework.test.util.MatcherAssertionErrors.assertThat;
 
 import java.io.IOException;
 
@@ -68,6 +68,29 @@ public class ContentRequestMatchers {
 				MediaType actualContentType = request.getHeaders().getContentType();
 				assertTrue("Content type not set", actualContentType != null);
 				assertEquals("Content type", expectedContentType, actualContentType);
+			}
+		};
+	}
+
+	/**
+	 * Assert the request content type is compatible with the given
+	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
+	 */
+	public RequestMatcher contentTypeCompatibleWith(String contentType) {
+		return contentTypeCompatibleWith(MediaType.parseMediaType(contentType));
+	}
+
+	/**
+	 * Assert the request content type is compatible with the given
+	 * content type as defined by {@link MediaType#isCompatibleWith(MediaType)}.
+	 */
+	public RequestMatcher contentTypeCompatibleWith(final MediaType contentType) {
+		return new RequestMatcher() {
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				MediaType actualContentType = request.getHeaders().getContentType();
+				assertTrue("Content type not set", actualContentType != null);
+				assertTrue("Content type [" + actualContentType + "] is not compatible with [" + contentType + "]",
+						actualContentType.isCompatibleWith(contentType));
 			}
 		};
 	}
