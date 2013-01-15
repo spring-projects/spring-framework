@@ -32,7 +32,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
-import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Databinding-aware JSP tag for rendering an HTML '{@code form}' whose
@@ -51,6 +50,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
+ * @author Rossen Stoyanchev
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */

@@ -34,6 +34,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
  * @author Juergen Hoeller
  * @author Scott Andrews
  * @author Jeremy Grelle
+ * @author Rossen Stoyanchev
  */
 public class FormTagTests extends AbstractHtmlElementTagTests {
 

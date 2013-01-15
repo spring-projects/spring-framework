@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ import org.springframework.web.util.WebUtils;
  * appropriate fallback for the locale (the HttpServletRequest's primary locale).
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 03.03.2003
  * @see org.springframework.web.servlet.DispatcherServlet
  * @see org.springframework.web.servlet.view.AbstractView#setRequestContextAttribute
@@ -234,8 +235,10 @@ public class RequestContext {
 	}
 
 	/**
-	 * Determine the fallback locale for this context. <p>The default implementation checks for a JSTL locale attribute
-	 * in request, session or application scope; if not found, returns the {@code HttpServletRequest.getLocale()}.
+	 * Determine the fallback locale for this context.
+	 * <p>The default implementation checks for a JSTL locale attribute in request,
+	 * session or application scope; if not found, returns the
+	 * {@code HttpServletRequest.getLocale()}.
 	 * @return the fallback locale (never {@code null})
 	 * @see javax.servlet.http.HttpServletRequest#getLocale()
 	 */
@@ -250,8 +253,8 @@ public class RequestContext {
 	}
 
 	/**
-	 * Determine the fallback theme for this context. <p>The default implementation returns the default theme (with name
-	 * "theme").
+	 * Determine the fallback theme for this context.
+	 * <p>The default implementation returns the default theme (with name "theme").
 	 * @return the fallback theme (never {@code null})
 	 */
 	protected Theme getFallbackTheme() {
@@ -310,8 +313,8 @@ public class RequestContext {
 	}
 
 	/**
-	 * Return the current theme (never {@code null}). <p>Resolved lazily for more efficiency when theme support is
-	 * not being used.
+	 * Return the current theme (never {@code null}).
+	 * <p>Resolved lazily for more efficiency when theme support is not being used.
 	 */
 	public final Theme getTheme() {
 		if (this.theme == null) {
@@ -351,7 +354,8 @@ public class RequestContext {
 
 	/**
 	 * Set the UrlPathHelper to use for context path and request URI decoding. Can be used to pass a shared
-	 * UrlPathHelper instance in. <p>A default UrlPathHelper is always available.
+	 * UrlPathHelper instance in.
+	 * <p>A default UrlPathHelper is always available.
 	 */
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
@@ -360,7 +364,8 @@ public class RequestContext {
 
 	/**
 	 * Return the UrlPathHelper used for context path and request URI decoding. Can be used to configure the current
-	 * UrlPathHelper. <p>A default UrlPathHelper is always available.
+	 * UrlPathHelper.
+	 * <p>A default UrlPathHelper is always available.
 	 */
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
@@ -377,8 +382,8 @@ public class RequestContext {
 
 	/**
 	 * Return the context path of the original request, that is, the path that indicates the current web application.
-	 * This is useful for building links to other resources within the application. <p>Delegates to the UrlPathHelper
-	 * for decoding.
+	 * This is useful for building links to other resources within the application.
+	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see javax.servlet.http.HttpServletRequest#getContextPath
 	 * @see #getUrlPathHelper
 	 */
@@ -423,7 +428,7 @@ public class RequestContext {
 	 * context path and the servlet path of the original request. This is useful
 	 * for building links to other resources within the application where a
 	 * servlet mapping of the style {@code "/main/*"} is used.
-	 * Delegates to the UrlPathHelper to determine the context and servlet path.
+	 * <p>Delegates to the UrlPathHelper to determine the context and servlet path.
 	 */
 	public String getPathToServlet() {
 		String path = this.urlPathHelper.getOriginatingContextPath(this.request);
@@ -437,8 +442,8 @@ public class RequestContext {
 	 * Return the request URI of the original request, that is, the invoked URL without parameters. This is particularly
 	 * useful as HTML form action target, possibly in combination with the original query string. <p><b>Note this
 	 * implementation will correctly resolve to the URI of any originating root request in the presence of a forwarded
-	 * request. However, this can only work when the Servlet 2.4 'forward' request attributes are present. <p>Delegates
-	 * to the UrlPathHelper for decoding.
+	 * request. However, this can only work when the Servlet 2.4 'forward' request attributes are present.
+	 * <p>Delegates to the UrlPathHelper for decoding.
 	 * @see #getQueryString
 	 * @see org.springframework.web.util.UrlPathHelper#getOriginatingRequestUri
 	 * @see #getUrlPathHelper
@@ -574,8 +579,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @param defaultMessage String to return if the lookup fails
 	 * @return the message
@@ -585,8 +591,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
@@ -597,8 +604,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @param defaultMessage String to return if the lookup fails
@@ -610,8 +618,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
@@ -621,8 +630,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @param args arguments for the message, or {@code null} if none
 	 * @return the message
@@ -633,8 +643,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the theme message for the given code. <p>Note that theme messages are never HTML-escaped, as they
-	 * typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the theme message for the given code.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param code code of the message
 	 * @param args arguments for the message as a List, or {@code null} if none
 	 * @return the message
@@ -645,8 +656,9 @@ public class RequestContext {
 	}
 
 	/**
-	 * Retrieve the given MessageSourceResolvable in the current theme. <p>Note that theme messages are never
-	 * HTML-escaped, as they typically denote theme-specific resource paths and not client-visible messages.
+	 * Retrieve the given MessageSourceResolvable in the current theme.
+	 * <p>Note that theme messages are never HTML-escaped, as they typically denote
+	 * theme-specific resource paths and not client-visible messages.
 	 * @param resolvable the MessageSourceResolvable
 	 * @return the message
 	 * @throws org.springframework.context.NoSuchMessageException if not found
