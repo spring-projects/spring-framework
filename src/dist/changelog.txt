@@ -6,13 +6,17 @@ http://www.springsource.org
 Changes in version 3.2.1 (2013-01-24)
 --------------------------------------
 
+* SpEL support for static finals on interfaces (SPR-10125)
 * AnnotationAwareOrderComparator is able to sort Class objects as well (SPR-10152)
 * added dedicated sort method to AnnotationAwareOrderComparator (SPR-9625)
 * fixed QualifierAnnotationAutowireCandidateResolver's detection of custom qualifier annotations (SPR-10107)
 * fixed AbstractAutoProxyCreator to accept null bean names again (SPR-10108)
 * AbstractAdvisingBeanPostProcessor caches per bean target class, working for null bean names as well (SPR-10144)
 * MessageSourceResourceBundle overrides JDK 1.6 containsKey method, avoiding NPE in getKeys (SPR-10136)
+* AbstractCacheManager accepts no caches defined, allowing for EHCache default cache setup (SPR-7955)
 * spring-task-3.2.xsd allows for SpEL expressions in initial-delay attribute (SPR-10102)
+* reintroduced "mode" and "proxy-target-class" attributes in spring-task-3.1/3.2.xsd (SPR-10177)
+* JDBC parameter binding uses JDBC 3.0 ParameterMetaData (if available) for type determination (SPR-10084)
 * JmsTemplate uses configured receiveTimeout if shorter than remaining transaction timeout (SPR-10109)
 * added MappingJackson2MessageConverter for JMS (SPR-10099)
 * MimeMessageHelper encodes attachment filename if not ASCII compliant (SPR-9258)
