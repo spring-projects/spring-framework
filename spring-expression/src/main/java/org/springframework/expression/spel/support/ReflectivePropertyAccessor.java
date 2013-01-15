@@ -287,7 +287,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findGetterForProperty(propertyName, clazz, target instanceof Class);
-		if(method == null && target instanceof Class) {
+		if (method == null && target instanceof Class) {
 			method = findGetterForProperty(propertyName, target.getClass(), false);
 		}
 		return method;
@@ -295,7 +295,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findSetterForProperty(propertyName, clazz, target instanceof Class);
-		if(method == null && target instanceof Class) {
+		if (method == null && target instanceof Class) {
 			method = findSetterForProperty(propertyName, target.getClass(), false);
 		}
 		return method;
@@ -303,7 +303,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Field findField(String name, Class<?> clazz, Object target) {
 		Field field = findField(name, clazz, target instanceof Class);
-		if(field == null && target instanceof Class) {
+		if (field == null && target instanceof Class) {
 			field = findField(name, target.getClass(), false);
 		}
 		return field;
@@ -383,15 +383,17 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return field;
 			}
 		}
-		if(clazz.getSuperclass() != null) {
+		// We'll search superclasses and implemented interfaces explicitly,
+		// although it shouldn't be necessary - however, see SPR-10125.
+		if (clazz.getSuperclass() != null) {
 			Field field = findField(name, clazz.getSuperclass(), mustBeStatic);
-			if(field != null) {
+			if (field != null) {
 				return field;
 			}
 		}
 		for (Class<?> implementedInterface : clazz.getInterfaces()) {
 			Field field = findField(name, implementedInterface, mustBeStatic);
-			if(field != null) {
+			if (field != null) {
 				return field;
 			}
 		}
