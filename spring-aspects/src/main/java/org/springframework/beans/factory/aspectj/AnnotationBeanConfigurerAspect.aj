@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * annotation to identify which classes need autowiring.
  *
  * <p>The bean name to look up will be taken from the
- * {@code &#64;Configurable} annotation if specified, otherwise the
+ * <code>&#64;Configurable</code> annotation if specified, otherwise the
  * default bean name to look up will be the FQN of the class being configured.
  *
  * @author Rod Johnson
@@ -43,7 +43,7 @@ import org.springframework.beans.factory.wiring.BeanConfigurerSupport;
  * @see org.springframework.beans.factory.annotation.Configurable
  * @see org.springframework.beans.factory.annotation.AnnotationBeanWiringInfoResolver
  */
-public aspect AnnotationBeanConfigurerAspect
+public aspect AnnotationBeanConfigurerAspect 
 		extends AbstractInterfaceDrivenDependencyInjectionAspect
 		implements BeanFactoryAware, InitializingBean, DisposableBean {
 
@@ -51,7 +51,7 @@ public aspect AnnotationBeanConfigurerAspect
 
 	public pointcut inConfigurableBean() : @this(Configurable);
 
-	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*);
+	public pointcut preConstructionConfiguration() : preConstructionConfigurationSupport(*); 
 
 	declare parents: @Configurable * implements ConfigurableObject;
 
@@ -80,10 +80,10 @@ public aspect AnnotationBeanConfigurerAspect
 	private pointcut preConstructionConfigurationSupport(Configurable c) : @this(c) && if(c.preConstruction());
 
 	/*
-	 * This declaration shouldn't be needed,
+	 * This declaration shouldn't be needed, 
 	 * except for an AspectJ bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=214559)
 	 */
-	declare parents: @Configurable Serializable+
+	declare parents: @Configurable Serializable+ 
 		implements ConfigurableDeserializationSupport;
 
 }
