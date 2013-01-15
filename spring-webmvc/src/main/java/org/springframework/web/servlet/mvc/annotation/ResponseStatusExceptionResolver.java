@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.web.servlet.mvc.annotation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,9 +35,17 @@ import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
  * <p>This exception resolver is enabled by default in the {@link org.springframework.web.servlet.DispatcherServlet}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 3.0
  */
-public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver {
+public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionResolver implements MessageSourceAware {
+
+	private MessageSource messageSource;
+
+
+	public void setMessageSource(MessageSource messageSource) {
+		this.messageSource = messageSource;
+	}
 
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
@@ -69,6 +80,9 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 		int statusCode = responseStatus.value().value();
 		String reason = responseStatus.reason();
+		if (this.messageSource != null) {
+			reason = this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale());
+		}
 		if (!StringUtils.hasLength(reason)) {
 			response.sendError(statusCode);
 		}
