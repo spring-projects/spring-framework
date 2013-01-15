@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,10 @@ import java.util.concurrent.ConcurrentMap;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.util.Assert;
 
 /**
- * Abstract base class implementing the common {@link CacheManager}
- * methods. Useful for 'static' environments where the backing caches do
- * not change.
+ * Abstract base class implementing the common {@link CacheManager} methods.
+ * Useful for 'static' environments where the backing caches do not change.
  *
  * @author Costin Leau
  * @author Juergen Hoeller
@@ -46,10 +44,10 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 	public void afterPropertiesSet() {
 		Collection<? extends Cache> caches = loadCaches();
-		Assert.notEmpty(caches, "loadCaches must not return an empty Collection");
-		this.cacheMap.clear();
 
 		// preserve the initial order of the cache names
+		this.cacheMap.clear();
+		this.cacheNames.clear();
 		for (Cache cache : caches) {
 			this.cacheMap.put(cache.getName(), cache);
 			this.cacheNames.add(cache.getName());
