@@ -167,22 +167,24 @@ class TypeConverterDelegate {
 		if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
 			TypeDescriptor targetTypeDesc = typeDescriptor;
-			boolean convert = false;
 
-			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
-				convert = true;
-			} else if (java.lang.String.class.equals(sourceTypeDesc.getType())){
+			if (java.lang.String.class.equals(sourceTypeDesc.getType())){
 				// if the source is a String, it may be parseable as a Number 
 				// and there may be a converter for that.
 				for (@SuppressWarnings("rawtypes") Class _class : numberSubclasses) {
-					Number number = null;
 					try {
+						Number number = null;
 						if (conversionService.canConvert(_class, targetTypeDesc.getType())) {
 							number = NumberUtils.parseNumber((String)convertedValue, _class);
-							sourceTypeDesc = TypeDescriptor.forObject(number);
 							convertedValue = number;
-							convert = true;
-							break;
+
+							try {
+								return (T) conversionService.convert(convertedValue, TypeDescriptor.forObject(number), targetTypeDesc);
+							}
+							catch (ConversionFailedException ex) {
+								// fallback to default conversion logic below
+								firstAttemptEx = ex;
+							}
 						}
 					} catch (NumberFormatException e) {
 						// unable to convert.  try another type.
@@ -190,7 +192,7 @@ class TypeConverterDelegate {
 				}
 			}
 
-			if (convert) {
+			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
 				try {
 					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
 				}
