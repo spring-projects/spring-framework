@@ -15,15 +15,73 @@
  */
 package org.springframework.beans;
 
-import java.util.EnumSet;
-
 import static org.junit.Assert.assertEquals;
+
+import java.util.EnumSet;
 
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.GenericConversionService;
 
 public class NumberToObjectConversionTests {
+
+	private enum TestCase {
+		BYTE(
+			new TestConverter<?>[] { new TestConverter<Byte>() }
+			, "1"
+			, TestEnum.ONE
+		), SHORT(
+			new TestConverter<?>[] { new TestConverter<Short>() }
+			, "1"
+			, TestEnum.ONE
+		), INTEGER(
+			new TestConverter<?>[] { new TestConverter<Integer>() }
+			, "1"
+			, TestEnum.ONE
+		), LONG(
+			new TestConverter<?>[] { new TestConverter<Long>() }
+			, "1"
+			, TestEnum.ONE
+		), FLOAT(
+			new TestConverter<?>[] { new TestConverter<Float>() }
+			, "1"
+			, TestEnum.ONE
+		), DOUBLE(
+			new TestConverter<?>[] { new TestConverter<Double>() }
+			, "1"
+			, TestEnum.ONE
+		), BYTE_FAIL_INTEGER_SUCCESS(
+			/* Test for multiple converters.  Use a byte + long converters, and use a value can 
+			 * be parsed as a long but not a byte.
+			 */
+			new TestConverter<?>[] { new TestConverter<Byte>(), new TestConverter<Integer>() }
+			, String.valueOf(Integer.MAX_VALUE)
+			, TestEnum.MAX_INT
+		)
+		;
+
+		private TestConverter<?>[] converters;
+		private String input;
+		private TestEnum expectedOutput;
+
+		private TestCase(TestConverter<?>[] converters, String input, TestEnum expectedOutput) {
+			this.converters = converters;
+			this.input = input;
+			this.expectedOutput = expectedOutput;
+		}
+
+		public TestConverter<?>[] getConverters() {
+			return converters;
+		}
+
+		public String getInput() {
+			return input;
+		}
+
+		public TestEnum getExpectedOutput() {
+			return expectedOutput;
+		}
+	}
 
 	private enum TestEnum {
 		ONE("1"), TWO("2"), MAX_INT(String.valueOf(Integer.MAX_VALUE));
@@ -52,7 +110,7 @@ public class NumberToObjectConversionTests {
 		}
 	}
 
-	private class TestConverter<T extends Number>  implements Converter<T, TestEnum> {
+	private static class TestConverter<T extends Number> implements Converter<T, TestEnum> {
 		public TestEnum convert(T source) {
 			for (TestEnum testEnum : EnumSet.allOf(TestEnum.class)) {
 				if (testEnum.getValue(source.getClass()).equals(source)) {
@@ -64,71 +122,20 @@ public class NumberToObjectConversionTests {
 	};
 
 	@Test
-	public void byteToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Byte>());
+	public void validConversionTest() {
+		for (TestCase _case : EnumSet.allOf(TestCase.class)) {
+			GenericConversionService service = new GenericConversionService();
+			for (TestConverter<?> converter : _case.getConverters()) {
+				service.addConverter(converter);
+			}
 
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
+			SimpleTypeConverter converter = new SimpleTypeConverter();
+			converter.setConversionService(service);
 
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
+			assertEquals(_case.getExpectedOutput(), converter.convertIfNecessary(_case.getInput(), TestEnum.class));
+		}
 	}
 
-	@Test
-	public void shortToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Short>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
-	}
-
-	@Test
-	public void integerToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Integer>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
-	}
-
-
-	@Test
-	public void longToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Long>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
-	}
-
-	@Test
-	public void floatToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Float>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
-	}
-
-	@Test
-	public void doubleToObjectTest() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Double>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.ONE, converter.convertIfNecessary("1", TestEnum.class));
-	}
 
 	@Test(expected = ConversionNotSupportedException.class)
 	public void noConverterForString() {
@@ -149,20 +156,4 @@ public class NumberToObjectConversionTests {
 
 		converter.convertIfNecessary(1, TestEnum.class);
 	}
-
-	/* Test for multiple converters.  Use a byte + long converters, and use a value can 
-	 * be parsed as a long but not a byte.
-	 */
-	@Test
-	public void integerToObjectTestMultipleConverters() {
-		GenericConversionService service = new GenericConversionService();
-		service.addConverter(new TestConverter<Byte>());
-		service.addConverter(new TestConverter<Integer>());
-
-		SimpleTypeConverter converter = new SimpleTypeConverter();
-		converter.setConversionService(service);
-
-		assertEquals(TestEnum.MAX_INT, converter.convertIfNecessary(String.valueOf(Integer.MAX_VALUE), TestEnum.class));
-	}
-
 }
