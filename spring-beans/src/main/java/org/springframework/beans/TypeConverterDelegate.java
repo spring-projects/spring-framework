@@ -20,7 +20,9 @@ import java.beans.PropertyEditor;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +36,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -57,6 +60,14 @@ class TypeConverterDelegate {
 
 	private final Object targetObject;
 
+	private final Class<?>[] numberSubclasses = new Class<?>[] {
+		java.lang.Byte.class, 
+		java.lang.Double.class, 
+		java.lang.Float.class, 
+		java.lang.Integer.class, 
+		java.lang.Long.class, 
+		java.lang.Short.class
+	};
 
 	/**
 	 * Create a new TypeConverterDelegate for the given editor registry.
@@ -156,7 +167,30 @@ class TypeConverterDelegate {
 		if (editor == null && conversionService != null && convertedValue != null && typeDescriptor != null) {
 			TypeDescriptor sourceTypeDesc = TypeDescriptor.forObject(newValue);
 			TypeDescriptor targetTypeDesc = typeDescriptor;
+			boolean convert = false;
+
 			if (conversionService.canConvert(sourceTypeDesc, targetTypeDesc)) {
+				convert = true;
+			} else if (java.lang.String.class.equals(sourceTypeDesc.getType())){
+				// if the source is a String, it may be parseable as a Number 
+				// and there may be a converter for that.
+				for (@SuppressWarnings("rawtypes") Class _class : numberSubclasses) {
+					Number number = null;
+					try {
+						if (conversionService.canConvert(_class, targetTypeDesc.getType())) {
+							number = NumberUtils.parseNumber((String)convertedValue, _class);
+							sourceTypeDesc = TypeDescriptor.forObject(number);
+							convertedValue = number;
+							convert = true;
+							break;
+						}
+					} catch (NumberFormatException e) {
+						// unable to convert.  try another type.
+					}
+				}
+			}
+
+			if (convert) {
 				try {
 					return (T) conversionService.convert(convertedValue, sourceTypeDesc, targetTypeDesc);
 				}
