@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,9 +100,6 @@ public class CachedIntrospectionResults {
 	 * @param classLoader the ClassLoader to clear the cache for
 	 */
 	public static void clearClassLoader(ClassLoader classLoader) {
-		if (classLoader == null) {
-			return;
-		}
 		synchronized (classCache) {
 			for (Iterator<Class> it = classCache.keySet().iterator(); it.hasNext();) {
 				Class beanClass = it.next();
@@ -183,11 +180,11 @@ public class CachedIntrospectionResults {
 	 * @param parent the parent ClassLoader to check for
 	 */
 	private static boolean isUnderneathClassLoader(ClassLoader candidate, ClassLoader parent) {
-		if (candidate == null) {
-			return false;
-		}
 		if (candidate == parent) {
 			return true;
+		}
+		if (candidate == null) {
+			return false;
 		}
 		ClassLoader classLoaderToCheck = candidate;
 		while (classLoaderToCheck != null) {

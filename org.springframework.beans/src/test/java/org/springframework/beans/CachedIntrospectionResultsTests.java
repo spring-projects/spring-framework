@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.beans;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
 
 import org.junit.Test;
+import test.beans.TestBean;
+
 import org.springframework.core.OverridingClassLoader;
 
-import test.beans.TestBean;
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
@@ -30,7 +32,7 @@ import test.beans.TestBean;
 public final class CachedIntrospectionResultsTests {
 
 	@Test
-	public void testAcceptClassLoader() throws Exception {
+	public void acceptAndClearClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
 		assertTrue(bw.isWritableProperty("name"));
 		assertTrue(bw.isWritableProperty("age"));
@@ -48,6 +50,14 @@ public final class CachedIntrospectionResultsTests {
 		assertFalse(CachedIntrospectionResults.classCache.containsKey(tbClass));
 
 		assertTrue(CachedIntrospectionResults.classCache.containsKey(TestBean.class));
+	}
+
+	@Test
+	public void clearClassLoaderForSystemClassLoader() throws Exception {
+		BeanUtils.getPropertyDescriptors(ArrayList.class);
+		assertTrue(CachedIntrospectionResults.classCache.containsKey(ArrayList.class));
+		CachedIntrospectionResults.clearClassLoader(ArrayList.class.getClassLoader());
+		assertFalse(CachedIntrospectionResults.classCache.containsKey(ArrayList.class));
 	}
 
 }
