@@ -776,7 +776,7 @@ configure(rootProject) {
 		projectsToScan -= project(":spring-instrument-tomcat")
 	}
 
-	// don"t publish the default jar for the root project
+	// don't publish the default jar for the root project
 	configurations.archives.artifacts.clear()
 
 	dependencies { // for integration tests
