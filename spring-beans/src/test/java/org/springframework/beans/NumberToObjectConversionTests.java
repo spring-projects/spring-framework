@@ -21,6 +21,7 @@ import java.util.EnumSet;
 
 import org.junit.Test;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 
 public class NumberToObjectConversionTests {
@@ -155,5 +156,35 @@ public class NumberToObjectConversionTests {
 		converter.setConversionService(service);
 
 		converter.convertIfNecessary(1, TestEnum.class);
+	}
+
+	@Test
+	public void multipleEnumConvertersNumber() {
+		DefaultConversionService service = new DefaultConversionService();
+		service.addConverter(new TestConverter<Integer>());
+
+		SimpleTypeConverter converter = new SimpleTypeConverter();
+		converter.setConversionService(service);
+
+		assertEquals(TestEnum.TWO, converter.convertIfNecessary("2", TestEnum.class));
+	}
+
+	/**
+	 * A precondition to the fallback test is that enum name can't be equal to the value 
+	 * being compared against.
+	 * 
+	 * examples 
+	 * - ONE(1) is valid for this test
+	 * - ONE("ONE") is not valid for this test because the fallback would not be executed.
+	 */
+	@Test
+	public void multipleEnumConvertersFallback() {
+		DefaultConversionService service = new DefaultConversionService();
+		service.addConverter(new TestConverter<Integer>());
+
+		SimpleTypeConverter converter = new SimpleTypeConverter();
+		converter.setConversionService(service);
+
+		assertEquals(TestEnum.TWO, converter.convertIfNecessary("TWO", TestEnum.class));
 	}
 }
