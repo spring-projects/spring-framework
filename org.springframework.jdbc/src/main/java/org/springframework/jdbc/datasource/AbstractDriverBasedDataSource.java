@@ -139,15 +139,18 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	protected Connection getConnectionFromDriver(String username, String password) throws SQLException {
-		Properties props = new Properties();
-		props.putAll(getConnectionProperties());
+		Properties mergedProps = new Properties();
+		Properties connProps = getConnectionProperties();
+		if (connProps != null) {
+			mergedProps.putAll(connProps);
+		}
 		if (username != null) {
-			props.setProperty("user", username);
+			mergedProps.setProperty("user", username);
 		}
 		if (password != null) {
-			props.setProperty("password", password);
+			mergedProps.setProperty("password", password);
 		}
-		return getConnectionFromDriver(props);
+		return getConnectionFromDriver(mergedProps);
 	}
 
 	/**
