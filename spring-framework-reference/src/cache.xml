@@ -551,10 +551,10 @@ public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)]]><
 		<ref bean="jdkCache"/>
 		<ref bean="gemfireCache"/>
 	</list></property>
-	<property name="addNoOpCache" value="true"/>
+	<property name="fallbackToNoOpCache" value="true"/>
 </bean>]]></programlisting>
 
-		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and aditionally, through the <literal>addNoOpManager</literal> flag, adds a
+		<para>The <literal>CompositeCacheManager</literal> above chains multiple <literal>CacheManager</literal>s and aditionally, through the <literal>fallbackToNoOpCache</literal> flag, adds a
 		<emphasis>no op</emphasis> cache that for all the definitions not handled by the configured cache managers. That is, every cache definition not found in either <literal>jdkCache</literal>
 		or <literal>gemfireCache</literal> (configured above) will be handled by the no op cache, which will not store any information causing the target method to be executed every time.
 		</para>
