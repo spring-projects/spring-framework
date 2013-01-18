@@ -169,9 +169,9 @@
       allows for specifying a <interfacename>ConnectionSpec</interfacename>
       instance to use for all operations on a given factory. If the adapter's
       <literal>connectionSpec</literal> property is specified, the adapter
-      uses the <literal>getConnection</literal> variant without argument, else
-      the one with the <interfacename>ConnectionSpec</interfacename>
-      argument.</para>
+      uses the <literal>getConnection</literal> variant with the
+      <interfacename>ConnectionSpec</interfacename> argument, otherwise
+	  the variant without argument.</para>
 
       <programlisting language="xml">&lt;bean id="managedConnectionFactory"
     class="com.sun.connector.cciblackbox.CciLocalTxManagedConnectionFactory"&gt;
