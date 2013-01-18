@@ -77,7 +77,7 @@ public class JmxTestBean implements IJmxTestBean {
     public void setAge(int age) {
         this.age = age;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -213,7 +213,7 @@ public class JmxTestBean implements IJmxTestBean {
      ]]><lineannotation>&lt;!-- search for the <interfacename>MBeanServer</interfacename> instance with the given agentId --&gt;</lineannotation><![CDATA[
      <property name="agentId" value="]]><emphasis><![CDATA[<MBeanServer instance agentId>]]></emphasis><![CDATA["/>
    </bean>
-   
+
    <bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
      <property name="server" ref="mbeanServer"/>
    ...
@@ -230,9 +230,9 @@ public class JmxTestBean implements IJmxTestBean {
        ]]><lineannotation>&lt;!-- Custom <literal>MBeanServerLocator</literal> --&gt;</lineannotation><![CDATA[
        <bean class="platform.package.MBeanServerLocator" factory-method="locateMBeanServer"/>
      </property>
-     
+
      ]]><lineannotation>&lt;!-- other beans here --&gt;</lineannotation><![CDATA[
-     
+
    </bean>
 </beans>]]></programlisting>
     </section>
@@ -1058,7 +1058,7 @@ public class AnnotationTestBean implements IJmxTestBean {
   </bean>
 
   <bean id="attributeSource"
-      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/>
+      class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 
 </beans>]]></programlisting>
 
