@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.support;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.management.InstanceAlreadyExistsException;
@@ -92,19 +93,19 @@ public class MBeanRegistrationSupport {
 	private static final Constants constants = new Constants(MBeanRegistrationSupport.class);
 
 	/**
-	 * <code>Log</code> instance for this class.
+	 * {@code Log} instance for this class.
 	 */
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
-	 * The <code>MBeanServer</code> instance being used to register beans.
+	 * The {@code MBeanServer} instance being used to register beans.
 	 */
 	protected MBeanServer server;
 
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	protected final Set<ObjectName> registeredBeans = new LinkedHashSet<ObjectName>();
+	protected final Set<ObjectName> registeredBeans = Collections.synchronizedSet(new LinkedHashSet<ObjectName>());
 
 	/**
 	 * The action take when registering an MBean and finding that it already exists.
@@ -114,16 +115,16 @@ public class MBeanRegistrationSupport {
 
 
 	/**
-	 * Specify the <code>MBeanServer</code> instance with which all beans should
-	 * be registered. The <code>MBeanExporter</code> will attempt to locate an
-	 * existing <code>MBeanServer</code> if none is supplied.
+	 * Specify the {@code MBeanServer} instance with which all beans should
+	 * be registered. The {@code MBeanExporter} will attempt to locate an
+	 * existing {@code MBeanServer} if none is supplied.
 	 */
 	public void setServer(MBeanServer server) {
 		this.server = server;
 	}
 
 	/**
-	 * Return the <code>MBeanServer</code> that the beans will be registered with.
+	 * Return the {@code MBeanServer} that the beans will be registered with.
 	 */
 	public final MBeanServer getServer() {
 		return this.server;
@@ -205,10 +206,9 @@ public class MBeanRegistrationSupport {
 	 * Unregisters all beans that have been registered by an instance of this class.
 	 */
 	protected void unregisterBeans() {
-		for (ObjectName objectName : this.registeredBeans) {
+		for (ObjectName objectName : new LinkedHashSet<ObjectName>(this.registeredBeans)) {
 			doUnregister(objectName);
 		}
-		this.registeredBeans.clear();
 	}
 
 	/**
@@ -234,6 +234,7 @@ public class MBeanRegistrationSupport {
 				logger.error("Could not unregister MBean [" + objectName + "]", ex);
 			}
 		}
+		this.registeredBeans.remove(objectName);
 	}
 
 	/**
