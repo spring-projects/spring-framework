@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jmx.support;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.management.InstanceAlreadyExistsException;
@@ -112,7 +113,7 @@ public class MBeanRegistrationSupport {
 	/**
 	 * The beans that have been registered by this exporter.
 	 */
-	protected final Set<ObjectName> registeredBeans = new LinkedHashSet<ObjectName>();
+	private final Set<ObjectName> registeredBeans = Collections.synchronizedSet(new LinkedHashSet<ObjectName>());
 
 	/**
 	 * The policy used when registering an MBean and finding that it already exists.
@@ -228,10 +229,9 @@ public class MBeanRegistrationSupport {
 	 * Unregisters all beans that have been registered by an instance of this class.
 	 */
 	protected void unregisterBeans() {
-		for (ObjectName objectName : this.registeredBeans) {
+		for (ObjectName objectName : new LinkedHashSet<ObjectName>(this.registeredBeans)) {
 			doUnregister(objectName);
 		}
-		this.registeredBeans.clear();
 	}
 
 	/**
@@ -257,6 +257,7 @@ public class MBeanRegistrationSupport {
 				logger.error("Could not unregister MBean [" + objectName + "]", ex);
 			}
 		}
+		this.registeredBeans.remove(objectName);
 	}
 
 	/**
