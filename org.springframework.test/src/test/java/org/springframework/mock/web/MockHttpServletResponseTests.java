@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.mock.web;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Set;
+import java.util.Collection;
 
 import junit.framework.TestCase;
 
@@ -117,7 +117,7 @@ public class MockHttpServletResponseTests extends TestCase {
 
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		response.addHeader(headerName, "value1");
-		Set<String> responseHeaders = response.getHeaderNames();
+		Collection<String> responseHeaders = response.getHeaderNames();
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());

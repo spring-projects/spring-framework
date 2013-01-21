@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -51,8 +51,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CHARSET_PREFIX = "charset=";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
-	
+
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+
 
 	//---------------------------------------------------------------------
 	// ServletResponse properties
@@ -63,7 +64,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private boolean writerAccessAllowed = true;
 
 	private String characterEncoding = WebUtils.DEFAULT_CHARACTER_ENCODING;
-	
+
 	private boolean charset = false;
 
 	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
@@ -108,7 +109,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getOutputStream()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setOutputStreamAccessAllowed(boolean outputStreamAccessAllowed) {
 		this.outputStreamAccessAllowed = outputStreamAccessAllowed;
@@ -123,7 +124,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Set whether {@link #getWriter()} access is allowed.
-	 * <p>Default is <code>true</code>.
+	 * <p>Default is {@code true}.
 	 */
 	public void setWriterAccessAllowed(boolean writerAccessAllowed) {
 		this.writerAccessAllowed = writerAccessAllowed;
@@ -141,17 +142,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		this.charset = true;
 		updateContentTypeHeader();
 	}
-	
+
 	private void updateContentTypeHeader() {
 		if (this.contentType != null) {
 			StringBuilder sb = new StringBuilder(this.contentType);
-			if (this.contentType.toLowerCase().indexOf(CHARSET_PREFIX) == -1 && this.charset) {
+			if (!this.contentType.toLowerCase().contains(CHARSET_PREFIX) && this.charset) {
 				sb.append(";").append(CHARSET_PREFIX).append(this.characterEncoding);
 			}
 			doAddHeaderValue(CONTENT_TYPE_HEADER, sb.toString(), true);
 		}
 	}
-	
+
 	public String getCharacterEncoding() {
 		return this.characterEncoding;
 	}
@@ -297,20 +298,20 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	/**
 	 * Return the names of all specified headers as a Set of Strings.
 	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
-	 * @return the <code>Set</code> of header name <code>Strings</code>, or an empty <code>Set</code> if none
+	 * @return the {@code Set} of header name {@code Strings}, or an empty {@code Set} if none
 	 */
-	public Set<String> getHeaderNames() {
+	public Collection<String> getHeaderNames() {
 		return this.headers.keySet();
 	}
 
 	/**
 	 * Return the primary value for the given header as a String, if any.
 	 * Will return the first value in case of multiple values.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
 	 * As of Spring 3.1, it returns a stringified value for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValue(String)} for raw Object access.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -319,7 +320,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	/**
 	 * Return all values for the given header as a List of Strings.
-	 * <p>As of Servlet 3.0, this method is also defined HttpServletResponse.
+	 * <p>As of Servlet 3.0, this method is also defined in HttpServletResponse.
 	 * As of Spring 3.1, it returns a List of stringified values for Servlet 3.0 compatibility.
 	 * Consider using {@link #getHeaderValues(String)} for raw Object access.
 	 * @param name the name of the header
@@ -339,7 +340,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * Return the primary value for the given header, if any.
 	 * <p>Will return the first value in case of multiple values.
 	 * @param name the name of the header
-	 * @return the associated header value, or <code>null<code> if none
+	 * @return the associated header value, or {@code null} if none
 	 */
 	public Object getHeaderValue(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -374,7 +375,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * returning the given URL String as-is.
 	 * <p>Can be overridden in subclasses, appending a session id or the like
 	 * in a redirect-specific fashion. For general URL encoding rules,
-	 * override the common {@link #encodeURL} method instead, appyling
+	 * override the common {@link #encodeURL} method instead, applying
 	 * to redirect URLs as well as to general URLs.
 	 */
 	public String encodeRedirectURL(String url) {
@@ -456,7 +457,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		}
 		doAddHeaderValue(name, value, false);
 	}
-	
+
 	private boolean setSpecialHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
 			setContentType((String) value);
