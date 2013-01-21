@@ -25,6 +25,8 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -42,6 +44,7 @@ public class TimedSpringRunnerTests {
 
 	@Test
 	public void timedTests() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		Class<TimedSpringRunnerTestCase> testClass = TimedSpringRunnerTestCase.class;
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
