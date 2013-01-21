@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.junit.Test;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -46,6 +47,7 @@ import static org.junit.Assert.*;
 /**
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
 public class JodaTimeFormattingTests {
 
@@ -454,6 +456,14 @@ public class JodaTimeFormattingTests {
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		assertEquals("2009-10-31T07:00:00.000-05:00", binder.getBindingResult().getFieldValue("mutableDateTimeAnnotated"));
+	}
+
+	@Test
+	public void dateToString() throws Exception {
+		Date date = new Date();
+		Object actual = this.conversionService.convert(date, TypeDescriptor.valueOf(Date.class), TypeDescriptor.valueOf(String.class));
+		String expected = JodaTimeContextHolder.getFormatter(org.joda.time.format.DateTimeFormat.shortDateTime(), Locale.US).print(new DateTime(date));
+		assertEquals(expected, actual);
 	}
 
 	@SuppressWarnings("unused")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.cache.ehcache;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 import net.sf.ehcache.CacheException;
 import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.config.Configuration;
+import net.sf.ehcache.config.ConfigurationFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,6 +31,8 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link FactoryBean} that exposes an EHCache {@link net.sf.ehcache.CacheManager}
@@ -53,6 +58,10 @@ import org.springframework.core.io.Resource;
  * @see net.sf.ehcache.CacheManager
  */
 public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, InitializingBean, DisposableBean {
+
+	// Check whether EHCache 2.1+ CacheManager.create(Configuration) method is available...
+	private static final Method createWithConfiguration =
+			ClassUtils.getMethodIfAvailable(CacheManager.class, "create", Configuration.class);
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -98,20 +107,41 @@ public class EhCacheManagerFactoryBean implements FactoryBean<CacheManager>, Ini
 
 	public void afterPropertiesSet() throws IOException, CacheException {
 		logger.info("Initializing EHCache CacheManager");
-		if (this.configLocation != null) {
-			InputStream is = this.configLocation.getInputStream();
-			try {
-				this.cacheManager = (this.shared ? CacheManager.create(is) : new CacheManager(is));
+		InputStream is = (this.configLocation != null ? this.configLocation.getInputStream() : null);
+		try {
+			// A bit convoluted for EHCache 1.x/2.0 compatibility.
+			// To be much simpler once we require EHCache 2.1+
+			if (this.cacheManagerName != null) {
+				if (this.shared && createWithConfiguration == null) {
+					// No CacheManager.create(Configuration) method available before EHCache 2.1;
+					// can only set CacheManager name after creation.
+					this.cacheManager = (is != null ? CacheManager.create(is) : CacheManager.create());
+					this.cacheManager.setName(this.cacheManagerName);
+				}
+				else {
+					Configuration configuration = (is != null ? ConfigurationFactory.parseConfiguration(is) :
+							ConfigurationFactory.parseConfiguration());
+					configuration.setName(this.cacheManagerName);
+					if (this.shared) {
+						this.cacheManager = (CacheManager) ReflectionUtils.invokeMethod(createWithConfiguration, null, configuration);
+					}
+					else {
+						this.cacheManager = new CacheManager(configuration);
+					}
+				}
 			}
-			finally {
+			// For strict backwards compatibility: use simplest possible constructors...
+			else if (this.shared) {
+				this.cacheManager = (is != null ? CacheManager.create(is) : CacheManager.create());
+			}
+			else {
+				this.cacheManager = (is != null ? new CacheManager(is) : new CacheManager());
+			}
+		}
+		finally {
+			if (is != null) {
 				is.close();
 			}
-		}
-		else {
-			this.cacheManager = (this.shared ? CacheManager.create() : new CacheManager());
-		}
-		if (this.cacheManagerName != null) {
-			this.cacheManager.setName(this.cacheManagerName);
 		}
 	}
 

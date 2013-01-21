@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.servlet.mvc.LastModified;
 
 /**
  * Convenient superclass for any kind of web content generator,
@@ -78,6 +80,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private boolean useCacheControlNoStore = true;
 
 	private int cacheSeconds = -1;
+
+	private boolean alwaysMustRevalidate = false;
 
 
 	/**
@@ -192,6 +196,25 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final boolean isUseCacheControlNoStore() {
 		return this.useCacheControlNoStore;
+	}
+
+	/**
+	 * An option to add 'must-revalidate' to every Cache-Control header. This
+	 * may be useful with annotated controller methods, which can
+	 * programmatically do a lastModified calculation as described in
+	 * {@link WebRequest#checkNotModified(long)}. Default is "false",
+	 * effectively relying on whether the handler implements
+	 * {@link LastModified} or not.
+	 */
+	public void setAlwaysMustRevalidate(boolean mustRevalidate) {
+		this.alwaysMustRevalidate = mustRevalidate;
+	}
+
+	/**
+	 * Return whether 'must-revaliate' is added to every Cache-Control header.
+	 */
+	public boolean isAlwaysMustRevalidate() {
+		return alwaysMustRevalidate;
 	}
 
 	/**
@@ -313,7 +336,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
 			String headerValue = "max-age=" + seconds;
-			if (mustRevalidate) {
+			if (mustRevalidate || this.alwaysMustRevalidate) {
 				headerValue += ", must-revalidate";
 			}
 			response.setHeader(HEADER_CACHE_CONTROL, headerValue);

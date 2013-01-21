@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,8 +71,6 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  * @see org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor
  * @see org.springframework.context.access.ContextSingletonBeanFactoryLocator
  * @see #getBeanFactoryLocatorKey
- * @see org.springframework.ejb.support.AbstractEnterpriseBean#setBeanFactoryLocator
- * @see org.springframework.ejb.support.AbstractEnterpriseBean#setBeanFactoryLocatorKey
  */
 public class SpringBeanAutowiringInterceptor {
 
@@ -99,9 +97,15 @@ public class SpringBeanAutowiringInterceptor {
 			invocationContext.proceed();
 		}
 		catch (RuntimeException ex) {
+			doReleaseBean(invocationContext.getTarget());
 			throw ex;
 		}
+		catch (Error err) {
+			doReleaseBean(invocationContext.getTarget());
+			throw err;
+		}
 		catch (Exception ex) {
+			doReleaseBean(invocationContext.getTarget());
 			// Cannot declare a checked exception on WebSphere here - so we need to wrap.
 			throw new EJBException(ex);
 		}

@@ -18,9 +18,8 @@ package org.springframework.beans;
 
 import java.beans.BeanInfo;
 import java.beans.PropertyDescriptor;
+import java.util.ArrayList;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import org.springframework.core.OverridingClassLoader;
@@ -37,7 +36,7 @@ import static org.junit.Assert.*;
 public final class CachedIntrospectionResultsTests {
 
 	@Test
-	public void acceptClassLoader() throws Exception {
+	public void acceptAndClearClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
 		assertTrue(bw.isWritableProperty("name"));
 		assertTrue(bw.isWritableProperty("age"));
@@ -55,6 +54,14 @@ public final class CachedIntrospectionResultsTests {
 		assertFalse(CachedIntrospectionResults.classCache.containsKey(tbClass));
 
 		assertTrue(CachedIntrospectionResults.classCache.containsKey(TestBean.class));
+	}
+
+	@Test
+	public void clearClassLoaderForSystemClassLoader() throws Exception {
+		BeanUtils.getPropertyDescriptors(ArrayList.class);
+		assertTrue(CachedIntrospectionResults.classCache.containsKey(ArrayList.class));
+		CachedIntrospectionResults.clearClassLoader(ArrayList.class.getClassLoader());
+		assertFalse(CachedIntrospectionResults.classCache.containsKey(ArrayList.class));
 	}
 
 	@Test

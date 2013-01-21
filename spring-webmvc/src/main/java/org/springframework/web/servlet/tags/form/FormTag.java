@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.web.util.HtmlUtils;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Scott Andrews
+ * @author Rossen Stoyanchev
  * @since 2.0
  * @see org.springframework.web.servlet.mvc.SimpleFormController
  */
@@ -411,6 +412,10 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected String resolveAction() throws JspException {
 		String action = getAction();
 		if (StringUtils.hasText(action)) {
+			String pathToServlet = getRequestContext().getPathToServlet();
+			if (action.startsWith("/") && !action.startsWith(getRequestContext().getContextPath())) {
+				action = pathToServlet + action;
+			}
 			action = getDisplayString(evaluate(ACTION_ATTRIBUTE, action));
 			return processAction(action);
 		}
@@ -469,8 +474,8 @@ public class FormTag extends AbstractHtmlElementTag {
 		if (hiddenFields != null) {
 			for (String name : hiddenFields.keySet()) {
 				this.tagWriter.appendValue("<input type=\"hidden\" ");
-				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\">");
-				this.tagWriter.appendValue("</input>\n");
+				this.tagWriter.appendValue("name=\"" + name + "\" value=\"" + hiddenFields.get(name) + "\" ");
+				this.tagWriter.appendValue("/>\n");
 			}
 		}
 	}

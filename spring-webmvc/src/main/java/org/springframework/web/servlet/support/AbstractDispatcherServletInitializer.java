@@ -94,6 +94,11 @@ public abstract class AbstractDispatcherServletInitializer
 
 		ServletRegistration.Dynamic registration =
 				servletContext.addServlet(servletName, dispatcherServlet);
+
+		Assert.notNull(registration,
+				"Failed to register servlet with name '" + servletName + "'." +
+				"Check if there is another servlet registered under the same name.");
+
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
 		registration.setAsyncSupported(isAsyncSupported());

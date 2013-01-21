@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ public class PreparedStatementCreatorFactory {
 	 * Return a new PreparedStatementSetter for the given parameters.
 	 * @param params list of parameters (may be {@code null})
 	 */
-	public PreparedStatementSetter newPreparedStatementSetter(List params) {
+	public PreparedStatementSetter newPreparedStatementSetter(List<?> params) {
 		return new PreparedStatementCreatorImpl(params != null ? params : Collections.emptyList());
 	}
 
@@ -225,7 +225,7 @@ public class PreparedStatementCreatorFactory {
 		}
 
 		public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-			PreparedStatement ps = null;
+			PreparedStatement ps;
 			if (generatedKeysColumnNames != null || returnGeneratedKeys) {
 				try {
 					if (generatedKeysColumnNames != null) {
@@ -235,10 +235,10 @@ public class PreparedStatementCreatorFactory {
 						ps = con.prepareStatement(this.actualSql, PreparedStatement.RETURN_GENERATED_KEYS);
 					}
 				}
-				catch (AbstractMethodError ex) {
+				catch (AbstractMethodError err) {
 					throw new InvalidDataAccessResourceUsageException(
-							"The JDBC driver is not compliant to JDBC 3.0 and thus " +
-							"does not support retrieval of auto-generated keys", ex);
+							"Your JDBC driver is not compliant with JDBC 3.0 - " +
+							"it does not support retrieval of auto-generated keys", err);
 				}
 			}
 			else if (resultSetType == ResultSet.TYPE_FORWARD_ONLY && !updatableResults) {
@@ -263,7 +263,7 @@ public class PreparedStatementCreatorFactory {
 			int sqlColIndx = 1;
 			for (int i = 0; i < this.parameters.size(); i++) {
 				Object in = this.parameters.get(i);
-				SqlParameter declaredParameter = null;
+				SqlParameter declaredParameter;
 				// SqlParameterValue overrides declared parameter metadata, in particular for
 				// independence from the declared parameter position in case of named parameters.
 				if (in instanceof SqlParameterValue) {

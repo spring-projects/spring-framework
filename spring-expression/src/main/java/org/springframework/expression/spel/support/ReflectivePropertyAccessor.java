@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +44,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  */
 public class ReflectivePropertyAccessor implements PropertyAccessor {
@@ -284,7 +287,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Method findGetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findGetterForProperty(propertyName, clazz, target instanceof Class);
-		if(method == null && target instanceof Class) {
+		if (method == null && target instanceof Class) {
 			method = findGetterForProperty(propertyName, target.getClass(), false);
 		}
 		return method;
@@ -292,7 +295,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Method findSetterForProperty(String propertyName, Class<?> clazz, Object target) {
 		Method method = findSetterForProperty(propertyName, clazz, target instanceof Class);
-		if(method == null && target instanceof Class) {
+		if (method == null && target instanceof Class) {
 			method = findSetterForProperty(propertyName, target.getClass(), false);
 		}
 		return method;
@@ -300,7 +303,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 	private Field findField(String name, Class<?> clazz, Object target) {
 		Field field = findField(name, clazz, target instanceof Class);
-		if(field == null && target instanceof Class) {
+		if (field == null && target instanceof Class) {
 			field = findField(name, target.getClass(), false);
 		}
 		return field;
@@ -310,13 +313,13 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a getter method for the specified property.
 	 */
 	protected Method findGetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] ms = clazz.getMethods();
+		Method[] ms = getSortedClassMethods(clazz);
 		String propertyMethodSuffix = getPropertyMethodSuffix(propertyName);
 
 		// Try "get*" method...
 		String getterName = "get" + propertyMethodSuffix;
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
@@ -324,7 +327,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		// Try "is*" method...
 		getterName = "is" + propertyMethodSuffix;
 		for (Method method : ms) {
-			if (!method.isBridge() && method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
+			if (method.getName().equals(getterName) && method.getParameterTypes().length == 0 &&
 					(boolean.class.equals(method.getReturnType()) || Boolean.class.equals(method.getReturnType())) &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
@@ -337,15 +340,28 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * Find a setter method for the specified property.
 	 */
 	protected Method findSetterForProperty(String propertyName, Class<?> clazz, boolean mustBeStatic) {
-		Method[] methods = clazz.getMethods();
+		Method[] methods = getSortedClassMethods(clazz);
 		String setterName = "set" + getPropertyMethodSuffix(propertyName);
 		for (Method method : methods) {
-			if (!method.isBridge() && method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
+			if (method.getName().equals(setterName) && method.getParameterTypes().length == 1 &&
 					(!mustBeStatic || Modifier.isStatic(method.getModifiers()))) {
 				return method;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns class methods ordered with non bridge methods appearing higher.
+	 */
+	private Method[] getSortedClassMethods(Class<?> clazz) {
+		Method[] methods = clazz.getMethods();
+		Arrays.sort(methods, new Comparator<Method>() {
+			public int compare(Method o1, Method o2) {
+				return (o1.isBridge() == o2.isBridge()) ? 0 : (o1.isBridge() ? 1 : -1);
+			}
+		});
+		return methods;
 	}
 
 	protected String getPropertyMethodSuffix(String propertyName) {
@@ -364,6 +380,20 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		Field[] fields = clazz.getFields();
 		for (Field field : fields) {
 			if (field.getName().equals(name) && (!mustBeStatic || Modifier.isStatic(field.getModifiers()))) {
+				return field;
+			}
+		}
+		// We'll search superclasses and implemented interfaces explicitly,
+		// although it shouldn't be necessary - however, see SPR-10125.
+		if (clazz.getSuperclass() != null) {
+			Field field = findField(name, clazz.getSuperclass(), mustBeStatic);
+			if (field != null) {
+				return field;
+			}
+		}
+		for (Class<?> implementedInterface : clazz.getInterfaces()) {
+			Field field = findField(name, implementedInterface, mustBeStatic);
+			if (field != null) {
 				return field;
 			}
 		}
