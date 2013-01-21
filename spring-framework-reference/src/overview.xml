@@ -385,7 +385,7 @@ TR: OK. Added to diagram.--></para>
       places:<itemizedlist>
           <listitem>
             <para>On the community download site <ulink
-            url="http://www.springsource.org/downloads/community">http://www.springsource.org/downloads/community</ulink>.
+            url="http://www.springsource.org/download/community">http://www.springsource.org/download/community</ulink>.
             Here you find all the Spring jars bundled together into a zip file
             for easy download. The names of the jars here since version 3.0
             are in the form
