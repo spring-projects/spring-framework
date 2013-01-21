@@ -112,7 +112,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			throw new HttpMediaTypeNotAcceptableException(allSupportedMediaTypes);
+			throw new HttpMediaTypeNotAcceptableException(producibleMediaTypes);
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<MediaType>(compatibleMediaTypes);
