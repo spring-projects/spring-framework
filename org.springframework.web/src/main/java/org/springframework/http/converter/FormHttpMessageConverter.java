@@ -265,10 +265,12 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		for (Map.Entry<String, List<Object>> entry : parts.entrySet()) {
 			String name = entry.getKey();
 			for (Object part : entry.getValue()) {
-				writeBoundary(boundary, os);
-				HttpEntity entity = getEntity(part);
-				writePart(name, entity, os);
-				writeNewLine(os);
+				if (part != null) {
+					writeBoundary(boundary, os);
+					HttpEntity entity = getEntity(part);
+					writePart(name, entity, os);
+					writeNewLine(os);
+				}
 			}
 		}
 	}
