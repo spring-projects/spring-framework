@@ -58,7 +58,7 @@ configure(allprojects) { project ->
 
 	test {
 		systemProperty("java.awt.headless", "true")
-		systemProperty("testGroups", properties.get("testGroups"))
+		systemProperty("testGroups", project.properties.get("testGroups"))
 	}
 
 	repositories {
