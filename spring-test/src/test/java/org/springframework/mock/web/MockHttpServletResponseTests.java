@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.mock.web;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Set;
-
+import java.util.Collection;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 
 import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link MockHttpServletResponse}.
@@ -127,7 +126,7 @@ public class MockHttpServletResponseTests {
 	public void httpHeaderNameCasingIsPreserved() throws Exception {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
-		Set<String> responseHeaders = response.getHeaderNames();
+		Collection<String> responseHeaders = response.getHeaderNames();
 		assertNotNull(responseHeaders);
 		assertEquals(1, responseHeaders.size());
 		assertEquals("HTTP header casing not being preserved", headerName, responseHeaders.iterator().next());
