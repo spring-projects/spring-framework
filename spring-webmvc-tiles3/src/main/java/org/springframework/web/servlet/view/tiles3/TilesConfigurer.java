@@ -98,6 +98,7 @@ import org.springframework.web.context.ServletContextAware;
  *
  * @author mick semb wever
  * @author Rossen Stoyanchev
+ * @author Alaa Nassef
  * @since 3.2
  */
 public class TilesConfigurer implements ServletContextAware, InitializingBean, DisposableBean {
@@ -260,7 +261,7 @@ public class TilesConfigurer implements ServletContextAware, InitializingBean, D
 			// original CompleteAutoloadTilesInitializer above. We cannot subclass
 			// CompleteAutoloadTilesInitializer when compiling against Tiles 2.1...
 			logger.debug("Registering Tiles 3.0 SpringLocaleResolver for complete-autoload setup");
-			BasicTilesContainer container = (BasicTilesContainer) TilesAccess.getContainer(preliminaryContext);
+			BasicTilesContainer container = (BasicTilesContainer) ((CachingTilesContainer) TilesAccess.getContainer(preliminaryContext)).getWrappedContainer();
 			BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(container.getDefinitionsFactory());
 			if (bw.isWritableProperty("localeResolver")) {
 				bw.setPropertyValue("localeResolver", new SpringLocaleResolver());
