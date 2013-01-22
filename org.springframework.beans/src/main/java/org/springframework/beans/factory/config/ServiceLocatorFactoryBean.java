@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -36,8 +35,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link FactoryBean} implementation that takes an interface which must have one or more
- * methods with the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
- * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>)
+ * methods with the signatures {@code MyType xxx()} or {@code MyType xxx(MyIdType id)}
+ * (typically, {@code MyService getService()} or {@code MyService getService(String id)})
  * and creates a dynamic proxy which implements that interface, delegating to an
  * underlying {@link org.springframework.beans.factory.BeanFactory}.
  *
@@ -51,7 +50,7 @@ import org.springframework.util.StringUtils;
  * setter or constructor injection of the target bean is preferable.</b>
  *
  * <p>On invocation of the no-arg factory method, or the single-arg factory
- * method with a String id of <code>null</code> or empty String, if exactly
+ * method with a String id of {@code null} or empty String, if exactly
  * <b>one</b> bean in the factory matches the return type of the factory
  * method, that bean is returned, otherwise a
  * {@link org.springframework.beans.factory.NoSuchBeanDefinitionException}
@@ -64,7 +63,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>A factory method argument will usually be a String, but can also be an
  * int or a custom enumeration type, for example, stringified via
- * <code>toString</code>. The resulting String can be used as bean name as-is,
+ * {@code toString}. The resulting String can be used as bean name as-is,
  * provided that corresponding beans are defined in the bean factory.
  * Alternatively, {@link #setServiceMappings(java.util.Properties) a custom mapping}
  * between service ids and bean names can be defined.
@@ -99,7 +98,7 @@ import org.springframework.util.StringUtils;
  *
  *&lt;/beans></pre>
  *
- * <p>The attendant <code>MyClientBean</code> class implementation might then
+ * <p>The attendant {@code MyClientBean} class implementation might then
  * look something like this:
  *
  * <pre class="code">package a.b.c;
@@ -151,7 +150,7 @@ import org.springframework.util.StringUtils;
  *
  *&lt;/beans></pre>
  *
- * <p>The attendant <code>MyClientBean</code> class implementation might then
+ * <p>The attendant {@code MyClientBean} class implementation might then
  * look something like this:
  *
  * <pre class="code">package a.b.c;
@@ -202,8 +201,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 
 	/**
 	 * Set the service locator interface to use, which must have one or more methods with
-	 * the signatures <code>MyType xxx()</code> or <code>MyType xxx(MyIdType id)</code>
-	 * (typically, <code>MyService getService()</code> or <code>MyService getService(String id)</code>).
+	 * the signatures {@code MyType xxx()} or {@code MyType xxx(MyIdType id)}
+	 * (typically, {@code MyService getService()} or {@code MyService getService(String id)}).
 	 * See the {@link ServiceLocatorFactoryBean class-level Javadoc} for
 	 * information on the semantics of such methods.
 	 */
@@ -214,8 +213,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	/**
 	 * Set the exception class that the service locator should throw if service
 	 * lookup failed. The specified exception class must have a constructor
-	 * with one of the following parameter types: <code>(String, Throwable)</code>
-	 * or <code>(Throwable)</code> or <code>(String)</code>.
+	 * with one of the following parameter types: {@code (String, Throwable)}
+	 * or {@code (Throwable)} or {@code (String)}.
 	 * <p>If not specified, subclasses of Spring's BeansException will be thrown,
 	 * for example NoSuchBeanDefinitionException. As those are unchecked, the
 	 * caller does not need to handle them, so it might be acceptable that
@@ -236,7 +235,7 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	 * Set mappings between service ids (passed into the service locator)
 	 * and bean names (in the bean factory). Service ids that are not defined
 	 * here will be treated as bean names as-is.
-	 * <p>The empty string as service id key defines the mapping for <code>null</code> and
+	 * <p>The empty string as service id key defines the mapping for {@code null} and
 	 * empty string, and for factory methods without parameter. If not defined,
 	 * a single matching bean will be retrieved from the bean factory.
 	 * @param serviceMappings mappings between service ids and bean names,
@@ -271,8 +270,8 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 	 * Determine the constructor to use for the given service locator exception
 	 * class. Only called in case of a custom service locator exception.
 	 * <p>The default implementation looks for a constructor with one of the
-	 * following parameter types: <code>(String, Throwable)</code>
-	 * or <code>(Throwable)</code> or <code>(String)</code>.
+	 * following parameter types: {@code (String, Throwable)}
+	 * or {@code (Throwable)} or {@code (String)}.
 	 * @param exceptionClass the exception class
 	 * @return the constructor to use
 	 * @see #setServiceLocatorExceptionClass
@@ -364,12 +363,12 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 			try {
 				String beanName = tryGetBeanName(args);
 				if (StringUtils.hasLength(beanName)) {
-					// Service locator for a specific bean name.
+					// Service locator for a specific bean name
 					return beanFactory.getBean(beanName, serviceLocatorMethodReturnType);
 				}
 				else {
-					// Service locator for a bean type.
-					return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorMethodReturnType);
+					// Service locator for a bean type
+					return beanFactory.getBean(serviceLocatorMethodReturnType);
 				}
 			}
 			catch (BeansException ex) {
