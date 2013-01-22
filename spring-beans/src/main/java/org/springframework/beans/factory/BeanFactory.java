@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@ public interface BeanFactory {
 	 * is {@code Object.class}, this method will succeed whatever the class of the
 	 * returned instance.
 	 * @return an instance of the bean
-	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 * @throws BeanNotOfRequiredTypeException if the bean is not of the required type
 	 * @throws BeansException if the bean could not be created
 	 */
@@ -158,7 +158,8 @@ public interface BeanFactory {
 	 * of the given type. For more extensive retrieval operations across sets of beans,
 	 * use {@link ListableBeanFactory} and/or {@link BeanFactoryUtils}.
 	 * @return an instance of the single bean matching the required type
-	 * @throws NoSuchBeanDefinitionException if there is not exactly one matching bean found
+	 * @throws NoSuchBeanDefinitionException if no bean of the given type was found
+	 * @throws NoUniqueBeanDefinitionException if more than one bean of the given type was found
 	 * @since 3.0
 	 * @see ListableBeanFactory
 	 */
@@ -172,7 +173,7 @@ public interface BeanFactory {
 	 * @param args arguments to use if creating a prototype using explicit arguments to a
 	 * static factory method. It is invalid to use a non-null args value in any other case.
 	 * @return an instance of the bean
-	 * @throws NoSuchBeanDefinitionException if there's no such bean definition
+	 * @throws NoSuchBeanDefinitionException if there is no such bean definition
 	 * @throws BeanDefinitionStoreException if arguments have been given but
 	 * the affected bean isn't a prototype
 	 * @throws BeansException if the bean could not be created

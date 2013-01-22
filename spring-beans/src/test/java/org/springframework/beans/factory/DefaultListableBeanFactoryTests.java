@@ -1270,6 +1270,12 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test(expected=NoSuchBeanDefinitionException.class)
+	public void testGetBeanByTypeWithNoneFound() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test(expected=NoUniqueBeanDefinitionException.class)
 	public void testGetBeanByTypeWithAmbiguity() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -1296,7 +1302,8 @@ public class DefaultListableBeanFactoryTests {
 		try {
 			lbf.getBean(TestBean.class);
 			fail("Should have thrown NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
