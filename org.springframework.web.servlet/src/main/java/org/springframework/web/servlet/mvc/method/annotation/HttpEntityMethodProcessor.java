@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> parameterType = returnType.getParameterType();
-		return HttpEntity.class.equals(parameterType) || ResponseEntity.class.equals(parameterType);
+		return HttpEntity.class.isAssignableFrom(parameterType) || ResponseEntity.class.isAssignableFrom(parameterType);
 	}
 
 	public Object resolveArgument(
@@ -123,7 +123,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		if (!entityHeaders.isEmpty()) {
 			outputMessage.getHeaders().putAll(entityHeaders);
 		}
-		
+
 		Object body = responseEntity.getBody();
 		if (body != null) {
 			writeWithMessageConverters(body, returnType, inputMessage, outputMessage);
