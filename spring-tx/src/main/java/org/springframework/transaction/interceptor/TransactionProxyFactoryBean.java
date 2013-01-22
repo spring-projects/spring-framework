@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,8 +176,8 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	/**
 	 * This callback is optional: If running in a BeanFactory and no transaction
 	 * manager has been set explicitly, a single matching bean of type
-	 * PlatformTransactionManager will be fetched from the BeanFactory.
-	 * @see org.springframework.beans.factory.BeanFactoryUtils#beanOfTypeIncludingAncestors
+	 * {@link PlatformTransactionManager} will be fetched from the BeanFactory.
+	 * @see org.springframework.beans.factory.BeanFactory#getBean(Class)
 	 * @see org.springframework.transaction.PlatformTransactionManager
 	 */
 	public void setBeanFactory(BeanFactory beanFactory) {

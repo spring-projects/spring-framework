@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.transaction.NoTransactionException;
@@ -247,12 +245,8 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		else if (this.transactionManagerBeanName != null) {
 			return this.beanFactory.getBean(this.transactionManagerBeanName, PlatformTransactionManager.class);
 		}
-		else if (this.beanFactory instanceof ListableBeanFactory) {
-			return BeanFactoryUtils.beanOfTypeIncludingAncestors(((ListableBeanFactory) this.beanFactory), PlatformTransactionManager.class);
-		}
 		else {
-			throw new IllegalStateException(
-					"Cannot retrieve PlatformTransactionManager beans from non-listable BeanFactory: " + this.beanFactory);
+			return this.beanFactory.getBean(PlatformTransactionManager.class);
 		}
 	}
 

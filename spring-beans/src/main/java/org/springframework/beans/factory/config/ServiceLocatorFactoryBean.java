@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -364,12 +363,12 @@ public class ServiceLocatorFactoryBean implements FactoryBean<Object>, BeanFacto
 			try {
 				String beanName = tryGetBeanName(args);
 				if (StringUtils.hasLength(beanName)) {
-					// Service locator for a specific bean name.
+					// Service locator for a specific bean name
 					return beanFactory.getBean(beanName, serviceLocatorMethodReturnType);
 				}
 				else {
-					// Service locator for a bean type.
-					return BeanFactoryUtils.beanOfTypeIncludingAncestors(beanFactory, serviceLocatorMethodReturnType);
+					// Service locator for a bean type
+					return beanFactory.getBean(serviceLocatorMethodReturnType);
 				}
 			}
 			catch (BeansException ex) {
