@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -196,6 +197,19 @@ public class RequestMappingInfoHandlerMappingTests {
 	}
 
 	@Test
+	public void testUnsatisfiedServletRequestParameterException() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/params");
+			this.mapping.getHandler(request);
+			fail("UnsatisfiedServletRequestParameterException expected");
+		}
+		catch (UnsatisfiedServletRequestParameterException ex) {
+			assertArrayEquals("Invalid request parameter conditions",
+					new String[] { "foo=bar" }, ex.getParamConditions());
+		}
+	}
+
+	@Test
 	public void uriTemplateVariables() {
 		PatternsRequestCondition patterns = new PatternsRequestCondition("/{path1}/{path2}");
 		RequestMappingInfo key = new RequestMappingInfo(patterns, null, null, null, null, null, null);
@@ -297,6 +311,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/persons", produces="application/xml")
 		public String produces() {
+			return "";
+		}
+
+		@RequestMapping(value = "/params", params="foo=bar")
+		public String param() {
 			return "";
 		}
 

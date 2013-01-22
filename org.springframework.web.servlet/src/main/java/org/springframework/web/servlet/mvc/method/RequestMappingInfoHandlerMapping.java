@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
+import org.springframework.web.servlet.mvc.condition.NameValueExpression;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -141,14 +145,17 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Set<MediaType> consumableMediaTypes;
 		Set<MediaType> producibleMediaTypes;
+		Set<String> paramConditions;
 
 		if (patternAndMethodMatches.isEmpty()) {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternMatches);
 			producibleMediaTypes = getProdicubleMediaTypes(request, patternMatches);
+			paramConditions = getRequestParams(request, patternMatches);
 		}
 		else {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternAndMethodMatches);
 			producibleMediaTypes = getProdicubleMediaTypes(request, patternAndMethodMatches);
+			paramConditions = getRequestParams(request, patternAndMethodMatches);
 		}
 
 		if (!consumableMediaTypes.isEmpty()) {
@@ -160,6 +167,10 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 		else if (!producibleMediaTypes.isEmpty()) {
 			throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
+		}
+		else if (!CollectionUtils.isEmpty(paramConditions)) {
+			String[] params = paramConditions.toArray(new String[paramConditions.size()]);
+			throw new UnsatisfiedServletRequestParameterException(params, request.getParameterMap());
 		}
 		else {
 			return null;
@@ -184,6 +195,20 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			}
 		}
 		return result;
+	}
+
+	private Set<String> getRequestParams(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+		for (RequestMappingInfo partialMatch : partialMatches) {
+			ParamsRequestCondition condition = partialMatch.getParamsCondition();
+			if (!CollectionUtils.isEmpty(condition.getExpressions()) && (condition.getMatchingCondition(request) == null)) {
+				Set<String> expressions = new HashSet<String>();
+				for (NameValueExpression expr : condition.getExpressions()) {
+					expressions.add(expr.toString());
+				}
+				return expressions;
+			}
+		}
+		return null;
 	}
 
 }
