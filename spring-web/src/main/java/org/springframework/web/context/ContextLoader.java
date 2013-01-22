@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.access.BeanFactoryLocator;
 import org.springframework.beans.factory.access.BeanFactoryReference;
@@ -280,7 +280,18 @@ public class ContextLoader {
 				this.context = createWebApplicationContext(servletContext);
 			}
 			if (this.context instanceof ConfigurableWebApplicationContext) {
-				configureAndRefreshWebApplicationContext((ConfigurableWebApplicationContext)this.context, servletContext);
+				ConfigurableWebApplicationContext cwac = (ConfigurableWebApplicationContext) this.context;
+				if (!cwac.isActive()) {
+					// The context has not yet been refreshed -> provide services such as
+					// setting the parent context, setting the application context id, etc
+					if (cwac.getParent() == null) {
+						// The context instance was injected without an explicit parent ->
+						// determine parent for root web application context, if any.
+						ApplicationContext parent = loadParentContext(servletContext);
+						cwac.setParent(parent);
+					}
+					configureAndRefreshWebApplicationContext(cwac, servletContext);
+				}
 			}
 			servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, this.context);
 
@@ -333,9 +344,7 @@ public class ContextLoader {
 			throw new ApplicationContextException("Custom context class [" + contextClass.getName() +
 					"] is not of type [" + ConfigurableWebApplicationContext.class.getName() + "]");
 		}
-		ConfigurableWebApplicationContext wac =
-				(ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
-		return wac;
+		return (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 	}
 
 	/**
@@ -370,10 +379,6 @@ public class ContextLoader {
 			}
 		}
 
-		// Determine parent for root web application context, if any.
-		ApplicationContext parent = loadParentContext(sc);
-
-		wac.setParent(parent);
 		wac.setServletContext(sc);
 		String initParameter = sc.getInitParameter(CONFIG_LOCATION_PARAM);
 		if (initParameter != null) {
@@ -472,11 +477,11 @@ public class ContextLoader {
 
 		Class<?> contextClass = applicationContext.getClass();
 		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
-			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
+				new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
-				GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
+					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
 			Assert.isAssignable(initializerContextClass, contextClass, String.format(
 					"Could not add context initializer [%s] as its generic parameter [%s] " +
 					"is not assignable from the type of application context used by this " +

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,17 @@
 
 package org.springframework.orm.jpa;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceException;
 import javax.persistence.spi.PersistenceUnitInfo;
 
-import junit.framework.TestCase;
-import org.easymock.MockControl;
-
+import org.junit.After;
+import org.junit.Before;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -31,18 +35,23 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Phillip Webb
  */
-public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
-
-	protected static MockControl emfMc;
+public abstract class AbstractEntityManagerFactoryBeanTests {
 
 	protected static EntityManagerFactory mockEmf;
 
+	@Before
+	public void setUp() throws Exception {
+		mockEmf = mock(EntityManagerFactory.class);
+	}
 
-	@Override
-	protected void setUp() throws Exception {
-		emfMc = MockControl.createControl(EntityManagerFactory.class);
-		mockEmf = (EntityManagerFactory) emfMc.getMock();
+	@After
+	public void tearDown() throws Exception {
+		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
+		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
+		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 	protected void checkInvariants(AbstractEntityManagerFactoryBean demf) {
@@ -54,14 +63,6 @@ public abstract class AbstractEntityManagerFactoryBeanTests extends TestCase {
 		assertSame("Successive invocations of getObject() return same object", emfi, demf.getObject());
 		assertSame(emfi, demf.getObject());
 		assertSame(emfi.getNativeEntityManagerFactory(), mockEmf);
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
-		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
-		assertFalse(TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-		assertFalse(TransactionSynchronizationManager.isActualTransactionActive());
 	}
 
 

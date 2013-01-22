@@ -1401,6 +1401,12 @@ String result =
       can in turn be configured with credentials information or connection
       pooling functionality.</para>
 
+      <tip><para>Note that the <literal>java.net</literal> implementation for
+      HTTP requests may raise an exception when accessing the status of a response
+      that represents an error (e.g. 401). If this is an issue, switch to
+      <classname>HttpComponentsClientHttpRequestFactory</classname> instead.
+      </para></tip>
+
       <para>The previous example using Apache HttpComponents
       <classname>HttpClient</classname> directly rewritten to use the
       <classname>RestTemplate</classname> is shown below</para>

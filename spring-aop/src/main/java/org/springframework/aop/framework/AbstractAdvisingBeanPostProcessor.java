@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	 */
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	private final Map<String, Boolean> eligibleBeans = new ConcurrentHashMap<String, Boolean>(64);
+	private final Map<Class, Boolean> eligibleBeans = new ConcurrentHashMap<Class, Boolean>(64);
 
 
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
@@ -94,19 +94,21 @@ public abstract class AbstractAdvisingBeanPostProcessor extends ProxyConfig
 	/**
 	 * Check whether the given bean is eligible for advising with this
 	 * post-processor's {@link Advisor}.
-	 * <p>Implements caching of {@code canApply} results per bean name.
+	 * <p>Implements caching of {@code canApply} results per bean target class.
+	 * Can be overridden e.g. to specifically exclude certain beans by name.
 	 * @param bean the bean instance
 	 * @param beanName the name of the bean
+	 * @see AopUtils#getTargetClass(Object)
 	 * @see AopUtils#canApply(Advisor, Class)
 	 */
 	protected boolean isEligible(Object bean, String beanName) {
-		Boolean eligible = this.eligibleBeans.get(beanName);
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		Boolean eligible = this.eligibleBeans.get(targetClass);
 		if (eligible != null) {
 			return eligible;
 		}
-		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		eligible = AopUtils.canApply(this.advisor, targetClass);
-		this.eligibleBeans.put(beanName, eligible);
+		this.eligibleBeans.put(targetClass, eligible);
 		return eligible;
 	}
 

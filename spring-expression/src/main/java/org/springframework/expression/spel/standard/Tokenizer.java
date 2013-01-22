@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
  * Lex some input data into a stream of tokens that can then be parsed.
  *
  * @author Andy Clement
+ * @author Phillip Webb
  * @since 3.0
  */
 class Tokenizer {
@@ -137,14 +138,20 @@ class Tokenizer {
 					}
 					break;
 				case '&':
-					if (isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
-						pushPairToken(TokenKind.SYMBOLIC_AND);
+					if (!isTwoCharToken(TokenKind.SYMBOLIC_AND)) {
+							throw new InternalParseException(new SpelParseException(
+									expressionString, pos,
+									SpelMessage.MISSING_CHARACTER, "&"));
 					}
+					pushPairToken(TokenKind.SYMBOLIC_AND);
 					break;
 				case '|':
-					if (isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
-						pushPairToken(TokenKind.SYMBOLIC_OR);
+					if (!isTwoCharToken(TokenKind.SYMBOLIC_OR)) {
+						throw new InternalParseException(new SpelParseException(
+								expressionString, pos,
+								SpelMessage.MISSING_CHARACTER, "|"));
 					}
+					pushPairToken(TokenKind.SYMBOLIC_OR);
 					break;
 				case '?':
 					if (isTwoCharToken(TokenKind.SELECT)) {

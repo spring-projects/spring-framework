@@ -438,7 +438,7 @@ public class Application {
             though a mapping file can be used to have more control over the behavior of Castor.
         </para>
         <para>
-            For more information on Castor, refer to the <link xl:href="http://castor.org/xml-framework.html">
+            For more information on Castor, refer to the <link xl:href="http://castor.codehaus.org/xml-framework.html">
             <citetitle>Castor web site</citetitle></link>. The Spring integration classes reside in the
             <package>org.springframework.oxm.castor</package> package.
         </para>
@@ -462,7 +462,7 @@ public class Application {
             <para>
                 Although it is possible to rely on Castor's default marshalling behavior, it might be necessary to have
                 more control over it. This can be accomplished using a Castor mapping file. For more information, refer
-                to <link xl:href="http://castor.org/xml-mapping.html">Castor XML Mapping</link>.
+                to <link xl:href="http://castor.codehaus.org/xml-mapping.html">Castor XML Mapping</link>.
             </para>
             <para>
                 The mapping can be set using the <property>mappingLocation</property> resource property, indicated

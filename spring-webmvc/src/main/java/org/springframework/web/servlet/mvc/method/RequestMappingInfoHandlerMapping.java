@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, decodedUriVariables);
 
 		if (isMatrixVariableContentAvailable()) {
-			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(uriVariables));
+			request.setAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, extractMatrixVariables(request, uriVariables));
 		}
 
 		if (!info.getProducesCondition().getProducibleMediaTypes().isEmpty()) {
@@ -113,7 +113,9 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return !getUrlPathHelper().shouldRemoveSemicolonContent();
 	}
 
-	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(Map<String, String> uriVariables) {
+	private Map<String, MultiValueMap<String, String>> extractMatrixVariables(
+			HttpServletRequest request, Map<String, String> uriVariables) {
+
 		Map<String, MultiValueMap<String, String>> result = new LinkedHashMap<String, MultiValueMap<String, String>>();
 		for (Entry<String, String> uriVar : uriVariables.entrySet()) {
 			String uriVarValue = uriVar.getValue();
@@ -134,7 +136,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
 
-			result.put(uriVar.getKey(), WebUtils.parseMatrixVariables(matrixVariables));
+			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
+			result.put(uriVar.getKey(), getUrlPathHelper().decodeMatrixVariables(request, vars));
 		}
 		return result;
 	}

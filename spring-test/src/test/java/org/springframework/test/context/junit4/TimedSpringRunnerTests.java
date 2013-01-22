@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.JUnit4;
 import org.springframework.test.annotation.Timed;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 /**
  * Verifies proper handling of the following in conjunction with the
@@ -42,6 +44,7 @@ public class TimedSpringRunnerTests {
 
 	@Test
 	public void timedTests() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
 		Class<TimedSpringRunnerTestCase> testClass = TimedSpringRunnerTestCase.class;
 		TrackingRunListener listener = new TrackingRunListener();
 		RunNotifier notifier = new RunNotifier();
@@ -64,34 +67,34 @@ public class TimedSpringRunnerTests {
 
 		// Should Pass.
 		@Test(timeout = 2000)
-		public void testJUnitTimeoutWithNoOp() {
+		public void jUnitTimeoutWithNoOp() {
 			/* no-op */
 		}
 
 		// Should Pass.
 		@Test
 		@Timed(millis = 2000)
-		public void testSpringTimeoutWithNoOp() {
+		public void springTimeoutWithNoOp() {
 			/* no-op */
 		}
 
 		// Should Fail due to timeout.
-		@Test(timeout = 200)
-		public void testJUnitTimeoutWithOneSecondWait() throws Exception {
-			Thread.sleep(1000);
+		@Test(timeout = 10)
+		public void jUnitTimeoutWithSleep() throws Exception {
+			Thread.sleep(20);
 		}
 
 		// Should Fail due to timeout.
 		@Test
-		@Timed(millis = 200)
-		public void testSpringTimeoutWithOneSecondWait() throws Exception {
-			Thread.sleep(1000);
+		@Timed(millis = 10)
+		public void springTimeoutWithSleep() throws Exception {
+			Thread.sleep(20);
 		}
 
 		// Should Fail due to duplicate configuration.
 		@Test(timeout = 200)
 		@Timed(millis = 200)
-		public void testSpringAndJUnitTimeout() {
+		public void springAndJUnitTimeouts() {
 			/* no-op */
 		}
 	}
