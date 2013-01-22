@@ -78,3 +78,21 @@ task cleanEclipseJdtUi(type: Delete) {
 tasks["eclipseJdt"].dependsOn(eclipseJdtPrepare)
 tasks["cleanEclipse"].dependsOn(cleanEclipseJdtUi)
 tasks["eclipse"].dependsOn(eclipseSettings, eclipseWstComponent)
+
+
+// Filter 'build' folder
+
+eclipse.project.file.withXml {
+	def node = it.asNode()
+
+	def filteredResources = node.get("filteredResources")
+	if(filteredResources) {
+		node.remove(filteredResources)
+	}
+	def filterNode = node.appendNode("filteredResources").appendNode("filter")
+	filterNode.appendNode("name", "build")
+	filterNode.appendNode("type", "26")
+	def matcherNode = filterNode.appendNode("matcher")
+	matcherNode.appendNode("id", "org.eclipse.ui.ide.multiFilter")
+	matcherNode.appendNode("arguments", "1.0-projectRelativePath-matches-false-true-build\\/((?!eclipse).)*")
+}
