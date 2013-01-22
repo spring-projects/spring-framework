@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.convert;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import org.springframework.util.ObjectUtils;
  * @author Keith Donald
  * @author Andy Clement
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 3.0
  */
 public class TypeDescriptor {
@@ -144,6 +146,22 @@ public class TypeDescriptor {
 			throw new IllegalArgumentException("mapType must be a java.util.Map");
 		}
 		return new TypeDescriptor(mapType, keyTypeDescriptor, valueTypeDescriptor);
+	}
+
+	/**
+	 * Create a new type descriptor as an array of the specified type. For example to
+	 * create a {@code Map<String,String>[]} use
+	 * {@code TypeDescriptor.array(TypeDescriptor.map(Map.class, TypeDescriptor.value(String.class), TypeDescriptor.value(String.class)))}.
+	 * @param elementTypeDescriptor the {@link TypeDescriptor} of the array element or {@code null}
+	 * @return an array {@link TypeDescriptor} or {@code null} if {@code elementTypeDescriptor} is {@code null}
+	 * @since 3.2
+	 */
+	public static TypeDescriptor array(TypeDescriptor elementTypeDescriptor) {
+		if(elementTypeDescriptor == null) {
+			return null;
+		}
+		Class<?> type = Array.newInstance(elementTypeDescriptor.getType(), 0).getClass();
+		return new TypeDescriptor(type, elementTypeDescriptor, null, null, elementTypeDescriptor.getAnnotations());
 	}
 
 	/**
