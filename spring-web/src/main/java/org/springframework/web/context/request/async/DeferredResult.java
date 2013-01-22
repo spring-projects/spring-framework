@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import org.springframework.web.context.request.NativeWebRequest;
  * <p>Subclasses can extend this class to easily associate additional data or
  * behavior with the {@link DeferredResult}. For example, one might want to
  * associate the user used to create the {@link DeferredResult} by extending the
- * class and adding an addition property for the user. In this way, the user
+ * class and adding an additional property for the user. In this way, the user
  * could easily be accessed later without the need to use a data structure to do
  * the mapping.
  *
  * <p>An example of associating additional behavior to this class might be
  * realized by extending the class to implement an additional interface. For
- * example, one might want to implement a {@link Comparable} so that when the
+ * example, one might want to implement {@link Comparable} so that when the
  * {@link DeferredResult} is added to a {@link PriorityQueue} it is handled in
  * the correct order.
  *

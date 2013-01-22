@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class WebAsyncTask<V> {
 
 
 	/**
-	 * Create an {@code WebAsyncTask} wrapping the given {@link Callable}.
+	 * Create a {@code WebAsyncTask} wrapping the given {@link Callable}.
 	 * @param callable the callable for concurrent handling
 	 */
 	public WebAsyncTask(Callable<V> callable) {
@@ -54,7 +54,7 @@ public class WebAsyncTask<V> {
 	}
 
 	/**
-	 * Create an {@code WebAsyncTask} with a timeout value and a {@link Callable}.
+	 * Create a {@code WebAsyncTask} with a timeout value and a {@link Callable}.
 	 * @param timeout timeout value in milliseconds
 	 * @param callable the callable for concurrent handling
 	 */
@@ -63,7 +63,7 @@ public class WebAsyncTask<V> {
 	}
 
 	/**
-	 * Create an {@code WebAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
+	 * Create a {@code WebAsyncTask} with a timeout value, an executor name, and a {@link Callable}.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
@@ -73,7 +73,7 @@ public class WebAsyncTask<V> {
 	}
 
 	/**
-	 * Create an {@code WebAsyncTask} with a timeout value, an executor instance, and a Callable.
+	 * Create a {@code WebAsyncTask} with a timeout value, an executor instance, and a Callable.
 	 * @param timeout timeout value in milliseconds; ignored if {@code null}
 	 * @param callable the callable for concurrent handling
 	 */
@@ -113,7 +113,7 @@ public class WebAsyncTask<V> {
 			return this.executor;
 		}
 		else if (this.executorName != null) {
-			Assert.state(this.beanFactory != null, "A BeanFactory is required to look up an task executor bean");
+			Assert.state(this.beanFactory != null, "A BeanFactory is required to look up a task executor bean");
 			return this.beanFactory.getBean(this.executorName, AsyncTaskExecutor.class);
 		}
 		else {
