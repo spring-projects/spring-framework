@@ -183,7 +183,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="..." class="..."&gt;
     &lt;!-- collaborators and configuration for this bean go here --&gt;
@@ -237,7 +237,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;!-- services --&gt;
 
@@ -260,7 +260,7 @@ The footnote should x-ref to first section in that chapter but I can't find the 
 &lt;beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+           http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean id="accountDao"
       class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao"&gt;

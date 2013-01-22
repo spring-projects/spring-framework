@@ -414,11 +414,11 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans 
-       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx 
-       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop 
-       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
@@ -507,11 +507,11 @@ TR: REVISED, PLS REVIEW.-->This declarative transaction capability allows you
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans 
-       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx 
-       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop 
-       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   <lineannotation>&lt;!-- <interfacename>SessionFactory</interfacename>, <interfacename>DataSource</interfacename>, etc. omitted --&gt;</lineannotation>
 
@@ -1150,11 +1150,11 @@ TR: OK AS IS. Two different callback methhods - one is Spring's (*afterCompletio
         xmlns:tx="http://www.springframework.org/schema/tx"
         xsi:schemaLocation="
    http://www.springframework.org/schema/beans 
-   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+   http://www.springframework.org/schema/beans/spring-beans.xsd
    http://www.springframework.org/schema/tx 
-   http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+   http://www.springframework.org/schema/tx/spring-tx.xsd
    http://www.springframework.org/schema/aop 
-   http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+   http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jdo.JdoTransactionManager"&gt;
     &lt;property name="persistenceManagerFactory" ref="myPmf"/&gt;
@@ -1731,11 +1731,11 @@ TR: REVISED, PLS REVIEW. Should be *inside your war*. --><!-- </para>
        xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans 
-       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/tx 
-       http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop 
-       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"&gt;
+       http://www.springframework.org/schema/aop/spring-aop.xsd"&gt;
 
   &lt;bean id="myTxManager" class="org.springframework.orm.jpa.JpaTransactionManager"&gt;
     &lt;property name="entityManagerFactory" ref="myEmf"/&gt;

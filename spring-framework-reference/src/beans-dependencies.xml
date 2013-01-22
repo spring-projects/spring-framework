@@ -532,7 +532,7 @@ public class ExampleBean {
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:p="http://www.springframework.org/schema/p"
      xsi:schemaLocation="http://www.springframework.org/schema/beans
-     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+     http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
 &lt;bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
       destroy-method="close"
@@ -968,7 +968,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="classic" class="com.example.ExampleBean"&gt;
       &lt;property name="email" value="foo@bar.com"/&gt;
@@ -991,7 +991,7 @@ support=support@example.co.uk</programlisting>
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:p="http://www.springframework.org/schema/p"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"&gt;
+      http://www.springframework.org/schema/beans/spring-beans.xsd"&gt;
 
   &lt;bean name="john-classic" class="com.example.Person"&gt;
       &lt;property name="name" value="John Doe"/&gt;

@@ -126,8 +126,8 @@ class GroovyMessenger implements Messenger {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
     ]]><lineannotation>&lt;!-- this is the bean definition for the Groovy-backed <interfacename>Messenger</interfacename> implementation --&gt;</lineannotation><![CDATA[
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy">
@@ -1038,8 +1038,8 @@ class TestBeanValidator implements Validator {
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:lang="http://www.springframework.org/schema/lang"
        xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd">
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang.xsd">
 
     <lang:groovy id="messenger" script-source="classpath:Messenger.groovy" ]]><lineannotation><emphasis role="bold">scope="prototype"</emphasis></lineannotation><![CDATA[>
         <lang:property name="message" value="I Can Do The RoboCop" />
