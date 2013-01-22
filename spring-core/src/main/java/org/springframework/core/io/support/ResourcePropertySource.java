@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,11 @@ import org.springframework.util.StringUtils;
 /**
  * Subclass of {@link PropertiesPropertySource} that loads a {@link Properties}
  * object from a given {@link org.springframework.core.io.Resource} or resource location such as
- * {@code "classpath:/com/myco/foo.properties"} or {@code "file:/path/to/file.properties"}.
+ * {@code "classpath:/com/myco/foo.properties"} or {@code "file:/path/to/file.xml"}.
+ * Both traditional and XML-based properties file formats are supported, however in order
+ * for XML processing to take effect, the underlying {@code Resource}'s
+ * {@link org.springframework.core.io.Resource#getFilename() getFilename()} method must
+ * return non-{@code null} and end in ".xml".
  *
  * @author Chris Beams
  * @since 3.1
@@ -99,7 +103,13 @@ public class ResourcePropertySource extends PropertiesPropertySource {
 	private static Properties loadPropertiesForResource(Resource resource) throws IOException {
 		Properties props = new Properties();
 		InputStream is = resource.getInputStream();
-		props.load(is);
+		String filename = resource.getFilename();
+		if (filename != null && filename.endsWith(".xml")) {
+			props.loadFromXML(is);
+		}
+		else {
+			props.load(is);
+		}
 		try {
 			is.close();
 		} catch (IOException ex) {
