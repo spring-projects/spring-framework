@@ -42,6 +42,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -199,6 +200,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		catch (HttpMediaTypeNotAcceptableException ex) {
 			assertEquals("Invalid supported producible media types",
 					Arrays.asList(new MediaType("application", "xml")), ex.getSupportedMediaTypes());
+		}
+	}
+
+	@Test
+	public void testUnsatisfiedServletRequestParameterException() throws Exception {
+		try {
+			MockHttpServletRequest request = new MockHttpServletRequest("GET", "/params");
+			this.handlerMapping.getHandler(request);
+			fail("UnsatisfiedServletRequestParameterException expected");
+		}
+		catch (UnsatisfiedServletRequestParameterException ex) {
+			assertArrayEquals("Invalid request parameter conditions",
+					new String[] { "foo=bar" }, ex.getParamConditions());
 		}
 	}
 
@@ -411,6 +425,11 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/persons", produces="application/xml")
 		public String produces() {
+			return "";
+		}
+
+		@RequestMapping(value = "/params", params="foo=bar")
+		public String param() {
 			return "";
 		}
 
