@@ -5110,7 +5110,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-    configurer.setFavorPathExtension(false).setFavorParameter(true);
+    configurer.favorPathExtension(false).favorParameter(true);
   }
 }</programlisting>
 
