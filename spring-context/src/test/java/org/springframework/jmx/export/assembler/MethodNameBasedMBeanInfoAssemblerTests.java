@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,11 +16,13 @@
 
 package org.springframework.jmx.export.assembler;
 
+import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanInfo;
 
 /**
  * @author Rob Harrop
+ * @author David Boden
  */
 public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssemblerTests {
 
@@ -54,6 +56,13 @@ public class MethodNameBasedMBeanInfoAssemblerTests extends AbstractJmxAssembler
 
 		assertTrue(attr.isReadable());
 		assertFalse(attr.isWritable());
+	}
+
+	public void testSetNameParameterIsNamed() throws Exception {
+		ModelMBeanInfo info = getMBeanInfoFromAssembler();
+
+		MBeanOperationInfo operationSetAge = info.getOperation("setName");
+		assertEquals("name", operationSetAge.getSignature()[0].getName());
 	}
 
 	@Override
