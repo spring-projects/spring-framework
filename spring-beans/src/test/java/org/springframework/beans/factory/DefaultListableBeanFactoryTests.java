@@ -28,6 +28,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.io.Closeable;
 import java.lang.reflect.Field;
@@ -97,6 +102,7 @@ import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.StopWatch;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Tests properties population and autowire behavior.
@@ -2259,6 +2265,26 @@ public class DefaultListableBeanFactoryTests {
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
 		assertThat(bf.containsBean("abs"), is(true));
 		assertThat(bf.containsBean("bogus"), is(false));
+	}
+
+	@Test
+	public void resolveEmbeddedValue() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		StringValueResolver r1 = mock(StringValueResolver.class);
+		StringValueResolver r2 = mock(StringValueResolver.class);
+		StringValueResolver r3 = mock(StringValueResolver.class);
+		bf.addEmbeddedValueResolver(r1);
+		bf.addEmbeddedValueResolver(r2);
+		bf.addEmbeddedValueResolver(r3);
+		given(r1.resolveStringValue("A")).willReturn("B");
+		given(r2.resolveStringValue("B")).willReturn(null);
+		given(r3.resolveStringValue(isNull(String.class))).willThrow(new IllegalArgumentException());
+
+		bf.resolveEmbeddedValue("A");
+
+		verify(r1).resolveStringValue("A");
+		verify(r2).resolveStringValue("B");
+		verify(r3, never()).resolveStringValue(isNull(String.class));
 	}
 
 
