@@ -17,6 +17,8 @@
 package org.springframework.beans.factory;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -49,7 +51,9 @@ import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -102,11 +106,14 @@ import org.springframework.util.StopWatch;
  * @author Rick Evans
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -1282,6 +1289,32 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypeWithPrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd2"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithMultiplePrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		thrown.expectMessage(containsString("more than one 'primary'"));
 		lbf.getBean(TestBean.class);
 	}
 
