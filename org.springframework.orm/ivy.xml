@@ -41,8 +41,8 @@
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence" rev="1.0.1" conf="test->compile"/>
 		<dependency org="org.eclipse.persistence" name="com.springsource.org.eclipse.persistence.jpa" rev="1.0.1" conf="optional, eclipselink->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate" rev="3.3.2.GA" conf="optional, hibernate->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
-		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA" conf="optional, hibernate-jpa->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.annotations" rev="3.4.0.GA-A" conf="optional, hibernate-jpa->compile"/>
+		<dependency org="org.hibernate" name="com.springsource.org.hibernate.ejb" rev="3.4.0.GA-A" conf="optional, hibernate-jpa->compile"/>
 		<dependency org="org.hibernate" name="com.springsource.org.hibernate.core" rev="4.1.0.Final" conf="optional, hibernate->compile"/>
 		<dependency org="javax.jdo" name="com.springsource.javax.jdo" rev="2.1.0" conf="provided, jdo->compile"/>
 		<dependency org="javax.persistence" name="com.springsource.javax.persistence" rev="1.0.0" conf="provided, jpa->compile"/>
