@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.io.support;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Enumeration;
@@ -26,6 +27,8 @@ import java.util.Properties;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.DefaultPropertiesPersister;
+import org.springframework.util.PropertiesPersister;
 import org.springframework.util.ResourceUtils;
 
 /**
@@ -41,6 +44,9 @@ import org.springframework.util.ResourceUtils;
  * @see PropertiesLoaderSupport
  */
 public abstract class PropertiesLoaderUtils {
+
+	private static final String XML_FILE_EXTENSION = ".xml";
+
 
 	/**
 	 * Load properties from the given resource.
@@ -118,6 +124,54 @@ public abstract class PropertiesLoaderUtils {
 			}
 		}
 		return properties;
+	}
+
+
+	/**
+	 * Load the properties from the given encoded resource.
+	 * @see #fillProperties
+	 */
+	static Properties loadProperties(EncodedResource resource) throws IOException {
+		Properties props = new Properties();
+		fillProperties(props, resource, new DefaultPropertiesPersister());
+		return props;
+	}
+
+	/**
+	 * Actually load properties from the given EncodedResource into the given Properties instance.
+	 * @param props the Properties instance to load into
+	 * @param resource the resource to load from
+	 * @param persister the PropertiesPersister to use
+	 * @throws IOException in case of I/O errors
+	 */
+	static void fillProperties(Properties props, EncodedResource resource, PropertiesPersister persister)
+			throws IOException {
+
+		InputStream stream = null;
+		Reader reader = null;
+		try {
+			String filename = resource.getResource().getFilename();
+			if (filename != null && filename.endsWith(XML_FILE_EXTENSION)) {
+				stream = resource.getInputStream();
+				persister.loadFromXml(props, stream);
+			}
+			else if (resource.requiresReader()) {
+				reader = resource.getReader();
+				persister.load(props, reader);
+			}
+			else {
+				stream = resource.getInputStream();
+				persister.load(props, stream);
+			}
+		}
+		finally {
+			if (stream != null) {
+				stream.close();
+			}
+			if (reader != null) {
+				reader.close();
+			}
+		}
 	}
 
 }
