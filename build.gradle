@@ -526,8 +526,8 @@ project("spring-orm-hibernate4") {
 	description = "Spring Object/Relational Mapping - Hibernate 4 support"
 	merge.into = project(":spring-orm")
 	dependencies {
-		compile(project(":spring-tx"))
-		compile(project(":spring-jdbc"))
+		provided(project(":spring-tx"))
+		provided(project(":spring-jdbc"))
 		optional("org.hibernate:hibernate-core:4.1.0.Final")
 		optional("org.hibernate:hibernate-entitymanager:4.1.0.Final")
 		optional(project(":spring-web"))
@@ -597,8 +597,8 @@ project("spring-webmvc-tiles3") {
 	description = "Spring Framework Tiles3 Integration"
 	merge.into = project(":spring-webmvc")
 	dependencies {
-		compile(project(":spring-context"))
-		compile(project(":spring-web"))
+		provided(project(":spring-context"))
+		provided(project(":spring-web"))
 		provided("javax.el:el-api:1.0")
 		provided("javax.servlet:jstl:1.2")
 		provided("javax.servlet.jsp:jsp-api:2.1")
@@ -689,8 +689,8 @@ project("spring-test-mvc") {
 	description = "Spring Test MVC Framework"
 	merge.into = project(":spring-test")
 	dependencies {
-		optional(project(":spring-context"))
-		compile(project(":spring-webmvc"))
+		provided(project(":spring-context"))
+		provided(project(":spring-webmvc"))
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		optional("org.hamcrest:hamcrest-core:1.3")
 		optional("com.jayway.jsonpath:json-path:0.8.1")
