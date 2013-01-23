@@ -90,6 +90,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Costin Leau
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -272,6 +273,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return getBean(beanNames[0], requiredType);
 		}
 		else if (beanNames.length > 1) {
+			T primaryBean = null;
+			for (String beanName : beanNames) {
+				T beanInstance = getBean(beanName, requiredType);
+				if (isPrimary(beanName, beanInstance)) {
+					if(primaryBean != null) {
+						throw new NoUniqueBeanDefinitionException(requiredType, beanNames.length,
+								"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
+					}
+					primaryBean = beanInstance;
+				}
+			}
+			if(primaryBean != null) {
+				return primaryBean;
+			}
 			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
 		}
 		else if (getParentBeanFactory() != null) {
