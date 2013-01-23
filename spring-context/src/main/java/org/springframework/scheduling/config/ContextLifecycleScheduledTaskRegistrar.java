@@ -22,9 +22,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 /**
- * {@link ScheduledTaskRegistrar} subclass that redirect the actual scheduling
+ * {@link ScheduledTaskRegistrar} subclass that redirects the actual scheduling
  * of tasks to the {@link ContextRefreshedEvent} callback. Falls back to regular
- * {@link ScheduledTaskRegistrar} behavior when not running within an ApplicationContext.
+ * {@code ScheduledTaskRegistrar} behavior when not running within an ApplicationContext.
  *
  * @author Juergen Hoeller
  * @since 3.2.1
