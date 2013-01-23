@@ -33,6 +33,7 @@ import org.springframework.util.ObjectUtils;
  * @since 3.2
  * @see <a href="http://tools.ietf.org/html/rfc3986#section-1.2.3">Hierarchical vs Opaque URIs</a>
  */
+@SuppressWarnings("serial")
 final class OpaqueUriComponents extends UriComponents {
 
 	private static final MultiValueMap<String, String> QUERY_PARAMS_NONE = new LinkedMultiValueMap<String, String>(0);
