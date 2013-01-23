@@ -277,14 +277,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			for (String beanName : beanNames) {
 				T beanInstance = getBean(beanName, requiredType);
 				if (isPrimary(beanName, beanInstance)) {
-					if(primaryBean != null) {
+					if (primaryBean != null) {
 						throw new NoUniqueBeanDefinitionException(requiredType, beanNames.length,
 								"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
 					}
 					primaryBean = beanInstance;
 				}
 			}
-			if(primaryBean != null) {
+			if (primaryBean != null) {
 				return primaryBean;
 			}
 			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
