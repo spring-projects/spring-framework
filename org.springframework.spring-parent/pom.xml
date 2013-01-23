@@ -6,7 +6,7 @@
   <artifactId>spring-parent</artifactId>
   <packaging>pom</packaging>
   <name>Spring Framework - Parent</name>
-  <version>3.1.4.BUILD-SNAPSHOT</version>
+  <version>3.1.4.RELEASE</version>
   <description>Spring Framework Parent</description>
   <scm>
     <url>https://fisheye.springframework.org/browse/spring-framework</url>
