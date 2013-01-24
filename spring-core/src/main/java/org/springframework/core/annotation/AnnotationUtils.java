@@ -17,9 +17,14 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -297,6 +302,54 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
+	}
+	
+	/**
+	 * Find all annotations of the given {@code annotationType}
+	 * 
+	 * <ul>
+	 * <li>in the given {@code clazz}</li>
+	 * <li>in the superclasses (if requested in the {@code includeSuperclasses} parameter)</li>
+	 * <li>in the annotations's annotations (if requested in the {@code traverseMetaAnnotations} parameter)</li>
+	 * </ul>
+	 * @param annotationType the Class object corresponding to the annotation type
+	 * @param clazz the Class object corresponding to the class on which to check for the annotation
+	 * @param traverseMetaAnnotations if the annotations should be checked as well
+	 * @param includeSuperclasses if the superclasses should be checked as well
+	 * @return a {@link Map} in form {@code Class} = {@code Annotation}
+	 */
+	public static<A extends Annotation> Map<Class<?>, A> extractAnnotations(Class<A> annotationType, Class<?> clazz, boolean traverseMetaAnnotations, boolean includeSuperclasses) {
+		Map<Class<?>, A> annotations = new HashMap<Class<?>, A>();
+
+		if (isAnnotationDeclaredLocally(annotationType, clazz)) {
+			annotations.put(clazz, clazz.getAnnotation(annotationType));
+		}
+
+		if (traverseMetaAnnotations) {
+			for (Annotation metaAnn : clazz.getAnnotations()) {
+
+				Class<? extends Annotation> metaAnnType = metaAnn.annotationType();
+				if (metaAnnType == Documented.class ||
+						metaAnnType == Target.class ||
+						metaAnnType == Inherited.class ||
+						metaAnnType == Retention.class) {
+					continue;
+				}
+
+				Map<Class<?>, A> metaAnnotations = extractAnnotations(annotationType, metaAnnType, traverseMetaAnnotations, includeSuperclasses);
+				annotations.putAll(metaAnnotations);
+			}
+		}
+
+		if (includeSuperclasses) {
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass != null && superclass != Object.class) {
+				Map<Class<?>, A> annotationsFromSuperclass = extractAnnotations(annotationType, superclass, traverseMetaAnnotations, includeSuperclasses);
+				annotations.putAll(annotationsFromSuperclass);
+			}
+		}
+
+		return annotations;
 	}
 
 	/**

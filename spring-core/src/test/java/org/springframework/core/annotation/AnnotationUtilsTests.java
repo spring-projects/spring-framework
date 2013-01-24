@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -215,6 +216,87 @@ public class AnnotationUtilsTests {
 		assertNotNull(order);
 	}
 
+	@Test
+	public void testExtractAnnotationsNoAnnotatedClass() {
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, NonAnnotatedClass.class, true, true);
+		assertNotNull(extractAnnotations);
+
+		assertTrue(extractAnnotations.isEmpty());
+	}
+
+	@Test
+	public void testExtractAnnotationsAnnotatedClass() {
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, SimpleAnnotatedClass.class, true, true);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(1, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(SimpleAnnotatedClass.class));
+		assertEquals("simple", extractAnnotations.get(SimpleAnnotatedClass.class).value());
+	}
+
+	@Test
+	public void testExtractAnnotationsAnnotatedClassNoSubclassesNoTraversing() {
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class, false, false);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(1, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class));
+		assertEquals("inherited", extractAnnotations.get(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class).value());
+	}
+
+	@Test
+	public void testExtractAnnotationsAnnotatedClassYesSubclassesNoTraversing() {
+
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class, false, true);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(2, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class));
+		assertTrue(extractAnnotations.containsKey(HasLocalAndMetaComponentAnnotation.class));
+		assertEquals("local", extractAnnotations.get(HasLocalAndMetaComponentAnnotation.class).value());
+		assertEquals("inherited", extractAnnotations.get(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class).value());
+
+		extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, InheritedHasLocalAndMetaComponentAnnotation.class, false, true);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(1, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(HasLocalAndMetaComponentAnnotation.class));
+		assertEquals("local", extractAnnotations.get(HasLocalAndMetaComponentAnnotation.class).value());
+	}
+
+	@Test
+	public void testExtractAnnotationsAnnotatedClassNoSubclassesYesTraversing() {
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class, true, false);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(1, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class));
+		assertEquals("inherited", extractAnnotations.get(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class).value());
+
+		extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, MetaSimpleAnnotatedClass.class, true, false);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(1, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(Meta1.class));
+		assertEquals("meta1", extractAnnotations.get(Meta1.class).value());
+	}
+
+	@Test
+	public void testExtractAnnotationsAnnotatedClassYesSubclassesYesTraversing() {
+		Map<Class<?>, Component> extractAnnotations = AnnotationUtils.extractAnnotations(Component.class, AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class, true, true);
+		assertNotNull(extractAnnotations);
+
+		assertEquals(4, extractAnnotations.size());
+		assertTrue(extractAnnotations.containsKey(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class));
+		assertTrue(extractAnnotations.containsKey(HasLocalAndMetaComponentAnnotation.class));
+		assertTrue(extractAnnotations.containsKey(Meta1.class));
+		assertTrue(extractAnnotations.containsKey(Meta2.class));
+		assertEquals("inherited", extractAnnotations.get(AnnotatedInheritedHasLocalAndMetaComponentAnnotation.class).value());
+		assertEquals("local", extractAnnotations.get(HasLocalAndMetaComponentAnnotation.class).value());
+		assertEquals("meta1", extractAnnotations.get(Meta1.class).value());
+		assertEquals("meta2", extractAnnotations.get(Meta2.class).value());
+	}
+
 
 	@Component(value="meta1")
 	@Retention(RetentionPolicy.RUNTIME)
@@ -230,6 +312,21 @@ public class AnnotationUtilsTests {
 	@Component(value="local")
 	@Meta2
 	static class HasLocalAndMetaComponentAnnotation {
+	}
+
+	@Component(value="inherited")
+	static class AnnotatedInheritedHasLocalAndMetaComponentAnnotation extends HasLocalAndMetaComponentAnnotation {
+	}
+
+	static class InheritedHasLocalAndMetaComponentAnnotation extends HasLocalAndMetaComponentAnnotation {
+	}
+
+	@Component(value="simple")
+	static class SimpleAnnotatedClass {
+	}
+
+	@Meta1
+	static class MetaSimpleAnnotatedClass extends SimpleAnnotatedClass {
 	}
 
 	public static interface AnnotatedInterface {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 
 package org.springframework.test.context;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,17 +45,19 @@ public class ContextConfigurationAttributes {
 
 	private final Class<?> declaringClass;
 
+	private Map<Class<?>, String[]> extendedLocations = new HashMap<Class<?>, String[]>();
+
 	private String[] locations;
 
 	private Class<?>[] classes;
 
-	private final boolean inheritLocations;
+	private boolean inheritLocations;
 
-	private final Class<? extends ContextLoader> contextLoaderClass;
+	private Class<? extends ContextLoader> contextLoaderClass;
 
-	private final Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers;
+	private Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers;
 
-	private final boolean inheritInitializers;
+	private boolean inheritInitializers;
 
 
 	/**
@@ -162,6 +167,41 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
+	 * This method adds a meta-annotation in the building attributes
+	 * @param annotationClass the Annotation that contains the {@link ContextConfiguration}
+	 * @param contextConfiguration the annotation from which to retrieve the attributes
+	 */
+	public void addConfigurationFromMetaAnnotations(Class<?> annotationClass, ContextConfiguration contextConfiguration) {
+
+		// we cannot merge all the locations[] right here: we need to store the 
+		// extended locations for future use, because the AbstractContextLoader
+		// (in the processContextConfiguration method)
+		// needs all the @Annotation.class = locations[] couples to generate
+		// the default values and harmonize the locations[] strings
+		String[] locations = resolveLocations(annotationClass, contextConfiguration);
+		extendedLocations.put(annotationClass, locations);
+
+		// update classes-configuration-list and initializers-list, merging the arrays
+		// TODO: is OK to not-checking possible duplications?
+		Class<?>[] classes =contextConfiguration.classes();
+		this.classes = ObjectUtils.mergeArrays(this.classes, classes);
+
+		Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>[] initializers = contextConfiguration.initializers();
+		this.initializers = ObjectUtils.mergeArrays(this.initializers, initializers);
+
+		// bitwise-and for inheritance settings
+		// TODO is OK this behavior? or is preferred to exclude the meta-annotations in the
+		// settings of inheritance of locations and initializers?
+		inheritLocations &= contextConfiguration.inheritLocations();
+		inheritInitializers &= contextConfiguration.inheritInitializers();
+
+		// override contextLoaderClass only if null or default
+		if (contextLoaderClass == null && contextLoaderClass.equals(ContextLoader.class)) {
+			contextLoaderClass = contextConfiguration.loader();
+		}
+	}
+
+	/**
 	 * Get the {@linkplain Class class} that declared the
 	 * {@link ContextConfiguration @ContextConfiguration} annotation.
 	 *
@@ -226,14 +266,32 @@ public class ContextConfigurationAttributes {
 
 	/**
 	 * Determine if this {@code ContextConfigurationAttributes} instance has
-	 * path-based resource locations.
+	 * path-based resource locations (or its meta-annotations).
 	 *
 	 * @return {@code true} if the {@link #getLocations() locations} array is not empty
 	 * @see #hasResources()
 	 * @see #hasClasses()
+	 * @see #hasExtendedLocations()
 	 */
 	public boolean hasLocations() {
-		return !ObjectUtils.isEmpty(getLocations());
+		return !ObjectUtils.isEmpty(getLocations()) || hasExtendedLocations();
+	}
+
+	/**
+	 * Determine if the {@code ContextConfigurationAttributes} in meta-annotations has
+	 * path-based resource locations.
+	 * 
+	 * @return {@code true} if one of the extendedLocations contains a not-empty array
+	 */
+	private boolean hasExtendedLocations() {
+		if (!extendedLocations.isEmpty()) {
+			for (String[] value : extendedLocations.values()) {
+				if (!ObjectUtils.isEmpty(value)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -306,6 +364,16 @@ public class ContextConfigurationAttributes {
 	}
 
 	/**
+	 * Get the {@code Map} with the form {@code @Annotation} = {@code locations[]}
+	 * declared in the meta-annotations of the declaring test class
+	 * 
+	 * @return the {@code Map} with the meta-annotation = locations[]
+	 */
+	public Map<Class<?>, String[]> getExtendedLocations() {
+		return extendedLocations;
+	}
+
+	/**
 	 * Provide a String representation of the context configuration attributes
 	 * and declaring class.
 	 */
@@ -319,6 +387,7 @@ public class ContextConfigurationAttributes {
 		.append("initializers", ObjectUtils.nullSafeToString(initializers))//
 		.append("inheritInitializers", inheritInitializers)//
 		.append("contextLoaderClass", contextLoaderClass.getName())//
+		.append("metaAnnotations", extendedLocations.keySet().toString())//
 		.toString();
 	}
 

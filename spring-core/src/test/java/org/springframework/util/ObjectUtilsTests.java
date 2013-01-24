@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -653,6 +653,56 @@ public final class ObjectUtilsTests extends TestCase {
 		int actual = ObjectUtils.nullSafeHashCode(array);
 		assertEquals(expected, actual);
 		assertTrue(array.hashCode() != actual);
+	}
+
+	public void testMergeArraysWithBothNulls() {
+		assertNull(ObjectUtils.mergeArrays(null, null));
+	}
+
+	public void testMergeArraysWithFirstNull() {
+		String[] second = new String[] {"c", "d"};
+		String[] merged = ObjectUtils.mergeArrays(null, second);
+		assertNotNull(merged);
+		assertArrayEquals(second, merged);
+	}
+
+	public void testMergeArraysWithSecondNull() {
+		String[] first = new String[] {"a", "b", "x"};
+		String[] merged = ObjectUtils.mergeArrays(first, null);
+		assertNotNull(merged);
+		assertArrayEquals(first, merged);
+	}
+
+	public void testMergeArraysWithBothEvaluated() {
+		String[] first = new String[] {"a", "b", "x"};
+		String[] second = new String[] {"c", "d"};
+		String[] expected = new String[] {"a", "b", "x", "c", "d"};
+		String[] merged = ObjectUtils.mergeArrays(first, second);
+		assertNotNull(merged);
+		assertArrayEquals(expected, merged);
+	}
+
+	public void testMergeArraysWithDifferentClasses() {
+		String[] firstStr = new String[] {"a", "b", "x"};
+		Object[] firstObj = new Object[] {"a", "b", "x"};
+		String[] secondStr = new String[] {"c", "d"};
+		Object[] secondObj = new Object[] {"c", "d"};
+		String[] expected = new String[] {"a", "b", "x", "c", "d"};
+
+		Object[] merged = ObjectUtils.mergeArrays(firstObj, secondStr);
+		assertNotNull(merged);
+		assertArrayEquals(expected, merged);
+
+		merged = ObjectUtils.mergeArrays(firstStr, secondObj);
+		assertNotNull(merged);
+		assertArrayEquals(expected, merged);
+	}
+
+	private void assertArrayEquals(Object[] expected, Object[] actual) {
+		assertEquals(expected.length, actual.length);
+		for (int i = 0; i < expected.length; i++) {
+			assertEquals(expected[i], actual[i]);
+		}
 	}
 
 }
