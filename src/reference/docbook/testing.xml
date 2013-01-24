@@ -1665,6 +1665,74 @@ public class ExtendedTest extends BaseTest {
     <lineannotation>// class body...</lineannotation>
 }</programlisting>
         </section>
+		
+		 <section xml:id="testcontext-ctx-management-metaannotations">
+          <title>Context Configuration and meta-annotations</title>
+
+          <para>A mechanism similar to inheritance of Context Configuration described
+		  in paragraph <link linkend="testcontext-ctx-management-inheritance">Context
+		  configuration inheritance</link> was first introduced in version 3.2.1:
+          it allows to create custom annotations with a
+		  <interfacename>@ContextConfiguration</interfacename>.
+		  Then it is possible to mix (in test classes) the explicit configuration
+		  (via <interfacename>@ContextConfiguration</interfacename> annotations)
+		  with the just defined custom annotations.</para>
+
+          <para>On the Spring side, it will be as if there were a single
+		  <interfacename>@ContextConfiguration</interfacename>, composed by the union of all the 
+		  <interfacename>@ContextConfiguration</interfacename> presents on that class, 
+		  on its annotations, on second level annotations, etc.</para>
+		  
+          <para>Inheritance of <interfacename>@ContextConfiguration</interfacename>
+		  works as described in paragraph <link linkend="testcontext-ctx-management-inheritance">
+		  Context configuration inheritance</link>.</para>
+
+          <para>A quick sample:</para>
+		  
+<programlisting language="java">
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+<emphasis role="bold">@ContextConfiguration(locations = "HsqlDb-Environment.xml")</emphasis> // ok, you can use profiles instead
+<emphasis role="bold">public @interface HsqldbEnvironment</emphasis> {
+}
+
+---------------
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+<emphasis role="bold">@ContextConfiguration</emphasis> // using default location if present [ IntegrationTest-context.xml ]
+<emphasis role="bold">public @interface IntegrationTest</emphasis> {
+}
+
+---------------
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+<emphasis role="bold">@ContextConfiguration(locations = {"Batch-Environment.xml", "Batch-Test-Environment.xml"})</emphasis> // specific configuration
+<emphasis role="bold">@IntegrationTest</emphasis>
+<emphasis role="bold">public @interface BatchIntegrationTest</emphasis> {
+}
+
+---------------
+
+@RunWith(SpringJUnit4ClassRunner.class)
+<emphasis role="bold">@ContextConfiguration(locations = "FirstJob.xml")</emphasis> // the job definition
+<emphasis role="bold">@BatchIntegrationTest</emphasis>
+<emphasis role="bold">@HsqldbEnvironment</emphasis>
+public class FirstJobIntegrationTest {
+
+// In this case, the Application Context is built merging this files:
+//     * FirstJob.xml                             [from actual class]
+//     * Batch-Environment.xml                    [from BatchIntegrationTest annotation]
+//     * Batch-Test-Environment.xml               [from BatchIntegrationTest annotation]
+//     * IntegrationTest-context.xml (if present) [from IntegrationTest annotation, implied by BatchIntegrationTest annotation]
+//     * HsqlDb-Environment.xml                   [from HsqldbEnvironment annotation]
+
+	[...]
+
+}
+</programlisting>
+		</section>
 
         <section xml:id="testcontext-ctx-management-env-profiles">
           <title>Context configuration with environment profiles</title>
