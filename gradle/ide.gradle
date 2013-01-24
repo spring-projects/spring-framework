@@ -27,17 +27,17 @@ eclipse.classpath.file.whenMerged { classpath ->
 
 
 // Use separate main/test outputs (prevents WTP from packaging test classes)
-eclipse.classpath.defaultOutputDir = file(project.name+"/eclipse/bin")
+eclipse.classpath.defaultOutputDir = file(project.name+"/bin/eclipse")
 eclipse.classpath.file.beforeMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		if(it.output.startsWith("build/eclipse")) {
+		if(it.output.startsWith("bin/")) {
 			it.output = null
 		}
 	}
 }
 eclipse.classpath.file.whenMerged { classpath ->
 	classpath.entries.findAll{ it instanceof SourceFolder }.each {
-		it.output = "build/eclipse/" + it.path.split("/")[1]
+		it.output = "bin/" + it.path.split("/")[1]
 	}
 }
 
@@ -90,9 +90,10 @@ eclipse.project.file.withXml {
 		node.remove(filteredResources)
 	}
 	def filterNode = node.appendNode("filteredResources").appendNode("filter")
-	filterNode.appendNode("name", "build")
-	filterNode.appendNode("type", "26")
+	filterNode.appendNode("id", "1359048889071")
+	filterNode.appendNode("name", "")
+	filterNode.appendNode("type", "30")
 	def matcherNode = filterNode.appendNode("matcher")
 	matcherNode.appendNode("id", "org.eclipse.ui.ide.multiFilter")
-	matcherNode.appendNode("arguments", "1.0-projectRelativePath-matches-false-true-build\\/((?!eclipse).)*")
+	matcherNode.appendNode("arguments", "1.0-projectRelativePath-matches-false-false-build")
 }
