@@ -497,6 +497,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NestedGenericCollectionBean extends BaseGenericCollectionBean {
 
 		private Map<String, Integer> mapOfInteger;
@@ -544,6 +545,7 @@ public class BeanWrapperGenericsTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class ComplexMapHolder {
 
 		private Map<List<Integer>, List<Long>> genericMap;

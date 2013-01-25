@@ -198,6 +198,7 @@ public class JpaInterceptorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestInvocation implements MethodInvocation {
 
 		private EntityManagerFactory entityManagerFactory;

@@ -700,6 +700,7 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class NullFactory {
 
 		public static Object create() {

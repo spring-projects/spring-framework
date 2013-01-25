@@ -137,10 +137,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 
 	@Test
 	public void testCglibProxyingGivesMeaningfulExceptionIfAskedToProxyNonvisibleClass() {
+
+		@SuppressWarnings("unused")
 		class YouCantSeeThis {
 			void hidden() {
 			}
 		}
+
 		YouCantSeeThis mine = new YouCantSeeThis();
 		try {
 			ProxyFactory pf = new ProxyFactory(mine);

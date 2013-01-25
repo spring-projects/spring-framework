@@ -77,6 +77,7 @@ public class JdoInterceptorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestInvocation implements MethodInvocation {
 
 		private PersistenceManagerFactory persistenceManagerFactory;

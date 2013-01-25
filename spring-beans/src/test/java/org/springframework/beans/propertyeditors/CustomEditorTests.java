@@ -1506,6 +1506,7 @@ public class CustomEditorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class PrimitiveArrayBean {
 
 		private byte[] byteArray;
@@ -1530,6 +1531,7 @@ public class CustomEditorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class CharBean {
 
 		private char myChar;
@@ -1554,6 +1556,7 @@ public class CustomEditorTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class OldCollectionsBean {
 
 		private Vector<?> vector;

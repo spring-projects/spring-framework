@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import javax.jms.Destination;
 import javax.jms.Session;
 
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import org.easymock.MockControl;
 import org.springframework.jca.StubResourceAdapter;
 import org.springframework.jms.StubQueue;
 import org.springframework.jms.support.destination.DestinationResolver;
@@ -89,6 +89,7 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class StubActiveMQActivationSpec extends StubJmsActivationSpec {
 
 		private int maxSessions;
@@ -133,6 +134,7 @@ public class DefaultJmsActivationSpecFactoryTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class StubWebSphereActivationSpecImpl extends StubJmsActivationSpec {
 
 		private Destination destination;
