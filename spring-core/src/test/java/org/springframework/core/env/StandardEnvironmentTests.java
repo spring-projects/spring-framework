@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -456,7 +456,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, String> getModifiableSystemEnvironment() {
+	public static Map<String, String> getModifiableSystemEnvironment() {
 		// for os x / linux
 		Class<?>[] classes = Collections.class.getDeclaredClasses();
 		Map<String, String> env = System.getenv();

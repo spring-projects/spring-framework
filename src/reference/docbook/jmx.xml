@@ -1061,7 +1061,7 @@ public class AnnotationTestBean implements IJmxTestBean {
   </bean>
 
   <bean id="attributeSource"
-      class="org.springframework.jmx.export.metadata.AttributesJmxAttributeSource"/>
+      class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 
 </beans>]]></programlisting>
 

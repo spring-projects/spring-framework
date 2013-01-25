@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * Hand written SpEL parser. Instances are reusable but are not thread safe.
  *
  * @author Andy Clement
+ * @author Phillip Webb
  * @since 3.0
  */
 class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
@@ -104,8 +105,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			Token t = peekToken();
 			if (t.kind==TokenKind.ASSIGN) { // a=b
 				if (expr==null) {
-				expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
-			}
+					expr = new NullLiteral(toPos(t.startpos-1,t.endpos-1));
+				}
 				nextToken();
 				SpelNodeImpl assignedValue = eatLogicalOrExpression();
 				return new Assign(toPos(t),expr,assignedValue);
@@ -139,7 +140,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (peekIdentifierToken("or") || peekToken(TokenKind.SYMBOLIC_OR)) {
 			Token t = nextToken(); //consume OR
 			SpelNodeImpl rhExpr = eatLogicalAndExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			expr = new OpOr(toPos(t),expr,rhExpr);
 		}
 		return expr;
@@ -151,7 +152,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (peekIdentifierToken("and") || peekToken(TokenKind.SYMBOLIC_AND)) {
 			Token t = nextToken();// consume 'AND'
 			SpelNodeImpl rhExpr = eatRelationalExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			expr = new OpAnd(toPos(t),expr,rhExpr);
 		}
 		return expr;
@@ -164,7 +165,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (relationalOperatorToken != null) {
 			Token t = nextToken(); //consume relational operator token
 			SpelNodeImpl rhExpr = eatSumExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			TokenKind tk = relationalOperatorToken.kind;
 			if (relationalOperatorToken.isNumericRelationalOperator()) {
 				int pos = toPos(t);
@@ -217,7 +218,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		while (peekToken(TokenKind.STAR,TokenKind.DIV,TokenKind.MOD)) {
 			Token t = nextToken(); // consume STAR/DIV/MOD
 			SpelNodeImpl rhExpr = eatPowerIncDecExpression();
-			checkRightOperand(t,rhExpr);
+			checkOperands(t,expr,rhExpr);
 			if (t.kind==TokenKind.STAR) {
 				expr = new OpMultiply(toPos(t),expr,rhExpr);
 			} else if (t.kind==TokenKind.DIV) {
@@ -833,6 +834,17 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			return t.stringValue();
 		} else {
 			return t.kind.toString().toLowerCase();
+		}
+	}
+
+	private void checkOperands(Token token, SpelNodeImpl left, SpelNodeImpl right) {
+		checkLeftOperand(token, left);
+		checkRightOperand(token, right);
+	}
+
+	private void checkLeftOperand(Token token, SpelNodeImpl operandExpression) {
+		if (operandExpression==null) {
+			raiseInternalException(token.startpos,SpelMessage.LEFT_OPERAND_PROBLEM);
 		}
 	}
 

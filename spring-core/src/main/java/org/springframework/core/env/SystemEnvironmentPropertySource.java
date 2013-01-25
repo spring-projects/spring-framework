@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	@Override
 	public boolean containsProperty(String name) {
-		return resolvePropertyName(name) != null;
+		return getProperty(name) != null;
 	}
 
 	/**
@@ -102,8 +102,8 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 
 	/**
 	 * Check to see if this property source contains a property with the given name, or
-	 * any underscore / uppercase variation thereof. Return the resolved name or
-	 * {@code null} if none found.
+	 * any underscore / uppercase variation thereof. Return the resolved name if one is
+	 * found or otherwise the original name. Never returns {@code null}.
 	 */
 	private String resolvePropertyName(String name) {
 		if (super.containsProperty(name)) {
@@ -127,6 +127,6 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 			}
 		}
 
-		return null;
+		return name;
 	}
 }

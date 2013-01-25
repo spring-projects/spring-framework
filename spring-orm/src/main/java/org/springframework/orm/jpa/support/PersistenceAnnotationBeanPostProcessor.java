@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.InjectionMetadata;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
@@ -60,7 +61,6 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * BeanPostProcessor that processes {@link javax.persistence.PersistenceUnit}
@@ -534,10 +534,11 @@ public class PersistenceAnnotationBeanPostProcessor
 			}
 			return emf;
 		}
+		else if (beanNames.length > 1) {
+			throw new NoUniqueBeanDefinitionException(EntityManagerFactory.class, beanNames);
+		}
 		else {
-			throw new NoSuchBeanDefinitionException(
-					EntityManagerFactory.class, "expected single bean but found " + beanNames.length + ": " +
-					StringUtils.arrayToCommaDelimitedString(beanNames));
+			throw new NoSuchBeanDefinitionException(EntityManagerFactory.class);
 		}
 	}
 

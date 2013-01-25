@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.util.Assert;
  * <emphasis>completion</emphasis> time). To measure the interval between the
  * scheduled <emphasis>start</emphasis> time of each execution instead, set the
  * 'fixedRate' property to {@code true}.
- * <p>
- * Note that the TaskScheduler interface already defines methods for scheduling
+ *
+ * <p>Note that the TaskScheduler interface already defines methods for scheduling
  * tasks at fixed-rate or with fixed-delay. Both also support an optional value
  * for the initial delay. Those methods should be used directly whenever
  * possible. The value of this Trigger implementation is that it can be used
@@ -68,7 +68,7 @@ public class PeriodicTrigger implements Trigger {
 	 */
 	public PeriodicTrigger(long period, TimeUnit timeUnit) {
 		Assert.isTrue(period >= 0, "period must not be negative");
-		this.timeUnit = (timeUnit != null) ? timeUnit : TimeUnit.MILLISECONDS;
+		this.timeUnit = (timeUnit != null ? timeUnit : TimeUnit.MILLISECONDS);
 		this.period = this.timeUnit.toMillis(period);
 	}
 
@@ -91,6 +91,7 @@ public class PeriodicTrigger implements Trigger {
 		this.fixedRate = fixedRate;
 	}
 
+
 	/**
 	 * Returns the time after which a task should run again.
 	 */
@@ -104,6 +105,7 @@ public class PeriodicTrigger implements Trigger {
 		return new Date(triggerContext.lastCompletionTime().getTime() + this.period);
 	}
 
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -113,16 +115,12 @@ public class PeriodicTrigger implements Trigger {
 			return false;
 		}
 		PeriodicTrigger other = (PeriodicTrigger) obj;
-		return this.fixedRate == other.fixedRate
-				&& this.initialDelay == other.initialDelay
-				&& this.period == other.period;
+		return (this.fixedRate == other.fixedRate && this.initialDelay == other.initialDelay && this.period == other.period);
 	}
 
 	@Override
 	public int hashCode() {
-		return (this.fixedRate ? 17 : 29) +
-				(int) (37 * this.period) +
-				(int) (41 * this.initialDelay);
+		return (this.fixedRate ? 17 : 29) + (int) (37 * this.period) + (int) (41 * this.initialDelay);
 	}
 
 }

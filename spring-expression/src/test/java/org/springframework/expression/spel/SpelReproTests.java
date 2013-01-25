@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,13 @@
 
 package org.springframework.expression.spel;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,8 +33,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.junit.rules.ExpectedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
@@ -48,16 +56,18 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import org.springframework.expression.spel.testresources.le.div.mod.reserved.Reserver;
 
-import static org.junit.Assert.*;
-
 /**
  * Reproduction tests cornering various SpEL JIRA issues.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
  * @author Clark Duplichien
+ * @author Phillip Webb
  */
 public class SpelReproTests extends ExpressionTestCase {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testNPE_SPR5661() {
@@ -1657,6 +1667,15 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
+	public void SPR_10162_onlyBridgeMethodTest() throws Exception {
+		ReflectivePropertyAccessor accessor = new ReflectivePropertyAccessor();
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		Object target = new OnlyBridgeMethod();
+		TypedValue value = accessor.read(context, target , "property");
+		assertEquals(Integer.class, value.getTypeDescriptor().getType());
+	}
+
+	@Test
 	public void SPR_10091_simpleTestValueType() {
 		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(new BooleanHolder());
@@ -1684,6 +1703,33 @@ public class SpelReproTests extends ExpressionTestCase {
 		Object value = parser.parseExpression("primitiveProperty").getValue(evaluationContext);
 	}
 
+	@Test
+	public void SPR_10146_malformedExpressions() throws Exception {
+		doTestSpr10146("/foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("*foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("%foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("<foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146(">foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("&&foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("||foo", "EL1070E:(pos 0): Problem parsing left operand");
+		doTestSpr10146("&foo", "EL1069E:(pos 0): missing expected character '&'");
+		doTestSpr10146("|foo", "EL1069E:(pos 0): missing expected character '|'");
+	}
+
+	private void doTestSpr10146(String expression, String expectedMessage) {
+		thrown.expect(SpelParseException.class);
+		thrown.expectMessage(expectedMessage);
+		new SpelExpressionParser().parseExpression(expression);
+	}
+
+	@Test
+	public void SPR_10125() throws Exception {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		String fromInterface = parser.parseExpression("T("+StaticFinalImpl1.class.getName()+").VALUE").getValue(context, String.class);
+		assertThat(fromInterface, is("interfaceValue"));
+		String fromClass = parser.parseExpression("T("+StaticFinalImpl2.class.getName()+").VALUE").getValue(context, String.class);
+		assertThat(fromClass, is("interfaceValue"));
+	}
 
 	public static class BooleanHolder {
 
@@ -1722,4 +1768,27 @@ public class SpelReproTests extends ExpressionTestCase {
 		}
 	}
 
+	static class PackagePrivateClassWithGetter {
+
+		public Integer getProperty() {
+			return null;
+		}
+	}
+
+	public static class OnlyBridgeMethod extends PackagePrivateClassWithGetter {
+
+	}
+
+	public static interface StaticFinal {
+		public static final String VALUE = "interfaceValue";
+	}
+
+	public abstract static class AbstractStaticFinal implements StaticFinal {
+	}
+
+	public static class StaticFinalImpl1 extends AbstractStaticFinal implements StaticFinal {
+	}
+
+	public static class StaticFinalImpl2 extends AbstractStaticFinal {
+	}
 }

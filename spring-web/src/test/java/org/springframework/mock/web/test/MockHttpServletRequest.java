@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -110,9 +109,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private boolean active = true;
 
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// ServletRequest properties
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	private final Map<String, Object> attributes = new LinkedHashMap<String, Object>();
 
@@ -151,11 +150,12 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private int localPort = DEFAULT_SERVER_PORT;
 
-	private Map<String, Part> parts = new HashMap<String, Part>();
+	private final Map<String, Part> parts = new HashMap<String, Part>();
 
-	//---------------------------------------------------------------------
+
+	// ---------------------------------------------------------------------
 	// HttpServletRequest properties
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	private String authType;
 
@@ -200,9 +200,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private DispatcherType dispatcherType = DispatcherType.REQUEST;
 
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// Constructors
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	/**
 	 * Create a new {@code MockHttpServletRequest} with a default
@@ -256,9 +256,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.add(Locale.ENGLISH);
 	}
 
-	//---------------------------------------------------------------------
+
+	// ---------------------------------------------------------------------
 	// Lifecycle methods
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	/**
 	 * Return the ServletContext that this request is associated with. (Not
@@ -302,9 +303,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 	// ServletRequest interface
-	//---------------------------------------------------------------------
+	// ---------------------------------------------------------------------
 
 	@Override
 	public Object getAttribute(String name) {
@@ -414,8 +415,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			}
 			else {
 				throw new IllegalArgumentException(
-						"Parameter map value must be single value " + " or array of type [" + String.class.getName() +
-								"]");
+						"Parameter map value must be single value " + " or array of type [" + String.class.getName() + "]");
 			}
 		}
 	}
@@ -490,8 +490,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getParameter(String name) {
-		Assert.notNull(name, "Parameter name must not be null");
-		String[] arr = this.parameters.get(name);
+		String[] arr = (name != null ? this.parameters.get(name) : null);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
@@ -502,8 +501,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String[] getParameterValues(String name) {
-		Assert.notNull(name, "Parameter name must not be null");
-		return this.parameters.get(name);
+		return (name != null ? this.parameters.get(name) : null);
 	}
 
 	@Override
@@ -620,7 +618,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @since 3.2
 	 */
 	public void setPreferredLocales(List<Locale> locales) {
-		Assert.notEmpty(locales, "preferred locales list must not be empty");
+		Assert.notEmpty(locales, "Locale list must not be empty");
 		this.locales.clear();
 		this.locales.addAll(locales);
 	}
@@ -779,7 +777,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public String getHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
-		return (header != null ? header.getValue().toString() : null);
+		return (header != null ? header.getStringValue() : null);
 	}
 
 	@Override
@@ -867,8 +865,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isUserInRole(String role) {
-		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext && ((MockServletContext) this.servletContext).getDeclaredRoles().contains(
-			role)));
+		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext &&
+				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {

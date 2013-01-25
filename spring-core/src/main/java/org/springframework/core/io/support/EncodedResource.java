@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.core.io.support;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -39,7 +41,9 @@ public class EncodedResource {
 
 	private final Resource resource;
 
-	private final String encoding;
+	private String encoding;
+
+	private Charset charset;
 
 
 	/**
@@ -48,7 +52,8 @@ public class EncodedResource {
 	 * @param resource the Resource to hold
 	 */
 	public EncodedResource(Resource resource) {
-		this(resource, null);
+		Assert.notNull(resource, "Resource must not be null");
+		this.resource = resource;
 	}
 
 	/**
@@ -61,6 +66,18 @@ public class EncodedResource {
 		Assert.notNull(resource, "Resource must not be null");
 		this.resource = resource;
 		this.encoding = encoding;
+	}
+
+	/**
+	 * Create a new EncodedResource for the given Resource,
+	 * using the specified encoding.
+	 * @param resource the Resource to hold
+	 * @param charset the charset to use for reading from the resource
+	 */
+	public EncodedResource(Resource resource, Charset charset) {
+		Assert.notNull(resource, "Resource must not be null");
+		this.resource = resource;
+		this.charset = charset;
 	}
 
 
@@ -80,17 +97,50 @@ public class EncodedResource {
 	}
 
 	/**
+	 * Return the charset to use for reading from the resource,
+	 * or {@code null} if none specified.
+	 */
+	public final Charset getCharset() {
+		return this.charset;
+	}
+
+
+	/**
+	 * Determine whether a {@link Reader} is required as opposed to an {@link InputStream},
+	 * i.e. whether an encoding or a charset has been specified.
+	 * @see #getReader()
+	 * @see #getInputStream()
+	 */
+	public boolean requiresReader() {
+		return (this.encoding != null || this.charset != null);
+	}
+
+	/**
 	 * Open a {@code java.io.Reader} for the specified resource,
 	 * using the specified encoding (if any).
 	 * @throws IOException if opening the Reader failed
+	 * @see #requiresReader()
 	 */
 	public Reader getReader() throws IOException {
-		if (this.encoding != null) {
+		if (this.charset != null) {
+			return new InputStreamReader(this.resource.getInputStream(), this.charset);
+		}
+		else if (this.encoding != null) {
 			return new InputStreamReader(this.resource.getInputStream(), this.encoding);
 		}
 		else {
 			return new InputStreamReader(this.resource.getInputStream());
 		}
+	}
+
+	/**
+	 * Open an {@code java.io.InputStream} for the specified resource,
+	 * typically assuming that there is no specific encoding to use.
+	 * @throws IOException if opening the InputStream failed
+	 * @see #requiresReader()
+	 */
+	public InputStream getInputStream() throws IOException {
+		return this.resource.getInputStream();
 	}
 
 

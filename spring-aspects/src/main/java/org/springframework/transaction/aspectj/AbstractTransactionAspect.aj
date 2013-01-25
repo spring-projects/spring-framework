@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
 /**
  * Abstract superaspect for AspectJ transaction aspects. Concrete
- * subaspects will implement the {@code transactionalMethodExecution()}
+ * subaspects will implement the <code>transactionalMethodExecution()</code>
  * pointcut using a strategy such as Java 5 annotations.
  *
  * <p>Suitable for use inside or outside the Spring IoC container.
@@ -66,7 +66,7 @@ public abstract aspect AbstractTransactionAspect extends TransactionAspectSuppor
 	@SuppressAjWarnings("adviceDidNotMatch")
 	after(Object txObject) throwing(Throwable t) : transactionalMethodExecution(txObject) {
 		try {
-			completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
+      		completeTransactionAfterThrowing(TransactionAspectSupport.currentTransactionInfo(), t);
 		}
 		catch (Throwable t2) {
 			logger.error("Failed to close transaction after throwing in a transactional method", t2);

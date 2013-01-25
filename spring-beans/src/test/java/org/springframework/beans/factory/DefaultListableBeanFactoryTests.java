@@ -17,6 +17,8 @@
 package org.springframework.beans.factory;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +28,11 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.io.Closeable;
 import java.lang.reflect.Field;
@@ -49,7 +56,9 @@ import javax.security.auth.Subject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -93,6 +102,7 @@ import org.springframework.tests.sample.beans.SideEffectBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.StopWatch;
+import org.springframework.util.StringValueResolver;
 
 /**
  * Tests properties population and autowire behavior.
@@ -102,11 +112,14 @@ import org.springframework.util.StopWatch;
  * @author Rick Evans
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Phillip Webb
  */
 public class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);
 
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	@Test
 	public void testUnreferencedSingletonWasInstantiated() {
@@ -1270,12 +1283,44 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test(expected=NoSuchBeanDefinitionException.class)
+	public void testGetBeanByTypeWithNoneFound() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test(expected=NoUniqueBeanDefinitionException.class)
 	public void testGetBeanByTypeWithAmbiguity() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
 		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
 		lbf.registerBeanDefinition("bd1", bd1);
 		lbf.registerBeanDefinition("bd2", bd2);
+		lbf.getBean(TestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypeWithPrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		TestBean bean = lbf.getBean(TestBean.class);
+		assertThat(bean.getBeanName(), equalTo("bd2"));
+	}
+
+	@Test
+	public void testGetBeanByTypeWithMultiplePrimary() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		bd1.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd1", bd1);
+		lbf.registerBeanDefinition("bd2", bd2);
+		thrown.expect(NoUniqueBeanDefinitionException.class);
+		thrown.expectMessage(containsString("more than one 'primary'"));
 		lbf.getBean(TestBean.class);
 	}
 
@@ -1296,7 +1341,8 @@ public class DefaultListableBeanFactoryTests {
 		try {
 			lbf.getBean(TestBean.class);
 			fail("Should have thrown NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException ex) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
@@ -2219,6 +2265,26 @@ public class DefaultListableBeanFactoryTests {
 				.rootBeanDefinition(TestBean.class).setAbstract(true).getBeanDefinition());
 		assertThat(bf.containsBean("abs"), is(true));
 		assertThat(bf.containsBean("bogus"), is(false));
+	}
+
+	@Test
+	public void resolveEmbeddedValue() throws Exception {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		StringValueResolver r1 = mock(StringValueResolver.class);
+		StringValueResolver r2 = mock(StringValueResolver.class);
+		StringValueResolver r3 = mock(StringValueResolver.class);
+		bf.addEmbeddedValueResolver(r1);
+		bf.addEmbeddedValueResolver(r2);
+		bf.addEmbeddedValueResolver(r3);
+		given(r1.resolveStringValue("A")).willReturn("B");
+		given(r2.resolveStringValue("B")).willReturn(null);
+		given(r3.resolveStringValue(isNull(String.class))).willThrow(new IllegalArgumentException());
+
+		bf.resolveEmbeddedValue("A");
+
+		verify(r1).resolveStringValue("A");
+		verify(r2).resolveStringValue("B");
+		verify(r3, never()).resolveStringValue(isNull(String.class));
 	}
 
 

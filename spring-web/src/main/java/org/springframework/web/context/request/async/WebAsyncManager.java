@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.springframework.web.util.UrlPathHelper;
  * as an SPI and not typically used directly by application classes.
  *
  * <p>An async scenario starts with request processing as usual in a thread (T1).
- * Concurrent request handling can be innitiated by calling
- * {@linkplain #startCallableProcessing(Callable, Object...) startCallableProcessing} or
- * {@linkplain #startDeferredResultProcessing(DeferredResult, Object...) startDeferredResultProcessing}
+ * Concurrent request handling can be initiated by calling
+ * {@link #startCallableProcessing(Callable, Object...) startCallableProcessing} or
+ * {@link #startDeferredResultProcessing(DeferredResult, Object...) startDeferredResultProcessing},
  * both of which produce a result in a separate thread (T2). The result is saved
  * and the request dispatched to the container, to resume processing with the saved
  * result in a third thread (T3). Within the dispatched thread (T3), the saved
@@ -263,7 +263,7 @@ public final class WebAsyncManager {
 	 * the timeout value of the {@code AsyncWebRequest} before delegating to
 	 * {@link #startCallableProcessing(Callable, Object...)}.
 	 *
-	 * @param webAsyncTask an WebAsyncTask containing the target {@code Callable}
+	 * @param webAsyncTask a WebAsyncTask containing the target {@code Callable}
 	 * @param processingContext additional context to save that can be accessed
 	 * via {@link #getConcurrentResultContext()}
 	 * @throws Exception If concurrent processing failed to start

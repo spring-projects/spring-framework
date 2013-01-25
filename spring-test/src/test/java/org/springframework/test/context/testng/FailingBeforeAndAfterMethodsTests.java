@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,8 +237,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@BeforeTransaction
 		public void beforeTransaction() {
-			// See SPR-8116
-			//org.testng.Assert.fail("always failing beforeTransaction()");
+			org.testng.Assert.fail("always failing beforeTransaction()");
 		}
 	}
 
@@ -251,8 +250,7 @@ public class FailingBeforeAndAfterMethodsTests {
 
 		@AfterTransaction
 		public void afterTransaction() {
-			// See SPR-8116
-			//org.testng.Assert.fail("always failing afterTransaction()");
+			org.testng.Assert.fail("always failing afterTransaction()");
 		}
 	}
 

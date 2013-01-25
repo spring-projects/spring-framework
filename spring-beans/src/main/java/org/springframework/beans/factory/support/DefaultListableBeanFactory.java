@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -89,6 +90,7 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @author Costin Leau
  * @author Chris Beams
+ * @author Phillip Webb
  * @since 16 April 2001
  * @see StaticListableBeanFactory
  * @see PropertiesBeanDefinitionReader
@@ -270,12 +272,28 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (beanNames.length == 1) {
 			return getBean(beanNames[0], requiredType);
 		}
-		else if (beanNames.length == 0 && getParentBeanFactory() != null) {
+		else if (beanNames.length > 1) {
+			T primaryBean = null;
+			for (String beanName : beanNames) {
+				T beanInstance = getBean(beanName, requiredType);
+				if (isPrimary(beanName, beanInstance)) {
+					if (primaryBean != null) {
+						throw new NoUniqueBeanDefinitionException(requiredType, beanNames.length,
+								"more than one 'primary' bean found of required type: " + Arrays.asList(beanNames));
+					}
+					primaryBean = beanInstance;
+				}
+			}
+			if (primaryBean != null) {
+				return primaryBean;
+			}
+			throw new NoUniqueBeanDefinitionException(requiredType, beanNames);
+		}
+		else if (getParentBeanFactory() != null) {
 			return getParentBeanFactory().getBean(requiredType);
 		}
 		else {
-			throw new NoSuchBeanDefinitionException(requiredType, "expected single bean but found " +
-					beanNames.length + ": " + StringUtils.arrayToCommaDelimitedString(beanNames));
+			throw new NoSuchBeanDefinitionException(requiredType);
 		}
 	}
 
@@ -823,8 +841,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			if (matchingBeans.size() > 1) {
 				String primaryBeanName = determinePrimaryCandidate(matchingBeans, descriptor);
 				if (primaryBeanName == null) {
-					throw new NoSuchBeanDefinitionException(type, "expected single matching bean but found " +
-							matchingBeans.size() + ": " + matchingBeans.keySet());
+					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 				}
 				if (autowiredBeanNames != null) {
 					autowiredBeanNames.add(primaryBeanName);
@@ -895,7 +912,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					boolean candidateLocal = containsBeanDefinition(candidateBeanName);
 					boolean primaryLocal = containsBeanDefinition(primaryBeanName);
 					if (candidateLocal == primaryLocal) {
-						throw new NoSuchBeanDefinitionException(descriptor.getDependencyType(),
+						throw new NoUniqueBeanDefinitionException(descriptor.getDependencyType(), candidateBeans.size(),
 								"more than one 'primary' bean found among candidates: " + candidateBeans.keySet());
 					}
 					else if (candidateLocal && !primaryLocal) {

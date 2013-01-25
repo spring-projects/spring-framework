@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -97,7 +96,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final String CHARSET_PREFIX = "charset=";
 
+
 	private boolean active = true;
+
 
 	// ---------------------------------------------------------------------
 	// ServletRequest properties
@@ -139,6 +140,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	private String localAddr = DEFAULT_SERVER_ADDR;
 
 	private int localPort = DEFAULT_SERVER_PORT;
+
 
 	// ---------------------------------------------------------------------
 	// HttpServletRequest properties
@@ -235,6 +237,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.add(Locale.ENGLISH);
 	}
 
+
 	// ---------------------------------------------------------------------
 	// Lifecycle methods
 	// ---------------------------------------------------------------------
@@ -278,6 +281,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			throw new IllegalStateException("Request is not active anymore");
 		}
 	}
+
 
 	// ---------------------------------------------------------------------
 	// ServletRequest interface
@@ -351,7 +355,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * parameter name, they will be replaced.
 	 */
 	public void setParameter(String name, String value) {
-		setParameter(name, new String[] { value });
+		setParameter(name, new String[] {value});
 	}
 
 	/**
@@ -373,7 +377,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void setParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key, "Parameter map key must be of type [" + String.class.getName() + "]");
+			Assert.isInstanceOf(String.class, key,
+					"Parameter map key must be of type [" + String.class.getName() + "]");
 			Object value = params.get(key);
 			if (value instanceof String) {
 				this.setParameter((String) key, (String) value);
@@ -382,8 +387,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				this.setParameter((String) key, (String[]) value);
 			}
 			else {
-				throw new IllegalArgumentException("Parameter map value must be single value " + " or array of type ["
-						+ String.class.getName() + "]");
+				throw new IllegalArgumentException(
+						"Parameter map value must be single value " + " or array of type [" + String.class.getName() + "]");
 			}
 		}
 	}
@@ -394,7 +399,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * parameter name, the given value will be added to the end of the list.
 	 */
 	public void addParameter(String name, String value) {
-		addParameter(name, new String[] { value });
+		addParameter(name, new String[] {value});
 	}
 
 	/**
@@ -425,7 +430,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public void addParameters(Map params) {
 		Assert.notNull(params, "Parameter map must not be null");
 		for (Object key : params.keySet()) {
-			Assert.isInstanceOf(String.class, key, "Parameter map key must be of type [" + String.class.getName() + "]");
+			Assert.isInstanceOf(String.class, key,
+					"Parameter map key must be of type [" + String.class.getName() + "]");
 			Object value = params.get(key);
 			if (value instanceof String) {
 				this.addParameter((String) key, (String) value);
@@ -434,8 +440,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 				this.addParameter((String) key, (String[]) value);
 			}
 			else {
-				throw new IllegalArgumentException("Parameter map value must be single value " + " or array of type ["
-						+ String.class.getName() + "]");
+				throw new IllegalArgumentException("Parameter map value must be single value " +
+						" or array of type [" + String.class.getName() + "]");
 			}
 		}
 	}
@@ -456,8 +462,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String getParameter(String name) {
-		Assert.notNull(name, "Parameter name must not be null");
-		String[] arr = this.parameters.get(name);
+		String[] arr = (name != null ? this.parameters.get(name) : null);
 		return (arr != null && arr.length > 0 ? arr[0] : null);
 	}
 
@@ -466,8 +471,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public String[] getParameterValues(String name) {
-		Assert.notNull(name, "Parameter name must not be null");
-		return this.parameters.get(name);
+		return (name != null ? this.parameters.get(name) : null);
 	}
 
 	public Map<String, String[]> getParameterMap() {
@@ -509,8 +513,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public BufferedReader getReader() throws UnsupportedEncodingException {
 		if (this.content != null) {
 			InputStream sourceStream = new ByteArrayInputStream(this.content);
-			Reader sourceReader = (this.characterEncoding != null) ? new InputStreamReader(sourceStream,
-				this.characterEncoding) : new InputStreamReader(sourceStream);
+			Reader sourceReader = (this.characterEncoding != null) ?
+					new InputStreamReader(sourceStream, this.characterEncoding) : new InputStreamReader(sourceStream);
 			return new BufferedReader(sourceReader);
 		}
 		else {
@@ -574,7 +578,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * @since 3.2
 	 */
 	public void setPreferredLocales(List<Locale> locales) {
-		Assert.notEmpty(locales, "preferred locales list must not be empty");
+		Assert.notEmpty(locales, "Locale list must not be empty");
 		this.locales.clear();
 		this.locales.addAll(locales);
 	}
@@ -634,6 +638,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public int getLocalPort() {
 		return this.localPort;
 	}
+
 
 	// ---------------------------------------------------------------------
 	// HttpServletRequest interface
@@ -797,8 +802,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public boolean isUserInRole(String role) {
-		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext && ((MockServletContext) this.servletContext).getDeclaredRoles().contains(
-			role)));
+		return (this.userRoles.contains(role) || (this.servletContext instanceof MockServletContext &&
+				((MockServletContext) this.servletContext).getDeclaredRoles().contains(role)));
 	}
 
 	public void setUserPrincipal(Principal userPrincipal) {

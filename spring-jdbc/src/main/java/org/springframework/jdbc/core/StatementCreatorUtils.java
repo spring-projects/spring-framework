@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -189,7 +190,7 @@ public abstract class StatementCreatorUtils {
 		if (inValue instanceof SqlParameterValue) {
 			SqlParameterValue parameterValue = (SqlParameterValue) inValue;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Overriding typeinfo with runtime info from SqlParameterValue: column index " + paramIndex +
+				logger.debug("Overriding type info with runtime info from SqlParameterValue: column index " + paramIndex +
 						", SQL type " + parameterValue.getSqlType() +
 						", Type name " + parameterValue.getTypeName());
 			}
@@ -228,18 +229,31 @@ public abstract class StatementCreatorUtils {
 			boolean useSetObject = false;
 			sqlType = Types.NULL;
 			try {
-				DatabaseMetaData dbmd = ps.getConnection().getMetaData();
-				String databaseProductName = dbmd.getDatabaseProductName();
-				String jdbcDriverName = dbmd.getDriverName();
-				if (databaseProductName.startsWith("Informix") ||
-						jdbcDriverName.startsWith("Microsoft SQL Server")) {
-					useSetObject = true;
+				ParameterMetaData pmd = null;
+				try {
+					pmd = ps.getParameterMetaData();
 				}
-				else if (databaseProductName.startsWith("DB2") ||
-						jdbcDriverName.startsWith("jConnect") ||
-						jdbcDriverName.startsWith("SQLServer")||
-						jdbcDriverName.startsWith("Apache Derby")) {
-					sqlType = Types.VARCHAR;
+				catch (Throwable ex) {
+					// JDBC driver not compliant with JDBC 3.0
+					// -> proceed with database-specific checks
+				}
+				if (pmd != null) {
+					sqlType = pmd.getParameterType(paramIndex);
+				}
+				else {
+					DatabaseMetaData dbmd = ps.getConnection().getMetaData();
+					String databaseProductName = dbmd.getDatabaseProductName();
+					String jdbcDriverName = dbmd.getDriverName();
+					if (databaseProductName.startsWith("Informix") ||
+							jdbcDriverName.startsWith("Microsoft SQL Server")) {
+						useSetObject = true;
+					}
+					else if (databaseProductName.startsWith("DB2") ||
+							jdbcDriverName.startsWith("jConnect") ||
+							jdbcDriverName.startsWith("SQLServer")||
+							jdbcDriverName.startsWith("Apache Derby")) {
+						sqlType = Types.VARCHAR;
+					}
 				}
 			}
 			catch (Throwable ex) {

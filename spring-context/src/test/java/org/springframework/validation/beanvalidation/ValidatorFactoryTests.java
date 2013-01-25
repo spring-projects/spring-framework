@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
+import javax.validation.Payload;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -37,6 +38,7 @@ import org.hibernate.validator.HibernateValidator;
 import org.junit.Test;
 
 import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
@@ -193,6 +195,18 @@ public class ValidatorFactoryTests {
 		System.out.println(fieldError.getDefaultMessage());
 	}
 
+	@Test
+	public void testInnerBeanValidation() throws Exception {
+		LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+		validator.afterPropertiesSet();
+
+		MainBean mainBean = new MainBean();
+		Errors errors = new BeanPropertyBindingResult(mainBean, "mainBean");
+		validator.validate(mainBean, errors);
+		Object rejected = errors.getFieldValue("inner.value");
+		assertNull(rejected);
+	}
+
 
 	@NameAddressValid
 	public static class ValidPerson {
@@ -242,7 +256,6 @@ public class ValidatorFactoryTests {
 		}
 	}
 
-
 	public static class ValidAddress {
 
 		@NotNull
@@ -257,7 +270,6 @@ public class ValidatorFactoryTests {
 		}
 	}
 
-
 	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
 	@Constraint(validatedBy = NameAddressValidator.class)
@@ -270,7 +282,6 @@ public class ValidatorFactoryTests {
 		Class<?>[] payload() default {};
 	}
 
-
 	public static class NameAddressValidator implements ConstraintValidator<NameAddressValid, ValidPerson> {
 
 		@Override
@@ -280,6 +291,55 @@ public class ValidatorFactoryTests {
 		@Override
 		public boolean isValid(ValidPerson value, ConstraintValidatorContext constraintValidatorContext) {
 			return (value.name == null || !value.address.street.contains(value.name));
+		}
+	}
+
+
+	public static class MainBean {
+
+		@InnerValid
+		private InnerBean inner = new InnerBean();
+
+		public InnerBean getInner() {
+			return inner;
+		}
+	}
+
+	public static class InnerBean {
+
+		private String value;
+
+		public String getValue() {
+			return value;
+		}
+		public void setValue(String value) {
+			this.value = value;
+		}
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	@Constraint(validatedBy=InnerValidator.class)
+	public static @interface InnerValid {
+		String message() default "NOT VALID";
+		Class<?>[] groups() default { };
+		Class<? extends Payload>[] payload() default {};
+	}
+
+	public static class InnerValidator implements ConstraintValidator<InnerValid, InnerBean> {
+
+		@Override
+		public void initialize(InnerValid constraintAnnotation) {
+		}
+
+		@Override
+		public boolean isValid(InnerBean bean, ConstraintValidatorContext context) {
+			context.disableDefaultConstraintViolation();
+			if (bean.getValue() == null) {
+				context.buildConstraintViolationWithTemplate("NULL"). addNode("value").addConstraintViolation();
+				return false;
+			}
+			return true;
 		}
 	}
 

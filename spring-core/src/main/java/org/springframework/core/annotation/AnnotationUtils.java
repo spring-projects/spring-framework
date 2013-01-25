@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -255,8 +255,9 @@ public abstract class AnnotationUtils {
 	 * declared locally on the supplied {@code clazz}. The supplied {@link Class}
 	 * may represent any type.
 	 * <p>Note: This method does <strong>not</strong> determine if the annotation is
-	 * {@link java.lang.annotation.Inherited inherited}. For greater clarity regarding inherited
-	 * annotations, consider using {@link #isAnnotationInherited(Class, Class)} instead.
+	 * {@linkplain java.lang.annotation.Inherited inherited}. For greater clarity
+	 * regarding inherited annotations, consider using
+	 * {@link #isAnnotationInherited(Class, Class)} instead.
 	 * @param annotationType the Class object corresponding to the annotation type
 	 * @param clazz the Class object corresponding to the class on which to check for the annotation
 	 * @return {@code true} if an annotation for the specified {@code annotationType}
@@ -268,7 +269,7 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		boolean declaredLocally = false;
-		for (Annotation annotation : Arrays.asList(clazz.getDeclaredAnnotations())) {
+		for (Annotation annotation : clazz.getDeclaredAnnotations()) {
 			if (annotation.annotationType().equals(annotationType)) {
 				declaredLocally = true;
 				break;
@@ -279,16 +280,16 @@ public abstract class AnnotationUtils {
 
 	/**
 	 * Determine whether an annotation for the specified {@code annotationType} is present
-	 * on the supplied {@code clazz} and is {@link java.lang.annotation.Inherited inherited}
-	 * i.e., not declared locally for the class).
+	 * on the supplied {@code clazz} and is {@linkplain java.lang.annotation.Inherited inherited}
+	 * (i.e., not declared locally for the class).
 	 * <p>If the supplied {@code clazz} is an interface, only the interface itself will be checked.
 	 * In accordance with standard meta-annotation semantics, the inheritance hierarchy for interfaces
-	 * will not be traversed. See the {@link java.lang.annotation.Inherited JavaDoc} for the
-	 * &#064;Inherited meta-annotation for further details regarding annotation inheritance.
+	 * will not be traversed. See the {@linkplain java.lang.annotation.Inherited Javadoc} for the
+	 * {@code @Inherited} meta-annotation for further details regarding annotation inheritance.
 	 * @param annotationType the Class object corresponding to the annotation type
 	 * @param clazz the Class object corresponding to the class on which to check for the annotation
 	 * @return {@code true} if an annotation for the specified {@code annotationType} is present
-	 * on the supplied {@code clazz} and is {@link java.lang.annotation.Inherited inherited}
+	 * on the supplied {@code clazz} and is <em>inherited</em>
 	 * @see Class#isAnnotationPresent(Class)
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */

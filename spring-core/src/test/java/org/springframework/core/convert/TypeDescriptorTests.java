@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import static org.junit.Assert.*;
 /**
  * @author Keith Donald
  * @author Andy Clement
+ * @author Phillip Webb
  */
 @SuppressWarnings("rawtypes")
 public class TypeDescriptorTests {
@@ -849,4 +851,23 @@ public class TypeDescriptorTests {
 		assertEquals(TypeDescriptor.forObject(new CustomMap()).getMapValueTypeDescriptor(), TypeDescriptor.valueOf(Integer.class));
 	}
 
+	@Test
+	public void createMapArray() throws Exception {
+		TypeDescriptor mapType = TypeDescriptor.map(LinkedHashMap.class, TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(Integer.class));
+		TypeDescriptor arrayType = TypeDescriptor.array(mapType);
+		assertEquals(arrayType.getType(), LinkedHashMap[].class);
+		assertEquals(arrayType.getElementTypeDescriptor(), mapType);
+	}
+
+
+	@Test
+	public void createStringArray() throws Exception {
+		TypeDescriptor arrayType = TypeDescriptor.array(TypeDescriptor.valueOf(String.class));
+		assertEquals(arrayType, TypeDescriptor.valueOf(String[].class));
+	}
+
+	@Test
+	public void createNullArray() throws Exception {
+		assertNull(TypeDescriptor.array(null));
+	}
 }

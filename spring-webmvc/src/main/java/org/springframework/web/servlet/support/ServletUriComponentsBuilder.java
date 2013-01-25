@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,9 +95,12 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		String scheme = request.getScheme();
 		int port = request.getServerPort();
 
+		String header = request.getHeader("X-Forwarded-Host");
+		String host = StringUtils.hasText(header) ? header: request.getServerName();
+
 		ServletUriComponentsBuilder builder = new ServletUriComponentsBuilder();
 		builder.scheme(scheme);
-		builder.host(request.getServerName());
+		builder.host(host);
 		if ((scheme.equals("http") && port != 80) || (scheme.equals("https") && port != 443)) {
 			builder.port(port);
 		}
@@ -138,7 +141,10 @@ public class ServletUriComponentsBuilder extends UriComponentsBuilder {
 		return fromRequest(getCurrentRequest());
 	}
 
-	private static HttpServletRequest getCurrentRequest() {
+	/**
+	 * Obtain the request through {@link RequestContextHolder}.
+	 */
+	protected static HttpServletRequest getCurrentRequest() {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		Assert.state(requestAttributes != null, "Could not find current request via RequestContextHolder");
 		Assert.isInstanceOf(ServletRequestAttributes.class, requestAttributes);

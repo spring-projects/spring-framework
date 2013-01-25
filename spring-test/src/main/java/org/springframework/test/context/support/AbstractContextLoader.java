@@ -185,8 +185,8 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 *
 	 * <p>For example, if the supplied class is {@code com.example.MyTest},
 	 * the generated locations will contain a single string with a value of
-	 * &quot;classpath:/com/example/MyTest{@code &lt;suffix&gt;}&quot;,
-	 * where {@code &lt;suffix&gt;} is the value of the
+	 * &quot;classpath:/com/example/MyTest{@code <suffix>}&quot;,
+	 * where {@code <suffix>} is the value of the
 	 * {@link #getResourceSuffix() resource suffix} string.
 	 *
 	 * <p>As of Spring 3.1, the implementation of this method adheres to the

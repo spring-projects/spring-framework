@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.format.datetime.DateFormatterRegistrar;
  * Installs lower-level type converters required to integrate Joda Time support into Spring's field formatting system.
  *
  * @author Keith Donald
+ * @author Phillip Webb
  * @since 3.0
  */
 final class JodaTimeConverters {
@@ -55,6 +56,7 @@ final class JodaTimeConverters {
 		registry.addConverter(new DateTimeToCalendarConverter());
 		registry.addConverter(new DateTimeToLongConverter());
 		registry.addConverter(new CalendarToReadableInstantConverter());
+		registry.addConverter(new DateToReadableInstantConverter());
 	}
 
 
@@ -159,4 +161,14 @@ final class JodaTimeConverters {
 		}
 	}
 
+	/**
+	 * Used when printing a java.util.Date field with a ReadableInstantPrinter.
+	 * @see MillisecondInstantPrinter
+	 * @see JodaDateTimeFormatAnnotationFormatterFactory
+	 */
+	private static class DateToReadableInstantConverter implements Converter<Date, ReadableInstant> {
+		public ReadableInstant convert(Date source) {
+			return new DateTime(source);
+		}
+	}
 }
