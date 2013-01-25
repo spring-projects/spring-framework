@@ -16,6 +16,9 @@
 
 package org.springframework.scheduling.timer;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -84,7 +87,7 @@ public class TimerSupportTests extends TestCase {
 		try {
 			timerFactoryBean.setScheduledTimerTasks(tasks);
 			timerFactoryBean.afterPropertiesSet();
-			assertTrue(timerFactoryBean.getObject() instanceof Timer);
+			assertThat(timerFactoryBean.getObject(), instanceOf(Timer.class));
 			timerTask0.run();
 			timerTask1.run();
 			timerTask2.run();

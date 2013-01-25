@@ -33,6 +33,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.*;
 
 /**
@@ -136,8 +137,8 @@ public class ConversionServiceFactoryBeanTests {
 
 		public ComplexConstructorArgument(Map<String, Class<?>> map) {
 			assertTrue(!map.isEmpty());
-			assertTrue(map.keySet().iterator().next() instanceof String);
-			assertTrue(map.values().iterator().next() instanceof Class);
+			assertThat(map.keySet().iterator().next(), instanceOf(String.class));
+			assertThat(map.values().iterator().next(), instanceOf(Class.class));
 		}
 	}
 
